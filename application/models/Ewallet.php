@@ -1,0 +1,235 @@
+<?php defined('BASEPATH') OR exit('No direct script access allowed');
+
+class Ewallet extends CI_Model {
+    var $table = 'cashin_payment_ewallet cpe';
+    var $column_order = array(null, 'cpe.c_datetime', 's.c_name', 'c.c_invoiceNo', 'cpe.c_type', 'cpe.ref_cashinChannelId', 'cpe.c_amount', 'cpe.c_mdr', 'cpe.c_fee', 'cpe.c_datetimeSettlement', 'cde.c_merchantTransactionId', null);
+    var $column_search = array('cpe.id', 'c.c_invoiceNo', 'cde.c_merchantTransactionId', 's.c_name', 'm.c_name');
+    var $order = array('cpe.id' => 'desc');
+
+    private function _get_datatables_query($search_name = null, $date_from = null, $date_to = null, $search_date_settlement = null, $search_invoice_no = null)
+    {
+        $this->db->select("cpe.*, m.c_name as name_merchant, s.c_name as name_submerchant, c.c_invoiceNo, 
+                           cde.c_merchantTransactionId AS Merchant_Transaction_Id");
+        $this->db->from($this->table);
+        $this->db->join('cashin c', 'c.id = cpe.ref_cashinId');
+        $this->db->join('submerchant s', 'cpe.ref_subMerchantId = s.id');
+        $this->db->join('merchant m', 'cpe.ref_merchantId = m.id');
+        $this->db->join('cashin_dynamic_ewallet cde', 'cde.ref_merchantId = cpe.ref_merchantId AND cde.id = cpe.ref_cashinDynamicEwalletId', 'left');
+
+        if ($search_name) {
+            $this->db->where('cpe.ref_merchantId', $search_name);
+        }
+        if ($date_from && $date_to) {
+            $this->db->where('cpe.c_datetimePayment >=', $date_from);
+            $this->db->where('cpe.c_datetimePayment <=', $date_to);
+        }
+        if ($search_date_settlement) {
+            $search_date_settlement = date('Y-m-d', strtotime($search_date_settlement));
+            $this->db->where('DATE(cpe.c_datetimeSettlement)', $search_date_settlement);
+        }
+        if ($search_invoice_no) {
+            $this->db->where('c.c_invoiceNo', $search_invoice_no);
+        }
+
+        $i = 0;
+        foreach ($this->column_search as $item) {
+            if ($_POST['search']['value']) {
+                if ($i === 0) {
+                    $this->db->group_start();
+                    $this->db->like($item, $_POST['search']['value']);
+                } else {
+                    $this->db->or_like($item, $_POST['search']['value']);
+                }
+                if (count($this->column_search) - 1 == $i)
+                    $this->db->group_end();
+            }
+            $i++;
+        }
+
+        if (isset($_POST['order'])) {
+            $this->db->order_by($this->column_order[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);
+        } else if (isset($this->order)) {
+            $order = $this->order;
+            $this->db->order_by(key($order), $order[key($order)]);
+        }
+    }
+
+    public function get_datatables($search_name = null, $date_from = null, $date_to = null, $search_date_settlement = null, $search_invoice_no = null)
+    {
+        $this->_get_datatables_query($search_name, $date_from, $date_to, $search_date_settlement, $search_invoice_no);
+        if ($_POST['length'] != -1)
+            $this->db->limit($_POST['length'], $_POST['start']);
+        $query = $this->db->get();
+        return $query->result();
+    }
+
+    public function count_filtered($search_name = null, $date_from = null, $date_to = null, $search_date_settlement = null, $search_invoice_no = null)
+    {
+        $this->_get_datatables_query($search_name, $date_from, $date_to, $search_date_settlement, $search_invoice_no);
+        $query = $this->db->get();
+        return $query->num_rows();
+    }
+
+    public function count_all_dt($search_name = null, $date_from = null, $date_to = null)
+    {
+        $this->db->from($this->table);
+        if ($search_name) $this->db->where('cpe.ref_merchantId', $search_name);
+        if ($date_from && $date_to) {
+            $this->db->where('cpe.c_datetimePayment >=', $date_from);
+            $this->db->where('cpe.c_datetimePayment <=', $date_to);
+        }
+        return $this->db->count_all_results();
+    }
+
+
+    
+        public function ewallet_detail($id)
+        {
+            $query = "SELECT a.c_datetime, a.ref_merchantId, c.c_name AS name_merchant, a.ref_subMerchantId, 
+                        d.c_name AS name_submerchant, b.c_invoiceNo, 
+                        a.c_type, a.ref_cashinChannelId, 
+                        a.c_amount, a.c_mdr, a.c_fee, a.c_datetimePayment,
+                        a.c_isSettlementRealtime, a.c_datetimeSettlement,
+                        e.c_merchantTransactionId AS Merchant_Transaction_Id
+                        FROM cashin_payment_ewallet a   
+                        JOIN cashin b ON b.id=a.ref_cashinId
+                        JOIN merchant c ON a.ref_merchantId=c.id
+                        JOIN submerchant d ON a.ref_subMerchantId=d.id
+                        LEFT JOIN cashin_dynamic_ewallet e ON (e.ref_merchantId=a.ref_merchantId AND e.id=a.ref_cashinDynamicEwalletId) 
+                        WHERE a.id ='$id'";
+
+            // var_dump($query);
+            // exit;
+
+            return $this->db->query($query)->result_array();
+
+        }
+
+    public function insertEwalletDynamic($dataInsert2) {
+        foreach ($dataInsert2 as $key => $value) {
+            if (is_array($value)) {
+                $dataInsert2[$key] = json_encode($value);
+            }
+        }
+
+        $this->db->insert('cashin_dynamic_ewallet', $dataInsert2);
+        return ($this->db->affected_rows() != 1) ? false : true;
+    }
+    
+    public function updateEwalletDynamic($data, $id) {
+        $this->db->where('id', $id);
+        $this->db->update('cashin_dynamic_ewallet', $data);
+        return ($this->db->affected_rows() != 1) ? false : true;
+    }
+    public function get_detail_ewallet($idRequest2) {
+        $query = "select cdv.*, m.c_name, m.id from cashin_dynamic_ewallet cdv join merchant m on m.id = cdv.ref_merchantId where cdv.id = $idRequest2";
+        return $this->db->query($query)->result_array();
+    }
+
+    public function get_qris($limit, $start, $search_date_qris = null, $search_date_qris_to = null, $search_name_qris = null, $search_date_qris_settlement = null, $search_invoice_no = null)
+    {
+
+        $query = "SELECT 
+                    merchant.c_name as name_merchant,
+                    cashin_payment_qris_mpm.id, 
+                    cashin_payment_qris_mpm.c_datetime, 
+                    submerchant.c_name as name_submerchant, 
+                    cashin.c_invoiceNo, 
+                    cashin_payment_qris_mpm.c_type,
+                    cashin_payment_qris_mpm.ref_merchantId, 
+                    cashin_payment_qris_mpm.ref_subMerchantId, 
+                    cashin_payment_qris_mpm.c_amount, 
+                    cashin_payment_qris_mpm.c_mdr, 
+                    cashin_payment_qris_mpm.c_fee,
+                    cashin_payment_qris_mpm.c_datetimePayment, cashin_payment_qris_mpm.c_isSettlementRealtime, 
+                    cashin_payment_qris_mpm.c_datetimeSettlement, cashin_payment_qris_mpm.c_isSettlementRealtimeExternal, 
+                    cashin_payment_qris_mpm.c_feeExternal, cashin_payment_qris_mpm.c_datetimeSettlementExternal,
+                    IF(cashin_payment_qris_mpm.c_type='Dynamic', cashin_dynamic_qris_mpm.c_merchantTransactionId, cashin_recurring_qris_mpm.c_merchantTransactionId) AS Merchant_Transaction_Id
+                    FROM cashin_payment_qris_mpm 
+                    JOIN cashin on cashin.id = cashin_payment_qris_mpm.ref_cashinId
+                    JOIN submerchant on cashin_payment_qris_mpm.ref_subMerchantId = submerchant.id 
+                    JOIN merchant on cashin_payment_qris_mpm.ref_merchantId = merchant.id
+                    LEFT JOIN cashin_dynamic_qris_mpm on (cashin_dynamic_qris_mpm.ref_subMerchantId = cashin_payment_qris_mpm.ref_subMerchantId AND cashin_dynamic_qris_mpm.id=cashin_payment_qris_mpm.ref_cashinDynamicQrisMpmId)
+                    LEFT JOIN cashin_recurring_qris_mpm on (cashin_recurring_qris_mpm.ref_subMerchantId = cashin_payment_qris_mpm.ref_subMerchantId AND cashin_recurring_qris_mpm.id=cashin_payment_qris_mpm.ref_cashinRecurringQrisMpmId)";
+
+        $query .= " WHERE 1=1 ";
+
+        if (!empty($search_name_qris)) {
+            $query .= " and cashin_payment_qris_mpm.ref_merchantId = '$search_name_qris'";
+        }
+
+        if (!empty($search_date_qris) && !empty($search_date_qris_to)) {
+            // $search_date_qris = date('Y-m-d', strtotime($search_date_qris));
+            $query .= " and cashin_payment_qris_mpm.c_datetime >= '$search_date_qris' AND cashin_payment_qris_mpm.c_datetime <= '$search_date_qris_to'";
+        }
+
+        if (!empty($search_date_qris_settlement)) {
+            $search_date_qris_settlement = date('Y-m-d', strtotime($search_date_qris_settlement));
+            $query .= " and DATE(cashin_payment_qris_mpm.c_datetimeSettlement) = '$search_date_qris_settlement'";
+        }
+
+        if (!empty($search_invoice_no)) {
+            $query .= " and cashin.c_invoiceNo= '$search_invoice_no'";
+        }
+
+        $query .= " ORDER BY cashin_payment_qris_mpm.id DESC
+                    LIMIT $start, $limit";
+
+        // var_dump($query);
+        // exit;
+
+        return $this->db->query($query)->result();
+    }
+
+    public function count_qris($refMerchantId, $search_date_qris = null)
+    {
+
+        $query = "SELECT 
+            cashin_payment_qris_mpm.id
+            FROM cashin_payment_qris_mpm 
+            join cashin on cashin.id = cashin_payment_qris_mpm.ref_cashinId
+            JOIN merchant on merchant.id=cashin_payment_qris_mpm.ref_merchantId
+            JOIN submerchant on submerchant.id=cashin_payment_qris_mpm.ref_subMerchantId
+            LEFT JOIN cashin_dynamic_qris_mpm on (cashin_dynamic_qris_mpm.ref_subMerchantId = cashin_payment_qris_mpm.ref_subMerchantId AND cashin_dynamic_qris_mpm.id=cashin_payment_qris_mpm.ref_cashinDynamicQrisMpmId)
+            LEFT JOIN cashin_recurring_qris_mpm on (cashin_recurring_qris_mpm.ref_subMerchantId = cashin_payment_qris_mpm.ref_subMerchantId AND cashin_recurring_qris_mpm.id=cashin_payment_qris_mpm.ref_cashinRecurringQrisMpmId)
+            where cashin_payment_qris_mpm.ref_merchantId  = $refMerchantId";
+
+        if ($search_date_qris) {
+            $query .= " AND cashin_payment_qris_mpm.c_datetime = '$search_date_qris'";
+        }
+
+        return $this->db->query($query)->num_rows();
+    }
+
+    public function get_merchant()
+    {
+        $query = "select * from merchant ";
+        return $this->db->query($query)->result();
+    }
+
+    public function get_summary($date_from, $date_to, $refMerchantId = null) {
+        // $this->db->select('COUNT(id) as qty, SUM(c_amount) as amount, SUM(c_fee) as fee, SUM(c_feeExternal) as fee_external');
+        $query = "SELECT COUNT(a.id) as qty, SUM(a.c_amount) as amount, SUM(a.c_fee) as fee, SUM(a.c_feeExternal) as fee_external
+        FROM cashin_payment_ewallet a
+        WHERE a.c_datetimePayment  >= '$date_from' AND a.c_datetimePayment <= '$date_to'";
+
+        if (!empty($refMerchantId)) {
+            $query .= " AND a.ref_merchantId = '$refMerchantId'";
+        }
+
+        // echo $query;
+        // exit;
+
+        return $this->db->query($query)->result_array();
+    }
+
+    public function monthly_qris() {
+        $query = "SELECT MONTH(c_datetime) AS month, SUM(c_amount) AS amount
+                  FROM cashin_payment_ewallet 
+                  WHERE YEAR(c_datetime) = '2025'
+                  GROUP BY MONTH(c_datetime)
+                  ORDER BY month";
+        return $this->db->query($query)->result_array();
+    }
+}
+?>
