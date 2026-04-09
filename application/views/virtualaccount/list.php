@@ -195,6 +195,7 @@ $download_url = base_url('admin/download_VA')
                         <th>Merchant</th>
                         <th>Invoice No</th>
                         <th>Channel Id</th>
+                        <th>Trans ID</th>
                         <th>Type</th>
                         <th>VA Number</th>
                         <th>VA Custom ID</th>
@@ -202,7 +203,6 @@ $download_url = base_url('admin/download_VA')
                         <th>Fee</th>
                         <th>Realtime?</th>
                         <th>Date Settlement</th>
-                        <th>Trans ID</th>
                         <th>Action</th>
                     </tr>
                 </thead>
@@ -226,6 +226,7 @@ $download_url = base_url('admin/download_VA')
             {data: 'c_type'},
             {data: 'c_vaNumber'},
             {data: 'c_custom'},
+            {data: 'Merchant_Transaction_Id'},
             {data: 'c_amount', render: function(data){
                 return 'Rp ' + number_format(data, 0, ',', '.');
             }},
@@ -234,7 +235,7 @@ $download_url = base_url('admin/download_VA')
             }},
             {data: 'c_isSettlementRealtime'},
             {data: 'c_datetimeSettlement'},
-            {data: 'Merchant_Transaction_Id'},
+            
             {data: 'action', orderable: false, searchable: false}
         ], {
             "language": {

@@ -57,6 +57,14 @@
             <!-- Topbar Navbar -->
             <ul class="navbar-nav ml-auto align-items-center">
 
+                <!-- Theme Toggle -->
+                <li class="nav-item">
+                    <button id="themeToggle" class="btn btn-link rounded-circle text-gray-500" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; text-decoration: none; outline: none !important; flex-shrink: 0;">
+                        <i class="fas fa-moon theme-icon-dark"></i>
+                        <i class="fas fa-sun theme-icon-light d-none"></i>
+                    </button>
+                </li>
+
                 <div class="topbar-divider d-none d-sm-block" style="height: 24px; border-left: 1px solid rgba(0,0,0,0.08);"></div>
 
                 <!-- Nav Item - User Information -->
@@ -106,45 +114,81 @@
 
             <script>
             document.addEventListener('DOMContentLoaded', function () {
-                const toggle = document.getElementById('toggleMaintenanceButton');
+                const themeToggle = document.getElementById('themeToggle');
+                const darkIcon = themeToggle.querySelector('.theme-icon-dark');
+                const lightIcon = themeToggle.querySelector('.theme-icon-light');
+                const html = document.documentElement;
 
-                fetch("<?= base_url('admin/getMaintenanceStatus') ?>")
-                .then(response => response.json())
-                .then(data => {
-                    toggle.checked = (data.status === 'Not Active'); 
-                })
-                .catch(error => {
-                    console.error('Error fetching maintenance status:', error);
+                // Function to update icon visibility
+                function updateThemeIcon(theme) {
+                    if (theme === 'dark') {
+                        darkIcon.classList.add('d-none');
+                        lightIcon.classList.remove('d-none');
+                        themeToggle.classList.remove('text-gray-500');
+                        themeToggle.classList.add('text-warning');
+                    } else {
+                        darkIcon.classList.remove('d-none');
+                        lightIcon.classList.add('d-none');
+                        themeToggle.classList.remove('text-warning');
+                        themeToggle.classList.add('text-gray-500');
+                    }
+                }
+
+                // Initial setup
+                const currentTheme = localStorage.getItem('theme') || 'light';
+                updateThemeIcon(currentTheme);
+
+                // Handle toggle click
+                themeToggle.addEventListener('click', function() {
+                    let theme = html.getAttribute('data-theme');
+                    let newTheme = (theme === 'dark') ? 'light' : 'dark';
+
+                    html.setAttribute('data-theme', newTheme);
+                    localStorage.setItem('theme', newTheme);
+                    updateThemeIcon(newTheme);
                 });
 
-                toggle.addEventListener('change', function () {
-                    const status = toggle.checked ? 'Not Active' : 'Active';
-
-                    // Show confirmation before proceeding
-                    const confirmMessage = `Are you sure you want to set OpenAPI status to "${status}"?`;
-                    if (!confirm(confirmMessage)) {
-                        toggle.checked = !toggle.checked; // Revert toggle if cancelled
-                        return;
-                    }
-
-                    // Proceed with AJAX request if confirmed
-                    fetch("<?= base_url('admin/toggleOpenApiStatus') ?>", {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-Requested-With': 'XMLHttpRequest'
-                        },
-                        body: JSON.stringify({ status: status })
-                    })
+                // Maintenance toggle logic
+                const toggle = document.getElementById('toggleMaintenanceButton');
+                if (toggle) {
+                    fetch("<?= base_url('admin/getMaintenanceStatus') ?>")
                     .then(response => response.json())
                     .then(data => {
-                        alert(data.message);
+                        toggle.checked = (data.status === 'Not Active'); 
                     })
                     .catch(error => {
-                        console.error('Error:', error);
-                        alert("An error occurred while updating OpenAPI status.");
+                        console.error('Error fetching maintenance status:', error);
                     });
-                });
+
+                    toggle.addEventListener('change', function () {
+                        const status = toggle.checked ? 'Not Active' : 'Active';
+
+                        // Show confirmation before proceeding
+                        const confirmMessage = `Are you sure you want to set OpenAPI status to "${status}"?`;
+                        if (!confirm(confirmMessage)) {
+                            toggle.checked = !toggle.checked; // Revert toggle if cancelled
+                            return;
+                        }
+
+                        // Proceed with AJAX request if confirmed
+                        fetch("<?= base_url('admin/toggleOpenApiStatus') ?>", {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            },
+                            body: JSON.stringify({ status: status })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            alert(data.message);
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert("An error occurred while updating OpenAPI status.");
+                        });
+                    });
+                }
             });
             </script>
 

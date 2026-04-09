@@ -6,8 +6,8 @@
     <!-- ── Page Header ── -->
     <div class="dt-page-header d-flex align-items-center justify-content-between">
         <div>
-            <h4 class="dt-page-title" style="font-size: 1.75rem; font-weight: 800; color: #1a202c; letter-spacing: -0.025em;">Holiday Calendar</h4>
-            <p class="dt-page-subtitle" style="color: #718096; font-size: 0.95rem;">Manage and visualize public holidays across the system.</p>
+            <h4 class="dt-page-title">Holiday Calendar</h4>
+            <p class="dt-page-subtitle">Manage and visualize public holidays across the system.</p>
         </div>
         
     </div>
@@ -26,8 +26,8 @@
     <?php endif; ?>
 
     <!-- ── Calendar Card ── -->
-    <div class="card border-0 shadow-sm dt-card" style="border-radius: 20px; overflow: hidden; background: #fff;">
-        <div class="dt-toolbar border-0 d-flex align-items-center justify-content-between" style="padding: 24px; background: #fff; border-bottom: 1px solid #f1f5f9 !important;">
+    <div class="card border-0 shadow-sm dt-card" style="border-radius: 20px; overflow: hidden;">
+        <div class="dt-toolbar border-0 d-flex align-items-center justify-content-between" style="padding: 24px; border-bottom: 1px solid var(--border-color) !important;">
             <div class="d-flex align-items-center gap-4">
                 <div class="d-flex align-items-center gap-2">
                     <div style="width: 10px; height: 10px; border-radius: 50%; background: var(--primary); box-shadow: 0 0 0 4px var(--primary-soft);"></div>

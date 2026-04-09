@@ -4,18 +4,19 @@
     <!-- ── Strategic Header ── -->
     <div class="dt-page-header">
         <div>
-            <h4 class="dt-page-title" style="font-size: 1.75rem; font-weight: 800; color: #1a202c; letter-spacing: -0.025em;">Strategic Analytics & Insights</h4>
-            <p class="dt-page-subtitle" style="color: #718096; font-size: 1rem;">
+            <h4 class="dt-page-title">Strategic Analytics & Insights</h4>
+            <p class="dt-page-subtitle">
                 Data Coverage: <span class="badge bg-primary-soft text-primary font-weight-bold" style="background: rgba(102, 78, 255, 0.1); padding: 5px 12px; border-radius: 8px;"><?= $date_range_label; ?></span>
             </p>
         </div>
         <div class="d-flex align-items-center gap-3">
             <!-- Period Selector -->
-            <div class="d-flex bg-white p-1 border shadow-sm gap-1" style="border-radius: 12px;">
+            <div class="d-flex bg-card p-1 border shadow-sm gap-1 dt-period-selector" style="border-radius: 12px; background-color: var(--bg-card); border-color: var(--border-color) !important;">
                 <a href="<?= base_url('admin/analytics?period=yesterday'); ?>" class="btn btn-sm <?= ($current_period == 'yesterday' ? 'btn-dt-action-primary active' : 'btn-light'); ?> px-3 py-2 font-weight-bold" style="border-radius: 10px; font-size: 11px; <?= ($current_period == 'yesterday' ? 'background: var(--primary); color: #fff; border: none;' : ''); ?>">Yesterday</a>
                 <a href="<?= base_url('admin/analytics?period=last_7_days'); ?>" class="btn btn-sm <?= ($current_period == 'last_7_days' ? 'btn-dt-action-primary active' : 'btn-light'); ?> px-3 py-2 font-weight-bold" style="border-radius: 10px; font-size: 11px; <?= ($current_period == 'last_7_days' ? 'background: var(--primary); color: #fff; border: none;' : ''); ?>">Last 7 Days</a>
                 <a href="<?= base_url('admin/analytics?period=last_month'); ?>" class="btn btn-sm <?= ($current_period == 'last_month' ? 'btn-dt-action-primary active' : 'btn-light'); ?> px-3 py-2 font-weight-bold" style="border-radius: 10px; font-size: 11px; <?= ($current_period == 'last_month' ? 'background: var(--primary); color: #fff; border: none;' : ''); ?>">Last Month</a>
             </div>
+
         </div>
     </div>
 
@@ -128,7 +129,7 @@
         <!-- Area Chart: QRIS Growth Trends -->
         <div class="col-xl-8 col-lg-7 mb-4">
             <div class="card border-0 shadow-sm dt-card h-100" style="border-radius: 20px;">
-                <div class="card-header bg-white border-0 py-4 px-4 d-flex align-items-center justify-content-between">
+                <div class="card-header border-0 py-4 px-4 d-flex align-items-center justify-content-between">
                     <div>
                         <h6 class="m-0 font-weight-bold text-gray-800" style="font-size: 1.1rem;">Ecosystem Yield Trend (Yearly)</h6>
                         <p class="m-0 text-muted small">Sequential profit analysis for seasonal scaling patterns</p>
@@ -145,7 +146,7 @@
         <!-- Pie Chart: Revenue Distribution -->
         <div class="col-xl-4 col-lg-5 mb-4">
             <div class="card border-0 shadow-sm dt-card h-100" style="border-radius: 20px;">
-                <div class="card-header bg-white border-0 py-4 px-4">
+                <div class="card-header border-0 py-4 px-4">
                     <h6 class="m-0 font-weight-bold text-gray-800" style="font-size: 1.1rem;">Profit Contribution Mix</h6>
                     <p class="m-0 text-muted small">Net yield distribution across channels (Fee - Ext. Cost)</p>
                 </div>

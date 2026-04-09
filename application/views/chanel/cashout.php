@@ -168,7 +168,7 @@
                             <label class="dt-more-label mb-2">Fee Value</label>
                             <div class="input-group">
                                 <div class="input-group-prepend">
-                                    <span class="input-group-text bg-light border-right-0" style="border-radius:8px 0 0 8px; font-size:12px;">Rp</span>
+                                    <span class="input-group-text border-right-0" style="border-radius:8px 0 0 8px; font-size:12px;">Rp</span>
                                 </div>
                                 <input type="number" class="dt-more-input h-auto" required name="fee" style="border-radius:0 8px 8px 0;">
                             </div>
@@ -216,7 +216,7 @@
                 <form method="post" action="<?= base_url('admin/createDebitBalance'); ?>">
                     <div class="mb-3">
                         <label class="dt-more-label mb-2">ID / Merchant</label>
-                        <input type="text" class="dt-more-input bg-light font-weight-bold text-primary" readonly id="merchantNameDebit">
+                        <input type="text" class="dt-more-input font-weight-bold text-primary" readonly id="merchantNameDebit">
                         <input type="hidden" id="merchantIdDebit" name="merchantIdDebit">
                     </div>
                     <div class="mb-3">

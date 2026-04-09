@@ -48,7 +48,7 @@ class DashboardController extends CI_Controller
          $data[] = [
             'date' => date('H:i:s d/m/Y', strtotime($row->date)),
             'merchant' => $row->merchant,
-            'type' => '<span class="badge bg-light text-dark border px-3 py-1 font-weight-bold small shadow-none">' . $row->type . '</span>',
+            'type' => '<span class="badge text-dark border px-3 py-1 font-weight-bold small shadow-none">' . $row->type . '</span>',
             'amount' => '<span class="font-weight-bold text-primary">Rp ' . number_format($row->amount, 0, ',', '.') . '</span>',
             'status' => $this->_get_status_badge($row->status)
          ];

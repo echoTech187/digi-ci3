@@ -182,11 +182,11 @@
                         <th>Invoice No</th>
                         <th>Type</th>
                         <th>Channel</th>
+                        <th>Merchant Trans ID</th>
                         <th>Amount</th>
                         <th>MDR</th>
                         <th>Fee</th>
                         <th>Settlement Info</th>
-                        <th>Merchant Trans ID</th>
                         <th>Action</th>
                     </tr>
                 </thead>
@@ -216,6 +216,7 @@
             {data: 'c_invoiceNo'},
             {data: 'c_type'},
             {data: 'ref_cashinChannelId'},
+            {data: 'Merchant_Transaction_Id'},
             {data: 'c_amount', render: function(data){
                 return 'Rp ' + number_format(data, 0, ',', '.');
             }},
@@ -226,7 +227,6 @@
                 return 'Rp ' + number_format(data, 0, ',', '.');
             }},
             {data: 'settlement_info'},
-            {data: 'Merchant_Transaction_Id'},
             {data: 'action', orderable: false, searchable: false}
         ], {
             "language": {

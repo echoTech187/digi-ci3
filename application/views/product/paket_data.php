@@ -264,6 +264,3 @@ $(document).ready(function() {
 
 });
 </script>
-
-<!-- End of Main Content -->
-</div>

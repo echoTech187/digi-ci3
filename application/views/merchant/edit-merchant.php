@@ -36,7 +36,7 @@
                             <label class="font-weight-bold text-gray-700 small">URL Callback QRIS MPM</label>
                             <div class="input-group">
                                 <div class="input-group-prepend">
-                                    <span class="input-group-text bg-light border-right-0"><i class="fas fa-qrcode"></i></span>
+                                    <span class="input-group-text border-right-0"><i class="fas fa-qrcode"></i></span>
                                 </div>
                                 <input type="text" name="c_openapiUrlCallbackQrisMpm" class="form-control border-left-0"
                                        placeholder="https://your-server.com/callback/qris"
@@ -49,7 +49,7 @@
                             <label class="font-weight-bold text-gray-700 small">URL Callback Virtual Account</label>
                             <div class="input-group">
                                 <div class="input-group-prepend">
-                                    <span class="input-group-text bg-light border-right-0"><i class="fas fa-university"></i></span>
+                                    <span class="input-group-text border-right-0"><i class="fas fa-university"></i></span>
                                 </div>
                                 <input type="text" name="c_openapiUrlCallbackVa" class="form-control border-left-0"
                                        placeholder="https://your-server.com/callback/va"
@@ -62,7 +62,7 @@
                             <label class="font-weight-bold text-gray-700 small">URL Callback E-Wallet</label>
                             <div class="input-group">
                                 <div class="input-group-prepend">
-                                    <span class="input-group-text bg-light border-right-0"><i class="fas fa-wallet"></i></span>
+                                    <span class="input-group-text border-right-0"><i class="fas fa-wallet"></i></span>
                                 </div>
                                 <input type="text" name="c_openapiUrlCallbackEwallet" class="form-control border-left-0"
                                        placeholder="https://your-server.com/callback/ewallet"

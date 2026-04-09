@@ -3,17 +3,18 @@
     <!-- ── Page Header ── -->
     <div class="dt-page-header">
         <div>
-            <h4 class="dt-page-title" style="font-size: 1.75rem; font-weight: 800; color: #1a202c; letter-spacing: -0.025em;"><?= $title; ?></h4>
-            <p class="dt-page-subtitle" style="color: #718096; font-size: 1rem;">Holistic overview of the ecosystem's real-time performance and financial health.</p>
+            <h4 class="dt-page-title"><?= $title; ?></h4>
+            <p class="dt-page-subtitle">Holistic overview of the ecosystem's real-time performance and financial health.</p>
         </div>
         <div class="d-flex align-items-center gap-3">
-            <div class="d-flex align-items-center gap-2 bg-white px-3 py-2 btn-dt-chip-action" style="border-radius: 12px;">
+            <div class="d-flex align-items-center gap-2 px-3 py-2 btn-dt-chip-action" style="border-radius: 12px; background-color: var(--bg-card); border: 1px solid var(--border-color);">
                 <span class="position-relative d-flex">
                     <span class="animate-ping position-absolute h-full w-full rounded-full bg-<?= ($maintenance_status == 'Active' ? 'success' : 'danger'); ?> opacity-75" style="width: 8px; height: 8px;"></span>
                     <span class="relative rounded-full bg-<?= ($maintenance_status == 'Active' ? 'success' : 'danger'); ?>" style="width: 8px; height: 8px;"></span>
                 </span>
-                <span class="font-weight-bold" style="color: #4a5568; letter-spacing: 0.5px;">System: <?= ($maintenance_status == 'Active' ? 'Online' : 'Maintenance'); ?></span>
+                <span class="font-weight-bold" style="color: var(--gray-700); letter-spacing: 0.5px;">System: <?= ($maintenance_status == 'Active' ? 'Online' : 'Maintenance'); ?></span>
             </div>
+
         </div>
     </div>
 
@@ -81,7 +82,8 @@
         <!-- Area Chart: Transaction Trends -->
         <div class="col-xl-8 col-lg-7 mb-4">
             <div class="card border-0 shadow-sm dt-card h-100" style="border-radius: 20px;">
-                <div class="card-header bg-white border-0 py-4 px-4 d-flex align-items-center justify-content-between">
+                <div class="card-header border-0 py-4 px-4 d-flex align-items-center justify-content-between">
+
                     <div>
                         <h6 class="m-0 font-weight-bold text-gray-800" style="font-size: 1.1rem;">Transaction Trends</h6>
                         <p class="m-0 text-muted small">Yearly comparison across primary payment channels</p>
@@ -103,7 +105,8 @@
         <!-- Donut Chart: Channel Mix -->
         <div class="col-xl-4 col-lg-5 mb-4">
             <div class="card border-0 shadow-sm dt-card h-100" style="border-radius: 20px;">
-                <div class="card-header bg-white border-0 py-4 px-4">
+                <div class="card-header border-0 py-4 px-4">
+
                     <h6 class="m-0 font-weight-bold text-gray-800" style="font-size: 1.1rem;">Channel Mix (Today)</h6>
                     <p class="m-0 text-muted small">Distribution of transaction volume</p>
                 </div>
@@ -154,7 +157,8 @@
                     <div class="table-responsive">
                         <table id="recentActivityTable" class="table mb-0" style="width:100%">
                             <thead>
-                                <tr style="background: #f9fafb;">
+                                <tr style="background: var(--bg-body);">
+
                                     <th class="border-0 px-4 py-3" style="font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; width: 180px;">TIMESTAMP</th>
                                     <th class="border-0 px-4 py-3" style="font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em;">PARTNER NAME</th>
                                     <th class="border-0 px-4 py-3" style="font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em;">TRANS. TYPE</th>
@@ -191,14 +195,15 @@
     transition: background 0.2s;
 }
 #recentActivityTable tbody tr:hover {
-    background-color: #f8fafc !important;
+    background-color: var(--bg-body) !important;
 }
 #recentActivityTable td {
     padding: 16px 24px;
     font-size: 14px;
-    color: #4a5568;
-    border-bottom: 1px solid #f1f5f9;
+    color: var(--gray-700);
+    border-bottom: 1px solid var(--border-color);
 }
+
 </style>
 
 <script src="<?= base_url('assets/'); ?>vendor/chart.js/Chart.min.js"></script>

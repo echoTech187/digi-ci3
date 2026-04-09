@@ -138,7 +138,7 @@
                             <form method="post" action="<?php echo base_url('admin/createCreditBalance'); ?>">
                                 <div class="mb-4">
                                     <label class="form-label text-muted small fw-bold">Merchant Name</label>
-                                    <input type="text" class="form-control bg-light border-0 py-2 fw-bold" readonly id="merchantName">
+                                    <input type="text" class="form-control border-0 py-2 fw-bold" readonly id="merchantName">
                                     <input type="hidden" id="merchantId" name="merchantId">
                                 </div>
                                 <div class="mb-4">
@@ -157,7 +157,7 @@
                                 <div class="mb-4">
                                     <label class="form-label text-muted small fw-bold">Amount (IDR)</label>
                                     <div class="input-group">
-                                        <span class="input-group-text bg-light border-1">Rp</span>
+                                        <span class="input-group-text border-1">Rp</span>
                                         <input type="text" class="form-control border-1 py-2 fw-bold text-success" id="amountCredit" name="amount" oninput="formatNumber(this)" placeholder="0">
                                     </div>
                                     <input type="hidden" id="rawAmountCredit" name="rawAmountCredit">
@@ -188,7 +188,7 @@
                             <form method="post" action="<?php echo base_url('admin/createDebitBalance'); ?>">
                                 <div class="mb-4">
                                     <label class="form-label text-muted small fw-bold">Merchant Name</label>
-                                    <input type="text" class="form-control bg-light border-0 py-2 fw-bold" readonly id="merchantNameDebit">
+                                    <input type="text" class="form-control border-0 py-2 fw-bold" readonly id="merchantNameDebit">
                                     <input type="hidden" id="merchantIdDebit" name="merchantIdDebit">
                                 </div>
                                 <div class="mb-4">
@@ -207,7 +207,7 @@
                                 <div class="mb-4">
                                     <label class="form-label text-muted small fw-bold">Amount (IDR)</label>
                                     <div class="input-group">
-                                        <span class="input-group-text bg-light border-1">Rp</span>
+                                        <span class="input-group-text border-1">Rp</span>
                                         <input type="text" class="form-control border-1 py-2 fw-bold text-danger" id="amountDebit" name="amount" oninput="formatNumber(this)" placeholder="0">
                                     </div>
                                     <input type="hidden" id="rawAmountDebit" name="rawAmountDebit">
@@ -398,7 +398,7 @@
                         </div>
                         <div class="modal-body p-0">
                             <div class="p-4 border-bottom bg-light">
-                                <div class="d-flex align-items-center">
+                                <div class="d-flex align-items-center gap-2">
                                     <div class="avatar-sm bg-warning-soft text-warning rounded-circle p-2 me-3" style="background-color: rgba(255, 193, 7, 0.1); width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
                                         <i class="fas fa-store"></i>
                                     </div>
@@ -421,7 +421,7 @@
                                     </div>
                                 </div>
                                 
-                                <div class="modal-footer border-0 px-4 py-3 bg-light border-top">
+                                <div class="modal-footer border-0 px-4 py-3 border-top">
                                     <button type="button" class="btn-dt-cancel" data-dismiss="modal">CANCEL</button>
                                     <button type="submit" class="btn-dt-apply px-4 ml-2" id="btnSaveDelegation">
                                         <i class="fas fa-save mr-2"></i> SAVE CHANGES

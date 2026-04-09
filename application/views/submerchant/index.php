@@ -162,7 +162,7 @@ $id = $this->uri->segment(3);
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer border-0 bg-light p-3 justify-content-center">
+                <div class="modal-footer border-0 p-3 justify-content-center">
                     <button type="button" class="btn-dt-action btn-dt-secondary px-4" data-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn-dt-action btn-dt-action-primary px-5 shadow-sm">Save Submerchant</button>
                 </div>
@@ -250,5 +250,3 @@ $(document).ready(function() {
     });
 });
 </script>
-
-</div>

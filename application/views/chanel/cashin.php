@@ -166,7 +166,7 @@
                             <label class="dt-more-label mb-2">Fee Value</label>
                             <div class="input-group">
                                 <div class="input-group-prepend">
-                                    <span class="input-group-text bg-light border-right-0" style="border-radius:8px 0 0 8px; font-size:12px;">Rp</span>
+                                    <span class="input-group-text border-right-0" style="border-radius:8px 0 0 8px; font-size:12px;">Rp</span>
                                 </div>
                                 <input type="number" class="dt-more-input h-auto" required name="fee" style="border-radius:0 8px 8px 0;">
                             </div>

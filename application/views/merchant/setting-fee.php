@@ -260,13 +260,13 @@
                                         <label class="form-label small fw-bold text-muted">Settlement (Days)</label>
                                         <div class="input-group">
                                             <input type="number" class="form-control border-1" id="c_settlementInterval" required name="c_settlementInterval">
-                                            <span class="input-group-text border-1 bg-light small">Days</span>
+                                            <span class="input-group-text border-1 small">Days</span>
                                         </div>
                                     </div>
                                     <div class="col-md-12">
                                         <label class="form-label small fw-bold text-muted">Fixed Fee (IDR)</label>
                                         <div class="input-group">
-                                            <span class="input-group-text border-1 bg-light small">Rp</span>
+                                            <span class="input-group-text border-1 small">Rp</span>
                                             <input type="number" class="form-control border-1 fw-bold text-primary" required id="c_fee" name="c_fee">
                                         </div>
                                     </div>
@@ -274,7 +274,7 @@
                                         <label class="form-label small fw-bold text-muted">Percentage Fee (%)</label>
                                         <div class="input-group">
                                             <input type="number" step="any" class="form-control border-1 fw-bold text-success" required id="c_feePercetange" name="c_feePercetange">
-                                            <span class="input-group-text border-1 bg-light small">%</span>
+                                            <span class="input-group-text border-1 small">%</span>
                                         </div>
                                     </div>
                                 </div>
@@ -290,14 +290,14 @@
                             <div class="col-md-4">
                                 <label class="form-label small fw-bold text-muted">Amount Min</label>
                                 <div class="input-group">
-                                    <span class="input-group-text border-1 bg-light small">Rp</span>
+                                    <span class="input-group-text border-1 small">Rp</span>
                                     <input type="number" class="form-control border-1" id="c_amountMin" required name="c_amountMin">
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label small fw-bold text-muted">Amount Max</label>
                                 <div class="input-group">
-                                    <span class="input-group-text border-1 bg-light small">Rp</span>
+                                    <span class="input-group-text border-1 small">Rp</span>
                                     <input type="number" class="form-control border-1" id="c_amountMax" required name="c_amountMax">
                                 </div>
                             </div>
@@ -311,7 +311,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer border-0 p-3 justify-content-end bg-light rounded-bottom-4 px-4">
+                <div class="modal-footer border-0 p-3 justify-content-end rounded-bottom-4 px-4">
                     <button type="button" class="btn-dt-cancel" data-dismiss="modal">CANCEL</button>
                     <button type="submit" class="btn-dt-apply px-4 ml-2">SAVE CONFIGURATION</button>
                 </div>
@@ -376,7 +376,7 @@
                                     <div class="col-6">
                                         <label class="form-label small fw-bold text-muted">Fixed Fee</label>
                                         <div class="input-group">
-                                            <span class="input-group-text border-1 bg-light small">Rp</span>
+                                            <span class="input-group-text border-1 small">Rp</span>
                                             <input type="number" class="form-control border-1" required name="c_fee">
                                         </div>
                                     </div>
@@ -384,7 +384,7 @@
                                         <label class="form-label small fw-bold text-muted">Fee Percentage (%)</label>
                                         <div class="input-group">
                                             <input type="number" step="any" class="form-control border-1" required name="c_feePercetange">
-                                            <span class="input-group-text border-1 bg-light small">%</span>
+                                            <span class="input-group-text border-1 small">%</span>
                                         </div>
                                     </div>
                                     <div class="col-12 text-muted smaller">
@@ -395,7 +395,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer border-0 p-3 justify-content-end bg-light rounded-bottom-4 px-4">
+                <div class="modal-footer border-0 p-3 justify-content-end rounded-bottom-4 px-4">
                     <button type="button" class="btn-dt-cancel" data-dismiss="modal">CANCEL</button>
                     <button type="submit" class="btn-dt-apply px-4 ml-2">APPLY BULK SETTINGS</button>
                 </div>
@@ -507,5 +507,3 @@ $(document).ready(function() {
     });
 });
 </script>
-
-</div>
