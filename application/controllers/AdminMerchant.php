@@ -1006,7 +1006,8 @@ class AdminMerchant extends CI_Controller
       foreach ($all_permissions as $p) {
          $status = 'Deny';
          if (isset($grants_map[$p->id])) {
-            $status = ($grants_map[$p->id] == 1) ? 'Grant' : 'Deny';
+            // Flexible check for 1/0 or booleans
+            $status = ($grants_map[$p->id] == 1 || $grants_map[$p->id] === true) ? 'Grant' : 'Deny';
          }
          
          $data[] = [
@@ -1028,10 +1029,18 @@ class AdminMerchant extends CI_Controller
       $permissions = $this->input->post('permissions');
       
       if (!empty($permissions) && is_array($permissions)) {
+         $successCount = 0;
          foreach ($permissions as $permId => $action) {
-            $this->Merchant->save_merchant_delegation($merchantId, $permId, $action);
+            if ($this->Merchant->save_merchant_delegation($merchantId, $permId, $action)) {
+               $successCount++;
+            }
          }
-         echo json_encode(['status' => 'success', 'message' => 'Delegation saved successfully']);
+         
+         if ($successCount > 0) {
+            echo json_encode(['status' => 'success', 'message' => "$successCount permissions updated successfully"]);
+         } else {
+            echo json_encode(['status' => 'error', 'message' => 'Failed to save permissions. Please check database connectivity.']);
+         }
       } else {
          echo json_encode(['status' => 'error', 'message' => 'No permissions data received']);
       }

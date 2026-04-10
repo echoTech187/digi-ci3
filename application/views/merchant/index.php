@@ -581,10 +581,10 @@
                                         </td>
                                         <td class="text-center">
                                             <div class="btn-group w-100" role="group">
-                                                <input type="radio" class="btn-check" name="permissions[${perm.id}]" id="grant_${perm.id}" value="Grant" ${perm.status === 'Grant' ? 'checked' : ''}>
+                                                <input type="radio" class="btn-check" name="permissions[${perm.id}]" id="grant_${perm.id}" value="Grant" ${perm.status.toLowerCase() === 'grant' ? 'checked' : ''} autocomplete="off">
                                                 <label class="btn btn-outline-success btn-sm font-weight-bold" for="grant_${perm.id}">GRANT</label>
                                                 
-                                                <input type="radio" class="btn-check" name="permissions[${perm.id}]" id="deny_${perm.id}" value="Deny" ${perm.status === 'Deny' ? 'checked' : ''}>
+                                                <input type="radio" class="btn-check" name="permissions[${perm.id}]" id="deny_${perm.id}" value="Deny" ${perm.status.toLowerCase() === 'deny' ? 'checked' : ''} autocomplete="off">
                                                 <label class="btn btn-outline-danger btn-sm font-weight-bold" for="deny_${perm.id}">DENY</label>
                                             </div>
                                         </td>

@@ -208,7 +208,8 @@ public function setMaintenanceStatus($newStatus) {
     {
         $this->db->from('rbac_merchant_access_grants');
         $this->db->where('ref_granteeMerchantId', $merchantId);
-        $this->db->where('ref_granterMerchantId', NULL); // NULL means granted by System/Admin
+        // Using NULL for System/Admin level permissions
+        $this->db->where('ref_granterMerchantId IS NULL', null, false);
         return $this->db->get()->result();
     }
 
@@ -224,11 +225,11 @@ public function setMaintenanceStatus($newStatus) {
         } else {
             $isAllowed = ($action === 'Grant') ? 1 : 0;
             
-            // Check if exists
+            // Check if exists using NULL for system granter
             $this->db->from('rbac_merchant_access_grants');
             $this->db->where('ref_granteeMerchantId', $granteeId);
             $this->db->where('ref_permissionId', $permissionId);
-            $this->db->where('ref_granterMerchantId', NULL);
+            $this->db->where('ref_granterMerchantId IS NULL', null, false);
             $exists = $this->db->get()->row();
 
             $data = [
