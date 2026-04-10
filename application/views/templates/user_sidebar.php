@@ -90,6 +90,26 @@
                         <span class="sb-nav-label"><?= $m['title'] ?></span>
                         <span class="sb-nav-arrow"><i class="fas fa-chevron-right"></i></span>
                     </a>
+
+                    <!-- Flyout Submenu for Mini Sidebar Mode -->
+                    <div class="sb-flyout">
+                        <div class="sb-flyout-title"><?= $m['title'] ?></div>
+                        <ul class="sb-flyout-list">
+                            <?php foreach ($m['sub_menus'] as $sm) : ?>
+                                <li class="sb-flyout-item <?= ($curr_url == $sm['url']) ? 'active' : '' ?>">
+                                    <a class="sb-flyout-link" href="<?= base_url($sm['url']) ?>">
+                                        <?php if (!empty($sm['icon'])) : ?>
+                                            <span class="sb-flyout-icon"><i class="<?= $sm['icon'] ?>"></i></span>
+                                        <?php else : ?>
+                                            <span class="sb-flyout-dot"></span>
+                                        <?php endif; ?>
+                                        <span><?= $sm['title'] ?></span>
+                                    </a>
+                                </li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </div>
+
                     <div id="sbCollapse<?= $m['id'] ?>" class="collapse <?= $is_active ? 'show' : '' ?>" data-parent="#sb-accordion">
                         <ul class="sb-subnav">
                             <?php foreach ($m['sub_menus'] as $sm) : ?>

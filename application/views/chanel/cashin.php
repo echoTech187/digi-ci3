@@ -69,7 +69,7 @@
             <div class="dt-toolbar-filters">
                 <!-- Filter & Reset Actions -->
                 <button type="button" class="btn-dt-chip-action btn-dt-action-success border-0" data-toggle="modal" data-target=".bd-example-modal-lg">
-                    <i class="fas fa-plus mr-1"></i> New Cash In Channel
+                    <i class="fas fa-plus"></i> <span class="d-none d-md-block">New Cash In Channel</span>
                 </button>
             </div>
         </div>

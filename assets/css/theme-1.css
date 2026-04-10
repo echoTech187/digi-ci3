@@ -1676,6 +1676,41 @@ body {
     background: #664EFF;
 }
 
+/* ── Flyout Dark Mode ── */
+[data-theme="dark"] .sb-flyout {
+    background: var(--bg-card) !important;
+    border-color: var(--border-color) !important;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5), 0 2px 10px rgba(0,0,0,0.4) !important;
+}
+
+[data-theme="dark"] .sb-flyout-title {
+    color: var(--gray-500) !important;
+    border-bottom-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .sb-flyout-link {
+    color: var(--gray-600) !important;
+}
+
+[data-theme="dark"] .sb-flyout-link:hover {
+    background: var(--gray-100) !important;
+    color: var(--gray-900) !important;
+}
+
+[data-theme="dark"] .sb-flyout-item.active .sb-flyout-link {
+    background: rgba(102, 78, 255, 0.15) !important;
+    color: #c8bfff !important;
+}
+
+[data-theme="dark"] .sb-flyout-dot {
+    background: var(--gray-300) !important;
+}
+
+[data-theme="dark"] .sb-flyout-item.active .sb-flyout-dot {
+    background: var(--primary) !important;
+}
+
+
 /* Invisible backdrop to close flyout on outside click */
 .sb-flyout-backdrop {
     display: none;
@@ -1908,7 +1943,7 @@ table>tbody>tr>td {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    flex-wrap: wrap;
+    /* flex-wrap: wrap; */
     gap: 8px;
     padding: 14px 20px;
     border-bottom: 1px solid var(--border-color);
@@ -2269,9 +2304,9 @@ table>tbody>tr>td {
         display: none !important; /* Hide standard headers */
     }
     .dt-table tr {
-        margin: 12px 12px !important;
-        border-radius: 12px !important;
-        padding: 8px !important;
+        /* margin: 12px 12px !important; */
+        /* border-radius: 12px !important; */
+        /* padding: 8px !important; */
         background: var(--bg-card) !important;
     }
     .dt-table td {
@@ -2790,6 +2825,9 @@ table>tbody>tr>td {
         align-items: stretch;
         gap: 8px;
         padding: 12px 14px;
+    }
+    .dt-toolbar-left{
+        width: 100%;
     }
 
     /* Search fills full width */
@@ -3378,12 +3416,12 @@ table>tbody>tr>td {
 
     .dt-table tbody tr {
         display: block !important;
-        background: #fff !important;
-        /* border-radius: 16px !important;
-        margin-bottom: 20px !important;*/
+        background: var(--bg-card) !important;
+        border-radius: 16px !important;
+        margin-bottom: 20px !important;
         padding: 15px !important;
-        /* box-shadow: 0 4px 15px rgba(0,0,0,0.05) !important;
-        border: 1px solid rgba(0,0,0,0.03) !important; */
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05) !important;
+        border: 1px solid rgba(0,0,0,0.03) !important;
         position: relative;
     }
 
@@ -3465,8 +3503,8 @@ table>tbody>tr>td {
         font-weight: 700 !important;
         font-size: 13px !important;
         margin: 0 !important;
-        /* background: #f8f9fc !important; */
-        /* color: #4e73df !important; */
+        background: #f8f9fc !important;
+        color: #4e73df !important;
         border: 1px solid rgba(0,0,0,0.05) !important;
         box-shadow: none !important;
     }
@@ -4136,4 +4174,44 @@ tr.saved  { opacity: 1; }
 
 .input-group{
     flex-wrap: nowrap;
+}
+
+/* Prevent table clipping for dropdowns */
+.dt-card { overflow: visible !important; }
+.card-body { overflow: visible !important; }
+.table-responsive { overflow: visible !important; }
+
+@media (max-width: 991.98px) {
+    .table-responsive {
+        overflow-x: visible !important;
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+/* Delegation Modal Responsive */
+@media (max-width: 575.98px) {
+    #permissionsList .table thead {
+        display: none;
+    }
+    #permissionsList .table tbody tr {
+        display: block;
+        padding: 1rem 0.5rem;
+        border-bottom: 1px solid #edf2f9;
+    }
+    #permissionsList .table td {
+        display: block;
+        width: 100% !important;
+        padding: 0.25rem 0 !important;
+        border: none !important;
+    }
+    #permissionsList .table td:last-child {
+        margin-top: 0.75rem;
+    }
+    #permissionsList .btn-group {
+        margin-top: 5px;
+    }
+    #permissionsList .btn-group .btn {
+        padding: 0.5rem;
+        font-size: 11px;
+    }
 }

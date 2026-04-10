@@ -12,12 +12,6 @@
             </h4>
             <p class="dt-page-subtitle">Manage menu structures and toggle access rights for this role.</p>
         </div>
-        <div class="d-flex align-items-center gap-2"> 
-            <button type="button" class="btn-dt-chip-action btn-dt-action-primary" data-toggle="modal" data-target="#addMenuModal" style="border-radius:10px; font-weight:600; font-size:14px;">
-                <i class="fas fa-plus mr-1"></i> Add Menu
-            </button>
-            
-        </div>
     </div>
 
     <!-- ── Alert ── -->
@@ -38,10 +32,10 @@
                 </div>
             </div>
             <div class="dt-toolbar-right">
-                <div class="small text-muted">
-                    <i class="fas fa-info-circle mr-1 text-primary"></i>
-                    Access changes are saved automatically.
-                </div>
+                <button type="button" class="btn-dt-chip-action btn-dt-action-primary" data-toggle="modal" data-target="#addMenuModal" style="border-radius:10px; font-weight:600; font-size:14px;">
+                    <i class="fas fa-plus"></i> <span class="d-none d-md-block">Add Menu</span>
+                </button>
+                
             </div>
         </div>
 

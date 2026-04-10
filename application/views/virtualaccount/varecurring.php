@@ -79,12 +79,8 @@ $download_url = base_url('admin/download_VA_recurring') // Assuming this exists 
                     <i class="fas fa-search dt-search-icon"></i>
                     <input type="text" id="vaRecurringGlobalSearch" class="dt-search-input" placeholder="Search by Channel, Merchant, or ID...">
                 </div>
-                <!-- RIGHT: Primary chips (Fewer than 4, so no More Filters button) -->
+                <!-- RIGHT: Filters -->
                 <div class="dt-toolbar-filters">
-                    <!-- RIGHT: Filters -->
-                <div class="dt-toolbar-filters">
-                    
-                    
                     <!-- More Filters Trigger -->
                     <div class="dt-filter-group dt-more-filters-wrapper">
                         <label class="dt-filter-label">&nbsp;</label>
@@ -136,8 +132,7 @@ $download_url = base_url('admin/download_VA_recurring') // Assuming this exists 
                             </div>
                         </div>
                     </div>
-                    
-                </div><!-- /.dt-toolbar-filters -->
+                </div>
             </div><!-- /.dt-toolbar -->
         </form>
         <!-- ── Table ── -->
