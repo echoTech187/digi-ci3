@@ -5,6 +5,7 @@
 CREATE TABLE IF NOT EXISTS `user_menu` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `title` varchar(128) NOT NULL,
+  `group_modules` varchar(128) NULL DEFAULT NULL,
   `url` varchar(128) NOT NULL,
   `icon` varchar(128) NOT NULL,
   `parent_id` int(11) NOT NULL DEFAULT '0',
