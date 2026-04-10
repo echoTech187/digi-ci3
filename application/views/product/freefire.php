@@ -54,7 +54,7 @@
             <div class="dt-toolbar-filters">
                 <!-- Filter & Reset Actions -->
                 <button type="button" class="btn-dt-chip-action btn-dt-action-success border-0" data-toggle="modal" data-target="#exampleModal">
-                    <i class="fas fa-plus mr-1"></i> Top Up Free Fire
+                    <i class="fas fa-plus"></i> <span class="d-none d-md-block">Top Up Free Fire</span>
                 </button>
             </div>
         </div>

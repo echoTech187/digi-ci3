@@ -52,7 +52,7 @@
                 <input type="text" id="globalProductSearch" class="dt-search-input" placeholder="Search by name, category, or description...">
             </div>
              <button type="button" class="btn-dt-action btn-dt-action-success border-0" data-toggle="modal" data-target="#exampleModal">
-                <i class="fas fa-plus mr-1"></i> Top Up OVO
+                <i class="fas fa-plus"></i> <span class="d-none d-md-block">Top Up OVO</span>
             </button>
         </div>
         <div class="card-body p-0">
