@@ -558,8 +558,8 @@ class TransactionController extends CI_Controller
             $row['c_datetimeSettlement'] = ($va->c_isSettlementRealtime == 1) ? 'Realtime' : $va->c_datetimeSettlement;
             $row['Merchant_Transaction_Id'] = $va->Merchant_Transaction_Id;
 
-            $action = '<a href="' . base_url('admin/VA_detail/' . $va->id) . '" class="btn btn-danger btn-sm">Detail</a> ';
-            $action .= '<a onclick="javascript: return confirm(\'Are you sure, want to resend notification again ??\')" href="' . base_url('admin/SendnotifikasiVA/' . $va->id . '/' . $va->ref_merchantId) . '" class="btn btn-warning btn-sm">Resend Notification</a>';
+            $action = '<a href="' . base_url('admin/VA_detail/' . $va->id) . '" class="btn btn-action-detail"><i class="fas fa-eye mr-2"></i>Detail</a> ';
+            $action .= '<a onclick="javascript: return confirm(\'Are you sure, want to resend notification again ??\')" href="' . base_url('admin/SendnotifikasiVA/' . $va->id . '/' . $va->ref_merchantId) . '" class="btn btn-action-resend"><i class="fas fa-paper-plane mr-2"></i>Resend</a>';
             $row['action'] = $action;
 
             $data[] = $row;
@@ -789,8 +789,8 @@ class TransactionController extends CI_Controller
             $row['c_datetimeSettlement'] = ($items->c_isSettlementRealtime == 1) ? 'Realtime' : $items->c_datetimeSettlement;
             $row['Merchant_Transaction_Id'] = $items->Merchant_Transaction_Id;
 
-            $action = '<a href="' . base_url('admin/qris_detail/' . $items->id) . '" class="btn btn-danger btn-sm">Detail</a> ';
-            $action .= '<a onclick="javascript: return confirm(\'Are you sure, want to resend notification again ??\')" href="' . base_url('admin/SendnotifikasiQRIS/' . $items->id . '/' . $items->ref_merchantId) . '" class="btn btn-warning btn-sm">Resend Notification</a>';
+            $action = '<a href="' . base_url('admin/qris_detail/' . $items->id) . '" class="btn btn-action-detail"><i class="fas fa-eye mr-2"></i>Detail</a> ';
+            $action .= '<a onclick="javascript: return confirm(\'Are you sure, want to resend notification again ??\')" href="' . base_url('admin/SendnotifikasiQRIS/' . $items->id . '/' . $items->ref_merchantId) . '" class="btn btn-action-resend"><i class="fas fa-paper-plane mr-2"></i>Resend</a>';
             $row['action'] = $action;
 
             $data[] = $row;
@@ -1051,8 +1051,8 @@ class TransactionController extends CI_Controller
             $row['settlement_info'] = ($items->c_isSettlementRealtime == 1) ? 'Realtime' : ($items->c_datetimeSettlement ?: '-');
             $row['Merchant_Transaction_Id'] = $items->Merchant_Transaction_Id ?: '-';
 
-            $action = '<a href="' . base_url('admin/ewallet_detail/' . $items->id) . '" class="btn btn-danger btn-sm">Detail</a> ';
-            $action .= '<a onclick="javascript: return confirm(\'Are you sure, want to resend notification again ??\')" href="' . base_url('admin/Sendnotifikasiewallet/' . $items->id) . '" class="btn btn-warning btn-sm">Resend Notification</a>';
+            $action = '<a href="' . base_url('admin/ewallet_detail/' . $items->id) . '" class="btn btn-action-detail"><i class="fas fa-eye mr-2"></i>Detail</a> ';
+            $action .= '<a onclick="javascript: return confirm(\'Are you sure, want to resend notification again ??\')" href="' . base_url('admin/Sendnotifikasiewallet/' . $items->id) . '" class="btn btn-action-resend"><i class="fas fa-paper-plane mr-2"></i>Resend</a>';
             $row['action'] = $action;
 
             $data[] = $row;
@@ -1231,8 +1231,8 @@ class TransactionController extends CI_Controller
             $responseBody = json_decode($items->c_responseBody, true);
             $row['parsedResponse'] = isset($responseBody['responseMessage']) ? $responseBody['responseMessage'] : (isset($responseBody['message']) ? $responseBody['message'] : '-');
 
-            $action = '<a href="' . base_url('admin/bi_fast_detail/' . $items->id) . '" class="btn btn-danger btn-sm">Detail</a> ';
-            $action .= '<a class="btn btn-warning btn-sm btn-info-request" href="#" data-merchantTransactionId="' . $items->c_merchantTransactionId . '" data-ref_cashoutExternalId="' . $items->ref_cashoutExternalId . '" data-ref_cashoutExternalLogBifastId="' . $items->ref_cashoutExternalLogBifastId . '">Info Request</a>';
+            $action = '<a href="' . base_url('admin/bi_fast_detail/' . $items->id) . '" class="btn btn-action-detail"><i class="fas fa-eye mr-2"></i>Detail</a> ';
+            $action .= '<a class="btn btn-action-resend btn-info-request" href="#" data-merchantTransactionId="' . $items->c_merchantTransactionId . '" data-ref_cashoutExternalId="' . $items->ref_cashoutExternalId . '" data-ref_cashoutExternalLogBifastId="' . $items->ref_cashoutExternalLogBifastId . '"><i class="fas fa-info-circle mr-2"></i>Info Request</a>';
             $row['action'] = $action;
 
             $data[] = $row;

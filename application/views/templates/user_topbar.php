@@ -32,9 +32,15 @@
                     $displayName = '#' . $segment;
                 }
 
+                // 3. URL Override: If segment match in breadcrumb_url_replace, use custom URL
+                $finalUrl = base_url($current_url);
+                if (isset($breadcrumb_url_replace) && isset($breadcrumb_url_replace[$segment])) {
+                    $finalUrl = base_url($breadcrumb_url_replace[$segment]);
+                }
+
                 $breadcrumb[] = [
                     'name' => $displayName,
-                    'url' => base_url($current_url)
+                    'url' => $finalUrl
                 ];
             }
             ?>

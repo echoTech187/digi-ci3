@@ -207,7 +207,9 @@ class Menu extends CI_Controller
       
       $this->load->model('AdminModel');
       $data['role'] = $this->AdminModel->get_roles();
-
+      $data['breadcrumb_url_replace'] = [
+         'menu' => 'menu/role'
+      ];
       $this->load->view('templates/user_header.php', $data);
       $this->load->view('templates/user_sidebar.php', $data);
       $this->load->view('templates/user_topbar.php', $data);
@@ -228,9 +230,15 @@ class Menu extends CI_Controller
       $data['role'] = $this->db->get_where('roles', ['id' => $role_id])->row_array();
 
       // Breadcrumb override: Replace ID with Role name
-      $role_name = isset($data['role']['name']) ? $data['role']['name'] : (isset($data['role']['role']) ? $data['role']['role'] : 'Role');
+      $role_name = isset($data['role']['role_name']) ? $data['role']['role_name'] : 'Role';
       $data['breadcrumb_replace'] = [
          $role_id => $role_name
+      ];
+
+      // Custom breadcrumb redirects
+      $data['breadcrumb_url_replace'] = [
+         'menu'       => 'menu/role',
+         'roleAccess' => 'menu/roleAccess/'.$role_id,
       ];
 
       // Get all menus hierarchically

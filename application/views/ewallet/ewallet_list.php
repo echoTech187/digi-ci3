@@ -41,7 +41,7 @@
                 <i class="fas fa-money-bill-wave"></i>
             </div>
         </div>
-        <div class="dt-summary-card dt-summary-yellow">
+        <div class="dt-summary-card dt-summary-yellow d-none">
             <div class="dt-summary-body">
                 <div class="dt-summary-label">TOTAL FEE</div>
                 <div class="dt-summary-value">Rp <?= number_format($total_fee, 0, ',', '.'); ?></div>
@@ -51,7 +51,7 @@
                 <i class="fas fa-percent"></i>
             </div>
         </div>
-        <div class="dt-summary-card dt-summary-red">
+        <div class="dt-summary-card dt-summary-red d-none">
             <div class="dt-summary-body">
                 <div class="dt-summary-label">TOTAL PROFIT</div>
                 <div class="dt-summary-value">Rp <?= number_format($profit, 0, ',', '.'); ?></div>

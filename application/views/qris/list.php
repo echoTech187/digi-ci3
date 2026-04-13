@@ -60,7 +60,7 @@ $download_url = base_url('admin/download_qris')
             </div>
         </div>
 
-        <div class="dt-summary-card dt-summary-yellow">
+        <div class="dt-summary-card dt-summary-yellow d-none">
             <div class="dt-summary-body">
                 <div class="dt-summary-label">TOTAL FEE</div>
                 <div class="dt-summary-value">Rp <?= number_format($total_fee, 0, ',', '.'); ?></div>
@@ -71,7 +71,7 @@ $download_url = base_url('admin/download_qris')
             </div>
         </div>
 
-        <div class="dt-summary-card dt-summary-red">
+        <div class="dt-summary-card dt-summary-red d-none">
             <div class="dt-summary-body">
                 <div class="dt-summary-label">TOTAL PROFIT</div>
                 <div class="dt-summary-value">Rp <?= number_format($total_fee - $total_fee_ext, 0, ',', '.'); ?></div>
