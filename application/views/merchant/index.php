@@ -6,11 +6,6 @@
             <h1 class="dt-page-title">Merchant Management</h1>
             <p class="dt-page-subtitle">View and manage all registered merchants and their balances.</p>
         </div>
-        <div class="dt-header-actions">
-            <button type="button" class="btn-dt-action btn-dt-action-success border-0" data-toggle="modal" data-target="#registerMerchabntModal">
-                <i class="fas fa-plus me-2"></i>Add Merchant
-            </button>
-        </div>
     </div>
 
     <!-- Summary Cards (Refined for Symmetry) -->
@@ -99,6 +94,9 @@
                             </a>
                         </div>
                     </div>
+                    <button type="button" class="btn-dt-action btn-dt-action-success border-0" data-toggle="modal" data-target="#registerMerchabntModal">
+                        <i class="fas fa-plus"></i> <span class="d-none d-md-block">Add Merchant</span>
+                    </button>
                 </div>
             </div>
         </form>

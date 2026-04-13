@@ -1,7 +1,7 @@
 <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.17/index.global.min.js'></script>
 
 <!-- Begin Page Content -->
-<div class="container-fluid pb-4">
+<div class="container-fluid pb-4 w-100">
 
     <!-- ── Page Header ── -->
     <div class="dt-page-header d-flex align-items-center justify-content-between">
@@ -25,29 +25,52 @@
         </div>
     <?php endif; ?>
 
-    <!-- ── Calendar Card ── -->
-    <div class="card border-0 shadow-sm dt-card" style="border-radius: 20px; overflow: hidden;">
-        <div class="dt-toolbar border-0 d-flex align-items-center justify-content-between" style="padding: 24px; border-bottom: 1px solid var(--border-color) !important;">
-            <div class="d-flex align-items-center gap-4">
-                <div class="d-flex align-items-center gap-2">
-                    <div style="width: 10px; height: 10px; border-radius: 50%; background: var(--primary); box-shadow: 0 0 0 4px var(--primary-soft);"></div>
-                    <span style="font-size: 13px; font-weight: 700; color: #4a5568;">Active Holiday</span>
+    <!-- ── Desktop Calendar ── -->
+    <div class="d-none d-md-block">
+        <div class="fc-card border-0 shadow-sm dt-card" style="border-radius: 20px; overflow: hidden;">
+            <div class="dt-toolbar border-0 d-flex align-items-center justify-content-between flex-wrap gap-3" style="padding: 16px 20px; border-bottom: 1px solid var(--border-color) !important;">
+                <div class="d-flex align-items-center flex-wrap gap-2 gap-md-4">
+                    <div class="d-flex align-items-center gap-2 px-2 py-1" style="background: rgba(0,0,0,0.02); border-radius: 8px;">
+                        <div style="width: 8px; height: 8px; border-radius: 50%; background: var(--primary); box-shadow: 0 0 0 3px var(--primary-soft);"></div>
+                        <span style="font-size: 12px; font-weight: 700; color: #4a5568;">Active <span class="d-none d-sm-inline">Holiday</span></span>
+                    </div>
+                    <div class="d-flex align-items-center gap-2 px-2 py-1" style="background: rgba(0,0,0,0.02); border-radius: 8px;">
+                        <div style="width: 8px; height: 8px; border-radius: 50%; background: #e2e8f0; box-shadow: 0 0 0 3px #f1f5f9;"></div>
+                        <span style="font-size: 12px; font-weight: 700; color: #94a3b8;">Inactive <span class="d-none d-sm-inline">/ Disabled</span></span>
+                    </div>
                 </div>
-                <div class="d-flex align-items-center gap-2">
-                    <div style="width: 10px; height: 10px; border-radius: 50%; background: #e2e8f0; box-shadow: 0 0 0 4px #f1f5f9;"></div>
-                    <span style="font-size: 13px; font-weight: 700; color: #94a3b8;">Inactive / Disabled</span>
-                </div>
+                <button type="button" class="btn-dt-chip-action btn-dt-action-primary border-0 px-3 px-md-4" style="height: 38px;" onclick="openAddHolidayModal()">
+                    <i class="fas fa-calendar-plus"></i> <span class="d-none d-md-inline">Add New Holiday</span>
+                </button>
             </div>
-            <button type="button" class="btn-dt-chip-action btn-dt-action-primary border-0 px-4" onclick="openAddHolidayModal()">
-                <i class="fas fa-calendar-plus"></i> Add New Holiday
-            </button>
+            <div class="card-body p-2 p-md-4">
+                <div id="calendar" style="min-height: 700px;"></div>
+            </div>
         </div>
-        <div class="card-body p-4">
-            <div id="calendar" style="min-height: 700px;"></div>
+    </div>
+
+    <!-- ── Mobile Premium Experience ── -->
+    <div class="d-md-none animate__animated animate__fadeIn">
+        <div class="fc-mobile-card mb-4">
+            <div id="calendar-mobile"></div>
+        </div>
+        
+        <div class="d-flex align-items-center justify-content-between mb-3 px-1">
+            <h5 class="mb-0 fw-bold" style="font-size: 1.1rem; letter-spacing: -0.02em;">MONTHLY EVENTS</h5>
+            <span class="badge badge-soft-primary px-3 py-2" style="border-radius: 10px; font-size: 11px;" id="mobile-event-count">0 Holidays</span>
+        </div>
+
+        <div id="mobile-event-list" class="mobile-event-container">
+            <!-- Dynamic list will be rendered here -->
         </div>
     </div>
 
 </div>
+
+<!-- Floating Action Button (Mobile) -->
+<button class="fab-btn d-md-none" onclick="openAddHolidayModal()" title="Add Holiday">
+    <i class="fas fa-plus"></i>
+</button>
 
 <!-- ── Add / Edit Holiday Modal ── -->
 <div class="modal fade" id="settingHolidayModal" tabindex="-1" role="dialog" aria-labelledby="settingHolidayModalTitle" aria-hidden="true">
@@ -138,12 +161,12 @@
   }
 
   document.addEventListener('DOMContentLoaded', function() {
-    var calendarEl = document.getElementById('calendar');
+    const isMobile = window.innerWidth < 768;
+    const calendarEl = document.getElementById(isMobile ? 'calendar-mobile' : 'calendar');
     
     // Fix: access properties directly from the raw event object
     const rawEvents = <?= json_encode($holidays) ?> || [];
     const formattedEvents = rawEvents.map(event => {
-        // Handle both flat property and extendedProps (if any)
         const status = event.status || (event.extendedProps && event.extendedProps.status);
         return {
             ...event,
@@ -151,14 +174,72 @@
         };
     });
 
+    function renderMobileEventList(view) {
+        if (!isMobile) return;
+        
+        const listContainer = document.getElementById('mobile-event-list');
+        const countBadge = document.getElementById('mobile-event-count');
+        const currentMonth = view.currentStart.getMonth();
+        const currentYear = view.currentStart.getFullYear();
+
+        const monthlyEvents = formattedEvents.filter(ev => {
+            const evDate = new Date(ev.start);
+            return evDate.getMonth() === currentMonth && evDate.getFullYear() === currentYear;
+        }).sort((a,b) => new Date(a.start) - new Date(b.start));
+
+        countBadge.textContent = `${monthlyEvents.length} Holiday${monthlyEvents.length !== 1 ? 's' : ''}`;
+
+        if (monthlyEvents.length === 0) {
+            listContainer.innerHTML = `
+                <div class="text-center py-5">
+                    <div class="mb-3"><i class="fas fa-calendar-day fa-3x text-light"></i></div>
+                    <p class="text-muted small fw-bold">No holidays found for this month.</p>
+                </div>`;
+            return;
+        }
+
+        listContainer.innerHTML = monthlyEvents.map(ev => `
+            <div class="mobile-event-item animate__animated animate__fadeInUp" onclick="openEditModal('${ev.start}', '${ev.desc || ev.title}', '${ev.status}')">
+                <div class="mobile-event-date">
+                    <span class="day">${new Date(ev.start).getDate()}</span>
+                    <span class="month">${new Date(ev.start).toLocaleString('default', { month: 'short' })}</span>
+                </div>
+                <div class="mobile-event-content">
+                    <div class="title">${ev.desc || ev.title}</div>
+                    <div class="status">
+                        <span class="badge badge-pill ${ev.status === 'Active' ? 'badge-success' : 'badge-light'}">
+                            ${ev.status}
+                        </span>
+                    </div>
+                </div>
+                <div class="mobile-event-arrow">
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // Helper for mobile list clicks
+    window.openEditModal = function(date, desc, status) {
+        resetModal('update', date, desc, status);
+        $('#settingHolidayModal').modal('show');
+    };
+
     calendar = new FullCalendar.Calendar(calendarEl, {
-      initialView: 'multiMonthYear',
-      headerToolbar: {
+      initialView: isMobile ? 'dayGridMonth' : 'multiMonthYear',
+      headerToolbar: isMobile ? {
+        left:   'prev,next',
+        center: 'title',
+        right:  'today'
+      } : {
         left:   'prev,next today',
         center: 'title',
         right:  'multiMonthYear,dayGridMonth'
       },
       multiMonthMaxColumns: 3,
+      datesSet: function(info) {
+          if (isMobile) renderMobileEventList(info.view);
+      },
       events: formattedEvents,
       dateClick: function(e) {
         const date = e.dateStr;
