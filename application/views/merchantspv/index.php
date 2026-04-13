@@ -142,88 +142,74 @@
 </div><!-- /.container-fluid -->
 
 <!-- Modal: Register Merchant SPV -->
-<div class="modal fade" id="registerMerchantSpv" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content border-0 shadow-lg" style="border-radius:20px; overflow:hidden;">
-            <div class="modal-header border-0 bg-primary p-4">
-                <h5 class="modal-title text-white font-weight-bold">
+<div class="modal fade" id="registerMerchantSpv" tabindex="-1" role="dialog" aria-labelledby="registerMerchantSpvLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header modal-header-primary border-0 py-3">
+                <h5 class="modal-title font-weight-bold text-white" id="registerMerchantSpvLabel">
                     <i class="fas fa-user-shield mr-2"></i>Register Merchant SPV
                 </h5>
-                <button type="button" class="btn-close btn-close-white opacity-100" data-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="close text-white outline-none" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
-            <div class="modal-body p-4 bg-light">
+            <div class="modal-body p-4 text-dark">
                 <form method="post" action="<?= base_url('admin/registerMerchantSpv'); ?>">
                     <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>">
                     
                     <div class="row mb-4">
-                        <div class="col-md-6">
-                            <label class="form-label small font-weight-bold text-muted uppercase">SPV Name</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-white border-end-0"><i class="fas fa-user text-primary"></i></span>
-                                <input type="text" class="form-control border-start-0" required name="c_name" placeholder="Full Name">
-                            </div>
+                        <div class="col-md-6 mb-3 mb-md-0">
+                            <label class="dt-more-label mb-2">SPV Name</label>
+                            <input type="text" class="dt-more-input" required name="c_name" placeholder="Full Name">
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label small font-weight-bold text-muted uppercase">Username</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-white border-end-0"><i class="fas fa-at text-primary"></i></span>
-                                <input type="text" class="form-control border-start-0" required name="c_username" placeholder="username123">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row mb-4">
-                        <div class="col-md-12">
-                            <label class="form-label small font-weight-bold text-muted uppercase">Email Address</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-white border-end-0"><i class="fas fa-envelope text-primary"></i></span>
-                                <input type="email" class="form-control border-start-0" required name="c_email" placeholder="email@example.com">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <label class="form-label small font-weight-bold text-muted uppercase">Password</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-white border-end-0"><i class="fas fa-lock text-primary"></i></span>
-                                <input type="password" class="form-control border-start-0" required name="c_password">
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label small font-weight-bold text-muted uppercase">Confirm Password</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-white border-end-0"><i class="fas fa-shield-alt text-primary"></i></span>
-                                <input type="password" class="form-control border-start-0" required name="c_confirmPassword">
-                            </div>
+                            <label class="dt-more-label mb-2">Username</label>
+                            <input type="text" class="dt-more-input" required name="c_username" placeholder="username123">
                         </div>
                     </div>
 
                     <div class="mb-4">
-                        <label class="form-label small font-weight-bold text-muted uppercase">Assigned Merchants</label>
-                        <select class="form-control select2-merchant" id="c_merchant_spv" name="c_merchant_spv[]" multiple="multiple" style="width: 100%;" required>
-                        </select>
-                        <div class="form-text text-muted small">Search and select one or more merchants for this supervisor.</div>
+                        <label class="dt-more-label mb-2">Email Address</label>
+                        <input type="email" class="dt-more-input" required name="c_email" placeholder="email@example.com">
                     </div>
 
-                    <div class="mb-4 pt-3 border-top">
-                        <label class="form-label small font-weight-bold text-muted uppercase">Account Status</label>
+                    <div class="row mb-4">
+                        <div class="col-md-6 mb-3 mb-md-0">
+                            <label class="dt-more-label mb-2">Password</label>
+                            <input type="password" class="dt-more-input" required name="c_password" placeholder="••••••••">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="dt-more-label mb-2">Confirm Password</label>
+                            <input type="password" class="dt-more-input" required name="c_confirmPassword" placeholder="••••••••">
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="dt-more-label mb-2">Assigned Merchants</label>
+                        <select class="form-control select2-merchant" id="c_merchant_spv" name="c_merchant_spv[]" multiple="multiple" style="width: 100%;" required>
+                        </select>
+                        <div class="form-text text-muted small mt-2">Search and select one or more merchants for this supervisor.</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="dt-more-label mb-2 d-block">Account Status</label>
                         <div class="d-flex" style="gap:20px;">
                             <?php 
                                 $statuses = ['Active', 'Pending', 'Blocked', 'Freeze'];
                                 foreach($statuses as $st):
                             ?>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="c_status" value="<?= $st ?>" id="status_<?= $st ?>" <?= $st == 'Active' ? 'checked' : '' ?>>
-                                <label class="form-check-label" for="status_<?= $st ?>"><?= $st ?></label>
+                            <div class="custom-control custom-radio">
+                                <input class="custom-control-input" type="radio" name="c_status" value="<?= $st ?>" id="status_<?= $st ?>" <?= $st == 'Active' ? 'checked' : '' ?>>
+                                <label class="custom-control-label" style="font-size:13px; font-weight:500;" for="status_<?= $st ?>"><?= $st ?></label>
                             </div>
                             <?php endforeach; ?>
                         </div>
                     </div>
-                    <div class="modal-footer border-0 px-0 pb-0 mt-4">
-                        <button type="button" class="btn-dt-cancel" data-dismiss="modal">CANCEL</button>
+
+                    <div class="modal-footer px-0 pb-0 border-0 pt-3 mt-2">
+                        <button type="button" class="btn-dt-cancel" data-dismiss="modal">Close</button>
                         <button type="submit" class="btn-dt-apply px-4 ml-2">
-                            <i class="fas fa-check mr-2"></i> REGISTER SUPERVISOR
+                            <i class="fas fa-save mr-2"></i> Register Supervisor
                         </button>
                     </div>
                 </form>
