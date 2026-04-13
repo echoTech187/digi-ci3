@@ -9,6 +9,7 @@
 	<meta name="description" content="">
 	<meta name="author" content="">
 
+	<link rel="icon" href="<?= base_url('public/icon/favicon.ico'); ?>" type="image/x-icon">
 	<title>Access Blocked</title>
 
 	<!-- Custom fonts for this template-->

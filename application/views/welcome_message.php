@@ -4,6 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 <html lang="en">
 <head>
 	<meta charset="utf-8">
+	<link rel="icon" href="<?= base_url('public/icon/favicon.ico'); ?>" type="image/x-icon">
 	<title>Welcome to CodeIgniter</title>
 
 	<style type="text/css">

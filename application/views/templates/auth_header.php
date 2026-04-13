@@ -9,6 +9,7 @@
 	<meta name="description" content="">
 	<meta name="author" content="">
 
+	<link rel="icon" href="<?= base_url('public/icon/favicon.ico'); ?>" type="image/x-icon">
 	<title><?= $title; ?></title>
 	<!-- CSRF Token for AJAX -->
 	<meta name="csrf-token-name" content="<?= $this->security->get_csrf_token_name(); ?>">
