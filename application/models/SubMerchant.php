@@ -36,16 +36,20 @@ class SubMerchant extends CI_Model
 
     public function count_filtered($id)
     {
+        $this->db->select('count(merchant.id) as total');
         $this->_get_datatables_query($id);
-        return $this->db->get()->num_rows();
+        $query = $this->db->get();
+        return $query->row()->total;
     }
 
     public function count_all_dt($id)
     {
+        $this->db->select('count(id) as total');
         $this->db->from('merchant');
         $this->db->where('parent_merchant_id', $id);
         $this->db->where('c_merchantLevel >', 0);
-        return $this->db->count_all_results();
+        $query = $this->db->get();
+        return $query->row()->total;
     }
 
     public function create_submerchant($data)

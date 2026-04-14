@@ -78,7 +78,7 @@ class AdminModel extends CI_Model {
 
   public function count_all()
   {
-      $this->db->from($this->table);
-      return $this->db->count_all_results();
+      $data = $this->db->select('count(id) as total')->from($this->table)->get();
+      return $data->row()->total;
   }
 }

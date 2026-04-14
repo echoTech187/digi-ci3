@@ -74,6 +74,7 @@ class Mutation_model extends CI_Model
 
     public function count_filtered($id, $search_date_mutation = null, $position = null, $channel = null, $search_date_mutation_to = null)
     {
+        $this->db->select('count(mutation.id) as total');
         // Optimized: Skip the columns and intensive joins for count if not filtering by channel
         $this->db->from('mutation');
         $this->db->where('mutation.ref_merchantId', $id);
@@ -110,14 +111,17 @@ class Mutation_model extends CI_Model
             $this->db->group_end();
         }
 
-        return $this->db->count_all_results();
+        $query = $this->db->get();
+        return $query->row()->total;
     }
 
     public function count_all_dt($id)
     {
+        $this->db->select('count(mutation.id) as total');
         $this->db->from('mutation');
         $this->db->where('ref_merchantId', $id);
-        return $this->db->count_all_results();
+        $query = $this->db->get();
+        return $query->row()->total;
     }
 
     public function get_mutations($limit, $start, $id, $search_date_mutation = null, $position = null, $channel = null)

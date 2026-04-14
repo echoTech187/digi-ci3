@@ -78,6 +78,7 @@ class Qris extends CI_Model {
     public function count_filtered($search_name = null, $date_from = null, $date_to = null, $search_settlement = null, $search_rrn = null, $search_invoice = null, $search_transid = null)
     {
         // Optimized: Only join what is necessary for filtering
+        $this->db->select('count(cpq.id) as total');
         $this->db->from($this->table);
         $this->db->join('cashin c', 'c.id = cpq.ref_cashinId'); // Needed for InvoiceNo
         
@@ -118,11 +119,13 @@ class Qris extends CI_Model {
             }
         }
 
-        return $this->db->count_all_results();
+        $query = $this->db->get();
+        return $query->row()->total;
     }
 
-    public function count_all_dt($search_name = null, $date_from = null, $date_to = null)
+    public function count_all_dt($search_name = null, $date_from = null, $date_to = null, $search_settlement = null, $search_rrn = null, $search_invoice = null, $search_transid = null)
     {
+        $this->db->select('count(cpq.id) as total');
         // Optimized: No joins needed for total records filtered only by merchant/date
         $this->db->from($this->table);
         if ($search_name) $this->db->where('cpq.ref_merchantId', $search_name);
@@ -130,7 +133,8 @@ class Qris extends CI_Model {
             $this->db->where('cpq.c_datetime >=', $date_from);
             $this->db->where('cpq.c_datetime <=', $date_to);
         }
-        return $this->db->count_all_results();
+        $query = $this->db->get();
+        return $query->row()->total;
     }
 
 

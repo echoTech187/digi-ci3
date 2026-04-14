@@ -82,15 +82,42 @@ class QRISDynamic extends CI_Model
 
     public function count_filtered($search_name = null, $search_date = null, $search_transid = null, $search_status = null, $search_reff = null, $search_date_to = null)
     {
-        $this->_get_datatables_query($search_name, $search_date, $search_transid, $search_status, $search_reff, $search_date_to);
-        return $this->db->count_all_results();
+        $this->db->select('count(cdq.id) as total');
+        // Optimized: Only join what is necessary for filtering
+        $this->db->from($this->table);
+        $this->_apply_filters($search_name, $search_date, $search_transid, $search_status, $search_reff, $search_date_to);
+
+        // Global Search requires more joins
+        if (isset($_POST['search']['value']) && $_POST['search']['value']) {
+            $this->db->join('submerchant s', 's.id = cdq.ref_subMerchantId', 'left');
+            $this->db->join('merchant m', 'm.id = cdq.ref_merchantId', 'left');
+            
+            $i = 0;
+            foreach ($this->column_search as $item) {
+                if ($i === 0) {
+                    $this->db->group_start();
+                    $this->db->like($item, $_POST['search']['value']);
+                } else {
+                    $this->db->or_like($item, $_POST['search']['value']);
+                }
+                if (count($this->column_search) - 1 == $i)
+                    $this->db->group_end();
+                $i++;
+            }
+        }
+
+        $query = $this->db->get();
+        return $query->row()->total;
     }
 
     public function count_all_dt($search_name = null, $search_date = null, $search_date_to = null)
     {
+        $this->db->select('count(cdq.id) as total');
+        // Optimized: No joins needed for total record count
         $this->db->from($this->table);
         $this->_apply_filters($search_name, $search_date, null, null, null, $search_date_to);
-        return $this->db->count_all_results();
+        $query = $this->db->get();
+        return $query->row()->total;
     }
 
     public function get_summary($search_name = null, $search_date = null, $search_date_to = null, $search_transid = null, $search_status = null, $search_reff = null)
@@ -232,8 +259,8 @@ class QRISDynamic extends CI_Model
 
     public function count_qrisdynamic($refMerchantId, $search_date_qd = null)
     {
+        $this->db->select('count(cdqm.id) as total');
         $this->db->from('cashin_dynamic_qris_mpm cdqm');
-        $this->db->join('submerchant s', 'cdqm.ref_subMerchantId = s.id');
         $this->db->where('cdqm.ref_merchantId', $refMerchantId);
 
         if ($search_date_qd) {
@@ -242,7 +269,8 @@ class QRISDynamic extends CI_Model
             $this->db->where('cdqm.c_datetimeRequest <=', $formatted_date . ' 23:59:59');
         }
 
-        return $this->db->count_all_results();
+        $query = $this->db->get();
+        return $query->row()->total;
     }
 
     public function get_merchant()

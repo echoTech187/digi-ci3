@@ -66,6 +66,7 @@ class Ewallet extends CI_Model {
 
     public function count_filtered($search_name = null, $date_from = null, $date_to = null, $search_date_settlement = null, $search_invoice_no = null)
     {
+        $this->db->select('count(cpe.id) as total');
         // Optimized: Only join what is necessary for filtering
         $this->db->from($this->table);
         
@@ -105,18 +106,21 @@ class Ewallet extends CI_Model {
             }
         }
 
-        return $this->db->count_all_results();
+        $query = $this->db->get();
+        return $query->row()->total;
     }
 
     public function count_all_dt($search_name = null, $date_from = null, $date_to = null)
     {
+        $this->db->select('count(cpe.id) as total');
         $this->db->from($this->table);
         if ($search_name) $this->db->where('cpe.ref_merchantId', $search_name);
         if ($date_from && $date_to) {
             $this->db->where('cpe.c_datetimePayment >=', $date_from);
             $this->db->where('cpe.c_datetimePayment <=', $date_to);
         }
-        return $this->db->count_all_results();
+        $query = $this->db->get();
+        return $query->row()->total;
     }
 
 

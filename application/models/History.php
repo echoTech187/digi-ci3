@@ -105,6 +105,7 @@ class History extends CI_Model {
 
     public function count_filtered($search_date = null, $search_merchant = null)
     {
+        $this->db->select('count(cpp.id) as total');
         // Optimized: Only join if global search is used
         $this->db->from($this->table);
         
@@ -132,11 +133,13 @@ class History extends CI_Model {
             }
         }
 
-        return $this->db->count_all_results();
+        $query = $this->db->get();
+        return $query->row()->total;
     }
 
     public function count_all_dt($search_date = null, $search_merchant = null)
     {
+        $this->db->select('count(cpp.id) as total');
         // Optimized: No joins needed for total count
         $this->db->from($this->table);
         if ($search_date) {
@@ -146,7 +149,8 @@ class History extends CI_Model {
         if ($search_merchant) {
             $this->db->where('cpp.ref_merchantId', $search_merchant);
         }
-        return $this->db->count_all_results();
+        $query = $this->db->get();
+        return $query->row()->total;
     }
 
     public function get_summary($search_date = null, $search_merchant = null)

@@ -51,19 +51,23 @@ class AdminDownload extends CI_Model {
 
     public function count_filtered($search_date = null)
     {
+        $this->db->select('count(ad.id) as total');
         $this->_get_datatables_query($search_date);
-        return $this->db->count_all_results();
+        $query = $this->db->get();
+        return $query->row()->total;
     }
 
     public function count_all_dt($search_date = null)
     {
+        $this->db->select('count(id) as total');
         $this->db->from($this->table);
         if ($search_date) {
             $formatted_date = date('Y-m-d', strtotime($search_date));
             $this->db->where('c_datetime >=', $formatted_date . ' 00:00:00');
             $this->db->where('c_datetime <=', $formatted_date . ' 23:59:59');
         }
-        return $this->db->count_all_results();
+        $query = $this->db->get();
+        return $query->row()->total;
     }
 
     public function get_download($limit, $start, $search_date = null) {

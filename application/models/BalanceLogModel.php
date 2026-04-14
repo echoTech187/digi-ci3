@@ -45,15 +45,18 @@ class BalanceLogModel extends CI_Model {
 
     public function count_filtered()
     {
+        $this->db->select('count(mbhl.id) as total');
         $this->_get_datatables_query();
         $query = $this->db->get();
-        return $query->num_rows();
+        return $query->row()->total;
     }
 
     public function count_all_dt()
     {
+        $this->db->select('count(id) as total');
         $this->db->from($this->table);
-        return $this->db->count_all_results();
+        $query = $this->db->get();
+        return $query->row()->total;
     }
 
     public function get_balance_log() {

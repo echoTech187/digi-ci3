@@ -74,6 +74,7 @@ class BiFast extends CI_Model {
 
     public function count_filtered($search_name = null, $date_from = null, $date_to = null, $search_transid = null, $search_external_reff = null, $search_channel = null, $search_status = null)
     {
+        $this->db->select('count(cpb.id) as total');
         // Optimized: Only join what is necessary for filtering
         $this->db->from($this->table);
         $this->db->join('cashout c', 'c.id = cpb.ref_cashoutId'); // Needed for InvoiceNo
@@ -115,18 +116,21 @@ class BiFast extends CI_Model {
             }
         }
 
-        return $this->db->count_all_results();
+        $query = $this->db->get();
+        return $query->row()->total;
     }
 
     public function count_all_dt($search_name = null, $date_from = null, $date_to = null)
     {
+        $this->db->select('count(cpb.id) as total');
         $this->db->from($this->table);
         if ($search_name) $this->db->where('cpb.ref_merchantId', $search_name);
         if ($date_from && $date_to) {
             $this->db->where('cpb.c_datetime >=', $date_from);
             $this->db->where('cpb.c_datetime <=', $date_to);
         }
-        return $this->db->count_all_results();
+        $query = $this->db->get();
+        return $query->row()->total;
     }
 
 

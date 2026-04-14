@@ -69,6 +69,7 @@ class EwalletDynamic extends CI_Model
 
     public function count_filtered($search_name = null, $search_date = null, $search_date_to = null, $search_transid = null, $search_status = null)
     {
+        $this->db->select('count(cde.id) as total');
         // Optimized: Only join if global search is used
         $this->db->from($this->table);
         $this->_apply_filters($search_name, $search_date, $search_date_to, $search_transid, $search_status);
@@ -91,14 +92,17 @@ class EwalletDynamic extends CI_Model
             }
         }
 
-        return $this->db->count_all_results();
+        $query = $this->db->get();
+        return $query->row()->total;
     }
 
     public function count_all_dt($search_name = null, $search_date = null, $search_date_to = null)
     {
+        $this->db->select('count(cde.id) as total');
         $this->db->from($this->table);
         $this->_apply_filters($search_name, $search_date, $search_date_to);
-        return $this->db->count_all_results();
+        $query = $this->db->get();
+        return $query->row()->total;
     }
 
     public function get_summary($search_name = null, $search_date = null, $search_date_to = null, $search_transid = null, $search_status = null)

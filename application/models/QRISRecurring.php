@@ -65,15 +65,42 @@ class QRISRecurring extends CI_Model {
 
     public function count_filtered($search_name = null, $search_date = null, $search_date_to = null, $search_submerchant = null)
     {
-        $this->_get_datatables_query($search_name, $search_date, $search_date_to, $search_submerchant);
-        return $this->db->count_all_results();
+        $this->db->select('count(crqm.id) as total');
+        // Optimized: Only join what is necessary for filtering
+        $this->db->from($this->table);
+        $this->_apply_filters($search_name, $search_date, $search_date_to, $search_submerchant);
+
+        // Global Search requires more joins
+        if (isset($_POST['search']['value']) && $_POST['search']['value']) {
+            $this->db->join('submerchant s', 'crqm.ref_subMerchantId = s.id', 'left');
+            $this->db->join('merchant m', 'crqm.ref_merchantId = m.id', 'left');
+            
+            $i = 0;
+            foreach ($this->column_search as $item) {
+                if ($i === 0) {
+                    $this->db->group_start();
+                    $this->db->like($item, $_POST['search']['value']);
+                } else {
+                    $this->db->or_like($item, $_POST['search']['value']);
+                }
+                if (count($this->column_search) - 1 == $i)
+                    $this->db->group_end();
+                $i++;
+            }
+        }
+
+        $query = $this->db->get();
+        return $query->row()->total;
     }
 
     public function count_all_dt($search_name = null, $search_date = null, $search_date_to = null)
     {
+        $this->db->select('count(crqm.id) as total');
+        // Optimized: No joins needed for total records count
         $this->db->from($this->table);
         $this->_apply_filters($search_name, $search_date, $search_date_to);
-        return $this->db->count_all_results();
+        $query = $this->db->get();
+        return $query->row()->total;
     }
 
     public function get_summary($search_name = null, $search_date = null, $search_date_to = null, $search_submerchant = null)

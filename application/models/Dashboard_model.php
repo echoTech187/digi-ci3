@@ -122,7 +122,7 @@ class Dashboard_model extends CI_Model
 
     public function get_merchant_count()
     {
-        return $this->db->count_all('merchant');
+        return $this->db->select('count(id) as total')->from('merchant')->get()->row()->total;
     }
 
     public function get_top_merchants($limit = 5)

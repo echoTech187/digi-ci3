@@ -47,17 +47,21 @@ class Chanel extends CI_Model {
 
     public function count_filtered($table, $column_order, $column_search, $order, $where = [])
     {
+        $this->db->select('count(id) as total');
         $this->_get_datatables_query($table, $column_order, $column_search, $order, $where);
-        return $this->db->count_all_results();
+        $query = $this->db->get();
+        return $query->row()->total;
     }
 
     public function count_all_dt($table, $where = [])
     {
+        $this->db->select('count(id) as total');
         $this->db->from($table);
         if (!empty($where)) {
             $this->db->where($where);
         }
-        return $this->db->count_all_results();
+        $query = $this->db->get();
+        return $query->row()->total;
     }
 
         public function get_pulsa_reguler($limit, $start, $provider = null) {

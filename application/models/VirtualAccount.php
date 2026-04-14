@@ -79,6 +79,7 @@ class VirtualAccount extends CI_Model {
 
     public function count_filtered($search_date = null, $search_date_to = null, $search_merchant = null, $search_settlement = null, $search_va = null, $search_transid = null)
     {
+        $this->db->select('count(cpv.id) as total');
         // Optimized: Only join what is necessary for filtering
         $this->db->from($this->table);
         $this->db->join('cashin c', 'cpv.ref_cashinId = c.id', 'left'); // Needed for InvoiceNo
@@ -133,11 +134,13 @@ class VirtualAccount extends CI_Model {
             }
         }
 
-        return $this->db->count_all_results();
+        $query = $this->db->get();
+        return $query->row()->total;
     }
 
     public function count_all_dt($search_date = null, $search_date_to = null, $search_merchant = null)
     {
+        $this->db->select('count(cpv.id) as total');
         // Optimized: No joins needed for total records count
         $this->db->from($this->table);
         
@@ -151,7 +154,8 @@ class VirtualAccount extends CI_Model {
 
         if ($search_merchant) $this->db->where('cpv.ref_merchantId', $search_merchant);
 
-        return $this->db->count_all_results();
+        $query = $this->db->get();
+        return $query->row()->total;
     }
 
 

@@ -39,6 +39,7 @@ class QRISDynamiclist extends CI_Model
 
     public function count_filtered_qris_dynamic($search = null)
     {
+        $this->db->select('count(cashin_dynamic_qris_mpm.id) as total');
         $this->db->from('cashin_dynamic_qris_mpm');
         
         if (!empty($search)) {
@@ -56,6 +57,7 @@ class QRISDynamiclist extends CI_Model
             $this->db->group_end();
         }
         
-        return $this->db->count_all_results();
+        $query = $this->db->get();
+        return $query->row()->total;
     }
 }

@@ -21,7 +21,9 @@ class Merchant extends CI_Model
         }
     
         if ($count_only) {
-            return $this->db->count_all_results();  // Return total row count
+            $this->db->select('count(id) as total');
+            $query = $this->db->get();
+            return $query->row()->total;
         }
     
         $this->db->order_by('id', 'DESC');
@@ -179,17 +181,21 @@ public function setMaintenanceStatus($newStatus) {
 
     public function count_filtered($table, $column_order, $column_search, $order, $where = [])
     {
+        $this->db->select('count(id) as total');
         $this->_get_datatables_query($table, $column_order, $column_search, $order, $where);
-        return $this->db->count_all_results();
+        $query = $this->db->get();
+        return $query->row()->total;
     }
 
     public function count_all_dt($table, $where = [])
     {
+        $this->db->select('count(id) as total');
         $this->db->from($table);
         if (!empty($where)) {
             $this->db->where($where);
         }
-        return $this->db->count_all_results();
+        $query = $this->db->get();
+        return $query->row()->total;
     }
 
     /**
