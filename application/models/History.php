@@ -34,17 +34,16 @@ class History extends CI_Model {
     
     public function count_history($refMerchantId, $search_date_purchase = null) {
 
-        $query = "SELECT 
-            cashout_payment_ppob.id
+        $query = "SELECT COUNT(cashout_payment_ppob.id) as total
             FROM cashout_payment_ppob
-            left join cashout on cashout.id = cashout_payment_ppob.ref_cashoutId
             WHERE cashout_payment_ppob.ref_merchantId = $refMerchantId ";
 
         if ($search_date_purchase) {
-            $query .= " AND cashout_payment_ppob.c_datetime = '$search_date_purchase'";
+            $formatted_date = date('Y-m-d', strtotime($search_date_purchase));
+            $query .= " AND cashout_payment_ppob.c_datetime >= '$formatted_date 00:00:00' AND cashout_payment_ppob.c_datetime <= '$formatted_date 23:59:59'";
         }
 
-        return $this->db->query($query)->num_rows();
+        return (int)$this->db->query($query)->row()->total;
     }
 
     public function get_merchant(){
@@ -106,13 +105,39 @@ class History extends CI_Model {
 
     public function count_filtered($search_date = null, $search_merchant = null)
     {
-        $this->_get_datatables_query($search_date, $search_merchant);
-        $query = $this->db->get();
-        return $query->num_rows();
+        // Optimized: Only join if global search is used
+        $this->db->from($this->table);
+        
+        if ($search_date) {
+            $this->db->where('cpp.c_datetime >=', $search_date . ' 00:00:00');
+            $this->db->where('cpp.c_datetime <=', $search_date . ' 23:59:59');
+        }
+        if ($search_merchant) {
+            $this->db->where('cpp.ref_merchantId', $search_merchant);
+        }
+
+        if (isset($_POST['search']['value']) && $_POST['search']['value']) {
+            $this->db->join('merchant m', 'cpp.ref_merchantId = m.id', 'left');
+            $i = 0;
+            foreach ($this->column_search as $item) {
+                if ($i === 0) {
+                    $this->db->group_start();
+                    $this->db->like($item, $_POST['search']['value']);
+                } else {
+                    $this->db->or_like($item, $_POST['search']['value']);
+                }
+                if (count($this->column_search) - 1 == $i)
+                    $this->db->group_end();
+                $i++;
+            }
+        }
+
+        return $this->db->count_all_results();
     }
 
     public function count_all_dt($search_date = null, $search_merchant = null)
     {
+        // Optimized: No joins needed for total count
         $this->db->from($this->table);
         if ($search_date) {
             $this->db->where('cpp.c_datetime >=', $search_date . ' 00:00:00');

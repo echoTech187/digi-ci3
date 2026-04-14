@@ -74,7 +74,47 @@ class BiFast extends CI_Model {
 
     public function count_filtered($search_name = null, $date_from = null, $date_to = null, $search_transid = null, $search_external_reff = null, $search_channel = null, $search_status = null)
     {
-        $this->_get_datatables_query($search_name, $date_from, $date_to, $search_transid, $search_external_reff, $search_channel, $search_status);
+        // Optimized: Only join what is necessary for filtering
+        $this->db->from($this->table);
+        $this->db->join('cashout c', 'c.id = cpb.ref_cashoutId'); // Needed for InvoiceNo
+        
+        if ($search_name) $this->db->where('cpb.ref_merchantId', $search_name);
+        if ($date_from && $date_to) {
+            $this->db->where('cpb.c_datetime >=', $date_from);
+            $this->db->where('cpb.c_datetime <=', $date_to);
+        }
+        if ($search_transid) $this->db->where('cpb.c_merchantTransactionId', $search_transid);
+        if ($search_status) $this->db->where('cpb.c_status', $search_status);
+        
+        if ($search_external_reff && $search_channel) {
+            if ($search_channel == "paylabs") {
+                $this->db->join('external_paylabs_disbursement_transfer_bank epb', 'epb.ref_cashoutPaymentBifastId = cpb.id');
+                $this->db->where('epb.c_referenceNo', $search_external_reff);
+            } else if ($search_channel == "gvconnect") {
+                $this->db->join('external_gvconnect_snap_disbursement_transfer_bank egb', 'egb.ref_cashoutPaymentBifastId = cpb.id');
+                $this->db->where('egb.c_partnerReferenceNo', $search_external_reff);
+            }
+        }
+
+        // Global Search requires more joins
+        if (isset($_POST['search']['value']) && $_POST['search']['value']) {
+            $this->db->join('merchant m', 'm.id = cpb.ref_merchantId');
+            $this->db->join('merchant_account_bank mab', 'mab.c_beneficiaryAccountNo = cpb.c_accountNo AND mab.ref_cashoutChannelId = cpb.ref_cashoutChannelId AND mab.ref_merchantId = cpb.ref_merchantId', 'left');
+            
+            $i = 0;
+            foreach ($this->column_search as $item) {
+                if ($i === 0) {
+                    $this->db->group_start();
+                    $this->db->like($item, $_POST['search']['value']);
+                } else {
+                    $this->db->or_like($item, $_POST['search']['value']);
+                }
+                if (count($this->column_search) - 1 == $i)
+                    $this->db->group_end();
+                $i++;
+            }
+        }
+
         return $this->db->count_all_results();
     }
 
@@ -108,37 +148,22 @@ class BiFast extends CI_Model {
                  ";
                  
 
-        // if ($search_date_bifast) {
-        //     $search_date_bifast = date('Y-m-d', strtotime($search_date_bifast));
-        //     $query .= " AND DATE(cashout_payment_bifast.c_datetime) = '$search_date_bifast'";
-        // }
-
+        // Optimized: Create a lean query for counting total rows without unnecessary joins
+        $lean_query = " FROM cashout_payment_bifast WHERE 1=1 ";
         if (!empty($date_from) && !empty($date_to)) {
-            // $search_date_qris = date('Y-m-d', strtotime($search_date_qris));
-            $query .= " and cashout_payment_bifast.c_datetime >= '$date_from' AND cashout_payment_bifast.c_datetime <= '$date_to'";
+            $lean_query .= " and cashout_payment_bifast.c_datetime >= '$date_from' AND cashout_payment_bifast.c_datetime <= '$date_to'";
         }
-
         if ($search_name_bifast) {
-            $query .= " AND cashout_payment_bifast.ref_merchantId = $search_name_bifast";
+            $lean_query .= " AND cashout_payment_bifast.ref_merchantId = $search_name_bifast";
         }
-
         if (!empty($search_transid_bifast)) {
-            $query .= " AND cashout_payment_bifast.c_merchantTransactionId ='$search_transid_bifast'";
+            $lean_query .= " AND cashout_payment_bifast.c_merchantTransactionId ='$search_transid_bifast'";
         }
-
         if (!empty($search_status_transaction_bifast)) {
-            $query .= " AND cashout_payment_bifast.c_status ='$search_status_transaction_bifast'";
+            $lean_query .= " AND cashout_payment_bifast.c_status ='$search_status_transaction_bifast'";
         }
 
-        if(!empty($search_external_reff_id) && !empty($search_channel_bifast)) {
-            if($search_channel_bifast == "paylabs") {
-                $query .= "AND external_paylabs_disbursement_transfer_bank.c_referenceNo = '$search_external_reff_id'";
-            } else if($search_channel_bifast == "gvconnect") {
-                $query .= "AND external_gvconnect_snap_disbursement_transfer_bank.c_partnerReferenceNo = '$search_external_reff_id'";
-            }
-        }
-
-        $total_query = "SELECT COUNT(*) as total_rows " . $query;
+        $total_query = "SELECT COUNT(*) as total_rows " . $lean_query;
         $total_rows = $this->db->query($total_query)->row()->total_rows;
 
         $data_query = "SELECT 

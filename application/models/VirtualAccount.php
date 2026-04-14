@@ -79,15 +79,9 @@ class VirtualAccount extends CI_Model {
 
     public function count_filtered($search_date = null, $search_date_to = null, $search_merchant = null, $search_settlement = null, $search_va = null, $search_transid = null)
     {
-        $this->_get_datatables_query($search_date, $search_date_to, $search_merchant, $search_settlement, $search_va, $search_transid);
-        return $this->db->count_all_results();
-    }
-
-    public function count_all_dt($search_date = null, $search_date_to = null, $search_merchant = null, $search_settlement = null, $search_va = null, $search_transid = null)
-    {
+        // Optimized: Only join what is necessary for filtering
         $this->db->from($this->table);
-        $this->db->join('cashin c', 'cpv.ref_cashinId = c.id');
-        $this->db->join('submerchant s', 'cpv.ref_subMerchantId = s.id');
+        $this->db->join('cashin c', 'cpv.ref_cashinId = c.id', 'left'); // Needed for InvoiceNo
         
         if ($search_date && $search_date_to) {
             $this->db->where('cpv.c_datetime >=', $search_date . ' 00:00:00');
@@ -96,15 +90,67 @@ class VirtualAccount extends CI_Model {
             $this->db->where('cpv.c_datetime >=', $search_date . ' 00:00:00');
             $this->db->where('cpv.c_datetime <=', $search_date . ' 23:59:59');
         }
-        if ($search_merchant) $this->db->where('cpv.ref_merchantId', $search_merchant);
+        if ($search_merchant) {
+            $this->db->where('cpv.ref_merchantId', $search_merchant);
+        }
         if ($search_settlement) {
             $this->db->where('cpv.c_datetimeSettlement >=', $search_settlement . ' 00:00:00');
             $this->db->where('cpv.c_datetimeSettlement <=', $search_settlement . ' 23:59:59');
         }
-        if ($search_va) $this->db->where('cpv.c_vaNumber', $search_va);
-        if ($search_transid) {
-             // simplified count join
+        if ($search_va) {
+            $this->db->where('cpv.c_vaNumber', $search_va);
         }
+        if ($search_transid) {
+            $this->db->join('cashin_dynamic_va cdv', 'cdv.id = cpv.ref_cashinDynamicVaId AND cdv.ref_merchantId = cpv.ref_merchantId', 'left');
+            $this->db->join('cashin_recurring_va crv', 'crv.id = cpv.ref_cashinRecurringVaId AND crv.ref_merchantId = cpv.ref_merchantId', 'left');
+            $this->db->group_start();
+            $this->db->where('cdv.c_merchantTransactionId', $search_transid);
+            $this->db->or_where('crv.c_merchantTransactionId', $search_transid);
+            $this->db->group_end();
+        }
+
+        // Global Search requires more joins
+        if (isset($_POST['search']['value']) && $_POST['search']['value']) {
+            $this->db->join('merchant m', 'cpv.ref_merchantId = m.id', 'left');
+            $this->db->join('external_gvpay_va_callback_payment egv', 'egv.ref_subMerchantId = cpv.ref_subMerchantId AND egv.ref_cashinPaymentVaId = cpv.id', 'left');
+            // Re-join dynamic if not already joined
+            if (!$search_transid) {
+                $this->db->join('cashin_dynamic_va cdv', 'cdv.id = cpv.ref_cashinDynamicVaId AND cdv.ref_merchantId = cpv.ref_merchantId', 'left');
+                $this->db->join('cashin_recurring_va crv', 'crv.id = cpv.ref_cashinRecurringVaId AND crv.ref_merchantId = cpv.ref_merchantId', 'left');
+            }
+
+            $i = 0;
+            foreach ($this->column_search as $item) {
+                if ($i === 0) {
+                    $this->db->group_start();
+                    $this->db->like($item, $_POST['search']['value']);
+                } else {
+                    $this->db->or_like($item, $_POST['search']['value']);
+                }
+                if (count($this->column_search) - 1 == $i)
+                    $this->db->group_end();
+                $i++;
+            }
+        }
+
+        return $this->db->count_all_results();
+    }
+
+    public function count_all_dt($search_date = null, $search_date_to = null, $search_merchant = null)
+    {
+        // Optimized: No joins needed for total records count
+        $this->db->from($this->table);
+        
+        if ($search_date && $search_date_to) {
+            $this->db->where('cpv.c_datetime >=', $search_date . ' 00:00:00');
+            $this->db->where('cpv.c_datetime <=', $search_date_to . ' 23:59:59');
+        } elseif ($search_date) {
+            $this->db->where('cpv.c_datetime >=', $search_date . ' 00:00:00');
+            $this->db->where('cpv.c_datetime <=', $search_date . ' 23:59:59');
+        }
+
+        if ($search_merchant) $this->db->where('cpv.ref_merchantId', $search_merchant);
+
         return $this->db->count_all_results();
     }
 

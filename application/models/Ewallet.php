@@ -66,7 +66,45 @@ class Ewallet extends CI_Model {
 
     public function count_filtered($search_name = null, $date_from = null, $date_to = null, $search_date_settlement = null, $search_invoice_no = null)
     {
-        $this->_get_datatables_query($search_name, $date_from, $date_to, $search_date_settlement, $search_invoice_no);
+        // Optimized: Only join what is necessary for filtering
+        $this->db->from($this->table);
+        
+        if ($search_name) $this->db->where('cpe.ref_merchantId', $search_name);
+        if ($date_from && $date_to) {
+            $this->db->where('cpe.c_datetimePayment >=', $date_from);
+            $this->db->where('cpe.c_datetimePayment <=', $date_to);
+        }
+        if ($search_date_settlement) {
+            $formatted_date = date('Y-m-d', strtotime($search_date_settlement));
+            $this->db->where('cpe.c_datetimeSettlement >=', $formatted_date . ' 00:00:00');
+            $this->db->where('cpe.c_datetimeSettlement <=', $formatted_date . ' 23:59:59');
+        }
+        if ($search_invoice_no) {
+            $this->db->join('cashin c', 'c.id = cpe.ref_cashinId');
+            $this->db->where('c.c_invoiceNo', $search_invoice_no);
+        }
+
+        // Global Search requires more joins
+        if (isset($_POST['search']['value']) && $_POST['search']['value']) {
+            if (!$search_invoice_no) $this->db->join('cashin c', 'c.id = cpe.ref_cashinId', 'left');
+            $this->db->join('submerchant s', 'cpe.ref_subMerchantId = s.id', 'left');
+            $this->db->join('merchant m', 'cpe.ref_merchantId = m.id', 'left');
+            $this->db->join('cashin_dynamic_ewallet cde', 'cde.ref_merchantId = cpe.ref_merchantId AND cde.id = cpe.ref_cashinDynamicEwalletId', 'left');
+
+            $i = 0;
+            foreach ($this->column_search as $item) {
+                if ($i === 0) {
+                    $this->db->group_start();
+                    $this->db->like($item, $_POST['search']['value']);
+                } else {
+                    $this->db->or_like($item, $_POST['search']['value']);
+                }
+                if (count($this->column_search) - 1 == $i)
+                    $this->db->group_end();
+                $i++;
+            }
+        }
+
         return $this->db->count_all_results();
     }
 
@@ -218,12 +256,13 @@ class Ewallet extends CI_Model {
         return $this->db->query($query)->result_array();
     }
 
-    public function monthly_qris() {
+    public function monthly_ewallet() {
         $year = date('Y');
-        $query = "SELECT MONTH(c_datetime) AS month, SUM(c_amount) AS amount
+        // Optimized: Avoid MONTH() index-killer
+        $query = "SELECT MONTH(c_datetimePayment) AS month, SUM(c_amount) AS amount
                   FROM cashin_payment_ewallet 
-                  WHERE c_datetime >= '$year-01-01 00:00:00' AND c_datetime <= '$year-12-31 23:59:59'
-                  GROUP BY MONTH(c_datetime)
+                  WHERE c_datetimePayment >= '$year-01-01 00:00:00' AND c_datetimePayment <= '$year-12-31 23:59:59'
+                  GROUP BY MONTH(c_datetimePayment)
                   ORDER BY month";
         return $this->db->query($query)->result_array();
     }

@@ -19,6 +19,7 @@ class Mutation_model extends CI_Model
             mutation.c_BalanceAfter 
         ", FALSE);
         $this->db->from('mutation');
+        // Optimized: Only join cashin/cashout if we actually need the columns for display
         $this->db->join('cashin', 'cashin.ref_merchantId = mutation.ref_merchantId AND cashin.id = mutation.ref_cashinId', 'left');
         $this->db->join('cashout', 'cashout.ref_merchantId = mutation.ref_merchantId AND cashout.Id = mutation.ref_cashoutId', 'left');
         $this->db->where('mutation.ref_merchantId', $id);
@@ -73,7 +74,42 @@ class Mutation_model extends CI_Model
 
     public function count_filtered($id, $search_date_mutation = null, $position = null, $channel = null, $search_date_mutation_to = null)
     {
-        $this->_get_datatables_query($id, $search_date_mutation, $position, $channel, $search_date_mutation_to);
+        // Optimized: Skip the columns and intensive joins for count if not filtering by channel
+        $this->db->from('mutation');
+        $this->db->where('mutation.ref_merchantId', $id);
+
+        if ($search_date_mutation && $search_date_mutation_to) {
+            $this->db->where('mutation.c_datetime >=', date('Y-m-d', strtotime($search_date_mutation)) . ' 00:00:00');
+            $this->db->where('mutation.c_datetime <=', date('Y-m-d', strtotime($search_date_mutation_to)) . ' 23:59:59');
+        } elseif ($search_date_mutation) {
+            $formatted_date = date('Y-m-d', strtotime($search_date_mutation));
+            $this->db->where('mutation.c_datetime >=', $formatted_date . ' 00:00:00');
+            $this->db->where('mutation.c_datetime <=', $formatted_date . ' 23:59:59');
+        }
+
+        if (!empty($position)) {
+            $this->db->where('mutation.c_potition', $position);
+        }
+
+        if (!empty($channel) && !empty($position)) {
+            // Only join if we filter by channel
+            if ($position === 'Credit') {
+                $this->db->join('cashin', 'cashin.ref_merchantId = mutation.ref_merchantId AND cashin.id = mutation.ref_cashinId');
+                $this->db->where('cashin.ref_cashinChannelId', $channel);
+            } elseif ($position === 'Debit') {
+                $this->db->join('cashout', 'cashout.ref_merchantId = mutation.ref_merchantId AND cashout.Id = mutation.ref_cashoutId');
+                $this->db->where('cashout.ref_cashoutChannelId', $channel);
+            }
+        }
+
+        if (isset($_POST['search']['value']) && $_POST['search']['value'] != "") {
+            $search = $_POST['search']['value'];
+            $this->db->group_start();
+            $this->db->like('mutation.id', $search);
+            $this->db->or_like('mutation.c_potition', $search);
+            $this->db->group_end();
+        }
+
         return $this->db->count_all_results();
     }
 

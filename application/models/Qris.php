@@ -77,12 +77,53 @@ class Qris extends CI_Model {
 
     public function count_filtered($search_name = null, $date_from = null, $date_to = null, $search_settlement = null, $search_rrn = null, $search_invoice = null, $search_transid = null)
     {
-        $this->_get_datatables_query($search_name, $date_from, $date_to, $search_settlement, $search_rrn, $search_invoice, $search_transid);
+        // Optimized: Only join what is necessary for filtering
+        $this->db->from($this->table);
+        $this->db->join('cashin c', 'c.id = cpq.ref_cashinId'); // Needed for InvoiceNo
+        
+        if ($search_name) $this->db->where('cpq.ref_merchantId', $search_name);
+        if ($date_from && $date_to) {
+            $this->db->where('cpq.c_datetime >=', $date_from);
+            $this->db->where('cpq.c_datetime <=', $date_to);
+        }
+        if ($search_rrn) {
+            $this->db->join('external_paydgn_qris_mpm_callback epq', 'epq.ref_subMerchantId = cpq.ref_subMerchantId AND epq.ref_cashinPaymentQrisMpmId = cpq.id');
+            $this->db->where('epq.c_issuerRrn', $search_rrn);
+        }
+        if ($search_transid) {
+            $this->db->join('cashin_dynamic_qris_mpm cdq', 'cdq.ref_subMerchantId = cpq.ref_subMerchantId AND cdq.id = cpq.ref_cashinDynamicQrisMpmId', 'left');
+            $this->db->join('cashin_recurring_qris_mpm crq', 'crq.ref_subMerchantId = cpq.ref_subMerchantId AND crq.id = cpq.ref_cashinRecurringQrisMpmId', 'left');
+            $this->db->group_start();
+            $this->db->where('cdq.c_merchantTransactionId', $search_transid);
+            $this->db->or_where('crq.c_merchantTransactionId', $search_transid);
+            $this->db->group_end();
+        }
+
+        // Global Search requires more joins
+        if (isset($_POST['search']['value']) && $_POST['search']['value']) {
+            $this->db->join('merchant m', 'cpq.ref_merchantId = m.id');
+            $this->db->join('submerchant s', 'cpq.ref_subMerchantId = s.id');
+            
+            $i = 0;
+            foreach ($this->column_search as $item) {
+                if ($i === 0) {
+                    $this->db->group_start();
+                    $this->db->like($item, $_POST['search']['value']);
+                } else {
+                    $this->db->or_like($item, $_POST['search']['value']);
+                }
+                if (count($this->column_search) - 1 == $i)
+                    $this->db->group_end();
+                $i++;
+            }
+        }
+
         return $this->db->count_all_results();
     }
 
-    public function count_all_dt($search_name = null, $date_from = null, $date_to = null, $search_settlement = null, $search_rrn = null, $search_invoice = null, $search_transid = null)
+    public function count_all_dt($search_name = null, $date_from = null, $date_to = null)
     {
+        // Optimized: No joins needed for total records filtered only by merchant/date
         $this->db->from($this->table);
         if ($search_name) $this->db->where('cpq.ref_merchantId', $search_name);
         if ($date_from && $date_to) {
