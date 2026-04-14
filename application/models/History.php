@@ -19,8 +19,8 @@ class History extends CI_Model {
         $query .= "WHERE 1=1 ";
 
         if ($search_date_purchase) {
-            $search_date_purchase = date('Y-m-d', strtotime($search_date_purchase));
-            $query .= " AND DATE(cashout_payment_ppob.c_datetime) = '$search_date_purchase'";
+            $formatted_date = date('Y-m-d', strtotime($search_date_purchase));
+            $query .= " AND cashout_payment_ppob.c_datetime >= '$formatted_date 00:00:00' AND cashout_payment_ppob.c_datetime <= '$formatted_date 23:59:59'";
         }
     
         if ($search_merchant_purchase) {
@@ -65,7 +65,8 @@ class History extends CI_Model {
         $this->db->join('merchant m', 'cpp.ref_merchantId = m.id', 'left');
 
         if ($search_date) {
-            $this->db->where('DATE(cpp.c_datetime)', $search_date);
+            $this->db->where('cpp.c_datetime >=', $search_date . ' 00:00:00');
+            $this->db->where('cpp.c_datetime <=', $search_date . ' 23:59:59');
         }
         if ($search_merchant) {
             $this->db->where('cpp.ref_merchantId', $search_merchant);
@@ -114,7 +115,8 @@ class History extends CI_Model {
     {
         $this->db->from($this->table);
         if ($search_date) {
-            $this->db->where('DATE(cpp.c_datetime)', $search_date);
+            $this->db->where('cpp.c_datetime >=', $search_date . ' 00:00:00');
+            $this->db->where('cpp.c_datetime <=', $search_date . ' 23:59:59');
         }
         if ($search_merchant) {
             $this->db->where('cpp.ref_merchantId', $search_merchant);
@@ -129,7 +131,8 @@ class History extends CI_Model {
         $this->db->join('merchant m', 'cpp.ref_merchantId = m.id', 'left');
 
         if ($search_date) {
-            $this->db->where('DATE(cpp.c_datetime)', $search_date);
+            $this->db->where('cpp.c_datetime >=', $search_date . ' 00:00:00');
+            $this->db->where('cpp.c_datetime <=', $search_date . ' 23:59:59');
         }
         if ($search_merchant) {
             $this->db->where('cpp.ref_merchantId', $search_merchant);

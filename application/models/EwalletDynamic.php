@@ -13,10 +13,10 @@ class EwalletDynamic extends CI_Model
             $this->db->where('cde.ref_merchantId', $search_name);
         }
         if ($search_date) {
-            $this->db->where('DATE(cde.c_datetimeRequest) >=', date('Y-m-d', strtotime($search_date)));
+            $this->db->where('cde.c_datetimeRequest >=', date('Y-m-d', strtotime($search_date)) . ' 00:00:00');
         }
         if ($search_date_to) {
-            $this->db->where('DATE(cde.c_datetimeRequest) <=', date('Y-m-d', strtotime($search_date_to)));
+            $this->db->where('cde.c_datetimeRequest <=', date('Y-m-d', strtotime($search_date_to)) . ' 23:59:59');
         }
         if ($search_transid) {
             $this->db->where('cde.c_merchantTransactionId', $search_transid);
@@ -70,8 +70,7 @@ class EwalletDynamic extends CI_Model
     public function count_filtered($search_name = null, $search_date = null, $search_date_to = null, $search_transid = null, $search_status = null)
     {
         $this->_get_datatables_query($search_name, $search_date, $search_date_to, $search_transid, $search_status);
-        $query = $this->db->get();
-        return $query->num_rows();
+        return $this->db->count_all_results();
     }
 
     public function count_all_dt($search_name = null, $search_date = null, $search_date_to = null)

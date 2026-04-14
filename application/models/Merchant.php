@@ -180,8 +180,7 @@ public function setMaintenanceStatus($newStatus) {
     public function count_filtered($table, $column_order, $column_search, $order, $where = [])
     {
         $this->_get_datatables_query($table, $column_order, $column_search, $order, $where);
-        $query = $this->db->get();
-        return $query->num_rows();
+        return $this->db->count_all_results();
     }
 
     public function count_all_dt($table, $where = [])

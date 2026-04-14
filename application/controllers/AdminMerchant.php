@@ -52,6 +52,9 @@ class AdminMerchant extends CI_Controller
          $list = $this->Merchant->get_datatables($table, $column_order, $column_search, $order, $where);
          $dataItems = array();
          $no = $this->input->post('start');
+         
+         // Pre-check permission outside the loop to avoid N+1 queries
+         $hasBalancePermission = $this->rbac->has_permission($role_id, 'balance_merchant_module');
 
          foreach ($list as $m) {
             $no++;
@@ -69,18 +72,18 @@ class AdminMerchant extends CI_Controller
             // Balance Column
             $available = (float)$m->c_balanceTotal - (float)$m->c_balanceHold;
             $row['balance'] = '
-                <div class="d-flex flex-column">
+                <div class="d-flex flex-column" style="min-width: 150px;">
                     <div class="d-flex justify-content-between small mb-1">
                         <span class="text-muted">Total:</span>
-                        <span class="fw-bold">Rp ' . number_format($m->c_balanceTotal, 0, ',', '.') . '</span>
+                        <span class="fw-bold text-dark">Rp ' . number_format($m->c_balanceTotal, 0, ',', '.') . '</span>
                     </div>
                     <div class="d-flex justify-content-between small mb-1">
                         <span class="text-muted">Hold:</span>
-                        <span class="text-warning font-weight-bold">Rp ' . number_format($m->c_balanceHold, 0, ',', '.') . '</span>
+                        <span class="text-warning fw-bold">Rp ' . number_format($m->c_balanceHold, 0, ',', '.') . '</span>
                     </div>
                     <div class="d-flex justify-content-between small border-top pt-1 mt-1">
                         <span class="text-muted">Available:</span>
-                        <span class="text-success font-weight-bold">Rp ' . number_format($available, 0, ',', '.') . '</span>
+                        <span class="text-success fw-bold">Rp ' . number_format($available, 0, ',', '.') . '</span>
                     </div>
                 </div>';
 
@@ -97,73 +100,49 @@ class AdminMerchant extends CI_Controller
                     </span>
                 </div>';
 
-            // Action Column (Fixed for clipping - Reverted to BS4 syntax)
+            // Action Column (Standardized Premium Style)
             $action_html = '
-                <div class="dropdown w-100">
-                    <div class="d-flex justify-content-end w-100">
-                        <a class="btn btn-white btn-sm rounded shadow-none d-md-none" href="' . base_url('admin/editMerchant/' . $m->id) . '">
-                            <i class="fas fa-edit mr-2 text-info"></i>Edit Merchant
+                <div class="dropdown">
+                    <button class="btn btn-white btn-sm rounded shadow-none dropdown-toggle border px-3" type="button" data-toggle="dropdown" aria-expanded="false" data-boundary="viewport">
+                        <i class="fas fa-ellipsis-v text-muted mr-2"></i>Actions
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-right border-0 shadow-lg p-2" style="min-width: 200px;">
+                        <a class="dropdown-item rounded-2 py-2" href="' . base_url('admin/editMerchant/' . $m->id) . '">
+                            <i class="fas fa-edit mr-2 text-info" style="width: 20px;"></i>Edit Merchant
                         </a>
-                        <button class="btn btn-white btn-sm rounded shadow-none flex justify-content-end block d-md-none" style="gap: 10px;" type="button" data-toggle="dropdown" aria-expanded="false" data-boundary="viewport">
-                            <i class="fas fa-ellipsis-v text-muted"></i> <span class="block d-md-none">Show more...</span>
-                        </button>
-                        <button class="btn btn-white btn-sm rounded shadow-none d-none d-md-block" style="gap: 10px;" type="button" data-toggle="dropdown" aria-expanded="false" data-boundary="viewport">
-                            <i class="fas fa-ellipsis-v text-muted"></i>
-                        </button>
-                    <ul class="dropdown-menu dropdown-menu-right border-0 shadow-lg p-2">
-                        <li>
-                            <a class="dropdown-item rounded-2 py-2" href="' . base_url('admin/mutation/' . $m->id) . '">
-                                <i class="fas fa-exchange-alt mr-2 text-primary"></i>Mutation Log
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item rounded-2 py-2" href="' . base_url('admin/editMerchant/' . $m->id) . '">
-                                <i class="fas fa-edit mr-2 text-info"></i>Edit Merchant
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item rounded-2 py-2" href="' . base_url('admin/submerchant/' . $m->id) . '">
-                                <i class="fas fa-users mr-2 text-success"></i>Sub Accounts
-                            </a>
-                        </li>';
-            
+                        <a class="dropdown-item rounded-2 py-2" href="' . base_url('admin/mutation/' . $m->id) . '">
+                            <i class="fas fa-exchange-alt mr-2 text-primary" style="width: 20px;"></i>Mutation Log
+                        </a>
+                        <a class="dropdown-item rounded-2 py-2" href="' . base_url('admin/submerchant/' . $m->id) . '">
+                            <i class="fas fa-users mr-2 text-success" style="width: 20px;"></i>Sub Accounts
+                        </a>';
+
             if (isset($m->c_merchantLevel) && $m->c_merchantLevel == 0) {
                 $action_html .= '
-                        <li>
-                            <button class="dropdown-item rounded-2 py-2" data-toggle="modal" data-target="#delegateModal" onClick="openDelegateModal(' . $m->id . ', \'' . addslashes($m->c_name) . '\')">
-                                <i class="fas fa-key mr-2 text-warning"></i>Delegate
-                            </button>
-                        </li>';
+                        <button class="dropdown-item rounded-2 py-2 border-0 bg-transparent w-100 text-left" data-toggle="modal" data-target="#delegateModal" onClick="openDelegateModal(' . $m->id . ', \'' . addslashes($m->c_name) . '\')">
+                            <i class="fas fa-key mr-2 text-warning" style="width: 20px;"></i>Delegate
+                        </button>';
             }
             
-            if ($this->rbac->has_permission($role_id, 'balance_merchant_module')) {
+            if ($hasBalancePermission) {
                 $action_html .= '
-                    <li><hr class="dropdown-divider"></li>
-                    <li>
-                        <button class="dropdown-item rounded-2 py-2" data-toggle="modal" data-target="#creditBalanceModal" onClick="detail(' . $m->id . ', \'' . addslashes($m->c_name) . '\')">
-                            <i class="fas fa-plus-circle mr-2 text-success"></i>Credit Balance
+                        <div class="dropdown-divider"></div>
+                        <button class="dropdown-item rounded-2 py-2 border-0 bg-transparent w-100 text-left" data-toggle="modal" data-target="#creditBalanceModal" onClick="detail(' . $m->id . ', \'' . addslashes($m->c_name) . '\')">
+                            <i class="fas fa-plus-circle mr-2 text-success" style="width: 20px;"></i>Credit Balance
                         </button>
-                    </li>
-                    <li>
-                        <button class="dropdown-item rounded-2 py-2" data-toggle="modal" data-target="#debitBalanceModal" onClick="detaildebit(' . $m->id . ', \'' . addslashes($m->c_name) . '\')">
-                            <i class="fas fa-minus-circle mr-2 text-danger"></i>Debit Balance
-                        </button>
-                    </li>';
+                        <button class="dropdown-item rounded-2 py-2 border-0 bg-transparent w-100 text-left" data-toggle="modal" data-target="#debitBalanceModal" onClick="detaildebit(' . $m->id . ', \'' . addslashes($m->c_name) . '\')">
+                            <i class="fas fa-minus-circle mr-2 text-danger" style="width: 20px;"></i>Debit Balance
+                        </button>';
             }
 
             $action_html .= '
-                        <li><hr class="dropdown-divider"></li>
-                        <li>
-                            <a class="dropdown-item rounded-2 py-2" href="' . base_url('admin/settingcashinfee/' . $m->id) . '">
-                                <i class="fas fa-cog mr-2 text-secondary"></i>Cashin Fee Settings
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item rounded-2 py-2" href="' . base_url('admin/settingcashoutfee/' . $m->id) . '">
-                                <i class="fas fa-cog mr-2 text-secondary"></i>Cashout Fee Settings
-                            </a>
-                        </li>
-                    </ul>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item rounded-2 py-2" href="' . base_url('admin/settingcashinfee/' . $m->id) . '">
+                            <i class="fas fa-cog mr-2 text-secondary" style="width: 20px;"></i>Cashin Fee Settings
+                        </a>
+                        <a class="dropdown-item rounded-2 py-2" href="' . base_url('admin/settingcashoutfee/' . $m->id) . '">
+                            <i class="fas fa-cog mr-2 text-secondary" style="width: 20px;"></i>Cashout Fee Settings
+                        </a>
                     </div>
                 </div>';
             
@@ -194,9 +173,7 @@ class AdminMerchant extends CI_Controller
       $data['cashin_channels'] = $this->Merchant->get_cashin_channel();
       $data['cashout_channels'] = $this->Merchant->get_cashout_channel();
 
-      // Summary calculation
-      $ref_entity = $this->session->userdata('ref_entity');
-      $this->db->select('c_balanceTotal, c_balanceHold');
+      $this->db->select('SUM(c_balanceTotal) as total_balance, SUM(c_balanceHold) as total_hold, COUNT(id) as total_merchants');
       $this->db->from('merchant');
       $this->db->where('c_status', 'Active');
       $this->db->where('c_merchantLevel', 0); // Only Level 0 for summary
@@ -211,22 +188,12 @@ class AdminMerchant extends CI_Controller
          $this->db->group_end();
       }
 
-      $all_merchants = $this->db->get()->result();
+      $summary = $this->db->get()->row();
 
-      $total_balance = 0;
-      $total_hold = 0;
-      $total_available = 0;
-
-      foreach ($all_merchants as $merchant) {
-         $total_balance += (float)$merchant->c_balanceTotal;
-         $total_hold += (float)$merchant->c_balanceHold;
-      }
-      $total_available = $total_balance - $total_hold;
-
-      $data['total_balance'] = $total_balance;
-      $data['total_hold'] = $total_hold;
-      $data['total_available'] = $total_available;
-      $data['total_merchants'] = count($all_merchants);
+      $data['total_balance'] = (float)($summary->total_balance ?? 0);
+      $data['total_hold'] = (float)($summary->total_hold ?? 0);
+      $data['total_available'] = $data['total_balance'] - $data['total_hold'];
+      $data['total_merchants'] = (int)($summary->total_merchants ?? 0);
 
       $data['submerchants'] = []; // Not used by server-side table
       $data['start'] = 0;

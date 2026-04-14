@@ -12,10 +12,10 @@ class QRISRecurring extends CI_Model {
             $this->db->where('crqm.ref_merchantId', $search_name);
         }
         if ($search_date) {
-            $this->db->where('DATE(crqm.c_datetimeRequest) >=', date('Y-m-d', strtotime($search_date)));
+            $this->db->where('crqm.c_datetimeRequest >=', date('Y-m-d', strtotime($search_date)) . ' 00:00:00');
         }
         if ($search_date_to) {
-            $this->db->where('DATE(crqm.c_datetimeRequest) <=', date('Y-m-d', strtotime($search_date_to)));
+            $this->db->where('crqm.c_datetimeRequest <=', date('Y-m-d', strtotime($search_date_to)) . ' 23:59:59');
         }
         if ($search_submerchant) {
             $this->db->where('crqm.ref_subMerchantId', $search_submerchant);
@@ -66,8 +66,7 @@ class QRISRecurring extends CI_Model {
     public function count_filtered($search_name = null, $search_date = null, $search_date_to = null, $search_submerchant = null)
     {
         $this->_get_datatables_query($search_name, $search_date, $search_date_to, $search_submerchant);
-        $query = $this->db->get();
-        return $query->num_rows();
+        return $this->db->count_all_results();
     }
 
     public function count_all_dt($search_name = null, $search_date = null, $search_date_to = null)
@@ -81,8 +80,15 @@ class QRISRecurring extends CI_Model {
     {
         $this->db->select("COUNT(crqm.id) as qty, SUM(crqm.c_amount) as total_trx");
         $this->db->from($this->table);
-        $this->db->join('submerchant s', 'crqm.ref_subMerchantId = s.id', 'left');
-        $this->db->join('merchant m', 'crqm.ref_merchantId = m.id', 'left');
+        
+        // Only join if we are filtering by name or submerchant to avoid massive scan overhead
+        if ($search_submerchant) {
+            $this->db->join('submerchant s', 'crqm.ref_subMerchantId = s.id', 'left');
+        }
+        if ($search_name) {
+            $this->db->join('merchant m', 'crqm.ref_merchantId = m.id', 'left');
+        }
+
         $this->_apply_filters($search_name, $search_date, $search_date_to, $search_submerchant);
         return $this->db->get()->row();
     }

@@ -12,7 +12,9 @@ class AdminDownload extends CI_Model {
         $this->db->from($this->table);
 
         if ($search_date) {
-            $this->db->where('DATE(ad.c_datetime)', $search_date);
+            $formatted_date = date('Y-m-d', strtotime($search_date));
+            $this->db->where('ad.c_datetime >=', $formatted_date . ' 00:00:00');
+            $this->db->where('ad.c_datetime <=', $formatted_date . ' 23:59:59');
         }
 
         $i = 0;
@@ -50,15 +52,16 @@ class AdminDownload extends CI_Model {
     public function count_filtered($search_date = null)
     {
         $this->_get_datatables_query($search_date);
-        $query = $this->db->get();
-        return $query->num_rows();
+        return $this->db->count_all_results();
     }
 
     public function count_all_dt($search_date = null)
     {
         $this->db->from($this->table);
         if ($search_date) {
-            $this->db->where('DATE(c_datetime)', $search_date);
+            $formatted_date = date('Y-m-d', strtotime($search_date));
+            $this->db->where('c_datetime >=', $formatted_date . ' 00:00:00');
+            $this->db->where('c_datetime <=', $formatted_date . ' 23:59:59');
         }
         return $this->db->count_all_results();
     }
@@ -73,8 +76,8 @@ class AdminDownload extends CI_Model {
                         FROM admin_download";
        
         if ($search_date) {
-            $search_date = date('Y-m-d', strtotime($search_date));
-            $query .= " where DATE(admin_download.c_datetime) = '$search_date'";
+            $formatted_date = date('Y-m-d', strtotime($search_date));
+            $query .= " where admin_download.c_datetime >= '$formatted_date 00:00:00' AND admin_download.c_datetime <= '$formatted_date 23:59:59'";
         }
     
         $query .= " ORDER BY id DESC

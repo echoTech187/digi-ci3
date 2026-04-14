@@ -23,10 +23,27 @@ class DashboardController extends CI_Controller
       $data['title'] = 'Dashboard';
       $data['user'] = $this->Model_user->view_user()->row_array();
       
-      // Fetch Dashboard Data
-      $data['today_stats'] = $this->Dashboard_model->get_today_stats();
-      $data['monthly_overview'] = $this->Dashboard_model->get_monthly_overview();
-      $data['recent_mutations'] = $this->Dashboard_model->get_recent_mutations();
+      // Optimized: Deferred loading for Recent Mutations 
+      // It will be loaded via AJAX DataTables in the view for faster initial page load
+      $data['recent_mutations'] = []; 
+
+      // OPTIMIZATION: Implement 5-minute Caching for Dashboard Stats
+      // This prevents scanning 160M rows on every page hit
+      $cache_ttl = 300; // 5 minutes
+      $last_cache = $this->session->userdata('dash_stats_timeout');
+      
+      if ($last_cache && time() < $last_cache) {
+         $data['today_stats'] = $this->session->userdata('dash_today_stats');
+         $data['monthly_overview'] = $this->session->userdata('dash_monthly_overview');
+      } else {
+         $data['today_stats'] = $this->Dashboard_model->get_today_stats();
+         $data['monthly_overview'] = $this->Dashboard_model->get_monthly_overview();
+         
+         $this->session->set_userdata('dash_today_stats', $data['today_stats']);
+         $this->session->set_userdata('dash_monthly_overview', $data['monthly_overview']);
+         $this->session->set_userdata('dash_stats_timeout', time() + $cache_ttl);
+      }
+
       $data['merchant_count'] = $this->Dashboard_model->get_merchant_count();
       $data['maintenance_status'] = $this->Merchant->getMaintenanceStatus();
 
@@ -125,51 +142,90 @@ class DashboardController extends CI_Controller
          // Format for QRIS (String YmdHis)
          $date_from_qris = date('Ymd', strtotime($date_from))."000001";
          $date_to_qris   = date('Ymd', strtotime($date_to))."235959";
-         
+
          $prev_date_from_qris = date('Ymd', strtotime($prev_date_from))."000001";
          $prev_date_to_qris   = date('Ymd', strtotime($prev_date_to))."235959";
 
-         // ── Fetch Current Summaries ──
-         $qris_summary     = $this->Qris->get_summary($date_from_qris, $date_to_qris, "");
-         $disburse_summary = $this->BiFast->get_summary($date_from, $date_to, "");
-         $va_summary       = $this->VirtualAccount->get_summary($date_from, $date_to, "");
-
-         // ── Fetch Total Attempts (Success Rate Calculation) ──
-         $total_cashin_attempts = $this->db->where('DATE(c_Datetime) >=', $date_from)
-                                         ->where('DATE(c_Datetime) <=', $date_to)
-                                         ->count_all_results('cashin');
-         $total_cashout_attempts = $this->db->where('DATE(c_Datetime) >=', $date_from)
-                                          ->where('DATE(c_Datetime) <=', $date_to)
-                                          ->count_all_results('cashout');
-         $total_attempts = ($total_cashin_attempts + $total_cashout_attempts) ?: 1; // avoid division by zero
-         $total_paid = ($qris_summary[0]['qty'] + $disburse_summary[0]['qty'] + $va_summary[0]['qty']);
-         $data['success_rate'] = round(($total_paid / $total_attempts) * 100, 1);
-
-         // ── Fetch Previous Summaries ──
-         $qris_summary_prev     = $this->Qris->get_summary($prev_date_from_qris, $prev_date_to_qris, "");
-         $disburse_summary_prev = $this->BiFast->get_summary($prev_date_from, $prev_date_to, "");
-         $va_summary_prev       = $this->VirtualAccount->get_summary($prev_date_from, $prev_date_to, "");
-         
-         $data['submerchants'] = $this->Merchant->get_merchant(null, null, null);
-         $data['current_stats'] = [
-             'qris' => $qris_summary[0],
-             'disburse' => $disburse_summary[0],
-             'va' => $va_summary[0]
-         ];
-         $data['prev_stats'] = [
-             'qris' => $qris_summary_prev[0],
-             'disburse' => $disburse_summary_prev[0],
-             'va' => $va_summary_prev[0]
-         ];
-         
-         // ── Legacy compatibility ──
-         $data['qris_summary_last_month'] = $qris_summary; 
-         $data['disburse_summary_last_month'] = $disburse_summary;
-         $data['va_summary_last_month'] = $va_summary;
-         
-         // ── Dynamic Chart Data ──
+         // Always set Date Range Label (Lightweight)
          $data['date_range_label'] = date('d M Y', strtotime($date_from)) . ($date_from != $date_to ? ' - ' . date('d M Y', strtotime($date_to)) : '');
-         $data['chart_data'] = $this->_get_period_chart_data($period, $date_from, $date_to);
+         
+         // Always set Submerchants (Required for filter dropdown)
+         $data['submerchants'] = $this->Merchant->get_merchant(null, null, null);
+
+         // OPTIMIZATION: Implement 5-minute Period-Based Caching for Analytics
+         $cache_key = 'dash_analytics_' . $period;
+         $cache_timeout_key = $cache_key . '_timeout';
+         $cache_ttl = 300; // 5 minutes
+         
+         $last_cache_time = $this->session->userdata($cache_timeout_key);
+         
+         if ($last_cache_time && time() < $last_cache_time) {
+             // Load from Cache
+             $cached_data = $this->session->userdata($cache_key);
+             $data['current_stats'] = $cached_data['current_stats'];
+             $data['prev_stats'] = $cached_data['prev_stats'];
+             $data['success_rate'] = $cached_data['success_rate'];
+             $data['chart_data'] = $cached_data['chart_data'];
+             // Legacy support
+             $data['qris_summary_last_month'] = $cached_data['current_stats']['qris_raw'];
+             $data['disburse_summary_last_month'] = $cached_data['current_stats']['disburse_raw'];
+             $data['va_summary_last_month'] = $cached_data['current_stats']['va_raw'];
+         } else {
+             // ── Fetch Current Summaries ──
+             $qris_summary     = $this->Qris->get_summary($date_from_qris, $date_to_qris, "");
+             $disburse_summary = $this->BiFast->get_summary($date_from, $date_to, "");
+             $va_summary       = $this->VirtualAccount->get_summary($date_from, $date_to, "");
+
+             // ── Fetch Total Attempts (Success Rate Calculation) ──
+             $start_dt = $date_from . ' 00:00:00';
+             $end_dt   = $date_to . ' 23:59:59';
+
+             $total_cashin_attempts = $this->db->where('c_datetime >=', $start_dt)
+                                               ->where('c_datetime <=', $end_dt)
+                                               ->count_all_results('cashin');
+             $total_cashout_attempts = $this->db->where('c_datetime >=', $start_dt)
+                                                ->where('c_datetime <=', $end_dt)
+                                                ->count_all_results('cashout');
+             $total_attempts = ($total_cashin_attempts + $total_cashout_attempts) ?: 1; 
+             $total_paid = ($qris_summary[0]['qty'] + $disburse_summary[0]['qty'] + $va_summary[0]['qty']);
+             $data['success_rate'] = round(($total_paid / $total_attempts) * 100, 1);
+
+             // ── Fetch Previous Summaries ──
+             $qris_summary_prev     = $this->Qris->get_summary($prev_date_from_qris, $prev_date_to_qris, "");
+             $disburse_summary_prev = $this->BiFast->get_summary($prev_date_from, $prev_date_to, "");
+             $va_summary_prev       = $this->VirtualAccount->get_summary($prev_date_from, $prev_date_to, "");
+             
+             $data['current_stats'] = [
+                 'qris' => $qris_summary[0],
+                 'disburse' => $disburse_summary[0],
+                 'va' => $va_summary[0],
+                 'qris_raw' => $qris_summary,
+                 'disburse_raw' => $disburse_summary,
+                 'va_raw' => $va_summary
+             ];
+             $data['prev_stats'] = [
+                 'qris' => $qris_summary_prev[0],
+                 'disburse' => $disburse_summary_prev[0],
+                 'va' => $va_summary_prev[0]
+             ];
+             
+             // Legacy compatibility 
+             $data['qris_summary_last_month'] = $qris_summary; 
+             $data['disburse_summary_last_month'] = $disburse_summary;
+             $data['va_summary_last_month'] = $va_summary;
+             
+             $data['chart_data'] = $this->_get_period_chart_data($period, $date_from, $date_to);
+
+             // Save to Cache
+             $cache_data = [
+                 'current_stats' => $data['current_stats'],
+                 'prev_stats' => $data['prev_stats'],
+                 'success_rate' => $data['success_rate'],
+                 'chart_data' => $data['chart_data']
+             ];
+             $this->session->set_userdata($cache_key, $cache_data);
+             $this->session->set_userdata($cache_timeout_key, time() + $cache_ttl);
+         }
 
          $this->load->view('admin/index_real', $data);
       }
@@ -189,11 +245,12 @@ class DashboardController extends CI_Controller
                $labels[] = $hour . ":00";
                $values[$i] = 0;
            }
-           $query = $this->db->select('HOUR(c_datetime) as hour, SUM(c_amount) as amount')
-               ->from('cashin_payment_qris_mpm')
-               ->where('DATE(c_datetime)', $date_from)
-               ->group_by('HOUR(c_datetime)')
-               ->get()->result_array();
+            $query = $this->db->select('HOUR(c_datetime) as hour, SUM(c_amount) as amount')
+                ->from('cashin_payment_qris_mpm')
+                ->where('c_datetime >=', $date_from . ' 00:00:00')
+                ->where('c_datetime <=', $date_from . ' 23:59:59')
+                ->group_by('HOUR(c_datetime)')
+                ->get()->result_array();
            foreach ($query as $row) {
                $values[(int)$row['hour']] = (float)$row['amount'];
            }
@@ -210,17 +267,22 @@ class DashboardController extends CI_Controller
                $values[$date->format('Y-m-d')] = 0;
            }
 
-           $query = $this->db->select('DATE(c_datetime) as day, SUM(c_amount) as amount')
-               ->from('cashin_payment_qris_mpm')
-               ->where('DATE(c_datetime) >=', $date_from)
-               ->where('DATE(c_datetime) <=', $date_to)
-               ->group_by('DATE(c_datetime)')
-               ->get()->result_array();
-           foreach ($query as $row) {
-               if (isset($values[$row['day']])) {
-                   $values[$row['day']] = (float)$row['amount'];
-               }
-           }
+          $tables = ['cashin_payment_qris_mpm']; // Add other tables if needed
+          foreach ($tables as $t) {
+              $this->db->select("DATE(c_datetime) as date, SUM(c_amount) as amount, COUNT(id) as qty");
+              $this->db->from($t);
+              // OPTIMIZATION: Use range queries instead of DATE() in WHERE clause
+              $this->db->where('c_datetime >=', $date_from . ' 00:00:00');
+              $this->db->where('c_datetime <=', $date_to . ' 23:59:59');
+              if ($t == 'cashout_payment_bifast') $this->db->where('c_status', 'SUCCESS');
+              $this->db->group_by("DATE(c_datetime)");
+              $res = $this->db->get()->result_array();
+              foreach ($res as $row) {
+                  if (isset($values[$row['date']])) {
+                      $values[$row['date']] += (float)$row['amount'];
+                  }
+              }
+          }
            $values = array_values($values);
        }
 
@@ -301,29 +363,39 @@ class DashboardController extends CI_Controller
       }
       
       $merchants = $this->db->get()->result_array();
+      
+      // OPTIMIZATION: Fetch all actual balances and hold amounts in bulk to avoid N+1 queries
+      // 1. Calculate Actual Balance (Cashin - Cashout)
+      $this->db->select('m.id, 
+          (COALESCE(cin.total, 0) - COALESCE(cout.total, 0)) as balanceActual');
+      $this->db->from('merchant m');
+      $this->db->join('(SELECT ref_merchantId, SUM(c_amount) as total FROM cashin GROUP BY ref_merchantId) cin', 'cin.ref_merchantId = m.id', 'left');
+      $this->db->join('(SELECT ref_merchantId, SUM(c_amount) as total FROM cashout GROUP BY ref_merchantId) cout', 'cout.ref_merchantId = m.id', 'left');
+      if (!empty($merchant_id)) $this->db->where('m.id', $merchant_id);
+      $this->db->where('m.c_status', 'Active');
+      $actualBalancesRaw = $this->db->get()->result_array();
+      $actualBalances = array_column($actualBalancesRaw, 'balanceActual', 'id');
+
+      // 2. Calculate Actual Hold (QRIS + VA + Ewallet where settlement is not realtime)
+      $this->db->select('m.id, 
+          (COALESCE(q.total, 0) + COALESCE(v.total, 0) + COALESCE(e.total, 0)) as holdActual');
+      $this->db->from('merchant m');
+      $this->db->join('(SELECT ref_merchantId, SUM(c_amount - c_fee) as total FROM cashin_payment_qris_mpm WHERE c_isSettlementRealtime=\'0\' GROUP BY ref_merchantId) q', 'q.ref_merchantId = m.id', 'left');
+      $this->db->join('(SELECT ref_merchantId, SUM(c_amount - c_fee) as total FROM cashin_payment_va WHERE c_isSettlementRealtime=\'0\' GROUP BY ref_merchantId) v', 'v.ref_merchantId = m.id', 'left');
+      $this->db->join('(SELECT ref_merchantId, SUM(c_amount - c_fee) as total FROM cashin_payment_ewallet WHERE c_isSettlementRealtime=\'0\' GROUP BY ref_merchantId) e', 'e.ref_merchantId = m.id', 'left');
+      if (!empty($merchant_id)) $this->db->where('m.id', $merchant_id);
+      $this->db->where('m.c_status', 'Active');
+      $actualHoldsRaw = $this->db->get()->result_array();
+      $actualHolds = array_column($actualHoldsRaw, 'holdActual', 'id');
+
       $results = [];
       $no = 1;
 
       foreach ($merchants as $row1) {
          $id = $row1['id'];
 
-         $sqlActual = "
-            SELECT 
-               COALESCE((SELECT SUM(c_amount) FROM cashin WHERE ref_merchantId=?), 0) -
-               COALESCE((SELECT SUM(c_amount) FROM cashout WHERE ref_merchantId=?), 0) AS balanceActual
-         ";
-         $qActual = $this->db->query($sqlActual, [$id, $id])->row_array();
-         $balanceTotalActual = round($qActual['balanceActual']);
-
-         $sqlHold = "
-            SELECT 
-               COALESCE((SELECT SUM(c_amount - c_fee) FROM cashin_payment_qris_mpm WHERE ref_merchantId=? AND c_isSettlementRealtime='0'), 0) +
-               COALESCE((SELECT SUM(c_amount - c_fee) FROM cashin_payment_va WHERE ref_merchantId=? AND c_isSettlementRealtime='0'), 0) +
-               COALESCE((SELECT SUM(c_amount - c_fee) FROM cashin_payment_ewallet WHERE ref_merchantId=? AND c_isSettlementRealtime='0'), 0)
-            AS holdActual
-         ";
-         $qHold = $this->db->query($sqlHold, [$id, $id, $id])->row_array();
-         $balanceHoldActual = round($qHold['holdActual']);
+         $balanceTotalActual = round($actualBalances[$id] ?? 0);
+         $balanceHoldActual  = round($actualHolds[$id] ?? 0);
 
          $balanceTotalSystem = round($row1['c_balanceTotal']);
          $balanceHoldSystem  = round($row1['c_balanceHold']);

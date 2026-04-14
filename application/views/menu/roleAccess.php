@@ -61,11 +61,7 @@
                             : "<span class='badge badge-light text-dark border px-2 py-1' style='font-size:10px;'>Sub Menu</span>";
                         $indent = $isSub ? "<span class='text-muted mr-2 ml-4' style='font-size:18px;'>ㄴ</span>" : "<i class='".$m['icon']." mr-2 text-primary'></i>";
 
-                        $ci = get_instance();
-                        $ci->db->where('role_id', $role['id']);
-                        $ci->db->where('menu_id', $m['id']);
-                        $result = $ci->db->get('user_access_menu');
-                        $checked = ($result->num_rows() > 0);
+                        $checked = in_array($m['id'], $role_access_ids);
                     ?>
                     <tr class="<?= $isSub ? 'bg-light-subtle' : '' ?>">
                         <td class="text-center text-muted small"><?= $i; ?></td>

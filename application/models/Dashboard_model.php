@@ -18,7 +18,8 @@ class Dashboard_model extends CI_Model
         // QRIS Today
         $qris = $this->db->select('SUM(c_amount) as amount, COUNT(id) as qty')
             ->from('cashin_payment_qris_mpm')
-            ->where('DATE(c_datetimePayment)', $today)
+            ->where('c_datetimePayment >=', $today.' 00:00:00')
+            ->where('c_datetimePayment <=', $today.' 23:59:59')
             ->get()->row();
         $stats['qris']['amount'] = $qris->amount != null ? $qris->amount : 0;
         $stats['qris']['qty'] = $qris->qty != null ? $qris->qty : 0;
@@ -26,7 +27,8 @@ class Dashboard_model extends CI_Model
         // VA Today
         $va = $this->db->select('SUM(c_amount) as amount, COUNT(id) as qty')
             ->from('cashin_payment_va')
-            ->where('DATE(c_datetimePayment)', $today)
+            ->where('c_datetimePayment >=', $today.' 00:00:00')
+            ->where('c_datetimePayment <=', $today.' 23:59:59')
             ->get()->row();
         $stats['va']['amount'] = $va->amount != null ? $va->amount : 0;
         $stats['va']['qty'] = $va->qty != null ? $va->qty : 0;
@@ -34,7 +36,8 @@ class Dashboard_model extends CI_Model
         // E-Wallet Today
         $ewallet = $this->db->select('SUM(c_amount) as amount, COUNT(id) as qty')
             ->from('cashin_payment_ewallet')
-            ->where('DATE(c_datetimePayment)', $today)
+            ->where('c_datetimePayment >=', $today.' 00:00:00')
+            ->where('c_datetimePayment <=', $today.' 23:59:59')
             ->get()->row();
         $stats['ewallet']['amount'] = $ewallet->amount != null ? $ewallet->amount : 0;
         $stats['ewallet']['qty'] = $ewallet->qty != null ? $ewallet->qty : 0;
@@ -42,7 +45,8 @@ class Dashboard_model extends CI_Model
         // Disbursement Today
         $disburse = $this->db->select('SUM(c_amount) as amount, COUNT(id) as qty')
             ->from('cashout_payment_bifast')
-            ->where('DATE(c_datetime)', $today)
+            ->where('c_datetime >=', $today.' 00:00:00')
+            ->where('c_datetime <=', $today.' 23:59:59')
             ->where('c_status', 'SUCCESS')
             ->get()->row();
         $stats['disburse']['amount'] = $disburse->amount != null ? $disburse->amount : 0;
@@ -63,7 +67,6 @@ class Dashboard_model extends CI_Model
         foreach ($channels as $channel) {
             $table = '';
             $date_field = '';
-            $wheres = [];
             switch ($channel) {
                 case 'qris': $table = 'cashin_payment_qris_mpm'; $date_field = 'c_datetimePayment'; break;
                 case 'va': $table = 'cashin_payment_va'; $date_field = 'c_datetimePayment'; break;
@@ -71,12 +74,17 @@ class Dashboard_model extends CI_Model
                 case 'disburse': $table = 'cashout_payment_bifast'; $date_field = 'c_datetime'; $wheres = ['c_status' => 'SUCCESS']; break;
             }
 
-            $monthly = $this->db->select("MONTH($date_field) as month, SUM(c_amount) as amount")
-                ->from($table)
-                ->where("YEAR($date_field)", $year)
-                ->where($wheres)
-                ->group_by("MONTH($date_field)")
-                ->get()->result_array();
+            $this->db->select("MONTH($date_field) as month, SUM(c_amount) as amount");
+            $this->db->from($table);
+            // SARGable Date Range to allow index usage on the YEAR
+            $this->db->where("$date_field >=", $year . '-01-01 00:00:00');
+            $this->db->where("$date_field <=", $year . '-12-31 23:59:59');
+            
+            if ($channel == 'disburse') {
+                $this->db->where('c_status', 'SUCCESS');
+            }
+            
+            $monthly = $this->db->group_by("MONTH($date_field)")->get()->result_array();
 
             $formatted = array_fill(1, 12, 0);
             foreach ($monthly as $row) {
@@ -90,28 +98,23 @@ class Dashboard_model extends CI_Model
 
     public function get_recent_mutations($limit = 10)
     {
-        // Unified recent activity from all payments and disburse
+        // Optimized: LIMIT inside subquery BEFORE JOIN to avoid scanning millions of rows
         $sql = "
-            (SELECT c_datetime as date, CAST('QRIS' AS CHAR) as type, c_amount as amount, CAST(c_status AS CHAR) as status, CAST(merchant.c_name AS CHAR) as merchant 
-             FROM cashin_payment_qris_mpm 
-             JOIN merchant ON merchant.id = cashin_payment_qris_mpm.ref_merchantId
-             ORDER BY c_datetime DESC LIMIT 5)
+            (SELECT t.date, CAST('QRIS' AS CHAR) as type, t.amount, CAST(m.c_status AS CHAR) as status, CAST(m.c_name AS CHAR) as merchant 
+             FROM (SELECT c_datetime as date, c_amount as amount, ref_merchantId FROM cashin_payment_qris_mpm ORDER BY c_datetime DESC LIMIT 5) t
+             JOIN merchant m ON m.id = t.ref_merchantId)
             UNION ALL
-            (SELECT c_datetime as date, CAST('VA' AS CHAR) as type, c_amount as amount, CAST(c_status AS CHAR) as status, CAST(merchant.c_name AS CHAR) as merchant 
-             FROM cashin_payment_va 
-             JOIN merchant ON merchant.id = cashin_payment_va.ref_merchantId
-             ORDER BY c_datetime DESC LIMIT 5)
+            (SELECT t.date, CAST('VA' AS CHAR) as type, t.amount, CAST(m.c_status AS CHAR) as status, CAST(m.c_name AS CHAR) as merchant 
+             FROM (SELECT c_datetime as date, c_amount as amount, ref_merchantId FROM cashin_payment_va ORDER BY c_datetime DESC LIMIT 5) t
+             JOIN merchant m ON m.id = t.ref_merchantId)
              UNION ALL
-            (SELECT c_datetimePayment as date, CAST('E-WALLET' AS CHAR) as type, c_amount as amount, CAST('PAID' AS CHAR) as status, CAST(merchant.c_name AS CHAR) as merchant 
-             FROM cashin_payment_ewallet 
-             JOIN merchant ON merchant.id = cashin_payment_ewallet.ref_merchantId
-             ORDER BY c_datetimePayment DESC LIMIT 5)
+            (SELECT t.date, CAST('E-WALLET' AS CHAR) as type, t.amount, CAST('PAID' AS CHAR) as status, CAST(m.c_name AS CHAR) as merchant 
+             FROM (SELECT c_datetimePayment as date, c_amount as amount, ref_merchantId FROM cashin_payment_ewallet ORDER BY c_datetimePayment DESC LIMIT 5) t
+             JOIN merchant m ON m.id = t.ref_merchantId)
             UNION ALL
-            (SELECT c_datetime as date, CAST('DISBURSE' AS CHAR) as type, c_amount as amount, CAST(cashout_payment_bifast.c_status AS CHAR) as status, CAST(merchant.c_name AS CHAR) as merchant 
-             FROM cashout_payment_bifast
-             JOIN merchant ON merchant.id = cashout_payment_bifast.ref_merchantId
-             WHERE cashout_payment_bifast.c_status = 'SUCCESS'
-             ORDER BY c_datetime DESC LIMIT 5)
+            (SELECT t.date, CAST('DISBURSE' AS CHAR) as type, t.amount, CAST(t.status AS CHAR) as status, CAST(m.c_name AS CHAR) as merchant 
+             FROM (SELECT c_datetime as date, c_amount as amount, c_status as status, ref_merchantId FROM cashout_payment_bifast WHERE c_status = 'SUCCESS' ORDER BY c_datetime DESC LIMIT 5) t
+             JOIN merchant m ON m.id = t.ref_merchantId)
             ORDER BY date DESC LIMIT $limit
         ";
         return $this->db->query($sql)->result();
@@ -129,7 +132,8 @@ class Dashboard_model extends CI_Model
         return $this->db->select('merchant.c_name, SUM(cashin_payment_qris_mpm.c_amount) as volume')
             ->from('cashin_payment_qris_mpm')
             ->join('merchant', 'merchant.id = cashin_payment_qris_mpm.ref_merchantId')
-            ->where('DATE(c_datetimePayment)', $today)
+            ->where('c_datetimePayment >=', $today.' 00:00:00')
+            ->where('c_datetimePayment <=', $today.' 23:59:59')
             ->group_by('merchant.id')
             ->order_by('volume', 'DESC')
             ->limit($limit)

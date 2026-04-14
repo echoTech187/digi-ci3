@@ -19,7 +19,9 @@ class QRISDynamic extends CI_Model
             $this->db->where('cdq.c_datetimeRequest >=', $date_from);
             $this->db->where('cdq.c_datetimeRequest <=', $date_to);
         } elseif ($search_date) {
-            $this->db->like('cdq.c_datetimeRequest', date('Y-m-d', strtotime($search_date)));
+            $formatted_date = date('Y-m-d', strtotime($search_date));
+            $this->db->where('cdq.c_datetimeRequest >=', $formatted_date . ' 00:00:00');
+            $this->db->where('cdq.c_datetimeRequest <=', $formatted_date . ' 23:59:59');
         }
 
         if ($search_transid) {
@@ -81,8 +83,7 @@ class QRISDynamic extends CI_Model
     public function count_filtered($search_name = null, $search_date = null, $search_transid = null, $search_status = null, $search_reff = null, $search_date_to = null)
     {
         $this->_get_datatables_query($search_name, $search_date, $search_transid, $search_status, $search_reff, $search_date_to);
-        $query = $this->db->get();
-        return $query->num_rows();
+        return $this->db->count_all_results();
     }
 
     public function count_all_dt($search_name = null, $search_date = null, $search_date_to = null)
@@ -96,8 +97,15 @@ class QRISDynamic extends CI_Model
     {
         $this->db->select("COUNT(cdq.id) as qty, SUM(cdq.c_amount) as total_amount");
         $this->db->from($this->table);
+        
+        // Only join if we are filtering by submerchant or merchant name to avoid massive scan overhead
+        if ($search_name) {
+             $this->db->join('merchant m', 'm.id = cdq.ref_merchantId', 'left');
+        }
+        
+        // Note: _apply_filters might join submerchant if needed, but we ensure minimal JOIN here
         $this->db->join('submerchant s', 's.id = cdq.ref_subMerchantId', 'left');
-        $this->db->join('merchant m', 'm.id = cdq.ref_merchantId', 'left');
+
         $this->_apply_filters($search_name, $search_date, $search_transid, $search_status, $search_reff, $search_date_to);
         $query = $this->db->get();
         return $query->row();
@@ -224,16 +232,17 @@ class QRISDynamic extends CI_Model
 
     public function count_qrisdynamic($refMerchantId, $search_date_qd = null)
     {
-        $query = "SELECT 
-                cdqm.id from cashin_dynamic_qris_mpm cdqm 
-                    join submerchant s on cdqm.ref_subMerchantId = s.id
-                    where cdqm.ref_merchantId = $refMerchantId";
+        $this->db->from('cashin_dynamic_qris_mpm cdqm');
+        $this->db->join('submerchant s', 'cdqm.ref_subMerchantId = s.id');
+        $this->db->where('cdqm.ref_merchantId', $refMerchantId);
 
         if ($search_date_qd) {
-            $query .= " AND cdqm.c_datetimeRequest = '$search_date_qd'";
+            $formatted_date = date('Y-m-d', strtotime($search_date_qd));
+            $this->db->where('cdqm.c_datetimeRequest >=', $formatted_date . ' 00:00:00');
+            $this->db->where('cdqm.c_datetimeRequest <=', $formatted_date . ' 23:59:59');
         }
 
-        return $this->db->query($query)->num_rows();
+        return $this->db->count_all_results();
     }
 
     public function get_merchant()

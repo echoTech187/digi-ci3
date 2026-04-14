@@ -254,21 +254,21 @@
         // Init Server-Side DataTable
         var table = initServerDataTable("#ewalletDynamicTable", "<?= base_url('admin/ewallet_dynamic') ?>", [
             {data: 'no', orderable: false},
-            {data: 'c_datetimeRequest', render: function(data){
+            {data: 'c_datetimeRequest',className: 'text-nowrap', render: function(data){
                 return moment(data).format('DD-MM-YYYY HH:mm:ss');
             }},
-            {data: 'name_submerchant'},
-            {data: 'ref_cashinChannelId'},
-            {data: 'c_merchantTransactionId', className: 'text-dark font-weight-bold'},
+            {data: 'name_submerchant',className: 'text-nowrap'},
+            {data: 'ref_cashinChannelId',className: 'text-nowrap'},
+            {data: 'c_merchantTransactionId', className: 'text-dark font-weight-bold text-nowrap'},
             {data: 'ref_cashinExternalId', className: 'text-center'},
-            {data: 'c_amount', render: function(data){
+            {data: 'c_amount',className: 'text-nowrap', render: function(data){
                 var val = typeof data === 'string' ? data.replace(/[^0-9.-]+/g,"") : data;
                 return '<span class="font-weight-bold text-dark">Rp ' + Number(val).toLocaleString('id-ID') + '</span>';
             }},
-            {data: 'c_datetimeExpired', render: function(data){
+            {data: 'c_datetimeExpired',className: 'text-nowrap', render: function(data){
                 return data ? moment(data).format('DD-MM-YYYY HH:mm:ss') : '-';
             }},
-            {data: 'c_status', className: 'text-center'},
+            {data: 'c_status',className: 'text-nowrap', className: 'text-center'},
             {data: 'simulation', orderable: false, className: 'text-center'}
         ], {
             "language": {

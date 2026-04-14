@@ -216,14 +216,14 @@
         // Init Server-Side DataTable
         var table = initServerDataTable("#qrisRecurringTable", "<?= base_url('admin/qris_recurring') ?>", [
             {data: 'no', orderable: false},
-            {data: 'c_datetimeRequest', render: function(data){
+            {data: 'c_datetimeRequest',className: 'text-nowrap', render: function(data){
                 return moment(data).format('DD-MM-YYYY HH:mm:ss');
             }},
-            {data: 'name_merchant'},
-            {data: 'name_submerchant'},
-            {data: 'c_merchantTransactionId', className: 'text-dark font-weight-bold'},
-            {data: 'ref_cashinExternalId'},
-            {data: 'c_amount', render: function(data){
+            {data: 'name_merchant',className: 'text-nowrap'},
+            {data: 'name_submerchant',className: 'text-nowrap'},
+            {data: 'c_merchantTransactionId', className: 'text-dark font-weight-bold text-nowrap'},
+            {data: 'ref_cashinExternalId',className: 'text-nowrap'},
+            {data: 'c_amount',className: 'text-nowrap', render: function(data){
                 var val = typeof data === 'string' ? data.replace(/[^0-9.-]+/g,"") : data;
                 return '<span class="font-weight-bold text-dark">Rp ' + Number(val).toLocaleString('id-ID') + '</span>';
             }},

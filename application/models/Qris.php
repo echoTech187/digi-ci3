@@ -78,8 +78,7 @@ class Qris extends CI_Model {
     public function count_filtered($search_name = null, $date_from = null, $date_to = null, $search_settlement = null, $search_rrn = null, $search_invoice = null, $search_transid = null)
     {
         $this->_get_datatables_query($search_name, $date_from, $date_to, $search_settlement, $search_rrn, $search_invoice, $search_transid);
-        $query = $this->db->get();
-        return $query->num_rows();
+        return $this->db->count_all_results();
     }
 
     public function count_all_dt($search_name = null, $date_from = null, $date_to = null, $search_settlement = null, $search_rrn = null, $search_invoice = null, $search_transid = null)
@@ -137,8 +136,8 @@ class Qris extends CI_Model {
         }
 
         if (!empty($search_date_qris_settlement)) {
-            $search_date_qris_settlement = date('Y-m-d', strtotime($search_date_qris_settlement));
-            $query .= " and DATE(cashin_payment_qris_mpm.c_datetimeSettlement) = '$search_date_qris_settlement'";
+            $formatted_date = date('Y-m-d', strtotime($search_date_qris_settlement));
+            $query .= " and cashin_payment_qris_mpm.c_datetimeSettlement >= '$formatted_date 00:00:00' AND cashin_payment_qris_mpm.c_datetimeSettlement <= '$formatted_date 23:59:59'";
         }
 
         if (!empty($search_transactionid_ht)) {
@@ -171,23 +170,17 @@ class Qris extends CI_Model {
 
     public function count_qris($refMerchantId, $search_date_qris = null)
     {
-
-        
-        $query = "SELECT 
-            cashin_payment_qris_mpm.id
-            FROM cashin_payment_qris_mpm 
-            join cashin on cashin.id = cashin_payment_qris_mpm.ref_cashinId
-            JOIN merchant on merchant.id=cashin_payment_qris_mpm.ref_merchantId
-            JOIN submerchant on submerchant.id=cashin_payment_qris_mpm.ref_subMerchantId
-            LEFT JOIN cashin_dynamic_qris_mpm on (cashin_dynamic_qris_mpm.ref_subMerchantId = cashin_payment_qris_mpm.ref_subMerchantId AND cashin_dynamic_qris_mpm.id=cashin_payment_qris_mpm.ref_cashinDynamicQrisMpmId)
-            LEFT JOIN cashin_recurring_qris_mpm on (cashin_recurring_qris_mpm.ref_subMerchantId = cashin_payment_qris_mpm.ref_subMerchantId AND cashin_recurring_qris_mpm.id=cashin_payment_qris_mpm.ref_cashinRecurringQrisMpmId)
-            where cashin_payment_qris_mpm.ref_merchantId  = $refMerchantId";
+        $this->db->from('cashin_payment_qris_mpm');
+        $this->db->join('cashin', 'cashin.id = cashin_payment_qris_mpm.ref_cashinId');
+        $this->db->join('merchant', 'merchant.id = cashin_payment_qris_mpm.ref_merchantId');
+        $this->db->join('submerchant', 'submerchant.id = cashin_payment_qris_mpm.ref_subMerchantId');
+        $this->db->where('cashin_payment_qris_mpm.ref_merchantId', $refMerchantId);
 
         if ($search_date_qris) {
-            $query .= " AND cashin_payment_qris_mpm.c_datetime = '$search_date_qris'";
+            $this->db->where('cashin_payment_qris_mpm.c_datetime', $search_date_qris);
         }
 
-        return $this->db->query($query)->num_rows();
+        return $this->db->count_all_results();
     }
 
     public function get_summary($date_from, $date_to, $refMerchantId = null) {
@@ -207,9 +200,10 @@ class Qris extends CI_Model {
     }
 
     public function monthly_qris() {
+        $year = date('Y');
         $query = "SELECT MONTH(c_datetime) AS month, SUM(c_amount) AS amount
                   FROM cashin_payment_qris_mpm 
-                  WHERE YEAR(c_datetime) = '2026'
+                  WHERE c_datetime >= '$year-01-01 00:00:00' AND c_datetime <= '$year-12-31 23:59:59'
                   GROUP BY MONTH(c_datetime)
                   ORDER BY month";
         return $this->db->query($query)->result_array();

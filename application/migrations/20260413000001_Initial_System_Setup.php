@@ -108,6 +108,25 @@ class Migration_Initial_System_Setup extends CI_Migration {
         $this->dbforge->add_key('id', TRUE);
         $this->dbforge->create_table('ci_sessions');
         $this->db->query('ALTER TABLE ci_sessions ADD INDEX ci_sessions_timestamp (timestamp)');
+
+
+        $this->dbforge->add_field([
+            'id' => ['type' => 'BIGINT', 'constraint' => 20, 'unsigned' => TRUE, 'auto_increment' => TRUE],
+            'ref_userId' => ['type' => 'INT', 'constraint' => 11],
+            'c_userType' => ['type' => 'ENUM("Admin","Merchant")', 'default' => 'Admin'],
+            'c_email' => ['type' => 'VARCHAR', 'constraint' => 200],
+            'c_sessionId' => ['type' => 'VARCHAR', 'constraint' => 100],
+            'c_ipAddress' => ['type' => 'VARCHAR', 'constraint' => 45],
+            'c_userAgent' => ['type' => 'TEXT', 'null' => TRUE],
+            'c_loginAt' => ['type' => 'DATETIME', 'default' => 'CURRENT_TIMESTAMP'],
+            'c_logoutAt' => ['type' => 'DATETIME', 'null' => TRUE],
+        ]);
+        $this->dbforge->add_key('id', TRUE);
+        $this->dbforge->create_table('user_session_log');
+        
+        $this->db->query('ALTER TABLE user_session_log ADD INDEX idx_userId (ref_userId)');
+        $this->db->query('ALTER TABLE user_session_log ADD INDEX idx_sessionId (c_sessionId)');
+        $this->db->query('ALTER TABLE user_session_log ADD INDEX idx_loginAt (c_loginAt)');
     }
 
     public function down() {

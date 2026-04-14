@@ -234,22 +234,22 @@
         // Init Server-Side DataTable
         var table = initServerDataTable("#vadynamicTable", "<?= base_url('admin/Va_dynamic') ?>", [
             {data: 'no', orderable: false},
-            {data: 'c_datetimeRequest', render: function(data){
+            {data: 'c_datetimeRequest',className: 'text-nowrap', render: function(data){
                 return moment(data).format('DD-MM-YYYY HH:mm:ss');
             }},
-            {data: 'name_merchant'},
-            {data: 'name_submerchant'},
-            {data: 'c_merchantTransactionId'},
-            {data: 'ref_cashinChannelId'},
-            {data: 'ref_cashinExternalId'},
-            {data: 'c_vaNumber', render: function(data){
+            {data: 'name_merchant',className: 'text-nowrap'},
+            {data: 'name_submerchant',className: 'text-nowrap'},
+            {data: 'c_merchantTransactionId',className: 'text-nowrap'},
+            {data: 'ref_cashinChannelId',className: 'text-nowrap'},
+            {data: 'ref_cashinExternalId',className: 'text-nowrap'},
+            {data: 'c_vaNumber',className: 'text-nowrap', render: function(data){
                 return '<code>' + data + '</code>';
             }},
-            {data: 'c_amount', render: function(data){
+            {data: 'c_amount',className: 'text-nowrap', render: function(data){
                 var val = typeof data === 'string' ? data.replace(/[^0-9.-]+/g,"") : data;
                 return '<span class="font-weight-bold text-dark">Rp ' + Number(val).toLocaleString('id-ID') + '</span>';
             }},
-            {data: 'c_datetimeExpired', render: function(data){
+            {data: 'c_datetimeExpired',className: 'text-nowrap', render: function(data){
                 return moment(data).format('DD-MM-YYYY HH:mm:ss');
             }},
             {data: 'c_status'}

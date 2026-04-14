@@ -1785,18 +1785,9 @@ ul.sidebar {
     display: none !important;
 }
 
-
-
-
-table>thead>tr>th,
-table>tbody>tr>td {
-    text-wrap: nowrap !important;
+.text-nowrap {
+    white-space: nowrap !important;
 }
-
-
-
-
-
 
 .glass-card {
     background: #ffffff;
@@ -2691,6 +2682,14 @@ table>tbody>tr>td {
     grid-template-columns: repeat(4, 1fr);
     gap: 1.25rem;
     margin-bottom: 1.5rem;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding: 5px 1.5rem 15px 1.5rem;
+    margin-left: -1.5rem;
+    margin-right: -1.5rem;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
 }
 
 .dt-summary-card {
@@ -2728,6 +2727,7 @@ table>tbody>tr>td {
     font-weight: 700;
     color: var(--gray-900);
     line-height: 1.2;
+    white-space: nowrap;
 }
 
 .dt-summary-sub {

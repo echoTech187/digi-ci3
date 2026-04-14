@@ -81,13 +81,26 @@ class Model_menu extends CI_Model
 
    public function get_all_menus_hierarchical()
    {
-      $main_menus = $this->db->where('parent_id', 0)->order_by('menu_order', 'ASC')->get('user_menu')->result_array();
+      // Optimized: Fetch all menus in one query and organize hierarchy in PHP memory
+      $menus = $this->db->order_by('parent_id', 'ASC')->order_by('menu_order', 'ASC')->get('user_menu')->result_array();
+      
+      $parents = [];
+      $children = [];
+      foreach ($menus as $m) {
+         if ($m['parent_id'] == 0) {
+            $parents[] = $m;
+         } else {
+            $children[$m['parent_id']][] = $m;
+         }
+      }
+
       $all_menus = [];
-      foreach ($main_menus as $m) {
-         $all_menus[] = $m;
-         $sub_menus = $this->db->where('parent_id', $m['id'])->order_by('menu_order', 'ASC')->get('user_menu')->result_array();
-         foreach ($sub_menus as $sm) {
-            $all_menus[] = $sm;
+      foreach ($parents as $p) {
+         $all_menus[] = $p;
+         if (isset($children[$p['id']])) {
+            foreach ($children[$p['id']] as $c) {
+               $all_menus[] = $c;
+            }
          }
       }
       return $all_menus;

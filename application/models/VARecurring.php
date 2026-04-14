@@ -17,13 +17,12 @@ class VARecurring extends CI_Model {
             $this->db->where('crv.ref_merchantId', $search_name);
         }
         if ($search_date) {
-            $search_date = date('Y-m-d', strtotime($search_date));
+            $formatted_date = date('Y-m-d', strtotime($search_date));
             if (!empty($_SESSION['search_date_var_to'])) {
-                $search_date_to = date('Y-m-d', strtotime($_SESSION['search_date_var_to']));
-                $this->db->where("DATE(crv.c_datetimeRequest) >=", $search_date);
-                $this->db->where("DATE(crv.c_datetimeRequest) <=", $search_date_to);
+                $formatted_date_to = date('Y-m-d', strtotime($_SESSION['search_date_var_to']));
+                $this->db->where("crv.c_datetimeRequest >= '$formatted_date 00:00:00' AND crv.c_datetimeRequest <= '$formatted_date_to 23:59:59'");
             } else {
-                $this->db->where('DATE(crv.c_datetimeRequest)', $search_date);
+                $this->db->where("crv.c_datetimeRequest >= '$formatted_date 00:00:00' AND crv.c_datetimeRequest <= '$formatted_date 23:59:59'");
             }
         }
         if ($search_sub) {
@@ -65,47 +64,49 @@ class VARecurring extends CI_Model {
     public function count_filtered($search_name = null, $search_date = null, $search_sub = null)
     {
         $this->_get_datatables_query($search_name, $search_date, $search_sub);
-        $query = $this->db->get();
-        return $query->num_rows();
-    }
-
-    public function count_all_dt($search_name = null, $search_date = null)
-    {
-        $this->db->from($this->table);
-        if ($search_name) $this->db->where('crv.ref_merchantId', $search_name);
-        if ($search_date) {
-            $search_date = date('Y-m-d', strtotime($search_date));
-            if (!empty($_SESSION['search_date_var_to'])) {
-                $search_date_to = date('Y-m-d', strtotime($_SESSION['search_date_var_to']));
-                $this->db->where("DATE(crv.c_datetimeRequest) >=", $search_date);
-                $this->db->where("DATE(crv.c_datetimeRequest) <=", $search_date_to);
-            } else {
-                $this->db->where('DATE(crv.c_datetimeRequest)', $search_date);
-            }
-        }
         return $this->db->count_all_results();
     }
-
-    public function get_summary($search_name = null, $search_date = null, $search_date_to = null, $search_sub = null)
+    public function get_summary($search_name = null, $search_date = null, $search_date_to = null, $search_va = null, $search_trxid = null)
     {
         $this->db->select("COUNT(crv.id) as qty, SUM(crv.c_amount) as total_amount");
         $this->db->from($this->table);
-        $this->db->join('merchant m', 'm.id = crv.ref_merchantId', 'left');
+        
+        if ($search_name) {
+            $this->db->join('merchant m', 'crv.ref_merchantId = m.id', 'left');
+            $this->db->where('crv.ref_merchantId', $search_name);
+        }
+        
+        if ($search_date) {
+            $search_date = date('Y-m-d', strtotime($search_date));
+            if ($search_date_to) {
+                $search_date_to = date('Y-m-d', strtotime($search_date_to));
+                $this->db->where("crv.c_datetimeRequest >= '$search_date 00:00:00'");
+                $this->db->where("crv.c_datetimeRequest <= '$search_date_to 23:59:59'");
+            } else {
+                $this->db->where("crv.c_datetimeRequest >= '$search_date 00:00:00'");
+                $this->db->where("crv.c_datetimeRequest <= '$search_date 23:59:59'");
+            }
+        }
 
+        return $this->db->get()->row();
+    }
+
+    public function count_all_dt($search_name = null, $search_date = null, $search_date_to = null)
+    {
+        $this->db->from($this->table);
         if ($search_name) $this->db->where('crv.ref_merchantId', $search_name);
         if ($search_date) {
             $search_date = date('Y-m-d', strtotime($search_date));
             if ($search_date_to) {
                 $search_date_to = date('Y-m-d', strtotime($search_date_to));
-                $this->db->where("DATE(crv.c_datetimeRequest) >=", $search_date);
-                $this->db->where("DATE(crv.c_datetimeRequest) <=", $search_date_to);
+                $this->db->where("crv.c_datetimeRequest >= '$search_date 00:00:00'");
+                $this->db->where("crv.c_datetimeRequest <= '$search_date_to 23:59:59'");
             } else {
-                $this->db->where('DATE(crv.c_datetimeRequest)', $search_date);
+                $this->db->where("crv.c_datetimeRequest >= '$search_date 00:00:00'");
+                $this->db->where("crv.c_datetimeRequest <= '$search_date 23:59:59'");
             }
         }
-        if ($search_sub) $this->db->where('crv.ref_subMerchantId', $search_sub);
-
-        return $this->db->get()->row();
+        return $this->db->count_all_results();
     }
 
     public function get_varecurring($limit, $start, $search_date_var = null, $search_name_var= null, $search_submerchant_var= null) {
@@ -117,8 +118,8 @@ class VARecurring extends CI_Model {
         $query .= " WHERE 1=1 ";
 
         if ($search_date_var) {
-                $search_date_var = date('Y-m-d', strtotime($search_date_var));
-                $query .= " AND DATE(crv.c_datetimeRequest) = '$search_date_var'";
+                $formatted_date = date('Y-m-d', strtotime($search_date_var));
+                $query .= " AND crv.c_datetimeRequest >= '$formatted_date 00:00:00' AND crv.c_datetimeRequest <= '$formatted_date 23:59:59'";
             }
 
         if ($search_name_var) {
@@ -135,17 +136,18 @@ class VARecurring extends CI_Model {
     }
 
     public function count_varecurring($refMerchantId, $search_date_var = null) {
-        $query = "SELECT 
-                crv.id from cashin_recurring_va crv 
-                 join submerchant s on s.id = crv.ref_subMerchantId
-                 where crv.ref_merchantId = $refMerchantId";
+        $this->db->from('cashin_recurring_va crv');
+        $this->db->join('submerchant s', 's.id = crv.ref_subMerchantId');
+        $this->db->where('crv.ref_merchantId', $refMerchantId);
 
         if ($search_date_var) {
-            $query .= " AND crv.c_datetimeRequest = '$search_date_var'";
+            $formatted_date = date('Y-m-d', strtotime($search_date_var));
+            $this->db->where("crv.c_datetimeRequest >= '$formatted_date 00:00:00'");
+            $this->db->where("crv.c_datetimeRequest <= '$formatted_date 23:59:59'");
         }
 
-        return $this->db->query($query)->num_rows();
-        }
+        return $this->db->count_all_results();
+    }
         
     public function get_merchant(){
             $query = "select * from merchant ";

@@ -245,6 +245,12 @@ class Menu extends CI_Controller
       $data['menu'] = $this->Model_menu->get_all_menus_hierarchical();
       $data['main_menus'] = $this->db->get_where('user_menu', ['parent_id' => 0])->result_array();
 
+      // Fetch all assigned menu IDs for this role in ONE query to avoid N+1 in view
+      $this->db->select('menu_id');
+      $this->db->where('role_id', $role_id);
+      $access_query = $this->db->get('user_access_menu')->result_array();
+      $data['role_access_ids'] = array_column($access_query, 'menu_id');
+
       $this->db->select('group_modules');
       $this->db->where('group_modules !=', '');
       $this->db->where('group_modules IS NOT NULL', null, false);

@@ -42,17 +42,15 @@ class ChannelController extends CI_Controller {
             $row['c_feeType'] = $items->c_feeType;
             $row['c_fee'] = $items->c_fee;
 
-            // Action dropdown
+            // Direct Action Button (Simplified from Dropdown)
             $row['action'] = '
-                <div class="dropdown text-center">
-                    <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
-                        <i class="fas fa-cog"></i>
+                <div class="text-center">
+                    <button class="btn btn-sm btn-outline-primary edit-cashin px-3 shadow-none font-weight-bold" 
+                        data-toggle="modal" data-target="#debitBalanceModal" 
+                        data-id="' . $items->id . '" 
+                        data-group="' . $items->c_channelGroup . '">
+                        <i class="fas fa-edit mr-1"></i> Edit
                     </button>
-                    <ul class="dropdown-menu shadow animate slideIn">
-                        <li><button class="dropdown-item edit-cashin" data-toggle="modal" data-target="#debitBalanceModal" 
-                            data-id="' . $items->id . '" 
-                            data-group="' . $items->c_channelGroup . '"><i class="fas fa-edit mr-2 text-primary"></i> Edit</button></li>
-                    </ul>
                 </div>';
 
             $dataItems[] = $row;
@@ -117,17 +115,15 @@ class ChannelController extends CI_Controller {
             $row['c_feeType'] = $items->c_feeType;
             $row['c_fee'] = $items->c_fee;
 
-            // Action dropdown with premium classes
+            // Direct Action Button (Simplified from Dropdown)
             $row['action'] = '
-                <div class="dropdown text-center">
-                    <button class="btn btn-sm btn-dt-action dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
-                        <i class="fas fa-ellipsis-v"></i>
+                <div class="text-center">
+                    <button class="btn btn-sm btn-outline-primary edit-cashout px-3 shadow-none font-weight-bold" 
+                        data-toggle="modal" data-target="#debitBalanceModal" 
+                        data-id="' . $items->id . '" 
+                        data-group="' . $items->c_channelGroup . '">
+                        <i class="fas fa-edit mr-1"></i> Edit
                     </button>
-                    <ul class="dropdown-menu shadow animate slideIn">
-                        <li><button class="dropdown-item edit-cashout" data-toggle="modal" data-target="#debitBalanceModal" 
-                            data-id="' . $items->id . '" 
-                            data-group="' . $items->c_channelGroup . '"><i class="fas fa-edit mr-2 text-primary"></i> Edit Info</button></li>
-                    </ul>
                 </div>';
 
             $dataItems[] = $row;

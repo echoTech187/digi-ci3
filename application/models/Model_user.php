@@ -12,9 +12,16 @@ class Model_user extends CI_Model
         $this->internalUrlHit = $internalUrlHit;
     }
 
+    private static $user_cache = null;
+    
     public function view_user()
     {
-        return $this->db->get_where('admin', ['c_email' => $this->session->userdata('c_email')]);
+        if (self::$user_cache !== null) {
+            return self::$user_cache;
+        }
+
+        self::$user_cache = $this->db->get_where('admin', ['c_email' => $this->session->userdata('c_email')]);
+        return self::$user_cache;
     }
 
     public function saldo()

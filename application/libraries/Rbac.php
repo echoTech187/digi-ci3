@@ -44,27 +44,48 @@ class Rbac {
      * @return array
      */
     public function get_menus_by_role($role_id) {
-        // Fetch Main Menus
+        $db_name = $this->CI->db->database;
+        $cache_key = 'rbac_menu_cache_' . $db_name . '_' . $role_id;
+        
+        // 1. Check Session Cache first to avoid Remote DB latency
+        if ($this->CI->session->has_userdata($cache_key)) {
+            return $this->CI->session->userdata($cache_key);
+        }
+
+        // 2. Fetch from DB if not cached
         $this->CI->db->select('m.*');
         $this->CI->db->from('user_menu m');
         $this->CI->db->join('user_access_menu am', 'm.id = am.menu_id');
         $this->CI->db->where('am.role_id', $role_id);
-        $this->CI->db->where('m.parent_id', 0);
         $this->CI->db->where('m.is_active', 1);
+        $this->CI->db->order_by('m.parent_id', 'ASC');
         $this->CI->db->order_by('m.menu_order', 'ASC');
-        $main_menus = $this->CI->db->get()->result_array();
+        $all_menus = $this->CI->db->get()->result_array();
 
-        // Fetch Sub Menus for each Main Menu
-        foreach($main_menus as &$menu) {
-            $this->CI->db->select('m.*');
-            $this->CI->db->from('user_menu m');
-            $this->CI->db->join('user_access_menu am', 'm.id = am.menu_id');
-            $this->CI->db->where('am.role_id', $role_id);
-            $this->CI->db->where('m.parent_id', $menu['id']);
-            $this->CI->db->where('m.is_active', 1);
-            $this->CI->db->order_by('m.menu_order', 'ASC');
-            $menu['sub_menus'] = $this->CI->db->get()->result_array();
+        $main_menus = [];
+        $sub_menus_map = [];
+
+        // Organize menus in PHP memory
+        foreach ($all_menus as $menu) {
+            if ($menu['parent_id'] == 0) {
+                $menu['sub_menus'] = []; 
+                $main_menus[$menu['id']] = $menu;
+            } else {
+                $sub_menus_map[$menu['parent_id']][] = $menu;
+            }
         }
-        return $main_menus;
+
+        foreach ($main_menus as $id => &$menu) {
+            if (isset($sub_menus_map[$id])) {
+                $menu['sub_menus'] = $sub_menus_map[$id];
+            }
+        }
+
+        $result = array_values($main_menus);
+
+        // 3. Store in Session Cache
+        $this->CI->session->set_userdata($cache_key, $result);
+
+        return $result;
     }
 }

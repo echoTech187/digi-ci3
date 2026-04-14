@@ -264,7 +264,7 @@
                     var cls = (data.toLowerCase() === 'fixed') ? 'text-info' : 'text-purple';
                     return '<span class="'+cls+' font-weight-bold" style="font-size:11px;">'+data.toUpperCase()+'</span>';
                 }},
-                {data: 'c_fee', className: 'font-weight-bold text-dark', render: function(data, type, row) {
+                {data: 'c_fee', className: 'font-weight-bold text-dark text-nowrap', render: function(data, type, row) {
                     return 'Rp ' + number_format(data, 0, ',', '.');
                 }},
                 {data: 'action', orderable: false, className: 'text-center'}

@@ -24,10 +24,12 @@ class Mutation_model extends CI_Model
         $this->db->where('mutation.ref_merchantId', $id);
 
         if ($search_date_mutation && $search_date_mutation_to) {
-            $this->db->where('DATE(mutation.c_datetime) >=', date('Y-m-d', strtotime($search_date_mutation)));
-            $this->db->where('DATE(mutation.c_datetime) <=', date('Y-m-d', strtotime($search_date_mutation_to)));
+            $this->db->where('mutation.c_datetime >=', date('Y-m-d', strtotime($search_date_mutation)) . ' 00:00:00');
+            $this->db->where('mutation.c_datetime <=', date('Y-m-d', strtotime($search_date_mutation_to)) . ' 23:59:59');
         } elseif ($search_date_mutation) {
-            $this->db->where('DATE(mutation.c_datetime)', date('Y-m-d', strtotime($search_date_mutation)));
+            $formatted_date = date('Y-m-d', strtotime($search_date_mutation));
+            $this->db->where('mutation.c_datetime >=', $formatted_date . ' 00:00:00');
+            $this->db->where('mutation.c_datetime <=', $formatted_date . ' 23:59:59');
         }
 
         if (!empty($position)) {
@@ -72,7 +74,7 @@ class Mutation_model extends CI_Model
     public function count_filtered($id, $search_date_mutation = null, $position = null, $channel = null, $search_date_mutation_to = null)
     {
         $this->_get_datatables_query($id, $search_date_mutation, $position, $channel, $search_date_mutation_to);
-        return $this->db->get()->num_rows();
+        return $this->db->count_all_results();
     }
 
     public function count_all_dt($id)
@@ -97,11 +99,12 @@ class Mutation_model extends CI_Model
 
     public function count_mutations($refMerchantId, $search_date_mutation = null, $search_potition = null)
     {
-        // Legacy method
         $this->db->from('mutation');
         $this->db->where('ref_merchantId', $refMerchantId);
         if ($search_date_mutation) {
-            $this->db->where('DATE(c_datetime)', date('Y-m-d', strtotime($search_date_mutation)));
+            $formatted_date = date('Y-m-d', strtotime($search_date_mutation));
+            $this->db->where('c_datetime >=', $formatted_date . ' 00:00:00');
+            $this->db->where('c_datetime <=', $formatted_date . ' 23:59:59');
         }
         if ($search_potition) {
             $this->db->where('c_potition', $search_potition);
@@ -145,10 +148,12 @@ class Mutation_model extends CI_Model
         $this->db->where('ref_merchantId', $id);
 
         if ($search_date_mutation && $search_date_mutation_to) {
-            $this->db->where('DATE(c_datetime) >=', date('Y-m-d', strtotime($search_date_mutation)));
-            $this->db->where('DATE(c_datetime) <=', date('Y-m-d', strtotime($search_date_mutation_to)));
+            $this->db->where('c_datetime >=', date('Y-m-d', strtotime($search_date_mutation)) . ' 00:00:00');
+            $this->db->where('c_datetime <=', date('Y-m-d', strtotime($search_date_mutation_to)) . ' 23:59:59');
         } elseif ($search_date_mutation) {
-            $this->db->where('DATE(c_datetime)', date('Y-m-d', strtotime($search_date_mutation)));
+            $formatted_date = date('Y-m-d', strtotime($search_date_mutation));
+            $this->db->where('c_datetime >=', $formatted_date . ' 00:00:00');
+            $this->db->where('c_datetime <=', $formatted_date . ' 23:59:59');
         }
         return $this->db->get()->row();
     }

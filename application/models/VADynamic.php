@@ -17,12 +17,12 @@ class VADynamic extends CI_Model {
             $this->db->where('cdv.ref_merchantId', $search_name);
         }
         if ($search_date) {
-            $search_date = date('Y-m-d', strtotime($search_date));
+            $formatted_date = date('Y-m-d', strtotime($search_date));
             if ($search_date_to) {
-                $search_date_to = date('Y-m-d', strtotime($search_date_to));
-                $this->db->where("DATE(cdv.c_datetimeRequest) BETWEEN '$search_date' AND '$search_date_to'");
+                $formatted_date_to = date('Y-m-d', strtotime($search_date_to));
+                $this->db->where("cdv.c_datetimeRequest >= '$formatted_date 00:00:00' AND cdv.c_datetimeRequest <= '$formatted_date_to 23:59:59'");
             } else {
-                $this->db->where('DATE(cdv.c_datetimeRequest)', $search_date);
+                $this->db->where("cdv.c_datetimeRequest >= '$formatted_date 00:00:00' AND cdv.c_datetimeRequest <= '$formatted_date 23:59:59'");
             }
         }
         if ($search_va) {
@@ -67,8 +67,7 @@ class VADynamic extends CI_Model {
     public function count_filtered($search_name = null, $search_date = null, $search_va = null, $search_trxid = null, $search_date_to = null)
     {
         $this->_get_datatables_query($search_name, $search_date, $search_va, $search_trxid, $search_date_to);
-        $query = $this->db->get();
-        return $query->num_rows();
+        return $this->db->count_all_results();
     }
 
     public function count_all_dt($search_name = null, $search_date = null, $search_date_to = null)
@@ -76,12 +75,12 @@ class VADynamic extends CI_Model {
         $this->db->from($this->table);
         if ($search_name) $this->db->where('cdv.ref_merchantId', $search_name);
         if ($search_date) {
-            $search_date = date('Y-m-d', strtotime($search_date));
+            $formatted_date = date('Y-m-d', strtotime($search_date));
             if ($search_date_to) {
-                $search_date_to = date('Y-m-d', strtotime($search_date_to));
-                $this->db->where("DATE(cdv.c_datetimeRequest) BETWEEN '$search_date' AND '$search_date_to'");
+                $formatted_date_to = date('Y-m-d', strtotime($search_date_to));
+                $this->db->where("cdv.c_datetimeRequest >= '$formatted_date 00:00:00' AND cdv.c_datetimeRequest <= '$formatted_date_to 23:59:59'");
             } else {
-                $this->db->where('DATE(cdv.c_datetimeRequest)', $search_date);
+                $this->db->where("cdv.c_datetimeRequest >= '$formatted_date 00:00:00' AND cdv.c_datetimeRequest <= '$formatted_date 23:59:59'");
             }
         }
         return $this->db->count_all_results();
@@ -93,12 +92,12 @@ class VADynamic extends CI_Model {
         $this->db->from($this->table);
         if ($search_name) $this->db->where('ref_merchantId', $search_name);
         if ($search_date) {
-            $search_date = date('Y-m-d', strtotime($search_date));
+            $formatted_date = date('Y-m-d', strtotime($search_date));
             if ($search_date_to) {
-                $search_date_to = date('Y-m-d', strtotime($search_date_to));
-                $this->db->where("DATE(c_datetimeRequest) BETWEEN '$search_date' AND '$search_date_to'");
+                $formatted_date_to = date('Y-m-d', strtotime($search_date_to));
+                $this->db->where("c_datetimeRequest >= '$formatted_date 00:00:00' AND c_datetimeRequest <= '$formatted_date_to 23:59:59'");
             } else {
-                $this->db->where('DATE(c_datetimeRequest)', $search_date);
+                $this->db->where("c_datetimeRequest >= '$formatted_date 00:00:00' AND c_datetimeRequest <= '$formatted_date 23:59:59'");
             }
         }
         if ($search_va) $this->db->where('c_vaNumber', $search_va);
@@ -114,8 +113,8 @@ class VADynamic extends CI_Model {
 
         $query .= " WHERE 1=1 ";
         if ($search_date_vad) {
-                $search_date_vad = date('Y-m-d', strtotime($search_date_vad));
-                $query .= " and DATE(cashin_dynamic_va.c_datetimeRequest) = '$search_date_vad'";
+                $formatted_date = date('Y-m-d', strtotime($search_date_vad));
+                $query .= " and cashin_dynamic_va.c_datetimeRequest >= '$formatted_date 00:00:00' AND cashin_dynamic_va.c_datetimeRequest <= '$formatted_date 23:59:59'";
             }
 
         if ($search_name_vad) {
@@ -151,18 +150,18 @@ class VADynamic extends CI_Model {
     }
 
     public function count_vadynamic($refMerchantId, $search_date_vad = null) {
-        $query = "SELECT cashin_dynamic_va.id 
-                FROM cashin_dynamic_va
-                JOIN submerchant s on s.id  = cashin_dynamic_va.ref_subMerchantId 
-                WHERE cashin_dynamic_va.ref_merchantId = $refMerchantId";
+        $this->db->from('cashin_dynamic_va cdv');
+        $this->db->join('submerchant s', 's.id = cdv.ref_subMerchantId');
+        $this->db->where('cdv.ref_merchantId', $refMerchantId);
 
         if ($search_date_vad) {
-            $search_date_vad = date('Y-m-d', strtotime($search_date_vad));
-            $query .= " AND DATE(cashin_dynamic_va.c_datetimeRequest) = '$search_date_vad'";
+            $formatted_date = date('Y-m-d', strtotime($search_date_vad));
+            $this->db->where('cdv.c_datetimeRequest >=', $formatted_date . ' 00:00:00');
+            $this->db->where('cdv.c_datetimeRequest <=', $formatted_date . ' 23:59:59');
         }
 
-        return $this->db->query($query)->num_rows();
-        }
+        return $this->db->count_all_results();
+    }
     public function get_merchant(){
             $query = "select * from merchant ";
             return $this->db->query($query)->result();

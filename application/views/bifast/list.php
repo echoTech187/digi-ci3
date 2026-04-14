@@ -292,31 +292,31 @@
         // Init Server-Side DataTable
         var table = initServerDataTable("#bifastTable", "<?= base_url('admin/bi_fast') ?>", [
             {data: 'no', orderable: false},
-            {data: 'merchant_info'},
-            {data: 'c_datetime', render: function(data){
+            {data: 'merchant_info',className: 'text-nowrap'},
+            {data: 'c_datetime',className: 'text-nowrap', render: function(data){
                 return moment(data).format('DD-MM-YYYY HH:mm:ss');
             }},
-            {data: 'c_invoiceNo'},
-            {data: 'c_merchantTransactionId'},
-            {data: 'ref_cashoutChannelId'},
-            {data: 'c_accountNo'},
-            {data: 'c_beneficiaryAccountName'},
-            {data: 'c_amount', render: function(data){
+            {data: 'c_invoiceNo',className: 'text-nowrap'},
+            {data: 'c_merchantTransactionId',className: 'text-nowrap'},
+            {data: 'ref_cashoutChannelId',className: 'text-nowrap'},
+            {data: 'c_accountNo',className: 'text-nowrap'},
+            {data: 'c_beneficiaryAccountName',className: 'text-nowrap'},
+            {data: 'c_amount',className: 'text-nowrap', render: function(data){
                 var val = typeof data === 'string' ? data.replace(/[^0-9.-]+/g,"") : data;
                 return 'Rp ' + Number(val).toLocaleString('id-ID');
             }},
-            {data: 'c_fee', render: function(data){
+            {data: 'c_fee',className: 'text-nowrap', render: function(data){
                 var val = typeof data === 'string' ? data.replace(/[^0-9.-]+/g,"") : data;
                 return 'Rp ' + Number(val).toLocaleString('id-ID');
             }},
-            {data: 'c_status', render: function(data) {
+            {data: 'c_status',className: 'text-nowrap', render: function(data) {
                 var badge = 'badge-secondary';
                 if(data == 'Success') badge = 'badge-success';
                 else if(data == 'Failed') badge = 'badge-danger';
                 else if(data == 'Process' || data == 'Pending') badge = 'badge-primary';
                 return '<span class="badge badge-pill ' + badge + '">' + data + '</span>';
             }},
-            {data: 'parsedResponse'},
+            {data: 'parsedResponse',className: 'text-nowrap'},
             {data: 'action', orderable: false, searchable: false}
         ], {
             "language": {

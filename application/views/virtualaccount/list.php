@@ -217,24 +217,24 @@ $download_url = base_url('admin/download_VA')
         // Init Server-Side DataTable
         var table = initServerDataTable("#vaTable", "<?= base_url('admin/virtual_account') ?>", [
             {data: 'no', orderable: false},
-            {data: 'c_datetime', render: function(data){
+            {data: 'c_datetime',className: 'text-nowrap', render: function(data){
                 return moment(data).format('DD-MM-YYYY HH:mm:ss');
             }},
-            {data: 'merchant_name'},
-            {data: 'c_invoiceNo'},
-            {data: 'ref_cashinChannelId'},
-            {data: 'c_type'},
-            {data: 'c_vaNumber'},
-            {data: 'c_custom'},
-            {data: 'Merchant_Transaction_Id'},
-            {data: 'c_amount', render: function(data){
+            {data: 'merchant_name',className: 'text-nowrap'},
+            {data: 'c_invoiceNo',className: 'text-nowrap'},
+            {data: 'ref_cashinChannelId',className: 'text-nowrap'},
+            {data: 'c_type',className: 'text-nowrap'},
+            {data: 'c_vaNumber',className: 'text-nowrap'},
+            {data: 'c_custom',className: 'text-nowrap'},
+            {data: 'Merchant_Transaction_Id',className: 'text-nowrap'},
+            {data: 'c_amount',className: 'text-nowrap', render: function(data){
                 return 'Rp ' + number_format(data, 0, ',', '.');
             }},
-            {data: 'c_fee', render: function(data){
+            {data: 'c_fee',className: 'text-nowrap', render: function(data){
                 return 'Rp ' + number_format(data, 0, ',', '.');
             }},
-            {data: 'c_isSettlementRealtime'},
-            {data: 'c_datetimeSettlement'},
+            {data: 'c_isSettlementRealtime',className: 'text-nowrap text-center'},
+            {data: 'c_datetimeSettlement',className: 'text-nowrap'},
             
             {data: 'action', orderable: false, searchable: false}
         ], {

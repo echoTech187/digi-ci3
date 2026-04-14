@@ -22,16 +22,18 @@ class VirtualAccount extends CI_Model {
         $this->db->join('external_gvpay_va_callback_payment egv', 'egv.ref_subMerchantId = cpv.ref_subMerchantId AND egv.ref_cashinPaymentVaId = cpv.id', 'left');
 
         if ($search_date && $search_date_to) {
-            $this->db->where('DATE(cpv.c_datetime) >=', $search_date);
-            $this->db->where('DATE(cpv.c_datetime) <=', $search_date_to);
+            $this->db->where('cpv.c_datetime >=', $search_date . ' 00:00:00');
+            $this->db->where('cpv.c_datetime <=', $search_date_to . ' 23:59:59');
         } elseif ($search_date) {
-            $this->db->where('DATE(cpv.c_datetime)', $search_date);
+            $this->db->where('cpv.c_datetime >=', $search_date . ' 00:00:00');
+            $this->db->where('cpv.c_datetime <=', $search_date . ' 23:59:59');
         }
         if ($search_merchant) {
             $this->db->where('cpv.ref_merchantId', $search_merchant);
         }
         if ($search_settlement) {
-            $this->db->where('DATE(cpv.c_datetimeSettlement)', $search_settlement);
+            $this->db->where('cpv.c_datetimeSettlement >=', $search_settlement . ' 00:00:00');
+            $this->db->where('cpv.c_datetimeSettlement <=', $search_settlement . ' 23:59:59');
         }
         if ($search_va) {
             $this->db->where('cpv.c_vaNumber', $search_va);
@@ -78,8 +80,7 @@ class VirtualAccount extends CI_Model {
     public function count_filtered($search_date = null, $search_date_to = null, $search_merchant = null, $search_settlement = null, $search_va = null, $search_transid = null)
     {
         $this->_get_datatables_query($search_date, $search_date_to, $search_merchant, $search_settlement, $search_va, $search_transid);
-        $query = $this->db->get();
-        return $query->num_rows();
+        return $this->db->count_all_results();
     }
 
     public function count_all_dt($search_date = null, $search_date_to = null, $search_merchant = null, $search_settlement = null, $search_va = null, $search_transid = null)
@@ -89,13 +90,17 @@ class VirtualAccount extends CI_Model {
         $this->db->join('submerchant s', 'cpv.ref_subMerchantId = s.id');
         
         if ($search_date && $search_date_to) {
-            $this->db->where('DATE(cpv.c_datetime) >=', $search_date);
-            $this->db->where('DATE(cpv.c_datetime) <=', $search_date_to);
+            $this->db->where('cpv.c_datetime >=', $search_date . ' 00:00:00');
+            $this->db->where('cpv.c_datetime <=', $search_date_to . ' 23:59:59');
         } elseif ($search_date) {
-            $this->db->where('DATE(cpv.c_datetime)', $search_date);
+            $this->db->where('cpv.c_datetime >=', $search_date . ' 00:00:00');
+            $this->db->where('cpv.c_datetime <=', $search_date . ' 23:59:59');
         }
         if ($search_merchant) $this->db->where('cpv.ref_merchantId', $search_merchant);
-        if ($search_settlement) $this->db->where('DATE(cpv.c_datetimeSettlement)', $search_settlement);
+        if ($search_settlement) {
+            $this->db->where('cpv.c_datetimeSettlement >=', $search_settlement . ' 00:00:00');
+            $this->db->where('cpv.c_datetimeSettlement <=', $search_settlement . ' 23:59:59');
+        }
         if ($search_va) $this->db->where('cpv.c_vaNumber', $search_va);
         if ($search_transid) {
              // simplified count join
@@ -118,14 +123,14 @@ class VirtualAccount extends CI_Model {
 
         if ($search_date_va) {
             $search_date_va = date('Y-m-d', strtotime($search_date_va));
-            $base_query .= " AND DATE(cpv.c_datetime) = '$search_date_va'";
+            $base_query .= " AND cpv.c_datetime >= '$search_date_va 00:00:00' AND cpv.c_datetime <= '$search_date_va 23:59:59'";
         }
         if ($search_name_va) {
             $base_query .= " AND m.id = $search_name_va";
         }
         if ($search_date_va_settlement) {
             $search_date_va_settlement = date('Y-m-d', strtotime($search_date_va_settlement));
-            $base_query .= " AND DATE(cpv.c_datetimeSettlement) = '$search_date_va_settlement'";
+            $base_query .= " AND cpv.c_datetimeSettlement >= '$search_date_va_settlement 00:00:00' AND cpv.c_datetimeSettlement <= '$search_date_va_settlement 23:59:59'";
         }
         if ($search_va_number) {
             $base_query .= " AND cpv.c_vaNumber = '$search_va_number'";
@@ -153,42 +158,37 @@ class VirtualAccount extends CI_Model {
 
     public function count_va($search_date_va = null, $search_name_va = null, $search_date_va_settlement = null, $search_va_number = null, $search_va_transid = null) 
     {
-        $query = "SELECT COUNT(*) AS total
-                FROM cashin_payment_va cpv
-                JOIN cashin c ON cpv.ref_cashinId = c.id
-                JOIN submerchant s ON cpv.ref_subMerchantId = s.id
-                LEFT JOIN cashin_dynamic_va ON (cashin_dynamic_va.id = cpv.ref_cashinDynamicVaId AND cashin_dynamic_va.ref_merchantId=cpv.ref_merchantId)
-                LEFT JOIN cashin_recurring_va ON (cashin_recurring_va.id = cpv.ref_cashinRecurringVaId AND cashin_recurring_va.ref_merchantId=cpv.ref_merchantId)
-                LEFT JOIN merchant m on cpv.ref_merchantId = m.id
-                LEFT JOIN external_gvpay_va_callback_payment
-                    ON (external_gvpay_va_callback_payment.ref_subMerchantId = cpv.ref_subMerchantId
-                    AND external_gvpay_va_callback_payment.ref_cashinPaymentVaId = cpv.id)
-                WHERE 1=1 ";
-
+        $this->db->from('cashin_payment_va cpv');
+        $this->db->join('cashin c', 'cpv.ref_cashinId = c.id');
+        $this->db->join('submerchant s', 'cpv.ref_subMerchantId = s.id');
+        $this->db->join('merchant m', 'cpv.ref_merchantId = m.id', 'left');
+        $this->db->join('cashin_dynamic_va cdv', 'cdv.id = cpv.ref_cashinDynamicVaId AND cdv.ref_merchantId = cpv.ref_merchantId', 'left');
+        
         if ($search_date_va) {
-            $search_date_va = date('Y-m-d', strtotime($search_date_va));
-            $query .= " AND DATE(cpv.c_datetime) = '$search_date_va'";
+            $formatted_date = date('Y-m-d', strtotime($search_date_va));
+            $this->db->where('cpv.c_datetime >=', $formatted_date . ' 00:00:00');
+            $this->db->where('cpv.c_datetime <=', $formatted_date . ' 23:59:59');
         }
 
         if ($search_name_va) {
-            $query .= " AND m.id = $search_name_va ";
+            $this->db->where('m.id', $search_name_va);
         }
 
         if ($search_date_va_settlement) {
-            $search_date_va_settlement = date('Y-m-d', strtotime($search_date_va_settlement));
-            $query .= " AND DATE(cpv.c_datetimeSettlement) = '$search_date_va_settlement'";
+            $formatted_date = date('Y-m-d', strtotime($search_date_va_settlement));
+            $this->db->where('cpv.c_datetimeSettlement >=', $formatted_date . ' 00:00:00');
+            $this->db->where('cpv.c_datetimeSettlement <=', $formatted_date . ' 23:59:59');
         }
 
         if ($search_va_number) {
-            $query .= " AND cpv.c_vaNumber = '$search_va_number'";
+            $this->db->where('cpv.c_vaNumber', $search_va_number);
         }
 
         if ($search_va_transid) {
-            $query .= " AND cashin_dynamic_va.c_merchantTransactionId = '$search_va_transid'";
+            $this->db->where('cdv.c_merchantTransactionId', $search_va_transid);
         }
 
-        $row = $this->db->query($query)->row();
-        return $row ? (int)$row->total : 0;
+        return (int)$this->db->count_all_results();
     }
 
 

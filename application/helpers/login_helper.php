@@ -24,19 +24,16 @@ function is_logged_in()
             return;
         }
 
-        // Look up URL in user_menu table
-        $menuItem = $ci->db->get_where('user_menu', ['url' => $current_url])->row_array();
+        // Combined Optimized Query: Check menu existence and access in one round-trip
+        $ci->db->select('m.id as menu_id, am.id as access_id');
+        $ci->db->from('user_menu m');
+        $ci->db->join('user_access_menu am', 'm.id = am.menu_id AND am.role_id = ' . (int)$actual_role_id, 'left');
+        $ci->db->where('m.url', $current_url);
+        $check = $ci->db->get();
 
-        if ($menuItem) {
-            $menu_id = $menuItem['id'];
-            
-            // Check Access mapping
-            $userAccess = $ci->db->get_where('user_access_menu', [
-                'role_id' => $actual_role_id,
-                'menu_id' => $menu_id
-            ]);
-
-            if ($userAccess->num_rows() < 1) {
+        if ($check->num_rows() > 0) {
+            $result = $check->row_array();
+            if (!$result['access_id']) {
                 redirect('auth/blocked');
             }
         }
