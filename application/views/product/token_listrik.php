@@ -9,40 +9,7 @@
     </div>
 
     <!-- ── KPI Summary Cards ── -->
-    <div class="dt-summary-row mb-4">
-        <div class="dt-summary-card dt-summary-blue">
-            <div class="dt-summary-body">
-                <div class="dt-summary-label">TOTAL PRODUCTS</div>
-                <div class="dt-summary-value" id="kpi-count">0</div>
-                <div class="dt-summary-sub"><i class="fas fa-tags mr-1"></i>Active SKU count</div>
-            </div>
-            <div class="dt-summary-icon dt-icon-blue">
-                <i class="fas fa-bolt"></i>
-            </div>
-        </div>
-
-        <div class="dt-summary-card dt-summary-yellow">
-            <div class="dt-summary-body">
-                <div class="dt-summary-label">GATEWAY STATUS</div>
-                <div class="dt-summary-value">ONLINE</div>
-                <div class="dt-summary-sub"><i class="fas fa-check-circle mr-1"></i>PPOB Provider</div>
-            </div>
-            <div class="dt-summary-icon dt-icon-yellow">
-                <i class="fas fa-plug"></i>
-            </div>
-        </div>
-
-        <div class="dt-summary-card dt-summary-purple">
-            <div class="dt-summary-body">
-                <div class="dt-summary-label">CURRENCY</div>
-                <div class="dt-summary-value">IDR</div>
-                <div class="dt-summary-sub"><i class="fas fa-money-bill-wave mr-1"></i>Indonesian Rupiah</div>
-            </div>
-            <div class="dt-summary-icon dt-icon-purple">
-                <i class="fas fa-coins"></i>
-            </div>
-        </div>
-    </div>
+    
 
     <div class="card border-0 shadow-sm dt-card">
         <!-- ── Toolbar ── -->

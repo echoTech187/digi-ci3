@@ -28,52 +28,7 @@ $download_url = base_url('admin/download_mutation')
     </div>
 
     <!-- ── KPI Summary Cards ── -->
-    <div class="dt-summary-row mb-4">
-        <div class="dt-summary-card dt-summary-blue">
-            <div class="dt-summary-body">
-                <div class="dt-summary-label">TOTAL TRANSACTIONS</div>
-                <div class="dt-summary-value"><?= number_format($summary->total_count, 0, ',', '.') ?></div>
-                <div class="dt-summary-sub"><i class="fas fa-exchange-alt mr-1"></i>Movement count</div>
-            </div>
-            <div class="dt-summary-icon dt-icon-blue">
-                <i class="fas fa-list-ul"></i>
-            </div>
-        </div>
-
-        <div class="dt-summary-card dt-summary-green">
-            <div class="dt-summary-body">
-                <div class="dt-summary-label">CREDIT VOLUME</div>
-                <div class="dt-summary-value text-success">Rp <?= number_format($summary->total_credit, 0, ',', '.') ?></div>
-                <div class="dt-summary-sub"><i class="fas fa-plus-circle mr-1"></i>Total inflows</div>
-            </div>
-            <div class="dt-summary-icon dt-icon-green">
-                <i class="fas fa-wallet"></i>
-            </div>
-        </div>
-
-        <div class="dt-summary-card dt-summary-yellow">
-            <div class="dt-summary-body">
-                <div class="dt-summary-label">DEBIT VOLUME</div>
-                <div class="dt-summary-value text-warning">Rp <?= number_format($summary->total_debit, 0, ',', '.') ?></div>
-                <div class="dt-summary-sub"><i class="fas fa-minus-circle mr-1"></i>Total outflows</div>
-            </div>
-            <div class="dt-summary-icon dt-icon-yellow">
-                <i class="fas fa-receipt"></i>
-            </div>
-        </div>
-
-        <div class="dt-summary-card dt-summary-red">
-            <div class="dt-summary-body">
-                <div class="dt-summary-label">NET FLOW</div>
-                <?php $net = $summary->total_credit - $summary->total_debit; ?>
-                <div class="dt-summary-value <?= $net >= 0 ? 'text-success' : 'text-danger' ?>">Rp <?= number_format($net, 0, ',', '.') ?></div>
-                <div class="dt-summary-sub"><i class="fas fa-chart-line mr-1"></i>Balance impact</div>
-            </div>
-            <div class="dt-summary-icon dt-icon-red">
-                <i class="fas fa-hand-holding-usd"></i>
-            </div>
-        </div>
-    </div>
+    
 
     <!-- ── Main Data Card ── -->
     <div class="card border-0 shadow-sm dt-card">

@@ -11,28 +11,7 @@
     <!-- ── Filter & KPI Row ── -->
     
         
-    <div class="dt-summary-row mb-4">
-        <div class="dt-summary-card dt-summary-blue mb-0">
-            <div class="dt-summary-body">
-                <div class="dt-summary-label">ACTIVE PACKAGES</div>
-                <div class="dt-summary-value" id="kpi-count">0</div>
-                <div class="dt-summary-sub"><i class="fas fa-tags mr-1"></i>Internet bundles</div>
-            </div>
-            <div class="dt-summary-icon dt-icon-blue">
-                <i class="fas fa-globe"></i>
-            </div>
-        </div>
-        <div class="dt-summary-card dt-summary-purple mb-0">
-            <div class="dt-summary-body">
-                <div class="dt-summary-label">PROVIDER</div>
-                <div class="dt-summary-value text-uppercase" id="kpi-provider">ALL</div>
-                <div class="dt-summary-sub"><i class="fas fa-network-wired mr-1"></i>Selected gateway</div>
-            </div>
-            <div class="dt-summary-icon dt-icon-purple">
-                <i class="fas fa-satellite-dish"></i>
-            </div>
-        </div>
-    </div>
+    
 
     <div class="card border-0 shadow-sm dt-card">
         <!-- ── Toolbar ── -->

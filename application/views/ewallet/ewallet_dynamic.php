@@ -10,28 +10,7 @@
     </div>
 
     <!-- ── KPI Summary Cards ── -->
-    <div class="dt-summary-row mb-4">
-        <div class="dt-summary-card dt-summary-blue">
-            <div class="dt-summary-body">
-                <div class="dt-summary-label">TOTAL QUANTITY</div>
-                <div class="dt-summary-value"><?= number_format($qty, 0, ',', '.'); ?></div>
-                <div class="dt-summary-sub"><i class="fas fa-list-ol mr-1"></i>Transaction qty</div>
-            </div>
-            <div class="dt-summary-icon dt-icon-blue">
-                <i class="fas fa-history"></i>
-            </div>
-        </div>
-        <div class="dt-summary-card dt-summary-green">
-            <div class="dt-summary-body">
-                <div class="dt-summary-label">TOTAL AMOUNT</div>
-                <div class="dt-summary-value">Rp <?= number_format($total_trx, 0, ',', '.'); ?></div>
-                <div class="dt-summary-sub"><i class="fas fa-money-bill-wave mr-1"></i>Volume processed</div>
-            </div>
-            <div class="dt-summary-icon dt-icon-green">
-                <i class="fas fa-wallet"></i>
-            </div>
-        </div>
-    </div>
+    
 
     <!-- ── Main Data Card ── -->
     <div class="card border-0 shadow-sm dt-card">

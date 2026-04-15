@@ -216,8 +216,6 @@ class TransactionController extends CI_Controller
          $data['channels'] = $this->Mutation_model->get_cashout_channels($id);
 
       $data['merchant'] = $this->Mutation_model->get_merchant($id);
-      $data['summary'] = $this->Mutation_model->get_summary($id, $search_date_mutation, $search_date_mutation_to);
-
       $this->load->view('templates/user_header.php', $data);
       $this->load->view('templates/user_sidebar.php', $data);
       $this->load->view('templates/user_topbar.php', $data);
@@ -429,17 +427,6 @@ class TransactionController extends CI_Controller
       $data['title'] = 'Purchase';
       $data['user'] = $this->Model_user->view_user()->row_array();
       $data['merchants'] = $this->History->get_merchant();
-
-      // Summary KPI Data
-      $qty = $total_trx = 0;
-      if (!empty($search_date_purchase) || !empty($search_merchant_purchase)) {
-         $summary = $this->History->get_summary($search_date_purchase, $search_merchant_purchase);
-         $qty = $summary[0]['qty'] ?: 0;
-         $total_trx = $summary[0]['amount'] ?: 0;
-      }
-      $data['qty'] = $qty;
-      $data['total_trx'] = $total_trx;
-
       // Load views
       $this->load->view('templates/user_header.php', $data);
       $this->load->view('templates/user_sidebar.php', $data);
@@ -578,24 +565,6 @@ class TransactionController extends CI_Controller
       $data['Vas'] = [];
       $data['pagination'] = '';
       $data['start'] = 0;
-
-      // Summary KPI Data
-      $qty = $total_trx = $total_fee = $total_fee_ext = $profit = 0;
-      if ($search_performed && !empty($data['search_date_va']) && !empty($data['search_date_va_to'])) {
-         $summary = $this->VirtualAccount->get_summary($data['search_date_va'], $data['search_date_va_to'], $data['search_name_va']);
-         $qty = $summary[0]['qty'] ?: 0;
-         $total_trx = $summary[0]['amount'] ?: 0;
-         $total_fee = $summary[0]['fee'] ?: 0;
-         $total_fee_ext = $summary[0]['fee_external'] ?: 0;
-         $profit = $total_fee - $total_fee_ext;
-      }
-
-      $data['qty'] = $qty;
-      $data['total_trx'] = $total_trx;
-      $data['total_fee'] = $total_fee;
-      $data['total_fee_ext'] = $total_fee_ext;
-      $data['profit'] = $profit;
-
       $data['merchants'] = $this->VirtualAccount->get_merchant();
 
       $this->load->view('templates/user_header.php', $data);
@@ -809,22 +778,6 @@ class TransactionController extends CI_Controller
       $data['qriss'] = [];
       $data['start'] = 0;
       $data['pagination'] = '';
-
-      if ($search_performed && !empty($date_from) && !empty($date_to)) {
-         $summary = $this->Qris->get_summary($date_from, $date_to, $search_name_qris);
-         $qty = $summary[0]['qty'];
-         $total_trx = $summary[0]['amount'];
-         $total_fee = $summary[0]['fee'];
-         $total_fee_ext = $summary[0]['fee_external'];
-         $profit = $summary[0]['fee_external'] - $summary[0]['fee'];
-      }
-
-      $data['qty'] = $qty;
-      $data['total_trx'] = $total_trx;
-      $data['total_fee'] = $total_fee;
-      $data['total_fee_ext'] = $total_fee_ext;
-      $data['profit'] = $profit;
-
       $data['search_rrn'] = $search_rrn;
       $data['search_transid_qriss'] = $search_transid_qriss;
 
@@ -1066,29 +1019,10 @@ class TransactionController extends CI_Controller
          );
          echo json_encode($output);
          exit;
-      }
-
+      }      
       $data['start'] = 0;
       $data['pagination'] = '';
       $data['ewallets'] = [];
-      $data['qty'] = 0;
-      $data['total_trx'] = 0;
-      $data['total_fee'] = 0;
-      $data['total_fee_ext'] = 0;
-      $data['profit'] = 0;
-
-      if ($search_performed) {
-         if (!empty($date_from) && !empty($date_to)) {
-            $summary = $this->Ewallet->get_summary($date_from, $date_to, $search_name_ewallet);
-            if ($summary) {
-               $data['qty'] = $summary[0]['qty'];
-               $data['total_trx'] = $summary[0]['amount'];
-               $data['total_fee'] = $summary['0']['fee'];
-               $data['total_fee_ext'] = $summary['0']['fee_external'];
-               $data['profit'] = $summary[0]['fee_external'] - $summary[0]['fee'];
-            }
-         }
-      }
 
       $data['merchants'] = $this->Ewallet->get_merchant();
 
@@ -1259,17 +1193,6 @@ class TransactionController extends CI_Controller
       $data['search_status_transaction_bifast'] = isset($search_status_transaction_bifast) ? $search_status_transaction_bifast : '';
 
       if ($search_performed) {
-         // Summary only for non-AJAX initial load
-         $qty = $total_trx = $total_fee = $total_fee_ext = $profit = 0;
-         if (!empty($date_from) && !empty($date_to)) {
-            $summary = $this->BiFast->get_summary($date_from, $date_to, $search_name_bifast);
-            $qty = $summary[0]['qty'];
-            $total_trx = $summary[0]['amount'];
-            $total_fee = $summary[0]['fee'];
-            $total_fee_ext = $summary[0]['fee_external'];
-            $profit = $total_fee_ext - $total_fee;
-         }
-
          // Parse responseBody
          foreach ($data['bifasts'] as $key => $row) {
             $responseBody = $row->c_responseBody != NULL ? $row->c_responseBody : null;
@@ -1283,11 +1206,11 @@ class TransactionController extends CI_Controller
          }
 
          // Final vars
-         $data['qty'] = $qty;
-         $data['total_trx'] = $total_trx;
-         $data['total_fee'] = $total_fee;
-         $data['total_fee_ext'] = $total_fee_ext;
-         $data['profit'] = $profit;
+         $data['qty'] = 0;
+         $data['total_trx'] = 0;
+         $data['total_fee'] = 0;
+         $data['total_fee_ext'] = 0;
+         $data['profit'] = 0;
          $data['search_status_transaction_bifast'] = $search_status_transaction_bifast;
       }
 
@@ -1460,11 +1383,7 @@ class TransactionController extends CI_Controller
          exit;
       }
 
-      // Summary for non-AJAX initial load
-      $summary = $this->VADynamic->get_summary($search_name_vad, $search_date_vad, $search_date_vad_to, $search_va_number, $search_merchant_trxid);
       $data['start'] = 0;
-      $data['qty'] = $summary[0]['qty'] ?: 0;
-      $data['total_trx'] = $summary[0]['amount'] ?: 0;
       $data['merchants'] = $this->VADynamic->get_merchant();
 
       $this->load->view('templates/user_header.php', $data);
@@ -1520,12 +1439,7 @@ class TransactionController extends CI_Controller
       else
          $search_submerchant_var = $this->session->userdata('search_submerchant_var');
 
-      // Summary data for KPI cards
-      $summary = $this->VARecurring->get_summary($search_name_var, $search_date_var, $search_date_var_to, $search_submerchant_var);
-      $data['qty'] = $summary->qty;
-      $data['total_trx'] = $summary->total_amount ?: 0;
-
-      $config['total_rows'] = $data['qty'];
+      $config['total_rows'] = $this->VARecurring->count_filtered($search_name_var, $search_date_var, $search_submerchant_var);
       $config['base_url'] = base_url('admin/VA_recurring');
       $config['per_page'] = 10;
       $config['uri_segment'] = 3;
@@ -1753,11 +1667,6 @@ class TransactionController extends CI_Controller
          exit;
       }
 
-      // Summary for non-AJAX initial load
-      $summary = $this->QRISDynamic->get_summary($search_name_qd, $search_date_qd, $search_date_qd_to, $search_transid_qd, $search_status_transaction_qd, $search_reff_label);
-      $data['qty'] = $summary->qty ?: 0;
-      $data['total_trx'] = $summary->total_amount ?: 0;
-
       $data['merchants'] = $this->QRISDynamic->get_merchant();
       $data['search_reff_label'] = $search_reff_label;
 
@@ -1886,11 +1795,6 @@ class TransactionController extends CI_Controller
          echo json_encode($output);
          exit;
       }
-
-      // Summary Data
-      $summary = $this->EwalletDynamic->get_summary($search_name_qd, $search_date_qd, $search_date_qd_to, $search_transid_qd, $search_status_transaction_qd);
-      $data['qty'] = $summary->qty;
-      $data['total_trx'] = $summary->total_trx ?: 0;
 
       $data['merchants'] = $this->EwalletDynamic->get_merchant();
 
@@ -2034,11 +1938,6 @@ class TransactionController extends CI_Controller
          echo json_encode($output);
          exit;
       }
-
-      // Summary Data for KPI Cards
-      $summary = $this->QRISRecurring->get_summary($search_name_qr, $search_date_qr, $search_date_qr_to, $search_submerchant_qr);
-      $data['qty'] = $summary->qty;
-      $data['total_trx'] = $summary->total_trx ?: 0;
 
       $data['merchants'] = $this->QRISRecurring->get_merchant();
 

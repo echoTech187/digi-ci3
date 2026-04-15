@@ -18,49 +18,7 @@ $download_url = base_url('admin/download_VA_recurring') // Assuming this exists 
         </div>
     </div>
     <!-- ── KPI Summary Cards ── -->
-    <div class="dt-summary-row mb-4">
-        <div class="dt-summary-card dt-summary-blue">
-            <div class="dt-summary-body">
-                <div class="dt-summary-label">TOTAL QUANTITY</div>
-                <div class="dt-summary-value"><?= number_format($qty, 0, ',', '.'); ?></div>
-                <div class="dt-summary-sub"><i class="fas fa-repeat mr-1"></i>Recurring payments</div>
-            </div>
-            <div class="dt-summary-icon dt-icon-blue">
-                <i class="fas fa-history"></i>
-            </div>
-        </div>
-        <div class="dt-summary-card dt-summary-green">
-            <div class="dt-summary-body">
-                <div class="dt-summary-label">TOTAL AMOUNT</div>
-                <div class="dt-summary-value text-success">Rp <?= number_format($total_trx, 0, ',', '.'); ?></div>
-                <div class="dt-summary-sub"><i class="fas fa-wallet mr-1"></i>Processed volume</div>
-            </div>
-            <div class="dt-summary-icon dt-icon-green">
-                <i class="fas fa-money-bill-wave"></i>
-            </div>
-        </div>
-        <!-- Placeholders for symmetry -->
-        <div class="dt-summary-card dt-summary-yellow" style="opacity: 0.6;">
-            <div class="dt-summary-body">
-                <div class="dt-summary-label">ACTIVE SCHEDULES</div>
-                <div class="dt-summary-value text-warning">-</div>
-                <div class="dt-summary-sub">Coming soon</div>
-            </div>
-            <div class="dt-summary-icon dt-icon-yellow">
-                <i class="fas fa-calendar-alt"></i>
-            </div>
-        </div>
-        <div class="dt-summary-card dt-summary-red" style="opacity: 0.6;">
-            <div class="dt-summary-body">
-                <div class="dt-summary-label">FAILED REQUESTS</div>
-                <div class="dt-summary-value text-danger">-</div>
-                <div class="dt-summary-sub">Coming soon</div>
-            </div>
-            <div class="dt-summary-icon dt-icon-red">
-                <i class="fas fa-exclamation-triangle"></i>
-            </div>
-        </div>
-    </div>
+    
     <!-- ── Main Data Card ── -->
     <div class="card border-0 shadow-sm dt-card">
          <!-- ── Toolbar ── -->

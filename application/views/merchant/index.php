@@ -9,51 +9,7 @@
     </div>
 
     <!-- Summary Cards (Refined for Symmetry) -->
-    <div class="dt-summary-row mb-4">
-        <div class="dt-summary-card dt-summary-blue">
-            <div class="dt-summary-body">
-                <div class="dt-summary-label">TOTAL MERCHANTS</div>
-                <div class="dt-summary-value"><?= isset($total_merchants) ? number_format($total_merchants, 0, ',', '.') : 0 ?></div>
-                <div class="dt-summary-sub"><i class="fas fa-users mr-1"></i>Registered accounts</div>
-            </div>
-            <div class="dt-summary-icon dt-icon-blue">
-                <i class="fas fa-store"></i>
-            </div>
-        </div>
-
-        <div class="dt-summary-card dt-summary-green">
-            <div class="dt-summary-body">
-                <div class="dt-summary-label">TOTAL BALANCE</div>
-                <div class="dt-summary-value">Rp <?= number_format($total_balance, 0, ',', '.') ?></div>
-                <div class="dt-summary-sub"><i class="fas fa-wallet mr-1"></i>Combined funds</div>
-            </div>
-            <div class="dt-summary-icon dt-icon-green">
-                <i class="fas fa-university"></i>
-            </div>
-        </div>
-
-        <div class="dt-summary-card dt-summary-orange">
-            <div class="dt-summary-body">
-                <div class="dt-summary-label">TOTAL HOLD</div>
-                <div class="dt-summary-value">Rp <?= number_format($total_hold, 0, ',', '.') ?></div>
-                <div class="dt-summary-sub"><i class="fas fa-lock mr-1"></i>Funds on hold</div>
-            </div>
-            <div class="dt-summary-icon dt-icon-orange">
-                <i class="fas fa-hand-holding-usd"></i>
-            </div>
-        </div>
-
-        <div class="dt-summary-card dt-summary-yellow">
-            <div class="dt-summary-body">
-                <div class="dt-summary-label">TOTAL AVAILABLE</div>
-                <div class="dt-summary-value">Rp <?= number_format($total_available, 0, ',', '.') ?></div>
-                <div class="dt-summary-sub"><i class="fas fa-check-circle mr-1"></i>Ready for payout</div>
-            </div>
-            <div class="dt-summary-icon dt-icon-yellow">
-                <i class="fas fa-coins"></i>
-            </div>
-        </div>
-    </div>
+    
 
     <!-- Alerts -->
     <?php if ($this->session->flashdata('success')) : ?>

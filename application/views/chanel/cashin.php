@@ -10,51 +10,7 @@
     </div>
 
     <!-- ── KPI Summary Cards ── -->
-    <div class="dt-summary-row mb-4">
-        <div class="dt-summary-card dt-summary-blue">
-            <div class="dt-summary-body">
-                <div class="dt-summary-label">TOTAL CHANNELS</div>
-                <div class="dt-summary-value"><?= number_format($qty, 0, ',', '.'); ?></div>
-                <div class="dt-summary-sub"><i class="fas fa-network-wired mr-1"></i>Configured routes</div>
-            </div>
-            <div class="dt-summary-icon dt-icon-blue">
-                <i class="fas fa-link"></i>
-            </div>
-        </div>
-
-        <div class="dt-summary-card dt-summary-green">
-            <div class="dt-summary-body">
-                <div class="dt-summary-label">ACTIVE GROUPS</div>
-                <div class="dt-summary-value"><?= number_format($groups, 0, ',', '.'); ?></div>
-                <div class="dt-summary-sub"><i class="fas fa-layer-group mr-1"></i>Revenue categories</div>
-            </div>
-            <div class="dt-summary-icon dt-icon-green">
-                <i class="fas fa-th-large"></i>
-            </div>
-        </div>
-
-        <div class="dt-summary-card dt-summary-orange">
-            <div class="dt-summary-body">
-                <div class="dt-summary-label">EXTERNAL PROVIDERS</div>
-                <div class="dt-summary-value"><?= number_format($providers, 0, ',', '.'); ?></div>
-                <div class="dt-summary-sub"><i class="fas fa-server mr-1"></i>Unique connections</div>
-            </div>
-            <div class="dt-summary-icon dt-icon-orange">
-                <i class="fas fa-hubspot"></i>
-            </div>
-        </div>
-
-        <div class="dt-summary-card dt-summary-blue">
-            <div class="dt-summary-body">
-                <div class="dt-summary-label">AVG CHANNEL FEE</div>
-                <div class="dt-summary-value">Rp <?= number_format($avg_fee, 0, ',', '.'); ?></div>
-                <div class="dt-summary-sub"><i class="fas fa-percentage mr-1"></i>Average per trx</div>
-            </div>
-            <div class="dt-summary-icon dt-icon-blue">
-                <i class="fas fa-tags"></i>
-            </div>
-        </div>
-    </div>
+    
 
     <!-- ── Main Data Card ── -->
     <div class="card border-0 shadow-sm dt-card">

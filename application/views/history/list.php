@@ -28,54 +28,7 @@ $download_url = base_url('admin/download_history')
     <?php endif; ?>
 
     <!-- ── KPI Summary Cards ── -->
-    <div class="dt-summary-row mb-4">
-
-        <div class="dt-summary-card dt-summary-blue">
-            <div class="dt-summary-body">
-                <div class="dt-summary-label">TOTAL QUANTITY</div>
-                <div class="dt-summary-value"><?= number_format($qty, 0, ',', '.'); ?></div>
-                <div class="dt-summary-sub"><i class="fas fa-plus mr-1"></i>Purchase count</div>
-            </div>
-            <div class="dt-summary-icon dt-icon-blue">
-                <i class="fas fa-list-ul"></i>
-            </div>
-        </div>
-
-        <div class="dt-summary-card dt-summary-green">
-            <div class="dt-summary-body">
-                <div class="dt-summary-label">TOTAL VOLUME</div>
-                <div class="dt-summary-value">Rp <?= number_format($total_trx, 0, ',', '.'); ?></div>
-                <div class="dt-summary-sub"><i class="fas fa-coins mr-1"></i>Transaction value</div>
-            </div>
-            <div class="dt-summary-icon dt-icon-green">
-                <i class="fas fa-money-bill-wave"></i>
-            </div>
-        </div>
-
-        <!-- Placeholder/Derived analytics to maintain 4-card layout symmetry -->
-        <div class="dt-summary-card dt-summary-yellow">
-            <div class="dt-summary-body">
-                <div class="dt-summary-label">AVG. TICKET</div>
-                <div class="dt-summary-value">Rp <?= $qty > 0 ? number_format($total_trx / $qty, 0, ',', '.') : '0'; ?></div>
-                <div class="dt-summary-sub"><i class="fas fa-chart-line mr-1"></i>Value per purchase</div>
-            </div>
-            <div class="dt-summary-icon dt-icon-yellow">
-                <i class="fas fa-calculator"></i>
-            </div>
-        </div>
-
-        <div class="dt-summary-card dt-summary-red">
-            <div class="dt-summary-body">
-                <div class="dt-summary-label">SYSTEM UPTIME</div>
-                <div class="dt-summary-value">100%</div>
-                <div class="dt-summary-sub"><i class="fas fa-check-circle mr-1"></i>Purchase Gateway</div>
-            </div>
-            <div class="dt-summary-icon dt-icon-red">
-                <i class="fas fa-server"></i>
-            </div>
-        </div>
-
-    </div>
+    
 
     <!-- ── Main Data Card ── -->
     <div class="card border-0 shadow-sm dt-card">

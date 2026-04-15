@@ -20,48 +20,7 @@
     </div>
 
     <!-- KPI Summary Cards -->
-    <div class="dt-summary-row mb-4">
-        <div class="dt-summary-card dt-summary-blue">
-            <div class="dt-summary-body">
-                <div class="dt-summary-label">TOTAL QUANTITY</div>
-                <div class="dt-summary-value"><?= number_format($qty, 0, ',', '.'); ?></div>
-                <div class="dt-summary-sub"><i class="fas fa-list mr-1"></i>Total transactions</div>
-            </div>
-            <div class="dt-summary-icon dt-icon-blue">
-                <i class="fas fa-list-ul"></i>
-            </div>
-        </div>
-        <div class="dt-summary-card dt-summary-green">
-            <div class="dt-summary-body">
-                <div class="dt-summary-label">TOTAL AMOUNT</div>
-                <div class="dt-summary-value">Rp <?= number_format($total_trx, 0, ',', '.'); ?></div>
-                <div class="mt-1 text-muted small"><i class="fas fa-coins mr-1"></i>Volume processed</div>
-            </div>
-            <div class="dt-summary-icon dt-icon-green">
-                <i class="fas fa-money-bill-wave"></i>
-            </div>
-        </div>
-        <div class="dt-summary-card dt-summary-yellow d-none">
-            <div class="dt-summary-body">
-                <div class="dt-summary-label">TOTAL FEE</div>
-                <div class="dt-summary-value">Rp <?= number_format($total_fee, 0, ',', '.'); ?></div>
-                <div class="mt-1 text-muted small"><i class="fas fa-receipt mr-1"></i>Service fee</div>
-            </div>
-            <div class="dt-summary-icon dt-icon-yellow">
-                <i class="fas fa-percent"></i>
-            </div>
-        </div>
-        <div class="dt-summary-card dt-summary-red d-none">
-            <div class="dt-summary-body">
-                <div class="dt-summary-label">TOTAL PROFIT</div>
-                <div class="dt-summary-value">Rp <?= number_format($profit, 0, ',', '.'); ?></div>
-                <div class="mt-1 text-muted small"><i class="fas fa-chart-line mr-1"></i>Net earnings</div>
-            </div>
-            <div class="dt-summary-icon dt-icon-red">
-                <i class="fas fa-hand-holding-usd"></i>
-            </div>
-        </div>
-    </div>
+    
 
     <!-- Main Data Card -->
     <div class="card border-0 shadow-sm dt-card">

@@ -10,35 +10,7 @@
     </div>
 
     <!-- ── KPI Summary Cards ── -->
-    <div class="dt-summary-row mb-4">
-        <!-- Total Supervisors -->
-        <div class="dt-summary-card dt-summary-blue">
-            <div class="dt-summary-body">
-                <div class="dt-summary-label">TOTAL SUPERVISORS</div>
-                <div class="dt-summary-value"><?= number_format($total_supervisors, 0, ',', '.'); ?></div>
-                <div class="dt-summary-sub"><i class="fas fa-user-tie mr-1"></i>Active supervisors</div>
-            </div>
-            <div class="dt-summary-icon dt-icon-blue">
-                <i class="fas fa-users-cog"></i>
-            </div>
-        </div>
-
-        <!-- Total Merchants Assigned -->
-        <div class="dt-summary-card dt-summary-green">
-            <div class="dt-summary-body">
-                <div class="dt-summary-label">ASSIGNED MERCHANTS</div>
-                <div class="dt-summary-value"><?= number_format($total_merchants_assigned, 0, ',', '.'); ?></div>
-                <div class="dt-summary-sub"><i class="fas fa-store mr-1"></i>Linked to supervisors</div>
-            </div>
-            <div class="dt-summary-icon dt-icon-green">
-                <i class="fas fa-link"></i>
-            </div>
-        </div>
-        
-        <!-- Placeholder for symmetry -->
-        <div class="dt-summary-card" style="border-left:none; box-shadow:none; background:transparent;"></div>
-        <div class="dt-summary-card" style="border-left:none; box-shadow:none; background:transparent;"></div>
-    </div>
+    
 
     <!-- ── Main Data Card ── -->
     <div class="card border-0 shadow-sm dt-card">

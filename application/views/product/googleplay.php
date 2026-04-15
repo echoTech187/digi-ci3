@@ -9,40 +9,7 @@
     </div>
 
     <!-- ── KPI Summary Cards ── -->
-    <div class="dt-summary-row mb-4">
-        <div class="dt-summary-card dt-summary-blue">
-            <div class="dt-summary-body">
-                <div class="dt-summary-label">TOTAL PRODUCTS</div>
-                <div class="dt-summary-value" id="kpi-count">0</div>
-                <div class="dt-summary-sub"><i class="fas fa-tags mr-1"></i>Gift Card SKUs</div>
-            </div>
-            <div class="dt-summary-icon dt-icon-blue">
-                <i class="fab fa-google-play"></i>
-            </div>
-        </div>
-
-        <div class="dt-summary-card dt-summary-purple">
-            <div class="dt-summary-body">
-                <div class="dt-summary-label">CATEGORY</div>
-                <div class="dt-summary-value">GAMES</div>
-                <div class="dt-summary-sub"><i class="fas fa-vr-cardboard mr-1"></i>Entertainment</div>
-            </div>
-            <div class="dt-summary-icon dt-icon-purple">
-                <i class="fas fa-trophy"></i>
-            </div>
-        </div>
-
-        <div class="dt-summary-card dt-summary-yellow">
-            <div class="dt-summary-body">
-                <div class="dt-summary-label">CURRENCY</div>
-                <div class="dt-summary-value">IDR</div>
-                <div class="dt-summary-sub"><i class="fas fa-money-bill-wave mr-1"></i>Indonesian Rupiah</div>
-            </div>
-            <div class="dt-summary-icon dt-icon-yellow">
-                <i class="fas fa-coins"></i>
-            </div>
-        </div>
-    </div>
+    
 
     <div class="card border-0 shadow-sm dt-card">
         <!-- ── Toolbar ── -->

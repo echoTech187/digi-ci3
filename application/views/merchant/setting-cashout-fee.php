@@ -13,51 +13,7 @@
     </div>
 
     <!-- ── KPI Summary Cards ── -->
-    <div class="dt-summary-row mb-4">
-        <div class="dt-summary-card dt-summary-blue">
-            <div class="dt-summary-body">
-                <div class="dt-summary-label">TOTAL CHANNELS</div>
-                <div class="dt-summary-value"><?= number_format($total_channels) ?></div>
-                <div class="dt-summary-sub"><i class="fas fa-list-ul mr-1"></i>Configured</div>
-            </div>
-            <div class="dt-summary-icon dt-icon-blue">
-                <i class="fas fa-layer-group"></i>
-            </div>
-        </div>
-
-        <div class="dt-summary-card dt-summary-green">
-            <div class="dt-summary-body">
-                <div class="dt-summary-label">ACTIVE CHANNELS</div>
-                <div class="dt-summary-value"><?= number_format($active_channels) ?></div>
-                <div class="dt-summary-sub"><i class="fas fa-check-circle mr-1"></i>Currently enabled</div>
-            </div>
-            <div class="dt-summary-icon dt-icon-green">
-                <i class="fas fa-toggle-on"></i>
-            </div>
-        </div>
-
-        <div class="dt-summary-card dt-summary-orange">
-            <div class="dt-summary-body">
-                <div class="dt-summary-label">INACTIVE CHANNELS</div>
-                <div class="dt-summary-value"><?= number_format($inactive_channels) ?></div>
-                <div class="dt-summary-sub"><i class="fas fa-times-circle mr-1"></i>Currently disabled</div>
-            </div>
-            <div class="dt-summary-icon dt-icon-orange">
-                <i class="fas fa-toggle-off"></i>
-            </div>
-        </div>
-
-        <div class="dt-summary-card dt-summary-yellow">
-            <div class="dt-summary-body">
-                <div class="dt-summary-label">MERCHANT</div>
-                <div class="dt-summary-value small" style="font-size: 18px;"><?= $merchant_name ?></div>
-                <div class="dt-summary-sub"><i class="fas fa-store mr-1"></i>ID: #<?= $merchant_id ?></div>
-            </div>
-            <div class="dt-summary-icon dt-icon-yellow">
-                <i class="fas fa-id-badge"></i>
-            </div>
-        </div>
-    </div>
+    
 
     <!-- Alerts -->
     <?php if ($this->session->flashdata('success')): ?>

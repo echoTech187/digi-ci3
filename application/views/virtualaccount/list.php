@@ -36,53 +36,7 @@ $download_url = base_url('admin/download_VA')
     <?php endif; ?>
 
     <!-- ── KPI Summary Cards ── -->
-    <div class="dt-summary-row mb-4">
-
-        <div class="dt-summary-card dt-summary-blue">
-            <div class="dt-summary-body">
-                <div class="dt-summary-label">TOTAL QUANTITY</div>
-                <div class="dt-summary-value"><?= number_format($qty, 0, ',', '.'); ?></div>
-                <div class="dt-summary-sub"><i class="fas fa-list-ol mr-1"></i>VA payments</div>
-            </div>
-            <div class="dt-summary-icon dt-icon-blue">
-                <i class="fas fa-hashtag"></i>
-            </div>
-        </div>
-
-        <div class="dt-summary-card dt-summary-green">
-            <div class="dt-summary-body">
-                <div class="dt-summary-label">TOTAL AMOUNT</div>
-                <div class="dt-summary-value text-success">Rp <?= number_format($total_trx, 0, ',', '.'); ?></div>
-                <div class="dt-summary-sub"><i class="fas fa-money-bill-wave mr-1"></i>Processed volume</div>
-            </div>
-            <div class="dt-summary-icon dt-icon-green">
-                <i class="fas fa-wallet"></i>
-            </div>
-        </div>
-
-        <div class="dt-summary-card dt-summary-yellow d-none">
-            <div class="dt-summary-body">
-                <div class="dt-summary-label">TOTAL FEE</div>
-                <div class="dt-summary-value text-warning">Rp <?= number_format($total_fee, 0, ',', '.'); ?></div>
-                <div class="dt-summary-sub"><i class="fas fa-receipt mr-1"></i>Service charge</div>
-            </div>
-            <div class="dt-summary-icon dt-icon-yellow">
-                <i class="fas fa-receipt"></i>
-            </div>
-        </div>
-
-        <div class="dt-summary-card dt-summary-red d-none">
-            <div class="dt-summary-body">
-                <div class="dt-summary-label">TOTAL PROFIT</div>
-                <div class="dt-summary-value text-danger">Rp <?= number_format($profit, 0, ',', '.'); ?></div>
-                <div class="dt-summary-sub"><i class="fas fa-chart-line mr-1"></i>Net income</div>
-            </div>
-            <div class="dt-summary-icon dt-icon-red">
-                <i class="fas fa-hand-holding-usd"></i>
-            </div>
-        </div>
-
-    </div>
+    
 
 
     <!-- ── Main Data Card ── -->

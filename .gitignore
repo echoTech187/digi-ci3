@@ -34,3 +34,6 @@ user_guide_src/cilexer/pycilexer.egg-info/*
 /tests/tests/
 /tests/results/
 *.txt
+database/dump.sql
+Hapus Summary Cards dari Semua Halaman (kecuali Dashboard & Analytics).md
+scratch_remove_summary.py

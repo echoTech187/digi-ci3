@@ -12,18 +12,7 @@ $id = $this->uri->segment(3);
     </div>
 
     <!-- ── KPI Summary Cards ── -->
-    <div class="dt-summary-row mb-4">
-        <div class="dt-summary-card dt-summary-blue">
-            <div class="dt-summary-body">
-                <div class="dt-summary-label">TOTAL SUBMERCHANTS</div>
-                <div class="dt-summary-value"><?= number_format($total_submerchants) ?></div>
-                <div class="dt-summary-sub"><i class="fas fa-users mr-1"></i>Registered accounts</div>
-            </div>
-            <div class="dt-summary-icon dt-icon-blue">
-                <i class="fas fa-user-friends"></i>
-            </div>
-        </div>
-    </div>
+    
 
     <!-- Alerts -->
     <?php if ($this->session->flashdata('success')): ?>

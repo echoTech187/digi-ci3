@@ -10,51 +10,7 @@
     </div>
 
     <!-- ── KPI Summary Cards ── -->
-    <div class="dt-summary-row mb-4">
-        <div class="dt-summary-card dt-summary-blue">
-            <div class="dt-summary-body">
-                <div class="dt-summary-label">TOTAL CHANNELS</div>
-                <div class="dt-summary-value"><?= number_format($qty, 0, ',', '.'); ?></div>
-                <div class="dt-summary-sub"><i class="fas fa-money-check-alt mr-1"></i>Available payout routes</div>
-            </div>
-            <div class="dt-summary-icon dt-icon-blue">
-                <i class="fas fa-sign-out-alt"></i>
-            </div>
-        </div>
-
-        <div class="dt-summary-card dt-summary-green">
-            <div class="dt-summary-body">
-                <div class="dt-summary-label">ACTIVE GROUPS</div>
-                <div class="dt-summary-value"><?= number_format($groups, 0, ',', '.'); ?></div>
-                <div class="dt-summary-sub"><i class="fas fa-layer-group mr-1"></i>Service categories</div>
-            </div>
-            <div class="dt-summary-icon dt-icon-green">
-                <i class="fas fa-th-list"></i>
-            </div>
-        </div>
-
-        <div class="dt-summary-card dt-summary-orange">
-            <div class="dt-summary-body">
-                <div class="dt-summary-label">EXTERNAL PROVIDERS</div>
-                <div class="dt-summary-value"><?= number_format($providers, 0, ',', '.'); ?></div>
-                <div class="dt-summary-sub"><i class="fas fa-server mr-1"></i>API integrations</div>
-            </div>
-            <div class="dt-summary-icon dt-icon-orange">
-                <i class="fas fa-network-wired"></i>
-            </div>
-        </div>
-
-        <div class="dt-summary-card dt-summary-purple">
-            <div class="dt-summary-body">
-                <div class="dt-summary-label">AVG CASHOUT FEE</div>
-                <div class="dt-summary-value">Rp <?= number_format($avg_fee, 0, ',', '.'); ?></div>
-                <div class="dt-summary-sub"><i class="fas fa-percentage mr-1"></i>Base cost per trx</div>
-            </div>
-            <div class="dt-summary-icon dt-icon-purple">
-                <i class="fas fa-file-invoice-dollar"></i>
-            </div>
-        </div>
-    </div>
+    
 
     <!-- ── Main Data Card ── -->
     <div class="card border-0 shadow-sm dt-card">
