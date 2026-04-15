@@ -9,51 +9,57 @@ class Dashboard_model extends CI_Model
         $stats = [
             'total_volume' => 0,
             'total_qty' => 0,
-            'qris' => ['amount' => 0, 'qty' => 0],
-            'va' => ['amount' => 0, 'qty' => 0],
-            'ewallet' => ['amount' => 0, 'qty' => 0],
-            'disburse' => ['amount' => 0, 'qty' => 0]
+            'total_profit' => 0,
+            'qris' => ['amount' => 0, 'qty' => 0, 'profit' => 0],
+            'va' => ['amount' => 0, 'qty' => 0, 'profit' => 0],
+            'ewallet' => ['amount' => 0, 'qty' => 0, 'profit' => 0],
+            'disburse' => ['amount' => 0, 'qty' => 0, 'profit' => 0]
         ];
 
         // QRIS Today
-        $qris = $this->db->select('SUM(c_amount) as amount, COUNT(id) as qty')
+        $qris = $this->db->select('SUM(c_amount) as amount, COUNT(id) as qty, SUM(c_fee - c_feeExternal) as profit')
             ->from('cashin_payment_qris_mpm')
             ->where('c_datetimePayment >=', $today.' 00:00:00')
             ->where('c_datetimePayment <=', $today.' 23:59:59')
             ->get()->row();
-        $stats['qris']['amount'] = $qris->amount != null ? $qris->amount : 0;
-        $stats['qris']['qty'] = $qris->qty != null ? $qris->qty : 0;
+        $stats['qris']['amount'] = $qris->amount ?: 0;
+        $stats['qris']['qty'] = $qris->qty ?: 0;
+        $stats['qris']['profit'] = $qris->profit ?: 0;
 
         // VA Today
-        $va = $this->db->select('SUM(c_amount) as amount, COUNT(id) as qty')
+        $va = $this->db->select('SUM(c_amount) as amount, COUNT(id) as qty, SUM(c_fee - c_feeExternal) as profit')
             ->from('cashin_payment_va')
             ->where('c_datetimePayment >=', $today.' 00:00:00')
             ->where('c_datetimePayment <=', $today.' 23:59:59')
             ->get()->row();
-        $stats['va']['amount'] = $va->amount != null ? $va->amount : 0;
-        $stats['va']['qty'] = $va->qty != null ? $va->qty : 0;
+        $stats['va']['amount'] = $va->amount ?: 0;
+        $stats['va']['qty'] = $va->qty ?: 0;
+        $stats['va']['profit'] = $va->profit ?: 0;
 
         // E-Wallet Today
-        $ewallet = $this->db->select('SUM(c_amount) as amount, COUNT(id) as qty')
+        $ewallet = $this->db->select('SUM(c_amount) as amount, COUNT(id) as qty, SUM(c_fee - c_feeExternal) as profit')
             ->from('cashin_payment_ewallet')
             ->where('c_datetimePayment >=', $today.' 00:00:00')
             ->where('c_datetimePayment <=', $today.' 23:59:59')
             ->get()->row();
-        $stats['ewallet']['amount'] = $ewallet->amount != null ? $ewallet->amount : 0;
-        $stats['ewallet']['qty'] = $ewallet->qty != null ? $ewallet->qty : 0;
+        $stats['ewallet']['amount'] = $ewallet->amount ?: 0;
+        $stats['ewallet']['qty'] = $ewallet->qty ?: 0;
+        $stats['ewallet']['profit'] = $ewallet->profit ?: 0;
 
         // Disbursement Today
-        $disburse = $this->db->select('SUM(c_amount) as amount, COUNT(id) as qty')
+        $disburse = $this->db->select('SUM(c_amount) as amount, COUNT(id) as qty, SUM(c_fee - c_feeExternal) as profit')
             ->from('cashout_payment_bifast')
             ->where('c_datetime >=', $today.' 00:00:00')
             ->where('c_datetime <=', $today.' 23:59:59')
             ->where('c_status', 'SUCCESS')
             ->get()->row();
-        $stats['disburse']['amount'] = $disburse->amount != null ? $disburse->amount : 0;
-        $stats['disburse']['qty'] = $disburse->qty != null ? $disburse->qty : 0;
+        $stats['disburse']['amount'] = $disburse->amount ?: 0;
+        $stats['disburse']['qty'] = $disburse->qty ?: 0;
+        $stats['disburse']['profit'] = $disburse->profit ?: 0;
 
         $stats['total_volume'] = $stats['qris']['amount'] + $stats['va']['amount'] + $stats['ewallet']['amount'] + $stats['disburse']['amount'];
         $stats['total_qty'] = $stats['qris']['qty'] + $stats['va']['qty'] + $stats['ewallet']['qty'] + $stats['disburse']['qty'];
+        $stats['total_profit'] = $stats['qris']['profit'] + $stats['va']['profit'] + $stats['ewallet']['profit'] + $stats['disburse']['profit'];
 
         return $stats;
     }
@@ -61,36 +67,48 @@ class Dashboard_model extends CI_Model
     public function get_monthly_overview()
     {
         $year = date('Y');
+        $today = date('Y-m-d');
         $channels = ['qris', 'va', 'ewallet', 'disburse'];
         $data = [];
 
+        // Mapping types in Summary Table to Channel Keys
+        $type_map = [
+            'QRIS' => 'qris',
+            'VA' => 'va',
+            'EWALLET' => 'ewallet',
+            'BIFAST' => 'disburse'
+        ];
+
+        // 1. Initialize data structure
         foreach ($channels as $channel) {
-            $table = '';
-            $date_field = '';
-            switch ($channel) {
-                case 'qris': $table = 'cashin_payment_qris_mpm'; $date_field = 'c_datetimePayment'; break;
-                case 'va': $table = 'cashin_payment_va'; $date_field = 'c_datetimePayment'; break;
-                case 'ewallet': $table = 'cashin_payment_ewallet'; $date_field = 'c_datetimePayment'; break;
-                case 'disburse': $table = 'cashout_payment_bifast'; $date_field = 'c_datetime'; $wheres = ['c_status' => 'SUCCESS']; break;
-            }
+            $data[$channel] = array_fill(1, 12, 0);
+        }
 
-            $this->db->select("MONTH($date_field) as month, SUM(c_amount) as amount");
-            $this->db->from($table);
-            // SARGable Date Range to allow index usage on the YEAR
-            $this->db->where("$date_field >=", $year . '-01-01 00:00:00');
-            $this->db->where("$date_field <=", $year . '-12-31 23:59:59');
-            
-            if ($channel == 'disburse') {
-                $this->db->where('c_status', 'SUCCESS');
-            }
-            
-            $monthly = $this->db->group_by("MONTH($date_field)")->get()->result_array();
+        // 2. Fetch Historical Sums from Summary Table (Total up to yesterday or today's already recapped data)
+        $this->db->select("MONTH(summary_date) as month, transaction_type, SUM(total_amount) as amount");
+        $this->db->from('tr_summary_daily');
+        $this->db->where('summary_date >=', $year . '-01-01');
+        $this->db->where('summary_date <', $today); // History only
+        $this->db->where_in('transaction_type', array_keys($type_map));
+        $monthly_hist = $this->db->group_by("MONTH(summary_date), transaction_type")->get()->result_array();
 
-            $formatted = array_fill(1, 12, 0);
-            foreach ($monthly as $row) {
-                $formatted[(int)$row['month']] = (float)$row['amount'];
-            }
-            $data[$channel] = array_values($formatted);
+        foreach ($monthly_hist as $row) {
+            $ch = $type_map[$row['transaction_type']];
+            $data[$ch][(int)$row['month']] += (float)$row['amount'];
+        }
+
+        // 3. Add Live Today's Data
+        $live_stats = $this->get_today_stats();
+        $current_month = (int)date('n');
+
+        $data['qris'][$current_month] += (float)$live_stats['qris']['amount'];
+        $data['va'][$current_month] += (float)$live_stats['va']['amount'];
+        $data['ewallet'][$current_month] += (float)$live_stats['ewallet']['amount'];
+        $data['disburse'][$current_month] += (float)$live_stats['disburse']['amount'];
+
+        // Format for output (array of values)
+        foreach ($data as $ch => $months) {
+            $data[$ch] = array_values($months);
         }
 
         return $data;

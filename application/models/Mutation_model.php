@@ -177,7 +177,7 @@ class Mutation_model extends CI_Model
         );
     }
 
-    public function get_summary($id, $search_date_mutation = null, $search_date_mutation_to = null)
+    public function get_summary($id, $search_date_mutation = null, $search_date_mutation_to = null, $position = null, $channel = null)
     {
         $this->db->select("
             SUM(CASE WHEN c_potition = 'Credit' THEN c_amount ELSE 0 END) as total_credit,
@@ -195,6 +195,21 @@ class Mutation_model extends CI_Model
             $this->db->where('c_datetime >=', $formatted_date . ' 00:00:00');
             $this->db->where('c_datetime <=', $formatted_date . ' 23:59:59');
         }
+
+        if (!empty($position)) {
+            $this->db->where('c_potition', $position);
+        }
+
+        if (!empty($channel) && !empty($position)) {
+            if ($position === 'Credit') {
+                $this->db->join('cashin', 'cashin.ref_merchantId = mutation.ref_merchantId AND cashin.id = mutation.ref_cashinId', 'left');
+                $this->db->where('cashin.ref_cashinChannelId', $channel);
+            } elseif ($position === 'Debit') {
+                $this->db->join('cashout', 'cashout.ref_merchantId = mutation.ref_merchantId AND cashout.Id = mutation.ref_cashoutId', 'left');
+                $this->db->where('cashout.ref_cashoutChannelId', $channel);
+            }
+        }
+
         return $this->db->get()->row();
     }
 }

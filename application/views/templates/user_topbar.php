@@ -76,7 +76,7 @@
                 <!-- Nav Item - User Information -->
                 <li class="nav-item dropdown no-arrow ml-2">
                     <a class="nav-link dropdown-toggle navbar-user-info pr-0 rounded-circle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <span class="mr-2 d-none d-lg-inline"><?= $user['c_name']; ?></span>
+                        <span class="mr-2 d-none d-lg-inline"><?= isset($user['c_name']) ? $user['c_name'] : 'System Administrator'; ?></span>
                         <img class="navbar-avatar" src="<?= base_url('assets/img/profile/default.jpg') ?>">
                     </a>
 
@@ -84,10 +84,10 @@
                     <div class="dropdown-menu dropdown-menu-right shadow-lg border-0 animated--grow-in mt-2" aria-labelledby="userDropdown" style="border-radius: 12px; min-width: 200px;">
                         <div class="px-4 py-3 border-bottom d-lg-none">
                             <p class="text-xs font-weight-bold text-uppercase text-muted mb-1">Signed in as</p>
-                            <p class="font-weight-bold text-dark mb-0"><?= $user['c_name']; ?></p>
+                            <p class="font-weight-bold text-dark mb-0"><?= isset($user['c_name']) ? $user['c_name'] : 'User'; ?></p>
                         </div>
 
-                        <?php if ($user['role_id'] != 4): ?>
+                        <?php if (isset($user['role_id']) && $user['role_id'] != 4): ?>
                             <div class="dropdown-item py-2 px-4 border-bottom">
                                 <div class="d-flex align-items-center justify-content-between" style="gap:10px">
                                     <div class="d-flex align-items-center">

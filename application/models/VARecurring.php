@@ -107,27 +107,67 @@ class VARecurring extends CI_Model {
     }
     public function get_summary($search_name = null, $search_date = null, $search_date_to = null, $search_va = null, $search_trxid = null)
     {
-        $this->db->select("COUNT(crv.id) as qty, SUM(crv.c_amount) as total_amount");
-        $this->db->from($this->table);
-        
-        if ($search_name) {
-            $this->db->join('merchant m', 'crv.ref_merchantId = m.id', 'left');
-            $this->db->where('crv.ref_merchantId', $search_name);
-        }
-        
-        if ($search_date) {
-            $search_date = date('Y-m-d', strtotime($search_date));
-            if ($search_date_to) {
-                $search_date_to = date('Y-m-d', strtotime($search_date_to));
-                $this->db->where("crv.c_datetimeRequest >= '$search_date 00:00:00'");
-                $this->db->where("crv.c_datetimeRequest <= '$search_date_to 23:59:59'");
-            } else {
-                $this->db->where("crv.c_datetimeRequest >= '$search_date 00:00:00'");
-                $this->db->where("crv.c_datetimeRequest <= '$search_date 23:59:59'");
-            }
+        $today = date('Y-m-d');
+        $is_today_included = false;
+        $is_history_included = false;
+
+        $total_qty = 0;
+        $total_amount = 0;
+
+        // Determine range
+        $start_date = $search_date ? date('Y-m-d', strtotime($search_date)) : null;
+        $end_date = $search_date_to ? date('Y-m-d', strtotime($search_date_to)) : ($search_date ? $start_date : null);
+
+        if (!$start_date) {
+            // All Time
+            $is_today_included = true;
+            $is_history_included = true;
+        } else {
+            if ($start_date < $today) $is_history_included = true;
+            if ($end_date >= $today || $start_date == $today) $is_today_included = true;
         }
 
-        return $this->db->get()->row();
+        // 1. Get Historical Data from Summary Table
+        if ($is_history_included) {
+            $this->db->select('SUM(total_qty) as qty, SUM(total_amount) as amount');
+            $this->db->from('tr_summary_daily');
+            $this->db->where('transaction_type', 'VA_RECURRING');
+            
+            if ($start_date) {
+                $this->db->where('summary_date >=', $start_date);
+                $this->db->where('summary_date <', $today);
+                if ($end_date && $end_date < $today) {
+                    $this->db->where('summary_date <=', $end_date);
+                }
+            } else {
+                $this->db->where('summary_date <', $today);
+            }
+
+            if ($search_name) {
+                $this->db->where('ref_merchantId', $search_name);
+            }
+            $hist = $this->db->get()->row();
+            $total_qty += $hist->qty ?: 0;
+            $total_amount += $hist->amount ?: 0;
+        }
+
+        // 2. Get Live Data for Today from Main Table
+        if ($is_today_included) {
+            $this->db->select('COUNT(crv.id) as qty, SUM(crv.c_amount) as total_amount');
+            $this->db->from($this->table);
+            $this->db->where('crv.c_datetimeRequest >=', $today . ' 00:00:00');
+            $this->db->where('crv.c_datetimeRequest <=', $today . ' 23:59:59');
+            if ($search_name) $this->db->where('crv.ref_merchantId', $search_name);
+            
+            $live = $this->db->get()->row();
+            $total_qty += $live->qty ?: 0;
+            $total_amount += $live->total_amount ?: 0;
+        }
+
+        return (object)[
+            'qty' => $total_qty,
+            'total_amount' => $total_amount
+        ];
     }
 
     public function count_all_dt($search_name = null, $search_date = null, $search_date_to = null)

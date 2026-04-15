@@ -8,17 +8,8 @@ class BiFast extends CI_Model {
     var $column_search = array('cpb.id', 'm.c_name', 'c.c_invoiceNo', 'cpb.c_merchantTransactionId', 'cpb.c_accountNo', 'mab.c_beneficiaryAccountName');
     var $order = array('cpb.id' => 'desc');
 
-    private function _get_datatables_query($search_name = null, $date_from = null, $date_to = null, $search_transid = null, $search_external_reff = null, $search_channel = null, $search_status = null)
+    private function _apply_filters($search_name = null, $date_from = null, $date_to = null, $search_transid = null, $search_external_reff = null, $search_channel = null, $search_status = null, $global_search = null)
     {
-        $this->db->select("cpb.*, m.c_name AS name_merchant, c.c_invoiceNo, mab.c_beneficiaryAccountName,
-                           COALESCE(epb.c_responseBody, egb.c_responseBody) AS c_responseBody");
-        $this->db->from($this->table);
-        $this->db->join('cashout c', 'c.id = cpb.ref_cashoutId');
-        $this->db->join('merchant m', 'm.id = cpb.ref_merchantId');
-        $this->db->join('merchant_account_bank mab', 'mab.c_beneficiaryAccountNo = cpb.c_accountNo AND mab.ref_cashoutChannelId = cpb.ref_cashoutChannelId AND mab.ref_merchantId = cpb.ref_merchantId', 'left');
-        $this->db->join('external_paylabs_disbursement_transfer_bank epb', 'epb.ref_cashoutPaymentBifastId = cpb.id', 'left');
-        $this->db->join('external_gvconnect_snap_disbursement_transfer_bank egb', 'egb.ref_cashoutPaymentBifastId = cpb.id', 'left');
-
         if ($search_name) {
             $this->db->where('cpb.ref_merchantId', $search_name);
         }
@@ -40,20 +31,34 @@ class BiFast extends CI_Model {
             }
         }
 
-        $i = 0;
-        foreach ($this->column_search as $item) {
-            if ($_POST['search']['value']) {
+        if ($global_search) {
+            $this->db->group_start();
+            $i = 0;
+            foreach ($this->column_search as $item) {
                 if ($i === 0) {
-                    $this->db->group_start();
-                    $this->db->like($item, $_POST['search']['value']);
+                    $this->db->like($item, $global_search);
                 } else {
-                    $this->db->or_like($item, $_POST['search']['value']);
+                    $this->db->or_like($item, $global_search);
                 }
-                if (count($this->column_search) - 1 == $i)
-                    $this->db->group_end();
+                $i++;
             }
-            $i++;
+            $this->db->group_end();
         }
+    }
+
+    private function _get_datatables_query($search_name = null, $date_from = null, $date_to = null, $search_transid = null, $search_external_reff = null, $search_channel = null, $search_status = null)
+    {
+        $this->db->select("cpb.*, m.c_name AS name_merchant, c.c_invoiceNo, mab.c_beneficiaryAccountName,
+                           COALESCE(epb.c_responseBody, egb.c_responseBody) AS c_responseBody");
+        $this->db->from($this->table);
+        $this->db->join('cashout c', 'c.id = cpb.ref_cashoutId');
+        $this->db->join('merchant m', 'm.id = cpb.ref_merchantId');
+        $this->db->join('merchant_account_bank mab', 'mab.c_beneficiaryAccountNo = cpb.c_accountNo AND mab.ref_cashoutChannelId = cpb.ref_cashoutChannelId AND mab.ref_merchantId = cpb.ref_merchantId', 'left');
+        $this->db->join('external_paylabs_disbursement_transfer_bank epb', 'epb.ref_cashoutPaymentBifastId = cpb.id', 'left');
+        $this->db->join('external_gvconnect_snap_disbursement_transfer_bank egb', 'egb.ref_cashoutPaymentBifastId = cpb.id', 'left');
+
+        $global_search = isset($_POST['search']['value']) ? $_POST['search']['value'] : null;
+        $this->_apply_filters($search_name, $date_from, $date_to, $search_transid, $search_external_reff, $search_channel, $search_status, $global_search);
 
         if (isset($_POST['order'])) {
             $this->db->order_by($this->column_order[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);
@@ -75,47 +80,23 @@ class BiFast extends CI_Model {
     public function count_filtered($search_name = null, $date_from = null, $date_to = null, $search_transid = null, $search_external_reff = null, $search_channel = null, $search_status = null)
     {
         $this->db->select('count(cpb.id) as total');
-        // Optimized: Only join what is necessary for filtering
         $this->db->from($this->table);
         $this->db->join('cashout c', 'c.id = cpb.ref_cashoutId'); // Needed for InvoiceNo
         
-        if ($search_name) $this->db->where('cpb.ref_merchantId', $search_name);
-        if ($date_from && $date_to) {
-            $this->db->where('cpb.c_datetime >=', $date_from);
-            $this->db->where('cpb.c_datetime <=', $date_to);
+        $global_search = isset($_POST['search']['value']) ? $_POST['search']['value'] : null;
+
+        // Joins needed for filters/search
+        if ($search_external_reff || $global_search) {
+             $this->db->join('external_paylabs_disbursement_transfer_bank epb', 'epb.ref_cashoutPaymentBifastId = cpb.id', 'left');
+             $this->db->join('external_gvconnect_snap_disbursement_transfer_bank egb', 'egb.ref_cashoutPaymentBifastId = cpb.id', 'left');
         }
-        if ($search_transid) $this->db->where('cpb.c_merchantTransactionId', $search_transid);
-        if ($search_status) $this->db->where('cpb.c_status', $search_status);
+        if ($global_search) {
+             $this->db->join('merchant m', 'm.id = cpb.ref_merchantId', 'left');
+             $this->db->join('merchant_account_bank mab', 'mab.c_beneficiaryAccountNo = cpb.c_accountNo AND mab.ref_cashoutChannelId = cpb.ref_cashoutChannelId AND mab.ref_merchantId = cpb.ref_merchantId', 'left');
+        }
+
+        $this->_apply_filters($search_name, $date_from, $date_to, $search_transid, $search_external_reff, $search_channel, $search_status, $global_search);
         
-        if ($search_external_reff && $search_channel) {
-            if ($search_channel == "paylabs") {
-                $this->db->join('external_paylabs_disbursement_transfer_bank epb', 'epb.ref_cashoutPaymentBifastId = cpb.id');
-                $this->db->where('epb.c_referenceNo', $search_external_reff);
-            } else if ($search_channel == "gvconnect") {
-                $this->db->join('external_gvconnect_snap_disbursement_transfer_bank egb', 'egb.ref_cashoutPaymentBifastId = cpb.id');
-                $this->db->where('egb.c_partnerReferenceNo', $search_external_reff);
-            }
-        }
-
-        // Global Search requires more joins
-        if (isset($_POST['search']['value']) && $_POST['search']['value']) {
-            $this->db->join('merchant m', 'm.id = cpb.ref_merchantId');
-            $this->db->join('merchant_account_bank mab', 'mab.c_beneficiaryAccountNo = cpb.c_accountNo AND mab.ref_cashoutChannelId = cpb.ref_cashoutChannelId AND mab.ref_merchantId = cpb.ref_merchantId', 'left');
-            
-            $i = 0;
-            foreach ($this->column_search as $item) {
-                if ($i === 0) {
-                    $this->db->group_start();
-                    $this->db->like($item, $_POST['search']['value']);
-                } else {
-                    $this->db->or_like($item, $_POST['search']['value']);
-                }
-                if (count($this->column_search) - 1 == $i)
-                    $this->db->group_end();
-                $i++;
-            }
-        }
-
         $query = $this->db->get();
         return $query->row()->total;
     }
@@ -201,20 +182,67 @@ class BiFast extends CI_Model {
     
     
 
-    public function get_summary($date_from, $date_to, $refMerchantId = null) {
-        // $this->db->select('COUNT(id) as qty, SUM(c_amount) as amount, SUM(c_fee) as fee, SUM(c_feeExternal) as fee_external');
-        $query = "SELECT COUNT(a.id) as qty, SUM(a.c_amount) as amount, SUM(a.c_fee) as fee, SUM(a.c_feeExternal) as fee_external
-        FROM cashout_payment_bifast a
-        WHERE a.c_datetime  >= '$date_from' AND a.c_datetime <= '$date_to'";
+    public function get_summary($date_from = null, $date_to = null, $refMerchantId = null, $search_transid = null, $search_external_reff = null, $search_channel = null, $search_status = null, $global_search = null) {
+        $today = date('Y-m-d');
+        
+        // Optimized: Only Success is usually shown in summary for BiFast
+        // Hybrid logic is used if no granular filters are applied
+        $use_hybrid = empty($search_transid) && empty($search_external_reff) && empty($search_channel) && empty($global_search);
+        
+        // Note: BiFast summary typically filters for SUCCESS status
+        $status_to_check = $search_status ?: 'SUCCESS';
 
-        if (!empty($refMerchantId)) {
-            $query .= " AND a.ref_merchantId = '$refMerchantId'";
+        if ($use_hybrid && $status_to_check == 'SUCCESS') {
+            // 1. Get History
+            $this->db->select('SUM(total_qty) as qty, SUM(total_amount) as amount, SUM(total_fee) as fee, SUM(total_fee_ext) as fee_external');
+            $this->db->from('tr_summary_daily');
+            $this->db->where('transaction_type', 'BIFAST');
+            
+            if ($date_from) $this->db->where('summary_date >=', $date_from);
+            if ($date_to) $this->db->where('summary_date <', $today);
+            else $this->db->where('summary_date <', $today);
+
+            if ($refMerchantId) $this->db->where('ref_merchantId', $refMerchantId);
+            
+            $history = $this->db->get()->row();
+
+            // 2. Get Live
+            if (!$date_to || $date_to >= $today) {
+                $this->db->select('COUNT(id) as qty, SUM(c_amount) as amount, SUM(c_fee) as fee, SUM(c_feeExternal) as fee_external');
+                $this->db->from('cashout_payment_bifast');
+                $this->db->where('c_datetime >=', $today . ' 00:00:00');
+                $this->db->where('c_status', 'SUCCESS');
+                if ($refMerchantId) $this->db->where('ref_merchantId', $refMerchantId);
+                
+                $live = $this->db->get()->row();
+            } else {
+                $live = (object)['qty' => 0, 'amount' => 0, 'fee' => 0, 'fee_external' => 0];
+            }
+
+            return [[
+                'qty' => ($history->qty ?? 0) + ($live->qty ?? 0),
+                'amount' => ($history->amount ?? 0) + ($live->amount ?? 0),
+                'fee' => ($history->fee ?? 0) + ($live->fee ?? 0),
+                'fee_external' => ($history->fee_external ?? 0) + ($live->fee_external ?? 0),
+            ]];
         }
 
-        // echo $query;
-        // exit;
+        // Fallback for complex filters
+        $this->db->select('COUNT(cpb.id) as qty, SUM(cpb.c_amount) as amount, SUM(cpb.c_fee) as fee, SUM(cpb.c_feeExternal) as fee_external');
+        $this->db->from('cashout_payment_bifast cpb');
+        $this->db->join('cashout c', 'c.id = cpb.ref_cashoutId', 'left');
 
-        return $this->db->query($query)->result_array();
+        if ($search_external_reff || $global_search) {
+             $this->db->join('external_paylabs_disbursement_transfer_bank epb', 'epb.ref_cashoutPaymentBifastId = cpb.id', 'left');
+             $this->db->join('external_gvconnect_snap_disbursement_transfer_bank egb', 'egb.ref_cashoutPaymentBifastId = cpb.id', 'left');
+        }
+        if ($global_search) {
+             $this->db->join('merchant m', 'm.id = cpb.ref_merchantId', 'left');
+             $this->db->join('merchant_account_bank mab', 'mab.c_beneficiaryAccountNo = cpb.c_accountNo AND mab.ref_cashoutChannelId = cpb.ref_cashoutChannelId AND mab.ref_merchantId = cpb.ref_merchantId', 'left');
+        }
+
+        $this->_apply_filters($refMerchantId, $date_from, $date_to, $search_transid, $search_external_reff, $search_channel, $search_status, $global_search);
+        return $this->db->get()->result_array();
     }
 
     public function getBifastDetail($id)

@@ -105,19 +105,69 @@ class QRISRecurring extends CI_Model {
 
     public function get_summary($search_name = null, $search_date = null, $search_date_to = null, $search_submerchant = null)
     {
-        $this->db->select("COUNT(crqm.id) as qty, SUM(crqm.c_amount) as total_trx");
-        $this->db->from($this->table);
-        
-        // Only join if we are filtering by name or submerchant to avoid massive scan overhead
-        if ($search_submerchant) {
-            $this->db->join('submerchant s', 'crqm.ref_subMerchantId = s.id', 'left');
-        }
-        if ($search_name) {
-            $this->db->join('merchant m', 'crqm.ref_merchantId = m.id', 'left');
+        $today = date('Y-m-d');
+        $is_today_included = false;
+        $is_history_included = false;
+
+        $total_qty = 0;
+        $total_amount = 0;
+
+        // Determine range
+        $start_date = $search_date ? date('Y-m-d', strtotime($search_date)) : null;
+        $end_date = $search_date_to ? date('Y-m-d', strtotime($search_date_to)) : ($search_date ? $start_date : null);
+
+        if (!$start_date) {
+            // All Time
+            $is_today_included = true;
+            $is_history_included = true;
+        } else {
+            if ($start_date < $today) $is_history_included = true;
+            if ($end_date >= $today || $start_date == $today) $is_today_included = true;
         }
 
-        $this->_apply_filters($search_name, $search_date, $search_date_to, $search_submerchant);
-        return $this->db->get()->row();
+        // 1. Get Historical Data from Summary Table
+        if ($is_history_included) {
+            $this->db->select('SUM(total_qty) as qty, SUM(total_amount) as amount');
+            $this->db->from('tr_summary_daily');
+            $this->db->where('transaction_type', 'QRIS_RECURRING');
+            
+            if ($start_date) {
+                $this->db->where('summary_date >=', $start_date);
+                $this->db->where('summary_date <', $today);
+                if ($end_date && $end_date < $today) {
+                    $this->db->where('summary_date <=', $end_date);
+                }
+            } else {
+                $this->db->where('summary_date <', $today);
+            }
+
+            if ($search_name) {
+                $this->db->where('ref_merchantId', $search_name);
+            }
+            $hist = $this->db->get()->row();
+            $total_qty += $hist->qty ?: 0;
+            $total_amount += $hist->amount ?: 0;
+        }
+
+        // 2. Get Live Data for Today from Main Table
+        if ($is_today_included) {
+            $this->db->select("COUNT(crqm.id) as qty, SUM(crqm.c_amount) as total_trx");
+            $this->db->from($this->table);
+            
+            $this->db->where('crqm.c_datetimeRequest >=', $today . ' 00:00:00');
+            $this->db->where('crqm.c_datetimeRequest <=', $today . ' 23:59:59');
+
+            $this->_apply_filters($search_name, $today, $today, $search_submerchant);
+            
+            $live = $this->db->get()->row();
+            $total_qty += $live->qty ?: 0;
+            $total_amount += $live->total_trx ?: 0;
+        }
+
+        return (object)[
+            'qty' => $total_qty,
+            'total_trx' => $total_amount
+        ];
     }
     
     public function get_merchant(){

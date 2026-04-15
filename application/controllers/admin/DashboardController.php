@@ -256,8 +256,12 @@ class DashboardController extends CI_Controller
            }
        } else {
            // Daily for 7 days or month
-           $start = new DateTime($date_from);
-           $end   = new DateTime($date_to);
+           $startStr = $date_from;
+           $endStr   = $date_to;
+           $today    = date('Y-m-d');
+
+           $start = new DateTime($startStr);
+           $end   = new DateTime($endStr);
            $interval = new DateInterval('P1D');
            $range = new DatePeriod($start, $interval, $end->modify('+1 day'));
 
@@ -267,22 +271,31 @@ class DashboardController extends CI_Controller
                $values[$date->format('Y-m-d')] = 0;
            }
 
-          $tables = ['cashin_payment_qris_mpm']; // Add other tables if needed
-          foreach ($tables as $t) {
-              $this->db->select("DATE(c_datetime) as date, SUM(c_amount) as amount, COUNT(id) as qty");
-              $this->db->from($t);
-              // OPTIMIZATION: Use range queries instead of DATE() in WHERE clause
-              $this->db->where('c_datetime >=', $date_from . ' 00:00:00');
-              $this->db->where('c_datetime <=', $date_to . ' 23:59:59');
-              if ($t == 'cashout_payment_bifast') $this->db->where('c_status', 'SUCCESS');
-              $this->db->group_by("DATE(c_datetime)");
-              $res = $this->db->get()->result_array();
-              foreach ($res as $row) {
-                  if (isset($values[$row['date']])) {
-                      $values[$row['date']] += (float)$row['amount'];
-                  }
-              }
-          }
+           // 1. Fetch Historical Totals from Summary Table
+           if ($startStr < $today) {
+                $hist_end = $endStr >= $today ? date('Y-m-d', strtotime('-1 day')) : $endStr;
+                
+                $this->db->select("summary_date, SUM(total_amount) as amount");
+                $this->db->from('tr_summary_daily');
+                $this->db->where('summary_date >=', $startStr);
+                $this->db->where('summary_date <=', $hist_end);
+                $this->db->group_by("summary_date");
+                $res = $this->db->get()->result_array();
+                
+                foreach ($res as $row) {
+                    if (isset($values[$row['summary_date']])) {
+                        $values[$row['summary_date']] += (float)$row['amount'];
+                    }
+                }
+           }
+
+           // 2. Add Live Today Data if in range
+           if ($endStr >= $today) {
+                $this->load->model('Dashboard_model');
+                $live_stats = $this->Dashboard_model->get_today_stats();
+                $values[$today] += (float)$live_stats['total_volume'];
+           }
+           
            $values = array_values($values);
        }
 

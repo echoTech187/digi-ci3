@@ -8,6 +8,47 @@ class Qris extends CI_Model {
     var $column_search = array('cpq.id', 'm.c_name', 's.c_name', 'c.c_invoiceNo', 'cdq.c_merchantTransactionId', 'crq.c_merchantTransactionId', 'epq.c_issuerRrn');
     var $order = array('cpq.id' => 'desc');
 
+    private function _apply_filters($search_name = null, $date_from = null, $date_to = null, $search_settlement = null, $search_rrn = null, $search_invoice = null, $search_transid = null, $global_search = null)
+    {
+        if ($search_name) {
+            $this->db->where('cpq.ref_merchantId', $search_name);
+        }
+        if ($date_from && $date_to) {
+            $this->db->where('cpq.c_datetime >=', $date_from);
+            $this->db->where('cpq.c_datetime <=', $date_to);
+        }
+        if ($search_settlement) {
+            $formatted_date = date('Y-m-d', strtotime($search_settlement));
+            $this->db->where("cpq.c_datetimeSettlement >= '$formatted_date 00:00:00' AND cpq.c_datetimeSettlement <= '$formatted_date 23:59:59'");
+        }
+        if ($search_rrn) {
+            $this->db->where('epq.c_issuerRrn', $search_rrn);
+        }
+        if ($search_invoice) {
+            $this->db->where('c.c_invoiceNo', $search_invoice);
+        }
+        if ($search_transid) {
+            $this->db->group_start();
+            $this->db->where('cdq.c_merchantTransactionId', $search_transid);
+            $this->db->or_where('crq.c_merchantTransactionId', $search_transid);
+            $this->db->group_end();
+        }
+
+        if ($global_search) {
+            $this->db->group_start();
+            $i = 0;
+            foreach ($this->column_search as $item) {
+                if ($i === 0) {
+                    $this->db->like($item, $global_search);
+                } else {
+                    $this->db->or_like($item, $global_search);
+                }
+                $i++;
+            }
+            $this->db->group_end();
+        }
+    }
+
     private function _get_datatables_query($search_name = null, $date_from = null, $date_to = null, $search_settlement = null, $search_rrn = null, $search_invoice = null, $search_transid = null)
     {
         $this->db->select("cpq.*, m.c_name as name_merchant, s.c_name as name_submerchant, c.c_invoiceNo, epq.c_issuerRrn,
@@ -20,43 +61,8 @@ class Qris extends CI_Model {
         $this->db->join('cashin_recurring_qris_mpm crq', 'crq.ref_subMerchantId = cpq.ref_subMerchantId AND crq.id = cpq.ref_cashinRecurringQrisMpmId', 'left');
         $this->db->join('external_paydgn_qris_mpm_callback epq', 'epq.ref_subMerchantId = cpq.ref_subMerchantId AND epq.ref_cashinPaymentQrisMpmId = cpq.id', 'left');
 
-        if ($search_name) {
-            $this->db->where('cpq.ref_merchantId', $search_name);
-        }
-        if ($date_from && $date_to) {
-            $this->db->where('cpq.c_datetime >=', $date_from);
-            $this->db->where('cpq.c_datetime <=', $date_to);
-        }
-        // if ($search_settlement) {
-        //     $this->db->where('DATE(cpq.c_datetimeSettlement)', $search_settlement);
-        // }
-        if ($search_rrn) {
-            $this->db->where('epq.c_issuerRrn', $search_rrn);
-        }
-        // if ($search_invoice) {
-        //     $this->db->where('c.c_invoiceNo', $search_invoice);
-        // }
-        if ($search_transid) {
-            $this->db->group_start();
-            $this->db->where('cdq.c_merchantTransactionId', $search_transid);
-            $this->db->or_where('crq.c_merchantTransactionId', $search_transid);
-            $this->db->group_end();
-        }
-
-        $i = 0;
-        foreach ($this->column_search as $item) {
-            if ($_POST['search']['value']) {
-                if ($i === 0) {
-                    $this->db->group_start();
-                    $this->db->like($item, $_POST['search']['value']);
-                } else {
-                    $this->db->or_like($item, $_POST['search']['value']);
-                }
-                if (count($this->column_search) - 1 == $i)
-                    $this->db->group_end();
-            }
-            $i++;
-        }
+        $global_search = isset($_POST['search']['value']) ? $_POST['search']['value'] : null;
+        $this->_apply_filters($search_name, $date_from, $date_to, $search_settlement, $search_rrn, $search_invoice, $search_transid, $global_search);
 
         if (isset($_POST['order'])) {
             $this->db->order_by($this->column_order[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);
@@ -77,48 +83,26 @@ class Qris extends CI_Model {
 
     public function count_filtered($search_name = null, $date_from = null, $date_to = null, $search_settlement = null, $search_rrn = null, $search_invoice = null, $search_transid = null)
     {
-        // Optimized: Only join what is necessary for filtering
         $this->db->select('count(cpq.id) as total');
         $this->db->from($this->table);
         $this->db->join('cashin c', 'c.id = cpq.ref_cashinId'); // Needed for InvoiceNo
         
-        if ($search_name) $this->db->where('cpq.ref_merchantId', $search_name);
-        if ($date_from && $date_to) {
-            $this->db->where('cpq.c_datetime >=', $date_from);
-            $this->db->where('cpq.c_datetime <=', $date_to);
+        $global_search = isset($_POST['search']['value']) ? $_POST['search']['value'] : null;
+
+        // Joins needed for filters/search
+        if ($search_rrn || $global_search) {
+             $this->db->join('external_paydgn_qris_mpm_callback epq', 'epq.ref_subMerchantId = cpq.ref_subMerchantId AND epq.ref_cashinPaymentQrisMpmId = cpq.id', 'left');
         }
-        if ($search_rrn) {
-            $this->db->join('external_paydgn_qris_mpm_callback epq', 'epq.ref_subMerchantId = cpq.ref_subMerchantId AND epq.ref_cashinPaymentQrisMpmId = cpq.id');
-            $this->db->where('epq.c_issuerRrn', $search_rrn);
-        }
-        if ($search_transid) {
+        if ($search_transid || $global_search) {
             $this->db->join('cashin_dynamic_qris_mpm cdq', 'cdq.ref_subMerchantId = cpq.ref_subMerchantId AND cdq.id = cpq.ref_cashinDynamicQrisMpmId', 'left');
             $this->db->join('cashin_recurring_qris_mpm crq', 'crq.ref_subMerchantId = cpq.ref_subMerchantId AND crq.id = cpq.ref_cashinRecurringQrisMpmId', 'left');
-            $this->db->group_start();
-            $this->db->where('cdq.c_merchantTransactionId', $search_transid);
-            $this->db->or_where('crq.c_merchantTransactionId', $search_transid);
-            $this->db->group_end();
+        }
+        if ($global_search) {
+             $this->db->join('merchant m', 'cpq.ref_merchantId = m.id', 'left');
         }
 
-        // Global Search requires more joins
-        if (isset($_POST['search']['value']) && $_POST['search']['value']) {
-            $this->db->join('merchant m', 'cpq.ref_merchantId = m.id');
-            $this->db->join('submerchant s', 'cpq.ref_subMerchantId = s.id');
-            
-            $i = 0;
-            foreach ($this->column_search as $item) {
-                if ($i === 0) {
-                    $this->db->group_start();
-                    $this->db->like($item, $_POST['search']['value']);
-                } else {
-                    $this->db->or_like($item, $_POST['search']['value']);
-                }
-                if (count($this->column_search) - 1 == $i)
-                    $this->db->group_end();
-                $i++;
-            }
-        }
-
+        $this->_apply_filters($search_name, $date_from, $date_to, $search_settlement, $search_rrn, $search_invoice, $search_transid, $global_search);
+        
         $query = $this->db->get();
         return $query->row()->total;
     }
@@ -228,20 +212,64 @@ class Qris extends CI_Model {
         return $this->db->count_all_results();
     }
 
-    public function get_summary($date_from, $date_to, $refMerchantId = null) {
-        // $this->db->select('COUNT(id) as qty, SUM(c_amount) as amount, SUM(c_fee) as fee, SUM(c_feeExternal) as fee_external');
-        $query = "SELECT COUNT(a.id) as qty, SUM(a.c_amount) as amount, SUM(a.c_fee) as fee, SUM(a.c_feeExternal) as fee_external
-        FROM cashin_payment_qris_mpm a
-        WHERE a.c_datetime  >= '$date_from' AND a.c_datetime <= '$date_to'";
+    public function get_summary($date_from = null, $date_to = null, $refMerchantId = null, $search_settlement = null, $search_rrn = null, $search_invoice = null, $search_transid = null, $global_search = null) {
+        $today = date('Y-m-d');
+        
+        // Hybrid logic for standard merchant/date view
+        $use_hybrid = empty($search_settlement) && empty($search_rrn) && empty($search_invoice) && empty($search_transid) && empty($global_search);
+        
+        if ($use_hybrid) {
+            // 1. Get History
+            $this->db->select('SUM(total_qty) as qty, SUM(total_amount) as amount, SUM(total_fee) as fee, SUM(total_fee_ext) as fee_external');
+            $this->db->from('tr_summary_daily');
+            $this->db->where('transaction_type', 'QRIS');
+            
+            if ($date_from) $this->db->where('summary_date >=', $date_from);
+            if ($date_to) $this->db->where('summary_date <', $today);
+            else $this->db->where('summary_date <', $today);
 
-        if (!empty($refMerchantId)) {
-            $query .= " AND a.ref_merchantId = '$refMerchantId'";
+            if ($refMerchantId) $this->db->where('ref_merchantId', $refMerchantId);
+            
+            $history = $this->db->get()->row();
+
+            // 2. Get Live
+            if (!$date_to || $date_to >= $today) {
+                $this->db->select('COUNT(id) as qty, SUM(c_amount) as amount, SUM(c_fee) as fee, SUM(c_feeExternal) as fee_external');
+                $this->db->from('cashin_payment_qris_mpm');
+                $this->db->where('c_datetime >=', $today . ' 00:00:00');
+                if ($refMerchantId) $this->db->where('ref_merchantId', $refMerchantId);
+                
+                $live = $this->db->get()->row();
+            } else {
+                $live = (object)['qty' => 0, 'amount' => 0, 'fee' => 0, 'fee_external' => 0];
+            }
+
+            return [[
+                'qty' => ($history->qty ?? 0) + ($live->qty ?? 0),
+                'amount' => ($history->amount ?? 0) + ($live->amount ?? 0),
+                'fee' => ($history->fee ?? 0) + ($live->fee ?? 0),
+                'fee_external' => ($history->fee_external ?? 0) + ($live->fee_external ?? 0),
+            ]];
         }
 
-        // echo $query;
-        // exit;
+        // Fallback for complex filters
+        $this->db->select('COUNT(cpq.id) as qty, SUM(cpq.c_amount) as amount, SUM(cpq.c_fee) as fee, SUM(cpq.c_feeExternal) as fee_external');
+        $this->db->from('cashin_payment_qris_mpm cpq');
+        $this->db->join('cashin c', 'c.id = cpq.ref_cashinId', 'left');
 
-        return $this->db->query($query)->result_array();
+        if ($search_rrn || $global_search) {
+             $this->db->join('external_paydgn_qris_mpm_callback epq', 'epq.ref_subMerchantId = cpq.ref_subMerchantId AND epq.ref_cashinPaymentQrisMpmId = cpq.id', 'left');
+        }
+        if ($search_transid || $global_search) {
+            $this->db->join('cashin_dynamic_qris_mpm cdq', 'cdq.ref_subMerchantId = cpq.ref_subMerchantId AND cdq.id = cpq.ref_cashinDynamicQrisMpmId', 'left');
+            $this->db->join('cashin_recurring_qris_mpm crq', 'crq.ref_subMerchantId = cpq.ref_subMerchantId AND crq.id = cpq.ref_cashinRecurringQrisMpmId', 'left');
+        }
+        if ($global_search) {
+             $this->db->join('merchant m', 'cpq.ref_merchantId = m.id', 'left');
+        }
+
+        $this->_apply_filters($refMerchantId, $date_from, $date_to, $search_settlement, $search_rrn, $search_invoice, $search_transid, $global_search);
+        return $this->db->get()->result_array();
     }
 
     public function monthly_qris() {

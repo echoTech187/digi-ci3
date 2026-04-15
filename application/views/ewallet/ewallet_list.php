@@ -24,7 +24,7 @@
         <div class="dt-summary-card dt-summary-blue">
             <div class="dt-summary-body">
                 <div class="dt-summary-label">TOTAL QUANTITY</div>
-                <div class="dt-summary-value"><?= number_format($qty, 0, ',', '.'); ?></div>
+                <div class="dt-summary-value" id="kpi-qty"><?= number_format($qty, 0, ',', '.'); ?></div>
                 <div class="dt-summary-sub"><i class="fas fa-list mr-1"></i>Total transactions</div>
             </div>
             <div class="dt-summary-icon dt-icon-blue">
@@ -34,7 +34,7 @@
         <div class="dt-summary-card dt-summary-green">
             <div class="dt-summary-body">
                 <div class="dt-summary-label">TOTAL AMOUNT</div>
-                <div class="dt-summary-value">Rp <?= number_format($total_trx, 0, ',', '.'); ?></div>
+                <div class="dt-summary-value" id="kpi-amount">Rp <?= number_format($total_trx, 0, ',', '.'); ?></div>
                 <div class="mt-1 text-muted small"><i class="fas fa-coins mr-1"></i>Volume processed</div>
             </div>
             <div class="dt-summary-icon dt-icon-green">
@@ -44,7 +44,7 @@
         <div class="dt-summary-card dt-summary-yellow d-none">
             <div class="dt-summary-body">
                 <div class="dt-summary-label">TOTAL FEE</div>
-                <div class="dt-summary-value">Rp <?= number_format($total_fee, 0, ',', '.'); ?></div>
+                <div class="dt-summary-value" id="kpi-fee">Rp <?= number_format($total_fee, 0, ',', '.'); ?></div>
                 <div class="mt-1 text-muted small"><i class="fas fa-receipt mr-1"></i>Service fee</div>
             </div>
             <div class="dt-summary-icon dt-icon-yellow">
@@ -54,7 +54,7 @@
         <div class="dt-summary-card dt-summary-red d-none">
             <div class="dt-summary-body">
                 <div class="dt-summary-label">TOTAL PROFIT</div>
-                <div class="dt-summary-value">Rp <?= number_format($profit, 0, ',', '.'); ?></div>
+                <div class="dt-summary-value" id="kpi-profit">Rp <?= number_format($profit, 0, ',', '.'); ?></div>
                 <div class="mt-1 text-muted small"><i class="fas fa-chart-line mr-1"></i>Net earnings</div>
             </div>
             <div class="dt-summary-icon dt-icon-red">
@@ -270,6 +270,29 @@
         // Wire global search input to DataTable
         $('#ewalletGlobalSearch').on('keyup', function() {
             table.search(this.value).draw();
+        });
+
+        // ── Dynamic Summary Update ──
+        $("#ewalletTable").on('xhr.dt', function(e, settings, json, xhr) {
+            if (json && json.summary) {
+                const s = json.summary;
+                const qty = parseInt(s.qty) || 0;
+                const amount = parseFloat(s.amount) || 0;
+                const fee = parseFloat(s.fee) || 0;
+                const feeExt = parseFloat(s.fee_external) || 0;
+                const profit = qty > 0 ? (fee - feeExt) : 0;
+
+                $('#kpi-qty').text(number_format(qty, 0, ',', '.'));
+                $('#kpi-amount').text('Rp ' + number_format(amount, 0, ',', '.'));
+                $('#kpi-fee').text('Rp ' + number_format(fee, 0, ',', '.'));
+                $('#kpi-profit').text('Rp ' + number_format(profit, 0, ',', '.'));
+                
+                // Optional: Gentle fade-in effect for premium feel
+                $('.dt-summary-value').addClass('va-updating').delay(100).queue(function(next) {
+                    $(this).removeClass('va-updating');
+                    next();
+                });
+            }
         });
 
         // ── More Filters dropdown toggle ──

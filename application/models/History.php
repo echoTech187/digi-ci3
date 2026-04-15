@@ -155,20 +155,64 @@ class History extends CI_Model {
 
     public function get_summary($search_date = null, $search_merchant = null)
     {
-        $this->db->select('COUNT(cpp.id) as qty, SUM(cpp.c_amount) as amount');
-        $this->db->from($this->table);
-        $this->db->join('merchant m', 'cpp.ref_merchantId = m.id', 'left');
+        $today = date('Y-m-d');
+        $is_today_included = false;
+        $is_history_included = false;
 
+        // Logic to determine if we need today's live data, historical data, or both
         if ($search_date) {
-            $this->db->where('cpp.c_datetime >=', $search_date . ' 00:00:00');
-            $this->db->where('cpp.c_datetime <=', $search_date . ' 23:59:59');
-        }
-        if ($search_merchant) {
-            $this->db->where('cpp.ref_merchantId', $search_merchant);
+            $search_date_formatted = date('Y-m-d', strtotime($search_date));
+            if ($search_date_formatted == $today) {
+                $is_today_included = true;
+            } else {
+                $is_history_included = true;
+            }
+        } else {
+            // No date filter means "All Time" (Today + History)
+            $is_today_included = true;
+            $is_history_included = true;
         }
 
-        $query = $this->db->get();
-        return $query->result_array();
+        $total_qty = 0;
+        $total_amount = 0;
+
+        // 1. Get Historical Data from Summary Table
+        if ($is_history_included) {
+            $this->db->select('SUM(total_qty) as qty, SUM(total_amount) as amount');
+            $this->db->from('tr_summary_daily');
+            $this->db->where('transaction_type', 'PPOB');
+            if ($search_date) {
+                $this->db->where('summary_date', date('Y-m-d', strtotime($search_date)));
+            } else {
+                $this->db->where('summary_date <', $today);
+            }
+            if ($search_merchant) {
+                $this->db->where('ref_merchantId', $search_merchant);
+            }
+            $hist = $this->db->get()->row();
+            $total_qty += $hist->qty ?: 0;
+            $total_amount += $hist->amount ?: 0;
+        }
+
+        // 2. Get Live Data for Today from Main Table
+        if ($is_today_included) {
+            $this->db->select('COUNT(cpp.id) as qty, SUM(cpp.c_amount) as amount');
+            $this->db->from($this->table);
+            $this->db->where('cpp.c_datetime >=', $today . ' 00:00:00');
+            $this->db->where('cpp.c_datetime <=', $today . ' 23:59:59');
+            $this->db->where('cpp.c_status', 'Success');
+            if ($search_merchant) {
+                $this->db->where('cpp.ref_merchantId', $search_merchant);
+            }
+            $live = $this->db->get()->row();
+            $total_qty += $live->qty ?: 0;
+            $total_amount += $live->amount ?: 0;
+        }
+
+        return [[
+            'qty' => $total_qty,
+            'amount' => $total_amount
+        ]];
     }
 }
 ?>

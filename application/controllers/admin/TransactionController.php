@@ -216,7 +216,7 @@ class TransactionController extends CI_Controller
          $data['channels'] = $this->Mutation_model->get_cashout_channels($id);
 
       $data['merchant'] = $this->Mutation_model->get_merchant($id);
-      $data['summary'] = $this->Mutation_model->get_summary($id, $search_date_mutation, $search_date_mutation_to);
+      $data['summary'] = $this->Mutation_model->get_summary($id, $search_date_mutation, $search_date_mutation_to, $search_position, $search_channel);
 
       $this->load->view('templates/user_header.php', $data);
       $this->load->view('templates/user_sidebar.php', $data);
@@ -565,11 +565,15 @@ class TransactionController extends CI_Controller
             $data[] = $row;
          }
 
+         $global_search = isset($_POST['search']['value']) ? $_POST['search']['value'] : null;
+         $summary = $this->VirtualAccount->get_summary($search_date, $search_date_to, $search_merchant, $search_va, $search_transid, $search_settlement, $global_search);
+
          $output = array(
             "draw" => $draw,
             "recordsTotal" => $this->VirtualAccount->count_all_dt($search_date, $search_date_to, $search_merchant, $search_settlement, $search_va, $search_transid),
             "recordsFiltered" => $this->VirtualAccount->count_filtered($search_date, $search_date_to, $search_merchant, $search_settlement, $search_va, $search_transid),
             "data" => $data,
+            "summary" => !empty($summary) ? $summary[0] : null
          );
          echo json_encode($output);
          exit;
@@ -581,14 +585,24 @@ class TransactionController extends CI_Controller
 
       // Summary KPI Data
       $qty = $total_trx = $total_fee = $total_fee_ext = $profit = 0;
-      if ($search_performed && !empty($data['search_date_va']) && !empty($data['search_date_va_to'])) {
-         $summary = $this->VirtualAccount->get_summary($data['search_date_va'], $data['search_date_va_to'], $data['search_name_va']);
-         $qty = $summary[0]['qty'] ?: 0;
-         $total_trx = $summary[0]['amount'] ?: 0;
-         $total_fee = $summary[0]['fee'] ?: 0;
-         $total_fee_ext = $summary[0]['fee_external'] ?: 0;
-         $profit = $total_fee - $total_fee_ext;
-      }
+      
+      // Calculate summary - Always calculate for initial load consistency
+      $summary = $this->VirtualAccount->get_summary(
+         $data['search_date_va'], 
+         $data['search_date_va_to'], 
+         $data['search_name_va'], 
+         $data['search_va_number'], 
+         $data['search_va_transid'], // Fixed order from model: $va_number, $transid, $settlement
+         $data['search_date_va_settlement']
+      );
+      
+      if (!empty($summary)) {
+            $qty = $summary[0]['qty'] ?: 0;
+            $total_trx = $summary[0]['amount'] ?: 0;
+            $total_fee = $summary[0]['fee'] ?: 0;
+            $total_fee_ext = $summary[0]['fee_external'] ?: 0;
+            $profit = $qty > 0 ? ($total_fee - $total_fee_ext) : 0;
+         }
 
       $data['qty'] = $qty;
       $data['total_trx'] = $total_trx;
@@ -796,11 +810,15 @@ class TransactionController extends CI_Controller
             $data[] = $row;
          }
 
+         $global_search = isset($_POST['search']['value']) ? $_POST['search']['value'] : null;
+         $summary = $this->Qris->get_summary($date_from_query, $date_to_query, $search_name, $search_settlement, $search_rrn, $search_invoice, $search_transid, $global_search);
+
          $output = array(
             "draw" => $draw,
             "recordsTotal" => $this->Qris->count_all_dt($search_name, $date_from_query, $date_to_query),
             "recordsFiltered" => $this->Qris->count_filtered($search_name, $date_from_query, $date_to_query, $search_settlement, $search_rrn, $search_invoice, $search_transid),
             "data" => $data,
+            "summary" => !empty($summary) ? $summary[0] : null
          );
          echo json_encode($output);
          exit;
@@ -810,14 +828,26 @@ class TransactionController extends CI_Controller
       $data['start'] = 0;
       $data['pagination'] = '';
 
-      if ($search_performed && !empty($date_from) && !empty($date_to)) {
-         $summary = $this->Qris->get_summary($date_from, $date_to, $search_name_qris);
-         $qty = $summary[0]['qty'];
-         $total_trx = $summary[0]['amount'];
-         $total_fee = $summary[0]['fee'];
-         $total_fee_ext = $summary[0]['fee_external'];
-         $profit = $summary[0]['fee_external'] - $summary[0]['fee'];
-      }
+      $qty = $total_trx = $total_fee = $total_fee_ext = $profit = 0;
+
+      // Calculate summary - Always calculate for initial load consistency
+      $summary = $this->Qris->get_summary(
+         $search_date_qris, 
+         $search_date_qris_to, 
+         $search_name_qris, 
+         $search_date_qris_settlement, 
+         $search_rrn, 
+         $search_invoice_no, 
+         $search_transid_qriss
+      );
+         
+         if (!empty($summary)) {
+            $qty = $summary[0]['qty'] ?: 0;
+            $total_trx = $summary[0]['amount'] ?: 0;
+            $total_fee = $summary[0]['fee'] ?: 0;
+            $total_fee_ext = $summary[0]['fee_external'] ?: 0;
+            $profit = $qty > 0 ? ($total_fee - $total_fee_ext) : 0;
+         }
 
       $data['qty'] = $qty;
       $data['total_trx'] = $total_trx;
@@ -1058,11 +1088,15 @@ class TransactionController extends CI_Controller
             $data[] = $row;
          }
 
+         $global_search = isset($_POST['search']['value']) ? $_POST['search']['value'] : null;
+         $summary = $this->Ewallet->get_summary($search_name, $date_from_query, $date_to_query, $search_date_settlement, $search_invoice_no_ajax, $global_search);
+
          $output = array(
             "draw" => $draw,
             "recordsTotal" => $this->Ewallet->count_all_dt($search_name, $date_from_query, $date_to_query),
             "recordsFiltered" => $this->Ewallet->count_filtered($search_name, $date_from_query, $date_to_query, $search_date_settlement, $search_invoice_no_ajax),
             "data" => $data,
+            "summary" => !empty($summary) ? $summary[0] : null
          );
          echo json_encode($output);
          exit;
@@ -1077,17 +1111,21 @@ class TransactionController extends CI_Controller
       $data['total_fee_ext'] = 0;
       $data['profit'] = 0;
 
-      if ($search_performed) {
-         if (!empty($date_from) && !empty($date_to)) {
-            $summary = $this->Ewallet->get_summary($date_from, $date_to, $search_name_ewallet);
-            if ($summary) {
-               $data['qty'] = $summary[0]['qty'];
-               $data['total_trx'] = $summary[0]['amount'];
-               $data['total_fee'] = $summary['0']['fee'];
-               $data['total_fee_ext'] = $summary['0']['fee_external'];
-               $data['profit'] = $summary[0]['fee_external'] - $summary[0]['fee'];
-            }
-         }
+      // Calculate summary - Always calculate for initial load consistency
+      $summary = $this->Ewallet->get_summary(
+         $search_date_ewallet, 
+         $search_date_ewallet_to, 
+         $search_name_ewallet, 
+         $search_date_ewallet_settlement, 
+         $search_invoice_no
+      );
+         
+         if (!empty($summary)) {
+            $data['qty'] = $summary[0]['qty'] ?: 0;
+            $data['total_trx'] = $summary[0]['amount'] ?: 0;
+            $data['total_fee'] = $summary[0]['fee'] ?: 0;
+            $data['total_fee_ext'] = $summary[0]['fee_external'] ?: 0;
+            $data['profit'] = $data['qty'] > 0 ? ($data['total_fee'] - $data['total_fee_ext']) : 0;
       }
 
       $data['merchants'] = $this->Ewallet->get_merchant();
@@ -1238,11 +1276,15 @@ class TransactionController extends CI_Controller
             $data[] = $row;
          }
 
+         $global_search = isset($_POST['search']['value']) ? $_POST['search']['value'] : null;
+         $summary = $this->BiFast->get_summary($date_from_query, $date_to_query, $search_name, $search_transid, $search_external_reff, $search_channel, $search_status, $global_search);
+
          $output = array(
             "draw" => $draw,
             "recordsTotal" => $this->BiFast->count_all_dt($search_name, $date_from_query, $date_to_query),
             "recordsFiltered" => $this->BiFast->count_filtered($search_name, $date_from_query, $date_to_query, $search_transid, $search_external_reff, $search_channel, $search_status),
             "data" => $data,
+            "summary" => !empty($summary) ? $summary[0] : null
          );
          echo json_encode($output);
          exit;
@@ -1258,16 +1300,25 @@ class TransactionController extends CI_Controller
       $data['profit'] = 0;
       $data['search_status_transaction_bifast'] = isset($search_status_transaction_bifast) ? $search_status_transaction_bifast : '';
 
-      if ($search_performed) {
-         // Summary only for non-AJAX initial load
-         $qty = $total_trx = $total_fee = $total_fee_ext = $profit = 0;
-         if (!empty($date_from) && !empty($date_to)) {
-            $summary = $this->BiFast->get_summary($date_from, $date_to, $search_name_bifast);
-            $qty = $summary[0]['qty'];
-            $total_trx = $summary[0]['amount'];
-            $total_fee = $summary[0]['fee'];
-            $total_fee_ext = $summary[0]['fee_external'];
-            $profit = $total_fee_ext - $total_fee;
+      $qty = $total_trx = $total_fee = $total_fee_ext = $profit = 0;
+
+      // Calculate summary - Always calculate for initial load consistency
+      $summary = $this->BiFast->get_summary(
+         $search_date_bifast, 
+         $search_date_bifast_to, 
+         $search_name_bifast, 
+         $search_transid_bifast, 
+         $search_external_reff_id, 
+         $search_channel_bifast, 
+         $search_status_transaction_bifast
+      );
+         
+         if (!empty($summary)) {
+            $qty = $summary[0]['qty'] ?: 0;
+            $total_trx = $summary[0]['amount'] ?: 0;
+            $total_fee = $summary[0]['fee'] ?: 0;
+            $total_fee_ext = $summary[0]['fee_external'] ?: 0;
+            $profit = $qty > 0 ? ($total_fee - $total_fee_ext) : 0;
          }
 
          // Parse responseBody
@@ -1289,7 +1340,7 @@ class TransactionController extends CI_Controller
          $data['total_fee_ext'] = $total_fee_ext;
          $data['profit'] = $profit;
          $data['search_status_transaction_bifast'] = $search_status_transaction_bifast;
-      }
+
 
 
 

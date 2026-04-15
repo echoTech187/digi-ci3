@@ -2778,6 +2778,19 @@ ul.sidebar {
     color: var(--warning);
 }
 
+.dt-summary-purple {
+    border-left-color: #8D6E63; /* Actually let's use a real purple */
+}
+
+.dt-summary-purple {
+    border-left-color: #6f42c1 !important;
+}
+
+.dt-icon-purple {
+    background: rgba(111, 66, 193, 0.1);
+    color: #6f42c1;
+}
+
 .dt-summary-red {
     border-left-color: var(--danger);
 }
