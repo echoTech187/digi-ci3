@@ -43,10 +43,11 @@ class ServiceController extends CI_Controller {
                 $row['c_caption'] = $items->c_caption;
                 $row['c_description'] = $items->c_description;
                 $row['c_fee'] = 'Rp ' . number_format($items->c_fee, 0, ',', '.');
+                $row['c_channelGroup2'] = $items->c_channelGroup2;
                 
                 $c_name = isset($items->c_name) ? $items->c_name : (isset($items->c_caption) ? $items->c_caption : '');
                 $row['action'] = '
-                    <button class="btn btn-sm btn-dt-action-primary shadow-sm" data-toggle="modal" data-target="#debitBalanceModal" onclick="detaildebit(\'' . htmlspecialchars($items->id, ENT_QUOTES) . '\', \'' . htmlspecialchars($c_name, ENT_QUOTES) . '\')">
+                    <button class="btn btn-sm btn-dt-action-primary shadow-sm" data-toggle="modal" data-target="#editProductModal" onclick="editProduct(\'' . htmlspecialchars($items->id, ENT_QUOTES) . '\', \'' . htmlspecialchars($items->c_caption, ENT_QUOTES) . '\', \'' . htmlspecialchars($items->c_description, ENT_QUOTES) . '\', \'' . htmlspecialchars($items->c_fee, ENT_QUOTES) . '\', \'' . htmlspecialchars($items->c_channelGroup2, ENT_QUOTES) . '\')">
                         <i class="fas fa-edit"></i> Edit
                     </button>';
 
@@ -179,6 +180,44 @@ class ServiceController extends CI_Controller {
 
             $this->session->set_flashdata('error', 'An error occurred while creating the product');
             redirect('admin/' . $name);
+         }
+      }
+   }
+
+   public function updateProduct()
+   {
+      $this->form_validation->set_rules('id', 'Product ID', 'required');
+      $this->form_validation->set_rules('caption', 'Caption', 'required');
+      $this->form_validation->set_rules('description', 'Description', 'required');
+      $this->form_validation->set_rules('price', 'Price', 'required|numeric');
+
+      $id = $this->input->post('id');
+      $caption = $this->input->post('caption');
+      $description = $this->input->post('description');
+      $price = $this->input->post('price');
+      $view_name = $this->input->post('view_name');
+      $channelgroup2 = $this->input->post('channelgroup2');
+
+      if ($this->form_validation->run() == FALSE) {
+         $this->session->set_flashdata('error', validation_errors());
+         redirect('admin/' . $view_name);
+      } else {
+         $data = array(
+            'c_caption' => $caption,
+            'c_description' => $description,
+            'c_fee' => $price
+         );
+
+         if (!empty($channelgroup2)) {
+            $data['c_channelGroup2'] = $channelgroup2;
+         }
+
+         if ($this->Chanel->update_cashout_chanel($id, $data)) {
+            $this->session->set_flashdata('message', 'Product updated successfully');
+            redirect('admin/' . $view_name);
+         } else {
+            $this->session->set_flashdata('error', 'An error occurred while updating the product');
+            redirect('admin/' . $view_name);
          }
       }
    }

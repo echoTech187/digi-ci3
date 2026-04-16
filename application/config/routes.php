@@ -58,6 +58,7 @@ $route['admin/toggleOpenApiStatus'] = 'admin/DashboardController/toggleOpenApiSt
 $route['admin/getMaintenanceStatus'] = 'admin/DashboardController/getMaintenanceStatus';
 $route['admin/syncAvailableBalanceMerchant'] = 'admin/DashboardController/syncAvailableBalanceMerchant';
 $route['admin/recent_mutations_json'] = 'admin/DashboardController/recent_mutations_json';
+$route['welcome'] = 'admin/DashboardController/welcome';
 
 // --- Merchant Module Extraction Routes ---
 $route['admin/merchant'] = 'AdminMerchant/merchant';

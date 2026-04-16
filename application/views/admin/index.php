@@ -12,13 +12,13 @@
     <!-- ── Alert Messages ── -->
     <?php if ($this->session->flashdata('success')) : ?>
         <div class="alert alert-success border-0 shadow-sm animate__animated animate__fadeIn mb-4">
-            <i class="fas fa-check-circle mr-2"></i> <?= $this->session->flashdata('success'); ?>
+            <i class="fas fa-check-circle "></i> <?= $this->session->flashdata('success'); ?>
         </div>
     <?php endif; ?>
 
     <?php if ($this->session->flashdata('message')) : ?>
         <div class="alert alert-info border-0 shadow-sm animate__animated animate__fadeIn mb-4">
-            <i class="fas fa-info-circle mr-2"></i> <?= $this->session->flashdata('message'); ?>
+            <i class="fas fa-info-circle "></i> <?= $this->session->flashdata('message'); ?>
         </div>
     <?php endif; ?>
 
@@ -86,7 +86,7 @@
                             'data-role="' + row.role_id + '" ' +
                             'data-status="' + row.c_status + '" ' +
                             'data-level="' + row.c_level + '">' +
-                            '<i class="fas fa-edit mr-1"></i> Manage' +
+                            '<i class="fas fa-edit mr-1 mr-2"></i> Manage' +
                         '</button>';
                     }
                 }
@@ -97,7 +97,7 @@
                 "processing": '<i class="fa fa-spinner fa-spin fa-2x fa-fw mx-auto d-block text-primary"></i>',
                 "info": "Showing _START_ – _END_ of _TOTAL_ admins",
                 "infoEmpty": "No admins to show",
-                "zeroRecords": '<div class="text-center py-4 text-muted"><i class="fas fa-users fa-2x mb-2 d-block"></i>No admin accounts found.</div>'
+                "zeroRecords": '<div class="text-center py-4 text-muted"><i class="fas fa-users fa-2x mb-2 d-block mr-2"></i> No admin accounts found.</div>'
             },
             "drawCallback": function(settings) {
                 var api    = this.api();
@@ -109,7 +109,7 @@
 
                 $pager.html(
                     '<button class="dt-nav-btn dt-prev-btn" ' + (info.page === 0 ? 'disabled' : '') + '>' +
-                        '<i class="fas fa-chevron-left"></i> PREVIOUS' +
+                        '<i class="fas fa-chevron-left mr-2"></i> PREVIOUS' +
                     '</button>' +
                     '<span class="dt-page-counter">' +
                         '<strong>' + currPage + '</strong> of <strong>' + totalPages + '</strong>' +
@@ -167,14 +167,21 @@
 <div class="modal fade manageUserModal" id="manageUserModal" tabindex="-1" role="dialog" aria-labelledby="manageUserModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header modal-header-primary border-0 py-3">
-                <h6 class="modal-title font-weight-bold" id="manageUserModalLabel">
-                    <i class="fas fa-user-cog mr-2"></i>MANAGE ADMIN ACCOUNT
-                </h6>
-                <button type="button" class="close text-white outline-none" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
+            <!-- Header Legacy Migrated -->
+<div class="modal-header modal-header-primary border-0 mh-premium">
+    <div class="d-flex align-items-center">
+        <div class="mh-icon-badge">
+            <i class="fas fa-star"></i>
+        </div>
+        <div class="mh-title-wrap">
+            <h6 class="mh-title" id="manageUserModalLabel">MANAGE ADMIN ACCOUNT</h6>
+            <small class="mh-subtitle" >Manage and process information details</small>
+        </div>
+    </div>
+    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" style="opacity:0.8;">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
             <form id="manageUserForm" action="<?= base_url('admin/manageUsers'); ?>" method="post">
                 <div class="modal-body p-4 text-dark">
                     <div class="mb-3">
@@ -211,11 +218,14 @@
                 </div>
                 <div class="modal-footer px-4 pb-4 border-0 pt-0">
                     <button type="button" class="btn-dt-cancel" data-dismiss="modal">CLOSE</button>
-                    <button type="submit" class="btn-dt-apply px-4 ml-2">
-                        <i class="fas fa-save mr-2"></i> SAVE CHANGES
+                    <button type="submit" class="btn-dt-apply px-4 ">
+                        <i class="fas fa-save  mr-2"></i> SAVE CHANGES
                     </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+
+

@@ -43,7 +43,7 @@
                                         <input type="file" class="custom-file-input" id="image" name="image">
                                         <label class="custom-file-label border-0" for="image">Choose new profile picture...</label>
                                     </div>
-                                    <small class="text-muted mt-2 d-block"><i class="fas fa-info-circle mr-1"></i> Recommended size: 512x512px. Format: JPG, PNG.</small>
+                                    <small class="text-muted mt-2 d-block"><i class="fas fa-info-circle mr-1 mr-2"></i> Recommended size: 512x512px. Format: JPG, PNG.</small>
                                 </div>
                             </div>
                         </div>
@@ -52,7 +52,7 @@
                     <div class="form-group row justify-content-end mt-4">
                         <div class="col-sm-10">
                             <button type="submit" class="btn-dt-action btn-dt-action-primary shadow-sm px-4">
-                                <i class="fas fa-save mr-2"></i> Save Changes
+                                <i class="fas fa-save  mr-2"></i> Save Changes
                             </button>
                         </div>
                     </div>
@@ -64,4 +64,7 @@
 
 </div>
 <!-- /.container-fluid -->
+
+
+
 

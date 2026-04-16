@@ -8,13 +8,10 @@
         </div>
     </div>
 
-    <!-- Summary Cards (Refined for Symmetry) -->
-    
-
     <!-- Alerts -->
     <?php if ($this->session->flashdata('success')) : ?>
         <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm mb-4" role="alert">
-            <i class="fas fa-check-circle me-2"></i>
+            <i class="fas fa-check-circle mr-2"></i>
             <?php echo $this->session->flashdata('success'); ?>
             <button type="button" class="btn-close" data-dismiss="alert" aria-label="Close"></button>
         </div>
@@ -22,7 +19,7 @@
 
     <?php if ($this->session->flashdata('error')) : ?>
         <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm mb-4" role="alert">
-            <i class="fas fa-exclamation-circle me-2"></i>
+            <i class="fas fa-exclamation-circle mr-2"></i>
             <?php echo $this->session->flashdata('error'); ?>
             <button type="button" class="btn-close" data-dismiss="alert" aria-label="Close"></button>
         </div>
@@ -51,13 +48,12 @@
                         </div>
                     </div>
                     <button type="button" class="btn-dt-action btn-dt-action-success border-0" data-toggle="modal" data-target="#registerMerchabntModal">
-                        <i class="fas fa-plus"></i> <span class="d-none d-md-block">Add Merchant</span>
+                        <i class="fas fa-plus mr-2"></i> <span class="d-none d-md-block">Add Merchant</span>
                     </button>
                 </div>
             </div>
         </form>
 
-        
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table id="merchantTable" class="table dt-table mb-0">
@@ -81,10 +77,18 @@
         <!-- Modal: Credit Balance -->
         <div class="modal fade" id="creditBalanceModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content border-0 shadow-lg">
-                    <div class="modal-header modal-header-primary border-0 py-3">
-                        <h5 class="modal-title font-weight-bold text-white"><i class="fas fa-plus-circle me-2"></i>Credit Merchant Balance</h5>
-                        <button type="button" class="close text-white outline-none" data-dismiss="modal" aria-label="Close">
+                <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
+                    <div class="modal-header modal-header-primary border-0 mh-premium">
+                        <div class="d-flex align-items-center">
+                            <div class="mh-icon-badge">
+                                <i class="fas fa-wallet"></i>
+                            </div>
+                            <div class="mh-title-wrap">
+                                <h6 class="mh-title" id="creditBalanceModalLabel">Credit Merchant Balance</h6>
+                                <small class="mh-subtitle">Modify and update existing information</small>
+                            </div>
+                        </div>
+                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
@@ -97,7 +101,7 @@
                             </div>
                             <div class="mb-4">
                                 <label class="form-label text-muted small fw-bold">Channel ID</label>
-                                <select name="channelId" class="form-select border-1 py-2" required>
+                                <select name="channelId" class="form-select border-1 py-1" style="font-size: 13px;" required>
                                     <option value="">Select Channel</option>
                                     <?php foreach ($cashin_channels as $cashin_channel): ?>
                                         <option value="<?php echo $cashin_channel->id; ?>"><?php echo $cashin_channel->id; ?></option>
@@ -106,7 +110,7 @@
                             </div>
                             <div class="mb-4">
                                 <label class="form-label text-muted small fw-bold">Description</label>
-                                <input type="text" class="form-control border-1 py-2" id="description" name="description" placeholder="e.g. Manual top-up by admin" required>
+                                <input type="text" class="form-control border-1 py-2" id="description" name="description" placeholder="e.g. Manual top-up" required>
                             </div>
                             <div class="mb-4">
                                 <label class="form-label text-muted small fw-bold">Amount (IDR)</label>
@@ -118,7 +122,7 @@
                             </div>
                             <div class="modal-footer border-0 px-0 pb-0 mt-4">
                                 <button type="button" class="btn-dt-cancel" data-dismiss="modal">CANCEL</button>
-                                <button type="submit" class="btn-dt-apply px-4 ml-2" onclick="javascript: return confirm('Are you sure the credit amount is correct?')">
+                                <button type="submit" class="btn-dt-apply px-4">
                                     <i class="fas fa-check mr-2"></i> CONFIRM CREDIT
                                 </button>
                             </div>
@@ -131,10 +135,18 @@
         <!-- Modal: Debit Balance -->
         <div class="modal fade" id="debitBalanceModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content border-0 shadow-lg">
-                    <div class="modal-header modal-header-primary border-0 py-3">
-                        <h5 class="modal-title font-weight-bold text-white"><i class="fas fa-minus-circle me-2"></i>Debit Merchant Balance</h5>
-                        <button type="button" class="close text-white outline-none" data-dismiss="modal" aria-label="Close">
+                <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
+                    <div class="modal-header modal-header-primary border-0 mh-premium">
+                        <div class="d-flex align-items-center">
+                            <div class="mh-icon-badge">
+                                <i class="fas fa-minus-circle"></i>
+                            </div>
+                            <div class="mh-title-wrap">
+                                <h6 class="mh-title" id="debitBalanceModalLabel">Debit Merchant Balance</h6>
+                                <small class="mh-subtitle">Process and modify merchant debit balance</small>
+                            </div>
+                        </div>
+                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
@@ -147,7 +159,7 @@
                             </div>
                             <div class="mb-4">
                                 <label class="form-label text-muted small fw-bold">Channel ID</label>
-                                <select name="channelId" class="form-select border-1 py-2" required>
+                                <select name="channelId" class="form-select border-1 py-1" style="font-size: 13px;" required>
                                     <option value="">Select Channel</option>
                                     <?php foreach ($cashout_channels as $cashout_channel): ?>
                                         <option value="<?php echo $cashout_channel->id; ?>"><?php echo $cashout_channel->id; ?></option>
@@ -156,7 +168,7 @@
                             </div>
                             <div class="mb-4">
                                 <label class="form-label text-muted small fw-bold">Description</label>
-                                <input type="text" class="form-control border-1 py-2" id="description" name="description" placeholder="e.g. Administrative deduction" required>
+                                <input type="text" class="form-control border-1 py-2" name="description" placeholder="e.g. Administrative deduction" required>
                             </div>
                             <div class="mb-4">
                                 <label class="form-label text-muted small fw-bold">Amount (IDR)</label>
@@ -168,7 +180,7 @@
                             </div>
                             <div class="modal-footer border-0 px-0 pb-0 mt-4">
                                 <button type="button" class="btn-dt-cancel" data-dismiss="modal">CANCEL</button>
-                                <button type="submit" class="btn-dt-apply px-4 ml-2" onclick="javascript: return confirm('Are you sure the debit amount is correct?')">
+                                <button type="submit" class="btn-dt-apply px-4">
                                     <i class="fas fa-check mr-2"></i> CONFIRM DEBIT
                                 </button>
                             </div>
@@ -181,10 +193,18 @@
         <!-- Modal: Register Merchant -->
         <div class="modal fade" id="registerMerchabntModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-lg modal-dialog-centered">
-                <div class="modal-content border-0 shadow-lg">
-                    <div class="modal-header modal-header-primary border-0 py-3">
-                        <h5 class="modal-title font-weight-bold text-white"><i class="fas fa-plus me-2"></i>Register New Merchant</h5>
-                        <button type="button" class="close text-white outline-none" data-dismiss="modal" aria-label="Close">
+                <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
+                    <div class="modal-header modal-header-primary border-0 mh-premium">
+                        <div class="d-flex align-items-center">
+                            <div class="mh-icon-badge">
+                                <i class="fas fa-store"></i>
+                            </div>
+                            <div class="mh-title-wrap">
+                                <h6 class="mh-title" id="registerMerchabntModalLabel">Register New Merchant</h6>
+                                <small class="mh-subtitle">Create and configure a new merchant account</small>
+                            </div>
+                        </div>
+                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
@@ -198,58 +218,56 @@
                                 <h6 class="text-primary fw-bold mb-3 border-bottom pb-2">Account Information</h6>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label small fw-bold">Merchant Name</label>
+                                <label class="form-label small fw-bold text-muted">Merchant Name</label>
                                 <input type="text" class="form-control border-1" required name="c_name" placeholder="ABC Store">
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label small fw-bold">Merchant Email</label>
+                                <label class="form-label small fw-bold text-muted">Merchant Email</label>
                                 <input type="email" class="form-control border-1" required name="c_email" placeholder="owner@abc.com">
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label small fw-bold">Merchant Phone</label>
+                                <label class="form-label small fw-bold text-muted">Merchant Phone</label>
                                 <input type="text" class="form-control border-1" name="c_phoneNumber" placeholder="08123xxx">
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label small fw-bold">GVConnect Business ID</label>
+                                <label class="form-label small fw-bold text-muted">GVConnect Business ID</label>
                                 <input type="text" class="form-control border-1" name="c_gvconnectBusinessId" placeholder="24090200001">
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label small fw-bold">Password</label>
+                                <label class="form-label small fw-bold text-muted">Password</label>
                                 <input type="password" class="form-control border-1" required name="c_password">
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label small fw-bold">Confirm Password</label>
+                                <label class="form-label small fw-bold text-muted">Confirm Password</label>
                                 <input type="password" class="form-control border-1" required name="c_confirmPassword">
                             </div>
 
                             <div class="col-md-12 mt-4">
                                 <h6 class="text-primary fw-bold mb-3 border-bottom pb-2">OpenAPI Configuration</h6>
                             </div>
-                            <div class="col-md-12">
-                                <label class="form-label small fw-bold">Whitelist IP (semicolon separated)</label>
+                            <div class="col-md-12 mb-2">
+                                <label class="form-label small fw-bold text-muted">Whitelist IP (semicolon separated)</label>
                                 <input type="text" class="form-control border-1" name="c_openapiIPAllow" placeholder="1.2.3.4; 5.6.7.8">
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label small fw-bold">Callback QRIS MPM</label>
+                                <label class="form-label small fw-bold text-muted">Callback QRIS MPM</label>
                                 <input type="text" class="form-control border-1" required name="c_openapiUrlCallbackQrisMpm" placeholder="https://api.your.com/callback">
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label small fw-bold">Callback E-wallet</label>
+                                <label class="form-label small fw-bold text-muted">Callback E-wallet</label>
                                 <input type="text" class="form-control border-1" required name="c_openapiUrlCallbackEwallet" placeholder="https://api.your.com/callback">
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label small fw-bold">Callback VA</label>
+                                <label class="form-label small fw-bold text-muted">Callback VA</label>
                                 <input type="text" class="form-control border-1" required name="c_openapiUrlCallbackVa" placeholder="https://api.your.com/callback">
                             </div>
-                            
+
                             <div class="col-md-12 mt-4">
                                 <h6 class="text-primary fw-bold mb-3 border-bottom pb-2">Service Permissions</h6>
-                                
                                 <div class="row pt-2">
-                                    <!-- VA Services -->
                                     <div class="col-md-4 border-end">
                                         <div class="d-flex align-items-center gap-1 mb-3 h6">
-                                            <div class="bg-primary-soft text-primary rounded-pill px-2 py-1 me-2" style="background-color: rgba(13, 110, 253, 0.1); font-size: 10px;">
+                                            <div class="bg-primary-soft text-primary rounded-pill px-2 py-1" style="background-color: rgba(13, 110, 253, 0.1); font-size: 10px;">
                                                 <i class="fas fa-university"></i>
                                             </div>
                                             <span class="fw-bold small text-dark mt-1 text-uppercase">Virtual Account</span>
@@ -263,20 +281,13 @@
                                             'c_openapiChannelVaRecurringCancel' => 'VA Recurring Cancel'
                                         ];
                                         foreach ($va_checkboxes as $key => $label) {
-                                            echo '<div class="mb-3">';
-                                            echo '  <div class="form-check form-switch">';
-                                            echo '    <input class="form-check-input" type="checkbox" name="' . $key . '" id="' . $key . '" value="1">';
-                                            echo '    <label class="form-check-label small fw-bold text-muted" for="' . $key . '">' . $label . '</label>';
-                                            echo '  </div>';
-                                            echo '</div>';
+                                            echo '<div class="mb-3"><div class="form-check form-switch"><input class="form-check-input" type="checkbox" name="'.$key.'" value="1"><label class="form-check-label small fw-bold text-muted">'.$label.'</label></div></div>';
                                         }
                                         ?>
                                     </div>
-
-                                    <!-- QRIS & E-Wallet -->
                                     <div class="col-md-4 border-end">
                                         <div class="d-flex align-items-center gap-1 mb-3 h6">
-                                            <div class="bg-success-soft text-success rounded-pill px-2 py-1 me-2" style="background-color: rgba(25, 135, 84, 0.1); font-size: 10px;">
+                                            <div class="bg-success-soft text-success rounded-pill px-2 py-1" style="background-color: rgba(25, 135, 84, 0.1); font-size: 10px;">
                                                 <i class="fas fa-qrcode"></i>
                                             </div>
                                             <span class="fw-bold small text-dark mt-1 text-uppercase">QRIS & E-Wallet</span>
@@ -291,20 +302,13 @@
                                             'c_openapiChannelEwalletDynamicCancel' => 'E-wallet Cancel'
                                         ];
                                         foreach ($qris_checkboxes as $key => $label) {
-                                            echo '<div class="mb-3">';
-                                            echo '  <div class="form-check form-switch">';
-                                            echo '    <input class="form-check-input" type="checkbox" name="' . $key . '" id="' . $key . '" value="1">';
-                                            echo '    <label class="form-check-label small fw-bold text-muted" for="' . $key . '">' . $label . '</label>';
-                                            echo '  </div>';
-                                            echo '</div>';
+                                            echo '<div class="mb-3"><div class="form-check form-switch"><input class="form-check-input" type="checkbox" name="'.$key.'" value="1"><label class="form-check-label small fw-bold text-muted">'.$label.'</label></div></div>';
                                         }
                                         ?>
                                     </div>
-
-                                    <!-- Transfer Services -->
                                     <div class="col-md-4">
                                         <div class="d-flex align-items-center gap-1 mb-3 h6">
-                                            <div class="bg-warning-soft text-warning rounded-pill px-2 py-1 me-2" style="background-color: rgba(255, 193, 7, 0.1); font-size: 10px;">
+                                            <div class="bg-warning-soft text-warning rounded-pill px-2 py-1" style="background-color: rgba(255, 193, 7, 0.1); font-size: 10px;">
                                                 <i class="fas fa-exchange-alt"></i>
                                             </div>
                                             <span class="fw-bold small text-dark mt-1 text-uppercase">Transfer</span>
@@ -316,21 +320,15 @@
                                             'c_allowTransferFromDashboard' => 'Allow Dashboard Transfer'
                                         ];
                                         foreach ($transfer_checkboxes as $key => $label) {
-                                            echo '<div class="mb-3">';
-                                            echo '  <div class="form-check form-switch">';
-                                            echo '    <input class="form-check-input" type="checkbox" name="' . $key . '" id="' . $key . '" value="1">';
-                                            echo '    <label class="form-check-label small fw-bold text-muted" for="' . $key . '">' . $label . '</label>';
-                                            echo '  </div>';
-                                            echo '</div>';
+                                            echo '<div class="mb-3"><div class="form-check form-switch"><input class="form-check-input" type="checkbox" name="'.$key.'" value="1"><label class="form-check-label small fw-bold text-muted">'.$label.'</label></div></div>';
                                         }
                                         ?>
                                     </div>
                                 </div>
                             </div>
-                            
                             <div class="modal-footer border-0 px-0 pb-0 mt-4 w-100 justify-content-end">
                                 <button type="button" class="btn-dt-cancel" data-dismiss="modal">CANCEL</button>
-                                <button type="submit" class="btn-dt-apply px-4 ml-2">
+                                <button type="submit" class="btn-dt-apply px-4">
                                     <i class="fas fa-save mr-2"></i> REGISTER MERCHANT
                                 </button>
                             </div>
@@ -343,10 +341,18 @@
         <!-- Modal: Delegate Access -->
         <div class="modal fade" id="delegateModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-lg modal-dialog-centered">
-                <div class="modal-content border-0 shadow-lg">
-                    <div class="modal-header modal-header-primary border-0 py-3">
-                        <h5 class="modal-title font-weight-bold text-white"><i class="fas fa-key me-2"></i>Delegate Permission Ceiling</h5>
-                        <button type="button" class="close text-white outline-none" data-dismiss="modal" aria-label="Close">
+                <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
+                    <div class="modal-header modal-header-primary border-0 mh-premium">
+                        <div class="d-flex align-items-center">
+                            <div class="mh-icon-badge">
+                                <i class="fas fa-lock"></i>
+                            </div>
+                            <div class="mh-title-wrap">
+                                <h6 class="mh-title" id="delegateModalLabel">Delegate Permission Ceiling</h6>
+                                <small class="mh-subtitle">Manage maximum hierarchy permissions</small>
+                            </div>
+                        </div>
+                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
@@ -362,22 +368,17 @@
                                 </div>
                             </div>
                         </div>
-                        
                         <form id="delegateForm">
                             <input type="hidden" id="delegateMerchantId" name="merchantId">
                             <div id="permissionsList" style="max-height: 400px; overflow-y: auto;" class="p-4">
-                                <!-- Loading State -->
                                 <div class="text-center py-5" id="permissionsLoader">
-                                    <div class="spinner-border text-warning" role="status">
-                                        <span class="visually-hidden">Loading...</span>
-                                    </div>
+                                    <div class="spinner-border text-warning" role="status"><span class="visually-hidden">Loading...</span></div>
                                     <p class="mt-2 text-muted">Fetching permissions...</p>
                                 </div>
                             </div>
-                            
                             <div class="modal-footer border-0 px-4 py-3 border-top">
                                 <button type="button" class="btn-dt-cancel" data-dismiss="modal">CANCEL</button>
-                                <button type="submit" class="btn-dt-apply px-4 ml-2" id="btnSaveDelegation">
+                                <button type="submit" class="btn-dt-apply px-4" id="btnSaveDelegation">
                                     <i class="fas fa-save mr-2"></i> SAVE CHANGES
                                 </button>
                             </div>
@@ -391,45 +392,10 @@
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script src="<?= base_url('assets/js/server-datatables.js') ?>"></script>
         <style>
-            /* Prevent table clipping for dropdowns */
             .dt-card { overflow: visible !important; }
             .card-body { overflow: visible !important; }
             .table-responsive { overflow: visible !important; }
-            
-            @media (max-width: 991.98px) {
-                .table-responsive {
-                    overflow-x: auto !important;
-                    -webkit-overflow-scrolling: touch;
-                }
-            }
-
-            /* Delegation Modal Responsive */
-            @media (max-width: 575.98px) {
-                #permissionsList .table thead {
-                    display: none;
-                }
-                #permissionsList .table tbody tr {
-                    display: block;
-                    padding: 1rem 0.5rem;
-                    border-bottom: 1px solid #edf2f9;
-                }
-                #permissionsList .table td {
-                    display: block;
-                    width: 100% !important;
-                    padding: 0.25rem 0 !important;
-                    border: none !important;
-                }
-                #permissionsList .table td:last-child {
-                    margin-top: 0.75rem;
-                }
-                #permissionsList .btn-group {
-                    margin-top: 5px;
-                }
-                #permissionsList .btn-group .btn {
-                    padding: 0.5rem;
-                    font-size: 11px;
-                }
-            }
+            @media (max-width: 991.98px) { .table-responsive { overflow-x: auto !important; -webkit-overflow-scrolling: touch; } }
         </style>
         <script>
             $(document).ready(function() {
@@ -442,81 +408,42 @@
                     { "data": "status", "orderable": false },
                     { "data": "action", "orderable": false, "className": "text-center pe-4" }
                 ];
-
                 var table = initServerDataTable('#merchantTable', ajaxUrl, columns, {
                     "language": {
                         "processing": '<i class="fa fa-spinner fa-spin fa-2x fa-fw mx-auto d-block text-primary"></i>',
                         "info": "Showing _START_ – _END_ of _TOTAL_ results",
                         "infoEmpty": "No results to show",
-                        "infoFiltered": "",
-                        "zeroRecords": '<div class="text-center py-4 text-muted"><i class="fas fa-inbox fa-2x mb-2 d-block"></i>No transactions found.</div>'
+                        "zeroRecords": '<div class="text-center py-4 text-muted"><i class="fas fa-inbox fa-2x mb-2 d-block"></i> No results found.</div>'
                     },
                     "dom": 'rt<"dt-footer"<"dt-footer-info"i><"dt-footer-pager">>',
-                    "responsive": false,
-                    "autoWidth": false,
                     "drawCallback": function(settings) {
-                        var api    = this.api();
-                        var info   = api.page.info();
+                        var api = this.api();
+                        var info = api.page.info();
                         var $pager = $(api.table().container()).find('.dt-footer-pager');
-
-                        var currPage   = info.page + 1;
+                        var currPage = info.page + 1;
                         var totalPages = info.pages || 1;
-
-                        $pager.html(
-                            '<button class="dt-nav-btn dt-prev-btn" ' + (info.page === 0 ? 'disabled' : '') + '>' +
-                                '<i class="fas fa-chevron-left"></i> PREVIOUS' +
-                            '</button>' +
-                            '<span class="dt-page-counter">' +
-                                '<strong>' + currPage + '</strong> of <strong>' + totalPages + '</strong>' +
-                            '</span>' +
-                            '<button class="dt-nav-btn dt-next-btn" ' + (info.page >= totalPages - 1 ? 'disabled' : '') + '>' +
-                                'NEXT <i class="fas fa-chevron-right"></i>' +
-                            '</button>'
-                        );
-
-                        $pager.find('.dt-prev-btn').off('click').on('click', function() {
-                            if (!$(this).prop('disabled')) { api.page('previous').draw('page'); }
-                        });
-                        $pager.find('.dt-next-btn').off('click').on('click', function() {
-                            if (!$(this).prop('disabled')) { api.page('next').draw('page'); }
-                        });
+                        $pager.html('<button class="dt-nav-btn dt-prev-btn" ' + (info.page === 0 ? 'disabled' : '') + '><i class="fas fa-chevron-left mr-2"></i> PREVIOUS</button><span class="dt-page-counter"><strong>' + currPage + '</strong> of <strong>' + totalPages + '</strong></span><button class="dt-nav-btn dt-next-btn" ' + (info.page >= totalPages - 1 ? 'disabled' : '') + '>NEXT <i class="fas fa-chevron-right ml-2"></i></button>');
+                        $pager.find('.dt-prev-btn').off('click').on('click', function() { if (!$(this).prop('disabled')) { api.page('previous').draw('page'); } });
+                        $pager.find('.dt-next-btn').off('click').on('click', function() { if (!$(this).prop('disabled')) { api.page('next').draw('page'); } });
                     }
                 });
-
-                // External search mapping
-                $('#merchantGlobalSearch').on('keyup', function() {
-                    table.search(this.value).draw();
-                });
+                $('#merchantGlobalSearch').on('keyup', function() { table.search(this.value).draw(); });
             });
 
-            function detail(id, name) {
-                document.getElementById('merchantId').value = id;
-                document.getElementById('merchantName').value = name;
-            }
-            function detaildebit(id, name) {
-                document.getElementById('merchantIdDebit').value = id;
-                document.getElementById('merchantNameDebit').value = name;
-            }
+            function detail(id, name) { document.getElementById('merchantId').value = id; document.getElementById('merchantName').value = name; }
+            function detaildebit(id, name) { document.getElementById('merchantIdDebit').value = id; document.getElementById('merchantNameDebit').value = name; }
 
             function formatNumber(input) {
                 let rawValue = input.value.replace(/[^0-9]/g, ''); 
-                if (input.id === "amountCredit") {
-                    document.getElementById('rawAmountCredit').value = rawValue;
-                } else if (input.id === "amountDebit") {
-                    document.getElementById('rawAmountDebit').value = rawValue;
-                }
-                
-                if (rawValue) {
-                    input.value = parseInt(rawValue).toLocaleString('id-ID');
-                } else {
-                    input.value = '';
-                }
+                if (input.id === "amountCredit") document.getElementById('rawAmountCredit').value = rawValue;
+                else if (input.id === "amountDebit") document.getElementById('rawAmountDebit').value = rawValue;
+                input.value = rawValue ? parseInt(rawValue).toLocaleString('id-ID') : '';
             }
 
             function openDelegateModal(id, name) {
                 $('#delegateMerchantId').val(id);
                 $('#delegateMerchantName').text(name);
-                $('#permissionsList').html('<div class="text-center py-5" id="permissionsLoader"><div class="spinner-border text-warning" role="status"><span class="visually-hidden">Loading...</span></div><p class="mt-2 text-muted">Fetching permissions...</p></div>');
+                $('#permissionsList').html('<div class="text-center py-5"><div class="spinner-border text-info" role="status"></div><p class="mt-2 text-muted">Fetching permissions...</p></div>');
                 
                 $.ajax({
                     url: '<?= base_url('admin/fetchMerchantPermissions/') ?>' + id,
@@ -524,89 +451,109 @@
                     dataType: 'json',
                     success: function(response) {
                         if (response.status === 'success') {
-                            let html = '<div class="table-responsive"><table class="table mb-0 align-middle">';
-                            html += '<thead><tr><th style="width: 60%">Permission Name</th><th class="text-center">Action</th></tr></thead><tbody>';
-                            
+                            let html = '<table class="table mb-0"><thead><tr><th>Permission Name</th><th class="text-center">Action</th></tr></thead><tbody>';
                             response.data.forEach(function(perm) {
-                                html += `<tr>
+                                const isGrant = perm.status.toLowerCase() === 'grant';
+                                const isDeny = perm.status.toLowerCase() === 'deny';
+                                
+                                html += `
+                                <tr>
                                     <td>
-                                        <div class="fw-bold text-dark">${perm.label}</div>
-                                        <div class="text-muted" style="font-size: 10px; letter-spacing: 0.5px;">${perm.name}</div>
+                                        <div class="font-weight-bold text-dark">${perm.label}</div>
+                                        <div class="text-muted small">${perm.name}</div>
                                     </td>
                                     <td class="text-center">
-                                        <div class="btn-group w-100" role="group">
-                                            <input type="radio" class="btn-check" name="permissions[${perm.id}]" id="grant_${perm.id}" value="Grant" ${perm.status.toLowerCase() === 'grant' ? 'checked' : ''} autocomplete="off">
-                                            <label class="btn btn-outline-success btn-sm font-weight-bold" for="grant_${perm.id}">GRANT</label>
-                                            
-                                            <input type="radio" class="btn-check" name="permissions[${perm.id}]" id="deny_${perm.id}" value="Deny" ${perm.status.toLowerCase() === 'deny' ? 'checked' : ''} autocomplete="off">
-                                            <label class="btn btn-outline-danger btn-sm font-weight-bold" for="deny_${perm.id}">DENY</label>
+                                        <div class="delegation-toggle-group">
+                                            <label class="btn btn-sm delegation-btn ${isGrant ? 'btn-success' : 'btn-link text-success'}">
+                                                <input type="radio" name="permissions[${perm.id}]" value="Grant" ${isGrant ? 'checked' : ''} style="display:none;"> GRANT
+                                            </label>
+                                            <label class="btn btn-sm delegation-btn ${isDeny ? 'btn-danger' : 'btn-link text-danger'}">
+                                                <input type="radio" name="permissions[${perm.id}]" value="Deny" ${isDeny ? 'checked' : ''} style="display:none;"> DENY
+                                            </label>
                                         </div>
                                     </td>
                                 </tr>`;
                             });
-                            
-                            html += '</tbody></table></div>';
-                            $('#permissionsList').html(html);
+                            $('#permissionsList').html(html + '</tbody></table>');
                         } else {
-                            $('#permissionsList').html('<div class="alert alert-danger m-3">Failed to load permissions.</div>');
+                            $('#permissionsList').html('<div class="alert alert-danger m-3">Failed to load permissions: ' + response.message + '</div>');
                         }
                     },
-                    error: function() {
-                        $('#permissionsList').html('<div class="alert alert-danger m-3">An error occurred while fetching data.</div>');
+                    error: function(xhr, status, error) {
+                        $('#permissionsList').html('<div class="alert alert-danger m-3">Connection error. Please check your network.</div>');
                     }
                 });
             }
+
+            // Manual Event Delegation for Radio Buttons in Modal (Original UI Style)
+            $(document).on('click', '.delegation-btn', function(e) {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                
+                const $label = $(this);
+                const $input = $label.find('input');
+                const $parentGroup = $label.closest('.delegation-toggle-group');
+                const val = $input.val();
+
+                // Reset all buttons in group to link style
+                $parentGroup.find('.delegation-btn').each(function() {
+                    const $l = $(this);
+                    const $i = $l.find('input');
+                    if ($i.val() === 'Grant') {
+                        $l.removeClass('btn-success active').addClass('btn-link text-success');
+                    } else {
+                        $l.removeClass('btn-danger active').addClass('btn-link text-danger');
+                    }
+                });
+
+                // Set clicked button to solid style
+                if (val === 'Grant') {
+                    $label.removeClass('btn-link text-success').addClass('btn-success active');
+                } else {
+                    $label.removeClass('btn-link text-danger').addClass('btn-danger active');
+                }
+
+                // Data update
+                $input.prop('checked', true);
+                $input.trigger('change');
+            });
 
             $('#delegateForm').on('submit', function(e) {
                 e.preventDefault();
                 const id = $('#delegateMerchantId').val();
                 const $btn = $('#btnSaveDelegation');
-                const originalText = $btn.text();
-                
-                const csrfName = $('meta[name="csrf-token-name"]').attr('content');
-                const csrfHash = $('meta[name="csrf-token-hash"]').attr('content');
-                const formData = $(this).serializeArray();
-                formData.push({name: csrfName, value: csrfHash});
-                
-                $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>SAVING...');
-                
+                const originalBtnHtml = $btn.html();
+
+                // Loading State
+                $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i> SAVING...');
+
                 $.ajax({
                     url: '<?= base_url('admin/saveDelegation/') ?>' + id,
                     type: 'POST',
-                    data: formData,
+                    data: $(this).serialize(),
                     dataType: 'json',
                     success: function(response) {
-                        if (response.status === 'success') {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Success',
+                        if (response.status === 'success') { 
+                            Swal.fire({ 
+                                icon: 'success', 
+                                title: 'Updated!', 
                                 text: response.message,
                                 timer: 2000,
                                 showConfirmButton: false
-                            });
-                            $('#delegateModal').modal('hide');
+                            }); 
+                            $('#delegateModal').modal('hide'); 
                         } else {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error',
-                                text: response.message
-                            });
+                            Swal.fire({ icon: 'error', title: 'Error', text: response.message });
                         }
                     },
                     error: function() {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: 'An internal server error occurred.'
-                        });
+                        Swal.fire({ icon: 'error', title: 'Failed', text: 'Could not communicate with server.' });
                     },
                     complete: function() {
-                        $btn.prop('disabled', false).text(originalText);
+                        $btn.prop('disabled', false).html(originalBtnHtml);
                     }
                 });
             });
         </script>
     </div>
 </div>
-<!-- /.container-fluid -->
-

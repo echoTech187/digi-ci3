@@ -58,8 +58,7 @@
                     <div class="dt-filter-group dt-more-filters-wrapper">
                         <label class="dt-filter-label">&nbsp;</label>
                         <button type="button" id="moreFiltersBtn" class="dt-more-filters-btn <?= $extra_active > 0 ? 'dt-more-filters-active' : ''; ?>">
-                            <i class="fas fa-sliders-h mr-1"></i>
-                            Filters
+                            <i class="fas fa-sliders-h mr-1 mr-2"></i> Filters
                             <?php if ($extra_active > 0): ?>
                                 <span class="dt-more-badge"><?= $extra_active; ?></span>
                             <?php endif; ?>
@@ -69,14 +68,14 @@
                         <!-- Dropdown panel -->
                         <div class="dt-more-panel" id="moreFiltersPanel">
                             <div class="dt-more-panel-header">
-                                <span class="dt-more-panel-title"><i class="fas fa-filter mr-1"></i>Advanced filters</span>
+                                <span class="dt-more-panel-title"><i class="fas fa-filter mr-1 mr-2"></i> Advanced filters</span>
                                 <a href="<?= base_url('admin/resetewallet'); ?>" class="dt-more-clear">Clear All</a>
                             </div>
 
                             <div class="dt-more-panel-body">
                                 <!-- Primary: Date Range -->
                                 <div class="dt-more-field">
-                                    <label class="dt-more-label"><i class="fas fa-calendar-alt mr-1"></i>Payment Date</label>
+                                    <label class="dt-more-label"><i class="fas fa-calendar-alt mr-1 mr-2"></i> Payment Date</label>
                                     <div class="dt-filter-chip">
                                         <input type="date" name="search_date_ewallet" class="dt-chip-input" value="<?= $search_date_ewallet_value; ?>" title="Date From">
                                         <span class="text-muted mx-1" style="font-size:11px;">→</span>
@@ -85,7 +84,7 @@
                                 </div>
                                 <!-- Merchant -->
                                 <div class="dt-more-field">
-                                    <label class="dt-more-label"><i class="fas fa-user-tie mr-1"></i>Merchant</label>
+                                    <label class="dt-more-label"><i class="fas fa-user-tie mr-1 mr-2"></i> Merchant</label>
                                     <select name="search_name_ewallet" class="dt-more-select select2-more">
                                         <option value="">All Merchants</option>
                                         <?php foreach ($merchants as $merchant): ?>
@@ -98,20 +97,20 @@
 
                                 <!-- Settlement Date -->
                                 <div class="dt-more-field">
-                                    <label class="dt-more-label"><i class="fas fa-check-circle mr-1"></i>Settlement Date</label>
+                                    <label class="dt-more-label"><i class="fas fa-check-circle mr-1 mr-2"></i> Settlement Date</label>
                                     <input type="date" name="search_date_ewallet_settlement" class="dt-more-input" value="<?= $search_date_ewallet_settlement_value; ?>">
                                 </div>
 
                                 <!-- Invoice No -->
                                 <div class="dt-more-field">
-                                    <label class="dt-more-label"><i class="fas fa-file-invoice mr-1"></i>Invoice No</label>
+                                    <label class="dt-more-label"><i class="fas fa-file-invoice mr-1 mr-2"></i> Invoice No</label>
                                     <input type="text" name="search_invoice_no" class="dt-more-input" placeholder="INV-..." value="<?= $search_invoice_no_value; ?>">
                                 </div>
                             </div>
 
                             <div class="dt-more-panel-footer">
                                 <button type="submit" name="submit" class="btn-dt-apply btn-dt-action-primary shadow-sm">
-                                    <i class="fas fa-check mr-1"></i> APPLY FILTER
+                                    <i class="fas fa-check mr-1 mr-2"></i> APPLY FILTER
                                 </button>
                                 <button type="button" id="moreFiltersClose" class="btn-dt-cancel btn-dt-secondary">
                                     CANCEL
@@ -193,7 +192,7 @@
                 "info": "Showing _START_ – _END_ of _TOTAL_ results",
                 "infoEmpty": "No results to show",
                 "infoFiltered": "",
-                "zeroRecords": '<div class="text-center py-4 text-muted"><i class="fas fa-inbox fa-2x mb-2 d-block"></i>No transactions found.</div>'
+                "zeroRecords": '<div class="text-center py-4 text-muted"><i class="fas fa-inbox fa-2x mb-2 d-block mr-2"></i> No transactions found.</div>'
             },
             "dom": 'rt<"dt-footer"<"dt-footer-info"i><"dt-footer-pager">>',
             "drawCallback": function(settings) {
@@ -206,7 +205,7 @@
 
                 $pager.html(
                     '<button class="dt-nav-btn dt-prev-btn" ' + (info.page === 0 ? 'disabled' : '') + '>'+
-                        '<i class="fas fa-chevron-left"></i> PREVIOUS'+
+                        '<i class="fas fa-chevron-left mr-2"></i> PREVIOUS'+
                     '</button>'+
                     '<span class="dt-page-counter">'+
                         '<strong>' + currPage + '</strong> of <strong>' + totalPages + '</strong>'+
@@ -264,3 +263,6 @@
         });
     });
 </script>
+
+
+

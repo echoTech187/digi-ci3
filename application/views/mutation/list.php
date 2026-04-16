@@ -50,8 +50,7 @@ $download_url = base_url('admin/download_mutation')
                     <div class="dt-filter-group dt-more-filters-wrapper">
                         <label class="dt-filter-label">&nbsp;</label>
                         <button type="button" id="moreFiltersBtn" class="dt-more-filters-btn <?= $extra_active > 0 ? 'dt-more-filters-active' : ''; ?>">
-                            <i class="fas fa-sliders-h mr-1"></i>
-                            Filters
+                            <i class="fas fa-sliders-h mr-1 mr-2"></i> Filters
                             <?php if ($extra_active > 0): ?>
                                 <span class="dt-more-badge"><?= $extra_active; ?></span>
                             <?php endif; ?>
@@ -61,14 +60,14 @@ $download_url = base_url('admin/download_mutation')
                         <!-- Dropdown Panel -->
                         <div class="dt-more-panel" id="moreFiltersPanel">
                             <div class="dt-more-panel-header">
-                                <span class="dt-more-panel-title"><i class="fas fa-filter mr-1"></i>Advanced Filters</span>
+                                <span class="dt-more-panel-title"><i class="fas fa-filter mr-1 mr-2"></i> Advanced Filters</span>
                                 <a href="<?= base_url('admin/resetMutation/' . $id); ?>" class="dt-more-clear">Clear All</a>
                             </div>
 
                             <div class="dt-more-panel-body">
                                 <!-- Period: Date Range -->
                                 <div class="dt-more-field">
-                                    <label class="dt-more-label"><i class="fas fa-calendar-alt mr-1"></i>Date Range</label>
+                                    <label class="dt-more-label"><i class="fas fa-calendar-alt mr-1 mr-2"></i> Date Range</label>
                                     <div class="dt-filter-chip">
                                         <input type="date" name="search_date_mutation" class="dt-chip-input" value="<?= $search_date_mutation_value ?>" title="From Date">
                                         <span class="text-muted mx-1" style="font-size:11px;">→</span>
@@ -78,7 +77,7 @@ $download_url = base_url('admin/download_mutation')
 
                                 <!-- Position Select -->
                                 <div class="dt-more-field">
-                                    <label class="dt-more-label"><i class="fas fa-exchange-alt mr-1"></i>Position</label>
+                                    <label class="dt-more-label"><i class="fas fa-exchange-alt mr-1 mr-2"></i> Position</label>
                                     <select name="search_position" id="search_position" class="dt-more-select">
                                         <option value="">All Positions</option>
                                         <option value="Credit" <?= ($search_position_value=='Credit')?'selected':'' ?>>Credit (Cash In)</option>
@@ -88,7 +87,7 @@ $download_url = base_url('admin/download_mutation')
 
                                 <!-- Channel Select -->
                                 <div class="dt-more-field">
-                                    <label class="dt-more-label"><i class="fas fa-layer-group mr-1"></i>Channel</label>
+                                    <label class="dt-more-label"><i class="fas fa-layer-group mr-1 mr-2"></i> Channel</label>
                                     <select name="search_channel" id="search_channel" class="dt-more-select select2-channel">
                                         <option value="">All Channels</option>
                                         <?php if (!empty($channels)): ?>
@@ -102,7 +101,7 @@ $download_url = base_url('admin/download_mutation')
 
                             <div class="dt-more-panel-footer">
                                 <button type="submit" class="btn-dt-apply btn-dt-action-primary shadow-sm">
-                                    <i class="fas fa-check mr-1"></i> APPLY FILTER
+                                    <i class="fas fa-check mr-1 mr-2"></i> APPLY FILTER
                                 </button>
                                 <button type="button" id="moreFiltersClose" class="btn-dt-cancel btn-dt-secondary">
                                     CANCEL
@@ -245,7 +244,7 @@ $(document).ready(function() {
 
                 $pager.html(
                     '<button type="button" class="dt-nav-btn dt-prev-btn" ' + (info.page === 0 ? 'disabled' : '') + '>' +
-                        '<i class="fas fa-chevron-left"></i> PREVIOUS' +
+                        '<i class="fas fa-chevron-left mr-2"></i> PREVIOUS' +
                     '</button>' +
                     '<span class="dt-page-counter">' +
                         '<strong>' + currPage + '</strong> of <strong>' + totalPages + '</strong>' +
@@ -294,3 +293,6 @@ $(document).ready(function() {
     });
 });
 </script>
+
+
+

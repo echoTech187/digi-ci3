@@ -33,13 +33,13 @@
         <!-- ── Alert Messages ── -->
         <?php if ($this->session->flashdata('success')): ?>
             <div class="alert alert-success mx-4 mt-3 mb-0 border-0 shadow-sm animate__animated animate__fadeIn">
-                <i class="fas fa-check-circle mr-2"></i> <?= $this->session->flashdata('success'); ?>
+                <i class="fas fa-check-circle "></i> <?= $this->session->flashdata('success'); ?>
             </div>
         <?php endif; ?>
 
         <?php if ($this->session->flashdata('error')): ?>
             <div class="alert alert-danger mx-4 mt-3 mb-0 border-0 shadow-sm animate__animated animate__fadeIn">
-                <i class="fas fa-exclamation-circle mr-2"></i> <?= $this->session->flashdata('error'); ?>
+                <i class="fas fa-exclamation-circle "></i> <?= $this->session->flashdata('error'); ?>
             </div>
         <?php endif; ?>
 
@@ -70,18 +70,25 @@
 <div class="modal fade bd-example-modal-lg" id="addChanelModal" tabindex="-1" role="dialog" aria-labelledby="addChanelModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header modal-header-primary border-0 py-3">
-                <h5 class="modal-title font-weight-bold text-white" id="addChanelModalLabel">
-                    <i class="fas fa-plus-circle mr-2"></i>New Cash In Channel
-                </h5>
-                <button type="button" class="close text-white outline-none" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
+            <!-- Header Legacy Migrated -->
+<div class="modal-header modal-header-primary border-0 mh-premium">
+    <div class="d-flex align-items-center">
+        <div class="mh-icon-badge">
+            <i class="fas fa-star"></i>
+        </div>
+        <div class="mh-title-wrap">
+            <h6 class="mh-title" id="addChanelModalLabel">New Cash In Channel</h6>
+            <small class="mh-subtitle" >Manage and process information details</small>
+        </div>
+    </div>
+    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" style="opacity:0.8;">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
             <div class="modal-body p-4 text-dark">
                 <?php if(validation_errors()): ?>
                     <div class="alert alert-danger mb-4 shadow-sm border-0 small">
-                        <i class="fas fa-exclamation-triangle mr-2"></i> <?= validation_errors(); ?>
+                        <i class="fas fa-exclamation-triangle "></i> <?= validation_errors(); ?>
                     </div>
                 <?php endif; ?>
                 
@@ -144,8 +151,8 @@
 
                     <div class="modal-footer px-0 pb-0 border-0 pt-3">
                         <button type="button" class="btn-dt-cancel" data-dismiss="modal">Close</button>
-                        <button type="submit" class="btn-dt-apply px-4 ml-2">
-                            <i class="fas fa-save mr-2"></i> Save New Channel
+                        <button type="submit" class="btn-dt-apply px-4 ">
+                            <i class="fas fa-save  mr-2"></i> Save New Channel
                         </button>
                     </div>
                 </form>
@@ -158,14 +165,21 @@
 <div class="modal fade" id="debitBalanceModal" tabindex="-1" aria-labelledby="debitBalanceModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header modal-header-primary border-0 py-3">
-                <h5 class="modal-title font-weight-bold text-white" id="debitBalanceModalLabel">
-                    <i class="fas fa-edit mr-2"></i>Edit Channel Info
-                </h5>
-                <button type="button" class="close text-white outline-none shadow-none" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
+            <!-- Header Legacy Migrated -->
+<div class="modal-header modal-header-primary border-0 mh-premium">
+    <div class="d-flex align-items-center">
+        <div class="mh-icon-badge">
+            <i class="fas fa-edit"></i>
+        </div>
+        <div class="mh-title-wrap">
+            <h6 class="mh-title"  id="debitBalanceModalLabel">Edit Channel Info</h6>
+            <small class="mh-subtitle" >Modify and update existing information</small>
+        </div>
+    </div>
+    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" style="opacity:0.8;">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
             <div class="modal-body p-4 text-dark">
                 <form method="post" action="<?= base_url('admin/createDebitBalance'); ?>">
                     <div class="mb-3">
@@ -188,8 +202,8 @@
                     
                     <div class="modal-footer px-0 pb-0 border-0 pt-2">
                         <button type="button" class="btn-dt-cancel" data-dismiss="modal">Close</button>
-                        <button type="submit" class="btn-dt-apply px-4 ml-2" onclick="return confirm('Is the data correct?')">
-                            <i class="fas fa-check mr-2"></i> Process Action
+                        <button type="submit" class="btn-dt-apply px-4 " onclick="return confirm('Is the data correct?')">
+                            <i class="fas fa-check  mr-2"></i> Process Action
                         </button>
                     </div>
                 </form>
@@ -223,7 +237,7 @@
                 "processing": '<i class="fa fa-spinner fa-spin fa-2x fa-fw mx-auto d-block text-primary"></i>',
                 "info": "Showing _START_ – _END_ of _TOTAL_ channels",
                 "infoEmpty": "No channels to show",
-                "zeroRecords": '<div class="text-center py-4 text-muted"><i class="fas fa-inbox fa-2x mb-2 d-block"></i>No channels found.</div>'
+                "zeroRecords": '<div class="text-center py-4 text-muted"><i class="fas fa-inbox fa-2x mb-2 d-block mr-2"></i> No channels found.</div>'
             },
             "drawCallback": function(settings) {
                 var api    = this.api();
@@ -235,7 +249,7 @@
 
                 $pager.html(
                     '<button class="dt-nav-btn dt-prev-btn" ' + (info.page === 0 ? 'disabled' : '') + '>' +
-                        '<i class="fas fa-chevron-left"></i> PREVIOUS' +
+                        '<i class="fas fa-chevron-left mr-2"></i> PREVIOUS' +
                     '</button>' +
                     '<span class="dt-page-counter">' +
                         '<strong>' + currPage + '</strong> of <strong>' + totalPages + '</strong>' +
@@ -269,3 +283,6 @@
         });
     });
 </script>
+
+
+

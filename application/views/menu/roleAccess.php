@@ -6,7 +6,7 @@
         <div>
             <h4 class="dt-page-title">
                 <?= $title; ?>
-                <span class="badge badge-primary ml-2" style="font-size:13px; font-weight:600; border-radius:8px; padding:5px 12px;">
+                <span class="badge badge-primary " style="font-size:13px; font-weight:600; border-radius:8px; padding:5px 12px;">
                     <?= $role['role_name']; ?>
                 </span>
             </h4>
@@ -17,7 +17,7 @@
     <!-- ── Alert ── -->
     <?php if ($this->session->flashdata('message')): ?>
         <div class="alert alert-success border-0 shadow-sm animate__animated animate__fadeIn mb-4">
-            <i class="fas fa-check-circle mr-2"></i> <?= $this->session->flashdata('message'); ?>
+            <i class="fas fa-check-circle "></i> <?= $this->session->flashdata('message'); ?>
         </div>
     <?php endif; ?>
 
@@ -59,7 +59,7 @@
                         $type = (!$isSub)
                             ? "<span class='badge badge-primary px-2 py-1' style='font-size:10px;'>Main Menu</span>"
                             : "<span class='badge badge-light text-dark border px-2 py-1' style='font-size:10px;'>Sub Menu</span>";
-                        $indent = $isSub ? "<span class='text-muted mr-2 ml-4' style='font-size:18px;'>ㄴ</span>" : "<i class='".$m['icon']." mr-2 text-primary'></i>";
+                        $indent = $isSub ? "<span class='text-muted  ml-4' style='font-size:18px;'>ㄴ</span>" : "<i class='".$m['icon']."  text-primary'></i>";
 
                         $checked = in_array($m['id'], $role_access_ids);
                     ?>
@@ -122,14 +122,21 @@
 <div class="modal fade" id="addMenuModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header modal-header-primary border-0 py-3">
-                <h5 class="modal-title font-weight-bold text-white">
-                    <i class="fas fa-plus-circle mr-2"></i>New Menu
-                </h5>
-                <button type="button" class="close text-white outline-none" data-dismiss="modal" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
+            <!-- Header Legacy Migrated -->
+<div class="modal-header modal-header-primary border-0 mh-premium">
+    <div class="d-flex align-items-center">
+        <div class="mh-icon-badge">
+            <i class="fas fa-star"></i>
+        </div>
+        <div class="mh-title-wrap">
+            <h6 class="mh-title" id="addMenuModalLabel">New Menu</h6>
+            <small class="mh-subtitle" >Manage and process information details</small>
+        </div>
+    </div>
+    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" style="opacity:0.8;">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
             <form id="addMenuForm">
                 <div class="modal-body p-4">
                     <div class="row">
@@ -149,7 +156,7 @@
                                             <option value="<?= $gm['group_modules'] ?>"><?= $gm['group_modules'] ?></option>
                                         <?php endforeach; ?>
                                     </select>
-                                    <button class="btn btn-primary add-group-btn m-0" type="button" style="border-top-left-radius: 0 !important; border-bottom-left-radius: 0 !important; font-size: 13px; font-weight: 600; padding: 0 15px; white-space: nowrap;"><i class="fas fa-plus"></i> Add</button>
+                                    <button class="btn btn-primary add-group-btn m-0" type="button" style="border-top-left-radius: 0 !important; border-bottom-left-radius: 0 !important; font-size: 13px; font-weight: 600; padding: 0 15px; white-space: nowrap;"><i class="fas fa-plus mr-2"></i> Add</button>
                                 </div>
                             </div>
                         </div>
@@ -190,7 +197,7 @@
                 </div>
                 <div class="modal-footer px-0 pb-0 border-0 pt-3 mx-4 mb-4">
                     <button type="button" class="btn-dt-cancel" data-dismiss="modal" data-dismiss="modal">Close</button>
-                    <button type="submit" class="btn-dt-apply px-4 ml-2">Create</button>
+                    <button type="submit" class="btn-dt-apply px-4 ">Create</button>
                 </div>
             </form>
         </div>
@@ -201,14 +208,21 @@
 <div class="modal fade" id="editMenuModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header modal-header-primary border-0 py-3">
-                <h5 class="modal-title font-weight-bold text-white">
-                    <i class="fas fa-edit mr-2"></i>Edit Menu
-                </h5>
-                <button type="button" class="close text-white outline-none" data-dismiss="modal" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
+            <!-- Header Legacy Migrated -->
+<div class="modal-header modal-header-primary border-0 mh-premium">
+    <div class="d-flex align-items-center">
+        <div class="mh-icon-badge">
+            <i class="fas fa-edit"></i>
+        </div>
+        <div class="mh-title-wrap">
+            <h6 class="mh-title"  id="editMenuModalLabel">Edit Menu</h6>
+            <small class="mh-subtitle" >Modify and update existing information</small>
+        </div>
+    </div>
+    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" style="opacity:0.8;">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
             <form id="editMenuForm">
                 <input type="hidden" name="id" id="edit_id">
                 <div class="modal-body p-4">
@@ -229,7 +243,7 @@
                                             <option value="<?= $gm['group_modules'] ?>"><?= $gm['group_modules'] ?></option>
                                         <?php endforeach; ?>
                                     </select>
-                                    <button class="btn btn-primary add-group-btn m-0" type="button" style="border-top-left-radius: 0 !important; border-bottom-left-radius: 0 !important; font-size: 13px; font-weight: 600; padding: 0 15px; white-space: nowrap;"><i class="fas fa-plus"></i> Add</button>
+                                    <button class="btn btn-primary add-group-btn m-0" type="button" style="border-top-left-radius: 0 !important; border-bottom-left-radius: 0 !important; font-size: 13px; font-weight: 600; padding: 0 15px; white-space: nowrap;"><i class="fas fa-plus mr-2"></i> Add</button>
                                 </div>
                             </div>
                         </div>
@@ -270,7 +284,7 @@
                 </div>
                 <div class="modal-footer px-0 pb-0 border-0 pt-3 mx-4 mb-4">
                     <button type="button" class="btn-dt-cancel" data-dismiss="modal" data-dismiss="modal">Close</button>
-                    <button type="submit" class="btn-dt-apply px-4 ml-2">Save Changes</button>
+                    <button type="submit" class="btn-dt-apply px-4 ">Save Changes</button>
                 </div>
             </form>
         </div>
@@ -282,14 +296,21 @@
 <div class="modal fade" id="addGroupModal" tabindex="-1" role="dialog" aria-hidden="true" style="z-index: 1060;">
     <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
         <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header bg-primary border-0 py-3">
-                <h6 class="modal-title font-weight-bold text-white">
-                    <i class="fas fa-plus-circle mr-2"></i>New Group Module
-                </h6>
-                <button type="button" class="close text-white outline-none" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
+            <!-- Header Legacy Migrated -->
+<div class="modal-header modal-header-primary border-0 mh-premium">
+    <div class="d-flex align-items-center">
+        <div class="mh-icon-badge">
+            <i class="fas fa-star"></i>
+        </div>
+        <div class="mh-title-wrap">
+            <h6 class="mh-title" id="addGroupModalLabel">New Group Module</h6>
+            <small class="mh-subtitle" >Manage and process information details</small>
+        </div>
+    </div>
+    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" style="opacity:0.8;">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
             <div class="modal-body p-4">
                 <div class="form-group mb-0">
                     <label class="dt-more-label mb-2">Group Name</label>
@@ -298,7 +319,7 @@
             </div>
             <div class="modal-footer px-0 pb-0 border-0 pt-0 mx-4 mb-4">
                 <button type="button" class="btn-dt-cancel py-2 px-3 m-0" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn-dt-apply py-2 px-3 ml-2" id="saveNewGroupBtn">Add</button>
+                <button type="button" class="btn-dt-apply py-2 px-3 " id="saveNewGroupBtn">Add</button>
             </div>
         </div>
     </div>
@@ -476,3 +497,6 @@ $(document).ready(function() {
 
 });
 </script>
+
+
+

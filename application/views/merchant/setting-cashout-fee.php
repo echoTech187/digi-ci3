@@ -7,7 +7,7 @@
         </div>
         <div class="d-flex" style="gap:10px;">
             <button type="button" class="btn-dt-action btn-dt-action-success add-btn" data-toggle="modal" data-target="#feeModal">
-                <i class="fas fa-plus mr-1"></i> Add Channel
+                <i class="fas fa-plus mr-1 mr-2"></i> Add Channel
             </button>
         </div>
     </div>
@@ -18,14 +18,14 @@
     <!-- Alerts -->
     <?php if ($this->session->flashdata('success')): ?>
         <div class="alert alert-success border-0 shadow-sm alert-dismissible fade show mb-4" role="alert">
-            <i class="fas fa-check-circle me-2"></i> <?= $this->session->flashdata('success'); ?>
+            <i class="fas fa-check-circle "></i> <?= $this->session->flashdata('success'); ?>
             <button type="button" class="btn-close" data-dismiss="alert" aria-label="Close"></button>
         </div>
     <?php endif; ?>
 
     <?php if ($this->session->flashdata('error')): ?>
         <div class="alert alert-danger border-0 shadow-sm alert-dismissible fade show mb-4" role="alert">
-            <i class="fas fa-exclamation-circle me-2"></i> <?= $this->session->flashdata('error'); ?>
+            <i class="fas fa-exclamation-circle "></i> <?= $this->session->flashdata('error'); ?>
             <button type="button" class="btn-close" data-dismiss="alert" aria-label="Close"></button>
         </div>
     <?php endif; ?>
@@ -46,7 +46,7 @@
                     <label class="dt-filter-label">&nbsp;</label>
                     <div class="d-flex" style="gap:6px;">
                         <button type="button" class="btn-dt-chip-action btn-dt-primary" data-toggle="modal" data-target="#bulkModal">
-                            <i class="fas fa-layer-group mr-1"></i> Bulk Add
+                            <i class="fas fa-layer-group mr-1 mr-2"></i> Bulk Add
                         </button>
                         <button type="button" class="btn-dt-chip-action btn-dt-secondary" onclick="location.reload()">
                             <i class="fas fa-sync-alt"></i>
@@ -126,13 +126,13 @@
                                                     data-min="<?= $row->c_amountMin ?>"
                                                     data-max="<?= $row->c_amountMax ?>"
                                                     data-status="<?= $row->c_status ?>">
-                                                <i class="fas fa-edit me-2 text-primary"></i> Edit Setting
+                                                <i class="fas fa-edit  text-primary mr-2"></i> Edit Setting
                                             </button>
                                         </li>
                                         <li><hr class="dropdown-divider"></li>
                                         <li>
                                             <a class="dropdown-item rounded-2 py-2 text-danger" href="<?= base_url('admin/deleteSettingCashoutFee/'. $merchant_id) . '/' . $row->id; ?>" onclick="return confirm('Are you sure you want to delete this configuration?')">
-                                                <i class="fas fa-trash me-2"></i> Delete
+                                                <i class="fas fa-trash  mr-2"></i> Delete
                                             </a>
                                         </li>
                                     </ul>
@@ -151,9 +151,18 @@
 <div class="modal fade" id="feeModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header modal-header-primary border-0 py-3 px-4">
-                <h5 class="modal-title fw-bold text-white" id="exampleModalLabel"><i class="fas fa-cog me-2"></i>Add Cashout Fee Setting</h5>
-                <button type="button" class="close text-white outline-none" data-dismiss="modal" aria-label="Close">
+            <!-- Header Legacy Migrated -->
+            <div class="modal-header modal-header-primary border-0 mh-premium">
+                <div class="d-flex align-items-center">
+                    <div class="mh-icon-badge">
+                        <i class="fas fa-arrow-circle-up"></i>
+                    </div>
+                    <div class="mh-title-wrap">
+                        <h6 class="mh-title" id="feeModalLabel">Add Cashout Fee Setting</h6>
+                        <small class="mh-subtitle" id="feeModalSubtitle">Create and register new data record</small>
+                    </div>
+                </div>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" style="opacity:0.8;">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -163,11 +172,11 @@
                         <div class="col-md-6">
                             <div class="card h-100 border-0 shadow-none bg-white p-3 rounded-4">
                                 <h6 class="text-primary fw-bold mb-3 d-flex align-items-center">
-                                    <i class="fas fa-network-wired me-2"></i> CHANNEL CONFIG
+                                    <i class="fas fa-network-wired  mr-2"></i> CHANNEL CONFIG
                                 </h6>
                                 <div class="mb-3">
                                     <label class="form-label small fw-bold text-muted">Channel Group</label>
-                                    <select class="form-select border-1" id="c_cashoutChannelGroup" required name="c_cashoutChannelGroup">
+                                    <select class="form-control border-1 select2" id="c_cashoutChannelGroup" required name="c_cashoutChannelGroup">
                                         <option value="" selected disabled>Select group</option>
                                         <?php foreach ($channel_groups as $chg): ?>
                                             <option value="<?= $chg->c_channelGroup ?>"><?= $chg->c_channelGroup ?></option>
@@ -176,7 +185,7 @@
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label small fw-bold text-muted">External ID Default</label>
-                                    <select class="form-select border-1" id="c_externalIdDefault" required name="c_externalIdDefault">
+                                    <select class="form-control border-1 select2" id="c_externalIdDefault" required name="c_externalIdDefault">
                                         <option value="" selected disabled>Select external ID</option>
                                         <?php foreach ($channel_external_id_defaults as $ecd): ?>
                                             <option value="<?= $ecd->c_externalIdDefault ?>"><?= $ecd->c_externalIdDefault ?></option>
@@ -185,7 +194,7 @@
                                 </div>
                                 <div class="mb-0">
                                     <label class="form-label small fw-bold text-muted">Specific Channel ID</label>
-                                    <select class="form-select border-1" id="ref_cashoutChannelId" required name="ref_cashoutChannelId" disabled>
+                                    <select class="form-control border-1 select2" id="ref_cashoutChannelId" required name="ref_cashoutChannelId" disabled>
                                         <option value="" disabled selected>Select channel ID</option>
                                     </select>
                                 </div>
@@ -194,12 +203,12 @@
                         <div class="col-md-6">
                             <div class="card h-100 border-0 shadow-none bg-white p-3 rounded-4">
                                 <h6 class="text-primary fw-bold mb-3 d-flex align-items-center">
-                                    <i class="fas fa-calculator me-2"></i> FEE STRUCTURE
+                                    <i class="fas fa-calculator  mr-2"></i> FEE STRUCTURE
                                 </h6>
                                 <div class="row g-3">
                                     <div class="col-md-12">
                                         <label class="form-label small fw-bold text-muted">Fee Type</label>
-                                        <select class="form-select border-1" id="c_feeType" required name="c_feeType">
+                                        <select class="form-control border-1 select2" id="c_feeType" required name="c_feeType">
                                             <option value="Fixed">Fixed</option>
                                             <option value="Percetange">Percentage</option>
                                             <option value="Both">Both</option>
@@ -226,7 +235,7 @@
                     
                     <div class="card border-0 shadow-none bg-white p-3 rounded-4 mt-4">
                         <h6 class="text-primary fw-bold mb-3 d-flex align-items-center">
-                            <i class="fas fa-shield-alt me-2"></i> LIMITS & STATUS
+                            <i class="fas fa-shield-alt  mr-2"></i> LIMITS & STATUS
                         </h6>
                         <div class="row g-3">
                             <div class="col-md-4">
@@ -245,7 +254,7 @@
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label small fw-bold text-muted">Status</label>
-                                <select class="form-select border-1" id="c_status" required name="c_status">
+                                <select class="form-control border-1 select2" id="c_status" required name="c_status">
                                     <option value="Active">Active</option>
                                     <option value="Not Active">Not Active</option>
                                 </select>
@@ -255,7 +264,7 @@
                 </div>
                 <div class="modal-footer border-0 p-3 justify-content-end rounded-bottom-4 px-4">
                     <button type="button" class="btn-dt-cancel" data-dismiss="modal">CANCEL</button>
-                    <button type="submit" class="btn-dt-apply px-4 ml-2">SAVE CONFIGURATION</button>
+                    <button type="submit" class="btn-dt-apply px-4 ">SAVE CONFIGURATION</button>
                 </div>
             </form>
         </div>
@@ -266,9 +275,18 @@
 <div class="modal fade" id="bulkModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header modal-header-primary border-0 py-3 px-4">
-                <h5 class="modal-title fw-bold text-white"><i class="fas fa-layer-group me-2"></i>Bulk Add Cashout Fees</h5>
-                <button type="button" class="close text-white outline-none" data-dismiss="modal" aria-label="Close">
+            <!-- Header Legacy Migrated -->
+            <div class="modal-header modal-header-primary border-0 mh-premium">
+                <div class="d-flex align-items-center">
+                    <div class="mh-icon-badge">
+                        <i class="fas fa-arrow-circle-up"></i>
+                    </div>
+                    <div class="mh-title-wrap">
+                        <h6 class="mh-title" id="bulkModalLabel">Bulk Add Cashout Fees</h6>
+                        <small class="mh-subtitle" >Create and register new data record</small>
+                    </div>
+                </div>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" style="opacity:0.8;">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -282,10 +300,10 @@
                     <div class="row g-4">
                         <div class="col-md-6">
                             <div class="card h-100 border-0 shadow-none bg-white p-3 rounded-4">
-                                <h6 class="text-success fw-bold mb-3"><i class="fas fa-bullseye me-2"></i>TARGET GROUPS</h6>
+                                <h6 class="text-success fw-bold mb-3"><i class="fas fa-bullseye  mr-2"></i> TARGET GROUPS</h6>
                                 <div class="mb-3">
                                     <label class="form-label small fw-bold text-muted">Cashout Channel Group</label>
-                                    <select class="form-select border-1" required name="c_cashoutChannelGroup">
+                                    <select class="form-control border-1 select2" required name="c_cashoutChannelGroup">
                                         <option value="" selected disabled>Select group</option>
                                         <?php foreach ($channel_groups as $chg): ?>
                                             <option value="<?= $chg->c_channelGroup ?>"><?= $chg->c_channelGroup ?></option>
@@ -294,7 +312,7 @@
                                 </div>
                                 <div class="mb-0">
                                     <label class="form-label small fw-bold text-muted">External ID Default</label>
-                                    <select class="form-select border-1" required name="c_externalIdDefault">
+                                    <select class="form-control border-1 select2" required name="c_externalIdDefault">
                                         <option value="" selected disabled>Select external ID</option>
                                         <?php foreach ($channel_external_id_defaults as $ecd): ?>
                                             <option value="<?= $ecd->c_externalIdDefault ?>"><?= $ecd->c_externalIdDefault ?></option>
@@ -305,11 +323,11 @@
                         </div>
                         <div class="col-md-6">
                             <div class="card h-100 border-0 shadow-none bg-white p-3 rounded-4">
-                                <h6 class="text-success fw-bold mb-3"><i class="fas fa-coins me-2"></i>FEE SETTINGS</h6>
+                                <h6 class="text-success fw-bold mb-3"><i class="fas fa-coins  mr-2"></i> FEE SETTINGS</h6>
                                 <div class="row g-3">
                                     <div class="col-6">
                                         <label class="form-label small fw-bold text-muted">Fee Type</label>
-                                        <select class="form-select border-1" required name="c_feeType">
+                                        <select class="form-control border-1 select2" required name="c_feeType">
                                             <option value="Fixed">Fixed</option>
                                             <option value="Percetange">Percentage</option>
                                             <option value="Both">Both</option>
@@ -339,7 +357,7 @@
                 </div>
                 <div class="modal-footer border-0 p-3 justify-content-end rounded-bottom-4 px-4">
                     <button type="button" class="btn-dt-cancel" data-dismiss="modal">CANCEL</button>
-                    <button type="submit" class="btn-dt-apply px-4 ml-2">APPLY BULK SETTINGS</button>
+                    <button type="submit" class="btn-dt-apply px-4 ">APPLY BULK SETTINGS</button>
                 </div>
             </form>
         </div>
@@ -348,6 +366,20 @@
 
 <script>
 $(document).ready(function() {
+    // Initialize Select2 for modal with dropdownParent to fix focus/render issues
+    $('#feeModal, #bulkModal').on('shown.bs.modal', function() {
+        var $modal = $(this);
+        $modal.find('.select2').each(function() {
+            if ($(this).hasClass('select2-hidden-accessible')) {
+                $(this).select2('destroy');
+            }
+            $(this).select2({
+                dropdownParent: $modal,
+                width: '100%'
+            });
+        });
+    });
+
     var table = $('#cashoutTable').DataTable({
             "processing": false,
             "serverSide": false,
@@ -356,7 +388,7 @@ $(document).ready(function() {
                 "info": "Showing _START_ – _END_ of _TOTAL_ results",
                 "infoEmpty": "No results to show",
                 "infoFiltered": "",
-                "zeroRecords": '<div class="text-center py-4 text-muted"><i class="fas fa-inbox fa-2x mb-2 d-block"></i>No settings found.</div>'
+                "zeroRecords": '<div class="text-center py-4 text-muted"><i class="fas fa-inbox fa-2x mb-2 d-block mr-2"></i> No settings found.</div>'
             },
             "dom": 'rt<"dt-footer"<"dt-footer-info"i><"dt-footer-pager">>',
             "drawCallback": function(settings) {
@@ -369,7 +401,7 @@ $(document).ready(function() {
 
                 $pager.html(
                     '<button class="dt-nav-btn dt-prev-btn" ' + (info.page === 0 ? 'disabled' : '') + '>' +
-                        '<i class="fas fa-chevron-left"></i> PREVIOUS' +
+                        '<i class="fas fa-chevron-left mr-2"></i> PREVIOUS' +
                     '</button>' +
                     '<span class="dt-page-counter">' +
                         '<strong>' + currPage + '</strong> of <strong>' + totalPages + '</strong>' +
@@ -394,51 +426,73 @@ $(document).ready(function() {
         let external = $('#c_externalIdDefault').val();
 
         if (group && external) {
-            $.post('<?= base_url("admin/getCashoutChannelGroups") ?>', {
+            let csrfName = $('meta[name="csrf-token-name"]').attr('content');
+            let csrfHash = $('meta[name="csrf-token-hash"]').attr('content');
+            
+            let postData = {
                 c_cashoutChannelGroup: group,
                 c_externalIdDefault: external
-            }, function(data) {
+            };
+            if (csrfName) postData[csrfName] = csrfHash;
+
+            $.post('<?= base_url("admin/getCashoutChannelGroups") ?>', postData, function(data) {
                 const options = JSON.parse(data);
                 const $channelId = $('#ref_cashoutChannelId');
+                
+                let currentVal = $channelId.val();
+                
                 $channelId.empty().append('<option disabled selected>Select channel ID</option>');
                 if (options.length > 0) {
                     options.forEach(item => $channelId.append(`<option value="${item.id}">${item.id}</option>`));
                     $channelId.prop('disabled', false);
+                    if (currentVal) $channelId.val(currentVal).trigger('change');
                 } else {
                     $channelId.append('<option disabled>No channels found</option>').prop('disabled', true);
                 }
-            }).fail(() => alert('Failed to load channel IDs.'));
+            }).fail(() => {
+                console.error('Failed to load channel IDs');
+            });
         }
     }
 
     $('#c_cashoutChannelGroup, #c_externalIdDefault').change(updateChannelIds);
 
     // Edit Button Handler
-    // Use event delegation for buttons inside DataTables
     $(document).on('click', '.edit-btn', function() {
         const d = $(this).data();
-        $('#exampleModalLabel').html('<i class="fas fa-edit me-2"></i>Edit Cashout Fee Configuration');
+        $('#feeModalTitle').html('Edit Cashout Fee Configuration');
+        $('#feeModalSubtitle').text('Update and modify existing channel fee configuration');
         $('#feeForm').attr('action', `<?= base_url('admin/editSettingCashoutFee/' . $merchant_id) ?>/${d.id}`);
         
-        $('#c_cashoutChannelGroup').val(d.group);
-        $('#c_externalIdDefault').val(d.externalid);
+        // Prevent trigger during population
+        $('#c_cashoutChannelGroup, #c_externalIdDefault').off('change', updateChannelIds);
         
-        // Manual trigger for channel ID since it depends on AJAX
+        $('#c_cashoutChannelGroup').val(d.group).trigger('change');
+        $('#c_externalIdDefault').val(d.externalid).trigger('change');
+        
+        // Manual populate for channel ID
         const $channelId = $('#ref_cashoutChannelId');
         $channelId.empty().append(`<option value="${d.channelid}" selected>${d.channelid}</option>`).prop('disabled', false);
 
-        $('#c_feeType').val(d.feetype);
+        // Re-enable trigger
+        $('#c_cashoutChannelGroup, #c_externalIdDefault').on('change', updateChannelIds);
+
+        $('#c_feeType').val(d.feetype).trigger('change');
         $('#c_fee').val(d.fee);
         $('#c_feePercetange').val(d.feepercentage);
         $('#c_amountMin').val(d.min);
         $('#c_amountMax').val(d.max);
-        $('#c_status').val(d.status);
+        $('#c_status').val(d.status).trigger('change');
     });
 
     $('.add-btn').click(function() {
-        $('#exampleModalLabel').html('<i class="fas fa-plus me-2"></i>Add New Cashout Fee');
+        $('#feeModalTitle').html('Add New Cashout Fee');
+        $('#feeModalSubtitle').text('Create and register new data record');
         $('#feeForm').attr('action', `<?= base_url('admin/createSettingCashoutFee/' . $merchant_id) ?>`);
         $('#feeForm')[0].reset();
+        
+        // Reset dropdowns manually
+        $('#c_cashoutChannelGroup, #c_externalIdDefault, #c_feeType, #c_status').val('').trigger('change');
         $('#ref_cashoutChannelId').prop('disabled', true).empty().append('<option disabled selected>Select channel ID</option>');
     });
 
@@ -448,3 +502,6 @@ $(document).ready(function() {
     });
 });
 </script>
+
+
+

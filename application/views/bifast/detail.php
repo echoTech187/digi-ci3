@@ -9,11 +9,19 @@
     </div>
 
     <div class="card border-0 shadow-sm dt-card">
-        <div class="modal-header modal-header-primary border-0 py-3">
-            <h6 class="modal-title font-weight-bold text-white uppercase" style="letter-spacing:1px;">
-                <i class="fas fa-info-circle mr-2"></i> BI-FAST DISBURSEMENT INFO
-            </h6>
+        <!-- Header Legacy Migrated -->
+<div class="modal-header modal-header-primary  border-0 py-3 mh-premium">
+    <div class="d-flex align-items-center">
+        <div class="mh-icon-badge">
+            <i class="fas fa-paper-plane"></i>
         </div>
+        <div class="mh-title-wrap">
+            <h6 class="mh-title">BI-FAST DISBURSEMENT INFO</h6>
+            <small class="mh-subtitle">Lihat detail informasi lengkap</small>
+        </div>
+    </div>
+    
+</div>
         <div class="card-body p-4">
             <?php
                 // echo "<pre>";
@@ -127,4 +135,7 @@
 
 </div>
 <!-- /.container-fluid -->
+
+
+
 

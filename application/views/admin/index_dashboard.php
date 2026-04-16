@@ -1,101 +1,150 @@
 <!-- Begin Page Content -->
-<div class="container-fluid">
+<div class="container-fluid pb-5">
     <!-- ── Page Header ── -->
-    <div class="dt-page-header">
+    <div class="dt-page-header mb-4">
         <div>
-            <h4 class="dt-page-title"><?= $title; ?></h4>
-            <p class="dt-page-subtitle">Holistic overview of the ecosystem's real-time performance and financial health.</p>
+            <div class="d-flex align-items-center mb-1">
+                <h4 class="dt-page-title mb-0 mr-3"><?= $title; ?> Analytics</h4>
+                <div class="badge bg-primary-soft text-primary rounded-pill px-3 py-1 font-weight-bold" style="font-size: 10px; letter-spacing: 0.5px;">
+                    <i class="fas fa-shield-check mr-1"></i> LOGICAL INTEGRITY VERIFIED
+                </div>
+            </div>
+            <p class="dt-page-subtitle text-muted">Holistic overview of the ecosystem's real-time performance and financial health.</p>
         </div>
         <div class="d-flex align-items-center gap-3">
-            <div class="d-flex align-items-center gap-2 px-3 py-2 btn-dt-chip-action" style="border-radius: 12px; background-color: var(--bg-card); border: 1px solid var(--border-color);">
+             <div class="text-right mr-3 d-none d-md-block">
+                <small class="text-muted d-block font-weight-bold" style="font-size: 10px; text-transform: uppercase; letter-spacing: 1px;">Cloud Sync Active</small>
+                <small class="text-primary font-weight-bold" style="font-size: 11px;">Last updated: <?= $last_synced; ?></small>
+            </div>
+            <div class="d-flex align-items-center gap-2 px-3 py-2 btn-dt-chip-action" style="border-radius: 12px; background: rgba(255,255,255,0.7); backdrop-filter: blur(10px); border: 1px solid var(--border-color);">
                 <span class="position-relative d-flex">
                     <span class="animate-ping position-absolute h-full w-full rounded-full bg-<?= ($maintenance_status == 'Active' ? 'success' : 'danger'); ?> opacity-75" style="width: 8px; height: 8px;"></span>
                     <span class="relative rounded-full bg-<?= ($maintenance_status == 'Active' ? 'success' : 'danger'); ?>" style="width: 8px; height: 8px;"></span>
                 </span>
-                <span class="font-weight-bold" style="color: var(--gray-700); letter-spacing: 0.5px;">System: <?= ($maintenance_status == 'Active' ? 'Online' : 'Maintenance'); ?></span>
+                <span class="font-weight-bold" style="color: var(--gray-700); letter-spacing: 0.5px; font-size: 12px;">System: <?= ($maintenance_status == 'Active' ? 'Online' : 'Maintenance'); ?></span>
             </div>
-
         </div>
     </div>
 
-    <!-- KPI Summary Grid -->
-    <div class="dt-summary-row mb-4">
+    <!-- ── KPI Summary Grid (Glassmorphism Transformation) ── -->
+    <div class="row mb-4 g-3">
         <!-- Today's Volume -->
-        <div class="dt-summary-card dt-summary-blue border-0 shadow-sm" style="border-left: 5px solid var(--primary) !important;">
-            <div class="dt-summary-body">
-                <div class="dt-summary-label">Total Volume (Today)</div>
-                <div class="dt-summary-value text-primary-custom" style="font-size: 1.5rem;">Rp <?= number_format($today_stats['total_volume'], 0, ',', '.'); ?></div>
-                <div class="dt-summary-sub">
-                    <i class="fas fa-chart-line text-success mr-1"></i> <span class="font-weight-bold text-gray-800"><?= number_format($today_stats['total_qty'], 0, ',', '.'); ?></span> settled transactions
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm dash-kpi-card" style="background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%); color: white; border-radius: 20px; overflow: hidden; position: relative;">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="dash-kpi-icon-wrap" style="background: rgba(255,255,255,0.2); border-radius: 12px; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-wallet fa-lg"></i>
+                        </div>
+                        <div class="text-right">
+                             <span class="badge rounded-pill px-2 py-1" style="background: rgba(255,255,255,0.2); font-size: 10px;">TODAY</span>
+                        </div>
+                    </div>
+                    <h6 class="font-weight-bold mb-1" style="opacity: 0.8; font-size: 11px; text-transform: uppercase; letter-spacing: 1px;">Net Volume</h6>
+                    <h3 class="font-weight-bold mb-3" style="font-size: 1.6rem; letter-spacing: -0.5px;">Rp <?= number_format($today_stats['total_volume'], 0, ',', '.'); ?></h3>
+                    <div class="d-flex align-items-center mt-auto">
+                        <div class="px-2 py-1 rounded-pill d-flex align-items-center" style="background: rgba(255,255,255,0.15); font-size: 10px;">
+                            <i class="fas fa-arrow-up mr-1" style="font-size: 8px;"></i> <?= number_format($today_stats['total_qty'], 0, ',', '.'); ?> Settled 
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <div class="dt-summary-icon dt-icon-blue">
-                <i class="fas fa-wallet"></i>
+                <div style="position: absolute; right: -20px; bottom: -20px; opacity: 0.1; font-size: 100px;">
+                    <i class="fas fa-wallet"></i>
+                </div>
             </div>
         </div>
 
         <!-- QRIS Today -->
-        <div class="dt-summary-card dt-summary-green border-0 shadow-sm" style="border-left: 5px solid var(--success) !important;">
-            <div class="dt-summary-body">
-                <div class="dt-summary-label">QRIS Performance</div>
-                <div class="dt-summary-value text-success" style="font-size: 1.5rem;">Rp <?= number_format($today_stats['qris']['amount'], 0, ',', '.'); ?></div>
-                <div class="dt-summary-sub">
-                    <i class="fas fa-qrcode mr-1"></i> <span class="font-weight-bold text-gray-800"><?= number_format($today_stats['qris']['qty'], 0, ',', '.'); ?></span> scan successful
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm dash-kpi-card" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border-radius: 20px; overflow: hidden; position: relative;">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="dash-kpi-icon-wrap" style="background: rgba(255,255,255,0.2); border-radius: 12px; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-qrcode fa-lg"></i>
+                        </div>
+                    </div>
+                    <h6 class="font-weight-bold mb-1" style="opacity: 0.8; font-size: 11px; text-transform: uppercase; letter-spacing: 1px;">QRIS Performance</h6>
+                    <h3 class="font-weight-bold mb-3" style="font-size: 1.6rem; letter-spacing: -0.5px;">Rp <?= number_format($today_stats['qris']['amount'], 0, ',', '.'); ?></h3>
+                    <div class="d-flex align-items-center mt-auto">
+                        <div class="px-2 py-1 rounded-pill d-flex align-items-center" style="background: rgba(255,255,255,0.15); font-size: 10px;">
+                            <i class="fas fa-check-circle mr-1" style="font-size: 8px;"></i> <?= number_format($today_stats['qris']['qty'], 0, ',', '.'); ?> Successful
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <div class="dt-summary-icon dt-icon-green">
-                <i class="fas fa-qrcode"></i>
+                <div style="position: absolute; right: -20px; bottom: -20px; opacity: 0.1; font-size: 100px;">
+                    <i class="fas fa-qrcode"></i>
+                </div>
             </div>
         </div>
 
         <!-- Disbursement Today -->
-        <div class="dt-summary-card dt-summary-yellow border-0 shadow-sm" style="border-left: 5px solid var(--warning) !important;">
-            <div class="dt-summary-body">
-                <div class="dt-summary-label">BI-FAST Disburse</div>
-                <div class="dt-summary-value text-warning" style="font-size: 1.5rem;">Rp <?= number_format($today_stats['disburse']['amount'], 0, ',', '.'); ?></div>
-                <div class="dt-summary-sub">
-                    <i class="fas fa-paper-plane mr-1"></i> <span class="font-weight-bold text-gray-800"><?= number_format($today_stats['disburse']['qty'], 0, ',', '.'); ?></span> processed
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm dash-kpi-card" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; border-radius: 20px; overflow: hidden; position: relative;">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="dash-kpi-icon-wrap" style="background: rgba(255,255,255,0.2); border-radius: 12px; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-paper-plane fa-lg"></i>
+                        </div>
+                    </div>
+                    <h6 class="font-weight-bold mb-1" style="opacity: 0.8; font-size: 11px; text-transform: uppercase; letter-spacing: 1px;">BI-FAST Disbursement</h6>
+                    <h3 class="font-weight-bold mb-3" style="font-size: 1.6rem; letter-spacing: -0.5px;">Rp <?= number_format($today_stats['disburse']['amount'], 0, ',', '.'); ?></h3>
+                    <div class="d-flex align-items-center mt-auto">
+                        <div class="px-2 py-1 rounded-pill d-flex align-items-center" style="background: rgba(255,255,255,0.15); font-size: 10px;">
+                            <i class="fas fa-bolt mr-1" style="font-size: 8px;"></i> <?= number_format($today_stats['disburse']['qty'], 0, ',', '.'); ?> Processed
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <div class="dt-summary-icon dt-icon-yellow">
-                <i class="fas fa-paper-plane"></i>
+                <div style="position: absolute; right: -20px; bottom: -20px; opacity: 0.1; font-size: 100px;">
+                    <i class="fas fa-paper-plane"></i>
+                </div>
             </div>
         </div>
 
         <!-- Active Merchants -->
-        <div class="dt-summary-card dt-summary-red border-0 shadow-sm" style="border-left: 5px solid var(--danger) !important;">
-            <div class="dt-summary-body">
-                <div class="dt-summary-label">Ecosystem Health</div>
-                <div class="dt-summary-value text-danger" style="font-size: 1.5rem;"><?= number_format($merchant_count, 0, ',', '.'); ?> Partners</div>
-                <div class="dt-summary-sub">
-                    <i class="fas fa-shield-alt mr-1"></i> Active merchant accounts
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm dash-kpi-card" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; border-radius: 20px; overflow: hidden; position: relative;">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="dash-kpi-icon-wrap" style="background: rgba(255,255,255,0.2); border-radius: 12px; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-store fa-lg"></i>
+                        </div>
+                    </div>
+                    <h6 class="font-weight-bold mb-1" style="opacity: 0.8; font-size: 11px; text-transform: uppercase; letter-spacing: 1px;">Ecosystem Partners</h6>
+                    <h3 class="font-weight-bold mb-3" style="font-size: 1.6rem; letter-spacing: -0.5px;"><?= number_format($merchant_count, 0, ',', '.'); ?> Accounts</h3>
+                    <div class="d-flex align-items-center mt-auto">
+                        <div class="px-2 py-1 rounded-pill d-flex align-items-center" style="background: rgba(255,255,255,0.15); font-size: 10px;">
+                            <i class="fas fa-user-check mr-1" style="font-size: 8px;"></i> All Active
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <div class="dt-summary-icon dt-icon-red">
-                <i class="fas fa-store"></i>
+                <div style="position: absolute; right: -20px; bottom: -20px; opacity: 0.1; font-size: 100px;">
+                    <i class="fas fa-store"></i>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Charts Section -->
-    <div class="row">
+    <!-- ── Charts Section ── -->
+    <div class="row mb-5">
         <!-- Area Chart: Transaction Trends -->
         <div class="col-xl-8 col-lg-7 mb-4">
-            <div class="card border-0 shadow-sm dt-card h-100" style="border-radius: 20px;">
-                <div class="card-header border-0 py-4 px-4 d-flex align-items-center justify-content-between">
-
+            <div class="card border-0 shadow-sm dt-card h-100" style="border-radius: 24px; background: white;">
+                <div class="card-header border-0 bg-transparent pt-4 px-4 pb-0 d-flex align-items-center justify-content-between">
                     <div>
-                        <h6 class="m-0 font-weight-bold text-gray-800" style="font-size: 1.1rem;">Transaction Trends</h6>
-                        <p class="m-0 text-muted small">Yearly comparison across primary payment channels</p>
+                        <h6 class="m-0 font-weight-bold text-gray-800" style="font-size: 1rem;">Transaction Trends</h6>
+                        <p class="m-0 text-muted small mt-1">Yearly volume distribution across core payment channels</p>
                     </div>
-                    <div class="dropdown no-arrow">
-                        <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
-                        </a>
+                    <div class="d-flex gap-2 pr-2">
+                        <div class="d-flex align-items-center small font-weight-bold mr-3" style="color: #6366f1;">
+                            <span class="mr-1" style="width: 8px; height: 8px; border-radius: 50%; background: #6366f1; display: inline-block;"></span> QRIS
+                        </div>
+                        <div class="d-flex align-items-center small font-weight-bold" style="color: #f59e0b;">
+                            <span class="mr-1" style="width: 8px; height: 8px; border-radius: 50%; background: #f59e0b; display: inline-block;"></span> Disburse
+                        </div>
                     </div>
                 </div>
                 <div class="card-body px-4 pb-4">
-                    <div class="chart-area" style="height: 350px;">
+                    <div class="chart-area" style="height: 380px;">
                         <canvas id="mainAreaChart"></canvas>
                     </div>
                 </div>
@@ -104,32 +153,35 @@
 
         <!-- Donut Chart: Channel Mix -->
         <div class="col-xl-4 col-lg-5 mb-4">
-            <div class="card border-0 shadow-sm dt-card h-100" style="border-radius: 20px;">
-                <div class="card-header border-0 py-4 px-4">
-
-                    <h6 class="m-0 font-weight-bold text-gray-800" style="font-size: 1.1rem;">Channel Mix (Today)</h6>
-                    <p class="m-0 text-muted small">Distribution of transaction volume</p>
+            <div class="card border-0 shadow-sm dt-card h-100" style="border-radius: 24px; background: white;">
+                <div class="card-header border-0 bg-transparent pt-4 px-4 pb-0">
+                    <h6 class="m-0 font-weight-bold text-gray-800" style="font-size: 1rem;">Channel Mix (Today)</h6>
+                    <p class="m-0 text-muted small mt-1">Share of successful transaction qty</p>
                 </div>
-                <div class="card-body px-4 pb-4">
-                    <div class="chart-pie pt-4 pb-2" style="height: 260px;">
+                <div class="card-body px-4 pb-4 d-flex flex-column justify-content-center">
+                    <div class="chart-pie mb-4" style="height: 280px; position: relative;">
                         <canvas id="channelDonutChart"></canvas>
+                        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; pointer-events: none;">
+                            <span class="d-block text-muted" style="font-size: 10px; text-transform: uppercase; font-weight: 800; letter-spacing: 1px;">Total Qty</span>
+                            <span class="h4 font-weight-bolder text-dark mb-0"><?= number_format($today_stats['total_qty'], 0, ',', '.'); ?></span>
+                        </div>
                     </div>
-                    <div class="mt-4 d-flex flex-wrap justify-content-center gap-3">
-                        <div class="d-flex align-items-center gap-2">
-                            <span style="width: 10px; height: 10px; border-radius: 50%; background: var(--primary);"></span>
-                            <span class="small font-weight-bold text-gray-600">QRIS</span>
+                    <div class="grid d-flex flex-wrap justify-content-center gap-3">
+                        <div class="small p-2 px-3 border rounded-pill d-flex align-items-center gap-2" style="background: #f8fafc; border-color: #f1f5f9 !important;">
+                            <span style="width: 8px; height: 8px; border-radius: 50%; background: #6366f1;"></span>
+                            <span class="font-weight-bold text-gray-600">QRIS</span>
                         </div>
-                        <div class="d-flex align-items-center gap-2">
-                            <span style="width: 10px; height: 10px; border-radius: 50%; background: var(--success);"></span>
-                            <span class="small font-weight-bold text-gray-600">VA</span>
+                        <div class="small p-2 px-3 border rounded-pill d-flex align-items-center gap-2" style="background: #f8fafc; border-color: #f1f5f9 !important;">
+                            <span style="width: 8px; height: 8px; border-radius: 50%; background: #10b981;"></span>
+                            <span class="font-weight-bold text-gray-600">VA</span>
                         </div>
-                        <div class="d-flex align-items-center gap-2">
-                            <span style="width: 10px; height: 10px; border-radius: 50%; background: var(--info);"></span>
-                            <span class="small font-weight-bold text-gray-600">E-Wallet</span>
+                        <div class="small p-2 px-3 border rounded-pill d-flex align-items-center gap-2" style="background: #f8fafc; border-color: #f1f5f9 !important;">
+                            <span style="width: 8px; height: 8px; border-radius: 50%; background: #3b82f6;"></span>
+                            <span class="font-weight-bold text-gray-600">E-Wallet</span>
                         </div>
-                        <div class="d-flex align-items-center gap-2">
-                            <span style="width: 10px; height: 10px; border-radius: 50%; background: var(--warning);"></span>
-                            <span class="small font-weight-bold text-gray-600">Disburse</span>
+                        <div class="small p-2 px-3 border rounded-pill d-flex align-items-center gap-2" style="background: #f8fafc; border-color: #f1f5f9 !important;">
+                            <span style="width: 8px; height: 8px; border-radius: 50%; background: #f59e0b;"></span>
+                            <span class="font-weight-bold text-gray-600">Disburse</span>
                         </div>
                     </div>
                 </div>
@@ -137,33 +189,32 @@
         </div>
     </div>
 
-    <!-- Recent Ecosystem Activity -->
+    <!-- ── Recent Ecosystem Activity ── -->
     <div class="row">
         <div class="col-12">
-            <div class="card border-0 shadow-sm dt-card" style="border-radius: 20px;">
-                <div class="dt-toolbar border-0 d-flex align-items-center justify-content-between" style="padding: 24px;">
+            <div class="card border-0 shadow-sm dt-card" style="border-radius: 24px; overflow: hidden; background: white;">
+                <div class="dt-toolbar border-0 d-flex align-items-center justify-content-between" style="padding: 28px;">
                     <div class="d-flex align-items-center gap-3">
                         <h6 class="m-0 font-weight-bold text-gray-800" style="font-size: 1.1rem;">Ecosystem Real-time Activity</h6>
                         <div class="d-flex align-items-center gap-2 bg-success-soft text-success px-3 py-1 rounded-pill">
-                            <div style="width: 6px; height: 6px; border-radius: 50%; background: var(--success); box-shadow: 0 0 0 4px var(--success-soft);" class="pulse"></div>
-                            <span style="font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Live feed</span>
+                            <div style="width: 8px; height: 8px; border-radius: 50%; background: #059669; box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.1);" class="pulse"></div>
+                            <span style="font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">LIVE FEED</span>
                         </div>
                     </div>
-                    <a href="<?= base_url('admin/report'); ?>" class="btn btn-light btn-sm font-weight-bold px-3 py-2" style="border-radius: 10px; font-size: 11px; color: var(--primary);">
-                        VIEW FULL LOGS <i class="fas fa-chevron-right ml-1"></i>
+                    <a href="<?= base_url('admin/report'); ?>" class="btn btn-primary btn-sm font-weight-bold px-4 py-2" style="border-radius: 12px; font-size: 11px;">
+                        EXPLORE RECORDS <i class="fas fa-external-link-alt ml-2" style="font-size: 10px;"></i>
                     </a>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
                         <table id="recentActivityTable" class="table mb-0" style="width:100%">
                             <thead>
-                                <tr style="background: var(--bg-body);">
-
-                                    <th class="border-0 px-4 py-3" style="font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; width: 180px;">TIMESTAMP</th>
-                                    <th class="border-0 px-4 py-3" style="font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em;">PARTNER NAME</th>
-                                    <th class="border-0 px-4 py-3" style="font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em;">TRANS. TYPE</th>
-                                    <th class="border-0 px-4 py-3 text-right" style="font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em;">AMOUNT</th>
-                                    <th class="border-0 px-4 py-3 text-center" style="font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em;">STATUS</th>
+                                <tr style="background: #f8fafc;">
+                                    <th class="border-0 px-4 py-4 text-muted" style="font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; width: 220px;">TIMESTAMP</th>
+                                    <th class="border-0 px-4 py-4 text-muted" style="font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">PARTNER NAME</th>
+                                    <th class="border-0 px-4 py-4 text-muted" style="font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">CHANNEL</th>
+                                    <th class="border-0 px-4 py-4 text-muted text-right" style="font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">AMOUNT</th>
+                                    <th class="border-0 px-4 py-4 text-muted text-center" style="font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">STATUS</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -171,8 +222,8 @@
                             </tbody>
                         </table>
                     </div>
-                    <div class="py-4 text-center">
-                        <p class="m-0 text-muted small">Updated every 30 seconds &bull; Real-time ecosystem integrity monitoring</p>
+                    <div class="py-5 text-center border-top" style="border-color: #f1f5f9 !important;">
+                        <p class="m-0 text-muted small"><i class="fas fa-sync-alt fa-spin mr-2"></i> Auto-refresh active every 30s &bull; Guaranteed data integrity from 4 core payment clusters</p>
                     </div>
                 </div>
             </div>
@@ -181,29 +232,41 @@
 </div>
 
 <style>
-/* Dashboard Specific Styles */
+/* Dashboard Specific Premium Styles */
+.dash-kpi-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: default;
+}
+.dash-kpi-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+}
+
+.bg-primary-soft { background-color: rgba(99, 102, 241, 0.1); }
+.bg-success-soft { background-color: rgba(16, 185, 129, 0.1); }
+
 .pulse {
     animation: pulse-animation 2s infinite;
 }
 @keyframes pulse-animation {
-    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(28, 200, 138, 0.7); }
-    70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(28, 200, 138, 0); }
-    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(28, 200, 138, 0); }
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+    70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
 }
 
 #recentActivityTable tbody tr {
     transition: background 0.2s;
 }
 #recentActivityTable tbody tr:hover {
-    background-color: var(--bg-body) !important;
+    background-color: #f8fafc !important;
 }
 #recentActivityTable td {
-    padding: 16px 24px;
+    padding: 20px 24px;
     font-size: 14px;
     color: var(--gray-700);
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
 }
-
 </style>
 
 <script src="<?= base_url('assets/'); ?>vendor/chart.js/Chart.min.js"></script>
@@ -211,13 +274,13 @@
     $(document).ready(function() {
         // Enhanced DataTable Init
         initServerDataTable("#recentActivityTable", "<?= base_url('admin/recent_mutations_json') ?>", [
-            {data: 'date'},
-            {data: 'merchant'},
+            {data: 'date', className: "font-weight-bold text-gray-600"},
+            {data: 'merchant', className: "font-weight-bold"},
             {data: 'type'},
-            {data: 'amount', className:"text-right font-weight-bold text-gray-800"},
+            {data: 'amount', className:"text-right font-weight-bold text-dark"},
             {data: 'status', className: 'text-center'}
         ], {
-            "pageLength": 10,
+            "pageLength": 8,
             "lengthChange": false,
             "searching": false,
             "info": false,
@@ -225,16 +288,16 @@
         });
     });
 
-    // Global Chart.js Overrides for Premium Finish
+    // Global Chart.js Modern Overrides
     Chart.defaults.global.defaultFontFamily = "'Inter', -apple-system, system-ui, sans-serif";
-    Chart.defaults.global.defaultFontColor = '#94a3b8';
+    Chart.defaults.global.defaultFontColor = '#64748b';
     Chart.defaults.global.defaultFontSize = 11;
 
     function number_format(number) {
         return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
     }
 
-    // Area Chart: Polished for FinTech Aesthetic
+    // Area Chart: Smooth, High-End Gradient Look
     var ctxArea = document.getElementById("mainAreaChart");
     var mainAreaChart = new Chart(ctxArea, {
         type: 'line',
@@ -243,25 +306,27 @@
             datasets: [
                 {
                     label: "QRIS",
-                    borderColor: "#664EFF", // --primary
-                    backgroundColor: "rgba(102, 78, 255, 0.08)",
+                    borderColor: "#6366f1",
+                    backgroundColor: "rgba(99, 102, 241, 0.05)",
                     data: <?= json_encode($monthly_overview['qris']); ?>,
                     lineTension: 0.4,
                     pointRadius: 4,
                     pointBackgroundColor: "#fff",
+                    pointBorderColor: "#6366f1",
                     pointBorderWidth: 2,
-                    borderWidth: 3
+                    borderWidth: 3.5
                 },
                 {
                     label: "Disburse",
-                    borderColor: "#f6c23e", // --warning
-                    backgroundColor: "rgba(246, 194, 62, 0.08)",
+                    borderColor: "#f59e0b",
+                    backgroundColor: "rgba(245, 158, 11, 0.05)",
                     data: <?= json_encode($monthly_overview['disburse']); ?>,
                     lineTension: 0.4,
                     pointRadius: 4,
                     pointBackgroundColor: "#fff",
+                    pointBorderColor: "#f59e0b",
                     pointBorderWidth: 2,
-                    borderWidth: 3
+                    borderWidth: 3.5
                 }
             ],
         },
@@ -270,22 +335,25 @@
             legend: { display: false },
             scales: {
                 yAxes: [{
-                    gridLines: { color: "#f1f5f9", zeroLineColor: "#f1f5f9", drawBorder: false },
+                    gridLines: { color: "rgba(241, 245, 249, 1)", zeroLineColor: "rgba(241, 245, 249, 1)", drawBorder: false },
                     ticks: {
                         callback: function(value) { return 'Rp' + number_format(value); },
                         maxTicksLimit: 7,
-                        padding: 15
+                        padding: 15,
+                        fontStyle: '600'
                     }
                 }],
                 xAxes: [{
                     gridLines: { display: false },
-                    ticks: { padding: 15 }
+                    ticks: { padding: 15, fontStyle: '600' }
                 }]
             },
             tooltips: {
-                backgroundColor: "rgba(255, 255, 255, 0.95)",
+                backgroundColor: "rgba(255, 255, 255, 1)",
                 titleFontColor: "#1e293b",
-                bodyFontColor: "#64748b",
+                titleFontSize: 14,
+                bodyFontColor: "#475569",
+                bodyFontSize: 13,
                 borderColor: "#e2e8f0",
                 borderWidth: 1,
                 xPadding: 15,
@@ -296,14 +364,14 @@
                 caretPadding: 10,
                 callbacks: {
                     label: function(tooltipItem, data) {
-                        return data.datasets[tooltipItem.datasetIndex].label + ': Rp ' + number_format(tooltipItem.yLabel);
+                        return ' ' + data.datasets[tooltipItem.datasetIndex].label + ': Rp ' + number_format(tooltipItem.yLabel);
                     }
                 }
             }
         }
     });
 
-    // Donut Chart: Ultra-Modern Clean Look
+    // Donut Chart: Clean, Modern Doughnut
     var ctxDonut = document.getElementById("channelDonutChart");
     var channelDonutChart = new Chart(ctxDonut, {
         type: 'doughnut',
@@ -316,25 +384,33 @@
                     <?= $today_stats['ewallet']['qty']; ?>,
                     <?= $today_stats['disburse']['qty']; ?>
                 ],
-                backgroundColor: ['#664EFF', '#1cc88a', '#36b9cc', '#f6c23e'],
-                hoverBackgroundColor: ['#553ce6', '#17a673', '#2c9faf', '#dda20a'],
-                hoverBorderColor: "rgba(255, 255, 255, 1)",
-                borderWidth: 5,
+                backgroundColor: ['#6366f1', '#10b981', '#3b82f6', '#f59e0b'],
+                hoverBackgroundColor: ['#4f46e5', '#059669', '#2563eb', '#d97706'],
+                hoverBorderColor: "#fff",
+                borderWidth: 6,
             }],
         },
         options: {
             maintainAspectRatio: false,
-            cutoutPercentage: 82,
+            cutoutPercentage: 84,
             legend: { display: false },
             tooltips: {
-                backgroundColor: "rgba(255, 255, 255, 0.95)",
+                backgroundColor: "rgba(255, 255, 255, 1)",
                 bodyFontColor: "#1e293b",
+                bodyFontSize: 13,
                 borderColor: "#e2e8f0",
                 borderWidth: 1,
-                xPadding: 12,
-                yPadding: 12,
+                xPadding: 15,
+                yPadding: 15,
                 displayColors: false,
                 caretPadding: 10,
+                callbacks: {
+                    label: function(tooltipItem, data) {
+                        var label = data.labels[tooltipItem.index];
+                        var value = data.datasets[0].data[tooltipItem.index];
+                        return ' ' + label + ': ' + number_format(value) + ' transactions';
+                    }
+                }
             },
         },
     });

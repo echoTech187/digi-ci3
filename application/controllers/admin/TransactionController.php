@@ -2446,14 +2446,14 @@ class TransactionController extends CI_Controller
       $this->load->model('BiFast');
 
       $ref_cashoutExternalId = $this->input->post('ref_cashoutExternalId');
-      $ref_cashoutExternalLogQrisMpmIdCreate = $this->input->post('ref_cashoutExternalLogQrisMpmIdCreate');
+      $ref_cashoutExternalLogBifastId = $this->input->post('ref_cashoutExternalLogBifastId');
 
       if (empty($ref_cashoutExternalId)) {
          echo json_encode(['error' => 'Invalid data sent to server']);
          return;
       }
 
-      $detailData = $this->BiFast->getDataBiFastChannelExternal($ref_cashoutExternalId, $ref_cashoutExternalLogQrisMpmIdCreate);
+      $detailData = $this->BiFast->getDataBiFastChannelExternal($ref_cashoutExternalId, $ref_cashoutExternalLogBifastId);
       echo json_encode($detailData);
    }
 

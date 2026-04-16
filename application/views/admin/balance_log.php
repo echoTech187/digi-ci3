@@ -16,7 +16,7 @@
             <div class="dt-summary-body">
                 <div class="dt-summary-label">TOTAL LOGS</div>
                 <div class="dt-summary-value"><?= number_format($total_logs, 0, ',', '.'); ?></div>
-                <div class="dt-summary-sub"><i class="fas fa-history mr-1"></i>Total adjustment records</div>
+                <div class="dt-summary-sub"><i class="fas fa-history mr-1 mr-2"></i> Total adjustment records</div>
             </div>
             <div class="dt-summary-icon dt-icon-blue">
                 <i class="fas fa-clipboard-list"></i>
@@ -28,7 +28,7 @@
             <div class="dt-summary-body">
                 <div class="dt-summary-label">ACTIVE MERCHANTS</div>
                 <div class="dt-summary-value"><?= number_format($total_merchants, 0, ',', '.'); ?></div>
-                <div class="dt-summary-sub"><i class="fas fa-users-cog mr-1"></i>Unique merchants adjusted</div>
+                <div class="dt-summary-sub"><i class="fas fa-users-cog mr-1 mr-2"></i> Unique merchants adjusted</div>
             </div>
             <div class="dt-summary-icon dt-icon-green">
                 <i class="fas fa-user-check"></i>
@@ -40,7 +40,7 @@
             <div class="dt-summary-body">
                 <div class="dt-summary-label">TOTAL SETTLED</div>
                 <div class="dt-summary-value">Rp <?= number_format($total_settled, 0, ',', '.'); ?></div>
-                <div class="dt-summary-sub"><i class="fas fa-wallet mr-1"></i>Cumulative balance added</div>
+                <div class="dt-summary-sub"><i class="fas fa-wallet mr-1 mr-2"></i> Cumulative balance added</div>
             </div>
             <div class="dt-summary-icon dt-icon-orange">
                 <i class="fas fa-money-bill-wave"></i>
@@ -52,7 +52,7 @@
             <div class="dt-summary-body">
                 <div class="dt-summary-label">AVG. ADJUSTMENT</div>
                 <div class="dt-summary-value">Rp <?= number_format($avg_settled, 0, ',', '.'); ?></div>
-                <div class="dt-summary-sub"><i class="fas fa-chart-line mr-1"></i>Average per transaction</div>
+                <div class="dt-summary-sub"><i class="fas fa-chart-line mr-1 mr-2"></i> Average per transaction</div>
             </div>
             <div class="dt-summary-icon dt-icon-purple">
                 <i class="fas fa-percentage"></i>
@@ -117,7 +117,7 @@ $(document).ready(function() {
             "processing": '<i class="fa fa-spinner fa-spin fa-2x fa-fw mx-auto d-block text-primary"></i>',
             "info": "Showing _START_ – _END_ of _TOTAL_ entries",
             "infoEmpty": "No results to show",
-            "zeroRecords": '<div class="text-center py-4 text-muted"><i class="fas fa-inbox fa-2x mb-2 d-block"></i>No logs found.</div>'
+            "zeroRecords": '<div class="text-center py-4 text-muted"><i class="fas fa-inbox fa-2x mb-2 d-block mr-2"></i> No logs found.</div>'
         },
         drawCallback: function(settings) {
             var api    = this.api();
@@ -129,7 +129,7 @@ $(document).ready(function() {
 
             $pager.html(
                 '<button class="dt-nav-btn dt-prev-btn" ' + (info.page === 0 ? 'disabled' : '') + '>' +
-                    '<i class="fas fa-chevron-left"></i> PREVIOUS' +
+                    '<i class="fas fa-chevron-left mr-2"></i> PREVIOUS' +
                 '</button>' +
                 '<span class="dt-page-counter">' +
                     '<strong>' + currPage + '</strong> of <strong>' + totalPages + '</strong>' +
@@ -155,3 +155,5 @@ $(document).ready(function() {
     }, 400));
 });
 </script>
+
+

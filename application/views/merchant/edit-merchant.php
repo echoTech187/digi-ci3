@@ -16,20 +16,20 @@
                 <div class="card-body p-4 pt-0">
                     <?php if ($this->session->flashdata('error')): ?>
                         <div class="alert alert-danger border-left-danger shadow-sm mb-4">
-                            <i class="fas fa-exclamation-circle mr-2"></i> <?= $this->session->flashdata('error'); ?>
+                            <i class="fas fa-exclamation-circle "></i> <?= $this->session->flashdata('error'); ?>
                         </div>
                     <?php endif; ?>
 
                     <?php if ($this->session->flashdata('success')): ?>
                         <div class="alert alert-success border-left-success shadow-sm mb-4">
-                            <i class="fas fa-check-circle mr-2"></i> <?= $this->session->flashdata('success'); ?>
+                            <i class="fas fa-check-circle "></i> <?= $this->session->flashdata('success'); ?>
                         </div>
                     <?php endif; ?>
 
                     <form action="<?= base_url('admin/updateMerchant/' . $merchant['id']); ?>" method="post">
                         
                         <div class="section-title mb-4 mt-0 text-primary font-weight-bold small">
-                            <i class="fas fa-link mr-2"></i> WEBHOOK CALLBACKS
+                            <i class="fas fa-link  mr-2"></i> WEBHOOK CALLBACKS
                         </div>
 
                         <div class="form-group mb-4">
@@ -74,7 +74,7 @@
                         <hr class="my-5" style="border-top: 1px dashed #e3e6f0;">
 
                         <div class="section-title mb-4 text-primary font-weight-bold small">
-                            <i class="fas fa-shield-alt mr-2"></i> SYSTEM STATUS
+                            <i class="fas fa-shield-alt  mr-2"></i> SYSTEM STATUS
                         </div>
 
                         <div class="form-group mb-5">
@@ -90,7 +90,7 @@
 
                         <div class="d-flex justify-content-end">
                             <button type="submit" class="btn-dt-action btn-dt-action-primary" style="padding: 12px 40px; font-size: 14px;">
-                                <i class="fas fa-save mr-2"></i> Save Configuration
+                                <i class="fas fa-save  mr-2"></i> Save Configuration
                             </button>
                         </div>
                     </form>
@@ -128,22 +128,22 @@
             <div class="card border-0 shadow-sm dt-card">
                 <div class="card-body p-4">
                     <h6 class="font-weight-bold text-gray-800 mb-3 d-flex align-items-center">
-                        <i class="fas fa-lightbulb text-warning mr-2"></i> Integration Tips
+                        <i class="fas fa-lightbulb text-warning  mr-2"></i> Integration Tips
                     </h6>
                     <div class="small text-muted mb-3" style="line-height: 1.6;">
                         Optimize your integration by following these best practices for webhook delivery.
                     </div>
                     <ul class="list-unstyled mb-0">
                         <li class="mb-3 d-flex align-items-start">
-                            <i class="fas fa-check-circle text-success mr-2 mt-1" style="font-size: 10px;"></i>
+                            <i class="fas fa-check-circle text-success  mt-1" style="font-size: 10px;"></i>
                             <span class="small">Use <strong>HTTPS</strong> for all callback endpoints to ensure data security.</span>
                         </li>
                         <li class="mb-3 d-flex align-items-start">
-                            <i class="fas fa-check-circle text-success mr-2 mt-1" style="font-size: 10px;"></i>
+                            <i class="fas fa-check-circle text-success  mt-1" style="font-size: 10px;"></i>
                             <span class="small">Implement signature verification to validate that incoming webhooks are from us.</span>
                         </li>
                         <li class="d-flex align-items-start">
-                            <i class="fas fa-check-circle text-success mr-2 mt-1" style="font-size: 10px;"></i>
+                            <i class="fas fa-check-circle text-success  mt-1" style="font-size: 10px;"></i>
                             <span class="small">Ensure your server responds with a <code>200 OK</code> status promptly.</span>
                         </li>
                     </ul>
@@ -171,3 +171,5 @@
     border-radius: 8px;
 }
 </style>
+
+

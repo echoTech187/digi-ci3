@@ -15,13 +15,13 @@
     <!-- ── Alert Messages ── -->
     <?php if ($this->session->flashdata('success')) : ?>
         <div class="alert alert-success border-0 shadow-sm animate__animated animate__fadeIn mb-4" style="border-radius: 12px; background: #ecfdf5; color: #065f46; border-left: 4px solid #10b981 !important;">
-            <i class="fas fa-check-circle mr-2"></i> <?= $this->session->flashdata('success'); ?>
+            <i class="fas fa-check-circle "></i> <?= $this->session->flashdata('success'); ?>
         </div>
     <?php endif; ?>
 
     <?php if ($this->session->flashdata('error')) : ?>
         <div class="alert alert-danger border-0 shadow-sm animate__animated animate__fadeIn mb-4" style="border-radius: 12px; background: #fef2f2; color: #991b1b; border-left: 4px solid #ef4444 !important;">
-            <i class="fas fa-exclamation-circle mr-2"></i> <?= $this->session->flashdata('error'); ?>
+            <i class="fas fa-exclamation-circle "></i> <?= $this->session->flashdata('error'); ?>
         </div>
     <?php endif; ?>
 
@@ -78,7 +78,7 @@
         <div class="modal-content border-0 shadow-lg" style="border-radius: 24px; overflow: hidden;">
             <div class="modal-header border-0 py-4" style="background: linear-gradient(135deg, var(--primary) 0%, #4f39ce 100%) !important; color: white;">
                 <h6 class="modal-title font-weight-bold" id="settingHolidayModalTitle" style="font-size: 1.1rem; letter-spacing: 0.5px;">
-                    <i class="fas fa-calendar-check mr-2"></i>MANAGE HOLIDAY
+                    <i class="fas fa-calendar-check  mr-2"></i> MANAGE HOLIDAY
                 </h6>
                 <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" style="opacity: 0.8; outline: none;">
                     <span aria-hidden="true">&times;</span>
@@ -265,3 +265,5 @@
     calendar.render();
   });
 </script>
+
+

@@ -17,14 +17,14 @@ $id = $this->uri->segment(3);
     <!-- Alerts -->
     <?php if ($this->session->flashdata('success')): ?>
         <div class="alert alert-success border-left-success shadow-sm alert-dismissible fade show mb-4" role="alert">
-            <i class="fas fa-check-circle mr-2"></i> <?= $this->session->flashdata('success'); ?>
+            <i class="fas fa-check-circle "></i> <?= $this->session->flashdata('success'); ?>
             <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         </div>
     <?php endif; ?>
 
     <?php if ($this->session->flashdata('error')): ?>
         <div class="alert alert-danger border-left-danger shadow-sm alert-dismissible fade show mb-4" role="alert">
-            <i class="fas fa-exclamation-circle mr-2"></i> <?= $this->session->flashdata('error'); ?>
+            <i class="fas fa-exclamation-circle "></i> <?= $this->session->flashdata('error'); ?>
             <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         </div>
     <?php endif; ?>
@@ -45,7 +45,7 @@ $id = $this->uri->segment(3);
                 <div class="dt-filter-group">
                     <label class="dt-filter-label">&nbsp;</label>
                     <button type="button" class="btn-dt-chip-action btn-dt-secondary" onclick="location.reload()">
-                        <i class="fas fa-sync-alt mr-1"></i> Refresh
+                        <i class="fas fa-sync-alt mr-1 mr-2"></i> Refresh
                     </button>
                 </div>
             </div>
@@ -76,12 +76,21 @@ $id = $this->uri->segment(3);
 <div class="modal fade" id="subMerchantModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
         <div class="modal-content glass-card border-0">
-            <div class="modal-header modal-header-primary py-3">
-                <h5 class="modal-title font-weight-bold" id="modalLabel">Add New Submerchant</h5>
-                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
+            <!-- Header Legacy Migrated -->
+<div class="modal-header modal-header-primary border-0 mh-premium">
+    <div class="d-flex align-items-center">
+        <div class="mh-icon-badge">
+            <i class="fas fa-store"></i>
+        </div>
+        <div class="mh-title-wrap">
+            <h6 class="mh-title" id="subMerchantModalLabel">Add New Submerchant</h6>
+            <small class="mh-subtitle" >Create and register new data record</small>
+        </div>
+    </div>
+    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" style="opacity:0.8;">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
             <form id="submerchant_form" method="post" action="<?= base_url('admin/registersubMerchant'); ?>">
                 <div class="modal-body p-4">
                     <input type="hidden" name="ref_merchantId" value="<?= $id ?>">
@@ -201,7 +210,7 @@ $(document).ready(function() {
                 "info": "Showing _START_ – _END_ of _TOTAL_ results",
                 "infoEmpty": "No results to show",
                 "infoFiltered": "",
-                "zeroRecords": '<div class="text-center py-4 text-muted"><i class="fas fa-inbox fa-2x mb-2 d-block"></i>No transactions found.</div>'
+                "zeroRecords": '<div class="text-center py-4 text-muted"><i class="fas fa-inbox fa-2x mb-2 d-block mr-2"></i> No transactions found.</div>'
             },
             "dom": 'rt<"dt-footer"<"dt-footer-info"i><"dt-footer-pager">>',
             "drawCallback": function(settings) {
@@ -214,7 +223,7 @@ $(document).ready(function() {
 
                 $pager.html(
                     '<button class="dt-nav-btn dt-prev-btn" ' + (info.page === 0 ? 'disabled' : '') + '>' +
-                        '<i class="fas fa-chevron-left"></i> PREVIOUS' +
+                        '<i class="fas fa-chevron-left mr-2"></i> PREVIOUS' +
                     '</button>' +
                     '<span class="dt-page-counter">' +
                         '<strong>' + currPage + '</strong> of <strong>' + totalPages + '</strong>' +
@@ -239,3 +248,5 @@ $(document).ready(function() {
     });
 });
 </script>
+
+

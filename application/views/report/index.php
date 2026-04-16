@@ -27,7 +27,7 @@
                     <input type="date" id="search_date" class="dt-more-input" value="<?= $search_date; ?>" style="min-width:160px;">
                 </div>
                 <a href="<?= base_url('admin/resetdownload'); ?>" class="btn-dt-chip-action btn-dt-action-primary border-0">
-                    <i class="fas fa-undo mr-1"></i> Reset Filter
+                    <i class="fas fa-undo mr-1 mr-2"></i> Reset Filter
                 </a>
             </div>
             
@@ -36,7 +36,7 @@
         <!-- ── Alert Messages ── -->
         <?php if ($this->session->flashdata('success')) : ?>
             <div class="alert alert-success mx-4 mt-3 mb-0 border-0 shadow-sm animate__animated animate__fadeIn">
-                <i class="fas fa-check-circle mr-2"></i> <?= $this->session->flashdata('success'); ?>
+                <i class="fas fa-check-circle "></i> <?= $this->session->flashdata('success'); ?>
             </div>
         <?php endif; ?>
 
@@ -96,7 +96,7 @@
                 "processing": '<i class="fa fa-spinner fa-spin fa-2x fa-fw mx-auto d-block text-primary"></i>',
                 "info": "Showing _START_ – _END_ of _TOTAL_ reports",
                 "infoEmpty": "No reports to show",
-                "zeroRecords": '<div class="text-center py-4 text-muted"><i class="fas fa-file-alt fa-2x mb-2 d-block"></i>No reports found.</div>'
+                "zeroRecords": '<div class="text-center py-4 text-muted"><i class="fas fa-file-alt fa-2x mb-2 d-block mr-2"></i> No reports found.</div>'
             },
             "drawCallback": function(settings) {
                 var api    = this.api();
@@ -108,7 +108,7 @@
 
                 $pager.html(
                     '<button class="dt-nav-btn dt-prev-btn" ' + (info.page === 0 ? 'disabled' : '') + '>' +
-                        '<i class="fas fa-chevron-left"></i> PREVIOUS' +
+                        '<i class="fas fa-chevron-left mr-2"></i> PREVIOUS' +
                     '</button>' +
                     '<span class="dt-page-counter">' +
                         '<strong>' + currPage + '</strong> of <strong>' + totalPages + '</strong>' +
@@ -138,3 +138,5 @@
         });
     });
 </script>
+
+

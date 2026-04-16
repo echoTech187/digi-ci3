@@ -48,10 +48,10 @@
                             <label class="dt-filter-label d-none d-md-block">&nbsp;</label>
                             <div class="d-flex" style="gap:6px;">
                                 <button type="submit" name="submit" class="btn-dt-chip-action btn-dt-primary">
-                                    <i class="fas fa-filter mr-1"></i> Apply
+                                    <i class="fas fa-filter mr-1 mr-2"></i> Apply
                                 </button>
                                 <a href="<?php echo base_url('admin/resetMutation/'. $id); ?>" class="btn-dt-chip-action btn-dt-secondary">
-                                    <i class="fas fa-undo mr-1"></i> Reset
+                                    <i class="fas fa-undo mr-1 mr-2"></i> Reset
                                 </a>
                                 <a href="<?php echo $download_url; ?>" class="btn-dt-chip-action btn-dt-action-success border-0">
                                     <i class="fas fa-download"></i> <span class="d-none d-md-block">Export</span>
@@ -62,9 +62,9 @@
                 </div>
             </form>
 
-            <?= $this->session->flashdata('success') ? '<div class="alert alert-success mx-4 mt-3 border-0 shadow-sm"><i class="fas fa-check-circle mr-2"></i>'.$this->session->flashdata('success').'</div>' : '' ?>
-            <?= isset($alert_message) ? '<div class="alert alert-danger mx-4 mt-3 border-0 shadow-sm"><i class="fas fa-exclamation-triangle mr-2"></i>'.$alert_message.'</div>' : '' ?>
-            <?= $error_message ? '<div class="alert alert-danger mx-4 mt-3 border-0 shadow-sm"><i class="fas fa-exclamation-circle mr-2"></i>'.$error_message.'</div>' : '' ?>
+            <?= $this->session->flashdata('success') ? '<div class="alert alert-success mx-4 mt-3 border-0 shadow-sm"><i class="fas fa-check-circle "></i>'.$this->session->flashdata('success').'</div>' : '' ?>
+            <?= isset($alert_message) ? '<div class="alert alert-danger mx-4 mt-3 border-0 shadow-sm"><i class="fas fa-exclamation-triangle "></i>'.$alert_message.'</div>' : '' ?>
+            <?= $error_message ? '<div class="alert alert-danger mx-4 mt-3 border-0 shadow-sm"><i class="fas fa-exclamation-circle "></i>'.$error_message.'</div>' : '' ?>
         </div>
 
         
@@ -86,8 +86,7 @@
                     <?php if (empty($mutations)): ?>
                         <tr>
                             <td colspan="7" class="text-center py-5 text-muted">
-                                <i class="fas fa-inbox fa-2x mb-2 d-block"></i>
-                                No mutation data found for the selected period.
+                                <i class="fas fa-inbox fa-2x mb-2 d-block mr-2"></i> No mutation data found for the selected period.
                             </td>
                         </tr>
                     <?php else: ?>
@@ -192,3 +191,5 @@ $(document).ready(function () {
 
 });
 </script>
+
+

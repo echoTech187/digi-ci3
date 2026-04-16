@@ -27,7 +27,7 @@
                 <div class="dt-filter-group">
                     <div class="d-flex" style="gap:6px;">
                         <button type="button" class="btn-dt-chip-action btn-dt-primary" data-toggle="modal" data-target="#registerMerchantSpv">
-                            <i class="fas fa-plus mr-1"></i> Add Supervisor
+                            <i class="fas fa-plus mr-1 mr-2"></i> Add Supervisor
                         </button>
                     </div>
                 </div>
@@ -37,14 +37,14 @@
         <div class="px-4">
             <?php if ($this->session->flashdata('success')) : ?>
                 <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm mb-3">
-                    <i class="fas fa-check-circle mr-2"></i><?= $this->session->flashdata('success'); ?>
+                    <i class="fas fa-check-circle "></i><?= $this->session->flashdata('success'); ?>
                     <button type="button" class="btn-close" data-dismiss="alert" aria-label="Close"></button>
                 </div>
             <?php endif; ?>
 
             <?php if ($this->session->flashdata('error')) : ?>
                 <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm mb-3">
-                    <i class="fas fa-exclamation-circle mr-2"></i><?= $this->session->flashdata('error'); ?>
+                    <i class="fas fa-exclamation-circle "></i><?= $this->session->flashdata('error'); ?>
                     <button type="button" class="btn-close" data-dismiss="alert" aria-label="Close"></button>
                 </div>
             <?php endif; ?>
@@ -91,13 +91,13 @@
                                             <ul class="dropdown-menu dropdown-menu-end shadow border-0 py-2">
                                                 <li>
                                                     <a class="dropdown-item py-2" href="<?= base_url('admin/listMerchants/' . $mspv->id) ?>">
-                                                        <i class="fas fa-store mr-2 text-primary"></i> View Merchants
+                                                        <i class="fas fa-store  text-primary mr-2"></i> View Merchants
                                                     </a>
                                                 </li>
                                                 <li class="dropdown-divider"></li>
                                                 <li>
                                                     <a class="dropdown-item py-2 text-danger" href="#">
-                                                        <i class="fas fa-trash-alt mr-2"></i> Delete
+                                                        <i class="fas fa-trash-alt  mr-2"></i> Delete
                                                     </a>
                                                 </li>
                                             </ul>
@@ -117,14 +117,21 @@
 <div class="modal fade" id="registerMerchantSpv" tabindex="-1" role="dialog" aria-labelledby="registerMerchantSpvLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header modal-header-primary border-0 py-3">
-                <h5 class="modal-title font-weight-bold text-white" id="registerMerchantSpvLabel">
-                    <i class="fas fa-user-shield mr-2"></i>Register Merchant SPV
-                </h5>
-                <button type="button" class="close text-white outline-none" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
+            <!-- Header Legacy Migrated -->
+<div class="modal-header modal-header-primary border-0 mh-premium">
+    <div class="d-flex align-items-center">
+        <div class="mh-icon-badge">
+            <i class="fas fa-store"></i>
+        </div>
+        <div class="mh-title-wrap">
+            <h6 class="mh-title"  id="registerMerchantSpvLabel">Register Merchant SPV</h6>
+            <small class="mh-subtitle" >Manage and process information details</small>
+        </div>
+    </div>
+    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" style="opacity:0.8;">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
             <div class="modal-body p-4 text-dark">
                 <form method="post" action="<?= base_url('admin/registerMerchantSpv'); ?>">
                     <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>">
@@ -180,8 +187,8 @@
 
                     <div class="modal-footer px-0 pb-0 border-0 pt-3 mt-2">
                         <button type="button" class="btn-dt-cancel" data-dismiss="modal">Close</button>
-                        <button type="submit" class="btn-dt-apply px-4 ml-2">
-                            <i class="fas fa-save mr-2"></i> Register Supervisor
+                        <button type="submit" class="btn-dt-apply px-4 ">
+                            <i class="fas fa-save  mr-2"></i> Register Supervisor
                         </button>
                     </div>
                 </form>
@@ -200,7 +207,7 @@ $(document).ready(function() {
         language: {
             "info": "Showing _START_ – _END_ of _TOTAL_ entries",
             "infoEmpty": "No entries to show",
-            "zeroRecords": '<div class="text-center py-4 text-muted"><i class="fas fa-inbox fa-2x mb-2 d-block"></i>No supervisors found.</div>'
+            "zeroRecords": '<div class="text-center py-4 text-muted"><i class="fas fa-inbox fa-2x mb-2 d-block mr-2"></i> No supervisors found.</div>'
         },
         drawCallback: function(settings) {
             var api    = this.api();
@@ -212,7 +219,7 @@ $(document).ready(function() {
 
             $pager.html(
                 '<button class="dt-nav-btn dt-prev-btn" ' + (info.page === 0 ? 'disabled' : '') + '>' +
-                    '<i class="fas fa-chevron-left"></i> PREVIOUS' +
+                    '<i class="fas fa-chevron-left mr-2"></i> PREVIOUS' +
                 '</button>' +
                 '<span class="dt-page-counter">' +
                     '<strong>' + currPage + '</strong> of <strong>' + totalPages + '</strong>' +
@@ -265,3 +272,6 @@ $(document).ready(function() {
     // Ensure tooltips/popovers work if any
 });
 </script>
+
+
+

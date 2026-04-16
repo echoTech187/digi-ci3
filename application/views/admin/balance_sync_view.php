@@ -8,7 +8,7 @@
         </div>
         <div class="d-flex align-items-center gap-2">
             <button onclick="window.location.reload()" class="btn-dt-action btn-dt-secondary">
-                <i class="fas fa-sync mr-1"></i> Re-Sync
+                <i class="fas fa-sync mr-1 mr-2"></i> Re-Sync
             </button>
         </div>
     </div>
@@ -88,3 +88,5 @@
         </div>
     </div>
 </div>
+
+

@@ -5,7 +5,7 @@
     <div class="dt-page-header">
         <div>
             <div class="d-flex align-items-center mb-1">
-                <a href="<?= base_url('admin/merchant_spv'); ?>" class="btn btn-sm btn-light border rounded-circle mr-2" title="Back to Supervisors">
+                <a href="<?= base_url('admin/merchant_spv'); ?>" class="btn btn-sm btn-light border rounded-circle " title="Back to Supervisors">
                     <i class="fas fa-arrow-left text-primary"></i>
                 </a>
                 <h4 class="dt-page-title text-dark fw-700 mb-0">Merchants for Supervisor #<?= $supervisor_id ?></h4>
@@ -93,7 +93,7 @@ $(document).ready(function() {
         language: {
             "info": "Showing _START_ – _END_ of _TOTAL_ entries",
             "infoEmpty": "No entries to show",
-            "zeroRecords": '<div class="text-center py-4 text-muted"><i class="fas fa-inbox fa-2x mb-2 d-block"></i>No merchants assigned to this supervisor.</div>'
+            "zeroRecords": '<div class="text-center py-4 text-muted"><i class="fas fa-inbox fa-2x mb-2 d-block mr-2"></i> No merchants assigned to this supervisor.</div>'
         },
         drawCallback: function(settings) {
             var api    = this.api();
@@ -105,7 +105,7 @@ $(document).ready(function() {
 
             $pager.html(
                 '<button class="dt-nav-btn dt-prev-btn" ' + (info.page === 0 ? 'disabled' : '') + '>' +
-                    '<i class="fas fa-chevron-left"></i> PREVIOUS' +
+                    '<i class="fas fa-chevron-left mr-2"></i> PREVIOUS' +
                 '</button>' +
                 '<span class="dt-page-counter">' +
                     '<strong>' + currPage + '</strong> of <strong>' + totalPages + '</strong>' +
@@ -130,3 +130,6 @@ $(document).ready(function() {
     });
 });
 </script>
+
+
+

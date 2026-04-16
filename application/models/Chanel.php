@@ -117,6 +117,10 @@ class Chanel extends CI_Model {
         public function insert_cashout_chanel($data) {
             return $this->db->insert('cashout_channel', $data);
         }
+        public function update_cashout_chanel($id, $data) {
+            $this->db->where('id', $id);
+            return $this->db->update('cashout_channel', $data);
+        }
         public function get_mobile_legend($limit, $start){
             $query = "select * from cashout_channel cc where c_channelGroup2 = 'diamond_mlbb' order by c_fee asc  ";
             return $this->db->query($query)->result();

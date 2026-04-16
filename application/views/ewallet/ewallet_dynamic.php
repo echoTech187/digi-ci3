@@ -44,8 +44,7 @@
                     <div class="dt-filter-group dt-more-filters-wrapper">
                         <label class="dt-filter-label">&nbsp;</label>
                         <button type="button" id="btnToggleFilters" class="dt-more-filters-btn btn-sm <?= $extra_active > 0 ? 'dt-more-filters-active' : ''; ?>">
-                            <i class="fas fa-sliders-h mr-1"></i>
-                            Filters
+                            <i class="fas fa-sliders-h mr-1 mr-2"></i> Filters
                             <?php if ($extra_active > 0): ?>
                                 <span class="dt-more-badge"><?= $extra_active; ?></span>
                             <?php endif; ?>
@@ -55,14 +54,14 @@
                         <!-- Dropdown Panel -->
                         <div class="dt-more-panel" id="moreFiltersPanel">
                             <div class="dt-more-panel-header">
-                                <span class="dt-more-panel-title"><i class="fas fa-filter mr-1"></i>Advanced Filters</span>
+                                <span class="dt-more-panel-title"><i class="fas fa-filter mr-1 mr-2"></i> Advanced Filters</span>
                                 <a href="<?= base_url('admin/resetewallet_dynamic'); ?>" class="dt-more-clear">Clear All</a>
                             </div>
 
                             <div class="dt-more-panel-body">
                                 <!-- Primary: Date Range -->
                                 <div class="dt-more-field">
-                                    <label class="dt-more-label"><i class="fas fa-calendar-alt mr-1"></i>Period</label>
+                                    <label class="dt-more-label"><i class="fas fa-calendar-alt mr-1 mr-2"></i> Period</label>
                                     <div class="dt-filter-chip">
                                         <input type="date" name="search_date_qd" class="dt-chip-input" value="<?= $this->session->userdata('search_date_qd'); ?>" title="Date From">
                                         <span class="text-muted mx-1" style="font-size:11px;">→</span>
@@ -72,7 +71,7 @@
 
                                 <!-- Primary: Merchant -->
                                 <div class="dt-more-field">
-                                    <label class="dt-more-label"><i class="fas fa-store mr-1"></i>Merchant</label>
+                                    <label class="dt-more-label"><i class="fas fa-store mr-1 mr-2"></i> Merchant</label>
                                     <div class="dt-filter-chip">
                                         <select name="search_name_qd" class="dt-chip-select ewallet-dynamic-select2">
                                             <option value="">All Merchants</option>
@@ -86,7 +85,7 @@
                                 </div>
                                 <!-- Status -->
                                 <div class="dt-more-field">
-                                    <label class="dt-more-label"><i class="fas fa-info-circle mr-1"></i>Status Transaction</label>
+                                    <label class="dt-more-label"><i class="fas fa-info-circle mr-1 mr-2"></i> Status Transaction</label>
                                     <select name="search_status_transaction_qd" class="dt-more-select ewallet-dynamic-select2 no-search">
                                         <option value="">All Statuses</option>
                                         <option value="Pending" <?= ($this->session->userdata('search_status_transaction_qd') == 'Pending') ? 'selected' : ''; ?>>Pending</option>
@@ -98,14 +97,14 @@
                                 
                                 <!-- Transaction ID -->
                                 <div class="dt-more-field">
-                                    <label class="dt-more-label"><i class="fas fa-hashtag mr-1"></i>Merchant Trans ID</label>
+                                    <label class="dt-more-label"><i class="fas fa-hashtag mr-1 mr-2"></i> Merchant Trans ID</label>
                                     <input type="text" name="search_transid_qd" class="dt-more-input" placeholder="e.g. TX12345..." value="<?= $this->session->userdata('search_transid_qd'); ?>">
                                 </div>
                             </div>
 
                             <div class="dt-more-panel-footer">
                                 <button type="submit" name="submit" class="btn-dt-apply btn-dt-action-primary shadow-sm">
-                                    <i class="fas fa-check mr-1"></i> APPLY FILTER
+                                    <i class="fas fa-check mr-1 mr-2"></i> APPLY FILTER
                                 </button>
                                 <button type="button" id="btnCloseFilters" class="btn-dt-cancel btn-dt-secondary">
                                     CANCEL
@@ -150,14 +149,21 @@
 <div class="modal fade" id="detailQrisDynamicChannelExternalModal" tabindex="-1">
     <div class="modal-dialog modal-lg border-0">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
-            <div class="modal-header modal-header-primary border-0 p-4">
-                <h5 class="modal-title text-white font-weight-bold" id="detailQrisDynamicChannelExternalModalLabel">
-                    <i class="fas fa-info-circle mr-2"></i> External Log Details
-                </h5>
-                <button type="button" class="close text-white opacity-100" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true" style="font-size: 1.5rem;">&times;</span>
-                </button>
-            </div>
+            <!-- Header Legacy Migrated -->
+<div class="modal-header modal-header-primary border-0 mh-premium">
+    <div class="d-flex align-items-center">
+        <div class="mh-icon-badge">
+            <i class="fas fa-info-circle"></i>
+        </div>
+        <div class="mh-title-wrap">
+            <h6 class="mh-title"  id="detailQrisDynamicChannelExternalModalLabel">External Log Details</h6>
+            <small class="mh-subtitle" >View comprehensive information details</small>
+        </div>
+    </div>
+    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" style="opacity:0.8;">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
             <div class="modal-body p-4 bg-light">
                 <div class="row mb-4">
                     <div class="col-md-4">
@@ -254,7 +260,7 @@
                 "processing": '<i class="fa fa-spinner fa-spin fa-2x fa-fw mx-auto d-block text-primary"></i>',
                 "info": "Showing _START_ – _END_ of _TOTAL_ results",
                 "infoEmpty": "No results to show",
-                "zeroRecords": '<div class="text-center py-4 text-muted"><i class="fas fa-inbox fa-2x mb-2 d-block"></i>No transactions found.</div>'
+                "zeroRecords": '<div class="text-center py-4 text-muted"><i class="fas fa-inbox fa-2x mb-2 d-block mr-2"></i> No transactions found.</div>'
             },
             "dom": 'rt<"dt-footer"<"dt-footer-info"i><"dt-footer-pager">>',
             "drawCallback": function(settings) {
@@ -267,7 +273,7 @@
 
                 $pager.html(
                     '<button class="dt-nav-btn dt-prev-btn" ' + (info.page === 0 ? 'disabled' : '') + '>' +
-                        '<i class="fas fa-chevron-left"></i> PREVIOUS' +
+                        '<i class="fas fa-chevron-left mr-2"></i> PREVIOUS' +
                     '</button>' +
                     '<span class="dt-page-counter">' +
                         '<strong>' + currPage + '</strong> of <strong>' + totalPages + '</strong>' +
@@ -339,7 +345,7 @@
                 ref_cashinExternalLogEwalletIdCreate = $(this).attr('data-ref_cashinExternalLogEwalletIdCreate');
             }
 
-            $('#detailQrisDynamicChannelExternalModalLabel').html('<i class="fas fa-info-circle mr-2"></i> External Log - ' + merchantTransactionId);
+            $('#detailQrisDynamicChannelExternalModalLabel').html('External Log - ' + merchantTransactionId);
             
             // Reset values to Loading/placeholder
             $('#cashinExternalId, #TransactionIdExternal1, #TransactionIdExternal2, #RequestDatetime, #ResponseDatetime').text('...');
@@ -380,3 +386,5 @@
         });
     });
 </script>
+
+

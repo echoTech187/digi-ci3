@@ -62,8 +62,7 @@ $download_url = base_url('admin/download_qris')
                     <div class="dt-filter-group dt-more-filters-wrapper">
                         <label class="dt-filter-label">&nbsp;</label>
                         <button type="button" id="qrisMoreFiltersBtn" class="dt-more-filters-btn <?= $extra_active > 0 ? 'dt-more-filters-active' : ''; ?>">
-                            <i class="fas fa-sliders-h mr-1"></i>
-                            Filters
+                            <i class="fas fa-sliders-h mr-1 mr-2"></i> Filters
                             <?php if ($extra_active > 0): ?>
                                 <span class="dt-more-badge"><?= $extra_active; ?></span>
                             <?php endif; ?>
@@ -73,14 +72,14 @@ $download_url = base_url('admin/download_qris')
                         <!-- Dropdown Panel -->
                         <div class="dt-more-panel" id="qrisMoreFiltersPanel">
                             <div class="dt-more-panel-header">
-                                <span class="dt-more-panel-title"><i class="fas fa-filter mr-1"></i>Advanced filters</span>
+                                <span class="dt-more-panel-title"><i class="fas fa-filter mr-1 mr-2"></i> Advanced filters</span>
                                 <a href="<?= base_url('admin/resetqris'); ?>" class="dt-more-clear">Clear All</a>
                             </div>
 
                             <div class="dt-more-panel-body">
                                 <!-- Primary: Date Range -->
                                 <div class="dt-more-field">
-                                    <label class="dt-more-label"><i class="fas fa-calendar-alt mr-1"></i>Payment Date</label>
+                                    <label class="dt-more-label"><i class="fas fa-calendar-alt mr-1 mr-2"></i> Payment Date</label>
                                     <div class="dt-filter-chip">
                                         <input type="date" name="search_date_qris" class="dt-chip-input" value="<?= $search_date_qris_value; ?>" title="Date From">
                                         <span class="text-muted mx-1" style="font-size:11px;">→</span>
@@ -89,7 +88,7 @@ $download_url = base_url('admin/download_qris')
                                 </div>
                                 <!-- Merchant -->
                                 <div class="dt-more-field">
-                                    <label class="dt-more-label"><i class="fas fa-user-tie mr-1"></i>Merchant</label>
+                                    <label class="dt-more-label"><i class="fas fa-user-tie mr-1 mr-2"></i> Merchant</label>
                                     <select name="search_name_qris" class="dt-more-select qris-select2 text-primary-custom fw-bold">
                                         <option value="">All Merchants</option>
                                         <?php foreach ($merchants as $merchant): ?>
@@ -102,26 +101,26 @@ $download_url = base_url('admin/download_qris')
 
                                 <!-- Settlement Date -->
                                 <div class="dt-more-field">
-                                    <label class="dt-more-label"><i class="fas fa-check-circle mr-1"></i>Settlement Date</label>
+                                    <label class="dt-more-label"><i class="fas fa-check-circle mr-1 mr-2"></i> Settlement Date</label>
                                     <input type="date" name="search_date_qris_settlement" class="dt-more-input" value="<?= $search_date_qris_settlement_value; ?>">
                                 </div>
 
                                 <!-- Transaction ID -->
                                 <div class="dt-more-field">
-                                    <label class="dt-more-label"><i class="fas fa-hashtag mr-1"></i>Transaction ID</label>
+                                    <label class="dt-more-label"><i class="fas fa-hashtag mr-1 mr-2"></i> Transaction ID</label>
                                     <input type="text" name="search_transactionid_ht" class="dt-more-input" placeholder="TXN-..." value="<?= $search_transactionid_ht_value; ?>">
                                 </div>
 
                                 <!-- RRN -->
                                 <div class="dt-more-field">
-                                    <label class="dt-more-label"><i class="fas fa-barcode mr-1"></i>RRN</label>
+                                    <label class="dt-more-label"><i class="fas fa-barcode mr-1 mr-2"></i> RRN</label>
                                     <input type="text" name="search_rrn" class="dt-more-input" placeholder="RRN..." value="<?= $search_rrn_value; ?>">
                                 </div>
                             </div>
 
                             <div class="dt-more-panel-footer">
                                 <button type="submit" name="submit" class="btn-dt-apply btn-dt-action-primary shadow-sm">
-                                    <i class="fas fa-check mr-1"></i> APPLY FILTER
+                                    <i class="fas fa-check mr-1 mr-2"></i> APPLY FILTER
                                 </button>
                                 <button type="button" id="qrisMoreFiltersClose" class="btn-dt-cancel btn-dt-secondary">
                                     CANCEL
@@ -199,7 +198,7 @@ $download_url = base_url('admin/download_qris')
                 "info": "Showing _START_ – _END_ of _TOTAL_ results",
                 "infoEmpty": "No results to show",
                 "infoFiltered": "",
-                "zeroRecords": '<div class="text-center py-4 text-muted"><i class="fas fa-inbox fa-2x mb-2 d-block"></i>No transactions found.</div>'
+                "zeroRecords": '<div class="text-center py-4 text-muted"><i class="fas fa-inbox fa-2x mb-2 d-block mr-2"></i> No transactions found.</div>'
             },
             "dom": 'rt<"dt-footer"<"dt-footer-info"i><"dt-footer-pager">>',
             "drawCallback": function(settings) {
@@ -212,7 +211,7 @@ $download_url = base_url('admin/download_qris')
 
                 $pager.html(
                     '<button class="dt-nav-btn dt-prev-btn" ' + (info.page === 0 ? 'disabled' : '') + '>' +
-                        '<i class="fas fa-chevron-left"></i> PREVIOUS' +
+                        '<i class="fas fa-chevron-left mr-2"></i> PREVIOUS' +
                     '</button>' +
                     '<span class="dt-page-counter">' +
                         '<strong>' + currPage + '</strong> of <strong>' + totalPages + '</strong>' +
@@ -268,3 +267,5 @@ $download_url = base_url('admin/download_qris')
         });
     });
 </script>
+
+

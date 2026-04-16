@@ -53,8 +53,7 @@ $download_url = base_url('admin/download_history')
                     <div class="dt-filter-group dt-more-filters-wrapper">
                         <label class="dt-filter-label">&nbsp;</label>
                         <button type="button" id="btnToggleFilters" class="dt-more-filters-btn btn-sm <?= $extra_active > 0 ? 'dt-more-filters-active' : ''; ?>">
-                            <i class="fas fa-sliders-h mr-1"></i>
-                            Filters
+                            <i class="fas fa-sliders-h mr-1 mr-2"></i> Filters
                             <?php if ($extra_active > 0): ?>
                                 <span class="dt-more-badge"><?= $extra_active; ?></span>
                             <?php endif; ?>
@@ -64,14 +63,14 @@ $download_url = base_url('admin/download_history')
                         <!-- Dropdown Panel -->
                         <div class="dt-more-panel" id="moreFiltersPanel">
                             <div class="dt-more-panel-header">
-                                <span class="dt-more-panel-title"><i class="fas fa-filter mr-1"></i>Advanced Filters</span>
+                                <span class="dt-more-panel-title"><i class="fas fa-filter mr-1 mr-2"></i> Advanced Filters</span>
                                 <a href="<?= base_url('admin/resetewallet_dynamic'); ?>" class="dt-more-clear">Clear All</a>
                             </div>
 
                             <div class="dt-more-panel-body">
                                 <!-- Primary: Single Date -->
                                 <div class="dt-more-field">
-                                    <label class="dt-more-label"><i class="fas fa-calendar-alt mr-1"></i>Transaction Date</label>
+                                    <label class="dt-more-label"><i class="fas fa-calendar-alt mr-1 mr-2"></i> Transaction Date</label>
                                     <div class="dt-filter-chip">
                                         <input type="date" name="search_date_purchase" class="dt-chip-input" value="<?= $search_date_purchase_value; ?>">
                                     </div>
@@ -79,7 +78,7 @@ $download_url = base_url('admin/download_history')
 
                                 <!-- Merchant -->
                                 <div class="dt-more-field">
-                                    <label class="dt-more-label"><i class="fas fa-store mr-1"></i>Merchant</label>
+                                    <label class="dt-more-label"><i class="fas fa-store mr-1 mr-2"></i> Merchant</label>
                                     <div class="dt-filter-chip" style="min-width: 180px;">
                                         <select name="search_merchant_purchase" class="dt-chip-input history-select2">
                                             <option value="">All Merchants</option>
@@ -95,7 +94,7 @@ $download_url = base_url('admin/download_history')
 
                             <div class="dt-more-panel-footer">
                                 <button type="submit" name="submit" class="btn-dt-apply btn-dt-action-primary shadow-sm">
-                                    <i class="fas fa-check mr-1"></i> APPLY FILTER
+                                    <i class="fas fa-check mr-1 mr-2"></i> APPLY FILTER
                                 </button>
                                 <button type="button" id="btnCloseFilters" class="btn-dt-cancel btn-dt-secondary">
                                     CANCEL
@@ -166,7 +165,7 @@ $download_url = base_url('admin/download_history')
 
                 $pager.html(
                     '<button class="dt-nav-btn dt-prev-btn" ' + (info.page === 0 ? 'disabled' : '') + '>' +
-                        '<i class="fas fa-chevron-left"></i> PREVIOUS' +
+                        '<i class="fas fa-chevron-left mr-2"></i> PREVIOUS' +
                     '</button>' +
                     '<span class="dt-page-counter">' +
                         '<strong>' + currPage + '</strong> of <strong>' + totalPages + '</strong>' +
@@ -221,3 +220,5 @@ $download_url = base_url('admin/download_history')
         });
     });
 </script>
+
+

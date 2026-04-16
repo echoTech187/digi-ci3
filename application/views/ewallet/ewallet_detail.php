@@ -9,11 +9,19 @@
     </div>
 
     <div class="card border-0 shadow-sm dt-card">
-        <div class="modal-header modal-header-primary border-0 py-3">
-            <h6 class="modal-title font-weight-bold text-white uppercase" style="letter-spacing:1px;">
-                <i class="fas fa-wallet mr-2"></i> E-WALLET TRANSACTION INFO
-            </h6>
+        <!-- Header Legacy Migrated -->
+<div class="modal-header modal-header-primary  border-0 py-3 mh-premium">
+    <div class="d-flex align-items-center">
+        <div class="mh-icon-badge">
+            <i class="fas fa-star"></i>
         </div>
+        <div class="mh-title-wrap">
+            <h6 class="mh-title">E-WALLET TRANSACTION INFO</h6>
+            <small class="mh-subtitle">Lihat detail informasi lengkap</small>
+        </div>
+    </div>
+    
+</div>
         <div class="card-body">
             <!-- <?php
                 // echo "<pre>";
@@ -116,3 +124,5 @@
 
 </div>
 <!-- /.container-fluid -->
+
+

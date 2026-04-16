@@ -957,7 +957,11 @@ class AdminMerchant extends CI_Controller
     */
    public function fetchMerchantPermissions($merchantId)
    {
-      if (!$merchantId || !$this->input->is_ajax_request()) show_error('No direct script access allowed or Merchant ID missing', 403);
+      if (!$merchantId) {
+          header('Content-Type: application/json');
+          echo json_encode(['status' => 'error', 'message' => 'Merchant ID missing']);
+          return;
+      }
       
       $this->load->model('Merchant');
       $all_permissions = $this->Merchant->get_rbac_permissions();
@@ -985,12 +989,17 @@ class AdminMerchant extends CI_Controller
          ];
       }
       
+      header('Content-Type: application/json');
       echo json_encode(['status' => 'success', 'data' => $data]);
    }
 
    public function saveDelegation($merchantId)
    {
-      if (!$merchantId || !$this->input->is_ajax_request()) show_error('No direct script access allowed or Merchant ID missing', 403);
+      if (!$merchantId) {
+          header('Content-Type: application/json');
+          echo json_encode(['status' => 'error', 'message' => 'Merchant ID missing']);
+          return;
+      }
       
       $this->load->model('Merchant');
       $permissions = $this->input->post('permissions');
@@ -1004,11 +1013,14 @@ class AdminMerchant extends CI_Controller
          }
          
          if ($successCount > 0) {
+            header('Content-Type: application/json');
             echo json_encode(['status' => 'success', 'message' => "$successCount permissions updated successfully"]);
          } else {
+            header('Content-Type: application/json');
             echo json_encode(['status' => 'error', 'message' => 'Failed to save permissions. Please check database connectivity.']);
          }
       } else {
+         header('Content-Type: application/json');
          echo json_encode(['status' => 'error', 'message' => 'No permissions data received']);
       }
    }

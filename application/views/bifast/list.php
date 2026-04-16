@@ -65,8 +65,7 @@
                     <div class="dt-filter-group dt-more-filters-wrapper">
                         <label class="dt-filter-label">&nbsp;</label>
                         <button type="button" id="bifastMoreFiltersBtn" class="dt-more-filters-btn <?= $extra_active > 0 ? 'dt-more-filters-active' : ''; ?>">
-                            <i class="fas fa-sliders-h mr-1"></i>
-                            Filters
+                            <i class="fas fa-sliders-h mr-1 mr-2"></i> Filters
                             <?php if ($extra_active > 0): ?>
                                 <span class="dt-more-badge"><?= $extra_active; ?></span>
                             <?php endif; ?>
@@ -76,14 +75,14 @@
                         <!-- Dropdown Panel -->
                         <div class="dt-more-panel" id="bifastMoreFiltersPanel">
                             <div class="dt-more-panel-header">
-                                <span class="dt-more-panel-title"><i class="fas fa-filter mr-1"></i>Advanced filters</span>
+                                <span class="dt-more-panel-title"><i class="fas fa-filter mr-1 mr-2"></i> Advanced filters</span>
                                 <a href="<?= base_url('admin/resetbi_fast'); ?>" class="dt-more-clear">Clear All</a>
                             </div>
 
                             <div class="dt-more-panel-body">
                                 <!-- Primary: Date Range -->
                                 <div class="dt-more-field">
-                                    <label class="dt-more-label"><i class="fas fa-calendar-alt mr-1"></i>Period</label>
+                                    <label class="dt-more-label"><i class="fas fa-calendar-alt mr-1 mr-2"></i> Period</label>
                                     <div class="dt-filter-chip">
                                         <input type="date" name="search_date_bifast" class="dt-chip-input" value="<?= $date_from_val; ?>" title="Date From">
                                         <span class="text-muted mx-1" style="font-size:11px;">→</span>
@@ -92,7 +91,7 @@
                                 </div>
                                 <!-- Merchant -->
                                 <div class="dt-more-field">
-                                    <label class="dt-more-label"><i class="fas fa-store mr-1"></i>Merchant</label>
+                                    <label class="dt-more-label"><i class="fas fa-store mr-1 mr-2"></i> Merchant</label>
                                     <select name="search_name_bifast" class="dt-more-select bifast-select2">
                                         <option value="">All Merchants</option>
                                         <?php foreach ($merchants as $merchant): ?>
@@ -105,7 +104,7 @@
 
                                 <!-- Status -->
                                 <div class="dt-more-field">
-                                    <label class="dt-more-label"><i class="fas fa-info-circle mr-1"></i>Transaction Status</label>
+                                    <label class="dt-more-label"><i class="fas fa-info-circle mr-1 mr-2"></i> Transaction Status</label>
                                     <select name="search_status_transaction_bifast" class="dt-more-select">
                                         <option value="">All Statuses</option>
                                         <?php foreach(['Pending', 'Process', 'Success', 'Failed', 'Init', 'Timeout'] as $st): ?>
@@ -116,13 +115,13 @@
 
                                 <!-- Trans ID -->
                                 <div class="dt-more-field">
-                                    <label class="dt-more-label"><i class="fas fa-hashtag mr-1"></i>Merchant Trans ID</label>
+                                    <label class="dt-more-label"><i class="fas fa-hashtag mr-1 mr-2"></i> Merchant Trans ID</label>
                                     <input type="text" name="search_transid_bifast" class="dt-more-input" placeholder="TRX-..." value="<?= $transid_val; ?>">
                                 </div>
 
                                 <!-- Channel -->
                                 <div class="dt-more-field">
-                                    <label class="dt-more-label"><i class="fas fa-network-wired mr-1"></i>External Channel</label>
+                                    <label class="dt-more-label"><i class="fas fa-network-wired mr-1 mr-2"></i> External Channel</label>
                                     <select name="search_channel_bifast" class="dt-more-select">
                                         <option value="">All Channels</option>
                                         <?php foreach ($channels as $ch): ?>
@@ -133,14 +132,14 @@
 
                                 <!-- External Reff -->
                                 <div class="dt-more-field">
-                                    <label class="dt-more-label"><i class="fas fa-fingerprint mr-1"></i>External Reff ID</label>
+                                    <label class="dt-more-label"><i class="fas fa-fingerprint mr-1 mr-2"></i> External Reff ID</label>
                                     <input type="text" name="search_external_reff_id" class="dt-more-input" placeholder="REF-..." value="<?= $external_val; ?>">
                                 </div>
                             </div>
 
                             <div class="dt-more-panel-footer">
                                 <button type="submit" name="submit" class="btn-dt-apply btn-dt-action-primary shadow-sm">
-                                    <i class="fas fa-check mr-1"></i> APPLY FILTER
+                                    <i class="fas fa-check mr-1 mr-2"></i> APPLY FILTER
                                 </button>
                                 <button type="button" id="bifastMoreFiltersClose" class="btn-dt-cancel btn-dt-secondary">
                                     CANCEL
@@ -187,58 +186,185 @@
 
 <!-- Detail Modal -->
 <div class="modal fade" id="detailBiFastChannelExternalModal" tabindex="-1" aria-labelledby="detailBiFastChannelExternalModalLabel">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header modal-header-primary border-0 py-3">
-                <h5 class="modal-title font-weight-bold text-white" id="detailBiFastChannelExternalModalLabel"><i class="fas fa-info-circle mr-2"></i>Detail Disbursement - Channel External</h5>
-                <button type="button" class="close text-white outline-none" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
+
+            <!-- Header -->
+            <div class="modal-header modal-header-primary border-0 mh-premium">
+    <div class="d-flex align-items-center">
+        <div class="mh-icon-badge">
+            <i class="fas fa-paper-plane"></i>
+        </div>
+        <div class="mh-title-wrap">
+            <h6 class="mh-title" id="detailBiFastChannelExternalModalLabel">Detail Disbursement</h6>
+            <small class="mh-subtitle" id="detailBiFastSubtitle">Channel External</small>
+        </div>
+    </div>
+    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" style="opacity:0.8;">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+
+            <div class="modal-body p-0">
+
+                <!-- ── Section 1: Transaction Info ── -->
+                <div class="px-4 pt-4 pb-3">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="" style="width:6px; height:18px; background: var(--primary); border-radius: 3px;"></div>
+                        <span class="font-weight-bold text-dark" style="font-size:12px; text-transform:uppercase; letter-spacing:0.6px;">Transaction Information</span>
+                    </div>
+
+                    <!-- Channel Badge -->
+                    <div class="mb-3">
+                        <label class="d-block text-muted mb-1" style="font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">Channel External</label>
+                        <div style="display:inline-flex; align-items:center; background:var(--primary-soft,#eef2ff); border:1.5px solid var(--primary,#4e73df); border-radius:8px; padding:7px 14px; min-width:160px;">
+                            <i class="fas fa-network-wired " style="color:var(--primary,#4e73df); font-size:13px;"></i>
+                            <span id="cashoutExternalId" class="font-weight-bold" style="font-size:13px; color:var(--primary,#4e73df);">—</span>
+                        </div>
+                    </div>
+
+                    <!-- Transaction IDs -->
+                    <div class="row" style="gap:0;">
+                        <div class="col-md-6 mb-3">
+                            <label class="d-block text-muted mb-1" style="font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">Transaction ID 1</label>
+                            <div style="display:flex; align-items:center; background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:8px; padding:8px 12px;">
+                                <i class="fas fa-hashtag text-muted " style="font-size:11px;"></i>
+                                <input type="text" id="TransactionIdExternal1" class="border-0 bg-transparent p-0 text-dark font-weight-bold" style="font-size:12.5px; outline:none; width:100%;" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="d-block text-muted mb-1" style="font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">Transaction ID 2</label>
+                            <div style="display:flex; align-items:center; background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:8px; padding:8px 12px;">
+                                <i class="fas fa-hashtag text-muted " style="font-size:11px;"></i>
+                                <input type="text" id="TransactionIdExternal2" class="border-0 bg-transparent p-0 text-dark font-weight-bold" style="font-size:12.5px; outline:none; width:100%;" readonly>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="mx-4 my-0" style="border-color:#f0f2f8;">
+
+                <!-- ── Section 2: Request ── -->
+                <div class="px-4 pt-3 pb-3">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="" style="width:6px; height:18px; background:#1cc88a; border-radius:3px;"></div>
+                        <span class="font-weight-bold text-dark" style="font-size:12px; text-transform:uppercase; letter-spacing:0.6px;">Request</span>
+                    </div>
+
+                    <!-- Request DateTime -->
+                    <div class="mb-3">
+                        <label class="d-block text-muted mb-1" style="font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;"><i class="fas fa-clock mr-1 mr-2"></i> Date Time</label>
+                        <div style="display:flex; align-items:center; background:#f0fff8; border:1.5px solid #b2f5e0; border-radius:8px; padding:8px 12px;">
+                            <i class="fas fa-calendar-check " style="color:#1cc88a; font-size:12px;"></i>
+                            <input type="text" id="RequestDatetime" class="border-0 bg-transparent p-0 font-weight-bold" style="font-size:12.5px; outline:none; width:100%; color:#0d7a52;" readonly>
+                        </div>
+                    </div>
+
+                    <!-- Request Header -->
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <label class="text-muted m-0" style="font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;"><i class="fas fa-code mr-1 mr-2"></i> Header</label>
+                            <button type="button" class="btn-copy-json" data-target="RequestHeaderCode" style="background:none; border:none; color:#1cc88a; font-size:11px; font-weight:600; cursor:pointer; padding:0;">
+                                <i class="fas fa-copy mr-1 mr-2"></i> Copy
+                            </button>
+                        </div>
+                        <div style="background:#1a1d2e; border-radius:10px; overflow:hidden;">
+                            <div style="padding:6px 14px; background:#12152a; display:flex; align-items:center; gap:6px;">
+                                <span style="width:8px; height:8px; border-radius:50%; background:#ff5f57; display:inline-block;"></span>
+                                <span style="width:8px; height:8px; border-radius:50%; background:#febc2e; display:inline-block;"></span>
+                                <span style="width:8px; height:8px; border-radius:50%; background:#28c840; display:inline-block;"></span>
+                                <span class=" text-muted" style="font-size:10px;">request-header.json</span>
+                            </div>
+                            <pre id="RequestHeaderCode" style="margin:0; padding:12px 16px; font-size:11.5px; color:#a8d8a8; font-family:'Courier New',monospace; max-height:100px; overflow-y:auto; white-space:pre-wrap; word-break:break-all;"></pre>
+                        </div>
+                    </div>
+
+                    <!-- Request Body -->
+                    <div class="mb-1">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <label class="text-muted m-0" style="font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;"><i class="fas fa-file-code mr-1 mr-2"></i> Body</label>
+                            <button type="button" class="btn-copy-json" data-target="RequestBodyCode" style="background:none; border:none; color:#1cc88a; font-size:11px; font-weight:600; cursor:pointer; padding:0;">
+                                <i class="fas fa-copy mr-1 mr-2"></i> Copy
+                            </button>
+                        </div>
+                        <div style="background:#1a1d2e; border-radius:10px; overflow:hidden;">
+                            <div style="padding:6px 14px; background:#12152a; display:flex; align-items:center; gap:6px;">
+                                <span style="width:8px; height:8px; border-radius:50%; background:#ff5f57; display:inline-block;"></span>
+                                <span style="width:8px; height:8px; border-radius:50%; background:#febc2e; display:inline-block;"></span>
+                                <span style="width:8px; height:8px; border-radius:50%; background:#28c840; display:inline-block;"></span>
+                                <span class=" text-muted" style="font-size:10px;">request-body.json</span>
+                            </div>
+                            <pre id="RequestBodyCode" style="margin:0; padding:12px 16px; font-size:11.5px; color:#a8d8a8; font-family:'Courier New',monospace; max-height:160px; overflow-y:auto; white-space:pre-wrap; word-break:break-all;"></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="mx-4 my-0" style="border-color:#f0f2f8;">
+
+                <!-- ── Section 3: Response ── -->
+                <div class="px-4 pt-3 pb-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="" style="width:6px; height:18px; background:#f6c23e; border-radius:3px;"></div>
+                        <span class="font-weight-bold text-dark" style="font-size:12px; text-transform:uppercase; letter-spacing:0.6px;">Response</span>
+                    </div>
+
+                    <!-- Response DateTime -->
+                    <div class="mb-3">
+                        <label class="d-block text-muted mb-1" style="font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;"><i class="fas fa-clock mr-1 mr-2"></i> Date Time</label>
+                        <div style="display:flex; align-items:center; background:#fffbf0; border:1.5px solid #fde68a; border-radius:8px; padding:8px 12px;">
+                            <i class="fas fa-calendar-check " style="color:#f6c23e; font-size:12px;"></i>
+                            <input type="text" id="ResponseDatetime" class="border-0 bg-transparent p-0 font-weight-bold" style="font-size:12.5px; outline:none; width:100%; color:#92701a;" readonly>
+                        </div>
+                    </div>
+
+                    <!-- Response Header -->
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <label class="text-muted m-0" style="font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;"><i class="fas fa-code mr-1 mr-2"></i> Header</label>
+                            <button type="button" class="btn-copy-json" data-target="ResponseHeaderCode" style="background:none; border:none; color:#f6c23e; font-size:11px; font-weight:600; cursor:pointer; padding:0;">
+                                <i class="fas fa-copy mr-1 mr-2"></i> Copy
+                            </button>
+                        </div>
+                        <div style="background:#1a1d2e; border-radius:10px; overflow:hidden;">
+                            <div style="padding:6px 14px; background:#12152a; display:flex; align-items:center; gap:6px;">
+                                <span style="width:8px; height:8px; border-radius:50%; background:#ff5f57; display:inline-block;"></span>
+                                <span style="width:8px; height:8px; border-radius:50%; background:#febc2e; display:inline-block;"></span>
+                                <span style="width:8px; height:8px; border-radius:50%; background:#28c840; display:inline-block;"></span>
+                                <span class=" text-muted" style="font-size:10px;">response-header.json</span>
+                            </div>
+                            <pre id="ResponseHeaderCode" style="margin:0; padding:12px 16px; font-size:11.5px; color:#fde68a; font-family:'Courier New',monospace; max-height:100px; overflow-y:auto; white-space:pre-wrap; word-break:break-all;"></pre>
+                        </div>
+                    </div>
+
+                    <!-- Response Body -->
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <label class="text-muted m-0" style="font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;"><i class="fas fa-file-code mr-1 mr-2"></i> Body</label>
+                            <button type="button" class="btn-copy-json" data-target="ResponseBodyCode" style="background:none; border:none; color:#f6c23e; font-size:11px; font-weight:600; cursor:pointer; padding:0;">
+                                <i class="fas fa-copy mr-1 mr-2"></i> Copy
+                            </button>
+                        </div>
+                        <div style="background:#1a1d2e; border-radius:10px; overflow:hidden;">
+                            <div style="padding:6px 14px; background:#12152a; display:flex; align-items:center; gap:6px;">
+                                <span style="width:8px; height:8px; border-radius:50%; background:#ff5f57; display:inline-block;"></span>
+                                <span style="width:8px; height:8px; border-radius:50%; background:#febc2e; display:inline-block;"></span>
+                                <span style="width:8px; height:8px; border-radius:50%; background:#28c840; display:inline-block;"></span>
+                                <span class=" text-muted" style="font-size:10px;">response-body.json</span>
+                            </div>
+                            <pre id="ResponseBodyCode" style="margin:0; padding:12px 16px; font-size:11.5px; color:#fde68a; font-family:'Courier New',monospace; max-height:160px; overflow-y:auto; white-space:pre-wrap; word-break:break-all;"></pre>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Footer -->
+            <div class="modal-footer border-0 px-4 py-3" style="background:#f8fafc; border-top:1px solid #edf2f9 !important;">
+                <button type="button" class="btn-dt-cancel" data-dismiss="modal">
+                    <i class="fas fa-times mr-1 mr-2"></i> Close
                 </button>
             </div>
-            <div class="modal-body shadow-sm">
-                <div class="table-responsive">
-                    <table class="table dt-table table-borderless small mb-0">
-                        <tbody>
-                            <tr>
-                                <td width="30%" class="font-weight-bold align-middle">Channel External</td>
-                                <td><input type="text" id="cashoutExternalId" class="dt-more-input bg-light" readonly></td>
-                            </tr>
-                            <tr>
-                                <td class="font-weight-bold align-middle">Transaction ID 1</td>
-                                <td><input type="text" id="TransactionIdExternal1" class="dt-more-input bg-light" readonly></td>
-                            </tr>
-                            <tr>
-                                <td class="font-weight-bold align-middle">Transaction ID 2</td>
-                                <td><input type="text" id="TransactionIdExternal2" class="dt-more-input bg-light" readonly></td>
-                            </tr>
-                            <tr>
-                                <td class="font-weight-bold align-middle">Request Date Time</td>
-                                <td><input type="text" id="RequestDatetime" class="dt-more-input bg-light" readonly></td>
-                            </tr>
-                            <tr>
-                                <td class="font-weight-bold align-middle">Request Header</td>
-                                <td><textarea id="RequestHeader" class="dt-more-input bg-light" rows="2" readonly></textarea></td>
-                            </tr>
-                            <tr>
-                                <td class="font-weight-bold align-middle">Request Body</td>
-                                <td><textarea id="RequestBody" class="dt-more-input bg-light" rows="4" readonly></textarea></td>
-                            </tr>
-                            <tr>
-                                <td class="font-weight-bold align-middle">Response Date Time</td>
-                                <td><input type="text" id="ResponseDatetime" class="dt-more-input bg-light" readonly></td>
-                            </tr>
-                            <tr>
-                                <td class="font-weight-bold align-middle">Response Header</td>
-                                <td><textarea id="ResponseHeader" class="dt-more-input bg-light" rows="2" readonly></textarea></td>
-                            </tr>
-                            <tr>
-                                <td class="font-weight-bold align-middle">Response Body</td>
-                                <td><textarea id="ResponseBody" class="dt-more-input bg-light" rows="4" readonly></textarea></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+
         </div>
     </div>
 </div>
@@ -279,7 +405,7 @@
                 "processing": '<i class="fa fa-spinner fa-spin fa-2x fa-fw mx-auto d-block text-primary"></i>',
                 "info": "Showing _START_ – _END_ of _TOTAL_ results",
                 "infoEmpty": "No results to show",
-                "zeroRecords": '<div class="text-center py-4 text-muted"><i class="fas fa-inbox fa-2x mb-2 d-block"></i>No transactions found.</div>'
+                "zeroRecords": '<div class="text-center py-4 text-muted"><i class="fas fa-inbox fa-2x mb-2 d-block mr-2"></i> No transactions found.</div>'
             },
             "dom": 'rt<"dt-footer"<"dt-footer-info"i><"dt-footer-pager">>',
             "drawCallback": function(settings) {
@@ -292,7 +418,7 @@
 
                 $pager.html(
                     '<button class="dt-nav-btn dt-prev-btn" ' + (info.page === 0 ? 'disabled' : '') + '>' +
-                        '<i class="fas fa-chevron-left"></i> PREVIOUS' +
+                        '<i class="fas fa-chevron-left mr-2"></i> PREVIOUS' +
                     '</button>' +
                     '<span class="dt-page-counter">' +
                         '<strong>' + currPage + '</strong> of <strong>' + totalPages + '</strong>' +
@@ -354,7 +480,8 @@
             var ref_cashoutExternalId = $(this).data('ref_cashoutexternalid'); 
             var ref_cashoutExternalLogBifastId = $(this).data('ref_cashoutexternallogbifastid'); 
 
-            $('#detailBiFastChannelExternalModalLabel').text('Detail Disbursement - ' + merchantTransactionId);
+            $('#detailBiFastChannelExternalModalLabel').text('Detail Disbursement');
+            $('#detailBiFastSubtitle').text(merchantTransactionId);
             
             $.ajax({
                 url: "<?php echo base_url('admin/getDetailBiFastChannelExternal'); ?>",
@@ -366,15 +493,21 @@
                 },
                 dataType: "json",
                 success: function(response) {
-                    $('#cashoutExternalId').val(ref_cashoutExternalId);
-                    $('#TransactionIdExternal1').val(response.TransactionIdExternal1);
-                    $('#TransactionIdExternal2').val(response.TransactionIdExternal2);
-                    $('#RequestDatetime').val(response.RequestDatetime);
-                    $('#RequestHeader').val(JSON.stringify(response.RequestHeader, null, 2));
-                    $('#RequestBody').val(JSON.stringify(response.RequestBody, null, 2));
-                    $('#ResponseDatetime').val(response.ResponseDatetime);
-                    $('#ResponseHeader').val(JSON.stringify(response.ResponseHeader, null, 2));
-                    $('#ResponseBody').val(JSON.stringify(response.ResponseBody, null, 2));
+                    // Transaction Info
+                    $('#cashoutExternalId').text(ref_cashoutExternalId || '—');
+                    $('#TransactionIdExternal1').val(response.TransactionIdExternal1 || '—');
+                    $('#TransactionIdExternal2').val(response.TransactionIdExternal2 || '—');
+
+                    // Request section
+                    $('#RequestDatetime').val(response.RequestDatetime || '—');
+                    $('#RequestHeaderCode').text(JSON.stringify(response.RequestHeader, null, 2));
+                    $('#RequestBodyCode').text(JSON.stringify(response.RequestBody, null, 2));
+
+                    // Response section
+                    $('#ResponseDatetime').val(response.ResponseDatetime || '—');
+                    $('#ResponseHeaderCode').text(JSON.stringify(response.ResponseHeader, null, 2));
+                    $('#ResponseBodyCode').text(JSON.stringify(response.ResponseBody, null, 2));
+
                     $('#detailBiFastChannelExternalModal').modal('show');
                 },
                 error: function() {
@@ -382,6 +515,25 @@
                 }
             });
         });
+
+        // Copy-to-clipboard for code blocks
+        $(document).on('click', '.btn-copy-json', function() {
+            var targetId = $(this).data('target');
+            var text = $('#' + targetId).text();
+            var $btn = $(this);
+
+            if (navigator.clipboard && text) {
+                navigator.clipboard.writeText(text).then(function() {
+                    $btn.html('<i class="fas fa-check mr-1 mr-2"></i> Copied!');
+                    setTimeout(function() {
+                        $btn.html('<i class="fas fa-copy mr-1 mr-2"></i> Copy');
+                    }, 1800);
+                });
+            }
+        });
     });
 </script>
 <!-- /.container-fluid -->
+
+
+

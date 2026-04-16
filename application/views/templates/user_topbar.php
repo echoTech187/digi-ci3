@@ -45,7 +45,7 @@
             }
             ?>
             <nav aria-label="breadcrumb" class="d-none d-lg-block">
-                <ol class="dt-breadcrumb ml-2">
+                <ol class="dt-breadcrumb ">
                     <li class="dt-breadcrumb-item"><a href="<?= base_url('admin') ?>" title="Home"><i class="fas fa-home" style="font-size:12px;"></i></a></li>
                     <?php foreach ($breadcrumb as $index => $item): ?>
                         <li class="dt-breadcrumb-separator"><i class="fas fa-chevron-right"></i></li>
@@ -74,9 +74,9 @@
                 <div class="topbar-divider d-none d-sm-block" style="height: 24px; border-left: 1px solid rgba(0,0,0,0.08);"></div>
 
                 <!-- Nav Item - User Information -->
-                <li class="nav-item dropdown no-arrow ml-2">
+                <li class="nav-item dropdown no-arrow ">
                     <a class="nav-link dropdown-toggle navbar-user-info pr-0 rounded-circle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <span class="mr-2 d-none d-lg-inline"><?= $user['c_name']; ?></span>
+                        <span class=" d-none d-lg-inline"><?= $user['c_name']; ?></span>
                         <img class="navbar-avatar" src="<?= base_url('assets/img/profile/default.jpg') ?>">
                     </a>
 
@@ -200,3 +200,6 @@
 
         </nav>
         <!-- End of Topbar -->
+
+
+

@@ -17,6 +17,24 @@ class DashboardController extends CI_Controller
 
    public function index()
    {
+      $role_id = $this->session->userdata('role');
+      if (!$role_id) $role_id = $this->session->userdata('role_id');
+
+      // Check if user has access to Dashboard Menu
+      $this->load->library('rbac');
+      $menus = $this->rbac->get_menus_by_role($role_id);
+      $has_dashboard_access = false;
+      foreach ($menus as $m) {
+          if ($m['url'] == 'admin') {
+              $has_dashboard_access = true;
+              break;
+          }
+      }
+
+      if (!$has_dashboard_access) {
+          redirect('welcome');
+      }
+
       $this->load->model('Dashboard_model');
       $this->load->model('Merchant');
       
@@ -35,12 +53,15 @@ class DashboardController extends CI_Controller
       if ($last_cache && time() < $last_cache) {
          $data['today_stats'] = $this->session->userdata('dash_today_stats');
          $data['monthly_overview'] = $this->session->userdata('dash_monthly_overview');
+         $data['last_synced'] = $this->session->userdata('dash_stats_updated');
       } else {
          $data['today_stats'] = $this->Dashboard_model->get_today_stats();
          $data['monthly_overview'] = $this->Dashboard_model->get_monthly_overview();
+         $data['last_synced'] = date('H:i:s');
          
          $this->session->set_userdata('dash_today_stats', $data['today_stats']);
          $this->session->set_userdata('dash_monthly_overview', $data['monthly_overview']);
+         $this->session->set_userdata('dash_stats_updated', $data['last_synced']);
          $this->session->set_userdata('dash_stats_timeout', time() + $cache_ttl);
       }
 
@@ -432,5 +453,34 @@ class DashboardController extends CI_Controller
       $data['do_update']    = $do_update;
 
       $this->load->view('admin/balance_sync_view', $data);
+   }
+
+   public function welcome()
+   {
+      $data['title'] = 'Welcome';
+      $data['user'] = $this->Model_user->view_user()->row_array();
+      
+      $role_id = $this->session->userdata('role');
+      if (!$role_id) $role_id = $this->session->userdata('role_id');
+
+      // Get all permitted menus for Quick Access
+      $this->load->library('rbac');
+      $data['menus'] = $this->rbac->get_menus_by_role($role_id);
+      
+      // Determine Welcome Message based on time
+      $hour = date('H');
+      if ($hour < 12) {
+          $data['greeting'] = 'Good Morning';
+      } elseif ($hour < 17) {
+          $data['greeting'] = 'Good Afternoon';
+      } else {
+          $data['greeting'] = 'Good Evening';
+      }
+
+      $this->load->view('templates/user_header.php', $data);
+      $this->load->view('templates/user_sidebar.php', $data);
+      $this->load->view('templates/user_topbar.php', $data);
+      $this->load->view('admin/welcome', $data);
+      $this->load->view('templates/user_footer.php');
    }
 }

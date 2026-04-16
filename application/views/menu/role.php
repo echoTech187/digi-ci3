@@ -12,7 +12,7 @@
     <!-- ── Alert Messages ── -->
     <?php if ($this->session->flashdata('message')) : ?>
         <div class="alert alert-success border-0 shadow-sm animate__animated animate__fadeIn mb-4">
-            <i class="fas fa-check-circle mr-2"></i> <?= $this->session->flashdata('message'); ?>
+            <i class="fas fa-check-circle "></i> <?= $this->session->flashdata('message'); ?>
         </div>
     <?php endif; ?>
 
@@ -33,7 +33,7 @@
                     <a href="<?= base_url('menu/roleAccess/') . $r->id; ?>"
                        class="btn-dt-chip-action btn-dt-secondary flex-shrink-0"
                        style="white-space:nowrap;">
-                        <i class="fas fa-cog mr-1"></i> Configure
+                        <i class="fas fa-cog mr-1 mr-2"></i> Configure
                     </a>
                 </div>
             </div>
@@ -55,3 +55,6 @@
 <style>
 .card:hover { box-shadow: 0 8px 24px rgba(78,115,223,.12) !important; }
 </style>
+
+
+

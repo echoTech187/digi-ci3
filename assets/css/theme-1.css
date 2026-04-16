@@ -3420,6 +3420,9 @@ ul.sidebar {
 }
 
 /* ── Themed Action Variants (Vibrant Solid) ── */
+.btn:hover{
+    cursor: pointer!important;
+}
 .btn-action-detail {
     background: #4e73df !important;
     color: #ffffff !important;
@@ -3447,6 +3450,40 @@ ul.sidebar {
 .dt-filter-label{
     display: none !important;
 }
+
+/* ── Merchant Delegation Button Tidy-Up ── */
+.delegation-toggle-group {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+}
+
+.delegation-btn {
+    min-width: 75px !important;
+    height: 30px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.5px !important;
+    text-transform: uppercase !important;
+    transition: all 0.2s ease !important;
+    cursor: pointer !important;
+}
+
+.delegation-btn.btn-link {
+    text-decoration: none !important;
+    border: 1px solid transparent !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+.delegation-btn.btn-success:not(.btn-link),
+.delegation-btn.btn-danger:not(.btn-link) {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
 /* ── Premium Responsive DataTables (Stacked Card Layout) ── */
 @media (max-width: 768px) {
     
@@ -4427,3 +4464,72 @@ tr.saved  { opacity: 1; }
         font-size: 11px;
     }
 }
+
+
+/* =====================================================
+   [9] PREMIUM MODAL HEADERS (BI-FAST STYLE)
+   ===================================================== */
+.mh-premium {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    padding: 1.1rem 1.25rem !important;
+    display: flex !important;
+    align-items: center !important;
+    position: relative;
+    border-radius: 0 !important;
+}
+
+.mh-icon-badge {
+    width: 38px !important;
+    height: 38px !important;
+    background: rgba(255, 255, 255, 0.18) !important;
+    border-radius: 12px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin-right: 15px !important;
+    flex-shrink: 0 !important;
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mh-icon-badge i {
+    color: #ffffff !important;
+    font-size: 16px !important;
+}
+
+.mh-title-wrap {
+    min-width: 0;
+    flex: 1;
+}
+
+.mh-title {
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    font-size: 14.5px !important;
+    margin-bottom: 2px !important;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.mh-subtitle {
+    color: rgba(255, 255, 255, 0.75) !important;
+    font-size: 10.5px !important;
+    display: block !important;
+    font-weight: 400 !important;
+}
+
+.mh-premium .close {
+    margin: -1rem -1rem -1rem auto !important;
+    color: #fff !important;
+    text-shadow: none !important;
+    opacity: 0.7 !important;
+    transition: all 0.2s;
+}
+
+.mh-premium .close:hover {
+    opacity: 1 !important;
+    transform: scale(1.1);
+}
+

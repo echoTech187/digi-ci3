@@ -8,11 +8,6 @@
         </div>
     </div>
 
-    <!-- ── Filter & KPI Row ── -->
-    
-        
-    
-
     <div class="card border-0 shadow-sm dt-card">
         <!-- ── Toolbar ── -->
         <form id="pulsa_reguler_form" onsubmit="return false;">
@@ -23,7 +18,7 @@
             </div>
             <div class="dt-toolbar-filters">
                 <div class="dt-filter-group">
-                    <label class="dt-filter-label"><i class="fas fa-broadcast-tower mr-1"></i>Provider</label>
+                    <label class="dt-filter-label"><i class="fas fa-broadcast-tower mr-1 mr-2"></i> Provider</label>
                     <div class="dt-filter-chip">
                         <select id="provider" name="provider" class="dt-chip-select">
                             <option value="">All Providers</option>
@@ -34,68 +29,62 @@
                         </select>
                     </div>
                 </div>
-                <!-- Filter & Reset Actions -->
                  <button type="button" class="btn-dt-chip-action btn-dt-action-success border-0" data-toggle="modal" data-target="#exampleModal">
-                    <i class="fas fa-plus"></i> <span class="d-none d-md-block">Buy Credit</span>
+                    <i class="fas fa-plus"></i> <span class="d-none d-md-block">Add Product</span>
                 </button>
-                
             </div>
         </div>
         </form>
 
         <div class="card-body p-0">
-                       
-            <!-- Modal -->
+            <!-- Add Product Modal -->
             <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content border-0 shadow-sm">
-                        <div class="modal-header modal-header-primary border-0 py-3">
-                            <h5 class="modal-title font-weight-bold text-white" id="exampleModalLabel">
-                                <i class="fas fa-plus-circle mr-2"></i>ADD PRODUCT
-                            </h5>
-                            <button type="button" class="close text-white outline-none" data-dismiss="modal" aria-label="Close">
+                        <div class="modal-header modal-header-primary border-0 mh-premium">
+                            <div class="d-flex align-items-center">
+                                <div class="mh-icon-badge">
+                                    <i class="fas fa-plus-circle"></i>
+                                </div>
+                                <div class="mh-title-wrap">
+                                    <h6 class="mh-title" id="exampleModalLabel">ADD PRODUCT</h6>
+                                    <small class="mh-subtitle">Create and register new data record</small>
+                                </div>
+                            </div>
+                            <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" style="opacity:0.8;">
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         </div>
-                        <div class="modal-body">
-                            <?php echo validation_errors(); ?>
-                            <form method="post" action="<?php echo base_url('admin/createpaketdata'); ?>">
-                                <div class="form-group row">
-                                    <label for="channelgroup2" class="col-sm-3 col-form-label">Provider</label>
-                                    <div class="col-sm-8">
-                                        <select name="channelgroup2" id="channelgroup2" class="form-control">
-                                            <option value="">Select Provider</option>
-                                            <option value="pulsa_xl">XL</option>
-                                            <option value="pulsa_axis">Axis</option>
-                                            <option value="pulsa_telkomsel">Telkomsel</option>
-                                            <option value="pulsa_tri">Tri</option>
-                                        </select>
-                                    </div>
+                        <div class="modal-body p-4 bg-light">
+                            <form method="post" action="<?php echo base_url('admin/ServiceController/createProduk'); ?>">
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold text-muted">Provider</label>
+                                    <select name="channelgroup2" class="form-control border-1" required>
+                                        <option value="">Select Provider</option>
+                                        <option value="pulsa_xl">XL</option>
+                                        <option value="pulsa_axis">Axis</option>
+                                        <option value="pulsa_telkomsel">Telkomsel</option>
+                                        <option value="pulsa_tri">Tri</option>
+                                    </select>
                                 </div>
-                                <div class="form-group row">
-                                    <label for="caption" class="col-sm-3 col-form-label">Caption</label>
-                                    <div class="col-sm-8">
-                                        <input type="text" class="form-control" id="caption" name ="caption" >
-                                        <input type="hidden" class="form-control" id="caption" name ="channelgroup" value= "ppob" >
-                                        <input type="hidden" class="form-control" id="caption" name ="name" value= "pulsa_reguler">
-                                    </div>
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold text-muted">Caption</label>
+                                    <input type="text" class="form-control border-1" name="caption" required>
+                                    <input type="hidden" name="channelgroup" value="ppob">
+                                    <input type="hidden" name="name" value="pulsa_reguler">
                                 </div>
-                                <div class="form-group row">
-                                    <label for="description" class="col-sm-3 col-form-label">Description</label>
-                                    <div class="col-sm-8">
-                                        <textarea class="form-control" id="description" name="description"></textarea>
-                                    </div>
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold text-muted">Description</label>
+                                    <textarea class="form-control border-1" name="description" rows="2" required></textarea>
                                 </div>
-                                <div class="form-group row">
-                                    <label for="price" class="col-sm-3 col-form-label">Price</label>
-                                    <div class="col-sm-8">
-                                        <input type="number" class="form-control" id="price" name="price">
-                                    </div>
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold text-muted">Price</label>
+                                    <input type="number" class="form-control border-1" name="price" required>
                                 </div>
-                                <div class="modal-footer border-0 px-0 pb-0">
+                                <div class="modal-footer border-0 px-0 pb-0 mt-4">
                                     <button type="button" class="btn-dt-cancel" data-dismiss="modal">Close</button>
-                                    <button type="submit" class="btn-dt-apply px-4 ml-2">
-                                        <i class="fas fa-save mr-2"></i> Buy
+                                    <button type="submit" class="btn-dt-apply px-4">
+                                        <i class="fas fa-save mr-2"></i> Save Product
                                     </button>
                                 </div>
                             </form>
@@ -105,19 +94,10 @@
             </div>
         </div>
 
-        <!-- Alert Messages -->
+        <!-- Alerts -->
         <?php if ($this->session->flashdata('message')): ?>
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <?php echo $this->session->flashdata('message'); ?>
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-        <?php endif; ?>
-    
-        <?php if ($this->session->flashdata('error')): ?>
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <?php echo $this->session->flashdata('error'); ?>
+            <div class="alert alert-success alert-dismissible fade show m-3" role="alert">
+                <?= $this->session->flashdata('message'); ?>
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -130,62 +110,65 @@
                     <thead>
                         <tr>
                             <th>NO</th>
+                            <th>PROVIDER</th>
                             <th>CAPTION</th>
                             <th>DESCRIPTION</th>
-                            <th>FEE</th>
+                            <th>PRICE</th>
                             <th class="text-center">ACTION</th>
                         </tr>
                     </thead>
-                    <tbody>
-                    </tbody>
+                    <tbody></tbody>
                 </table>
             </div>
 
-            <div class="modal fade" id="editpulsamodal" tabindex="-1" aria-labelledby="debitBalanceModalLabel" aria-hidden="true">
+            <!-- Edit Product Modal -->
+            <div class="modal fade" id="editProductModal" tabindex="-1" aria-labelledby="editProductModalLabel" aria-hidden="true">
                 <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header modal-header-primary border-0 py-3">
-                            <h5 class="modal-title font-weight-bold text-white" id="debitBalanceModalLabel"><i class="fas fa-edit mr-2"></i>Edit Produk</h5>
-                            <button type="button" class="close text-white outline-none" data-dismiss="modal" aria-label="Close">
+                    <div class="modal-content border-0 shadow-lg">
+                        <div class="modal-header modal-header-primary border-0 mh-premium">
+                            <div class="d-flex align-items-center">
+                                <div class="mh-icon-badge">
+                                    <i class="fas fa-edit"></i>
+                                </div>
+                                <div class="mh-title-wrap">
+                                    <h6 class="mh-title" id="editProductModalLabel">Edit Product</h6>
+                                    <small class="mh-subtitle">Modify and update existing product information</small>
+                                </div>
+                            </div>
+                            <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" style="opacity:0.8;">
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         </div>
-                        <div class="modal-body">
-                            <form method="post" action="<?php echo base_url('admin/createDebitBalance'); ?>">
-                                <div class="form-group row">
-                                    <label for="merchant" class="col-sm-3 col-form-label">Merchant </label>
-                                    <div class="col-sm-8">
-                                        <input type="text" class="form-control" readonly id="merchantNameDebit">
-                                        <input type="hidden" id="merchantIdDebit" name="merchantIdDebit">
-                                    </div>
+                        <div class="modal-body p-4 bg-light">
+                            <form method="post" action="<?php echo base_url('admin/ServiceController/updateProduct'); ?>">
+                                <input type="hidden" name="view_name" value="pulsa_reguler">
+                                <input type="hidden" id="edit_product_id" name="id">
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold text-muted">Provider</label>
+                                    <select id="edit_channelgroup2" name="channelgroup2" class="form-control border-1" required>
+                                        <option value="">Select Provider</option>
+                                        <option value="pulsa_xl">XL</option>
+                                        <option value="pulsa_axis">Axis</option>
+                                        <option value="pulsa_telkomsel">Telkomsel</option>
+                                        <option value="pulsa_tri">Tri</option>
+                                    </select>
                                 </div>
-                                <div class="form-group row">
-                                    <label for="description" class="col-sm-3 col-form-label">Channel Id </label>
-                                    <div class="col-sm-8">
-                                        <select name="channelId" class="form-control">
-                                            <option value="">Select Channel</option>
-                                            <?php foreach ($cashout_channels as $cashout_channel): ?>
-                                                <option value="<?php echo $cashout_channel->id; ?>"><?php echo $cashout_channel->id; ?></option>
-                                            <?php endforeach; ?>
-                                        </select>
-                                    </div>
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold text-muted">Product Caption</label>
+                                    <input type="text" class="form-control border-1" id="edit_caption" name="caption" required>
                                 </div>
-                                <div class="form-group row">
-                                    <label for="description" class="col-sm-3 col-form-label">Description</label>
-                                    <div class="col-sm-8">
-                                        <input type="text" class="form-control" id="description" name ="description" >
-                                    </div>
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold text-muted">Description</label>
+                                    <textarea class="form-control border-1" id="edit_description" name="description" rows="3" required></textarea>
                                 </div>
-                                <div class="form-group row">
-                                    <label for="amount" class="col-sm-3 col-form-label">Amount</label>
-                                    <div class="col-sm-8">
-                                        <input type="text" class="form-control" id="amount" name="amount">
-                                    </div>
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold text-muted">Price / Fee (IDR)</label>
+                                    <input type="number" class="form-control border-1" id="edit_price" name="price" required>
                                 </div>
-                                <div class="modal-footer border-0 px-0 pb-0 mt-4 justify-content-center">
-                                    <button type="button" class="btn-dt-cancel" data-dismiss="modal">Close</button>
-                                    <button type="submit" class="btn-dt-apply px-4 ml-2" onclick="javascript: return confirm('Data correct ??')">
-                                        <i class="fas fa-check mr-2"></i> Save
+                                <div class="modal-footer border-0 px-0 pb-0 mt-4">
+                                    <button type="button" class="btn-dt-cancel" data-dismiss="modal">Cancel</button>
+                                    <button type="submit" class="btn-dt-apply px-4">
+                                        <i class="fas fa-save mr-2"></i> Save Changes
                                     </button>
                                 </div>
                             </form>
@@ -193,17 +176,23 @@
                     </div>
                 </div>
             </div>
-            
         </div>
     </div>
 </div>
-<!-- /.container-fluid -->
 
 <script src="<?= base_url('assets/js/server-datatables.js') ?>"></script>
 <script>
 $(document).ready(function() {
     window.productTable = initServerDataTable('#productTable', "<?= base_url('admin/pulsa_reguler') ?>", [
         { data: 'no' },
+        { 
+            data: 'c_channelGroup2',
+            render: function(data, type, row) {
+                if(!data) return '-';
+                // Remove 'pulsa_' prefix and uppercase
+                return '<span class="badge badge-info px-2 py-1">' + data.replace('pulsa_', '').toUpperCase() + '</span>';
+            }
+        },
         { data: 'c_caption' },
         { data: 'c_description' },
         { data: 'c_fee' },
@@ -224,23 +213,24 @@ $(document).ready(function() {
     });
 
     $('#provider').on('change', function() {
-        var providerText = $("#provider option:selected").text();
-        if ($(this).val() === "") {
-            providerText = "All";
-        }
-        $('#kpi-provider').text(providerText.replace('pulsa_', '').toUpperCase());
         window.productTable.ajax.reload();
     });
 
-
-    window.productTable.on('draw', function() {
-        $('#kpi-count').text(window.productTable.page.info().recordsTotal);
-    });
     $('#globalProductSearch').on('keyup', function() {
         window.productTable.search(this.value).draw();
     });
-
 });
-</script>
 
-<!-- End of Main Content -->
+function editProduct(id, caption, description, fee, provider) {
+    $('#edit_product_id').val(id);
+    $('#edit_caption').val(caption);
+    $('#edit_description').val(description);
+    $('#edit_channelgroup2').val(provider).trigger('change');
+    
+    // Clean fee from formatting
+    var cleanFee = fee.toString().replace(/[^0-9]/g, '');
+    $('#edit_price').val(cleanFee);
+    
+    $('#editProductModal').modal('show');
+}
+</script>
