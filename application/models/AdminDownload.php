@@ -51,6 +51,11 @@ class AdminDownload extends CI_Model {
 
     public function count_filtered($search_date = null)
     {
+        $is_filtered = ($search_date || (isset($_POST['search']['value']) && !empty($_POST['search']['value'])));
+        if (!$is_filtered) {
+            return $this->count_all_dt($search_date);
+        }
+
         $this->db->select('count(ad.id) as total');
         $this->_get_datatables_query($search_date);
         $query = $this->db->get();
@@ -59,15 +64,10 @@ class AdminDownload extends CI_Model {
 
     public function count_all_dt($search_date = null)
     {
-        $this->db->select('count(id) as total');
-        $this->db->from($this->table);
-        if ($search_date) {
-            $formatted_date = date('Y-m-d', strtotime($search_date));
-            $this->db->where('c_datetime >=', $formatted_date . ' 00:00:00');
-            $this->db->where('c_datetime <=', $formatted_date . ' 23:59:59');
-        }
-        $query = $this->db->get();
-        return $query->row()->total;
+        $table_name = explode(' ', $this->table)[0];
+        $query = $this->db->query("SELECT TABLE_ROWS FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '{$table_name}'");
+        $result = $query->row();
+        return $result ? (int)$result->TABLE_ROWS : 0;
     }
 
     public function get_download($limit, $start, $search_date = null) {

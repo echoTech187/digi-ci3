@@ -47,21 +47,22 @@ class History extends CI_Model {
     }
 
     public function get_merchant(){
-        $query = "select * from merchant ";
+        $query = "select id,c_name from merchant ";
         return $this->db->query($query)->result();
     }
 
     // --- DataTables Server-Side Processing ---
     var $table = 'cashout_payment_ppob cpp';
-    var $column_order = array(null, 'm.c_name', 'cpp.c_datetime', 'cpp.ref_cashoutChannelId', 'cpp.c_invoiceNo', 'cpp.c_phone', 'cpp.c_amount', 'cpp.c_status');
-    var $column_search = array('cpp.id', 'm.c_name', 'cpp.c_invoiceNo', 'cpp.c_phone', 'cpp.ref_cashoutChannelId');
+    var $column_order = array(null, 'm.c_name', 'cpp.c_datetime', 'cpp.ref_cashoutChannelId', 'c.c_invoiceNo', 'cpp.c_phone', 'cpp.c_amount', 'cpp.c_status');
+    var $column_search = array('cpp.id', 'm.c_name', 'c.c_invoiceNo', 'cpp.c_phone', 'cpp.ref_cashoutChannelId');
     var $order = array('cpp.id' => 'desc');
 
     private function _get_datatables_query($search_date = null, $search_merchant = null)
     {
-        $this->db->select('cpp.*, m.c_name as name_merchant');
+        $this->db->select('cpp.*, m.c_name as name_merchant, c.c_invoiceNo');
         $this->db->from($this->table);
         $this->db->join('merchant m', 'cpp.ref_merchantId = m.id', 'left');
+        $this->db->join('cashout c', 'c.id = cpp.ref_cashoutId', 'left');
 
         if ($search_date) {
             $this->db->where('cpp.c_datetime >=', $search_date . ' 00:00:00');
@@ -105,6 +106,11 @@ class History extends CI_Model {
 
     public function count_filtered($search_date = null, $search_merchant = null)
     {
+        $is_filtered = ($search_date || $search_merchant || (isset($_POST['search']['value']) && !empty($_POST['search']['value'])));
+        if (!$is_filtered) {
+            return $this->count_all_dt();
+        }
+
         $this->db->select('count(cpp.id) as total');
         // Optimized: Only join if global search is used
         $this->db->from($this->table);
@@ -119,6 +125,7 @@ class History extends CI_Model {
 
         if (isset($_POST['search']['value']) && $_POST['search']['value']) {
             $this->db->join('merchant m', 'cpp.ref_merchantId = m.id', 'left');
+            $this->db->join('cashout c', 'c.id = cpp.ref_cashoutId', 'left');
             $i = 0;
             foreach ($this->column_search as $item) {
                 if ($i === 0) {
@@ -139,18 +146,10 @@ class History extends CI_Model {
 
     public function count_all_dt($search_date = null, $search_merchant = null)
     {
-        $this->db->select('count(cpp.id) as total');
-        // Optimized: No joins needed for total count
-        $this->db->from($this->table);
-        if ($search_date) {
-            $this->db->where('cpp.c_datetime >=', $search_date . ' 00:00:00');
-            $this->db->where('cpp.c_datetime <=', $search_date . ' 23:59:59');
-        }
-        if ($search_merchant) {
-            $this->db->where('cpp.ref_merchantId', $search_merchant);
-        }
-        $query = $this->db->get();
-        return $query->row()->total;
+        $table_name = explode(' ', $this->table)[0];
+        $query = $this->db->query("SELECT TABLE_ROWS FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '{$table_name}'");
+        $result = $query->row();
+        return $result ? (int)$result->TABLE_ROWS : 0;
     }
 
     public function get_summary($search_date = null, $search_merchant = null)

@@ -36,6 +36,11 @@ class SubMerchant extends CI_Model
 
     public function count_filtered($id)
     {
+        $is_filtered = (isset($_POST['search']['value']) && !empty($_POST['search']['value']));
+        if (!$is_filtered) {
+            return $this->count_all_dt($id);
+        }
+
         $this->db->select('count(merchant.id) as total');
         $this->_get_datatables_query($id);
         $query = $this->db->get();

@@ -65,6 +65,11 @@ class QRISRecurring extends CI_Model {
 
     public function count_filtered($search_name = null, $search_date = null, $search_date_to = null, $search_submerchant = null)
     {
+        $is_filtered = ($search_name || $search_date || $search_date_to || $search_submerchant || (isset($_POST['search']['value']) && !empty($_POST['search']['value'])));
+        if (!$is_filtered) {
+            return $this->count_all_dt();
+        }
+
         $this->db->select('count(crqm.id) as total');
         // Optimized: Only join what is necessary for filtering
         $this->db->from($this->table);
@@ -95,12 +100,10 @@ class QRISRecurring extends CI_Model {
 
     public function count_all_dt($search_name = null, $search_date = null, $search_date_to = null)
     {
-        $this->db->select('count(crqm.id) as total');
-        // Optimized: No joins needed for total records count
-        $this->db->from($this->table);
-        $this->_apply_filters($search_name, $search_date, $search_date_to);
-        $query = $this->db->get();
-        return $query->row()->total;
+        $table_name = explode(' ', $this->table)[0];
+        $query = $this->db->query("SELECT TABLE_ROWS FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '{$table_name}'");
+        $result = $query->row();
+        return $result ? (int)$result->TABLE_ROWS : 0;
     }
 
     public function get_summary($search_name = null, $search_date = null, $search_date_to = null, $search_submerchant = null)
@@ -121,7 +124,7 @@ class QRISRecurring extends CI_Model {
     }
     
     public function get_merchant(){
-        $query = "select * from merchant ";
+        $query = "select id,c_name from merchant ";
         return $this->db->query($query)->result();
     }
 

@@ -82,6 +82,11 @@ class QRISDynamic extends CI_Model
 
     public function count_filtered($search_name = null, $search_date = null, $search_transid = null, $search_status = null, $search_reff = null, $search_date_to = null)
     {
+        $is_filtered = ($search_name || $search_date || $search_transid || $search_status || $search_reff || (isset($_POST['search']['value']) && !empty($_POST['search']['value'])));
+        if (!$is_filtered) {
+            return $this->count_all_dt();
+        }
+
         $this->db->select('count(cdq.id) as total');
         // Optimized: Only join what is necessary for filtering
         $this->db->from($this->table);
@@ -112,12 +117,10 @@ class QRISDynamic extends CI_Model
 
     public function count_all_dt($search_name = null, $search_date = null, $search_date_to = null)
     {
-        $this->db->select('count(cdq.id) as total');
-        // Optimized: No joins needed for total record count
-        $this->db->from($this->table);
-        $this->_apply_filters($search_name, $search_date, null, null, null, $search_date_to);
-        $query = $this->db->get();
-        return $query->row()->total;
+        $table_name = explode(' ', $this->table)[0];
+        $query = $this->db->query("SELECT TABLE_ROWS FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '{$table_name}'");
+        $result = $query->row();
+        return $result ? (int)$result->TABLE_ROWS : 0;
     }
 
     public function get_summary($search_name = null, $search_date = null, $search_date_to = null, $search_transid = null, $search_status = null, $search_reff = null)
@@ -275,7 +278,7 @@ class QRISDynamic extends CI_Model
 
     public function get_merchant()
     {
-        $query = "select * from merchant ";
+        $query = "select id,c_name from merchant ";
         return $this->db->query($query)->result();
     }
     

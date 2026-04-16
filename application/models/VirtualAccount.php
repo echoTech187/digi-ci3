@@ -79,6 +79,11 @@ class VirtualAccount extends CI_Model {
 
     public function count_filtered($search_date = null, $search_date_to = null, $search_merchant = null, $search_settlement = null, $search_va = null, $search_transid = null)
     {
+        $is_filtered = ($search_date || $search_merchant || $search_settlement || $search_va || $search_transid || (isset($_POST['search']['value']) && !empty($_POST['search']['value'])));
+        if (!$is_filtered) {
+            return $this->count_all_dt();
+        }
+
         $this->db->select('count(cpv.id) as total');
         // Optimized: Only join what is necessary for filtering
         $this->db->from($this->table);
@@ -140,22 +145,10 @@ class VirtualAccount extends CI_Model {
 
     public function count_all_dt($search_date = null, $search_date_to = null, $search_merchant = null)
     {
-        $this->db->select('count(cpv.id) as total');
-        // Optimized: No joins needed for total records count
-        $this->db->from($this->table);
-        
-        if ($search_date && $search_date_to) {
-            $this->db->where('cpv.c_datetime >=', $search_date . ' 00:00:00');
-            $this->db->where('cpv.c_datetime <=', $search_date_to . ' 23:59:59');
-        } elseif ($search_date) {
-            $this->db->where('cpv.c_datetime >=', $search_date . ' 00:00:00');
-            $this->db->where('cpv.c_datetime <=', $search_date . ' 23:59:59');
-        }
-
-        if ($search_merchant) $this->db->where('cpv.ref_merchantId', $search_merchant);
-
-        $query = $this->db->get();
-        return $query->row()->total;
+        $table_name = explode(' ', $this->table)[0];
+        $query = $this->db->query("SELECT TABLE_ROWS FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '{$table_name}'");
+        $result = $query->row();
+        return $result ? (int)$result->TABLE_ROWS : 0;
     }
 
 
@@ -282,7 +275,7 @@ class VirtualAccount extends CI_Model {
         return $this->db->query($query)->result_array();
     }
     public function get_merchant(){
-            $query = "select * from merchant ";
+            $query = "select id,c_name from merchant ";
             return $this->db->query($query)->result();
         }
     }

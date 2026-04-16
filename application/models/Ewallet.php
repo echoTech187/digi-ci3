@@ -66,6 +66,11 @@ class Ewallet extends CI_Model {
 
     public function count_filtered($search_name = null, $date_from = null, $date_to = null, $search_date_settlement = null, $search_invoice_no = null)
     {
+        $is_filtered = ($search_name || $date_from || $search_date_settlement || $search_invoice_no || (isset($_POST['search']['value']) && !empty($_POST['search']['value'])));
+        if (!$is_filtered) {
+            return $this->count_all_dt();
+        }
+
         $this->db->select('count(cpe.id) as total');
         // Optimized: Only join what is necessary for filtering
         $this->db->from($this->table);
@@ -112,15 +117,10 @@ class Ewallet extends CI_Model {
 
     public function count_all_dt($search_name = null, $date_from = null, $date_to = null)
     {
-        $this->db->select('count(cpe.id) as total');
-        $this->db->from($this->table);
-        if ($search_name) $this->db->where('cpe.ref_merchantId', $search_name);
-        if ($date_from && $date_to) {
-            $this->db->where('cpe.c_datetimePayment >=', $date_from);
-            $this->db->where('cpe.c_datetimePayment <=', $date_to);
-        }
-        $query = $this->db->get();
-        return $query->row()->total;
+        $table_name = explode(' ', $this->table)[0];
+        $query = $this->db->query("SELECT TABLE_ROWS FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '{$table_name}'");
+        $result = $query->row();
+        return $result ? (int)$result->TABLE_ROWS : 0;
     }
 
 
@@ -240,7 +240,7 @@ class Ewallet extends CI_Model {
 
     public function get_merchant()
     {
-        $query = "select * from merchant ";
+        $query = "select id,c_name from merchant ";
         return $this->db->query($query)->result();
     }
 

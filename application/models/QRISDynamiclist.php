@@ -34,11 +34,18 @@ class QRISDynamiclist extends CI_Model
 
     public function count_all_qris_dynamic()
     {
-        return $this->db->count_all('cashin_dynamic_qris_mpm');
+        $query = $this->db->query("SELECT TABLE_ROWS FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'cashin_dynamic_qris_mpm'");
+        $result = $query->row();
+        return $result ? (int)$result->TABLE_ROWS : 0;
     }
 
     public function count_filtered_qris_dynamic($search = null)
     {
+        $is_filtered = !empty($search);
+        if (!$is_filtered) {
+            return $this->count_all_qris_dynamic();
+        }
+
         $this->db->select('count(cashin_dynamic_qris_mpm.id) as total');
         $this->db->from('cashin_dynamic_qris_mpm');
         

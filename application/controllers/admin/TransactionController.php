@@ -1220,7 +1220,6 @@ class TransactionController extends CI_Controller
       $data['channels'] = $this->BiFast->get_channels();
 
 
-
       // Render view
       $this->load->view('templates/user_header.php', $data);
       $this->load->view('templates/user_sidebar.php', $data);

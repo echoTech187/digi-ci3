@@ -66,6 +66,11 @@ class VADynamic extends CI_Model {
 
     public function count_filtered($search_name = null, $search_date = null, $search_va = null, $search_trxid = null, $search_date_to = null)
     {
+        $is_filtered = ($search_name || $search_date || $search_va || $search_trxid || $search_date_to || (isset($_POST['search']['value']) && !empty($_POST['search']['value'])));
+        if (!$is_filtered) {
+            return $this->count_all_dt();
+        }
+
         $this->db->select('count(cdv.id) as total');
         // Optimized: Only join what is necessary for filtering
         $this->db->from($this->table);
@@ -114,21 +119,10 @@ class VADynamic extends CI_Model {
 
     public function count_all_dt($search_name = null, $search_date = null, $search_date_to = null)
     {
-        $this->db->select('count(cdv.id) as total');
-        // Optimized: No joins needed for total count
-        $this->db->from($this->table);
-        if ($search_name) $this->db->where('cdv.ref_merchantId', $search_name);
-        if ($search_date) {
-            $formatted_date = date('Y-m-d', strtotime($search_date));
-            if ($search_date_to) {
-                $formatted_date_to = date('Y-m-d', strtotime($search_date_to));
-                $this->db->where("cdv.c_datetimeRequest >= '$formatted_date 00:00:00' AND cdv.c_datetimeRequest <= '$formatted_date_to 23:59:59'");
-            } else {
-                $this->db->where("cdv.c_datetimeRequest >= '$formatted_date 00:00:00' AND cdv.c_datetimeRequest <= '$formatted_date 23:59:59'");
-            }
-        }
-        $query = $this->db->get();
-        return $query->row()->total;
+        $table_name = explode(' ', $this->table)[0];
+        $query = $this->db->query("SELECT TABLE_ROWS FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '{$table_name}'");
+        $result = $query->row();
+        return $result ? (int)$result->TABLE_ROWS : 0;
     }
 
     public function get_summary($search_name = null, $search_date = null, $search_date_to = null, $search_va = null, $search_trxid = null)
@@ -209,7 +203,7 @@ class VADynamic extends CI_Model {
         return $query->row()->total;
     }
     public function get_merchant(){
-            $query = "select * from merchant ";
+            $query = "select id,c_name from merchant ";
             return $this->db->query($query)->result();
         }
 

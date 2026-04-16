@@ -74,6 +74,11 @@ class Mutation_model extends CI_Model
 
     public function count_filtered($id, $search_date_mutation = null, $position = null, $channel = null, $search_date_mutation_to = null)
     {
+        $is_filtered = ($search_date_mutation || $position || $channel || $search_date_mutation_to || (isset($_POST['search']['value']) && !empty($_POST['search']['value'])));
+        if (!$is_filtered) {
+            return $this->count_all_dt($id);
+        }
+
         $this->db->select('count(mutation.id) as total');
         // Optimized: Skip the columns and intensive joins for count if not filtering by channel
         $this->db->from('mutation');

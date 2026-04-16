@@ -18,7 +18,7 @@ class BiFast extends CI_Model {
         $this->db->join('merchant_account_bank mab', 'mab.c_beneficiaryAccountNo = cpb.c_accountNo AND mab.ref_cashoutChannelId = cpb.ref_cashoutChannelId AND mab.ref_merchantId = cpb.ref_merchantId', 'left');
         $this->db->join('external_paylabs_disbursement_transfer_bank epb', 'epb.ref_cashoutPaymentBifastId = cpb.id', 'left');
         $this->db->join('external_gvconnect_snap_disbursement_transfer_bank egb', 'egb.ref_cashoutPaymentBifastId = cpb.id', 'left');
-
+        
         if ($search_name) {
             $this->db->where('cpb.ref_merchantId', $search_name);
         }
@@ -61,6 +61,7 @@ class BiFast extends CI_Model {
             $order = $this->order;
             $this->db->order_by(key($order), $order[key($order)]);
         }
+        
     }
 
     public function get_datatables($search_name = null, $date_from = null, $date_to = null, $search_transid = null, $search_external_reff = null, $search_channel = null, $search_status = null)
@@ -74,6 +75,11 @@ class BiFast extends CI_Model {
 
     public function count_filtered($search_name = null, $date_from = null, $date_to = null, $search_transid = null, $search_external_reff = null, $search_channel = null, $search_status = null)
     {
+        $is_filtered = ($search_name || $date_from || $search_transid || $search_external_reff || $search_channel || $search_status || (isset($_POST['search']['value']) && !empty($_POST['search']['value'])));
+        if (!$is_filtered) {
+            return $this->count_all_dt();
+        }
+
         $this->db->select('count(cpb.id) as total');
         // Optimized: Only join what is necessary for filtering
         $this->db->from($this->table);
@@ -122,15 +128,10 @@ class BiFast extends CI_Model {
 
     public function count_all_dt($search_name = null, $date_from = null, $date_to = null)
     {
-        $this->db->select('count(cpb.id) as total');
-        $this->db->from($this->table);
-        if ($search_name) $this->db->where('cpb.ref_merchantId', $search_name);
-        if ($date_from && $date_to) {
-            $this->db->where('cpb.c_datetime >=', $date_from);
-            $this->db->where('cpb.c_datetime <=', $date_to);
-        }
-        $query = $this->db->get();
-        return $query->row()->total;
+        $table_name = explode(' ', $this->table)[0];
+        $query = $this->db->query("SELECT TABLE_ROWS FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '{$table_name}'");
+        $result = $query->row();
+        return $result ? (int)$result->TABLE_ROWS : 0;
     }
 
 
@@ -192,7 +193,6 @@ class BiFast extends CI_Model {
                 ) AS c_responseBody " . $query . " Order BY cashout_payment_bifast.id DESC LIMIT $start, $limit";
 
         $data = $this->db->query($data_query)->result();
-
         return [
         'total_rows' => $total_rows,
         'data' => $data
@@ -232,7 +232,7 @@ class BiFast extends CI_Model {
     }
     
     public function get_merchant(){
-        $query = "select * from merchant ";
+        $query = "select id, c_name from merchant ";
         return $this->db->query($query)->result();
     }
 

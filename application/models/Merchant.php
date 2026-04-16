@@ -181,6 +181,11 @@ public function setMaintenanceStatus($newStatus) {
 
     public function count_filtered($table, $column_order, $column_search, $order, $where = [])
     {
+        $is_filtered = (!empty($where) || (isset($_POST['search']['value']) && !empty($_POST['search']['value'])));
+        if (!$is_filtered) {
+            return $this->count_all_dt($table, $where);
+        }
+
         $this->db->select('count(id) as total');
         $this->_get_datatables_query($table, $column_order, $column_search, $order, $where);
         $query = $this->db->get();
@@ -189,13 +194,18 @@ public function setMaintenanceStatus($newStatus) {
 
     public function count_all_dt($table, $where = [])
     {
-        $this->db->select('count(id) as total');
-        $this->db->from($table);
         if (!empty($where)) {
+            $this->db->select('count(id) as total');
+            $this->db->from($table);
             $this->db->where($where);
+            $query = $this->db->get();
+            return $query->row()->total;
         }
-        $query = $this->db->get();
-        return $query->row()->total;
+
+        $table_name = explode(' ', $table)[0];
+        $query = $this->db->query("SELECT TABLE_ROWS FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '{$table_name}'");
+        $result = $query->row();
+        return $result ? (int)$result->TABLE_ROWS : 0;
     }
 
     /**

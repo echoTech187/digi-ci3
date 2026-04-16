@@ -45,6 +45,11 @@ class BalanceLogModel extends CI_Model {
 
     public function count_filtered()
     {
+        $is_filtered = (isset($_POST['search']['value']) && !empty($_POST['search']['value']));
+        if (!$is_filtered) {
+            return $this->count_all_dt();
+        }
+
         $this->db->select('count(mbhl.id) as total');
         $this->_get_datatables_query();
         $query = $this->db->get();
@@ -53,10 +58,10 @@ class BalanceLogModel extends CI_Model {
 
     public function count_all_dt()
     {
-        $this->db->select('count(id) as total');
-        $this->db->from($this->table);
-        $query = $this->db->get();
-        return $query->row()->total;
+        $table_name = explode(' ', $this->table)[0];
+        $query = $this->db->query("SELECT TABLE_ROWS FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '{$table_name}'");
+        $result = $query->row();
+        return $result ? (int)$result->TABLE_ROWS : 0;
     }
 
     public function get_balance_log() {

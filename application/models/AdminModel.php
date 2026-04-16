@@ -69,16 +69,23 @@ class AdminModel extends CI_Model {
       return $query->result();
   }
 
-  public function count_filtered()
-  {
-      $this->_get_datatables_query();
-      $query = $this->db->get();
-      return $query->num_rows();
-  }
+    public function count_filtered()
+    {
+        $is_filtered = (isset($_POST['search']['value']) && !empty($_POST['search']['value']));
+        if (!$is_filtered) {
+            return $this->count_all();
+        }
 
-  public function count_all()
-  {
-      $data = $this->db->select('count(id) as total')->from($this->table)->get();
-      return $data->row()->total;
-  }
+        $this->_get_datatables_query();
+        $query = $this->db->get();
+        return $query->num_rows();
+    }
+
+    public function count_all()
+    {
+        $table_name = explode(' ', $this->table)[0];
+        $query = $this->db->query("SELECT TABLE_ROWS FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '{$table_name}'");
+        $result = $query->row();
+        return $result ? (int)$result->TABLE_ROWS : 0;
+    }
 }
