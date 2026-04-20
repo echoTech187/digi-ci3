@@ -19,6 +19,7 @@ user_guide_src/cilexer/pycilexer.egg-info/*
 /cache
 /system
 /vendor
+/scratch
 
 # IDE Files
 #-------------------------
