@@ -34,13 +34,14 @@ class VirtualAccount extends CI_Model {
             $this->db->join('cashin c', 'cpv.ref_cashinId = c.id', 'left');
         }
 
-        // Join callback/custom data only if needed
-        if (!$only_ids && !$count_only || $searchValue || strpos($sort_col, 'egv.') !== false) {
+        // Join callback/custom data only if getting full data (NOT during ID-fetch to prevent timeouts)
+        if (!$only_ids && !$count_only || strpos($sort_col, 'egv.') !== false) {
             $this->db->join('external_gvpay_va_callback_payment egv', 'egv.ref_subMerchantId = cpv.ref_subMerchantId AND egv.ref_cashinPaymentVaId = cpv.id', 'left');
         }
         
-        // Join merchant only if needed
-        if (!$only_ids && !$count_only || $search_merchant || $searchValue || strpos($sort_col, 'm.') !== false) {
+        // Join merchant only if needed (NOT during ID-fetch for transid search)
+        $isTextSearch = $searchValue && !preg_match('/^(VA|INV|[0-9]{8,})/i', $searchValue);
+        if (!$only_ids && !$count_only || $search_merchant || $isTextSearch || strpos($sort_col, 'm.') !== false) {
             $this->db->join('merchant m', 'cpv.ref_merchantId = m.id', 'left');
         }
 
@@ -48,7 +49,8 @@ class VirtualAccount extends CI_Model {
             $this->db->join('submerchant s', 'cpv.ref_subMerchantId = s.id', 'left');
         }
 
-        if (!$only_ids && !$count_only || $search_transid || $searchValue) {
+        // Trans ID joins ONLY for full data display, NEVER during ID-fetch (use Pre-Lookup instead)
+        if (!$only_ids && !$count_only) {
             $this->db->join('cashin_dynamic_va cdv', 'cdv.id = cpv.ref_cashinDynamicVaId AND cdv.ref_merchantId = cpv.ref_merchantId', 'left');
             $this->db->join('cashin_recurring_va crv', 'crv.id = cpv.ref_cashinRecurringVaId AND crv.ref_merchantId = cpv.ref_merchantId', 'left');
         }
@@ -63,50 +65,114 @@ class VirtualAccount extends CI_Model {
         if ($search_merchant) {
             $this->db->where('cpv.ref_merchantId', $search_merchant);
         }
-        if ($search_settlement) {
-            $this->db->where('cpv.c_datetimeSettlement >=', $search_settlement . ' 00:00:00');
-            $this->db->where('cpv.c_datetimeSettlement <=', $search_settlement . ' 23:59:59');
-        }
         if ($search_va !== null && $search_va !== '') {
             $search_va = trim($search_va);
             if ($search_va !== '') {
-                $this->db->like('cpv.c_vaNumber', $search_va, 'after');
+                $safeVa = $this->db->escape_str($search_va);
+                $matching_ids = [-1];
+                
+                // 1. Check c_vaNumber & egv.c_custom
+                $cpv_res = $this->db->query("SELECT id FROM cashin_payment_va WHERE c_vaNumber LIKE '$safeVa%' LIMIT 50")->result();
+                if (!empty($cpv_res)) $matching_ids = array_merge($matching_ids, array_column($cpv_res, 'id'));
+                
+                $egv_res = $this->db->query("SELECT ref_cashinPaymentVaId FROM external_gvpay_va_callback_payment WHERE c_custom LIKE '$safeVa%' LIMIT 50")->result();
+                if (!empty($egv_res)) $matching_ids = array_merge($matching_ids, array_column($egv_res, 'ref_cashinPaymentVaId'));
+
+                // 2. Check Merchant Transaction IDs (sub-tables)
+                $cdv_res = $this->db->query("SELECT id FROM cashin_dynamic_va WHERE c_merchantTransactionId LIKE '$safeVa%' LIMIT 50")->result();
+                if (!empty($cdv_res)) {
+                    $cdv_ids = array_column($cdv_res, 'id');
+                    $cpv_res = $this->db->query("SELECT id FROM cashin_payment_va WHERE ref_cashinDynamicVaId IN (".implode(',', $cdv_ids).") LIMIT 50")->result();
+                    if (!empty($cpv_res)) $matching_ids = array_merge($matching_ids, array_column($cpv_res, 'id'));
+                }
+                
+                $this->db->where_in('cpv.id', array_unique($matching_ids));
             }
         }
         if ($search_transid !== null && $search_transid !== '') {
             $search_transid = trim($search_transid);
             if ($search_transid !== '') {
-                $this->db->group_start();
-                $this->db->like('cdv.c_merchantTransactionId', $search_transid, 'after');
-                $this->db->or_like('crv.c_merchantTransactionId', $search_transid, 'after');
-                $this->db->group_end();
+                $safeTransId = $this->db->escape_str($search_transid);
+                $matching_ids = [-1];
+                
+                // 1. Check c_vaNumber & egv.c_custom
+                $cpv_res = $this->db->query("SELECT id FROM cashin_payment_va WHERE c_vaNumber LIKE '$safeTransId%' LIMIT 50")->result();
+                if (!empty($cpv_res)) $matching_ids = array_merge($matching_ids, array_column($cpv_res, 'id'));
+
+                $egv_res = $this->db->query("SELECT ref_cashinPaymentVaId FROM external_gvpay_va_callback_payment WHERE c_custom LIKE '$safeTransId%' LIMIT 50")->result();
+                if (!empty($egv_res)) $matching_ids = array_merge($matching_ids, array_column($egv_res, 'ref_cashinPaymentVaId'));
+
+                // 2. Check Merchant Transaction IDs (sub-tables)
+                $cdv_res = $this->db->query("SELECT id FROM cashin_dynamic_va WHERE c_merchantTransactionId LIKE '$safeTransId%' LIMIT 50")->result();
+                if (!empty($cdv_res)) {
+                    $cdv_ids = array_column($cdv_res, 'id');
+                    $cpv_res = $this->db->query("SELECT id FROM cashin_payment_va WHERE ref_cashinDynamicVaId IN (".implode(',', $cdv_ids).") LIMIT 50")->result();
+                    if (!empty($cpv_res)) $matching_ids = array_merge($matching_ids, array_column($cpv_res, 'id'));
+                }
+                
+                $crv_res = $this->db->query("SELECT id FROM cashin_recurring_va WHERE c_merchantTransactionId LIKE '$safeTransId%' LIMIT 50")->result();
+                if (!empty($crv_res)) {
+                    $crv_ids = array_column($crv_res, 'id');
+                    $cpv_res = $this->db->query("SELECT id FROM cashin_payment_va WHERE ref_cashinRecurringVaId IN (".implode(',', $crv_ids).") LIMIT 50")->result();
+                    if (!empty($cpv_res)) $matching_ids = array_merge($matching_ids, array_column($cpv_res, 'id'));
+                }
+                
+                $this->db->where_in('cpv.id', array_unique($matching_ids));
             }
         }
 
         if ($searchValue) {
-            $isTechnicalSearch = (preg_match('/^(VA|INV)/i', $searchValue));
-            $i = 0;
-            foreach ($this->column_search as $item) {
-                // EMERGENCY OPTIMIZATION: Skip searching name columns if search value is a technical ID prefix
-                if ($isTechnicalSearch && in_array($item, ['m.c_name'])) {
-                    continue;
-                }
+            $safeSearch = $this->db->escape_str($searchValue);
+            
+            // Detect technical IDs (Numeric > 8 digits, or starting with VA/INV/GD/GR/0000)
+            $isTechnicalId = preg_match('/^([0-9]{8,30}|(VA|INV|GD|GR|0000)[0-9a-zA-Z]+)/i', $searchValue);
+            $isInvoiceSearch = preg_match('/^INV/i', $searchValue);
 
-                // EMERGENCY OPTIMIZATION: Prefix search only (no leading %) to allow index usage
-                // Skip searching invoice column if search value doesn't look like an invoice
-                if ($item == 'c.c_invoiceNo' && !$isInvoiceSearch) {
-                    continue;
+            if ($isTechnicalId) {
+                $matching_ids = [-1];
+                
+                // 1. Direct ID match
+                if (is_numeric($searchValue) && strlen($searchValue) < 15) {
+                    $matching_ids[] = (int)$searchValue;
                 }
+                
+                // 2. VA Number match
+                $va_res = $this->db->query("SELECT id FROM cashin_payment_va WHERE c_vaNumber LIKE '$safeSearch%' LIMIT 50")->result();
+                if (!empty($va_res)) $matching_ids = array_merge($matching_ids, array_column($va_res, 'id'));
+                
+                // 3. EGV Custom field match
+                $egv_res = $this->db->query("SELECT ref_cashinPaymentVaId FROM external_gvpay_va_callback_payment WHERE c_custom LIKE '$safeSearch%' LIMIT 50")->result();
+                if (!empty($egv_res)) $matching_ids = array_merge($matching_ids, array_column($egv_res, 'ref_cashinPaymentVaId'));
+                
+                // 4. Trans ID Dynamic
+                $cdv_res = $this->db->query("SELECT id FROM cashin_dynamic_va WHERE c_merchantTransactionId LIKE '$safeSearch%' LIMIT 50")->result();
+                if (!empty($cdv_res)) {
+                    $cdv_ids = array_column($cdv_res, 'id');
+                    $cpv_res = $this->db->query("SELECT id FROM cashin_payment_va WHERE ref_cashinDynamicVaId IN (".implode(',', $cdv_ids).") LIMIT 50")->result();
+                    if (!empty($cpv_res)) $matching_ids = array_merge($matching_ids, array_column($cpv_res, 'id'));
+                }
+                
+                // 5. Trans ID Recurring
+                $crv_res = $this->db->query("SELECT id FROM cashin_recurring_va WHERE c_merchantTransactionId LIKE '$safeSearch%' LIMIT 50")->result();
+                if (!empty($crv_res)) {
+                    $crv_ids = array_column($crv_res, 'id');
+                    $cpv_res = $this->db->query("SELECT id FROM cashin_payment_va WHERE ref_cashinRecurringVaId IN (".implode(',', $crv_ids).") LIMIT 50")->result();
+                    if (!empty($cpv_res)) $matching_ids = array_merge($matching_ids, array_column($cpv_res, 'id'));
+                }
+                
+                $this->db->where_in('cpv.id', array_unique($matching_ids));
 
-                if ($i === 0) {
-                    $this->db->group_start();
-                    $this->db->like($item, $searchValue, 'after');
+                
+            } else if ($isInvoiceSearch) {
+                $this->db->where("cpv.ref_cashinId IN (SELECT id FROM cashin WHERE c_invoiceNo LIKE '$safeSearch%')", NULL, FALSE);
+            } else {
+                // TEXT SEARCH: Merchant name only (min 4 chars)
+                if (strlen($searchValue) >= 4) {
+                    $this->db->like('m.c_name', $searchValue, 'after');
                 } else {
-                    $this->db->or_like($item, $searchValue, 'after');
+                    $this->db->where('1=0', NULL, FALSE);
                 }
-                $i++;
             }
-            if ($i > 0) $this->db->group_end();
         }
 
         if (!$count_only) {
