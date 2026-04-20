@@ -11,7 +11,7 @@ class VirtualAccount extends CI_Model {
     private function _get_datatables_query($search_date = null, $search_date_to = null, $search_merchant = null, $search_settlement = null, $search_va = null, $search_transid = null, $only_ids = false, $count_only = false)
     {
         // Emergency 3-second safeguard
-        $this->db->query("SET SESSION max_execution_time = 3000");
+        $this->db->query("SET SESSION max_execution_time = 10000");
 
         if ($count_only) {
             $this->db->select("count(cpv.id) as total");

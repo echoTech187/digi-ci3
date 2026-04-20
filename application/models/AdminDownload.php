@@ -9,6 +9,10 @@ class AdminDownload extends CI_Model {
 
     private function _get_datatables_query($search_date = null)
     {
+        // Emergency 3-second safeguard
+        $this->db->query("SET SESSION max_execution_time = 10000");
+        
+        $this->db->select('ad.id, ad.c_datetime, ad.c_type, ad.c_filename, ad.c_status, ad.c_remark');
         $this->db->from($this->table);
 
         if ($search_date) {

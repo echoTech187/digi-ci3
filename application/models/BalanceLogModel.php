@@ -9,6 +9,10 @@ class BalanceLogModel extends CI_Model {
 
     private function _get_datatables_query()
     {
+        // Emergency 3-second safeguard
+        $this->db->query("SET SESSION max_execution_time = 10000");
+        
+        $this->db->select('mbhl.id, mbhl.created_at, mbhl.merchant_id, mbhl.merchant_name, mbhl.add_to_available');
         $this->db->from($this->table);
 
         $i = 0;

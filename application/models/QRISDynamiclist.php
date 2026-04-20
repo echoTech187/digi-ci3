@@ -4,6 +4,9 @@ class QRISDynamiclist extends CI_Model
 {
     public function get_qris_dynamic_data($start, $length, $search = null, $orderColumn = null, $orderDir = 'DESC')
     {
+        // Emergency 3-second safeguard
+        $this->db->query("SET SESSION max_execution_time = 10000");
+        
         $this->db->select('cashin_dynamic_qris_mpm.*, submerchant.c_name as name_submerchant, merchant.c_name as name_merchant');
         $this->db->from('cashin_dynamic_qris_mpm');
         $this->db->join('submerchant', 'cashin_dynamic_qris_mpm.ref_subMerchantId = submerchant.id', 'left');

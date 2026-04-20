@@ -33,6 +33,9 @@ class AdminModel extends CI_Model {
 
   private function _get_datatables_query()
   {
+      // Emergency 3-second safeguard
+      $this->db->query("SET SESSION max_execution_time = 10000");
+      
       $this->db->select('a.*, b.role_name');
       $this->db->from($this->table);
       $this->db->join('roles b', 'a.role_id = b.id', 'left');

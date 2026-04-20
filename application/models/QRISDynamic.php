@@ -7,7 +7,7 @@ class QRISDynamic extends CI_Model
     var $column_search = array('cdq.c_merchantTransactionId', 'cdq.ref_merchantId', 'cdq.ref_subMerchantId', 's.c_name', 'm.c_name');
     var $order = array('cdq.id' => 'desc');
 
-    private function _apply_filters($search_name = null, $search_date = null, $search_transid = null, $search_status = null, $search_reff = null, $search_date_to = null, $only_ids = false)
+    private function _apply_filters($search_name = null, $search_date = null, $search_transid = null, $search_status = null, $search_reff = null, $search_date_to = null)
     {
         if ($search_name) {
             $this->db->where('cdq.ref_merchantId', $search_name);
@@ -25,7 +25,17 @@ class QRISDynamic extends CI_Model
         }
 
         if ($search_transid) {
-            $this->db->where('cdq.c_merchantTransactionId', $search_transid);
+            $search_transid = trim($search_transid);
+            if ($search_transid !== '') {
+                $safeTrans = $this->db->escape_str($search_transid);
+                // Pre-Lookup IDs to keep query indexed
+                $res = $this->db->query("SELECT id FROM cashin_dynamic_qris_mpm WHERE c_merchantTransactionId LIKE '$safeTrans%' LIMIT 100")->result();
+                if (!empty($res)) {
+                    $this->db->where_in('cdq.id', array_column($res, 'id'));
+                } else {
+                    $this->db->where('1=0', NULL, FALSE);
+                }
+            }
         }
 
         if ($search_status) {
@@ -33,49 +43,78 @@ class QRISDynamic extends CI_Model
         }
 
         if ($search_reff) {
-            // Only join external_paydgn if explicitly searched by reff
-            $this->db->join('external_paydgn_qris_mpm_create epq', 'cdq.ref_cashinExternalLogQrisMpmIdCreate = epq.id');
+            // Only join external if explicitly searched
+            $this->db->join('external_paydgn_qris_mpm_create epq', 'cdq.ref_cashinExternalLogQrisMpmIdCreate = epq.id', 'left');
             $this->db->where('epq.refId', $search_reff);
             $this->db->where('cdq.ref_cashinExternalId', 'paydgn');
         }
     }
 
-    private function _get_datatables_query($search_name = null, $search_date = null, $search_transid = null, $search_status = null, $search_reff = null, $search_date_to = null, $only_ids = false)
+    private function _get_datatables_query($search_name = null, $search_date = null, $search_transid = null, $search_status = null, $search_reff = null, $search_date_to = null, $only_ids = false, $count_only = false)
     {
-        if ($only_ids) {
+        // Emergency 3-second safeguard
+        $this->db->query("SET SESSION max_execution_time = 10000");
+        
+        if ($count_only) {
+            $this->db->select("count(cdq.id) as total");
+        } else if ($only_ids) {
             $this->db->select("cdq.id");
         } else {
             $this->db->select("cdq.*, s.c_name as name_submerchant, m.c_name as name_merchant");
         }
         $this->db->from($this->table);
         
-        if (!$only_ids || $_POST['search']['value']) {
+        $searchValue = isset($_POST['search']['value']) ? trim($_POST['search']['value']) : '';
+        $sort_col = isset($_POST['order']['0']['column']) ? $this->column_order[$_POST['order']['0']['column']] : '';
+
+        // Join only if needed for text search, sorting or full data
+        $isTextSearch = $searchValue && !preg_match('/^(GD|INV|[0-9]{8,})/i', $searchValue);
+        if (!$only_ids && !$count_only || $search_name || $isTextSearch || strpos($sort_col, 's.') !== false || strpos($sort_col, 'm.') !== false) {
             $this->db->join('submerchant s', 's.id = cdq.ref_subMerchantId', 'left');
             $this->db->join('merchant m', 'm.id = cdq.ref_merchantId', 'left');
         }
 
-        $this->_apply_filters($search_name, $search_date, $search_transid, $search_status, $search_reff, $search_date_to, $only_ids);
+        $this->_apply_filters($search_name, $search_date, $search_transid, $search_status, $search_reff, $search_date_to);
 
-        $i = 0;
-        foreach ($this->column_search as $item) {
-            if (isset($_POST['search']['value']) && $_POST['search']['value']) {
-                if ($i === 0) {
-                    $this->db->group_start();
-                    $this->db->like($item, $_POST['search']['value']);
-                } else {
-                    $this->db->or_like($item, $_POST['search']['value']);
+        if ($searchValue) {
+            $safeSearch = $this->db->escape_str($searchValue);
+            
+            // Detect technical IDs (Numeric > 8 digits, or starting with GD/INV/0000)
+            $isTechnicalId = preg_match('/^([0-9]{8,30}|(GD|INV|0000)[0-9a-zA-Z]+)/i', $searchValue);
+
+            if ($isTechnicalId) {
+                $matching_ids = [-1];
+                
+                // 1. Merchant Trans ID match
+                $res = $this->db->query("SELECT id FROM cashin_dynamic_qris_mpm WHERE c_merchantTransactionId LIKE '$safeSearch%' LIMIT 100")->result();
+                if (!empty($res)) $matching_ids = array_merge($matching_ids, array_column($res, 'id'));
+                
+                // 2. Direct PK match if numeric
+                if (is_numeric($searchValue) && strlen($searchValue) < 15) {
+                    $matching_ids[] = (int)$searchValue;
                 }
-                if (count($this->column_search) - 1 == $i)
+
+                $this->db->where_in('cdq.id', array_unique($matching_ids));
+            } else {
+                // TEXT SEARCH: Merchant or Submerchant name (min 4 chars)
+                if (strlen($searchValue) >= 4) {
+                    $this->db->group_start();
+                    $this->db->like('s.c_name', $searchValue, 'after');
+                    $this->db->or_like('m.c_name', $searchValue, 'after');
                     $this->db->group_end();
+                } else {
+                    $this->db->where('1=0', NULL, FALSE);
+                }
             }
-            $i++;
         }
 
-        if (isset($_POST['order'])) {
-            $this->db->order_by($this->column_order[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);
-        } else if (isset($this->order)) {
-            $order = $this->order;
-            $this->db->order_by(key($order), $order[key($order)]);
+        if (!$count_only) {
+            if (isset($_POST['order'])) {
+                $this->db->order_by($this->column_order[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);
+            } else if (isset($this->order)) {
+                $order = $this->order;
+                $this->db->order_by(key($order), $order[key($order)]);
+            }
         }
     }
 
@@ -86,6 +125,8 @@ class QRISDynamic extends CI_Model
         if ($_POST['length'] != -1)
             $this->db->limit($_POST['length'], $_POST['start']);
         $query = $this->db->get();
+        if (!$query) return array();
+        
         $id_results = $query->result();
         
         if (empty($id_results)) return array();

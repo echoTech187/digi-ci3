@@ -8,6 +8,9 @@ class Chanel extends CI_Model {
 
     private function _get_datatables_query($table, $column_order, $column_search, $order, $where = [])
     {
+        // Emergency 3-second safeguard
+        $this->db->query("SET SESSION max_execution_time = 10000");
+        
         $this->db->from($table);
         
         if (!empty($where)) {

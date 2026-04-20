@@ -27,22 +27,13 @@ class Ewallet extends CI_Model {
         $sort_col = isset($_POST['order']['0']['column']) ? $this->column_order[$_POST['order']['0']['column']] : '';
 
         // Join cashin only if searching for invoice, sorting by it, or getting full data
-        if (!$only_ids && !$count_only || $search_invoice_no || $isInvoiceSearch || strpos($sort_col, 'c.') !== false) {
-            $this->db->join('cashin c', 'cpe.ref_cashinId = c.id', 'left');
-            $this->db->join('external_paydgn_ewallet_callback_payment epc', 'epc.ref_subMerchantId = cpe.ref_subMerchantId AND epc.ref_cashinPaymentEwalletId = cpe.id', 'left');
-        }
-
-        // Join submerchant & merchant only if needed for filters, search or sorting
+        // Base joins only added if needed for sorting or full data (Deferred Join pattern)
         if (!$only_ids && !$count_only || $search_name || $searchValue || strpos($sort_col, 's.') !== false || strpos($sort_col, 'm.') !== false) {
-            $this->db->join('submerchant s', 'cpe.ref_subMerchantId = s.id');
-            $this->db->join('merchant m', 'cpe.ref_merchantId = m.id');
+            $this->db->join('submerchant s', 'cpe.ref_subMerchantId = s.id', 'left');
+            $this->db->join('merchant m', 'cpe.ref_merchantId = m.id', 'left');
         }
 
-        // Join dynamic ewallet only if needed
-        if (!$only_ids && !$count_only || $searchValue || strpos($sort_col, 'cde.') !== false) {
-            $this->db->join('cashin_dynamic_ewallet cde', 'cde.ref_merchantId = cpe.ref_merchantId AND cde.id = cpe.ref_cashinDynamicEwalletId', 'left');
-        }
-
+        // Apply Basic Filters
         if ($search_name) {
             $this->db->where('cpe.ref_merchantId', $search_name);
         }
@@ -56,33 +47,64 @@ class Ewallet extends CI_Model {
             $this->db->where('cpe.c_datetimeSettlement <=', $formatted_date . ' 23:59:59');
         }
         if ($search_invoice_no) {
-            $this->db->where('c.c_invoiceNo', $search_invoice_no);
+            $search_invoice_no = trim($search_invoice_no);
+            if ($search_invoice_no !== '') {
+                $safeInv = $this->db->escape_str($search_invoice_no);
+                $this->db->where_in('cpe.ref_cashinId', "SELECT id FROM cashin WHERE c_invoiceNo LIKE '$safeInv%'", FALSE);
+            }
         }
 
         if ($searchValue) {
-            $isTechnicalSearch = (preg_match('/^INV/i', $searchValue));
-            $i = 0;
-            foreach ($this->column_search as $item) {
-                // EMERGENCY OPTIMIZATION: Skip searching name columns if search value is a technical ID prefix
-                if ($isTechnicalSearch && in_array($item, ['s.c_name', 'm.c_name'])) {
-                    continue;
-                }
+            $safeSearch = $this->db->escape_str($searchValue);
+            
+            // Detect technical IDs (Numeric > 8 digits, or starting with INV/GD/GR/0000)
+            $isTechnicalId = preg_match('/^([0-9]{8,30}|(INV|GD|GR|0000)[0-9a-zA-Z]+)/i', $searchValue);
+            $isInvoiceSearch = preg_match('/^INV/i', $searchValue);
 
-                // EMERGENCY OPTIMIZATION: Prefix search only (no leading %) to allow index usage
-                // Skip searching invoice column if search value doesn't look like an invoice
-                if ($item == 'c.c_invoiceNo' && !$isInvoiceSearch) {
-                    continue;
+            if ($isTechnicalId) {
+                $matching_ids = [-1];
+                
+                // 1. Direct ID match
+                if (is_numeric($searchValue) && strlen($searchValue) < 15) {
+                    $matching_ids[] = (int)$searchValue;
                 }
-
-                if ($i === 0) {
-                    $this->db->group_start();
-                    $this->db->like($item, $searchValue, 'after');
+                
+                // 2. Invoice No match (via sub-query lookup)
+                $inv_res = $this->db->query("SELECT id FROM cashin WHERE c_invoiceNo LIKE '$safeSearch%' LIMIT 50")->result();
+                $inv_ids = array_column($inv_res, 'id');
+                
+                // 3. Merchant Trans ID match (via dynamic ewallet lookup)
+                $cde_res = $this->db->query("SELECT id FROM cashin_dynamic_ewallet WHERE c_merchantTransactionId LIKE '$safeSearch%' LIMIT 50")->result();
+                if (!empty($cde_res)) {
+                    $cde_ids = array_column($cde_res, 'id');
+                    $cpe_res = $this->db->query("SELECT id FROM cashin_payment_ewallet WHERE ref_cashinDynamicEwalletId IN (".implode(',', $cde_ids).") LIMIT 50")->result();
+                    if (!empty($cpe_res)) $matching_ids = array_merge($matching_ids, array_column($cpe_res, 'id'));
+                }
+                
+                // Construct the combined filter for technical IDs
+                $this->db->group_start();
+                if (count($matching_ids) > 1) {
+                    $this->db->where_in('cpe.id', array_unique($matching_ids));
+                }
+                if (!empty($inv_ids)) {
+                    if (count($matching_ids) > 1) {
+                        $this->db->or_where_in('cpe.ref_cashinId', $inv_ids);
+                    } else {
+                        $this->db->where_in('cpe.ref_cashinId', $inv_ids);
+                    }
+                } else if (count($matching_ids) <= 1) {
+                    $this->db->where('1=0', NULL, FALSE);
+                }
+                $this->db->group_end();
+                
+            } else {
+                // TEXT SEARCH: Submerchant name only (min 4 chars)
+                if (strlen($searchValue) >= 4) {
+                    $this->db->like('s.c_name', $searchValue, 'after');
                 } else {
-                    $this->db->or_like($item, $searchValue, 'after');
+                    $this->db->where('1=0', NULL, FALSE);
                 }
-                $i++;
             }
-            if ($i > 0) $this->db->group_end();
         }
 
         if (!$count_only) {
@@ -93,6 +115,7 @@ class Ewallet extends CI_Model {
                 $this->db->order_by(key($order), $order[key($order)]);
             }
         }
+
     }
 
     public function get_datatables($search_name = null, $date_from = null, $date_to = null, $search_date_settlement = null, $search_invoice_no = null)
@@ -102,6 +125,8 @@ class Ewallet extends CI_Model {
         if ($_POST['length'] != -1)
             $this->db->limit($_POST['length'], $_POST['start']);
         $query = $this->db->get();
+        if (!$query) return array(); // Fail-safe
+        
         $id_results = $query->result();
         
         if (empty($id_results)) return array();

@@ -5,6 +5,9 @@ class Mutation_model extends CI_Model
  
     private function _get_datatables_query($id, $search_date_mutation = null, $position = null, $channel = null, $search_date_mutation_to = null)
     {
+        // Emergency 3-second safeguard
+        $this->db->query("SET SESSION max_execution_time = 10000");
+        
         $this->db->select("
             mutation.id, 
             mutation.ref_merchantId, 

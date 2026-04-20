@@ -59,6 +59,9 @@ class History extends CI_Model {
 
     private function _get_datatables_query($search_date = null, $search_merchant = null)
     {
+        // Emergency 3-second safeguard
+        $this->db->query("SET SESSION max_execution_time = 10000");
+        
         $this->db->select('cpp.*, m.c_name as name_merchant, c.c_invoiceNo');
         $this->db->from($this->table);
         $this->db->join('merchant m', 'cpp.ref_merchantId = m.id', 'left');

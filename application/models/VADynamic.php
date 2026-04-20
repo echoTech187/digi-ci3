@@ -8,6 +8,9 @@ class VADynamic extends CI_Model {
 
     private function _get_datatables_query($search_name = null, $search_date = null, $search_va = null, $search_trxid = null, $search_date_to = null, $only_ids = false)
     {
+        // Emergency 3-second safeguard
+        $this->db->query("SET SESSION max_execution_time = 10000");
+        
         if ($only_ids) {
             $this->db->select("cdv.id");
         } else {

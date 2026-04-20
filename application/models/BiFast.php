@@ -11,7 +11,7 @@ class BiFast extends CI_Model {
     private function _get_datatables_query($search_name = null, $date_from = null, $date_to = null, $search_transid = null, $search_external_reff = null, $search_channel = null, $search_status = null, $only_ids = false, $count_only = false)
     {
         // Emergency 3-second safeguard
-        $this->db->query("SET SESSION max_execution_time = 5000");
+        $this->db->query("SET SESSION max_execution_time = 10000");
 
         if ($count_only) {
             $this->db->select("count(cpb.id) as total");

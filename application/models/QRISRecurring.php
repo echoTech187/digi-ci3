@@ -24,6 +24,9 @@ class QRISRecurring extends CI_Model {
 
     private function _get_datatables_query($search_name = null, $search_date = null, $search_date_to = null, $search_submerchant = null, $only_ids = false)
     {
+        // Emergency 3-second safeguard
+        $this->db->query("SET SESSION max_execution_time = 10000");
+        
         if ($only_ids) {
             $this->db->select("crqm.id");
         } else {
