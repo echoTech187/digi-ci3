@@ -26,9 +26,11 @@ class Qris extends CI_Model {
         $isInvoiceSearch = (preg_match('/^QRIS|^INV/i', $searchValue));
         $sort_col = isset($_POST['order']['0']['column']) ? $this->column_order[$_POST['order']['0']['column']] : '';
 
-        // Optimization: Use joins only if global search is active, or we need full data/sorting by externally joined columns
+        // Optimization: Use joins only if global search is active...
         $isExternalSort = !empty($sort_col) && !preg_match('/^cpq\./', $sort_col) && $sort_col != 'Merchant_Transaction_Id';
-        $needFullJoins = (!$only_ids && !$count_only) || $searchValue || $isExternalSort;
+        
+        // When fetching ONLY IDs, we DO NOT need full joins for global search anymore because we use subqueries!
+        $needFullJoins = (!$only_ids && !$count_only) || $isExternalSort;
 
         // Join cashin only if searching for invoice via global search, sorting by it, or getting full data
         if ($needFullJoins || $isInvoiceSearch) {
@@ -36,18 +38,19 @@ class Qris extends CI_Model {
         }
         
         // Join merchant and submerchant only if needed for global search or sorting or full data
-        if ($needFullJoins || $search_name) {
+        $isTextSearch = $searchValue && !preg_match('/^[0-9]{5,25}$/', $searchValue) && !$isInvoiceSearch;
+        if ($needFullJoins || $search_name || $isTextSearch) {
             $this->db->join('merchant m', 'cpq.ref_merchantId = m.id');
             $this->db->join('submerchant s', 'cpq.ref_subMerchantId = s.id');
         }
 
-        // Transactions ID joins (Only if full data or global search)
+        // Transactions ID joins (Only if full data, NEVER during ID fetch to prevent timeouts)
         if ($needFullJoins) {
             $this->db->join('cashin_dynamic_qris_mpm cdq', 'cdq.id = cpq.ref_cashinDynamicQrisMpmId', 'left');
             $this->db->join('cashin_recurring_qris_mpm crq', 'crq.id = cpq.ref_cashinRecurringQrisMpmId', 'left');
         }
 
-        // Callback/RRN joins (Only if full data or global search)
+        // Callback/RRN joins (Only if full data, NEVER during ID fetch to prevent timeouts on missing index)
         if ($needFullJoins) {
             $this->db->join('external_paydgn_qris_mpm_callback epq', 'epq.ref_cashinPaymentQrisMpmId = cpq.id', 'left');
         }
@@ -60,8 +63,13 @@ class Qris extends CI_Model {
             $this->db->where('cpq.c_datetime <=', $date_to);
         }
         if ($search_rrn) {
-            // Using subquery for RRN filter to use index on callback table first (avoid 23M row scan)
-            $this->db->where("cpq.id IN (SELECT ref_cashinPaymentQrisMpmId FROM external_paydgn_qris_mpm_callback WHERE c_issuerRrn = '".$this->db->escape_str($search_rrn)."')", NULL, FALSE);
+            $safeRrn = $this->db->escape_str($search_rrn);
+            $epq_res = $this->db->query("SELECT ref_cashinPaymentQrisMpmId FROM external_paydgn_qris_mpm_callback WHERE c_issuerRrn = '$safeRrn' LIMIT 20")->result();
+            if (!empty($epq_res)) {
+                $this->db->where_in("cpq.id", array_column($epq_res, 'ref_cashinPaymentQrisMpmId'));
+            } else {
+                $this->db->where("1=0", NULL, FALSE); // No match found
+            }
         }
         if ($search_settlement) {
             $formatted_date = date('Y-m-d', strtotime($search_settlement));
@@ -69,11 +77,24 @@ class Qris extends CI_Model {
             $this->db->where('cpq.c_datetimeSettlement <=', $formatted_date . " 23:59:59");
         }
         if ($search_transid) {
-            // High-performance filter using subqueries for Trans ID (essential for 23M rows)
-            $this->db->group_start();
-            $this->db->where("cpq.ref_cashinDynamicQrisMpmId IN (SELECT id FROM cashin_dynamic_qris_mpm WHERE c_merchantTransactionId = '".$this->db->escape_str($search_transid)."')", NULL, FALSE);
-            $this->db->or_where("cpq.ref_cashinRecurringQrisMpmId IN (SELECT id FROM cashin_recurring_qris_mpm WHERE c_merchantTransactionId = '".$this->db->escape_str($search_transid)."')", NULL, FALSE);
-            $this->db->group_end();
+            $safeTransId = $this->db->escape_str($search_transid);
+            $matching_ids = [-1]; // Defaults to -1 to force empty result if not found
+            
+            $cdq_res = $this->db->query("SELECT id FROM cashin_dynamic_qris_mpm WHERE c_merchantTransactionId = '$safeTransId' LIMIT 20")->result();
+            if (!empty($cdq_res)) {
+                $cdq_ids = array_column($cdq_res, 'id');
+                $cpq_res = $this->db->query("SELECT id FROM cashin_payment_qris_mpm WHERE ref_cashinDynamicQrisMpmId IN (".implode(',', $cdq_ids).") LIMIT 20")->result();
+                $matching_ids = array_merge($matching_ids, array_column($cpq_res, 'id'));
+            }
+            
+            $crq_res = $this->db->query("SELECT id FROM cashin_recurring_qris_mpm WHERE c_merchantTransactionId = '$safeTransId' LIMIT 20")->result();
+            if (!empty($crq_res)) {
+                $crq_ids = array_column($crq_res, 'id');
+                $cpq_res = $this->db->query("SELECT id FROM cashin_payment_qris_mpm WHERE ref_cashinRecurringQrisMpmId IN (".implode(',', $crq_ids).") LIMIT 20")->result();
+                $matching_ids = array_merge($matching_ids, array_column($cpq_res, 'id'));
+            }
+            
+            $this->db->where_in('cpq.id', array_unique($matching_ids));
         }
         if ($search_invoice) {
             // Fast invoice lookup via subquery
@@ -81,40 +102,64 @@ class Qris extends CI_Model {
         }
 
         if ($searchValue) {
-            $isTechnicalSearch = (preg_match('/^(QRIS|INV)/i', $searchValue));
-            $i = 0;
-            foreach ($this->column_search as $item) {
-                // EMERGENCY OPTIMIZATION: 
-                // 1. Skip searching name columns if search value is a technical ID prefix to prevent 23M row scan
-                if ($isTechnicalSearch && in_array($item, ['m.c_name', 's.c_name'])) {
-                    continue;
-                }
-
-                // 2. Minimum 3 characters for ID/Invoice, 5 for text searches to prevent 23M row scan
-                if (strlen($searchValue) < 3) {
-                    continue;
+            $safeSearchValue = $this->db->escape_like_str($searchValue);
+            
+            // Regex to strictly detect Trans IDs (GD/GR), Invoices (INV/QRIS), Pure RRNs (8+ digits), or Hex UUIDs.
+            $isTechnicalId = preg_match('/^([0-9]{8,30}|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-.*|(GD|GR)[0-9a-zA-Z]+|0000[0-9a-fA-F]+)$/i', $searchValue);
+            $isInvoiceSearch = preg_match('/^(INV|QRIS)/i', $searchValue);
+            
+            if ($isTechnicalId) {
+                // FAST TECHNICAL ID SEARCH VIA PRE-LOOKUP API
+                // MySQL CANNOT optimize OR clauses across multiple subqueries without scanning 23M rows.
+                // Solution: We fetch matching IDs separately in milliseconds and inject them via WHERE IN
+                
+                $matching_ids = [-1]; // Defaults to -1 so if no matches, table is empty instead of full
+                
+                // 1. Direct PK exact match
+                if (is_numeric($safeSearchValue) && strlen($safeSearchValue) < 15) {
+                    $matching_ids[] = (int)$safeSearchValue;
                 }
                 
-                // 3. Skip searching heavy text columns if search value is too short
-                if (in_array($item, ['m.c_name', 's.c_name']) && strlen($searchValue) < 5) {
-                    continue;
+                // 2. Lookup Trans ID from Dynamic QRIS
+                $cdq_res = $this->db->query("SELECT id FROM cashin_dynamic_qris_mpm WHERE c_merchantTransactionId LIKE '$safeSearchValue%' LIMIT 20")->result();
+                if (!empty($cdq_res)) {
+                    $cdq_ids = array_column($cdq_res, 'id');
+                    $cpq_res = $this->db->query("SELECT id FROM cashin_payment_qris_mpm WHERE ref_cashinDynamicQrisMpmId IN (".implode(',', $cdq_ids).") LIMIT 20")->result();
+                    $matching_ids = array_merge($matching_ids, array_column($cpq_res, 'id'));
                 }
-
-                // 4. Skip searching invoice column if search value doesn't look like an invoice
-                if ($item == 'c.c_invoiceNo' && !$isInvoiceSearch) {
-                    continue;
+                
+                // 3. Lookup Trans ID from Recurring QRIS
+                $crq_res = $this->db->query("SELECT id FROM cashin_recurring_qris_mpm WHERE c_merchantTransactionId LIKE '$safeSearchValue%' LIMIT 20")->result();
+                if (!empty($crq_res)) {
+                    $crq_ids = array_column($crq_res, 'id');
+                    $cpq_res = $this->db->query("SELECT id FROM cashin_payment_qris_mpm WHERE ref_cashinRecurringQrisMpmId IN (".implode(',', $crq_ids).") LIMIT 20")->result();
+                    $matching_ids = array_merge($matching_ids, array_column($cpq_res, 'id'));
                 }
+                
+                // 4. Lookup RRN from Paydgn Callback
+                $epq_res = $this->db->query("SELECT ref_cashinPaymentQrisMpmId FROM external_paydgn_qris_mpm_callback WHERE c_issuerRrn LIKE '$safeSearchValue%' LIMIT 20")->result();
+                if (!empty($epq_res)) {
+                    $matching_ids = array_merge($matching_ids, array_column($epq_res, 'ref_cashinPaymentQrisMpmId'));
+                }
+                
+                // Apply final IDs to Query Builder
+                $this->db->where_in('cpq.id', array_unique($matching_ids));
 
-                if ($i === 0) {
+            } else if ($isInvoiceSearch) {
+                // FAST INVOICE SEARCH
+                $this->db->where("cpq.ref_cashinId IN (SELECT id FROM cashin WHERE c_invoiceNo LIKE '$safeSearchValue%')", NULL, FALSE);
+            } else {
+                // TEXT SEARCH: Merchant/Submerchant Names
+                if (strlen($searchValue) >= 4) {
                     $this->db->group_start();
-                    // 5. Prefix search only (no leading %) to allow index usage
-                    $this->db->like($item, $searchValue, 'after');
+                    $this->db->like('m.c_name', $searchValue, 'after');
+                    $this->db->or_like('s.c_name', $searchValue, 'after');
+                    $this->db->group_end();
                 } else {
-                    $this->db->or_like($item, $searchValue, 'after');
+                    // Prevent massive scan on short text queries
+                    $this->db->where('1=0', NULL, FALSE);
                 }
-                $i++;
             }
-            if ($i > 0) $this->db->group_end();
         }
 
         if (!$count_only) {

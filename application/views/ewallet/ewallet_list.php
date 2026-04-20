@@ -46,7 +46,7 @@
                 <!-- LEFT: Global Search -->
                 <div class="dt-search-wrapper">
                     <i class="fas fa-search dt-search-icon"></i>
-                    <input type="text" id="ewalletGlobalSearch" class="dt-search-input" placeholder="Search by E-Wallet No, or Trans ID...">
+                    <input type="text" id="ewalletGlobalSearch" class="dt-search-input" placeholder="Search by Trans ID...">
                 </div>
 
                 <!-- RIGHT: Primary chips + More Filters trigger -->

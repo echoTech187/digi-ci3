@@ -148,8 +148,8 @@ $download_url = base_url('admin/download_VA')
                         <th>Merchant</th>
                         <th>Invoice No</th>
                         <th>Channel Id</th>
-                        <th>Trans ID</th>
                         <th>Type</th>
+                        <th>Trans ID</th>
                         <th>VA Number</th>
                         <th>VA Custom ID</th>
                         <th>Amount</th>
