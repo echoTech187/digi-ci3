@@ -171,6 +171,8 @@ class EwalletDynamic extends CI_Model
         $ResponseHeader                 = null;
         $ResponseBody                   = null;
 
+        $ref_cashinExternalId = strtolower($ref_cashinExternalId);
+
         if ($ref_cashinExternalId == 'ifp') {
 
             $qtxt1_1    = "SELECT c_orderId, c_transactionId, c_datetimeRequest, c_requestHeader, c_requestBody, c_datetimeResponse, c_responseHeader, c_responseBody FROM external_ifp_ewallet_create WHERE id='$ref_cashinExternalLogEwalletIdCreate'";
@@ -180,6 +182,26 @@ class EwalletDynamic extends CI_Model
 
                 $TransactionIdExternal1     = $result1_1->c_orderId;
                 $TransactionIdExternal2     = $result1_1->c_transactionId;
+                
+                $DatetimeRequest            = $result1_1->c_datetimeRequest;
+                $RequestHeader              = $result1_1->c_requestHeader;
+                $RequestBody                = $result1_1->c_requestBody;
+
+                $DatetimeResponse           = $result1_1->c_datetimeResponse;
+                $ResponseHeader             = $result1_1->c_responseHeader;
+                $ResponseBody               = $result1_1->c_responseBody;
+
+            }
+
+        } elseif ($ref_cashinExternalId == 'gvpay' || $ref_cashinExternalId == 'gvconnect') {
+
+            $qtxt1_1    = "SELECT c_customId, c_datetimeRequest, c_requestHeader, c_requestBody, c_datetimeResponse, c_responseHeader, c_responseBody FROM external_gvpay_ewallet_create WHERE id='$ref_cashinExternalLogEwalletIdCreate'";
+            $query1_1   = $this->db->query($qtxt1_1);
+            $result1_1  = $query1_1->num_rows() ? $query1_1->row() : false;
+            if($result1_1) {
+
+                $TransactionIdExternal1     = $result1_1->c_customId;
+                $TransactionIdExternal2     = '-';
                 
                 $DatetimeRequest            = $result1_1->c_datetimeRequest;
                 $RequestHeader              = $result1_1->c_requestHeader;

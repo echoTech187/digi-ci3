@@ -154,38 +154,9 @@ class QRISDynamic extends CI_Model
 
     public function count_filtered($search_name = null, $search_date = null, $search_transid = null, $search_status = null, $search_reff = null, $search_date_to = null)
     {
-        $is_filtered = ($search_name || $search_date || $search_transid || $search_status || $search_reff || (isset($_POST['search']['value']) && !empty($_POST['search']['value'])));
-        if (!$is_filtered) {
-            return $this->count_all_dt();
-        }
-
-        $this->db->select('count(DISTINCT cdq.id) as total');
-        $this->db->from($this->table);
-        
-        // Lean joins based on active filters
-        if (isset($_POST['search']['value']) && $_POST['search']['value']) {
-            $this->db->join('submerchant s', 's.id = cdq.ref_subMerchantId', 'left');
-            $this->db->join('merchant m', 'm.id = cdq.ref_merchantId', 'left');
-        }
-        
-        $this->_apply_filters($search_name, $search_date, $search_transid, $search_status, $search_reff, $search_date_to, true);
-
-        if (isset($_POST['search']['value']) && $_POST['search']['value']) {
-            $i = 0;
-            foreach ($this->column_search as $item) {
-                if ($i === 0) {
-                    $this->db->group_start();
-                    $this->db->like($item, $_POST['search']['value']);
-                } else {
-                    $this->db->or_like($item, $_POST['search']['value']);
-                }
-                if (count($this->column_search) - 1 == $i)
-                    $this->db->group_end();
-                $i++;
-            }
-        }
-
+        $this->_get_datatables_query($search_name, $search_date, $search_transid, $search_status, $search_reff, $search_date_to, false, true);
         $query = $this->db->get();
+        if (!$query) return 0;
         return $query->row()->total;
     }
 
@@ -419,6 +390,66 @@ class QRISDynamic extends CI_Model
 
                 $TransactionIdExternal1     = $result1_1->refId;
                 $TransactionIdExternal2     = $result1_1->partnerRefId;
+                
+                $DatetimeRequest            = $result1_1->c_datetimeRequest;
+                $RequestHeader              = $result1_1->c_requestHeader;
+                $RequestBody                = $result1_1->c_requestBody;
+
+                $DatetimeResponse           = $result1_1->c_datetimeResponse;
+                $ResponseHeader             = $result1_1->c_responseHeader;
+                $ResponseBody               = $result1_1->c_responseBody;
+
+            }
+
+        } elseif ($ref_cashinExternalId == 'inacash') {
+
+            $qtxt1_1    = "SELECT refId, partnerRefId, c_datetimeRequest, c_requestHeader, c_requestBody, c_datetimeResponse, c_responseHeader, c_responseBody FROM external_inacash_qris_mpm_create WHERE id='$ref_cashinExternalLogQrisMpmIdCreate'";
+            $query1_1   = $this->db->query($qtxt1_1);
+            $result1_1  = $query1_1->num_rows() ? $query1_1->row() : false;
+            if($result1_1) {
+
+                $TransactionIdExternal1     = $result1_1->refId;
+                $TransactionIdExternal2     = $result1_1->partnerRefId;
+                
+                $DatetimeRequest            = $result1_1->c_datetimeRequest;
+                $RequestHeader              = $result1_1->c_requestHeader;
+                $RequestBody                = $result1_1->c_requestBody;
+
+                $DatetimeResponse           = $result1_1->c_datetimeResponse;
+                $ResponseHeader             = $result1_1->c_responseHeader;
+                $ResponseBody               = $result1_1->c_responseBody;
+
+            }
+
+        } elseif ($ref_cashinExternalId == 'ifp') {
+
+            $qtxt1_1    = "SELECT c_order_id, c_transaction_id, c_datetimeRequest, c_requestHeader, c_requestBody, c_datetimeResponse, c_responseHeader, c_responseBody FROM external_ifp_qris_mpm_create WHERE id='$ref_cashinExternalLogQrisMpmIdCreate'";
+            $query1_1   = $this->db->query($qtxt1_1);
+            $result1_1  = $query1_1->num_rows() ? $query1_1->row() : false;
+            if($result1_1) {
+
+                $TransactionIdExternal1     = $result1_1->c_order_id;
+                $TransactionIdExternal2     = $result1_1->c_transaction_id;
+                
+                $DatetimeRequest            = $result1_1->c_datetimeRequest;
+                $RequestHeader              = $result1_1->c_requestHeader;
+                $RequestBody                = $result1_1->c_requestBody;
+
+                $DatetimeResponse           = $result1_1->c_datetimeResponse;
+                $ResponseHeader             = $result1_1->c_responseHeader;
+                $ResponseBody               = $result1_1->c_responseBody;
+
+            }
+
+        } elseif ($ref_cashinExternalId == 'quantum') {
+
+            $qtxt1_1    = "SELECT c_transactionId, c_quantumSubMerchantId, c_datetimeRequest, c_requestHeader, c_requestBody, c_datetimeResponse, c_responseHeader, c_responseBody FROM external_quantum_qris_mpm_create WHERE id='$ref_cashinExternalLogQrisMpmIdCreate'";
+            $query1_1   = $this->db->query($qtxt1_1);
+            $result1_1  = $query1_1->num_rows() ? $query1_1->row() : false;
+            if($result1_1) {
+
+                $TransactionIdExternal1     = $result1_1->c_transactionId;
+                $TransactionIdExternal2     = $result1_1->c_quantumSubMerchantId;
                 
                 $DatetimeRequest            = $result1_1->c_datetimeRequest;
                 $RequestHeader              = $result1_1->c_requestHeader;

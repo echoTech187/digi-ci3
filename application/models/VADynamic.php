@@ -254,6 +254,8 @@ class VADynamic extends CI_Model {
         $ResponseHeader                 = null;
         $ResponseBody                   = null;
 
+        $ref_cashinExternalId = strtolower($ref_cashinExternalId);
+
         if ($ref_cashinExternalId == 'ifp') {
             $qtxt1_1    = "SELECT c_orderId, c_transactionId, c_datetimeRequest, c_requestHeader, c_requestBody, c_datetimeResponse, c_responseHeader, c_responseBody FROM external_ifp_va_create WHERE id='$ref_cashinExternalLogVaIdCreate'";
             $query1_1   = $this->db->query($qtxt1_1);
@@ -275,6 +277,49 @@ class VADynamic extends CI_Model {
             if($result1_1) {
                 $TransactionIdExternal1     = $result1_1->c_customId;
                 $TransactionIdExternal2     = $result1_1->c_vaNumber;
+                $DatetimeRequest            = $result1_1->c_datetimeRequest;
+                $RequestHeader              = $result1_1->c_requestHeader;
+                $RequestBody                = $result1_1->c_requestBody;
+                $DatetimeResponse           = $result1_1->c_datetimeResponse;
+                $ResponseHeader             = $result1_1->c_responseHeader;
+                $ResponseBody               = $result1_1->c_responseBody;
+            }
+        } elseif ($ref_cashinExternalId == 'quantum') {
+            $qtxt1_1    = "SELECT c_transactionId, c_quantumSubMerchantId, c_datetimeRequest, c_requestHeader, c_requestBody, c_datetimeResponse, c_responseHeader, c_responseBody FROM external_quantum_qris_mpm_create WHERE id='$ref_cashinExternalLogVaIdCreate'";
+            $query1_1   = $this->db->query($qtxt1_1);
+            $result1_1  = $query1_1->num_rows() ? $query1_1->row() : false;
+            if($result1_1) {
+                $TransactionIdExternal1     = $result1_1->c_transactionId;
+                $TransactionIdExternal2     = $result1_1->c_quantumSubMerchantId;
+                $DatetimeRequest            = $result1_1->c_datetimeRequest;
+                $RequestHeader              = $result1_1->c_requestHeader;
+                $RequestBody                = $result1_1->c_requestBody;
+                $DatetimeResponse           = $result1_1->c_datetimeResponse;
+                $ResponseHeader             = $result1_1->c_responseHeader;
+                $ResponseBody               = $result1_1->c_responseBody;
+            }
+        } elseif ($ref_cashinExternalId == 'inacash' || $ref_cashinExternalId == 'paydgn') {
+            $table = ($ref_cashinExternalId == 'inacash') ? 'external_inacash_qris_mpm_create' : 'external_paydgn_qris_mpm_create';
+            $qtxt1_1    = "SELECT refId, partnerRefId, c_datetimeRequest, c_requestHeader, c_requestBody, c_datetimeResponse, c_responseHeader, c_responseBody FROM $table WHERE id='$ref_cashinExternalLogVaIdCreate'";
+            $query1_1   = $this->db->query($qtxt1_1);
+            $result1_1  = $query1_1->num_rows() ? $query1_1->row() : false;
+            if($result1_1) {
+                $TransactionIdExternal1     = $result1_1->refId;
+                $TransactionIdExternal2     = $result1_1->partnerRefId;
+                $DatetimeRequest            = $result1_1->c_datetimeRequest;
+                $RequestHeader              = $result1_1->c_requestHeader;
+                $RequestBody                = $result1_1->c_requestBody;
+                $DatetimeResponse           = $result1_1->c_datetimeResponse;
+                $ResponseHeader             = $result1_1->c_responseHeader;
+                $ResponseBody               = $result1_1->c_responseBody;
+            }
+        } elseif ($ref_cashinExternalId == 'paylabs') {
+            $qtxt1_1    = "SELECT c_platformTradeNo, c_merchantTradeNo, c_datetimeRequest, c_requestHeader, c_requestBody, c_datetimeResponse, c_responseHeader, c_responseBody FROM external_paylabs_qris_mpm_create WHERE id='$ref_cashinExternalLogVaIdCreate'";
+            $query1_1   = $this->db->query($qtxt1_1);
+            $result1_1  = $query1_1->num_rows() ? $query1_1->row() : false;
+            if($result1_1) {
+                $TransactionIdExternal1     = $result1_1->c_platformTradeNo;
+                $TransactionIdExternal2     = $result1_1->c_merchantTradeNo;
                 $DatetimeRequest            = $result1_1->c_datetimeRequest;
                 $RequestHeader              = $result1_1->c_requestHeader;
                 $RequestBody                = $result1_1->c_requestBody;

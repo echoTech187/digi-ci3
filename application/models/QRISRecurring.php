@@ -172,6 +172,8 @@ class QRISRecurring extends CI_Model {
         $ResponseHeader                 = null;
         $ResponseBody                   = null;
 
+        $ref_cashinExternalId = strtolower($ref_cashinExternalId);
+
         if ($ref_cashinExternalId == 'paylabs') {
             $qtxt1_1    = "SELECT c_platformTradeNo, c_merchantTradeNo, c_datetimeRequest, c_requestHeader, c_requestBody, c_datetimeResponse, c_responseHeader, c_responseBody FROM external_paylabs_qris_mpm_create WHERE id='$ref_cashinExternalLogQrisMpmIdCreate'";
             $query1_1   = $this->db->query($qtxt1_1);
@@ -202,6 +204,34 @@ class QRISRecurring extends CI_Model {
             }
         } elseif ($ref_cashinExternalId == 'paydgn') {
             $qtxt1_1    = "SELECT refId, partnerRefId, c_datetimeRequest, c_requestHeader, c_requestBody, c_datetimeResponse, c_responseHeader, c_responseBody FROM external_paydgn_qris_mpm_create WHERE id='$ref_cashinExternalLogQrisMpmIdCreate'";
+            $query1_1   = $this->db->query($qtxt1_1);
+            $result1_1  = $query1_1->num_rows() ? $query1_1->row() : false;
+            if($result1_1) {
+                $TransactionIdExternal1     = $result1_1->refId;
+                $TransactionIdExternal2     = $result1_1->partnerRefId;
+                $DatetimeRequest            = $result1_1->c_datetimeRequest;
+                $RequestHeader              = $result1_1->c_requestHeader;
+                $RequestBody                = $result1_1->c_requestBody;
+                $DatetimeResponse           = $result1_1->c_datetimeResponse;
+                $ResponseHeader             = $result1_1->c_responseHeader;
+                $ResponseBody               = $result1_1->c_responseBody;
+            }
+        } elseif ($ref_cashinExternalId == 'ifp') {
+            $qtxt1_1    = "SELECT c_order_id, c_transaction_id, c_datetimeRequest, c_requestHeader, c_requestBody, c_datetimeResponse, c_responseHeader, c_responseBody FROM external_ifp_qris_mpm_create WHERE id='$ref_cashinExternalLogQrisMpmIdCreate'";
+            $query1_1   = $this->db->query($qtxt1_1);
+            $result1_1  = $query1_1->num_rows() ? $query1_1->row() : false;
+            if($result1_1) {
+                $TransactionIdExternal1     = $result1_1->c_order_id;
+                $TransactionIdExternal2     = $result1_1->c_transaction_id;
+                $DatetimeRequest            = $result1_1->c_datetimeRequest;
+                $RequestHeader              = $result1_1->c_requestHeader;
+                $RequestBody                = $result1_1->c_requestBody;
+                $DatetimeResponse           = $result1_1->c_datetimeResponse;
+                $ResponseHeader             = $result1_1->c_responseHeader;
+                $ResponseBody               = $result1_1->c_responseBody;
+            }
+        } elseif ($ref_cashinExternalId == 'inacash') {
+            $qtxt1_1    = "SELECT refId, partnerRefId, c_datetimeRequest, c_requestHeader, c_requestBody, c_datetimeResponse, c_responseHeader, c_responseBody FROM external_inacash_qris_mpm_create WHERE id='$ref_cashinExternalLogQrisMpmIdCreate'";
             $query1_1   = $this->db->query($qtxt1_1);
             $result1_1  = $query1_1->num_rows() ? $query1_1->row() : false;
             if($result1_1) {
