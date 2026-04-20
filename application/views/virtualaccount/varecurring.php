@@ -279,10 +279,10 @@ $download_url = base_url('admin/download_VA_recurring') // Assuming this exists 
                 $moreBtn.removeClass('dt-open');
             }
         });
-        // Global search
-        $('#vaRecurringGlobalSearch').on('keyup', function() {
+        // Global search with Debounce
+        $('#vaRecurringGlobalSearch').on('input', debounce(function() {
             table.search(this.value).draw();
-        });
+        }, 400));
         // Detail AJAX
         $(document).on('click', '.detailVaDynamicChannelExternalAjax', function(e) {
             e.preventDefault();

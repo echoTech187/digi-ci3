@@ -26,6 +26,7 @@ function initServerDataTable(tableId, ajaxUrl, columns, additionalOptions = {}) 
             }
         },
         "columns": columns,
+        "ordering": false,
         "language": {
             "processing": '<i class="fa fa-spinner fa-spin fa-2x fa-fw mx-auto d-block text-primary"></i>',
             "info": "Showing _START_ – _END_ of _TOTAL_ results",
@@ -146,6 +147,7 @@ $(document).ready(function () {
 $(document).on('keypress', '.dt-search-input', function(e) {
     if (e.which == 13) { // Enter key
         e.preventDefault();
-        $(this).trigger('change'); // Force update if needed
+        // Trigger blur to ensure any pending changes are committed if needed
+        $(this).blur().focus(); 
     }
 });

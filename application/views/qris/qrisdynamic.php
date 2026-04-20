@@ -254,6 +254,7 @@
             }},
             {data: 'c_status'}
         ], {
+            "ordering": false,
             "language": {
                 "processing": '<i class="fa fa-spinner fa-spin fa-2x fa-fw mx-auto d-block text-primary"></i>',
                 "info": "Showing _START_ – _END_ of _TOTAL_ results",
@@ -290,10 +291,10 @@
             }
         });
 
-        // Global search
-        $('#qrisDynamicGlobalSearch').on('keyup', function() {
+        // Global search with Debounce
+        $('#qrisDynamicGlobalSearch').on('input', debounce(function() {
             table.search(this.value).draw();
-        });
+        }, 400));
 
         // ── More Filters dropdown ──
         var $moreBtn   = $('#qrisMoreFiltersBtn');

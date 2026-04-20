@@ -1,6 +1,34 @@
 <!-- Begin Page Content -->
 <div class="container-fluid pb-4">
 
+    <!-- ── Alert Messages ── -->
+    <?php if ($this->session->flashdata('success')) : ?>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle mr-2"></i> <?= $this->session->flashdata('success'); ?>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    <?php endif; ?>
+
+    <?php if ($this->session->flashdata('error')) : ?>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle mr-2"></i> <?= $this->session->flashdata('error'); ?>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    <?php endif; ?>
+
+    <?php if ($this->session->flashdata('error_message')) : ?>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle mr-2"></i> <?= $this->session->flashdata('error_message'); ?>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    <?php endif; ?>
+
     <!-- ── Page Header ── -->
     <div class="dt-page-header">
         <div>
@@ -18,9 +46,6 @@
             
         </div>
     </div>
-
-    <!-- ── KPI Summary Cards ── -->
-    
 
     <!-- ── Main Data Card ── -->
     <div class="card border-0 shadow-sm dt-card">
@@ -53,13 +78,11 @@
                 <!-- LEFT: Global Search -->
                 <div class="dt-search-wrapper">
                     <i class="fas fa-search dt-search-icon"></i>
-                    <input type="text" id="bifastGlobalSearch" class="dt-search-input" placeholder="Search by any parameter...">
+                    <input type="text" id="bifastGlobalSearch" class="dt-search-input" placeholder="Search by Trans ID, or Account No...">
                 </div>
 
                 <!-- RIGHT: Primary chips + More Filters trigger -->
                 <div class="dt-toolbar-filters">
-
-                    
 
                     <!-- More Filters trigger -->
                     <div class="dt-filter-group dt-more-filters-wrapper">
@@ -401,12 +424,14 @@
             {data: 'parsedResponse',className: 'text-nowrap'},
             {data: 'action', orderable: false, searchable: false}
         ], {
+            "ordering": false,
             "language": {
                 "processing": '<i class="fa fa-spinner fa-spin fa-2x fa-fw mx-auto d-block text-primary"></i>',
                 "info": "Showing _START_ – _END_ of _TOTAL_ results",
                 "infoEmpty": "No results to show",
                 "zeroRecords": '<div class="text-center py-4 text-muted"><i class="fas fa-inbox fa-2x mb-2 d-block mr-2"></i> No transactions found.</div>'
             },
+            "order": [[2, 'desc']],
             "dom": 'rt<"dt-footer"<"dt-footer-info"i><"dt-footer-pager">>',
             "drawCallback": function(settings) {
                 var api    = this.api();
@@ -438,9 +463,9 @@
         });
 
         // Global search
-        $('#bifastGlobalSearch').on('keyup', function() {
+        $('#bifastGlobalSearch').on('input', debounce(function() {
             table.search(this.value).draw();
-        });
+        }, 400));
 
         // ── More Filters dropdown ──
         var $moreBtn   = $('#bifastMoreFiltersBtn');
@@ -534,6 +559,3 @@
     });
 </script>
 <!-- /.container-fluid -->
-
-
-

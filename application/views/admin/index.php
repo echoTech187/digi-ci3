@@ -128,10 +128,10 @@
             }
         });
 
-        // Global Search
-        $('#adminGlobalSearch').on('keyup', function() {
+        // Global Search with Debounce
+        $('#adminGlobalSearch').on('input', debounce(function() {
             table.search(this.value).draw();
-        });
+        }, 400));
 
         // Fill modal on edit button click
         $('#adminTable').on('click', '.edit-btn', function () {
@@ -168,20 +168,20 @@
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content border-0 shadow-lg">
             <!-- Header Legacy Migrated -->
-<div class="modal-header modal-header-primary border-0 mh-premium">
-    <div class="d-flex align-items-center">
-        <div class="mh-icon-badge">
-            <i class="fas fa-star"></i>
-        </div>
-        <div class="mh-title-wrap">
-            <h6 class="mh-title" id="manageUserModalLabel">MANAGE ADMIN ACCOUNT</h6>
-            <small class="mh-subtitle" >Manage and process information details</small>
-        </div>
-    </div>
-    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" style="opacity:0.8;">
-        <span aria-hidden="true">&times;</span>
-    </button>
-</div>
+            <div class="modal-header modal-header-primary border-0 mh-premium">
+                <div class="d-flex align-items-center">
+                    <div class="mh-icon-badge">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <div class="mh-title-wrap">
+                        <h6 class="mh-title" id="manageUserModalLabel">MANAGE ADMIN ACCOUNT</h6>
+                        <small class="mh-subtitle" >Manage and process information details</small>
+                    </div>
+                </div>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" style="opacity:0.8;">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
             <form id="manageUserForm" action="<?= base_url('admin/manageUsers'); ?>" method="post">
                 <div class="modal-body p-4 text-dark">
                     <div class="mb-3">
@@ -226,6 +226,3 @@
         </div>
     </div>
 </div>
-
-
-

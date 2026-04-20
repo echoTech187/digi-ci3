@@ -264,9 +264,10 @@ $(document).ready(function() {
         });
 
     // Global search
-    $('#dt-search').on('keyup', function() {
+    // Global search with Debounce
+    $('#dt-search').on('input', debounce(function() {
         table.search(this.value).draw();
-    });
+    }, 400));
 
     // ── More Filters dropdown ──
     const $moreBtn   = $('#moreFiltersBtn');

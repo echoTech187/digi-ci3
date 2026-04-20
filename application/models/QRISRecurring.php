@@ -22,12 +22,19 @@ class QRISRecurring extends CI_Model {
         }
     }
 
-    private function _get_datatables_query($search_name = null, $search_date = null, $search_date_to = null, $search_submerchant = null)
+    private function _get_datatables_query($search_name = null, $search_date = null, $search_date_to = null, $search_submerchant = null, $only_ids = false)
     {
-        $this->db->select("crqm.*, s.c_name as name_submerchant, m.c_name as name_merchant");
+        if ($only_ids) {
+            $this->db->select("crqm.id");
+        } else {
+            $this->db->select("crqm.*, s.c_name as name_submerchant, m.c_name as name_merchant");
+        }
         $this->db->from($this->table);
-        $this->db->join('submerchant s', 'crqm.ref_subMerchantId = s.id', 'left');
-        $this->db->join('merchant m', 'crqm.ref_merchantId = m.id', 'left');
+        
+        if (!$only_ids || $_POST['search']['value']) {
+            $this->db->join('submerchant s', 'crqm.ref_subMerchantId = s.id', 'left');
+            $this->db->join('merchant m', 'crqm.ref_merchantId = m.id', 'left');
+        }
 
         $this->_apply_filters($search_name, $search_date, $search_date_to, $search_submerchant);
 
@@ -56,9 +63,32 @@ class QRISRecurring extends CI_Model {
 
     public function get_datatables($search_name = null, $search_date = null, $search_date_to = null, $search_submerchant = null)
     {
-        $this->_get_datatables_query($search_name, $search_date, $search_date_to, $search_submerchant);
+        // STEP 1: Get matching IDs only (Fast)
+        $this->_get_datatables_query($search_name, $search_date, $search_date_to, $search_submerchant, true);
         if (isset($_POST['length']) && $_POST['length'] != -1)
             $this->db->limit($_POST['length'], $_POST['start']);
+        $query = $this->db->get();
+        $id_results = $query->result();
+        
+        if (empty($id_results)) return array();
+        
+        $ids = array_column($id_results, 'id');
+        
+        // STEP 2: Fetch full details for those IDs
+        $this->db->select("crqm.*, s.c_name as name_submerchant, m.c_name as name_merchant");
+        $this->db->from($this->table);
+        $this->db->join('submerchant s', 'crqm.ref_subMerchantId = s.id', 'left');
+        $this->db->join('merchant m', 'crqm.ref_merchantId = m.id', 'left');
+        
+        $this->db->where_in('crqm.id', $ids);
+        
+        if (isset($_POST['order'])) {
+            $this->db->order_by($this->column_order[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);
+        } else if (isset($this->order)) {
+            $order = $this->order;
+            $this->db->order_by(key($order), $order[key($order)]);
+        }
+        
         $query = $this->db->get();
         return $query->result();
     }
@@ -70,12 +100,11 @@ class QRISRecurring extends CI_Model {
             return $this->count_all_dt();
         }
 
-        $this->db->select('count(crqm.id) as total');
-        // Optimized: Only join what is necessary for filtering
+        $this->db->select('count(DISTINCT crqm.id) as total');
         $this->db->from($this->table);
         $this->_apply_filters($search_name, $search_date, $search_date_to, $search_submerchant);
 
-        // Global Search requires more joins
+        // Lean joins based on active filters
         if (isset($_POST['search']['value']) && $_POST['search']['value']) {
             $this->db->join('submerchant s', 'crqm.ref_subMerchantId = s.id', 'left');
             $this->db->join('merchant m', 'crqm.ref_merchantId = m.id', 'left');

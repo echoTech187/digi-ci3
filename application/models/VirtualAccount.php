@@ -8,18 +8,50 @@ class VirtualAccount extends CI_Model {
     var $column_search = array('cpv.id', 'm.c_name', 'c.c_invoiceNo', 'cpv.c_vaNumber', 'cdv.c_merchantTransactionId', 'crv.c_merchantTransactionId', 'egv.c_custom');
     var $order = array('cpv.id' => 'desc');
 
-    private function _get_datatables_query($search_date = null, $search_date_to = null, $search_merchant = null, $search_settlement = null, $search_va = null, $search_transid = null)
+    private function _get_datatables_query($search_date = null, $search_date_to = null, $search_merchant = null, $search_settlement = null, $search_va = null, $search_transid = null, $only_ids = false, $count_only = false)
     {
-        $this->db->select("cpv.*, c.c_invoiceNo, m.c_name AS merchant_name, s.c_name AS submerchant_name, 
-                           IF(cpv.c_type = 'Dynamic', cdv.c_merchantTransactionId, crv.c_merchantTransactionId) AS Merchant_Transaction_Id,
-                           egv.c_custom");
+        // Emergency 3-second safeguard
+        $this->db->query("SET SESSION max_execution_time = 3000");
+
+        if ($count_only) {
+            $this->db->select("count(cpv.id) as total");
+        } else if ($only_ids) {
+            $this->db->select("cpv.id");
+        } else {
+            $this->db->select("cpv.*, c.c_invoiceNo, m.c_name AS merchant_name, s.c_name AS submerchant_name, 
+                               IF(cpv.c_type = 'Dynamic', cdv.c_merchantTransactionId, crv.c_merchantTransactionId) AS Merchant_Transaction_Id,
+                               egv.c_custom");
+        }
         $this->db->from($this->table);
-        $this->db->join('cashin c', 'cpv.ref_cashinId = c.id', 'left');
-        $this->db->join('submerchant s', 'cpv.ref_subMerchantId = s.id', 'left');
-        $this->db->join('cashin_dynamic_va cdv', 'cdv.id = cpv.ref_cashinDynamicVaId AND cdv.ref_merchantId = cpv.ref_merchantId', 'left');
-        $this->db->join('cashin_recurring_va crv', 'crv.id = cpv.ref_cashinRecurringVaId AND crv.ref_merchantId = cpv.ref_merchantId', 'left');
-        $this->db->join('merchant m', 'cpv.ref_merchantId = m.id', 'left');
-        $this->db->join('external_gvpay_va_callback_payment egv', 'egv.ref_subMerchantId = cpv.ref_subMerchantId AND egv.ref_cashinPaymentVaId = cpv.id', 'left');
+        
+        // Essential joins
+        $searchValue = isset($_POST['search']['value']) ? $_POST['search']['value'] : '';
+        $isInvoiceSearch = (preg_match('/^INV/i', $searchValue));
+        $sort_col = isset($_POST['order']['0']['column']) ? $this->column_order[$_POST['order']['0']['column']] : '';
+
+        // Join cashin only if searching for invoice, sorting by it, or getting full data
+        if (!$only_ids && !$count_only || $isInvoiceSearch || strpos($sort_col, 'c.') !== false) {
+            $this->db->join('cashin c', 'cpv.ref_cashinId = c.id', 'left');
+        }
+
+        // Join callback/custom data only if needed
+        if (!$only_ids && !$count_only || $searchValue || strpos($sort_col, 'egv.') !== false) {
+            $this->db->join('external_gvpay_va_callback_payment egv', 'egv.ref_subMerchantId = cpv.ref_subMerchantId AND egv.ref_cashinPaymentVaId = cpv.id', 'left');
+        }
+        
+        // Join merchant only if needed
+        if (!$only_ids && !$count_only || $search_merchant || $searchValue || strpos($sort_col, 'm.') !== false) {
+            $this->db->join('merchant m', 'cpv.ref_merchantId = m.id', 'left');
+        }
+
+        if (!$only_ids && !$count_only) {
+            $this->db->join('submerchant s', 'cpv.ref_subMerchantId = s.id', 'left');
+        }
+
+        if (!$only_ids && !$count_only || $search_transid || $searchValue) {
+            $this->db->join('cashin_dynamic_va cdv', 'cdv.id = cpv.ref_cashinDynamicVaId AND cdv.ref_merchantId = cpv.ref_merchantId', 'left');
+            $this->db->join('cashin_recurring_va crv', 'crv.id = cpv.ref_cashinRecurringVaId AND crv.ref_merchantId = cpv.ref_merchantId', 'left');
+        }
 
         if ($search_date && $search_date_to) {
             $this->db->where('cpv.c_datetime >=', $search_date . ' 00:00:00');
@@ -35,30 +67,57 @@ class VirtualAccount extends CI_Model {
             $this->db->where('cpv.c_datetimeSettlement >=', $search_settlement . ' 00:00:00');
             $this->db->where('cpv.c_datetimeSettlement <=', $search_settlement . ' 23:59:59');
         }
-        if ($search_va) {
-            $this->db->where('cpv.c_vaNumber', $search_va);
+        if ($search_va !== null && $search_va !== '') {
+            $search_va = trim($search_va);
+            if ($search_va !== '') {
+                $this->db->like('cpv.c_vaNumber', $search_va, 'after');
+            }
         }
-        if ($search_transid) {
-            $this->db->group_start();
-            $this->db->where('cdv.c_merchantTransactionId', $search_transid);
-            $this->db->or_where('crv.c_merchantTransactionId', $search_transid);
-            $this->db->group_end();
+        if ($search_transid !== null && $search_transid !== '') {
+            $search_transid = trim($search_transid);
+            if ($search_transid !== '') {
+                $this->db->group_start();
+                $this->db->like('cdv.c_merchantTransactionId', $search_transid, 'after');
+                $this->db->or_like('crv.c_merchantTransactionId', $search_transid, 'after');
+                $this->db->group_end();
+            }
         }
 
-        $i = 0;
-        foreach ($this->column_search as $item) {
-            if ($_POST['search']['value']) {
+        if ($searchValue) {
+            $isTechnicalSearch = (preg_match('/^(VA|INV)/i', $searchValue));
+            $i = 0;
+            foreach ($this->column_search as $item) {
+                // EMERGENCY OPTIMIZATION: Skip searching name columns if search value is a technical ID prefix
+                if ($isTechnicalSearch && in_array($item, ['m.c_name'])) {
+                    continue;
+                }
+
+                // EMERGENCY OPTIMIZATION: Prefix search only (no leading %) to allow index usage
+                // Skip searching invoice column if search value doesn't look like an invoice
+                if ($item == 'c.c_invoiceNo' && !$isInvoiceSearch) {
+                    continue;
+                }
+
                 if ($i === 0) {
                     $this->db->group_start();
-                    $this->db->like($item, $_POST['search']['value']);
+                    $this->db->like($item, $searchValue, 'after');
                 } else {
-                    $this->db->or_like($item, $_POST['search']['value']);
+                    $this->db->or_like($item, $searchValue, 'after');
                 }
-                if (count($this->column_search) - 1 == $i)
-                    $this->db->group_end();
+                $i++;
             }
-            $i++;
+            if ($i > 0) $this->db->group_end();
         }
+
+        if (!$count_only) {
+            if (isset($_POST['order'])) {
+                $this->db->order_by($this->column_order[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);
+            } else if (isset($this->order)) {
+                $order = $this->order;
+                $this->db->order_by(key($order), $order[key($order)]);
+            }
+        }
+    
 
         if (isset($_POST['order'])) {
             $this->db->order_by($this->column_order[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);
@@ -70,75 +129,46 @@ class VirtualAccount extends CI_Model {
 
     public function get_datatables($search_date = null, $search_date_to = null, $search_merchant = null, $search_settlement = null, $search_va = null, $search_transid = null)
     {
-        $this->_get_datatables_query($search_date, $search_date_to, $search_merchant, $search_settlement, $search_va, $search_transid);
+        // STEP 1: Get only IDs for the current page (Fast query)
+        $this->_get_datatables_query($search_date, $search_date_to, $search_merchant, $search_settlement, $search_va, $search_transid, true);
         if ($_POST['length'] != -1)
             $this->db->limit($_POST['length'], $_POST['start']);
+        $query = $this->db->get();
+        $id_results = $query->result();
+        
+        if (empty($id_results)) return array();
+        
+        $ids = array_column($id_results, 'id');
+        
+        // STEP 2: Fetch full data for only these specific IDs
+        $this->db->select("cpv.*, c.c_invoiceNo, m.c_name AS merchant_name, s.c_name AS submerchant_name, 
+                           IF(cpv.c_type = 'Dynamic', cdv.c_merchantTransactionId, crv.c_merchantTransactionId) AS Merchant_Transaction_Id,
+                           egv.c_custom");
+        $this->db->from($this->table);
+        $this->db->join('cashin c', 'cpv.ref_cashinId = c.id', 'left');
+        $this->db->join('submerchant s', 'cpv.ref_subMerchantId = s.id', 'left');
+        $this->db->join('merchant m', 'cpv.ref_merchantId = m.id', 'left');
+        $this->db->join('cashin_dynamic_va cdv', 'cdv.id = cpv.ref_cashinDynamicVaId AND cdv.ref_merchantId = cpv.ref_merchantId', 'left');
+        $this->db->join('cashin_recurring_va crv', 'crv.id = cpv.ref_cashinRecurringVaId AND crv.ref_merchantId = cpv.ref_merchantId', 'left');
+        $this->db->join('external_gvpay_va_callback_payment egv', 'egv.ref_subMerchantId = cpv.ref_subMerchantId AND egv.ref_cashinPaymentVaId = cpv.id', 'left');
+        
+        $this->db->where_in('cpv.id', $ids);
+        
+        // Re-apply sorting to maintain order from STEP 1
+        if (isset($_POST['order'])) {
+            $this->db->order_by($this->column_order[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);
+        } else if (isset($this->order)) {
+            $order = $this->order;
+            $this->db->order_by(key($order), $order[key($order)]);
+        }
+        
         $query = $this->db->get();
         return $query->result();
     }
 
     public function count_filtered($search_date = null, $search_date_to = null, $search_merchant = null, $search_settlement = null, $search_va = null, $search_transid = null)
     {
-        $is_filtered = ($search_date || $search_merchant || $search_settlement || $search_va || $search_transid || (isset($_POST['search']['value']) && !empty($_POST['search']['value'])));
-        if (!$is_filtered) {
-            return $this->count_all_dt();
-        }
-
-        $this->db->select('count(cpv.id) as total');
-        // Optimized: Only join what is necessary for filtering
-        $this->db->from($this->table);
-        $this->db->join('cashin c', 'cpv.ref_cashinId = c.id', 'left'); // Needed for InvoiceNo
-        
-        if ($search_date && $search_date_to) {
-            $this->db->where('cpv.c_datetime >=', $search_date . ' 00:00:00');
-            $this->db->where('cpv.c_datetime <=', $search_date_to . ' 23:59:59');
-        } elseif ($search_date) {
-            $this->db->where('cpv.c_datetime >=', $search_date . ' 00:00:00');
-            $this->db->where('cpv.c_datetime <=', $search_date . ' 23:59:59');
-        }
-        if ($search_merchant) {
-            $this->db->where('cpv.ref_merchantId', $search_merchant);
-        }
-        if ($search_settlement) {
-            $this->db->where('cpv.c_datetimeSettlement >=', $search_settlement . ' 00:00:00');
-            $this->db->where('cpv.c_datetimeSettlement <=', $search_settlement . ' 23:59:59');
-        }
-        if ($search_va) {
-            $this->db->where('cpv.c_vaNumber', $search_va);
-        }
-        if ($search_transid) {
-            $this->db->join('cashin_dynamic_va cdv', 'cdv.id = cpv.ref_cashinDynamicVaId AND cdv.ref_merchantId = cpv.ref_merchantId', 'left');
-            $this->db->join('cashin_recurring_va crv', 'crv.id = cpv.ref_cashinRecurringVaId AND crv.ref_merchantId = cpv.ref_merchantId', 'left');
-            $this->db->group_start();
-            $this->db->where('cdv.c_merchantTransactionId', $search_transid);
-            $this->db->or_where('crv.c_merchantTransactionId', $search_transid);
-            $this->db->group_end();
-        }
-
-        // Global Search requires more joins
-        if (isset($_POST['search']['value']) && $_POST['search']['value']) {
-            $this->db->join('merchant m', 'cpv.ref_merchantId = m.id', 'left');
-            $this->db->join('external_gvpay_va_callback_payment egv', 'egv.ref_subMerchantId = cpv.ref_subMerchantId AND egv.ref_cashinPaymentVaId = cpv.id', 'left');
-            // Re-join dynamic if not already joined
-            if (!$search_transid) {
-                $this->db->join('cashin_dynamic_va cdv', 'cdv.id = cpv.ref_cashinDynamicVaId AND cdv.ref_merchantId = cpv.ref_merchantId', 'left');
-                $this->db->join('cashin_recurring_va crv', 'crv.id = cpv.ref_cashinRecurringVaId AND crv.ref_merchantId = cpv.ref_merchantId', 'left');
-            }
-
-            $i = 0;
-            foreach ($this->column_search as $item) {
-                if ($i === 0) {
-                    $this->db->group_start();
-                    $this->db->like($item, $_POST['search']['value']);
-                } else {
-                    $this->db->or_like($item, $_POST['search']['value']);
-                }
-                if (count($this->column_search) - 1 == $i)
-                    $this->db->group_end();
-                $i++;
-            }
-        }
-
+        $this->_get_datatables_query($search_date, $search_date_to, $search_merchant, $search_settlement, $search_va, $search_transid, false, true);
         $query = $this->db->get();
         return $query->row()->total;
     }
@@ -176,10 +206,17 @@ class VirtualAccount extends CI_Model {
             $base_query .= " AND cpv.c_datetimeSettlement >= '$search_date_va_settlement 00:00:00' AND cpv.c_datetimeSettlement <= '$search_date_va_settlement 23:59:59'";
         }
         if ($search_va_number) {
-            $base_query .= " AND cpv.c_vaNumber = '$search_va_number'";
+            $search_va_number = trim($search_va_number);
+            if ($search_va_number !== '') {
+                $base_query .= " AND cpv.c_vaNumber LIKE '{$this->db->escape_like_str($search_va_number)}%'";
+            }
         }
         if ($search_va_transid) {
-            $base_query .= " AND cashin_dynamic_va.c_merchantTransactionId = '$search_va_transid'";
+            $search_va_transid = trim($search_va_transid);
+            if ($search_va_transid !== '') {
+                $escaped_transid = $this->db->escape_like_str($search_va_transid);
+                $base_query .= " AND (cashin_dynamic_va.c_merchantTransactionId LIKE '{$escaped_transid}%' OR cashin_recurring_va.c_merchantTransactionId LIKE '{$escaped_transid}%')";
+            }
         }
 
         // Hitung total rows untuk pagination
@@ -224,11 +261,20 @@ class VirtualAccount extends CI_Model {
         }
 
         if ($search_va_number) {
-            $this->db->where('cpv.c_vaNumber', $search_va_number);
+            $search_va_number = trim($search_va_number);
+            if ($search_va_number !== '') {
+                $this->db->like('cpv.c_vaNumber', $search_va_number, 'after');
+            }
         }
 
         if ($search_va_transid) {
-            $this->db->where('cdv.c_merchantTransactionId', $search_va_transid);
+            $search_va_transid = trim($search_va_transid);
+            if ($search_va_transid !== '') {
+                $this->db->group_start();
+                $this->db->like('cdv.c_merchantTransactionId', $search_va_transid, 'after');
+                $this->db->or_like('cashin_recurring_va.c_merchantTransactionId', $search_va_transid, 'after');
+                $this->db->group_end();
+            }
         }
 
         return (int)$this->db->count_all_results();

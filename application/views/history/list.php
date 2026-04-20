@@ -210,9 +210,10 @@ $download_url = base_url('admin/download_history')
         });
 
         // Global search
-        $('#historyGlobalSearch').on('keyup', function() {
+        // Global search with Debounce
+        $('#historyGlobalSearch').on('input', debounce(function() {
             table.search(this.value).draw();
-        });
+        }, 400));
 
         // Select2 for the toolbar
         $('.history-select2').select2({

@@ -267,10 +267,10 @@
                 });
             }
         });
-        // Global search
-        $('#vadynamicGlobalSearch').on('keyup', function() {
+        // Global search with Debounce
+        $('#vadynamicGlobalSearch').on('input', debounce(function() {
             table.search(this.value).draw();
-        });
+        }, 400));
         // ── More Filters dropdown ──
         var $moreBtn   = $('#vadynamicMoreFiltersBtn');
         var $morePanel = $('#vadynamicMoreFiltersPanel');

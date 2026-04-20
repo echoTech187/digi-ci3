@@ -6,12 +6,19 @@ class VADynamic extends CI_Model {
     var $column_search = array('cdv.c_vaNumber', 'cdv.c_merchantTransactionId', 's.c_name', 'm.c_name');
     var $order = array('cdv.id' => 'desc');
 
-    private function _get_datatables_query($search_name = null, $search_date = null, $search_va = null, $search_trxid = null, $search_date_to = null)
+    private function _get_datatables_query($search_name = null, $search_date = null, $search_va = null, $search_trxid = null, $search_date_to = null, $only_ids = false)
     {
-        $this->db->select("cdv.*, s.c_name as name_submerchant, m.c_name as name_merchant");
+        if ($only_ids) {
+            $this->db->select("cdv.id");
+        } else {
+            $this->db->select("cdv.*, s.c_name as name_submerchant, m.c_name as name_merchant");
+        }
         $this->db->from($this->table);
-        $this->db->join('submerchant s', 's.id = cdv.ref_subMerchantId', 'left');
-        $this->db->join('merchant m', 'm.id = cdv.ref_merchantId', 'left');
+        
+        if (!$only_ids || $_POST['search']['value']) {
+            $this->db->join('submerchant s', 's.id = cdv.ref_subMerchantId', 'left');
+            $this->db->join('merchant m', 'm.id = cdv.ref_merchantId', 'left');
+        }
 
         if ($search_name) {
             $this->db->where('cdv.ref_merchantId', $search_name);
@@ -57,9 +64,33 @@ class VADynamic extends CI_Model {
 
     public function get_datatables($search_name = null, $search_date = null, $search_va = null, $search_trxid = null, $search_date_to = null)
     {
-        $this->_get_datatables_query($search_name, $search_date, $search_va, $search_trxid, $search_date_to);
+        // STEP 1: Get only IDs matching filters/length/sort
+        $this->_get_datatables_query($search_name, $search_date, $search_va, $search_trxid, $search_date_to, true);
         if (isset($_POST['length']) && $_POST['length'] != -1)
             $this->db->limit($_POST['length'], $_POST['start']);
+        $query = $this->db->get();
+        $id_results = $query->result();
+        
+        if (empty($id_results)) return array();
+        
+        $ids = array_column($id_results, 'id');
+        
+        // STEP 2: Fetch full records for only these specific IDs
+        $this->db->select("cdv.*, s.c_name as name_submerchant, m.c_name as name_merchant");
+        $this->db->from($this->table);
+        $this->db->join('submerchant s', 's.id = cdv.ref_subMerchantId', 'left');
+        $this->db->join('merchant m', 'm.id = cdv.ref_merchantId', 'left');
+        
+        $this->db->where_in('cdv.id', $ids);
+        
+        // Order must be re-applied
+        if (isset($_POST['order'])) {
+            $this->db->order_by($this->column_order[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);
+        } else if (isset($this->order)) {
+            $order = $this->order;
+            $this->db->order_by(key($order), $order[key($order)]);
+        }
+        
         $query = $this->db->get();
         return $query->result();
     }
@@ -71,9 +102,14 @@ class VADynamic extends CI_Model {
             return $this->count_all_dt();
         }
 
-        $this->db->select('count(cdv.id) as total');
-        // Optimized: Only join what is necessary for filtering
+        $this->db->select('count(DISTINCT cdv.id) as total');
         $this->db->from($this->table);
+        
+        // Lean joins based on active filters
+        if (isset($_POST['search']['value']) && $_POST['search']['value']) {
+            $this->db->join('submerchant s', 's.id = cdv.ref_subMerchantId', 'left');
+            $this->db->join('merchant m', 'm.id = cdv.ref_merchantId', 'left');
+        }
         
         if ($search_name) {
             $this->db->where('cdv.ref_merchantId', $search_name);
@@ -94,11 +130,7 @@ class VADynamic extends CI_Model {
             $this->db->where('cdv.c_merchantTransactionId', $search_trxid);
         }
 
-        // Global Search requires more joins
         if (isset($_POST['search']['value']) && $_POST['search']['value']) {
-            $this->db->join('submerchant s', 's.id = cdv.ref_subMerchantId', 'left');
-            $this->db->join('merchant m', 'm.id = cdv.ref_merchantId', 'left');
-            
             $i = 0;
             foreach ($this->column_search as $item) {
                 if ($i === 0) {

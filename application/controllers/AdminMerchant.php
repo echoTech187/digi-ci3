@@ -37,26 +37,27 @@ class AdminMerchant extends CI_Controller
 
       // Server-side DataTables Handler
       if ($this->input->is_ajax_request()) {
-         $table = 'merchant m';
-         $column_order = array(null, 'm.id', 'm.c_name', 'm.c_balanceTotal', 'm.c_status', null);
-         $column_search = array('m.id', 'm.c_name', 'm.c_email');
-         $order = array('m.id' => 'desc');
-         
-         $where = [];
-         $where['m.c_merchantLevel'] = 0; // Filter to show only level 0 merchants here
-         $ref_entity = $this->session->userdata('ref_entity');
-         if (!empty($ref_entity)) {
-             $where['m.ref_entity'] = $ref_entity;
-         }
+         try {
+            $table = 'merchant m';
+            $column_order = array(null, 'm.id', 'm.c_name', 'm.c_balanceTotal', 'm.c_status', null);
+            $column_search = array('m.id', 'm.c_name', 'm.c_email');
+            $order = array('m.id' => 'desc');
+            
+            $where = [];
+            $where['m.c_merchantLevel'] = 0; // Filter to show only level 0 merchants here
+            $ref_entity = $this->session->userdata('ref_entity');
+            if (!empty($ref_entity)) {
+                $where['m.ref_entity'] = $ref_entity;
+            }
 
-         $list = $this->Merchant->get_datatables($table, $column_order, $column_search, $order, $where);
-         $dataItems = array();
-         $no = $this->input->post('start');
-         
-         // Pre-check permission outside the loop to avoid N+1 queries
-         $hasBalancePermission = $this->rbac->has_permission($role_id, 'balance_merchant_module');
+            $list = $this->Merchant->get_datatables($table, $column_order, $column_search, $order, $where);
+            $dataItems = array();
+            $no = $this->input->post('start');
+            
+            // Pre-check permission outside the loop to avoid N+1 queries
+            $hasBalancePermission = $this->rbac->has_permission($role_id, 'balance_merchant_module');
 
-         foreach ($list as $m) {
+            foreach ($list as $m) {
             $no++;
             $row = array();
             $row['no'] = $no;
@@ -150,7 +151,7 @@ class AdminMerchant extends CI_Controller
             $dataItems[] = $row;
          }
 
-         $output = array(
+         	$output = array(
             "draw" => intval($this->input->post("draw")),
             "recordsTotal" => $this->Merchant->count_all_dt($table, $where),
             "recordsFiltered" => $this->Merchant->count_filtered($table, $column_order, $column_search, $order, $where),
@@ -158,6 +159,18 @@ class AdminMerchant extends CI_Controller
          );
          echo json_encode($output);
          exit;
+      } catch (Throwable $e) {
+         log_message('error', 'Merchant AJAX error: ' . $e->getMessage());
+         $this->session->set_flashdata('error', 'Error retrieving Merchant data: ' . $e->getMessage());
+         echo json_encode([
+             "draw" => intval($this->input->post("draw")),
+             "recordsTotal" => 0,
+             "recordsFiltered" => 0,
+             "data" => [],
+             "redirect" => base_url('admin/merchant')
+         ]);
+         exit;
+      }
       }
 
       $data['title'] = 'Merchant';

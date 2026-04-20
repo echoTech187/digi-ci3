@@ -6,12 +6,19 @@ class VARecurring extends CI_Model {
     var $column_search = array('crv.c_vaNumber', 'crv.c_merchantTransactionId', 's.c_name', 'm.c_name');
     var $order = array('crv.id' => 'desc');
 
-    private function _get_datatables_query($search_name = null, $search_date = null, $search_sub = null)
+    private function _get_datatables_query($search_name = null, $search_date = null, $search_sub = null, $only_ids = false)
     {
-        $this->db->select("crv.*, s.c_name as name_submerchant, m.c_name as name_merchant");
+        if ($only_ids) {
+            $this->db->select("crv.id");
+        } else {
+            $this->db->select("crv.*, s.c_name as name_submerchant, m.c_name as name_merchant");
+        }
         $this->db->from($this->table);
-        $this->db->join('submerchant s', 's.id = crv.ref_subMerchantId', 'left');
-        $this->db->join('merchant m', 'm.id = crv.ref_merchantId', 'left');
+        
+        if (!$only_ids || $_POST['search']['value']) {
+            $this->db->join('submerchant s', 's.id = crv.ref_subMerchantId', 'left');
+            $this->db->join('merchant m', 'm.id = crv.ref_merchantId', 'left');
+        }
 
         if ($search_name) {
             $this->db->where('crv.ref_merchantId', $search_name);
@@ -31,7 +38,7 @@ class VARecurring extends CI_Model {
 
         $i = 0;
         foreach ($this->column_search as $item) {
-            if ($_POST['search']['value']) {
+            if (isset($_POST['search']['value']) && $_POST['search']['value']) {
                 if ($i === 0) {
                     $this->db->group_start();
                     $this->db->like($item, $_POST['search']['value']);
@@ -54,9 +61,32 @@ class VARecurring extends CI_Model {
 
     public function get_datatables($search_name = null, $search_date = null, $search_sub = null)
     {
-        $this->_get_datatables_query($search_name, $search_date, $search_sub);
+        // STEP 1: Get matching IDs only
+        $this->_get_datatables_query($search_name, $search_date, $search_sub, true);
         if ($_POST['length'] != -1)
             $this->db->limit($_POST['length'], $_POST['start']);
+        $query = $this->db->get();
+        $id_results = $query->result();
+        
+        if (empty($id_results)) return array();
+        
+        $ids = array_column($id_results, 'id');
+        
+        // STEP 2: Fetch full records for matching IDs
+        $this->db->select("crv.*, s.c_name as name_submerchant, m.c_name as name_merchant");
+        $this->db->from($this->table);
+        $this->db->join('submerchant s', 's.id = crv.ref_subMerchantId', 'left');
+        $this->db->join('merchant m', 'm.id = crv.ref_merchantId', 'left');
+        
+        $this->db->where_in('crv.id', $ids);
+        
+        if (isset($_POST['order'])) {
+            $this->db->order_by($this->column_order[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);
+        } else if (isset($this->order)) {
+            $order = $this->order;
+            $this->db->order_by(key($order), $order[key($order)]);
+        }
+        
         $query = $this->db->get();
         return $query->result();
     }
@@ -68,10 +98,14 @@ class VARecurring extends CI_Model {
             return $this->count_all_dt();
         }
 
-        $this->db->select('count(crv.id) as total');
-        // Optimized: Only join what is necessary for filtering
+        $this->db->select('count(DISTINCT crv.id) as total');
         $this->db->from($this->table);
-        $this->db->join('submerchant s', 's.id = crv.ref_subMerchantId', 'left');
+        
+        // Lean joins based on active filters
+        if (isset($_POST['search']['value']) && $_POST['search']['value']) {
+            $this->db->join('submerchant s', 's.id = crv.ref_subMerchantId', 'left');
+            $this->db->join('merchant m', 'm.id = crv.ref_merchantId', 'left');
+        }
         
         if ($search_name) {
             $this->db->where('crv.ref_merchantId', $search_name);
@@ -89,10 +123,7 @@ class VARecurring extends CI_Model {
             $this->db->where('crv.ref_subMerchantId', $search_sub);
         }
 
-        // Global Search requires more joins
         if (isset($_POST['search']['value']) && $_POST['search']['value']) {
-            $this->db->join('merchant m', 'm.id = crv.ref_merchantId', 'left');
-            
             $i = 0;
             foreach ($this->column_search as $item) {
                 if ($i === 0) {

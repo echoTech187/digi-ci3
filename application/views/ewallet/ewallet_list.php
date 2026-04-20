@@ -46,7 +46,7 @@
                 <!-- LEFT: Global Search -->
                 <div class="dt-search-wrapper">
                     <i class="fas fa-search dt-search-icon"></i>
-                    <input type="text" id="ewalletGlobalSearch" class="dt-search-input" placeholder="Search by any parameter...">
+                    <input type="text" id="ewalletGlobalSearch" class="dt-search-input" placeholder="Search by E-Wallet No, or Trans ID...">
                 </div>
 
                 <!-- RIGHT: Primary chips + More Filters trigger -->
@@ -194,6 +194,7 @@
                 "infoFiltered": "",
                 "zeroRecords": '<div class="text-center py-4 text-muted"><i class="fas fa-inbox fa-2x mb-2 d-block mr-2"></i> No transactions found.</div>'
             },
+            "order": [[1, 'desc']],
             "dom": 'rt<"dt-footer"<"dt-footer-info"i><"dt-footer-pager">>',
             "drawCallback": function(settings) {
                 var api    = this.api();
@@ -225,10 +226,10 @@
             }
         });
 
-        // Wire global search input to DataTable
-        $('#ewalletGlobalSearch').on('keyup', function() {
+        // Global search with Debounce
+        $('#ewalletGlobalSearch').on('input', debounce(function() {
             table.search(this.value).draw();
-        });
+        }, 400));
 
         // ── More Filters dropdown toggle ──
         var $moreBtn   = $('#moreFiltersBtn');

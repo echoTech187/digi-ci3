@@ -50,7 +50,7 @@ $download_url = base_url('admin/download_VA')
                 <!-- LEFT: Global Search -->
                 <div class="dt-search-wrapper">
                     <i class="fas fa-search dt-search-icon"></i>
-                    <input type="text" id="vaGlobalSearch" class="dt-search-input" placeholder="Search by Channel, Merchant, or ID...">
+                    <input type="text" id="vaGlobalSearch" class="dt-search-input" placeholder="Search by VA No, or Trans ID...">
                 </div>
 
                 <!-- RIGHT: Primary chips + More Filters trigger -->
@@ -198,6 +198,7 @@ $download_url = base_url('admin/download_VA')
                 "infoFiltered": "",
                 "zeroRecords": '<div class="text-center py-4 text-muted"><i class="fas fa-inbox fa-2x mb-2 d-block mr-2"></i> No transactions found.</div>'
             },
+            "order": [[1, 'desc']],
             "dom": 'rt<"dt-footer"<"dt-footer-info"i><"dt-footer-pager">>',
             "drawCallback": function(settings) {
                 var api    = this.api();
@@ -228,10 +229,10 @@ $download_url = base_url('admin/download_VA')
             }
         });
 
-        // Global search
-        $('#vaGlobalSearch').on('keyup', function() {
+        // Global search with Debounce
+        $('#vaGlobalSearch').on('input', debounce(function() {
             table.search(this.value).draw();
-        });
+        }, 400));
 
         // ── More Filters dropdown ──
         var $moreBtn   = $('#vaMoreFiltersBtn');

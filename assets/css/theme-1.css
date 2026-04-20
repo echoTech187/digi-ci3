@@ -4429,7 +4429,10 @@ tr.saved  { opacity: 1; }
 .dt-card { overflow: visible !important; }
 .card-body { overflow: visible !important; }
 .table-responsive { overflow-x: auto !important; }
-
+table.dataTable{
+    margin-top: 0!important;
+    margin-bottom: 0!important;
+}
 @media (max-width: 991.98px) {
     .table-responsive {
         overflow-x: auto !important;

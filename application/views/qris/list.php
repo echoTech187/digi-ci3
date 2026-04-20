@@ -34,6 +34,9 @@ $download_url = base_url('admin/download_qris')
     <?php if ($this->session->flashdata('success')): ?>
         <div class="alert alert-success"><?= $this->session->flashdata('success'); ?></div>
     <?php endif; ?>
+    <?php if ($this->session->flashdata('error')): ?>
+        <div class="alert alert-danger"><?= $this->session->flashdata('error'); ?></div>
+    <?php endif; ?>
 
     <!-- ── KPI Summary Cards ── -->
     
@@ -50,7 +53,7 @@ $download_url = base_url('admin/download_qris')
                 <!-- LEFT: Global Search -->
                 <div class="dt-search-wrapper">
                     <i class="fas fa-search dt-search-icon"></i>
-                    <input type="text" id="qrisGlobalSearch" class="dt-search-input" placeholder="Search by any parameter...">
+                    <input type="text" id="qrisGlobalSearch" class="dt-search-input" placeholder="Search by Trans ID, or RRN...">
                 </div>
 
                 <!-- RIGHT: Primary chips + More Filters trigger -->
@@ -193,6 +196,7 @@ $download_url = base_url('admin/download_qris')
             
             {data: 'action', orderable: false, searchable: false}
         ], {
+            "ordering": false,
             "language": {
                 "processing": '<i class="fa fa-spinner fa-spin fa-2x fa-fw mx-auto d-block text-primary"></i>',
                 "info": "Showing _START_ – _END_ of _TOTAL_ results",
@@ -200,6 +204,7 @@ $download_url = base_url('admin/download_qris')
                 "infoFiltered": "",
                 "zeroRecords": '<div class="text-center py-4 text-muted"><i class="fas fa-inbox fa-2x mb-2 d-block mr-2"></i> No transactions found.</div>'
             },
+            "order": [[1, 'desc']],
             "dom": 'rt<"dt-footer"<"dt-footer-info"i><"dt-footer-pager">>',
             "drawCallback": function(settings) {
                 var api    = this.api();
@@ -230,10 +235,16 @@ $download_url = base_url('admin/download_qris')
             }
         });
 
-        // Global search
-        $('#qrisGlobalSearch').on('keyup', function() {
-            table.search(this.value).draw();
+        table.on('xhr', function(e, settings, json) {
+            if (json && json.redirect) {
+                window.location = json.redirect;
+            }
         });
+
+        // Global search with Debounce
+        $('#qrisGlobalSearch').on('input', debounce(function() {
+            table.search(this.value).draw();
+        }, 400));
 
         // ── More Filters dropdown ──
         var $moreBtn   = $('#qrisMoreFiltersBtn');

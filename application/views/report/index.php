@@ -128,9 +128,10 @@
         });
 
         // Global search
-        $('#reportGlobalSearch').on('keyup', function() {
+        // Global search with Debounce
+        $('#reportGlobalSearch').on('input', debounce(function() {
             table.search(this.value).draw();
-        });
+        }, 400));
 
         // Date filter
         $('#search_date').on('change', function() {

@@ -427,7 +427,17 @@
                         $pager.find('.dt-next-btn').off('click').on('click', function() { if (!$(this).prop('disabled')) { api.page('next').draw('page'); } });
                     }
                 });
-                $('#merchantGlobalSearch').on('keyup', function() { table.search(this.value).draw(); });
+
+                table.on('xhr', function(e, settings, json) {
+                    if (json && json.redirect) {
+                        window.location = json.redirect;
+                    }
+                });
+
+                // Global search with Debounce
+                $('#merchantGlobalSearch').on('input', debounce(function() {
+                    table.search(this.value).draw();
+                }, 400));
             });
 
             function detail(id, name) { document.getElementById('merchantId').value = id; document.getElementById('merchantName').value = name; }

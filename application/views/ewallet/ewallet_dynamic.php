@@ -292,10 +292,10 @@
             }
         });
 
-        // Global search
-        $('#ewalletDynamicGlobalSearch').on('keyup', function() {
+        // Global search with Debounce
+        $('#ewalletDynamicGlobalSearch').on('input', debounce(function() {
             table.search(this.value).draw();
-        });
+        }, 400));
 
         // Select2 inside toolbar
         $('.ewallet-dynamic-select2').select2({
