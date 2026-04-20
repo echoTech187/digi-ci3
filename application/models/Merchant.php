@@ -140,12 +140,14 @@ public function setMaintenanceStatus($newStatus) {
     }
 
     /* Server-Side DataTables Helpers */
-    private function _get_datatables_query($table, $column_order, $column_search, $order, $where = [])
+    private function _get_datatables_query($table, $column_order, $column_search, $order, $where = [], $count_only = false)
     {
         // Emergency 3-second safeguard
         $this->db->query("SET SESSION max_execution_time = 10000");
         
-        $this->db->select('*');
+        if (!$count_only) {
+            $this->db->select('*');
+        }
         $this->db->from($table);
         
         if (!empty($where)) {
@@ -167,10 +169,12 @@ public function setMaintenanceStatus($newStatus) {
             $i++;
         }
 
-        if (isset($_POST['order'])) {
-            $this->db->order_by($column_order[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);
-        } else if (isset($order)) {
-            $this->db->order_by(key($order), $order[key($order)]);
+        if (!$count_only) {
+            if (isset($_POST['order'])) {
+                $this->db->order_by($column_order[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);
+            } else if (isset($order)) {
+                $this->db->order_by(key($order), $order[key($order)]);
+            }
         }
     }
 
@@ -191,7 +195,7 @@ public function setMaintenanceStatus($newStatus) {
         }
 
         $this->db->select('count(id) as total');
-        $this->_get_datatables_query($table, $column_order, $column_search, $order, $where);
+        $this->_get_datatables_query($table, $column_order, $column_search, $order, $where, true);
         $query = $this->db->get();
         return $query->row()->total;
     }
