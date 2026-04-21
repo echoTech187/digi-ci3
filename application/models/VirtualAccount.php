@@ -411,10 +411,15 @@ class VirtualAccount extends CI_Model {
             $data[] = $row;
         }
 
+        $is_filtered = $search_date || $search_date_to || $search_merchant || $search_settlement || $search_va || $search_transid || $this->input->post('search')['value'];
+        
+        $recordsTotal = $this->count_all_dt($search_date, $search_date_to, $search_merchant);
+        $recordsFiltered = $is_filtered ? $this->count_filtered($search_date, $search_date_to, $search_merchant, $search_settlement, $search_va, $search_transid) : $recordsTotal;
+
         $output = [
             "draw" => intval($this->input->post("draw")),
-            "recordsTotal" => $this->count_all_dt($search_date, $search_date_to, $search_merchant),
-            "recordsFiltered" => $this->count_filtered($search_date, $search_date_to, $search_merchant, $search_settlement, $search_va, $search_transid),
+            "recordsTotal" => $recordsTotal,
+            "recordsFiltered" => $recordsFiltered,
             "data" => $data,
         ];
 

@@ -16,7 +16,7 @@
         </div>
         <div class="d-flex align-items-center gap-3">
             <!-- Period Selector -->
-            <div class="d-flex p-1 gap-1" style="background: #f1f5f9; border-radius: 14px; border: 1px solid #e2e8f0;">
+            <div class="d-flex p-1 gap-1" style="border-radius: 14px;">
                 <a href="<?= base_url('admin/analytics?period=yesterday'); ?>" class="btn btn-sm <?= ($current_period == 'yesterday' ? 'btn-primary' : 'btn-link text-muted'); ?> px-4 py-2 font-weight-bold shadow-none" style="border-radius: 10px; font-size: 11px; text-decoration: none;">Yesterday</a>
                 <a href="<?= base_url('admin/analytics?period=last_7_days'); ?>" class="btn btn-sm <?= ($current_period == 'last_7_days' ? 'btn-primary' : 'btn-link text-muted'); ?> px-4 py-2 font-weight-bold shadow-none" style="border-radius: 10px; font-size: 11px; text-decoration: none;">Last 7 Days</a>
                 <a href="<?= base_url('admin/analytics?period=last_month'); ?>" class="btn btn-sm <?= ($current_period == 'last_month' ? 'btn-primary' : 'btn-link text-muted'); ?> px-4 py-2 font-weight-bold shadow-none" style="border-radius: 10px; font-size: 11px; text-decoration: none;">Last Month</a>
@@ -147,7 +147,7 @@
             <div class="card border-0 shadow-sm dt-card h-100" style="border-radius: 24px;">
                 <div class="card-header border-0 bg-transparent py-4 px-4 d-flex align-items-center justify-content-between">
                     <div>
-                        <h6 class="m-0 font-weight-bold text-gray-800" style="font-size: 1rem;">Yield Analysis Trend</h6>
+                        <h6 class="m-0 font-weight-bold text-gray-900" style="font-size: 1rem;">Yield Analysis Trend</h6>
                         <p class="m-0 text-muted small mt-1">Growth progression in total platform volume over selected period</p>
                     </div>
                 </div>
@@ -163,7 +163,7 @@
         <div class="col-xl-4 col-lg-5">
             <div class="card border-0 shadow-sm dt-card h-100" style="border-radius: 24px;">
                 <div class="card-header border-0 bg-transparent py-4 px-4">
-                    <h6 class="m-0 font-weight-bold text-gray-800" style="font-size: 1rem;">Net Contribution Mix</h6>
+                    <h6 class="m-0 font-weight-bold text-gray-900" style="font-size: 1rem;">Net Contribution Mix</h6>
                     <p class="m-0 text-muted small mt-1">Direct profit distribution (Fee - Cost)</p>
                 </div>
                 <div class="card-body px-4 pb-4">

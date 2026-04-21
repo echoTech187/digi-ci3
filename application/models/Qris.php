@@ -420,10 +420,15 @@ class Qris extends CI_Model {
             $data[] = $row;
         }
 
+        $is_filtered = $search_name || $date_from || $date_to || $search_settlement || $search_rrn || $search_invoice || $search_transid || $this->input->post('search')['value'];
+        
+        $recordsTotal = $this->count_all_dt($search_name, $date_from_query, $date_to_query);
+        $recordsFiltered = $is_filtered ? $this->count_filtered($search_name, $date_from_query, $date_to_query, $search_settlement, $search_rrn, $search_invoice, $search_transid) : $recordsTotal;
+
         $output = [
             "draw" => intval($this->input->post("draw")),
-            "recordsTotal" => $this->count_all_dt($search_name, $date_from_query, $date_to_query),
-            "recordsFiltered" => $this->count_filtered($search_name, $date_from_query, $date_to_query, $search_settlement, $search_rrn, $search_invoice, $search_transid),
+            "recordsTotal" => $recordsTotal,
+            "recordsFiltered" => $recordsFiltered,
             "data" => $data,
         ];
 

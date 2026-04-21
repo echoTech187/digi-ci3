@@ -70,83 +70,8 @@
                         <th width="80" class="text-center pe-4">Action</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <?php foreach ($cashin_channel_x_merchant as $index => $row): ?>
-                        <tr>
-                            <td class="ps-4 text-muted small"><?= $index + 1 ?></td>
-                            <td>
-                                <div class="d-flex flex-column">
-                                    <span class="fw-bold text-dark"><?= $row->c_cashinChannelGroup; ?></span>
-                                    <span class="text-muted small">ID: <code class="text-primary"><?= $row->ref_cashinChannelId; ?></code></span>
-                                    <span class="text-muted smaller">Ext: <?= $row->c_externalIdDefault; ?></span>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="d-flex flex-column">
-                                    <div class="d-flex justify-content-between small">
-                                        <span class="text-muted">Type:</span>
-                                        <span class="badge badge-light text-dark-soft text-dark px-2 py-0" style="font-size: 10px;"><?= $row->c_feeType; ?></span>
-                                    </div>
-                                    <div class="d-flex justify-content-between fw-bold mt-1">
-                                        <span class="text-muted small">Fixed:</span>
-                                        <span class="text-primary">Rp <?= number_format($row->c_fee, 0, ',', '.'); ?></span>
-                                    </div>
-                                    <div class="d-flex justify-content-between small">
-                                        <span class="text-muted">Percentage:</span>
-                                        <span class="text-success fw-bold"><?= $row->c_feePercetange; ?>%</span>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="text-center">
-                                <span class="badge bg-info-soft text-info rounded-pill px-3 py-1">
-                                    <?= $row->c_settlementInterval; ?> Days
-                                </span>
-                            </td>
-                            <td class="text-right">
-                                <div class="d-flex flex-column align-items-end">
-                                    <span class="text-muted small">Min: <span class="text-dark fw-bold">Rp <?= number_format($row->c_amountMin, 0, ',', '.'); ?></span></span>
-                                    <span class="text-muted small">Max: <span class="text-dark fw-bold">Rp <?= number_format($row->c_amountMax, 0, ',', '.'); ?></span></span>
-                                </div>
-                            </td>
-                            <td class="text-center">
-                                <span class="badge bg-<?= $row->c_status == 'Active' ? 'success' : 'secondary' ?>-soft text-<?= $row->c_status == 'Active' ? 'success' : 'secondary' ?> rounded-pill px-3 py-1">
-                                    <?= $row->c_status; ?>
-                                </span>
-                            </td>
-                            <td class="text-center pe-4">
-                                <div class="dropdown">
-                                    <button class="btn btn-light btn-sm rounded-circle shadow-none p-2" type="button" data-toggle="dropdown" aria-expanded="false">
-                                        <i class="fas fa-ellipsis-v text-muted"></i>
-                                    </button>
-                                    <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg p-2">
-                                        <li>
-                                            <button class="dropdown-item rounded-2 py-2 edit-btn" 
-                                                    data-toggle="modal" data-target="#feeModal"
-                                                    data-id="<?= $row->id ?>"
-                                                    data-group="<?= $row->c_cashinChannelGroup ?>"
-                                                    data-channelid="<?= $row->ref_cashinChannelId ?>"
-                                                    data-externalid="<?= $row->c_externalIdDefault ?>"
-                                                    data-feetype="<?= $row->c_feeType ?>"
-                                                    data-fee="<?= $row->c_fee ?>"
-                                                    data-feepercentage="<?= $row->c_feePercetange ?>"
-                                                    data-settlement="<?= $row->c_settlementInterval ?>"
-                                                    data-min="<?= $row->c_amountMin ?>"
-                                                    data-max="<?= $row->c_amountMax ?>"
-                                                    data-status="<?= $row->c_status ?>">
-                                                <i class="fas fa-edit  text-primary mr-2"></i> Edit Setting
-                                            </button>
-                                        </li>
-                                        <li><hr class="dropdown-divider"></li>
-                                        <li>
-                                            <a class="dropdown-item rounded-2 py-2 text-danger" href="<?= base_url('admin/deleteSettingCashinFee/'. $merchant_id) . '/' . $row->id; ?>" onclick="return confirm('Are you sure you want to delete this configuration?')">
-                                                <i class="fas fa-trash  mr-2"></i> Delete
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
+                <tbody id="cashinTableBody">
+                    <!-- Data will be loaded via AJAX -->
                 </tbody>
             </table>
         </div>
@@ -394,9 +319,126 @@ $(document).ready(function() {
         });
     });
 
+    // CSRF helper
+    const csrfName = $('meta[name="csrf-token-name"]').attr('content');
+    const csrfHash = $('meta[name="csrf-token-hash"]').attr('content');
+
     var table = $('#cashinTable').DataTable({
-            "processing": false,
-            "serverSide": false,
+            "processing": true,
+            "serverSide": true,
+            "ajax": {
+                "url": window.location.href,
+                "type": "POST",
+                "data": function(d) {
+                    if (csrfName) d[csrfName] = csrfHash;
+                    return d;
+                }
+            },
+            "columns": [
+                { "data": "no", "className": "ps-4 text-muted small" },
+                { 
+                    "data": "c_cashinChannelGroup",
+                    "render": function(data, type, row) {
+                        return `
+                            <div class="d-flex flex-column">
+                                <span class="fw-bold text-dark">${data}</span>
+                                <span class="text-muted small">ID: <code class="text-primary">${row.ref_cashinChannelId}</code></span>
+                                <span class="text-muted smaller">Ext: ${row.c_externalIdDefault}</span>
+                            </div>
+                        `;
+                    }
+                },
+                {
+                    "data": "c_feeType",
+                    "render": function(data, type, row) {
+                        const fee = new Intl.NumberFormat('id-ID').format(row.c_fee);
+                        return `
+                            <div class="d-flex flex-column">
+                                <div class="d-flex justify-content-between small">
+                                    <span class="text-muted">Type:</span>
+                                    <span class="badge badge-light text-dark-soft text-dark px-2 py-0" style="font-size: 10px;">${data}</span>
+                                </div>
+                                <div class="d-flex justify-content-between fw-bold mt-1">
+                                    <span class="text-muted small">Fixed:</span>
+                                    <span class="text-primary">Rp ${fee}</span>
+                                </div>
+                                <div class="d-flex justify-content-between small">
+                                    <span class="text-muted">Percentage:</span>
+                                    <span class="text-success fw-bold">${row.c_feePercetange}%</span>
+                                </div>
+                            </div>
+                        `;
+                    }
+                },
+                {
+                    "data": "c_settlementInterval",
+                    "className": "text-center",
+                    "render": function(data) {
+                        return `<span class="badge bg-info-soft text-info rounded-pill px-3 py-1">${data} Days</span>`;
+                    }
+                },
+                {
+                    "data": "c_amountMin",
+                    "className": "text-right",
+                    "render": function(data, type, row) {
+                        const min = new Intl.NumberFormat('id-ID').format(data);
+                        const max = new Intl.NumberFormat('id-ID').format(row.c_amountMax);
+                        return `
+                            <div class="d-flex flex-column align-items-end">
+                                <span class="text-muted small">Min: <span class="text-dark fw-bold">Rp ${min}</span></span>
+                                <span class="text-muted small">Max: <span class="text-dark fw-bold">Rp ${max}</span></span>
+                            </div>
+                        `;
+                    }
+                },
+                {
+                    "data": "c_status",
+                    "className": "text-center",
+                    "render": function(data) {
+                        const style = data === 'Active' ? 'success' : 'secondary';
+                        return `<span class="badge bg-${style}-soft text-${style} rounded-pill px-3 py-1">${data}</span>`;
+                    }
+                },
+                {
+                    "data": null,
+                    "className": "text-center pe-4",
+                    "orderable": false,
+                    "render": function(data, type, row) {
+                        return `
+                            <div class="dropdown">
+                                <button class="btn btn-light btn-sm rounded-circle shadow-none p-2" type="button" data-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-ellipsis-v text-muted"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg p-2">
+                                    <li>
+                                        <button class="dropdown-item rounded-2 py-2 edit-btn" 
+                                                data-toggle="modal" data-target="#feeModal"
+                                                data-id="${row.id}"
+                                                data-group="${row.c_cashinChannelGroup}"
+                                                data-channelid="${row.ref_cashinChannelId}"
+                                                data-externalid="${row.c_externalIdDefault}"
+                                                data-feetype="${row.c_feeType}"
+                                                data-fee="${row.c_fee}"
+                                                data-feepercentage="${row.c_feePercetange}"
+                                                data-settlement="${row.c_settlementInterval}"
+                                                data-min="${row.c_amountMin}"
+                                                data-max="${row.c_amountMax}"
+                                                data-status="${row.c_status}">
+                                            <i class="fas fa-edit text-primary mr-2"></i> Edit Setting
+                                        </button>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <a class="dropdown-item rounded-2 py-2 text-danger" href="<?= base_url('admin/deleteSettingCashinFee/'. $merchant_id) ?>/${row.id}" onclick="return confirm('Are you sure?')">
+                                            <i class="fas fa-trash mr-2"></i> Delete
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        `;
+                    }
+                }
+            ],
             "language": {
                 "processing": '<i class="fa fa-spinner fa-spin fa-2x fa-fw mx-auto d-block text-primary"></i>',
                 "info": "Showing _START_ – _END_ of _TOTAL_ results",

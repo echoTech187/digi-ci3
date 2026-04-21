@@ -65,48 +65,8 @@
                         <?php } ?>
                     </tr>
                 </thead>
-                <tbody>
-                    <?php if(!empty($merchant_spv)): ?>
-                        <?php foreach ($merchant_spv as $index => $mspv): ?>
-                            <tr>
-                                <td class="text-center"><?= $index + 1 ?></td>
-                                <td class="font-weight-bold text-dark"><?= $mspv->c_name; ?></td>
-                                <td><span class="badge badge-light text-dark text-dark border px-2 py-1"><?= $mspv->c_username; ?></span></td>
-                                <td><?= $mspv->c_email; ?></td>
-                                <td>
-                                    <?php 
-                                        $statusClass = 'secondary';
-                                        if($mspv->c_status == 'Active') $statusClass = 'success';
-                                        elseif($mspv->c_status == 'Pending') $statusClass = 'warning';
-                                        elseif($mspv->c_status == 'Blocked' || $mspv->c_status == 'Freeze') $statusClass = 'danger';
-                                    ?>
-                                    <span class="badge badge-<?= $statusClass ?>"><?= $mspv->c_status; ?></span>
-                                </td>
-                                <?php if (!$this->rbac->has_permission($this->session->userdata('role'), 'no_action')) { ?>
-                                    <td class="text-center">
-                                        <div class="dropdown">
-                                            <button class="btn btn-dt-action" type="button" data-toggle="dropdown" aria-expanded="false">
-                                                <i class="fas fa-ellipsis-v"></i>
-                                            </button>
-                                            <ul class="dropdown-menu dropdown-menu-end shadow border-0 py-2">
-                                                <li>
-                                                    <a class="dropdown-item py-2" href="<?= base_url('admin/listMerchants/' . $mspv->id) ?>">
-                                                        <i class="fas fa-store  text-primary mr-2"></i> View Merchants
-                                                    </a>
-                                                </li>
-                                                <li class="dropdown-divider"></li>
-                                                <li>
-                                                    <a class="dropdown-item py-2 text-danger" href="#">
-                                                        <i class="fas fa-trash-alt  mr-2"></i> Delete
-                                                    </a>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                <?php } ?>
-                            </tr>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
+                <tbody id="merchantSpvTableBody">
+                    <!-- Data will be loaded via AJAX -->
                 </tbody>
             </table>
         </div>
@@ -201,10 +161,69 @@
 $(document).ready(function() {
     // ── DataTable Initialization ──
     const table = $('#merchantSpvTable').DataTable({
+        "processing": true,
+        "serverSide": true,
+        "ajax": {
+            "url": "<?= base_url('admin/merchant_spv') ?>",
+            "type": "POST",
+            "data": function(d) {
+                // CSRF if needed
+                d.<?= $this->security->get_csrf_token_name() ?> = "<?= $this->security->get_csrf_hash() ?>";
+            }
+        },
+        "columns": [
+            { "data": "no", "className": "text-center" },
+            { "data": "c_name", "className": "font-weight-bold text-dark" },
+            { 
+                "data": "c_username",
+                "render": function(data) {
+                    return `<span class="badge badge-light text-dark text-dark border px-2 py-1">${data}</span>`;
+                }
+            },
+            { "data": "c_email" },
+            { 
+                "data": "c_status",
+                "render": function(data) {
+                    let statusClass = 'secondary';
+                    if(data == 'Active') statusClass = 'success';
+                    else if(data == 'Pending') statusClass = 'warning';
+                    else if(data == 'Blocked' || data == 'Freeze') statusClass = 'danger';
+                    return `<span class="badge badge-${statusClass}">${data}</span>`;
+                }
+            },
+            { 
+                "data": null,
+                "className": "text-center",
+                "orderable": false,
+                "render": function(data, type, row) {
+                    return `
+                        <div class="dropdown">
+                            <button class="btn btn-dt-action" type="button" data-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-ellipsis-v text-muted"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0 py-2">
+                                <li>
+                                    <a class="dropdown-item py-2" href="<?= base_url('admin/listMerchants/') ?>${row.id}">
+                                        <i class="fas fa-store text-primary mr-2"></i> View Merchants
+                                    </a>
+                                </li>
+                                <li class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item py-2 text-danger" href="#">
+                                        <i class="fas fa-trash-alt mr-2"></i> Delete
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    `;
+                }
+            }
+        ],
         dom: 'rt<"dt-footer"<"dt-footer-info"i><"dt-footer-pager">>',
         pageLength: 10,
         order: [[1, 'asc']],
         language: {
+            "processing": '<i class="fa fa-spinner fa-spin fa-2x fa-fw mx-auto d-block text-primary"></i>',
             "info": "Showing _START_ – _END_ of _TOTAL_ entries",
             "infoEmpty": "No entries to show",
             "zeroRecords": '<div class="text-center py-4 text-muted"><i class="fas fa-inbox fa-2x mb-2 d-block mr-2"></i> No supervisors found.</div>'

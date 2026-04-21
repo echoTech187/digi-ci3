@@ -16,7 +16,7 @@
                 <small class="text-muted d-block font-weight-bold" style="font-size: 10px; text-transform: uppercase; letter-spacing: 1px;">Cloud Sync Active</small>
                 <small class="text-primary font-weight-bold" style="font-size: 11px;">Last updated: <?= $last_synced; ?></small>
             </div>
-            <div class="d-flex align-items-center gap-2 px-3 py-2 btn-dt-chip-action" style="border-radius: 12px; background: rgba(255,255,255,0.7); backdrop-filter: blur(10px); border: 1px solid var(--border-color);">
+            <div class="d-flex align-items-center gap-2 px-3 py-2 btn-dt-chip-action" style="border-radius: 12px; backdrop-filter: blur(10px); border: 1px solid var(--border-color);">
                 <span class="position-relative d-flex">
                     <span class="animate-ping position-absolute h-full w-full rounded-full bg-<?= ($maintenance_status == 'Active' ? 'success' : 'danger'); ?> opacity-75" style="width: 8px; height: 8px;"></span>
                     <span class="relative rounded-full bg-<?= ($maintenance_status == 'Active' ? 'success' : 'danger'); ?>" style="width: 8px; height: 8px;"></span>
@@ -131,7 +131,7 @@
             <div class="card border-0 shadow-sm dt-card h-100" style="border-radius: 24px; background: white;">
                 <div class="card-header border-0 bg-transparent pt-4 px-4 pb-0 d-flex align-items-center justify-content-between">
                     <div>
-                        <h6 class="m-0 font-weight-bold text-gray-800" style="font-size: 1rem;">Transaction Trends</h6>
+                        <h6 class="m-0 font-weight-bold text-gray-900" style="font-size: 1rem;">Transaction Trends</h6>
                         <p class="m-0 text-muted small mt-1">Yearly volume distribution across core payment channels</p>
                     </div>
                     <div class="d-flex gap-2 pr-2">
@@ -155,7 +155,7 @@
         <div class="col-xl-4 col-lg-5 mb-4">
             <div class="card border-0 shadow-sm dt-card h-100" style="border-radius: 24px; background: white;">
                 <div class="card-header border-0 bg-transparent pt-4 px-4 pb-0">
-                    <h6 class="m-0 font-weight-bold text-gray-800" style="font-size: 1rem;">Channel Mix (Today)</h6>
+                    <h6 class="m-0 font-weight-bold text-gray-900" style="font-size: 1rem;">Channel Mix (Today)</h6>
                     <p class="m-0 text-muted small mt-1">Share of successful transaction qty</p>
                 </div>
                 <div class="card-body px-4 pb-4 d-flex flex-column justify-content-center">
@@ -167,19 +167,19 @@
                         </div>
                     </div>
                     <div class="grid d-flex flex-wrap justify-content-center gap-3">
-                        <div class="small p-2 px-3 border rounded-pill d-flex align-items-center gap-2" style="background: #f8fafc; border-color: #f1f5f9 !important;">
+                        <div class="small p-2 px-3 border rounded-pill d-flex align-items-center gap-2" style="background: var(--gray-100); border-color: var(--border-color) !important;">
                             <span style="width: 8px; height: 8px; border-radius: 50%; background: #6366f1;"></span>
                             <span class="font-weight-bold text-gray-600">QRIS</span>
                         </div>
-                        <div class="small p-2 px-3 border rounded-pill d-flex align-items-center gap-2" style="background: #f8fafc; border-color: #f1f5f9 !important;">
+                        <div class="small p-2 px-3 border rounded-pill d-flex align-items-center gap-2" style="background: var(--gray-100); border-color: var(--border-color) !important;">
                             <span style="width: 8px; height: 8px; border-radius: 50%; background: #10b981;"></span>
                             <span class="font-weight-bold text-gray-600">VA</span>
                         </div>
-                        <div class="small p-2 px-3 border rounded-pill d-flex align-items-center gap-2" style="background: #f8fafc; border-color: #f1f5f9 !important;">
+                        <div class="small p-2 px-3 border rounded-pill d-flex align-items-center gap-2" style="background: var(--gray-100); border-color: var(--border-color) !important;">
                             <span style="width: 8px; height: 8px; border-radius: 50%; background: #3b82f6;"></span>
                             <span class="font-weight-bold text-gray-600">E-Wallet</span>
                         </div>
-                        <div class="small p-2 px-3 border rounded-pill d-flex align-items-center gap-2" style="background: #f8fafc; border-color: #f1f5f9 !important;">
+                        <div class="small p-2 px-3 border rounded-pill d-flex align-items-center gap-2" style="background: var(--gray-100); border-color: var(--border-color) !important;">
                             <span style="width: 8px; height: 8px; border-radius: 50%; background: #f59e0b;"></span>
                             <span class="font-weight-bold text-gray-600">Disburse</span>
                         </div>
@@ -195,7 +195,7 @@
             <div class="card border-0 shadow-sm dt-card" style="border-radius: 24px; overflow: hidden; background: white;">
                 <div class="dt-toolbar border-0 d-flex align-items-center justify-content-between" style="padding: 28px;">
                     <div class="d-flex align-items-center gap-3">
-                        <h6 class="m-0 font-weight-bold text-gray-800" style="font-size: 1.1rem;">Ecosystem Real-time Activity</h6>
+                        <h6 class="m-0 font-weight-bold text-gray-900" style="font-size: 1.1rem;">Ecosystem Real-time Activity</h6>
                         <div class="d-flex align-items-center gap-2 bg-success-soft text-success px-3 py-1 rounded-pill">
                             <div style="width: 8px; height: 8px; border-radius: 50%; background: #059669; box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.1);" class="pulse"></div>
                             <span style="font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">LIVE FEED</span>
@@ -209,7 +209,7 @@
                     <div class="table-responsive">
                         <table id="recentActivityTable" class="table mb-0" style="width:100%">
                             <thead>
-                                <tr style="background: #f8fafc;">
+                                <tr style="background: var(--bg-body);">
                                     <th class="border-0 px-4 py-4 text-muted" style="font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; width: 220px;">TIMESTAMP</th>
                                     <th class="border-0 px-4 py-4 text-muted" style="font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">PARTNER NAME</th>
                                     <th class="border-0 px-4 py-4 text-muted" style="font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">CHANNEL</th>
@@ -222,7 +222,7 @@
                             </tbody>
                         </table>
                     </div>
-                    <div class="py-5 text-center border-top" style="border-color: #f1f5f9 !important;">
+                    <div class="py-5 text-center border-top" style="border-color: var(--border-color) !important;">
                         <p class="m-0 text-muted small"><i class="fas fa-sync-alt fa-spin mr-2"></i> Auto-refresh active every 30s &bull; Guaranteed data integrity from 4 core payment clusters</p>
                     </div>
                 </div>
@@ -258,13 +258,13 @@
     transition: background 0.2s;
 }
 #recentActivityTable tbody tr:hover {
-    background-color: #f8fafc !important;
+    background-color: var(--gray-100) !important;
 }
 #recentActivityTable td {
     padding: 20px 24px;
     font-size: 14px;
     color: var(--gray-700);
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid var(--border-color);
     vertical-align: middle;
 }
 </style>

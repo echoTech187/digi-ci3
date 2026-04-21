@@ -114,18 +114,31 @@ class AdminMerchant extends CI_Controller
          redirect('auth');
       }
 
+      if ($this->input->is_ajax_request()) {
+         try {
+            return $this->Merchant->get_merchant_spv_handler();
+         } catch (Exception $e) {
+            log_message('error', 'Supervisor AJAX error: ' . $e->getMessage());
+            $output = [
+               "draw" => intval($this->input->post("draw")),
+               "recordsTotal" => 0,
+               "recordsFiltered" => 0,
+               "data" => [],
+               "error" => $e->getMessage()
+            ];
+            echo json_encode($output);
+            return;
+         }
+      }
+
       $role_id = $this->session->userdata('role');
 
       $data['title'] = 'Merchant Supervisor';
       $data['user'] = $this->Model_user->view_user()->row_array();
-
-
-      $this->db->select('*');
-      $this->db->from('merchant_supervisor');
-      $this->db->where('c_status', 'Active');
-
-      $query = $this->db->get();
-      $data['merchant_spv'] = $query->result();
+      
+      // Still load small subset for initial state or count if needed, 
+      // but primarily handled by AJAX now.
+      $data['merchant_spv'] = []; 
 
       // Summary data for KPI cards
       $data['total_supervisors'] = count($data['merchant_spv']);
@@ -141,13 +154,28 @@ class AdminMerchant extends CI_Controller
          redirect('admin/merchant_spv');
       }
       $this->load->model('Merchant');
+
+      if ($this->input->is_ajax_request()) {
+         try {
+            return $this->Merchant->get_merchants_by_supervisor_handler($supervisorId);
+         } catch (Exception $e) {
+            log_message('error', 'Supervisor Assigned Merchants AJAX error: ' . $e->getMessage());
+            echo json_encode([
+               "draw" => intval($this->input->post("draw")),
+               "recordsTotal" => 0,
+               "recordsFiltered" => 0,
+               "data" => []
+            ]);
+            return;
+         }
+      }
+
       $data['title'] = 'Merchant Supervisor - List Merchants';
       $data['user'] = $this->Model_user->view_user()->row_array();
-      $data['merchants'] = $this->Merchant->getMerchantsBySupervisor($supervisorId);
+      $data['merchants'] = []; // Handled by AJAX
       $data['supervisor_id'] = $supervisorId;
 
       // Breadcrumb override: Replace ID with Supervisor Name
-      // We'll fetch the supervisor details
       $supervisor = $this->db->get_where('merchant_supervisor', ['id' => $supervisorId])->row_array();
       $supervisor_name = $supervisor ? $supervisor['c_name'] : 'Supervisor';
       $data['breadcrumb_replace'] = [
@@ -339,6 +367,22 @@ class AdminMerchant extends CI_Controller
       }
       $merchant = $this->Merchant->get_merchant_by_id($data['merchant_id']);
       $data['merchant_name'] = $merchant ? $merchant['c_name'] : 'Unknown';
+
+      if ($this->input->is_ajax_request()) {
+         try {
+            return $this->Merchant->get_fee_datatables_handler('cashin', $data['merchant_id']);
+         } catch (Throwable $e) {
+            log_message('error', 'Cashin Fee AJAX error: ' . $e->getMessage());
+            $this->output->set_content_type('application/json')->set_output(json_encode([
+               "draw" => intval($this->input->post("draw")),
+               "recordsTotal" => 0,
+               "recordsFiltered" => 0,
+               "data" => [],
+               "error" => "Error retrieving cashin fee data"
+            ]));
+            return;
+         }
+      }
 
       // Breadcrumb override: Replace ID with Merchant Name
       $data['breadcrumb_replace'] = [
@@ -575,6 +619,22 @@ class AdminMerchant extends CI_Controller
       }
       $merchant = $this->Merchant->get_merchant_by_id($data['merchant_id']);
       $data['merchant_name'] = $merchant ? $merchant['c_name'] : 'Unknown';
+
+      if ($this->input->is_ajax_request()) {
+         try {
+            return $this->Merchant->get_fee_datatables_handler('cashout', $data['merchant_id']);
+         } catch (Throwable $e) {
+            log_message('error', 'Cashout Fee AJAX error: ' . $e->getMessage());
+            $this->output->set_content_type('application/json')->set_output(json_encode([
+               "draw" => intval($this->input->post("draw")),
+               "recordsTotal" => 0,
+               "recordsFiltered" => 0,
+               "data" => [],
+               "error" => "Error retrieving cashout fee data"
+            ]));
+            return;
+         }
+      }
 
       // Breadcrumb override: Replace ID with Merchant Name
       $data['breadcrumb_replace'] = [

@@ -78,38 +78,18 @@ class UserAccessController extends CI_Controller {
 
       // Intercept AJAX request for DataTables
       if ($this->input->is_ajax_request()) {
-         $list = $this->AdminModel->get_datatables();
-         $data = array();
-         $no = isset($_POST['start']) ? $_POST['start'] : 0;
-         foreach ($list as $admin) {
-            $no++;
-            $row = array();
-            $row['no'] = $no;
-            $row['c_email'] = $admin->c_email;
-            $row['c_name'] = $admin->c_name;
-            $row['c_status'] = $admin->c_status;
-            $row['c_level'] = $admin->c_level;
-            $row['role_name'] = $admin->role_name;
-            $row['id'] = $admin->id;
-            $row['role_id'] = $admin->role_id;
-            
-            $data[] = $row;
+         try {
+            return $this->AdminModel->get_datatables_handler();
+         } catch (Throwable $e) {
+            log_message('error', 'Admin List AJAX error: ' . $e->getMessage());
+            echo json_encode(array(
+               "draw" => intval($this->input->post("draw")),
+               "recordsTotal" => 0,
+               "recordsFiltered" => 0,
+               "data" => array(),
+               "error" => "Error retrieving admin list data: " . $e->getMessage()
+            ));
          }
-
-         $output = array(
-            "draw" => isset($_POST['draw']) ? $_POST['draw'] : null,
-            "recordsTotal" => $this->AdminModel->count_all(),
-            "recordsFiltered" => $this->AdminModel->count_filtered(),
-            "data" => $data,
-         );
-         
-         if (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false) {
-             $this->output->set_content_type('application/json');
-         } else {
-             header('Content-Type: application/json');
-         }
-         echo json_encode($output);
-         return;
       }
 
       $serviceName            = "manage_users";

@@ -129,9 +129,15 @@ class Datatables
         $this->apply_search($this->CI->db);
         
         // 4. Calculate recordsFiltered (Count after search)
-        // We clone the current builder state to perform the count without clearing it
-        $temp_db = clone $this->CI->db;
-        $recordsFiltered = $temp_db->count_all_results('', FALSE);
+        // If no search is applied, recordsFiltered is the same as recordsTotal
+        $search_value = isset($_POST['search']['value']) ? $_POST['search']['value'] : '';
+        if ($search_value == '') {
+            $recordsFiltered = $recordsTotal;
+        } else {
+            // We clone the current builder state to perform the count without clearing it
+            $temp_db = clone $this->CI->db;
+            $recordsFiltered = $temp_db->count_all_results('', FALSE);
+        }
         
         // 5. Apply order and limit to the main builder
         $this->apply_order($this->CI->db);

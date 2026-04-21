@@ -308,5 +308,46 @@ class Ewallet extends CI_Model {
                   ORDER BY month";
         return $this->db->query($query)->result_array();
     }
+
+    public function get_datatables_handler($filters = [])
+    {
+        $search_name = $filters['merchant'] ?? null;
+        $date_from = $filters['date_from'] ?? null;
+        $date_to = $filters['date_to'] ?? null;
+        $search_date_settlement = $filters['settlement'] ?? null;
+        $search_invoice_no = $filters['invoice'] ?? null;
+
+        // Format dates for query
+        $date_from_query = !empty($date_from) ? date('Ymd', strtotime($date_from)) . "000001" : null;
+        $date_to_query = !empty($date_to) ? date('Ymd', strtotime($date_to)) . "235959" : null;
+
+        $list = $this->get_datatables($search_name, $date_from_query, $date_to_query, $search_date_settlement, $search_invoice_no);
+        
+        $data = [];
+        $no = intval($this->input->post('start'));
+        foreach ($list as $items) {
+            $no++;
+            $row = (array)$items;
+            $row['no'] = $no;
+            $data[] = $row;
+        }
+
+        $recordsTotal = $this->count_all_dt($search_name, $date_from_query, $date_to_query);
+        
+        // Consistency: Use approx count if no filters, exact if filtered
+        $is_filtered = $search_name || $date_from || $date_to || $search_date_settlement || $search_invoice_no || (!empty($this->input->post('search')['value']));
+        $recordsFiltered = $is_filtered ? $this->count_filtered($search_name, $date_from_query, $date_to_query, $search_date_settlement, $search_invoice_no) : $recordsTotal;
+
+        $output = [
+            "draw" => intval($this->input->post("draw")),
+            "recordsTotal" => $recordsTotal,
+            "recordsFiltered" => $recordsFiltered,
+            "data" => $data,
+        ];
+
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode($output));
+    }
 }
 ?>

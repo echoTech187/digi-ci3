@@ -48,29 +48,8 @@
                         <th>STATUS</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <?php if (empty($merchants)): ?>
-                        <!-- Table will handle zeroRecords -->
-                    <?php else: ?>
-                        <?php foreach ($merchants as $m): ?>
-                            <tr>
-                                <td class="text-center"><span class="badge badge-light text-dark border px-2 py-1 text-dark"><?= $m->id ?></span></td>
-                                <td class="font-weight-bold text-dark"><?= htmlspecialchars($m->c_name) ?></td>
-                                <td class="font-weight-bold text-primary">Rp <?= number_format($m->c_balanceTotal, 0, ',', '.') ?></td>
-                                <td class="text-muted small">Rp <?= number_format($m->c_balanceHold, 0, ',', '.') ?></td>
-                                <td>
-                                    <span class="badge badge-<?= $m->c_openapistatus === 'Active' ? 'success' : 'secondary' ?>">
-                                        <?= $m->c_openapistatus ?>
-                                    </span>
-                                </td>
-                                <td>
-                                    <span class="badge badge-<?= $m->c_status === 'Active' ? 'success' : 'danger' ?>">
-                                        <?= $m->c_status ?>
-                                    </span>
-                                </td>
-                            </tr>
-                        <?php endforeach ?>
-                    <?php endif ?>
+                <tbody id="supervisorMerchantTableBody">
+                    <!-- Data will be loaded via AJAX -->
                 </tbody>
             </table>
         </div>
@@ -86,11 +65,61 @@
 <script>
 $(document).ready(function() {
     // ── DataTable Initialization ──
+    const supervisorId = "<?= $supervisor_id ?>";
     const table = $('#supervisorMerchantTable').DataTable({
+        "processing": true,
+        "serverSide": true,
+        "ajax": {
+            "url": "<?= base_url('admin/listMerchants/') ?>" + supervisorId,
+            "type": "POST",
+            "data": function(d) {
+                // CSRF if needed
+                d.<?= $this->security->get_csrf_token_name() ?> = "<?= $this->security->get_csrf_hash() ?>";
+            }
+        },
+        "columns": [
+            { 
+                "data": "id", 
+                "className": "text-center",
+                "render": function(data) {
+                    return `<span class="badge badge-light text-dark border px-2 py-1 text-dark">${data}</span>`;
+                }
+            },
+            { "data": "c_name", "className": "font-weight-bold text-dark" },
+            { 
+                "data": "c_balanceTotal", 
+                "className": "font-weight-bold text-primary",
+                "render": function(data) {
+                    return 'Rp ' + new Intl.NumberFormat('id-ID').format(data);
+                }
+            },
+            { 
+                "data": "c_balanceHold", 
+                "className": "text-muted small",
+                "render": function(data) {
+                    return 'Rp ' + new Intl.NumberFormat('id-ID').format(data);
+                }
+            },
+            { 
+                "data": "c_openapistatus",
+                "render": function(data) {
+                    let style = data === 'Active' ? 'success' : 'secondary';
+                    return `<span class="badge badge-${style}">${data}</span>`;
+                }
+            },
+            { 
+                "data": "c_status",
+                "render": function(data) {
+                    let style = data === 'Active' ? 'success' : 'danger';
+                    return `<span class="badge badge-${style}">${data}</span>`;
+                }
+            }
+        ],
         dom: 'rt<"dt-footer"<"dt-footer-info"i><"dt-footer-pager">>',
         pageLength: 10,
         order: [[1, 'asc']], // Sort by Merchant Name
         language: {
+            "processing": '<i class="fa fa-spinner fa-spin fa-2x fa-fw mx-auto d-block text-primary"></i>',
             "info": "Showing _START_ – _END_ of _TOTAL_ entries",
             "infoEmpty": "No entries to show",
             "zeroRecords": '<div class="text-center py-4 text-muted"><i class="fas fa-inbox fa-2x mb-2 d-block mr-2"></i> No merchants assigned to this supervisor.</div>'

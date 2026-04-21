@@ -17,33 +17,18 @@ class ReportController extends CI_Controller {
       is_logged_in();
 
       if ($this->input->is_ajax_request()) {
-         $draw = intval($this->input->post("draw"));
-         $start = intval($this->input->post("start"));
-         $length = intval($this->input->post("length"));
-
-         $list = $this->BalanceLogModel->get_datatables();
-         $dataItems = array();
-         $no = $start;
-
-         foreach ($list as $items) {
-            $no++;
-            $row = array();
-            $row['no'] = $no;
-            $row['created_at'] = $items->created_at;
-            $row['merchant_id'] = $items->merchant_id;
-            $row['merchant_name'] = $items->merchant_name;
-            $row['add_to_available'] = $items->add_to_available;
-
-            $dataItems[] = $row;
+         try {
+            return $this->BalanceLogModel->get_datatables_handler();
+         } catch (Throwable $e) {
+            log_message('error', 'Balance Log AJAX error: ' . $e->getMessage());
+            echo json_encode(array(
+               "draw" => intval($this->input->post("draw")),
+               "recordsTotal" => 0,
+               "recordsFiltered" => 0,
+               "data" => array(),
+               "error" => "Error retrieving balance log data: " . $e->getMessage()
+            ));
          }
-
-         $output = array(
-            "draw" => $draw,
-            "recordsTotal" => $this->BalanceLogModel->count_all_dt(),
-            "recordsFiltered" => $this->BalanceLogModel->count_filtered(),
-            "data" => $dataItems,
-         );
-         echo json_encode($output);
       }
 
       $data['title'] = 'Balance Log';

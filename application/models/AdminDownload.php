@@ -93,5 +93,37 @@ class AdminDownload extends CI_Model {
     
         return $this->db->query($query)->result();
     }
+    public function get_datatables_handler($filters = [])
+    {
+        $search_date = $filters['date'] ?? null;
+
+        $list = $this->get_datatables($search_date);
+        
+        $data = [];
+        $no = intval($this->input->post('start'));
+        foreach ($list as $items) {
+            $no++;
+            $row = (array)$items;
+            $row['no'] = $no;
+            $data[] = $row;
+        }
+
+        $recordsTotal = $this->count_all_dt($search_date);
+        
+        // Consistency: Use approx count if no filters, exact if filtered
+        $is_filtered = $search_date || (!empty($this->input->post('search')['value']));
+        $recordsFiltered = $is_filtered ? $this->count_filtered($search_date) : $recordsTotal;
+
+        $output = [
+            "draw" => intval($this->input->post("draw")),
+            "recordsTotal" => $recordsTotal,
+            "recordsFiltered" => $recordsFiltered,
+            "data" => $data,
+        ];
+
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode($output));
+    }
 }
 ?>

@@ -331,5 +331,35 @@ class Chanel extends CI_Model {
             $this->db->where("c_channelGroup !=", "ppob");
             return $this->db->get()->row();
         }
+    public function get_datatables_handler($table, $column_order, $column_search, $order, $where = [])
+    {
+        $list = $this->get_datatables($table, $column_order, $column_search, $order, $where);
+        
+        $data = [];
+        $no = intval($this->input->post('start'));
+        foreach ($list as $items) {
+            $no++;
+            $row = (array)$items;
+            $row['no'] = $no;
+            $data[] = $row;
+        }
+
+        $recordsTotal = $this->count_all_dt($table, $where);
+        
+        // Consistency: Use exact count if filtered, otherwise use recordsTotal
+        $is_filtered = (!empty($where) || (isset($_POST['search']['value']) && !empty($_POST['search']['value'])));
+        $recordsFiltered = $is_filtered ? $this->count_filtered($table, $column_order, $column_search, $order, $where) : $recordsTotal;
+
+        $output = [
+            "draw" => intval($this->input->post("draw")),
+            "recordsTotal" => $recordsTotal,
+            "recordsFiltered" => $recordsFiltered,
+            "data" => $data,
+        ];
+
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode($output));
     }
+}
 ?>

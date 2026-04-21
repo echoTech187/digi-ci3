@@ -23,35 +23,18 @@ class ChannelController extends CI_Controller {
       $order = array('cc.id' => 'asc');
 
       if ($this->input->is_ajax_request()) {
-         $draw = intval($this->input->post("draw"));
-         $start = intval($this->input->post("start"));
-         $length = intval($this->input->post("length"));
-
-         $list = $this->Chanel->get_datatables($table, $column_order, $column_search, $order);
-         $dataItems = array();
-         $no = $start;
-
-         foreach ($list as $items) {
-            $no++;
-            $row = array();
-            $row['no'] = $no;
-            $row['id'] = $items->id;
-            $row['c_channelGroup'] = $items->c_channelGroup;
-            $row['c_description'] = $items->c_description;
-            $row['c_externalIdDefault'] = $items->c_externalIdDefault;
-            $row['c_feeType'] = $items->c_feeType;
-            $row['c_fee'] = $items->c_fee;
-
-            $dataItems[] = $row;
+         try {
+            return $this->Chanel->get_datatables_handler($table, $column_order, $column_search, $order);
+         } catch (Throwable $e) {
+            log_message('error', 'Cashin Channel AJAX error: ' . $e->getMessage());
+            echo json_encode(array(
+               "draw" => intval($this->input->post("draw")),
+               "recordsTotal" => 0,
+               "recordsFiltered" => 0,
+               "data" => array(),
+               "error" => "Error retrieving cashin channel data: " . $e->getMessage()
+            ));
          }
-
-         $output = array(
-            "draw" => $draw,
-            "recordsTotal" => $this->Chanel->count_all_dt($table),
-            "recordsFiltered" => $this->Chanel->count_filtered($table, $column_order, $column_search, $order),
-            "data" => $dataItems,
-         );
-         echo json_encode($output);
       }
 
       $summary = $this->Chanel->get_cashin_summary();
@@ -80,35 +63,18 @@ class ChannelController extends CI_Controller {
       $where = array('cc.c_channelGroup !=' => 'ppob');
 
       if ($this->input->is_ajax_request()) {
-         $draw = intval($this->input->post("draw"));
-         $start = intval($this->input->post("start"));
-         $length = intval($this->input->post("length"));
-
-         $list = $this->Chanel->get_datatables($table, $column_order, $column_search, $order, $where);
-         $dataItems = array();
-         $no = $start;
-
-         foreach ($list as $items) {
-            $no++;
-            $row = array();
-            $row['no'] = $no;
-            $row['id'] = $items->id;
-            $row['c_channelGroup'] = $items->c_channelGroup;
-            $row['c_description'] = $items->c_description;
-            $row['c_externalIdDefault'] = $items->c_externalIdDefault;
-            $row['c_feeType'] = $items->c_feeType;
-            $row['c_fee'] = $items->c_fee;
-
-            $dataItems[] = $row;
+         try {
+            return $this->Chanel->get_datatables_handler($table, $column_order, $column_search, $order, $where);
+         } catch (Throwable $e) {
+            log_message('error', 'Cashout Channel AJAX error: ' . $e->getMessage());
+            echo json_encode(array(
+               "draw" => intval($this->input->post("draw")),
+               "recordsTotal" => 0,
+               "recordsFiltered" => 0,
+               "data" => array(),
+               "error" => "Error retrieving cashout channel data: " . $e->getMessage()
+            ));
          }
-
-         $output = array(
-            "draw" => $draw,
-            "recordsTotal" => $this->Chanel->count_all_dt($table, $where),
-            "recordsFiltered" => $this->Chanel->count_filtered($table, $column_order, $column_search, $order, $where),
-            "data" => $dataItems,
-         );
-         echo json_encode($output);
       }
 
       $summary = $this->Chanel->get_cashout_summary();

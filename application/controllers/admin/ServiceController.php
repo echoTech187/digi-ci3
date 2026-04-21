@@ -21,41 +21,24 @@ class ServiceController extends CI_Controller {
         $order = array('cc.id' => 'asc');
 
         if ($this->input->is_ajax_request()) {
-            $draw = intval($this->input->post("draw"));
-            $start = intval($this->input->post("start"));
-            $length = intval($this->input->post("length"));
-
-            if ($requires_provider) {
-                $provider = $this->input->post('provider');
-                if (!empty($provider)) {
-                    $where["cc.c_channelGroup2 LIKE '%" . $this->db->escape_like_str($provider) . "%' ESCAPE '!'"] = NULL;
+            try {
+                if ($requires_provider) {
+                    $provider = $this->input->post('provider');
+                    if (!empty($provider)) {
+                        $where["cc.c_channelGroup2 LIKE '%" . $this->db->escape_like_str($provider) . "%' ESCAPE '!'"] = NULL;
+                    }
                 }
+                return $this->Chanel->get_datatables_handler($table, $column_order, $column_search, $order, $where);
+            } catch (Throwable $e) {
+                log_message('error', 'Product AJAX error: ' . $e->getMessage());
+                echo json_encode(array(
+                    "draw" => intval($this->input->post("draw")),
+                    "recordsTotal" => 0,
+                    "recordsFiltered" => 0,
+                    "data" => array(),
+                    "error" => "Error retrieving product data: " . $e->getMessage()
+                ));
             }
-
-            $list = $this->Chanel->get_datatables($table, $column_order, $column_search, $order, $where);
-            $dataItems = array();
-            $no = $start;
-
-            foreach ($list as $items) {
-                $no++;
-                $row = array();
-                $row['no'] = $no;
-                $row['c_caption'] = $items->c_caption;
-                $row['c_description'] = $items->c_description;
-                $row['c_fee'] = $items->c_fee;
-                $row['c_channelGroup2'] = $items->c_channelGroup2;
-                $row['id'] = $items->id;
-
-                $dataItems[] = $row;
-            }
-
-            $output = array(
-                "draw" => $draw,
-                "recordsTotal" => $this->Chanel->count_all_dt($table, $where),
-                "recordsFiltered" => $this->Chanel->count_filtered($table, $column_order, $column_search, $order, $where),
-                "data" => $dataItems,
-            );
-            echo json_encode($output);
         }
 
         $data['title'] = $page_title;

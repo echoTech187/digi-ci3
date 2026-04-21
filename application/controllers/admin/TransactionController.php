@@ -802,63 +802,19 @@ class TransactionController extends CI_Controller
 
       $this->pagination->initialize($config);
 
+      // Handle DataTables AJAX Request
       if ($this->input->is_ajax_request()) {
-         $this->db->db_debug = FALSE;
          try {
-            $draw = intval($this->input->post("draw"));
-            $start = intval($this->input->post("start"));
-            $length = intval($this->input->post("length"));
-
-            $search_name = $this->session->userdata('search_name_ewallet');
-            $date_from_query = !empty($this->session->userdata('search_date_ewallet')) && !empty($this->session->userdata('search_date_ewallet_to')) ? 
-               date('Ymd', strtotime($this->session->userdata('search_date_ewallet'))) . "000001" : null;
-            $date_to_query = !empty($this->session->userdata('search_date_ewallet')) && !empty($this->session->userdata('search_date_ewallet_to')) ? 
-               date('Ymd', strtotime($this->session->userdata('search_date_ewallet_to'))) . "235959" : null;
-            $search_date_settlement = $this->session->userdata('search_date_ewallet_settlement');
-            $search_invoice_no_ajax = $this->session->userdata('search_invoice_no');
-
-            $list = $this->Ewallet->get_datatables($search_name, $date_from_query, $date_to_query, $search_date_settlement, $search_invoice_no_ajax);
-            
-            // Explicit error check
-            $db_error = $this->db->error();
-            if ($db_error['code'] !== 0) {
-               throw new Exception("Database Error [" . $db_error['code'] . "]: " . $db_error['message']);
-            }
-
-            $dataItems = array();
-            $no = $start;
-
-            foreach ($list as $items) {
-               $no++;
-               $row = array();
-               $row['no'] = $no;
-               $row['id'] = $items->id;
-               $row['ref_merchantId'] = $items->ref_merchantId;
-               $row['ref_subMerchantId'] = $items->ref_subMerchantId;
-               $row['name_merchant'] = $items->name_merchant;
-               $row['name_submerchant'] = $items->name_submerchant;
-               $row['c_datetime'] = $items->c_datetime;
-               $row['c_invoiceNo'] = $items->c_invoiceNo;
-               $row['c_type'] = $items->c_type;
-               $row['ref_cashinChannelId'] = $items->ref_cashinChannelId;
-               $row['c_amount'] = $items->c_amount;
-               $row['c_mdr'] = $items->c_mdr;
-               $row['c_fee'] = $items->c_fee;
-               $row['c_isSettlementRealtime'] = $items->c_isSettlementRealtime;
-               $row['c_datetimeSettlement'] = $items->c_datetimeSettlement;
-               $row['Merchant_Transaction_Id'] = $items->Merchant_Transaction_Id;
-
-               $dataItems[] = $row;
-            }
-
-            $output = array(
-               "draw" => $draw,
-               "recordsTotal" => $this->Ewallet->count_all_dt($search_name, $date_from_query, $date_to_query),
-               "recordsFiltered" => $this->Ewallet->count_filtered($search_name, $date_from_query, $date_to_query, $search_date_settlement, $search_invoice_no_ajax),
-               "data" => $dataItems,
-            );
-            echo json_encode($output);
+            $filters = [
+               'merchant' => $this->session->userdata('search_name_ewallet'),
+               'date_from' => $this->session->userdata('search_date_ewallet'),
+               'date_to' => $this->session->userdata('search_date_ewallet_to'),
+               'settlement' => $this->session->userdata('search_date_ewallet_settlement'),
+               'invoice' => $this->session->userdata('search_invoice_no')
+            ];
+            return $this->Ewallet->get_datatables_handler($filters);
          } catch (Throwable $e) {
+            log_message('error', 'E-Wallet AJAX error: ' . $e->getMessage());
             echo json_encode(array(
                "draw" => intval($this->input->post("draw")),
                "recordsTotal" => 0,
@@ -867,8 +823,7 @@ class TransactionController extends CI_Controller
                "error" => "Error retrieving E-Wallet data: " . $e->getMessage()
             ));
          }
-      
-      }      
+      }    
       $data['start'] = 0;
       $data['pagination'] = '';
       $data['ewallets'] = [];
@@ -983,66 +938,19 @@ class TransactionController extends CI_Controller
 
       // Handle DataTables AJAX Request
       if ($this->input->is_ajax_request()) {
-         $this->db->db_debug = FALSE;
          try {
-            $draw = intval($this->input->post("draw"));
-            $start = intval($this->input->post("start"));
-            $length = intval($this->input->post("length"));
-
-            // Get filter values from session
-            $search_name = $this->session->userdata('search_name_bifast');
-            $search_date_from = $this->session->userdata('search_date_bifast');
-            $search_date_to = $this->session->userdata('search_date_bifast_to');
-            $search_transid = $this->session->userdata('search_transid_bifast');
-            $search_external_reff = $this->session->userdata('search_external_reff_id');
-            $search_channel = $this->session->userdata('search_channel_bifast');
-            $search_status = $this->session->userdata('search_status_transaction_bifast');
-
-            // Format dates for query
-            $date_from_query = !empty($search_date_from) ? date('Ymd', strtotime($search_date_from)) . "000001" : null;
-            $date_to_query = !empty($search_date_to) ? date('Ymd', strtotime($search_date_to)) . "235959" : null;
-
-            $list = $this->BiFast->get_datatables($search_name, $date_from_query, $date_to_query, $search_transid, $search_external_reff, $search_channel, $search_status);
-            
-            // Explicit error check
-            $db_error = $this->db->error();
-            if ($db_error['code'] !== 0) {
-               throw new Exception("Database Error [" . $db_error['code'] . "]: " . $db_error['message']);
-            }
-
-            $dataItems = array();
-            $no = $start;
-            foreach ($list as $items) {
-               $no++;
-               $row = array();
-               $row['no'] = $no;
-               $row['id'] = $items->id;
-               $row['ref_merchantId'] = $items->ref_merchantId;
-               $row['name_merchant'] = $items->name_merchant;
-               $row['c_datetime'] = $items->c_datetime;
-               $row['c_invoiceNo'] = $items->c_invoiceNo;
-               $row['c_merchantTransactionId'] = $items->c_merchantTransactionId;
-               $row['ref_cashoutChannelId'] = $items->ref_cashoutChannelId;
-               $row['c_accountNo'] = $items->c_accountNo;
-               $row['c_beneficiaryAccountName'] = $items->c_beneficiaryAccountName;
-               $row['c_amount'] = $items->c_amount;
-               $row['c_fee'] = $items->c_fee;
-               $row['c_status'] = $items->c_status;
-               $row['c_responseBody'] = $items->c_responseBody;
-               $row['ref_cashoutExternalId'] = $items->ref_cashoutExternalId;
-               $row['ref_cashoutExternalLogBifastId'] = $items->ref_cashoutExternalLogBifastId;
-
-               $dataItems[] = $row;
-            }
-
-            $output = array(
-               "draw" => $draw,
-               "recordsTotal" => $this->BiFast->count_all_dt($search_name, $date_from_query, $date_to_query),
-               "recordsFiltered" => $this->BiFast->count_filtered($search_name, $date_from_query, $date_to_query, $search_transid, $search_external_reff, $search_channel, $search_status),
-               "data" => $dataItems,
-            );
-            echo json_encode($output);
+            $filters = [
+               'merchant' => $this->session->userdata('search_name_bifast'),
+               'date_from' => $this->session->userdata('search_date_bifast'),
+               'date_to' => $this->session->userdata('search_date_bifast_to'),
+               'transid' => $this->session->userdata('search_transid_bifast'),
+               'external_reff' => $this->session->userdata('search_external_reff_id'),
+               'channel' => $this->session->userdata('search_channel_bifast'),
+               'status' => $this->session->userdata('search_status_transaction_bifast')
+            ];
+            return $this->BiFast->get_datatables_handler($filters);
          } catch (Throwable $e) {
+            log_message('error', 'BI-FAST AJAX error: ' . $e->getMessage());
             echo json_encode(array(
                "draw" => intval($this->input->post("draw")),
                "recordsTotal" => 0,
@@ -1192,43 +1100,25 @@ class TransactionController extends CI_Controller
 
       // Handle DataTables AJAX
       if ($this->input->is_ajax_request()) {
-         $draw = intval($this->input->post("draw"));
-         $start = intval($this->input->post("start"));
-         $length = intval($this->input->post("length"));
-
-         $list = $this->VADynamic->get_datatables($search_name_vad, $search_date_vad, $search_va_number, $search_merchant_trxid, $search_date_vad_to);
-         $dataItems = array();
-         $data = array();
-         $no = $start;
-
-         foreach ($list as $items) {
-            $no++;
-            $row = array();
-            $row['no'] = $no;
-            $row['c_datetimeRequest'] = $items->c_datetimeRequest;
-            $row['name_merchant'] = $items->name_merchant ?: '-';
-            $row['name_submerchant'] = $items->name_submerchant;
-            $row['c_merchantTransactionId'] = $items->c_merchantTransactionId;
-            $row['ref_cashinChannelId'] = $items->ref_cashinChannelId;
-            $row['ref_cashinExternalId'] = $items->ref_cashinExternalId;
-            $row['ref_cashinExternalLogVaIdCreate'] = $items->ref_cashinExternalLogVaIdCreate;
-            $row['c_vaNumber'] = $items->c_vaNumber;
-            $row['c_amount'] = $items->c_amount;
-            $row['c_datetimeExpired'] = $items->c_datetimeExpired;
-            $row['c_status'] = $items->c_status;
-
-            $dataItems[] = $row;
-            $items->no = $no;
-            $data[] = $items;
+         try {
+            $filters = [
+               'merchant' => $this->session->userdata('search_name_vad'),
+               'date' => $this->session->userdata('search_date_vad'),
+               'date_to' => $this->session->userdata('search_date_vad_to'),
+               'va_number' => $this->session->userdata('search_va_number'),
+               'merchant_trxid' => $this->session->userdata('search_merchant_trxid')
+            ];
+            return $this->VADynamic->get_datatables_handler($filters);
+         } catch (Throwable $e) {
+            log_message('error', 'VA Dynamic AJAX error: ' . $e->getMessage());
+            echo json_encode(array(
+               "draw" => intval($this->input->post("draw")),
+               "recordsTotal" => 0,
+               "recordsFiltered" => 0,
+               "data" => array(),
+               "error" => "Error retrieving VA Dynamic data: " . $e->getMessage()
+            ));
          }
-
-         $output = array(
-            "draw" => $draw,
-            "recordsTotal" => $this->VADynamic->count_all_dt($search_name_vad, $search_date_vad, $search_date_vad_to),
-            "recordsFiltered" => $this->VADynamic->count_filtered($search_name_vad, $search_date_vad, $search_va_number, $search_merchant_trxid, $search_date_vad_to),
-            "data" => $dataItems,
-         );
-         echo json_encode($output);
       }
 
       $data['start'] = 0;
@@ -1319,52 +1209,14 @@ class TransactionController extends CI_Controller
       if ($this->input->is_ajax_request()) {
          $this->db->db_debug = FALSE;
          try {
-            $draw = intval($this->input->post("draw"));
-            $start = intval($this->input->post("start"));
-            $length = intval($this->input->post("length"));
-
-            $search_name = $this->session->userdata('search_name_var');
-            $search_date = $this->session->userdata('search_date_var');
-            $search_sub = $this->session->userdata('search_submerchant_var');
-
-            $list = $this->VARecurring->get_datatables($search_name, $search_date, $search_sub);
-            
-            // Explicit error check
-            $db_error = $this->db->error();
-            if ($db_error['code'] !== 0) {
-               throw new Exception("Database Error [" . $db_error['code'] . "]: " . $db_error['message']);
-            }
-
-            $dataItems = array();
-            $no = $start;
-
-            foreach ($list as $items) {
-               $no++;
-               $row = array();
-               $row['no'] = $no;
-               $row['id'] = $items->id;
-               $row['c_datetimeRequest'] = $items->c_datetimeRequest;
-               $row['name_merchant'] = $items->name_merchant;
-               $row['name_submerchant'] = $items->name_submerchant;
-               $row['c_merchantTransactionId'] = $items->c_merchantTransactionId;
-               $row['ref_cashinChannelId'] = $items->ref_cashinChannelId;
-               $row['ref_cashinExternalId'] = $items->ref_cashinExternalId;
-               $row['ref_cashinExternalLogVaIdCreate'] = $items->ref_cashinExternalLogVaIdCreate;
-               $row['c_vaNumber'] = $items->c_vaNumber;
-               $row['c_amount'] = $items->c_amount;
-               $row['c_status'] = $items->c_status;
-
-               $dataItems[] = $row;
-            }
-
-            $output = array(
-               "draw" => $draw,
-               "recordsTotal" => $this->VARecurring->count_all_dt($search_name, $search_date),
-               "recordsFiltered" => $this->VARecurring->count_filtered($search_name, $search_date, $search_sub),
-               "data" => $dataItems,
-            );
-            echo json_encode($output);
+            $filters = [
+               'merchant' => $this->session->userdata('search_name_var'),
+               'date' => $this->session->userdata('search_date_var'),
+               'submerchant' => $this->session->userdata('search_submerchant_var'),
+            ];
+            return $this->VARecurring->get_datatables_handler($filters);
          } catch (Throwable $e) {
+            log_message('error', 'VA Recurring AJAX error: ' . $e->getMessage());
             echo json_encode(array(
                "draw" => intval($this->input->post("draw")),
                "recordsTotal" => 0,
@@ -1445,53 +1297,18 @@ class TransactionController extends CI_Controller
       ]);
 
       if ($this->input->is_ajax_request()) {
-         $this->db->db_debug = FALSE;
          try {
-            $draw = intval($this->input->post("draw"));
-            $start = intval($this->input->post("start"));
-            $length = intval($this->input->post("length"));
-
-            $list = $this->QRISDynamic->get_datatables($search_name_qd, $search_date_qd, $search_transid_qd, $search_status_transaction_qd, $search_reff_label, $search_date_qd_to);
-            
-            // Explicit error check
-            $db_error = $this->db->error();
-            if ($db_error['code'] !== 0) {
-               throw new Exception("Database Error [" . $db_error['code'] . "]: " . $db_error['message']);
-            }
-
-            $dataItems = array();
-            $data = array();
-            $no = $start;
-
-            foreach ($list as $items) {
-               $no++;
-               $row = array();
-               $row['no'] = $no;
-               $row['c_datetimeRequest'] = $items->c_datetimeRequest;
-               $row['name_merchant'] = ' [' . ($items->ref_merchantId ?? '-') . '] - ' . ($items->name_merchant ?? '-');
-               $row['name_submerchant'] = ' [' . ($items->ref_subMerchantId ?? '-') . '] - ' . ($items->name_submerchant ?? '-');
-               $row['c_merchantTransactionId'] = $items->c_merchantTransactionId;
-
-               $row['ref_cashinExternalId'] = $items->ref_cashinExternalId;
-               $row['ref_cashinExternalLogQrisMpmIdCreate'] = $items->ref_cashinExternalLogQrisMpmIdCreate ?? '';
-               $row['c_amount'] = $items->c_amount;
-               $row['c_datetimeExpired'] = $items->c_datetimeExpired;
-               $row['c_status'] = $items->c_status;
-               $row['ref_cashinPaymentQrisMpmId'] = $items->ref_cashinPaymentQrisMpmId ?? '';
-
-               $dataItems[] = $row;
-               $items->no = $no;
-               $data[] = $items;
-            }
-
-            $output = array(
-               "draw" => $draw,
-               "recordsTotal" => $this->QRISDynamic->count_all_dt($search_name_qd, $search_date_qd, $search_date_qd_to),
-               "recordsFiltered" => $this->QRISDynamic->count_filtered($search_name_qd, $search_date_qd, $search_transid_qd, $search_status_transaction_qd, $search_reff_label, $search_date_qd_to),
-               "data" => $dataItems,
-            );
-            echo json_encode($output);
+            $filters = [
+               'merchant' => $this->session->userdata('search_name_qd'),
+               'date' => $this->session->userdata('search_date_qd'),
+               'date_to' => $this->session->userdata('search_date_qd_to'),
+               'transid' => $this->session->userdata('search_transid_qd'),
+               'status' => $this->session->userdata('search_status_transaction_qd'),
+               'reff' => $this->session->userdata('search_reff_label')
+            ];
+            return $this->QRISDynamic->get_datatables_handler($filters);
          } catch (Throwable $e) {
+            log_message('error', 'QRIS Dynamic AJAX error: ' . $e->getMessage());
             echo json_encode(array(
                "draw" => intval($this->input->post("draw")),
                "recordsTotal" => 0,
@@ -1561,54 +1378,17 @@ class TransactionController extends CI_Controller
          $search_status_transaction_qd = $this->session->userdata('search_status_transaction_qd');
 
       if ($this->input->is_ajax_request()) {
-         $this->db->db_debug = FALSE;
          try {
-            $draw = intval($this->input->post("draw"));
-            $start = intval($this->input->post("start"));
-            $length = intval($this->input->post("length"));
-
-            $list = $this->EwalletDynamic->get_datatables($search_name_qd, $search_date_qd, $search_date_qd_to, $search_transid_qd, $search_status_transaction_qd);
-            
-            // Explicit error check
-            $db_error = $this->db->error();
-            if ($db_error['code'] !== 0) {
-               throw new Exception("Database Error [" . $db_error['code'] . "]: " . $db_error['message']);
-            }
-
-            $dataItems = array();
-            $data = array();
-            $no = $start;
-
-            foreach ($list as $items) {
-               $no++;
-               $row = array();
-               $row['no'] = $no;
-               $row['c_datetimeRequest'] = $items->c_datetimeRequest;
-               $row['name_submerchant'] = ' [' . $items->ref_subMerchantId . '] - ' . $items->name_submerchant;
-               $row['ref_cashinChannelId'] = $items->ref_cashinChannelId;
-               $row['c_merchantTransactionId'] = $items->c_merchantTransactionId;
-
-               $row['ref_cashinExternalId'] = $items->ref_cashinExternalId;
-               $row['ref_cashinExternalLogEwalletIdCreate'] = $items->ref_cashinExternalLogEwalletIdCreate ?? '';
-               $row['c_amount'] = $items->c_amount;
-               $row['c_datetimeExpired'] = $items->c_datetimeExpired;
-               $row['c_status'] = $items->c_status;
-               $row['ref_cashinPaymentEwalletId'] = $items->ref_cashinPaymentEwalletId ?? '';
-               $row['simulation'] = '';
-
-               $dataItems[] = $row;
-               $items->no = $no;
-               $data[] = $items;
-            }
-
-            $output = array(
-               "draw" => $draw,
-               "recordsTotal" => $this->EwalletDynamic->count_all_dt($search_name_qd, $search_date_qd, $search_date_qd_to),
-               "recordsFiltered" => $this->EwalletDynamic->count_filtered($search_name_qd, $search_date_qd, $search_date_qd_to, $search_transid_qd, $search_status_transaction_qd),
-               "data" => $dataItems,
-            );
-            echo json_encode($output);
+            $filters = [
+               'merchant' => $this->session->userdata('search_name_qd'),
+               'date' => $this->session->userdata('search_date_qd'),
+               'date_to' => $this->session->userdata('search_date_qd_to'),
+               'transid' => $this->session->userdata('search_transid_qd'),
+               'status' => $this->session->userdata('search_status_transaction_qd')
+            ];
+            return $this->EwalletDynamic->get_datatables_handler($filters);
          } catch (Throwable $e) {
+            log_message('error', 'E-Wallet Dynamic AJAX error: ' . $e->getMessage());
             echo json_encode(array(
                "draw" => intval($this->input->post("draw")),
                "recordsTotal" => 0,
@@ -1702,49 +1482,16 @@ class TransactionController extends CI_Controller
          $search_submerchant_qr = $this->session->userdata('search_submerchant_qr');
 
       if ($this->input->is_ajax_request()) {
-         $this->db->db_debug = FALSE;
          try {
-            $draw = intval($this->input->post("draw"));
-            $start = intval($this->input->post("start"));
-            $length = intval($this->input->post("length"));
-
-            $list = $this->QRISRecurring->get_datatables($search_name_qr, $search_date_qr, $search_date_qr_to, $search_submerchant_qr);
-            
-            // Explicit error check
-            $db_error = $this->db->error();
-            if ($db_error['code'] !== 0) {
-               throw new Exception("Database Error [" . $db_error['code'] . "]: " . $db_error['message']);
-            }
-
-            $dataItems = array();
-            $no = $start;
-
-            foreach ($list as $items) {
-               $no++;
-               $row = array();
-               $row['no'] = $no;
-               $row['id'] = $items->id;
-               $row['c_datetimeRequest'] = $items->c_datetimeRequest;
-               $row['name_merchant'] = $items->name_merchant;
-               $row['ref_subMerchantId'] = $items->ref_subMerchantId;
-               $row['name_submerchant'] = $items->name_submerchant;
-               $row['c_merchantTransactionId'] = $items->c_merchantTransactionId;
-               $row['ref_cashinExternalId'] = $items->ref_cashinExternalId;
-               $row['ref_cashinExternalLogQrisMpmIdCreate'] = $items->ref_cashinExternalLogQrisMpmIdCreate;
-               $row['c_amount'] = $items->c_amount;
-               $row['c_status'] = $items->c_status;
-
-               $dataItems[] = $row;
-            }
-
-            $output = array(
-               "draw" => $draw,
-               "recordsTotal" => $this->QRISRecurring->count_all_dt($search_name_qr, $search_date_qr, $search_date_qr_to),
-               "recordsFiltered" => $this->QRISRecurring->count_filtered($search_name_qr, $search_date_qr, $search_date_qr_to, $search_submerchant_qr),
-               "data" => $dataItems,
-            );
-            echo json_encode($output);
+            $filters = [
+               'merchant' => $this->session->userdata('search_name_qr'),
+               'date' => $this->session->userdata('search_date_qr'),
+               'date_to' => $this->session->userdata('search_date_qr_to'),
+               'submerchant' => $this->session->userdata('search_submerchant_qr')
+            ];
+            return $this->QRISRecurring->get_datatables_handler($filters);
          } catch (Throwable $e) {
+            log_message('error', 'QRIS Recurring AJAX error: ' . $e->getMessage());
             echo json_encode(array(
                "draw" => intval($this->input->post("draw")),
                "recordsTotal" => 0,
@@ -1780,45 +1527,13 @@ class TransactionController extends CI_Controller
       }
 
       if ($this->input->is_ajax_request()) {
-         $this->db->db_debug = FALSE;
          try {
-            $draw = intval($this->input->post("draw"));
-            $start = intval($this->input->post("start"));
-            $length = intval($this->input->post("length"));
-
-            $list = $this->AdminDownload->get_datatables($search_date);
-            
-            // Explicit error check
-            $db_error = $this->db->error();
-            if ($db_error['code'] !== 0) {
-               throw new Exception("Database Error [" . $db_error['code'] . "]: " . $db_error['message']);
-            }
-
-            $dataItems = array();
-            $no = $start;
-
-            foreach ($list as $items) {
-               $no++;
-               $row = array();
-               $row['no'] = $no;
-               $row['id'] = $items->id;
-               $row['c_datetime'] = $items->c_datetime;
-               $row['c_type'] = $items->c_type;
-               $row['c_filename'] = $items->c_filename;
-               $row['c_status'] = $items->c_status;
-               $row['c_remark'] = $items->c_remark;
-
-               $dataItems[] = $row;
-            }
-
-            $output = array(
-               "draw" => $draw,
-               "recordsTotal" => $this->AdminDownload->count_all_dt($search_date),
-               "recordsFiltered" => $this->AdminDownload->count_filtered($search_date),
-               "data" => $dataItems,
-            );
-            echo json_encode($output);
+            $filters = [
+               'date' => $this->session->userdata('search_date') ?: $this->input->post('search_date')
+            ];
+            return $this->AdminDownload->get_datatables_handler($filters);
          } catch (Throwable $e) {
+            log_message('error', 'Report AJAX error: ' . $e->getMessage());
             echo json_encode(array(
                "draw" => intval($this->input->post("draw")),
                "recordsTotal" => 0,

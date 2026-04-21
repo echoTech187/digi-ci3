@@ -227,5 +227,41 @@ class EwalletDynamic extends CI_Model
                 );
     }
 
+    public function get_datatables_handler($filters = [])
+    {
+        $search_name = $filters['merchant'] ?? null;
+        $search_date = $filters['date'] ?? null;
+        $search_date_to = $filters['date_to'] ?? null;
+        $search_transid = $filters['transid'] ?? null;
+        $search_status = $filters['status'] ?? null;
+
+        $list = $this->get_datatables($search_name, $search_date, $search_date_to, $search_transid, $search_status);
+        
+        $data = [];
+        $no = intval($this->input->post('start'));
+        foreach ($list as $items) {
+            $no++;
+            $row = (array)$items;
+            $row['no'] = $no;
+            $data[] = $row;
+        }
+
+        $recordsTotal = $this->count_all_dt($search_name, $search_date, $search_date_to);
+        
+        // Consistency: Use approx count if no filters, exact if filtered
+        $is_filtered = $search_name || $search_date || $search_date_to || $search_transid || $search_status || (!empty($this->input->post('search')['value']));
+        $recordsFiltered = $is_filtered ? $this->count_filtered($search_name, $search_date, $search_date_to, $search_transid, $search_status) : $recordsTotal;
+
+        $output = [
+            "draw" => intval($this->input->post("draw")),
+            "recordsTotal" => $recordsTotal,
+            "recordsFiltered" => $recordsFiltered,
+            "data" => $data,
+        ];
+
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode($output));
+    }
 }
 ?>

@@ -472,5 +472,47 @@ class BiFast extends CI_Model {
                 );
     }
 
+    public function get_datatables_handler($filters = [])
+    {
+        $search_name = $filters['merchant'] ?? null;
+        $date_from = $filters['date_from'] ?? null;
+        $date_to = $filters['date_to'] ?? null;
+        $search_transid = $filters['transid'] ?? null;
+        $search_external_reff = $filters['external_reff'] ?? null;
+        $search_channel = $filters['channel'] ?? null;
+        $search_status = $filters['status'] ?? null;
+
+        // Format dates for query
+        $date_from_query = !empty($date_from) ? date('Ymd', strtotime($date_from)) . "000001" : null;
+        $date_to_query = !empty($date_to) ? date('Ymd', strtotime($date_to)) . "235959" : null;
+
+        $list = $this->get_datatables($search_name, $date_from_query, $date_to_query, $search_transid, $search_external_reff, $search_channel, $search_status);
+        
+        $data = [];
+        $no = intval($this->input->post('start'));
+        foreach ($list as $items) {
+            $no++;
+            $row = (array)$items;
+            $row['no'] = $no;
+            $data[] = $row;
+        }
+
+        $recordsTotal = $this->count_all_dt($search_name, $date_from_query, $date_to_query);
+        
+        // Consistency: Use approx count if no filters, exact if filtered
+        $is_filtered = $search_name || $date_from || $date_to || $search_transid || $search_external_reff || $search_channel || $search_status || (!empty($this->input->post('search')['value']));
+        $recordsFiltered = $is_filtered ? $this->count_filtered($search_name, $date_from_query, $date_to_query, $search_transid, $search_external_reff, $search_channel, $search_status) : $recordsTotal;
+
+        $output = [
+            "draw" => intval($this->input->post("draw")),
+            "recordsTotal" => $recordsTotal,
+            "recordsFiltered" => $recordsFiltered,
+            "data" => $data,
+        ];
+
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode($output));
+    }
 }
 ?>

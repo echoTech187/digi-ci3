@@ -304,4 +304,312 @@ public function setMaintenanceStatus($newStatus) {
             })
             ->make(true);
     }
+    // --- DataTables Server-Side Processing for Fee Settings ---
+    
+    public function get_fee_datatables_handler($type, $merchant_id)
+    {
+        $table = ($type === 'cashin') ? 'cashin_channel_x_merchant' : 'cashout_channel_x_merchant';
+        $prefix = ($type === 'cashin') ? 'cashin' : 'cashout';
+        $channel_group_col = "c_{$prefix}ChannelGroup";
+        $channel_id_col = "ref_{$prefix}ChannelId";
+        
+        $column_search = [$channel_group_col, $channel_id_col, 'c_externalIdDefault', 'c_status'];
+        $column_order = [null, $channel_group_col, 'c_fee', null, null, 'c_status', null];
+
+        // Emergency 3-second safeguard
+        $this->db->query("SET SESSION max_execution_time = 10000");
+
+        // STEP 1: Get only IDs matching filters/length/sort
+        $this->db->select("id");
+        $this->db->from($table);
+        $this->db->where('ref_merchantId', $merchant_id);
+
+        // Global search
+        if ($this->input->post('search')['value']) {
+            $i = 0;
+            foreach ($column_search as $item) {
+                if ($i === 0) {
+                    $this->db->group_start();
+                    $this->db->like($item, $this->input->post('search')['value']);
+                } else {
+                    $this->db->or_like($item, $this->input->post('search')['value']);
+                }
+                if (count($column_search) - 1 == $i)
+                    $this->db->group_end();
+                $i++;
+            }
+        }
+
+        if ($this->input->post('order')) {
+            $this->db->order_by($column_order[$this->input->post('order')['0']['column']], $this->input->post('order')['0']['dir']);
+        } else {
+            $this->db->order_by('id', 'desc');
+        }
+
+        if ($this->input->post('length') != -1)
+            $this->db->limit($this->input->post('length'), $this->input->post('start'));
+
+        $query = $this->db->get();
+        $id_results = $query->result();
+        
+        if (empty($id_results)) {
+            $output = [
+                "draw" => intval($this->input->post("draw")),
+                "recordsTotal" => 0,
+                "recordsFiltered" => 0,
+                "data" => [],
+            ];
+            $this->output->set_content_type('application/json')->set_output(json_encode($output));
+            return;
+        }
+        
+        $ids = array_column($id_results, 'id');
+
+        // STEP 2: Fetch full records
+        $this->db->from($table);
+        $this->db->where_in('id', $ids);
+        
+        // Re-apply order
+        if ($this->input->post('order')) {
+            $this->db->order_by($column_order[$this->input->post('order')['0']['column']], $this->input->post('order')['0']['dir']);
+        } else {
+            $this->db->order_by('id', 'desc');
+        }
+
+        $list = $this->db->get()->result();
+        
+        $data = [];
+        $no = intval($this->input->post('start'));
+        foreach ($list as $items) {
+            $no++;
+            $row = (array)$items;
+            $row['no'] = $no;
+            $data[] = $row;
+        }
+
+        // Count Total
+        $recordsTotal = $this->db->where('ref_merchantId', $merchant_id)->count_all_results($table);
+        
+        // Count Filtered
+        if ($this->input->post('search')['value']) {
+            $this->db->where('ref_merchantId', $merchant_id);
+            $i = 0;
+            foreach ($column_search as $item) {
+                if ($i === 0) {
+                    $this->db->group_start();
+                    $this->db->like($item, $this->input->post('search')['value']);
+                } else {
+                    $this->db->or_like($item, $this->input->post('search')['value']);
+                }
+                if (count($column_search) - 1 == $i)
+                    $this->db->group_end();
+                $i++;
+            }
+            $recordsFiltered = $this->db->count_all_results($table);
+        } else {
+            $recordsFiltered = $recordsTotal;
+        }
+
+        $output = [
+            "draw" => intval($this->input->post("draw")),
+            "recordsTotal" => $recordsTotal,
+            "recordsFiltered" => $recordsFiltered,
+            "data" => $data,
+        ];
+
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode($output));
+    }
+    public function get_merchant_spv_handler()
+    {
+        $table = 'merchant_supervisor';
+        $column_order  = ['id', 'c_name', 'c_username', 'c_email', 'c_status'];
+        $column_search = ['c_name', 'c_username', 'c_email', 'c_status'];
+
+        // STEP 1: IDs only
+        $this->db->select('id');
+        $this->db->from($table);
+
+        $i = 0;
+        foreach ($column_search as $item) {
+            if ($this->input->post('search')['value']) {
+                if ($i === 0) {
+                    $this->db->group_start();
+                    $this->db->like($item, $this->input->post('search')['value']);
+                } else {
+                    $this->db->or_like($item, $this->input->post('search')['value']);
+                }
+                if (count($column_search) - 1 == $i)
+                    $this->db->group_end();
+            }
+            $i++;
+        }
+
+        if ($this->input->post('order')) {
+            $this->db->order_by($column_order[$this->input->post('order')['0']['column']], $this->input->post('order')['0']['dir']);
+        } else {
+            $this->db->order_by('id', 'desc');
+        }
+
+        if ($this->input->post('length') != -1)
+            $this->db->limit($this->input->post('length'), $this->input->post('start'));
+
+        $id_results = $this->db->get()->result();
+
+        if (empty($id_results)) {
+            return $this->output->set_content_type('application/json')->set_output(json_encode([
+                "draw" => intval($this->input->post("draw")),
+                "recordsTotal" => 0,
+                "recordsFiltered" => 0,
+                "data" => []
+            ]));
+        }
+
+        $ids = array_column($id_results, 'id');
+
+        // STEP 2: Full records
+        $this->db->from($table);
+        $this->db->where_in('id', $ids);
+        if ($this->input->post('order')) {
+            $this->db->order_by($column_order[$this->input->post('order')['0']['column']], $this->input->post('order')['0']['dir']);
+        } else {
+            $this->db->order_by('id', 'desc');
+        }
+        $list = $this->db->get()->result();
+
+        $data = [];
+        $no = intval($this->input->post('start'));
+        foreach ($list as $items) {
+            $no++;
+            $row = (array)$items;
+            $row['no'] = $no;
+            $data[] = $row;
+        }
+
+        $recordsTotal = $this->db->count_all_results($table);
+        if ($this->input->post('search')['value']) {
+            $i = 0;
+            foreach ($column_search as $item) {
+                if ($i === 0) {
+                    $this->db->group_start();
+                    $this->db->like($item, $this->input->post('search')['value']);
+                } else {
+                    $this->db->or_like($item, $this->input->post('search')['value']);
+                }
+                if (count($column_search) - 1 == $i)
+                    $this->db->group_end();
+                $i++;
+            }
+            $recordsFiltered = $this->db->count_all_results($table);
+        } else {
+            $recordsFiltered = $recordsTotal;
+        }
+
+        return $this->output->set_content_type('application/json')->set_output(json_encode([
+            "draw" => intval($this->input->post("draw")),
+            "recordsTotal" => $recordsTotal,
+            "recordsFiltered" => $recordsFiltered,
+            "data" => $data
+        ]));
+    }
+
+    public function get_merchants_by_supervisor_handler($supervisor_id)
+    {
+        // Join merchant_supervisor_assignment and merchant
+        $table = 'merchant';
+        $column_order  = ['id', 'c_name', 'c_balanceTotal', 'c_balanceHold', 'c_openapistatus', 'c_status'];
+        $column_search = ['c_name', 'id'];
+
+        $this->db->select('merchant.id');
+        $this->db->from($table);
+        $this->db->join('merchant_supervisor_assignment', 'merchant_supervisor_assignment.ref_merchantId = merchant.id');
+        $this->db->where('merchant_supervisor_assignment.ref_supervisorId', $supervisor_id);
+
+        $i = 0;
+        foreach ($column_search as $item) {
+            if ($this->input->post('search')['value']) {
+                if ($i === 0) {
+                    $this->db->group_start();
+                    $this->db->like($item, $this->input->post('search')['value']);
+                } else {
+                    $this->db->or_like($item, $this->input->post('search')['value']);
+                }
+                if (count($column_search) - 1 == $i)
+                    $this->db->group_end();
+            }
+            $i++;
+        }
+
+        if ($this->input->post('order')) {
+            $this->db->order_by($column_order[$this->input->post('order')['0']['column']], $this->input->post('order')['0']['dir']);
+        } else {
+            $this->db->order_by('merchant.id', 'desc');
+        }
+
+        if ($this->input->post('length') != -1)
+            $this->db->limit($this->input->post('length'), $this->input->post('start'));
+
+        $id_results = $this->db->get()->result();
+
+        if (empty($id_results)) {
+            return $this->output->set_content_type('application/json')->set_output(json_encode([
+                "draw" => intval($this->input->post("draw")),
+                "recordsTotal" => 0,
+                "recordsFiltered" => 0,
+                "data" => []
+            ]));
+        }
+
+        $ids = array_column($id_results, 'id');
+
+        $this->db->from($table);
+        $this->db->where_in('id', $ids);
+        if ($this->input->post('order')) {
+            $this->db->order_by($column_order[$this->input->post('order')['0']['column']], $this->input->post('order')['0']['dir']);
+        } else {
+            $this->db->order_by('id', 'desc');
+        }
+        $list = $this->db->get()->result();
+
+        $data = [];
+        $no = intval($this->input->post('start'));
+        foreach ($list as $items) {
+            $no++;
+            $row = (array)$items;
+            $row['no'] = $no;
+            $data[] = $row;
+        }
+
+        $this->db->join('merchant_supervisor_assignment', 'merchant_supervisor_assignment.ref_merchantId = merchant.id');
+        $this->db->where('merchant_supervisor_assignment.ref_supervisorId', $supervisor_id);
+        $recordsTotal = $this->db->count_all_results($table);
+
+        if ($this->input->post('search')['value']) {
+            $this->db->join('merchant_supervisor_assignment', 'merchant_supervisor_assignment.ref_merchantId = merchant.id');
+            $this->db->where('merchant_supervisor_assignment.ref_supervisorId', $supervisor_id);
+            $i = 0;
+            foreach ($column_search as $item) {
+                if ($i === 0) {
+                    $this->db->group_start();
+                    $this->db->like($item, $this->input->post('search')['value']);
+                } else {
+                    $this->db->or_like($item, $this->input->post('search')['value']);
+                }
+                if (count($column_search) - 1 == $i)
+                    $this->db->group_end();
+                $i++;
+            }
+            $recordsFiltered = $this->db->count_all_results($table);
+        } else {
+            $recordsFiltered = $recordsTotal;
+        }
+
+        return $this->output->set_content_type('application/json')->set_output(json_encode([
+            "draw" => intval($this->input->post("draw")),
+            "recordsTotal" => $recordsTotal,
+            "recordsFiltered" => $recordsFiltered,
+            "data" => $data
+        ]));
+    }
 }
