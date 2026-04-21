@@ -324,7 +324,7 @@ class DashboardController extends CI_Controller
 
    public function syncAvailableBalanceMerchant()
    {
-      ini_set('max_execution_time', 300); 
+      ini_set('max_execution_time', 600); 
       ini_set('memory_limit', '1024M');
 
       $merchant_id = $this->input->get('merchant_id');
@@ -340,10 +340,9 @@ class DashboardController extends CI_Controller
       
       $merchants = $this->db->get()->result_array();
       
-      // OPTIMIZATION: Fetch all actual balances and hold amounts in bulk to avoid N+1 queries
+      // Calculate Actuals (Read-only initially for the report)
       // 1. Calculate Actual Balance (Cashin - Cashout)
-      $this->db->select('m.id, 
-          (COALESCE(cin.total, 0) - COALESCE(cout.total, 0)) as balanceActual');
+      $this->db->select('m.id, (COALESCE(cin.total, 0) - COALESCE(cout.total, 0)) as balanceActual');
       $this->db->from('merchant m');
       $this->db->join('(SELECT ref_merchantId, SUM(c_amount) as total FROM cashin GROUP BY ref_merchantId) cin', 'cin.ref_merchantId = m.id', 'left');
       $this->db->join('(SELECT ref_merchantId, SUM(c_amount) as total FROM cashout GROUP BY ref_merchantId) cout', 'cout.ref_merchantId = m.id', 'left');
@@ -352,9 +351,8 @@ class DashboardController extends CI_Controller
       $actualBalancesRaw = $this->db->get()->result_array();
       $actualBalances = array_column($actualBalancesRaw, 'balanceActual', 'id');
 
-      // 2. Calculate Actual Hold (QRIS + VA + Ewallet where settlement is not realtime)
-      $this->db->select('m.id, 
-          (COALESCE(q.total, 0) + COALESCE(v.total, 0) + COALESCE(e.total, 0)) as holdActual');
+      // 2. Calculate Actual Hold
+      $this->db->select('m.id, (COALESCE(q.total, 0) + COALESCE(v.total, 0) + COALESCE(e.total, 0)) as holdActual');
       $this->db->from('merchant m');
       $this->db->join('(SELECT ref_merchantId, SUM(c_amount - c_fee) as total FROM cashin_payment_qris_mpm WHERE c_isSettlementRealtime=\'0\' GROUP BY ref_merchantId) q', 'q.ref_merchantId = m.id', 'left');
       $this->db->join('(SELECT ref_merchantId, SUM(c_amount - c_fee) as total FROM cashin_payment_va WHERE c_isSettlementRealtime=\'0\' GROUP BY ref_merchantId) v', 'v.ref_merchantId = m.id', 'left');
@@ -369,7 +367,6 @@ class DashboardController extends CI_Controller
 
       foreach ($merchants as $row1) {
          $id = $row1['id'];
-
          $balanceTotalActual = round($actualBalances[$id] ?? 0);
          $balanceHoldActual  = round($actualHolds[$id] ?? 0);
 
@@ -379,28 +376,43 @@ class DashboardController extends CI_Controller
          $directUpdateBalanceTotal = false;
          $directUpdateBalanceHold  = false;
 
-         if ($balanceTotalSystem != $balanceTotalActual && $do_update) {
-               $this->db->where('id', $id)->update('merchant', ['c_balanceTotal' => $balanceTotalActual]);
-               $directUpdateBalanceTotal = true;
-               $balanceTotalSystem = $balanceTotalActual; 
-         }
-
-         if ($balanceHoldSystem != $balanceHoldActual && $do_update) {
-               $this->db->where('id', $id)->update('merchant', ['c_balanceHold' => $balanceHoldActual]);
-               $directUpdateBalanceHold = true;
-               $balanceHoldSystem = $balanceHoldActual; 
+         if ($do_update) {
+            /**
+             * CRITICAL: Using Transaction and Row-Level Locking (SELECT FOR UPDATE)
+             * to prevent balance corruption during concurrent updates.
+             */
+            $this->db->trans_start();
+            
+            // Lock the row
+            $currentRow = $this->db->query("SELECT id, c_balanceTotal, c_balanceHold FROM merchant WHERE id = ? FOR UPDATE", [$id])->row_array();
+            
+            if ($currentRow) {
+               // Re-calculate ONLY if it still differs from the locked current row value
+               if (round($currentRow['c_balanceTotal']) != $balanceTotalActual) {
+                  $this->db->where('id', $id)->update('merchant', ['c_balanceTotal' => $balanceTotalActual]);
+                  $directUpdateBalanceTotal = true;
+                  $balanceTotalSystem = $balanceTotalActual;
+               }
+               if (round($currentRow['c_balanceHold']) != $balanceHoldActual) {
+                  $this->db->where('id', $id)->update('merchant', ['c_balanceHold' => $balanceHoldActual]);
+                  $directUpdateBalanceHold = true;
+                  $balanceHoldSystem = $balanceHoldActual;
+               }
+            }
+            
+            $this->db->trans_complete();
          }
 
          $results[] = [
-               'no' => $no++,
-               'id' => $id,
-               'name' => $row1['c_name'],
-               'balance_actual' => $balanceTotalActual,
-               'balance_system' => $balanceTotalSystem,
-               'hold_actual'    => $balanceHoldActual,
-               'hold_system'    => $balanceHoldSystem,
-               'updated_total'  => $directUpdateBalanceTotal,
-               'updated_hold'   => $directUpdateBalanceHold
+            'no' => $no++,
+            'id' => $id,
+            'name' => $row1['c_name'],
+            'balance_actual' => $balanceTotalActual,
+            'balance_system' => $balanceTotalSystem,
+            'hold_actual'    => $balanceHoldActual,
+            'hold_system'    => $balanceHoldSystem,
+            'updated_total'  => $directUpdateBalanceTotal,
+            'updated_hold'   => $directUpdateBalanceHold
          ];
       }
 

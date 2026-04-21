@@ -19,11 +19,7 @@ function is_logged_in()
             $current_url .= '/' . strtolower($segment2);
         }
 
-        // Allow default dashboard routes
-        if ($current_url == 'admin' || $current_url == 'user') {
-            return;
-        }
-
+        // REMOVED: Broad segment bypass for 'admin' and 'user' to ensure granular RBAC
         // Combined Optimized Query: Check menu existence and access in one round-trip
         $ci->db->select('m.id as menu_id, am.id as access_id');
         $ci->db->from('user_menu m');

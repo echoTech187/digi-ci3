@@ -63,7 +63,7 @@
 
                 <!-- Recaptcha if active -->
                 <div class="form-group mb-0">
-                    <div class="g-recaptcha" data-sitekey="6LcohZQsAAAAABZs36_69j5-9aKaLdewFK05foHx"></div>
+                    <div class="g-recaptcha" data-sitekey="<?= $recaptcha_site_key; ?>"></div>
                 </div>
 
                 <button type="submit" class="btn-login">

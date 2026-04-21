@@ -211,7 +211,7 @@ public function setMaintenanceStatus($newStatus) {
         }
 
         $table_name = explode(' ', $table)[0];
-        $query = $this->db->query("SELECT TABLE_ROWS FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '{$table_name}'");
+        $query = $this->db->query("SELECT TABLE_ROWS FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ?", [$table_name]);
         $result = $query->row();
         return $result ? (int)$result->TABLE_ROWS : 0;
     }

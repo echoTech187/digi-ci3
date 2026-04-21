@@ -2,6 +2,12 @@
 
 class Auth extends CI_Controller
 {
+    public function __construct()
+    {
+        parent::__construct();
+        $this->config->load('secrets', TRUE, TRUE);
+    }
+
     public function index()
     {
         if ($this->session->userdata('c_email')) {
@@ -15,8 +21,11 @@ class Auth extends CI_Controller
 
         if ($this->form_validation->run() == false) {
             $data['title'] = 'Login Admin GIDI';
+            $secrets = $this->config->item('secrets');
+            $data['recaptcha_site_key'] = $secrets['recaptcha_site_key'];
+
             $this->load->view('templates/auth_header.php', $data);
-            $this->load->view('auth/login');
+            $this->load->view('auth/login', $data);
             $this->load->view('templates/auth_footer.php');
         } else {
             $this->_login();
@@ -42,7 +51,9 @@ class Auth extends CI_Controller
             return; 
         }
 
-        $recaptchaSecret = '6LcohZQsAAAAABuu38QT8AMjD_s9vgLv9fu-rdj8';
+        // Configuration loaded in constructor
+        $secrets = $this->config->item('secrets');
+        $recaptchaSecret = $secrets['recaptcha_secret_key'];
 
         $response = verify_recaptcha($recaptchaResponse, $recaptchaSecret);
         if (!$response['success']) {
@@ -145,11 +156,14 @@ class Auth extends CI_Controller
 
     private function _sendEmail($token, $type)
     {
+        // Configuration loaded in constructor
+        $secrets = $this->config->item('secrets');
+
         $config = [
             'protocol'  => 'smtp',
             'smtp_host' => 'ssl://smtp.googlemail.com',
-            'smtp_user' => 'fikriramdani3215@gmail.com',
-            'smtp_pass' => 'Bogorraya123',
+            'smtp_user' => $secrets['smtp_user'],
+            'smtp_pass' => $secrets['smtp_pass'],
             'smtp_port' => 465,
             'mailtype'  => 'html',
             'charset'   => 'utf-8',
@@ -158,7 +172,7 @@ class Auth extends CI_Controller
 
         $this->email->initialize($config);
 
-        $this->email->from('fikriramdani3215@gmail.com', 'Admin Kelas Koding');
+        $this->email->from($secrets['smtp_user'], 'Admin Kelas Koding');
         $this->email->to($this->input->post('email'));
 
         if ($type == 'verify') {
