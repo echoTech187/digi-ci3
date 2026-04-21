@@ -296,10 +296,6 @@ class QRISDynamic extends CI_Model
     public function get_merchant_detail($id)
     {
         $query = "SELECT c_name FROM merchant WHERE id = '$id'";
-
-        // var_dump($query);
-        // exit;
-
         return $this->db->query($query)->result_array();
     }
     

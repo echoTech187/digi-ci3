@@ -300,19 +300,12 @@ class Qris extends CI_Model {
         $query .= " ORDER BY cashin_payment_qris_mpm.id DESC
                     LIMIT $start, $limit";
 
-        // var_dump($query);
-        // exit;
-
         return $this->db->query($query)->result();
     }
 
     public function get_merchant_detail($id)
     {
         $query = "SELECT c_name FROM merchant WHERE id = '$id'";
-
-        // var_dump($query);
-        // exit;
-
         return $this->db->query($query)->result_array();
     }
 
@@ -340,10 +333,6 @@ class Qris extends CI_Model {
         if (!empty($refMerchantId)) {
             $query .= " AND a.ref_merchantId = '$refMerchantId'";
         }
-
-        // echo $query;
-        // exit;
-
         return $this->db->query($query)->result_array();
     }
 

@@ -60,7 +60,6 @@ class AdminMerchant extends CI_Controller
                "data" => [],
                "redirect" => base_url('admin/merchant')
             ]);
-            exit;
          }
       }
 

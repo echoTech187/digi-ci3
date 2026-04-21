@@ -187,9 +187,6 @@ class Ewallet extends CI_Model {
                         LEFT JOIN cashin_dynamic_ewallet e ON (e.ref_merchantId=a.ref_merchantId AND e.id=a.ref_cashinDynamicEwalletId) 
                         WHERE a.id ='$id'";
 
-            // var_dump($query);
-            // exit;
-
             return $this->db->query($query)->result_array();
 
         }
@@ -264,9 +261,6 @@ class Ewallet extends CI_Model {
         $query .= " ORDER BY cashin_payment_qris_mpm.id DESC
                     LIMIT $start, $limit";
 
-        // var_dump($query);
-        // exit;
-
         return $this->db->query($query)->result();
     }
 
@@ -300,9 +294,6 @@ class Ewallet extends CI_Model {
         if (!empty($refMerchantId)) {
             $query .= " AND a.ref_merchantId = '$refMerchantId'";
         }
-
-        // echo $query;
-        // exit;
 
         return $this->db->query($query)->result_array();
     }

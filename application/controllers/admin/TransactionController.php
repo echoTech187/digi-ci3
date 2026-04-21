@@ -45,8 +45,7 @@ class TransactionController extends CI_Controller
 
       if ($this->input->is_ajax_request()) {
          try {
-            $this->SubMerchant->get_datatables_handler($id);
-            exit;
+            return $this->SubMerchant->get_datatables_handler($id);
          } catch (Throwable $e) {
             log_message('error', 'Submerchant AJAX error: ' . $e->getMessage());
             echo json_encode(array(
@@ -57,7 +56,6 @@ class TransactionController extends CI_Controller
                "error" => "Error retrieving submerchant data: " . $e->getMessage()
             ));
          }
-         exit;
       }
 
       $data['merchant'] = $this->Mutation_model->get_merchant($id);
@@ -121,8 +119,7 @@ class TransactionController extends CI_Controller
                'position' => $search_position,
                'channel' => $search_channel
             ];
-            $this->Mutation_model->get_datatables_handler($id, $filters);
-            exit;
+            return $this->Mutation_model->get_datatables_handler($id, $filters);
          } catch (Throwable $e) {
             log_message('error', 'Mutation AJAX error: ' . $e->getMessage());
             echo json_encode(array(
@@ -133,7 +130,6 @@ class TransactionController extends CI_Controller
                "error" => "Error retrieving mutation data: " . $e->getMessage()
             ));
          }
-         exit;
       }
 
       $data['channels'] = [];
@@ -429,8 +425,7 @@ class TransactionController extends CI_Controller
                'va_number' => $this->session->userdata('search_va_number'),
                'transid' => $this->session->userdata('search_va_transid')
             ];
-            $this->VirtualAccount->get_datatables_handler($filters);
-            exit;
+            return $this->VirtualAccount->get_datatables_handler($filters);
          } catch (Throwable $e) {
             log_message('error', 'VA AJAX error: ' . $e->getMessage());
             echo json_encode(array(
@@ -441,7 +436,6 @@ class TransactionController extends CI_Controller
                "error" => "Error retrieving VA data: " . $e->getMessage()
             ));
          }
-         exit;
       }
 
       $data['Vas'] = [];
@@ -603,8 +597,7 @@ class TransactionController extends CI_Controller
                'invoice' => $this->session->userdata('search_invoice_no'),
                'transid' => $this->session->userdata('search_transactionid_ht')
             ];
-            $this->Qris->get_datatables_handler($filters);
-            exit;
+            return $this->Qris->get_datatables_handler($filters);
          } catch (Throwable $e) {
             log_message('error', 'QRIS AJAX error: ' . $e->getMessage());
             echo json_encode(array(
@@ -616,7 +609,6 @@ class TransactionController extends CI_Controller
                "redirect" => base_url('admin/qris')
             ));
          }
-         exit;
       }
 
       $data['qriss'] = [];
@@ -875,7 +867,7 @@ class TransactionController extends CI_Controller
                "error" => "Error retrieving E-Wallet data: " . $e->getMessage()
             ));
          }
-         exit;
+      
       }      
       $data['start'] = 0;
       $data['pagination'] = '';
@@ -1059,7 +1051,6 @@ class TransactionController extends CI_Controller
                "error" => "Error retrieving BI-FAST data: " . $e->getMessage()
             ));
          }
-         exit;
       }
 
       $data['start'] = 0;
@@ -1238,7 +1229,6 @@ class TransactionController extends CI_Controller
             "data" => $dataItems,
          );
          echo json_encode($output);
-         exit;
       }
 
       $data['start'] = 0;
@@ -1383,7 +1373,6 @@ class TransactionController extends CI_Controller
                "error" => "Error retrieving VA Recurring data: " . $e->getMessage()
             ));
          }
-         exit;
       }
 
       $data['start'] = 0;
@@ -1511,7 +1500,6 @@ class TransactionController extends CI_Controller
                "error" => "Error retrieving QRIS Dynamic data: " . $e->getMessage()
             ));
          }
-         exit;
       }
 
       $data['merchants'] = $this->QRISDynamic->get_merchant();
@@ -1629,7 +1617,6 @@ class TransactionController extends CI_Controller
                "error" => "Error retrieving E-Wallet Dynamic data: " . $e->getMessage()
             ));
          }
-         exit;
       }
 
       $data['merchants'] = $this->EwalletDynamic->get_merchant();
@@ -1766,7 +1753,6 @@ class TransactionController extends CI_Controller
                "error" => "Error retrieving QRIS Recurring data: " . $e->getMessage()
             ));
          }
-         exit;
       }
 
       $data['merchants'] = $this->QRISRecurring->get_merchant();
@@ -1841,7 +1827,6 @@ class TransactionController extends CI_Controller
                "error" => "Error retrieving report data: " . $e->getMessage()
             ));
          }
-         exit;
       }
 
       if ($search_date) {
@@ -2077,10 +2062,7 @@ class TransactionController extends CI_Controller
             header('Content-Length: ' . filesize($filepath));
 
             readfile($filepath);
-
-            exit;
-         }
-         else {
+         }else {
 
             echo 'File not found.';
          }

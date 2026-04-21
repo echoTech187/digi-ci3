@@ -44,7 +44,6 @@ class ReportController extends CI_Controller {
             "data" => $dataItems,
          );
          echo json_encode($output);
-         exit;
       }
 
       $data['title'] = 'Balance Log';

@@ -233,9 +233,7 @@ class Mutation_model extends CI_Model
                 IF(mutation.c_potition = 'Credit', cashin.c_description, cashout.c_description) AS description,
                 IF(mutation.c_potition = 'Credit', cashin.c_InvoiceNo, cashout.c_InvoiceNo) AS refNoLog,
                 mutation.c_amount,
-                mutation.c_BalanceAfter,
-                mutation.c_lastBalance,
-                mutation.c_description as mutation_desc
+                mutation.c_BalanceAfter
             ", FALSE)
             ->join('cashin', 'cashin.ref_merchantId = mutation.ref_merchantId AND cashin.id = mutation.ref_cashinId', 'left')
             ->join('cashout', 'cashout.ref_merchantId = mutation.ref_merchantId AND cashout.Id = mutation.ref_cashoutId', 'left')

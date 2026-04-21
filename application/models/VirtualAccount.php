@@ -357,10 +357,6 @@ class VirtualAccount extends CI_Model {
             if (!empty($refMerchantId)) {
                 $query .= " AND a.ref_merchantId = '$refMerchantId'";
             }
-    
-            // echo $query;
-            // exit;
-    
             return $this->db->query($query)->result_array();
         }
 

@@ -52,7 +52,6 @@ class ChannelController extends CI_Controller {
             "data" => $dataItems,
          );
          echo json_encode($output);
-         exit;
       }
 
       $summary = $this->Chanel->get_cashin_summary();
@@ -110,7 +109,6 @@ class ChannelController extends CI_Controller {
             "data" => $dataItems,
          );
          echo json_encode($output);
-         exit;
       }
 
       $summary = $this->Chanel->get_cashout_summary();

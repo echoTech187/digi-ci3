@@ -284,9 +284,6 @@ class BiFast extends CI_Model {
             $query .= " AND a.ref_merchantId = '$refMerchantId'";
         }
 
-        // echo $query;
-        // exit;
-
         return $this->db->query($query)->result_array();
     }
 

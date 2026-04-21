@@ -56,7 +56,6 @@ class ServiceController extends CI_Controller {
                 "data" => $dataItems,
             );
             echo json_encode($output);
-            exit;
         }
 
         $data['title'] = $page_title;

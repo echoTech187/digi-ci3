@@ -55,10 +55,6 @@ class Auth extends CI_Controller
         }
 
         $admin = $this->db->get_where('admin', ['c_email' => $c_email])->row_array();
-        // echo '<pre>';
-        // print_r($admin);
-        // echo '</pre>';
-        // exit;
 
         if ($admin) {
             if ($admin['c_status'] == 'Active') {
