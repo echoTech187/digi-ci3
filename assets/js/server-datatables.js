@@ -48,30 +48,100 @@ function initServerDataTable(tableId, ajaxUrl, columns, additionalOptions = {}) 
             var api    = this.api();
             var info   = api.page.info();
             var $pager = $(api.table().container()).find('.dt-footer-pager');
+            var $info  = $(api.table().container()).find('.dt-footer-info');
 
             var currPage   = info.page + 1;
             var totalPages = info.pages || 1;
 
-            $pager.html(
-                '<button class="dt-nav-btn dt-prev-btn" ' + (info.page === 0 ? 'disabled' : '') + '>' +
-                    '<i class="fas fa-chevron-left"></i> PREVIOUS' +
-                '</button>' +
-                '<span class="dt-page-counter">' +
-                    '<strong>' + currPage + '</strong> of <strong>' + totalPages + '</strong>' +
-                '</span>' +
-                '<button class="dt-nav-btn dt-next-btn" ' + (info.page >= totalPages - 1 ? 'disabled' : '') + '>' +
-                    'NEXT <i class="fas fa-chevron-right"></i>' +
-                '</button>'
-            );
+            // Render Info text with better formatting
+            if ($info.length) {
+                var start = info.length > 0 ? info.start + 1 : 0;
+                var end = info.end;
+                var total = info.recordsDisplay;
+                $info.html('Showing <strong>' + end + '</strong> of <strong>' + number_format(total) + '</strong> results');
+            }
 
+            // Render Pager
+            var pagerHtml = '<div class="dt-pager-nav">';
+            
+            // Previous Button
+            pagerHtml += '<button class="dt-pager-btn dt-prev-btn" ' + (info.page === 0 ? 'disabled' : '') + '>';
+            pagerHtml += '<i class="fas fa-chevron-left mr-md-2"></i><span class="dt-pager-btn-txt">Previous</span>';
+            pagerHtml += '</button>';
+
+            // Page Numbers
+            pagerHtml += '<ul class="dt-pager-numbers d-none d-md-flex">';
+            pagerHtml += generatePagerNumbers(info);
+            pagerHtml += '</ul>';
+
+            // Next Button
+            pagerHtml += '<button class="dt-pager-btn dt-next-btn" ' + (info.page >= totalPages - 1 ? 'disabled' : '') + '>';
+            pagerHtml += '<span class="dt-pager-btn-txt">Next</span><i class="fas fa-chevron-right ml-md-2"></i>';
+            pagerHtml += '</button>';
+
+            pagerHtml += '</div>';
+
+            $pager.html(pagerHtml);
+
+            // Bind Events
             $pager.find('.dt-prev-btn').off('click').on('click', function() {
                 if (!$(this).prop('disabled')) { api.page('previous').draw('page'); }
             });
             $pager.find('.dt-next-btn').off('click').on('click', function() {
                 if (!$(this).prop('disabled')) { api.page('next').draw('page'); }
             });
+            $pager.find('.dt-pager-link').off('click').on('click', function() {
+                var page = $(this).data('page');
+                if (page !== undefined) { api.page(page).draw('page'); }
+            });
         }
     };
+
+    /**
+     * Internal Helper: Generate numeric page links with ellipses
+     */
+    function generatePagerNumbers(info) {
+        var current = info.page;
+        var last = info.pages - 1;
+        var delta = 1; // Number of pages back and forth from current
+        var left = current - delta;
+        var right = current + delta + 1;
+        var range = [];
+        var rangeWithDots = [];
+        var l;
+
+        if (info.pages <= 1) return '<li class="dt-pager-item"><button class="dt-pager-link active">1</button></li>';
+
+        for (var i = 0; i <= last; i++) {
+            if (i == 0 || i == last || (i >= left && i < right)) {
+                range.push(i);
+            }
+        }
+
+        for (var i of range) {
+            if (l !== undefined) {
+                if (i - l === 2) {
+                    rangeWithDots.push(l + 1);
+                } else if (i - l !== 1) {
+                    rangeWithDots.push('...');
+                }
+            }
+            rangeWithDots.push(i);
+            l = i;
+        }
+
+        var html = '';
+        for (var i of rangeWithDots) {
+            if (i === '...') {
+                html += '<li class="dt-pager-ellipsis">...</li>';
+            } else {
+                html += '<li class="dt-pager-item">';
+                html += '<button class="dt-pager-link ' + (i === current ? 'active' : '') + '" data-page="' + i + '">' + (i + 1) + '</button>';
+                html += '</li>';
+            }
+        }
+        return html;
+    }
 
     // Merge default options with any additional options provided
     var finalOptions = $.extend(true, {}, defaultOptions, additionalOptions);

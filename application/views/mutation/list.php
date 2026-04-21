@@ -232,36 +232,7 @@ $(document).ready(function() {
                 return 'Rp ' + number_format(data, 0, ',', '.');
             }
         }
-    ], {
-            "dom": 'rt<"dt-footer"<"dt-footer-info"i><"dt-footer-pager">>',
-            "drawCallback": function(settings) {
-                var api    = this.api();
-                var info   = api.page.info();
-                var $pager = $(api.table().container()).find('.dt-footer-pager');
-
-                var currPage   = info.page + 1;
-                var totalPages = info.pages || 1;
-
-                $pager.html(
-                    '<button type="button" class="dt-nav-btn dt-prev-btn" ' + (info.page === 0 ? 'disabled' : '') + '>' +
-                        '<i class="fas fa-chevron-left mr-2"></i> PREVIOUS' +
-                    '</button>' +
-                    '<span class="dt-page-counter">' +
-                        '<strong>' + currPage + '</strong> of <strong>' + totalPages + '</strong>' +
-                    '</span>' +
-                    '<button type="button" class="dt-nav-btn dt-next-btn" ' + (info.page >= totalPages - 1 ? 'disabled' : '') + '>' +
-                        'NEXT <i class="fas fa-chevron-right"></i>' +
-                    '</button>'
-                );
-
-                $pager.find('.dt-prev-btn').off('click').on('click', function() {
-                    if (!$(this).prop('disabled')) { api.page('previous').draw('page'); }
-                });
-                $pager.find('.dt-next-btn').off('click').on('click', function() {
-                    if (!$(this).prop('disabled')) { api.page('next').draw('page'); }
-                });
-            }
-        });
+    ]);
 
     // Global search
     // Global search with Debounce
