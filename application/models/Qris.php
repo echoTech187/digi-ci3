@@ -397,5 +397,50 @@ class Qris extends CI_Model {
         $query = "select id,c_name from merchant ";
         return $this->db->query($query)->result();
     }
+
+    /**
+     * Standardized DataTables handler for QRIS list.
+     * Utilizes the optimized two-step Pre-Lookup query logic.
+     */
+    public function get_datatables_handler($filters = [])
+    {
+        $search_name = $filters['merchant'] ?? null;
+        $date_from = $filters['date_from'] ?? null;
+        $date_to = $filters['date_to'] ?? null;
+        $search_settlement = $filters['settlement'] ?? null;
+        $search_rrn = $filters['rrn'] ?? null;
+        $search_invoice = $filters['invoice'] ?? null;
+        $search_transid = $filters['transid'] ?? null;
+
+        // Format dates for query if they exist (following legacy logic)
+        $date_from_query = null;
+        $date_to_query = null;
+        if (!empty($date_from) && !empty($date_to)) {
+            $date_from_query = date('Ymd', strtotime($date_from)) . "000001";
+            $date_to_query = date('Ymd', strtotime($date_to)) . "235959";
+        }
+
+        $list = $this->get_datatables($search_name, $date_from_query, $date_to_query, $search_settlement, $search_rrn, $search_invoice, $search_transid);
+        
+        $data = [];
+        $no = intval($this->input->post('start'));
+        foreach ($list as $items) {
+            $no++;
+            $row = (array)$items;
+            $row['no'] = $no;
+            $data[] = $row;
+        }
+
+        $output = [
+            "draw" => intval($this->input->post("draw")),
+            "recordsTotal" => $this->count_all_dt($search_name, $date_from_query, $date_to_query),
+            "recordsFiltered" => $this->count_filtered($search_name, $date_from_query, $date_to_query, $search_settlement, $search_rrn, $search_invoice, $search_transid),
+            "data" => $data,
+        ];
+
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode($output));
+    }
 }
 ?>

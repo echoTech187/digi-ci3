@@ -31,146 +31,35 @@ class AdminMerchant extends CI_Controller
       }
 
       $role_id = $this->session->userdata('role');
-      if (!$this->rbac->has_permission($role_id, $serviceName)) {
-         show_error('Access Denied', 403);
-      }
 
       // Server-side DataTables Handler
       if ($this->input->is_ajax_request()) {
          try {
-            $table = 'merchant m';
-            $column_order = array(null, 'm.id', 'm.c_name', 'm.c_balanceTotal', 'm.c_status', null);
-            $column_search = array('m.id', 'm.c_name', 'm.c_email');
-            $order = array('m.id' => 'desc');
-            
-            $where = [];
-            $where['m.c_merchantLevel'] = 0; // Filter to show only level 0 merchants here
+            $this->load->library('datatables');
+
+            $where = ['m.c_merchantLevel' => 0];
             $ref_entity = $this->session->userdata('ref_entity');
             if (!empty($ref_entity)) {
-                $where['m.ref_entity'] = $ref_entity;
+               $where['m.ref_entity'] = $ref_entity;
             }
 
-            $list = $this->Merchant->get_datatables($table, $column_order, $column_search, $order, $where);
-            $dataItems = array();
-            $no = $this->input->post('start');
-            
-            // Pre-check permission outside the loop to avoid N+1 queries
+            $role_id = $this->session->userdata('role');
             $hasBalancePermission = $this->rbac->has_permission($role_id, 'balance_merchant_module');
 
-            foreach ($list as $m) {
-            $no++;
-            $row = array();
-            $row['no'] = $no;
-            $row['id'] = '<span class="fw-bold text-dark">#' . $m->id . '</span>';
-            
-            // Info Column
-            $row['info'] = '
-                <div class="d-flex flex-column">
-                    <span class="fw-bold text-dark">' . $m->c_name . '</span>
-                    <span class="text-muted small">' . $m->c_email . '</span>
-                </div>';
-
-            // Balance Column
-            $available = (float)$m->c_balanceTotal - (float)$m->c_balanceHold;
-            $row['balance'] = '
-                <div class="d-flex flex-column" style="min-width: 150px;">
-                    <div class="d-flex justify-content-between small mb-1">
-                        <span class="text-muted">Total:</span>
-                        <span class="fw-bold text-dark">Rp ' . number_format($m->c_balanceTotal, 0, ',', '.') . '</span>
-                    </div>
-                    <div class="d-flex justify-content-between small mb-1">
-                        <span class="text-muted">Hold:</span>
-                        <span class="text-warning fw-bold">Rp ' . number_format($m->c_balanceHold, 0, ',', '.') . '</span>
-                    </div>
-                    <div class="d-flex justify-content-between small border-top pt-1 mt-1">
-                        <span class="text-muted">Available:</span>
-                        <span class="text-success fw-bold">Rp ' . number_format($available, 0, ',', '.') . '</span>
-                    </div>
-                </div>';
-
-            // Status Column
-            $status_class = ($m->c_status == 'Active') ? 'bg-success' : 'bg-secondary';
-            $openapi_class = ($m->c_openapiStatus == 'Active') ? 'text-success' : 'text-muted';
-            $row['status'] = '
-                <div class="d-flex flex-column">
-                    <span class="mb-2 badge ' . $status_class . '-soft text-' . str_replace('-soft', '', $status_class) . ' rounded-pill px-3 py-1" style="width: fit-content;">
-                        ' . $m->c_status . '
-                    </span>
-                    <span class="small ' . $openapi_class . ' d-flex align-items-center gap-1">
-                        <i class="fas fa-plug me-1"></i>OpenAPI: ' . $m->c_openapiStatus . '
-                    </span>
-                </div>';
-
-            // Action Column (Standardized Premium Style)
-            $action_html = '
-                <div class="dropdown">
-                    <button class="btn btn-white btn-sm rounded shadow-none dropdown-toggle border px-3" type="button" data-toggle="dropdown" aria-expanded="false" data-boundary="viewport">
-                        <i class="fas fa-ellipsis-v text-muted mr-2"></i>Actions
-                    </button>
-                    <div class="dropdown-menu dropdown-menu-right border-0 shadow-lg p-2" style="min-width: 200px;">
-                        <a class="dropdown-item rounded-2 py-2" href="' . base_url('admin/editMerchant/' . $m->id) . '">
-                            <i class="fas fa-edit mr-2 text-info" style="width: 20px;"></i>Edit Merchant
-                        </a>
-                        <a class="dropdown-item rounded-2 py-2" href="' . base_url('admin/mutation/' . $m->id) . '">
-                            <i class="fas fa-exchange-alt mr-2 text-primary" style="width: 20px;"></i>Mutation Log
-                        </a>
-                        <a class="dropdown-item rounded-2 py-2" href="' . base_url('admin/submerchant/' . $m->id) . '">
-                            <i class="fas fa-users mr-2 text-success" style="width: 20px;"></i>Sub Accounts
-                        </a>';
-
-            if (isset($m->c_merchantLevel) && $m->c_merchantLevel == 0) {
-                $action_html .= '
-                        <button class="dropdown-item rounded-2 py-2 border-0 bg-transparent w-100 text-left" data-toggle="modal" data-target="#delegateModal" onClick="openDelegateModal(' . $m->id . ', \'' . addslashes($m->c_name) . '\')">
-                            <i class="fas fa-key mr-2 text-warning" style="width: 20px;"></i>Delegate
-                        </button>';
-            }
-            
-            if ($hasBalancePermission) {
-                $action_html .= '
-                        <div class="dropdown-divider"></div>
-                        <button class="dropdown-item rounded-2 py-2 border-0 bg-transparent w-100 text-left" data-toggle="modal" data-target="#creditBalanceModal" onClick="detail(' . $m->id . ', \'' . addslashes($m->c_name) . '\')">
-                            <i class="fas fa-plus-circle mr-2 text-success" style="width: 20px;"></i>Credit Balance
-                        </button>
-                        <button class="dropdown-item rounded-2 py-2 border-0 bg-transparent w-100 text-left" data-toggle="modal" data-target="#debitBalanceModal" onClick="detaildebit(' . $m->id . ', \'' . addslashes($m->c_name) . '\')">
-                            <i class="fas fa-minus-circle mr-2 text-danger" style="width: 20px;"></i>Debit Balance
-                        </button>';
-            }
-
-            $action_html .= '
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item rounded-2 py-2" href="' . base_url('admin/settingcashinfee/' . $m->id) . '">
-                            <i class="fas fa-cog mr-2 text-secondary" style="width: 20px;"></i>Cashin Fee Settings
-                        </a>
-                        <a class="dropdown-item rounded-2 py-2" href="' . base_url('admin/settingcashoutfee/' . $m->id) . '">
-                            <i class="fas fa-cog mr-2 text-secondary" style="width: 20px;"></i>Cashout Fee Settings
-                        </a>
-                    </div>
-                </div>';
-            
-            $row['action'] = $action_html;
-            $dataItems[] = $row;
+            // Centralized DataTables logic moved to Merchant model
+            return $this->Merchant->getMerchantDataTable($where, $hasBalancePermission);
+         } catch (Throwable $e) {
+            log_message('error', 'Merchant AJAX error: ' . $e->getMessage());
+            $this->session->set_flashdata('error', 'Error retrieving Merchant data: ' . $e->getMessage());
+            echo json_encode([
+               "draw" => intval($this->input->post("draw")),
+               "recordsTotal" => 0,
+               "recordsFiltered" => 0,
+               "data" => [],
+               "redirect" => base_url('admin/merchant')
+            ]);
+            exit;
          }
-
-         	$output = array(
-            "draw" => intval($this->input->post("draw")),
-            "recordsTotal" => $this->Merchant->count_all_dt($table, $where),
-            "recordsFiltered" => $this->Merchant->count_filtered($table, $column_order, $column_search, $order, $where),
-            "data" => $dataItems,
-         );
-         echo json_encode($output);
-         exit;
-      } catch (Throwable $e) {
-         log_message('error', 'Merchant AJAX error: ' . $e->getMessage());
-         $this->session->set_flashdata('error', 'Error retrieving Merchant data: ' . $e->getMessage());
-         echo json_encode([
-             "draw" => intval($this->input->post("draw")),
-             "recordsTotal" => 0,
-             "recordsFiltered" => 0,
-             "data" => [],
-             "redirect" => base_url('admin/merchant')
-         ]);
-         exit;
-      }
       }
 
       $data['title'] = 'Merchant';
@@ -212,17 +101,12 @@ class AdminMerchant extends CI_Controller
       $data['start'] = 0;
       $data['pagination'] = '';
 
-      // Load views
-      $this->load->view('templates/user_header.php', $data);
-      $this->load->view('templates/user_sidebar.php', $data);
-      $this->load->view('templates/user_topbar.php', $data);
       $this->load->view('merchant/index', $data);
-      $this->load->view('templates/user_footer.php', $data);
    }
 
    public function merchant_spv()
    {
-      $serviceName = "view_merchants";
+      $serviceName = "view_merchantspv";
       $this->load->model('Merchant');
 
       if (!$this->session->userdata('c_email')) {
@@ -230,9 +114,6 @@ class AdminMerchant extends CI_Controller
       }
 
       $role_id = $this->session->userdata('role');
-      if (!$this->rbac->has_permission($role_id, $serviceName)) {
-         show_error('Access Denied', 403);
-      }
 
       $data['title'] = 'Merchant Supervisor';
       $data['user'] = $this->Model_user->view_user()->row_array();
@@ -249,12 +130,7 @@ class AdminMerchant extends CI_Controller
       $data['total_supervisors'] = count($data['merchant_spv']);
       $data['total_merchants_assigned'] = $this->db->where('c_refSupervisor IS NOT NULL')->count_all_results('merchant');
 
-      // Load views
-      $this->load->view('templates/user_header.php', $data);
-      $this->load->view('templates/user_sidebar.php', $data);
-      $this->load->view('templates/user_topbar.php', $data);
       $this->load->view('merchantspv/index', $data);
-      $this->load->view('templates/user_footer.php', $data);
    }
 
     public function listMerchants($supervisorId)
@@ -277,12 +153,7 @@ class AdminMerchant extends CI_Controller
          $supervisorId => $supervisor_name
       ];
 
-      // Load views
-      $this->load->view('templates/user_header.php', $data);
-      $this->load->view('templates/user_sidebar.php', $data);
-      $this->load->view('templates/user_topbar.php', $data);
       $this->load->view('merchantspv/list', $data);
-      $this->load->view('templates/user_footer.php', $data);
     }   
 
 
@@ -403,12 +274,7 @@ class AdminMerchant extends CI_Controller
          $merchant_id => $data['merchant']['c_name']
       ];
 
-      // Load views
-      $this->load->view('templates/user_header.php', $data);
-      $this->load->view('templates/user_sidebar.php', $data);
-      $this->load->view('templates/user_topbar.php', $data);
       $this->load->view('merchant/edit-merchant', $data);
-      $this->load->view('templates/user_footer.php', $data);
    }
 
    public function updateMerchant($merchant_id)
@@ -495,12 +361,7 @@ class AdminMerchant extends CI_Controller
          }
       }
    
-       // Load views
-       $this->load->view('templates/user_header.php', $data);
-       $this->load->view('templates/user_sidebar.php', $data);
-       $this->load->view('templates/user_topbar.php', $data);
        $this->load->view('merchant/setting-fee', $data);
-       $this->load->view('templates/user_footer.php', $data);
    }
 
    public function createSettingCashinFee()
@@ -736,12 +597,7 @@ class AdminMerchant extends CI_Controller
          }
       }
    
-       // Load views
-       $this->load->view('templates/user_header.php', $data);
-       $this->load->view('templates/user_sidebar.php', $data);
-       $this->load->view('templates/user_topbar.php', $data);
        $this->load->view('merchant/setting-cashout-fee', $data);
-       $this->load->view('templates/user_footer.php', $data);
    }
 
    public function createSettingCashoutFee()

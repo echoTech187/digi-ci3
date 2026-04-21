@@ -16,11 +16,7 @@ class User extends CI_Controller
         $data['user'] = $this->Model_user->view_user()->row_array();
         // $data['menu'] = $this->Model_menu->getMenu();
 
-        $this->load->view('templates/user_header.php', $data);
-        $this->load->view('templates/user_sidebar.php', $data);
-        $this->load->view('templates/user_topbar.php', $data);
         $this->load->view('user/index', $data);
-        $this->load->view('templates/user_footer.php');
     }
 
     public function changePassword()
@@ -38,12 +34,7 @@ class User extends CI_Controller
         $this->form_validation->set_rules('repeatPassword', 'Repeat Password', 'required|trim|matches[newPassword]');
 
         if ($this->form_validation->run() == false) {
-            // Load tampilan
-            $this->load->view('templates/user_header', $data);
-            $this->load->view('templates/user_sidebar', $data);
-            $this->load->view('templates/user_topbar', $data);
             $this->load->view('user/changePassword', $data);
-            $this->load->view('templates/user_footer');
         } else {
             $currentPassword = $this->input->post('currentPassword');
             $newPassword = $this->input->post('newPassword');

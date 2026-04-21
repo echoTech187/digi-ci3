@@ -1,4 +1,4 @@
-<div class="container-fluid pb-4">
+<div>
     <!-- ── Page Header ── -->
     <div class="dt-page-header">
         <div>

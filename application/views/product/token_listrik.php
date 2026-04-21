@@ -1,5 +1,5 @@
 <!-- Begin Page Content -->
-<div class="container-fluid pb-4">
+<div>
     <!-- ── Page Header ── -->
     <div class="dt-page-header">
         <div>
@@ -155,8 +155,25 @@ $(document).ready(function() {
         { data: 'no' },
         { data: 'c_caption' },
         { data: 'c_description' },
-        { data: 'c_fee' },
-        { data: 'action', orderable: false, searchable: false, className: 'text-center' }
+        { 
+            data: 'c_fee',
+            className: 'font-weight-bold text-dark',
+            render: function(data) {
+                return 'Rp ' + number_format(data, 0, ',', '.');
+            }
+        },
+        { 
+            data: null, 
+            orderable: false, 
+            searchable: false, 
+            className: 'text-center',
+            render: function(data, type, row) {
+                return '<button class="btn btn-sm btn-dt-action-primary shadow-sm" data-toggle="modal" data-target="#editProductModal" ' +
+                       'onclick="editProduct(\'' + (row.id || '').replace(/'/g, "\\'") + '\', \'' + (row.c_caption || '').replace(/'/g, "\\'") + '\', \'' + (row.c_description || '').replace(/'/g, "\\'") + '\', \'' + row.c_fee + '\')">' +
+                       '<i class="fas fa-edit"></i> Edit' +
+                       '</button>';
+            }
+        }
     ], {
         "ajax": {
             "url": "<?= base_url('admin/token_listrik') ?>",

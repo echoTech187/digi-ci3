@@ -58,10 +58,6 @@ class ReportController extends CI_Controller {
       $data['total_settled']   = $summary->total_settled;
       $data['avg_settled']     = $summary->avg_settled;
 
-      $this->load->view('templates/user_header.php', $data);
-      $this->load->view('templates/user_sidebar.php', $data);
-      $this->load->view('templates/user_topbar.php', $data);
       $this->load->view('admin/balance_log', $data);
-      $this->load->view('templates/user_footer.php', $data);
    }
 }

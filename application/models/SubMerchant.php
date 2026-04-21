@@ -68,4 +68,24 @@ class SubMerchant extends CI_Model
     {
         return $this->db->where('id', $id)->update('merchant', $data);
     }
+
+    /**
+     * Standardized DataTables handler for SubAccount list.
+     */
+    public function get_datatables_handler($id)
+    {
+        $this->load->library('datatables');
+        return $this->datatables->of('merchant')
+            ->where('parent_merchant_id', $id)
+            ->where('c_merchantLevel >', 0)
+            ->set_column_order([null, 'c_name', 'c_email', 'c_gvconnectBusinessId', 'c_status'])
+            ->set_column_search(['c_name', 'c_email', 'id'])
+            ->set_default_order(['id' => 'desc'])
+            ->addColumn('no', function($row) {
+                static $no = null;
+                if ($no === null) $no = intval($this->input->post('start'));
+                return ++$no;
+            })
+            ->make(true);
+    }
 }

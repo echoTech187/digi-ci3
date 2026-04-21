@@ -273,4 +273,35 @@ public function setMaintenanceStatus($newStatus) {
             }
         }
     }
+
+    /**
+     * Server-Side DataTables Handler using the Datatables library.
+     * This centralizes the data retrieval and formatting logic for the merchant list.
+     * 
+     * @param array $where Filter conditions
+     * @param bool $hasBalancePermission Permission flag for balance column
+     * @return void Outputs JSON response
+     */
+    public function getMerchantDataTable($where, $hasBalancePermission)
+    {
+        $this->load->library('datatables');
+        
+        return $this->datatables->of('merchant m')
+            ->set_column_order([null, 'm.id', 'm.c_name', 'm.c_balanceTotal', 'm.c_status', null])
+            ->set_column_search(['m.id', 'm.c_name', 'm.c_email'])
+            ->set_default_order(['m.id' => 'desc'])
+            ->where($where)
+            ->addColumn('no', function ($row) {
+                static $no = null;
+                if ($no === null) $no = intval($this->input->post('start'));
+                return ++$no;
+            })
+            ->addColumn('hasBalancePermission', function ($row) use ($hasBalancePermission) {
+                return $hasBalancePermission;
+            })
+            ->editColumn('c_merchantLevel', function ($row) {
+                return isset($row->c_merchantLevel) ? $row->c_merchantLevel : 0;
+            })
+            ->make(true);
+    }
 }

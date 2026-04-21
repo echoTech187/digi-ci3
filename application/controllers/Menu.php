@@ -22,11 +22,7 @@ class Menu extends CI_Controller
       $this->form_validation->set_rules('menu', 'Menu', 'required');
 
       if ($this->form_validation->run() == false) {
-         $this->load->view('templates/user_header.php', $data);
-         $this->load->view('templates/user_sidebar.php', $data);
-         $this->load->view('templates/user_topbar.php', $data);
          $this->load->view('menu/index', $data);
-         $this->load->view('templates/user_footer.php');
       } else {
          $data = [
             'menu' => $this->input->post('menu')
@@ -57,11 +53,7 @@ class Menu extends CI_Controller
 
       $this->form_validation->set_rules('menu', 'Menu', 'required');
 
-      $this->load->view('templates/user_header.php', $data);
-      $this->load->view('templates/user_sidebar.php', $data);
-      $this->load->view('templates/user_topbar.php', $data);
       $this->load->view('menu/editMenu', $data);
-      $this->load->view('templates/user_footer.php');
    }
 
    public function updateMenu()
@@ -96,11 +88,7 @@ class Menu extends CI_Controller
       $this->form_validation->set_rules('icon', 'Icon', 'required');
 
       if ($this->form_validation->run() == false) {
-         $this->load->view('templates/user_header.php', $data);
-         $this->load->view('templates/user_sidebar.php', $data);
-         $this->load->view('templates/user_topbar.php', $data);
          $this->load->view('menu/subMenu', $data);
-         $this->load->view('templates/user_footer.php');
       } else {
          $data = [
             'menu_id'   => $this->input->post('menu_id'),
@@ -145,11 +133,7 @@ class Menu extends CI_Controller
             $id => $subMenuName
          ];
 
-         $this->load->view('templates/user_header.php', $data);
-         $this->load->view('templates/user_sidebar.php', $data);
-         $this->load->view('templates/user_topbar.php', $data);
          $this->load->view('menu/editSubMenu', $data);
-         $this->load->view('templates/user_footer.php');
       }
    }
 
@@ -211,11 +195,7 @@ class Menu extends CI_Controller
       $data['breadcrumb_url_replace'] = [
          'menu' => 'menu/role'
       ];
-      $this->load->view('templates/user_header.php', $data);
-      $this->load->view('templates/user_sidebar.php', $data);
-      $this->load->view('templates/user_topbar.php', $data);
       $this->load->view('menu/role', $data);
-      $this->load->view('templates/user_footer.php');
    }
 
    public function roleAccess($role_id)
@@ -258,11 +238,7 @@ class Menu extends CI_Controller
       $this->db->group_by('group_modules');
       $data['group_modules'] = $this->db->get('user_menu')->result_array();
 
-      $this->load->view('templates/user_header.php', $data);
-      $this->load->view('templates/user_sidebar.php', $data);
-      $this->load->view('templates/user_topbar.php', $data);
       $this->load->view('menu/roleAccess', $data);
-      $this->load->view('templates/user_footer.php');
    }
 
    public function changeAccess()

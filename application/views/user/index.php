@@ -1,5 +1,5 @@
 <!-- Begin Page Content -->
-<div class="container-fluid">
+<div >
 
     <!-- Page Heading -->
 

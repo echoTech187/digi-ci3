@@ -1,5 +1,5 @@
 <!-- Begin Page Content -->
-<div class="container-fluid">
+<div >
     <div class="card shadow border-left-info">
         <div class="card-header">
             <h3>Balance External Log</h3>

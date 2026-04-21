@@ -2,7 +2,7 @@
 $id = $this->uri->segment(3);
 ?>
 
-<div class="container-fluid pb-4">
+<div>
     <!-- ── Page Header ── -->
     <div class="dt-page-header">
         <div>
@@ -73,10 +73,61 @@ $(document).ready(function() {
     // Initialize Server-side DataTable
     var table = initServerDataTable("#submerchantTable", "<?= base_url('admin/submerchant/'.$id) ?>", [
         { data: 'no', orderable: false },
-        { data: 'c_name', className: 'font-weight-bold text-gray-800' },
+        { 
+            data: 'c_name', 
+            className: 'font-weight-bold text-gray-800',
+            render: function(data, type, row) {
+                return '<div>' + data + '</div><small class="text-muted">ID: ' + row.id + '</small>';
+            }
+        },
         { data: 'c_email' },
-        { data: 'c_status', className: 'text-center' },
-        { data: 'action', className: 'text-center', orderable: false }
+        { 
+            data: 'c_status', 
+            className: 'text-center',
+            render: function(data, type, row) {
+                var status_class = (data == 'Active') ? 'success' : 'secondary';
+                return '<span class="badge badge-' + status_class + '">' + data + '</span>';
+            }
+        },
+        { 
+            data: 'id', 
+            className: 'text-center', 
+            orderable: false,
+            render: function(data, type, row) {
+                var baseUrl = "<?= base_url() ?>";
+                return '<div class="dropdown">' +
+                       '    <button class="btn btn-sm btn-light border dropdown-toggle" type="button" data-toggle="dropdown">' +
+                       '        Actions' +
+                       '    </button>' +
+                       '    <div class="dropdown-menu dropdown-menu-right shadow-sm border-0">' +
+                       '        <a class="dropdown-item py-2" href="' + baseUrl + 'admin/submerchant/' + data + '">' +
+                       '            <i class="fas fa-users mr-2 text-success"></i>Sub Accounts' +
+                       '        </a>' +
+                       '        <div class="dropdown-divider"></div>' +
+                       '        <button type="button" class="dropdown-item py-2 edit-sub-btn" ' +
+                       '            data-toggle="modal" data-target="#subMerchantModal"' +
+                       '            data-id="' + data + '"' +
+                       '            data-name="' + row.c_name + '"' +
+                       '            data-email="' + row.c_email + '"' +
+                       '            data-merchantid="' + row.parent_merchant_id + '"' +
+                       '            data-businessname="' + row.c_gvconnectBusinessName + '"' +
+                       '            data-businessid="' + row.c_gvconnectBusinessId + '"' +
+                       '            data-key="' + row.c_gvconnectGVConnectKey + '"' +
+                       '            data-qris="' + row.c_gvconnectStaticQrisRaw + '"' +
+                       '            data-bni="' + row.c_gvconnectStaticVaBni + '"' +
+                       '            data-bca="' + row.c_gvconnectStaticVaBca + '"' +
+                       '            data-cimb="' + row.c_gvconnectStaticVaCimb + '"' +
+                       '            data-permata="' + row.c_gvconnectStaticVaPermata + '"' +
+                       '            data-status="' + row.c_status + '">' +
+                       '            <i class="fas fa-edit mr-2 text-info"></i>Edit Details' +
+                       '        </button>' +
+                       '        <a class="dropdown-item py-2" href="' + baseUrl + 'admin/mutation/' + data + '">' +
+                       '            <i class="fas fa-exchange-alt mr-2 text-warning"></i>Mutations' +
+                       '        </a>' +
+                       '    </div>' +
+                       '</div>';
+            }
+        }
     ], {
             "language": {
                 "processing": '<i class="fa fa-spinner fa-spin fa-2x fa-fw mx-auto d-block text-primary"></i>',

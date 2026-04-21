@@ -44,78 +44,11 @@ class TransactionController extends CI_Controller
       ];
 
       if ($this->input->is_ajax_request()) {
-         $this->db->db_debug = FALSE;
          try {
-            $draw = intval($this->input->post("draw"));
-            $start = intval($this->input->post("start"));
-            $length = intval($this->input->post("length"));
-
-            $list = $this->SubMerchant->get_datatables($id);
-            
-            // Explicit error check
-            $db_error = $this->db->error();
-            if ($db_error['code'] !== 0) {
-               throw new Exception("Database Error [" . $db_error['code'] . "]: " . $db_error['message']);
-            }
-
-            $dataItems = array();
-            $no = $start;
-
-            foreach ($list as $items) {
-               $no++;
-               $row = array();
-               $row['no'] = $no;
-               $row['c_name'] = '<div>' . htmlspecialchars($items->c_name) . '</div><small class="text-muted">ID: ' . $items->id . '</small>';
-               $row['c_email'] = $items->c_email;
-               $row['c_gvconnectBusinessId'] = (isset($items->c_gvconnectBusinessId) && $items->c_gvconnectBusinessId) ? $items->c_gvconnectBusinessId : '-';
-
-               $status_class = ($items->c_status == 'Active') ? 'success' : 'secondary';
-               $row['c_status'] = '<span class="badge badge-' . $status_class . '">' . $items->c_status . '</span>';
-
-               $row['action'] = '
-                  <div class="dropdown">
-                        <button class="btn btn-sm btn-light border dropdown-toggle" type="button" data-toggle="dropdown">
-                           Actions
-                        </button>
-                        <div class="dropdown-menu dropdown-menu-right shadow-sm border-0">
-                           <a class="dropdown-item py-2" href="' . base_url('admin/submerchant/' . $items->id) . '">
-                              <i class="fas fa-users mr-2 text-success"></i>Sub Accounts
-                           </a>
-                           <div class="dropdown-divider"></div>
-                           <button type="button" class="dropdown-item py-2 edit-sub-btn" 
-                              data-toggle="modal" data-target="#subMerchantModal"
-                              data-id="' . $items->id . '"
-                              data-name="' . htmlspecialchars($items->c_name) . '"
-                              data-email="' . htmlspecialchars($items->c_email) . '"
-                              data-merchantid="' . $items->parent_merchant_id . '"
-                              data-businessname="' . htmlspecialchars(isset($items->c_gvconnectBusinessName) ? $items->c_gvconnectBusinessName : '') . '"
-                              data-businessid="' . htmlspecialchars(isset($items->c_gvconnectBusinessId) ? $items->c_gvconnectBusinessId : '') . '"
-                              data-key="' . htmlspecialchars(isset($items->c_gvconnectGVConnectKey) ? $items->c_gvconnectGVConnectKey : '') . '"
-                              data-qris="' . htmlspecialchars(isset($items->c_gvconnectStaticQrisRaw) ? $items->c_gvconnectStaticQrisRaw : '') . '"
-                              data-bni="' . htmlspecialchars(isset($items->c_gvconnectStaticVaBni) ? $items->c_gvconnectStaticVaBni : '') . '"
-                              data-bca="' . htmlspecialchars(isset($items->c_gvconnectStaticVaBca) ? $items->c_gvconnectStaticVaBca : '') . '"
-                              data-cimb="' . htmlspecialchars(isset($items->c_gvconnectStaticVaCimb) ? $items->c_gvconnectStaticVaCimb : '') . '"
-                              data-permata="' . htmlspecialchars(isset($items->c_gvconnectStaticVaPermata) ? $items->c_gvconnectStaticVaPermata : '') . '"
-                              data-status="' . $items->c_status . '">
-                              <i class="fas fa-edit mr-2 text-info"></i>Edit Details
-                           </button>
-                           <a class="dropdown-item py-2" href="' . base_url('admin/mutation/' . $items->id) . '">
-                              <i class="fas fa-exchange-alt mr-2 text-warning"></i>Mutations
-                           </a>
-                        </div>
-                  </div>';
-
-               $dataItems[] = $row;
-            }
-
-            $output = array(
-               "draw" => $draw,
-               "recordsTotal" => $this->SubMerchant->count_all_dt($id),
-               "recordsFiltered" => $this->SubMerchant->count_filtered($id),
-               "data" => $dataItems,
-            );
-            echo json_encode($output);
+            $this->SubMerchant->get_datatables_handler($id);
+            exit;
          } catch (Throwable $e) {
+            log_message('error', 'Submerchant AJAX error: ' . $e->getMessage());
             echo json_encode(array(
                "draw" => intval($this->input->post("draw")),
                "recordsTotal" => 0,
@@ -130,11 +63,7 @@ class TransactionController extends CI_Controller
       $data['merchant'] = $this->Mutation_model->get_merchant($id);
       $data['total_submerchants'] = $this->SubMerchant->count_all_dt($id);
 
-      $this->load->view('templates/user_header.php', $data);
-      $this->load->view('templates/user_sidebar.php', $data);
-      $this->load->view('templates/user_topbar.php', $data);
       $this->load->view('submerchant/index', $data);
-      $this->load->view('templates/user_footer.php', $data);
    }
 
    public function resetsubmerchant()
@@ -185,55 +114,17 @@ class TransactionController extends CI_Controller
       ]);
 
       if ($this->input->is_ajax_request()) {
-         $this->db->db_debug = FALSE;
          try {
-            $draw = intval($this->input->post("draw"));
-            $start = intval($this->input->post("start"));
-            $length = intval($this->input->post("length"));
-
-            $list = $this->Mutation_model->get_datatables($id, $search_date_mutation, $search_position, $search_channel, $search_date_mutation_to);
-            
-            // Explicit error check
-            $db_error = $this->db->error();
-            if ($db_error['code'] !== 0) {
-               throw new Exception("Database Error [" . $db_error['code'] . "]: " . $db_error['message']);
-            }
-
-            $dataItems = array();
-            $no = $start;
-
-            foreach ($list as $items) {
-               $no++;
-               $row = array();
-               $row['no'] = $no;
-               $row['c_datetime'] = $items->c_datetime;
-
-               $pos_class = ($items->c_potition == 'Credit') ? 'success' : 'danger';
-               $row['c_potition'] = '<span class="badge badge-' . $pos_class . '">' . $items->c_potition . '</span>';
-
-               $row['channelName'] = $items->channelName ?: '-';
-               $row['description'] = $items->description ?: '-';
-
-               $amount_class = ($items->c_potition == 'Credit') ? 'text-success' : 'text-danger';
-               $row['c_amount'] = '<span class="' . $amount_class . ' font-weight-bold">' . number_format($items->c_amount, 2) . '</span>';
-               $row['c_BalanceAfter'] = number_format($items->c_BalanceAfter, 2);
-               
-               // Raw values for premium client-side rendering
-               $row['c_amount_raw']   = $items->c_amount;
-               $row['c_balance_raw']  = $items->c_BalanceAfter;
-               $row['c_position_raw'] = $items->c_potition;
-
-               $dataItems[] = $row;
-            }
-
-            $output = array(
-               "draw" => $draw,
-               "recordsTotal" => $this->Mutation_model->count_all_dt($id),
-               "recordsFiltered" => $this->Mutation_model->count_filtered($id, $search_date_mutation, $search_position, $search_channel, $search_date_mutation_to),
-               "data" => $dataItems,
-            );
-            echo json_encode($output);
+            $filters = [
+               'date' => $search_date_mutation,
+               'date_to' => $search_date_mutation_to,
+               'position' => $search_position,
+               'channel' => $search_channel
+            ];
+            $this->Mutation_model->get_datatables_handler($id, $filters);
+            exit;
          } catch (Throwable $e) {
+            log_message('error', 'Mutation AJAX error: ' . $e->getMessage());
             echo json_encode(array(
                "draw" => intval($this->input->post("draw")),
                "recordsTotal" => 0,
@@ -251,12 +142,7 @@ class TransactionController extends CI_Controller
       elseif ($search_position == 'Debit')
          $data['channels'] = $this->Mutation_model->get_cashout_channels($id);
 
-      $data['merchant'] = $this->Mutation_model->get_merchant($id);
-      $this->load->view('templates/user_header.php', $data);
-      $this->load->view('templates/user_sidebar.php', $data);
-      $this->load->view('templates/user_topbar.php', $data);
       $this->load->view('mutation/list', $data);
-      $this->load->view('templates/user_footer.php', $data);
    }
    public function registersubMerchant()
    {
@@ -431,41 +317,13 @@ class TransactionController extends CI_Controller
 
       // Intercept AJAX request for DataTables
       if ($this->input->is_ajax_request()) {
-         $this->db->db_debug = FALSE;
          try {
-            $list = $this->History->get_datatables($search_date_purchase, $search_merchant_purchase);
-            
-            // Explicit error check
-            $db_error = $this->db->error();
-            if ($db_error['code'] !== 0) {
-               throw new Exception("Database Error [" . $db_error['code'] . "]: " . $db_error['message']);
-            }
-
-            $data = array();
-            $no = isset($_POST['start']) ? $_POST['start'] : 0;
-            foreach ($list as $history) {
-               $no++;
-               $row = array();
-               $row['no'] = $no;
-               $row['name_merchant'] = $history->name_merchant;
-               $row['c_datetime'] = $history->c_datetime;
-               $row['ref_cashoutChannelId'] = $history->ref_cashoutChannelId;
-               $row['c_invoiceNo'] = $history->c_invoiceNo;
-               $row['c_phone'] = $history->c_phone;
-               $row['c_amount'] = $history->c_amount;
-               $row['c_status'] = $history->c_status;
-
-               $data[] = $row;
-            }
-
-            $output = array(
-               "draw" => isset($_POST['draw']) ? $_POST['draw'] : null,
-               "recordsTotal" => $this->History->count_all_dt($search_date_purchase, $search_merchant_purchase),
-               "recordsFiltered" => $this->History->count_filtered($search_date_purchase, $search_merchant_purchase),
-               "data" => $data,
-            );
-
-            $this->output->set_content_type('application/json')->set_output(json_encode($output));
+            $filters = [
+               'date' => $search_date_purchase,
+               'merchant' => $search_merchant_purchase
+            ];
+            $this->History->get_datatables_handler($filters);
+            return;
          } catch (Throwable $e) {
             $this->output->set_content_type('application/json')->set_output(json_encode(array(
                "draw" => isset($_POST['draw']) ? intval($_POST['draw']) : 0,
@@ -481,12 +339,7 @@ class TransactionController extends CI_Controller
       $data['title'] = 'Purchase';
       $data['user'] = $this->Model_user->view_user()->row_array();
       $data['merchants'] = $this->History->get_merchant();
-      // Load views
-      $this->load->view('templates/user_header.php', $data);
-      $this->load->view('templates/user_sidebar.php', $data);
-      $this->load->view('templates/user_topbar.php', $data);
       $this->load->view('history/list', $data);
-      $this->load->view('templates/user_footer.php', $data);
    }
    public function resetHistory()
    {
@@ -567,62 +420,19 @@ class TransactionController extends CI_Controller
 
       // Handle DataTables AJAX Request
       if ($this->input->is_ajax_request()) {
-         $this->db->db_debug = FALSE;
          try {
-            $draw = intval($this->input->post("draw"));
-            $start = intval($this->input->post("start"));
-            $length = intval($this->input->post("length"));
-
-            // Get filter values from session (set by the Search button reload)
-            $search_date = $this->session->userdata('search_date_va');
-            $search_date_to = $this->session->userdata('search_date_va_to');
-            $search_merchant = $this->session->userdata('search_name_va');
-            $search_settlement = $this->session->userdata('search_date_va_settlement');
-            $search_va = $this->session->userdata('search_va_number');
-            $search_transid = $this->session->userdata('search_va_transid');
-
-            $list = $this->VirtualAccount->get_datatables($search_date, $search_date_to, $search_merchant, $search_settlement, $search_va, $search_transid);
-            
-            // Explicit error check
-            $db_error = $this->db->error();
-            if ($db_error['code'] !== 0) {
-               throw new Exception("Database Error [" . $db_error['code'] . "]: " . $db_error['message']);
-            }
-
-            $data = array();
-            $no = $start;
-            foreach ($list as $va) {
-               $no++;
-               $row = array();
-               $row['no'] = $no;
-               $row['c_datetime'] = $va->c_datetime;
-               $row['merchant_name'] = $va->merchant_name;
-               $row['c_invoiceNo'] = $va->c_invoiceNo;
-               $row['ref_cashinChannelId'] = $va->ref_cashinChannelId;
-               $row['c_type'] = $va->c_type;
-               $row['c_vaNumber'] = $va->c_vaNumber;
-               $row['c_custom'] = $va->c_custom;
-               $row['c_amount'] = number_format($va->c_amount, 2);
-               $row['c_fee'] = number_format($va->c_fee, 2);
-               $row['c_isSettlementRealtime'] = ($va->c_isSettlementRealtime == 1) ? 'Yes' : 'No';
-               $row['c_datetimeSettlement'] = ($va->c_isSettlementRealtime == 1) ? 'Realtime' : $va->c_datetimeSettlement;
-               $row['Merchant_Transaction_Id'] = $va->Merchant_Transaction_Id;
-
-               $action = '<a href="' . base_url('admin/VA_detail/' . $va->id) . '" class="btn btn-action-detail"><i class="fas fa-eye mr-2"></i>Detail</a> ';
-               $action .= '<a onclick="javascript: return confirm(\'Are you sure, want to resend notification again ??\')" href="' . base_url('admin/SendnotifikasiVA/' . $va->id . '/' . $va->ref_merchantId) . '" class="btn btn-action-resend"><i class="fas fa-paper-plane mr-2"></i>Resend</a>';
-               $row['action'] = $action;
-
-               $data[] = $row;
-            }
-
-            $output = array(
-               "draw" => $draw,
-               "recordsTotal" => $this->VirtualAccount->count_all_dt($search_date, $search_date_to, $search_merchant, $search_settlement, $search_va, $search_transid),
-               "recordsFiltered" => $this->VirtualAccount->count_filtered($search_date, $search_date_to, $search_merchant, $search_settlement, $search_va, $search_transid),
-               "data" => $data,
-            );
-            echo json_encode($output);
+            $filters = [
+               'date' => $this->session->userdata('search_date_va'),
+               'date_to' => $this->session->userdata('search_date_va_to'),
+               'merchant' => $this->session->userdata('search_name_va'),
+               'settlement' => $this->session->userdata('search_date_va_settlement'),
+               'va_number' => $this->session->userdata('search_va_number'),
+               'transid' => $this->session->userdata('search_va_transid')
+            ];
+            $this->VirtualAccount->get_datatables_handler($filters);
+            exit;
          } catch (Throwable $e) {
+            log_message('error', 'VA AJAX error: ' . $e->getMessage());
             echo json_encode(array(
                "draw" => intval($this->input->post("draw")),
                "recordsTotal" => 0,
@@ -639,11 +449,7 @@ class TransactionController extends CI_Controller
       $data['start'] = 0;
       $data['merchants'] = $this->VirtualAccount->get_merchant();
 
-      $this->load->view('templates/user_header.php', $data);
-      $this->load->view('templates/user_sidebar.php', $data);
-      $this->load->view('templates/user_topbar.php', $data);
       $this->load->view('virtualaccount/list', $data);
-      $this->load->view('templates/user_footer.php', $data);
    }
 
    public function resetVA()
@@ -683,11 +489,7 @@ class TransactionController extends CI_Controller
       }
       $data['breadcrumb_replace'] = [$id => $displayId];
 
-      $this->load->view('templates/user_header.php', $data);
-      $this->load->view('templates/user_sidebar.php', $data);
-      $this->load->view('templates/user_topbar.php', $data);
       $this->load->view('virtualaccount/detail_va', $data);
-      $this->load->view('templates/user_footer.php', $data);
    }
    public function download_VA()
    {
@@ -791,83 +593,26 @@ class TransactionController extends CI_Controller
       // Pagination config
       // Handle DataTables AJAX Request
       if ($this->input->is_ajax_request()) {
-         $this->db->db_debug = FALSE;
          try {
-            $draw = intval($this->input->post("draw"));
-            $start = intval($this->input->post("start"));
-            $length = intval($this->input->post("length"));
-
-            // Get filter values from session (set by the Search button reload)
-            $search_rrn = $this->session->userdata('search_rrn');
-            $search_name = $this->session->userdata('search_name_qris');
-            $search_date_from = $this->session->userdata('search_date_qris');
-            $search_date_to = $this->session->userdata('search_date_qris_to');
-            $search_settlement = $this->session->userdata('search_date_qris_settlement');
-            $search_invoice = $this->session->userdata('search_invoice_no');
-            $search_transid = $this->session->userdata('search_transactionid_ht');
-
-            // Format dates for query if they exist
-            $date_from_query = null;
-            $date_to_query = null;
-            if (!empty($search_date_from) && !empty($search_date_to)) {
-               $date_from_query = date('Ymd', strtotime($search_date_from)) . "000001";
-               $date_to_query = date('Ymd', strtotime($search_date_to)) . "235959";
-            }
-
-            $list = $this->Qris->get_datatables($search_name, $date_from_query, $date_to_query, $search_settlement, $search_rrn, $search_invoice, $search_transid);
-            
-            // Explicit error check
-            $db_error = $this->db->error();
-            if ($db_error['code'] !== 0) {
-               throw new Exception("Database Error [" . $db_error['code'] . "]: " . $db_error['message']);
-            }
-
-            $data = array();
-            $no = $start;
-            foreach ($list as $items) {
-               $no++;
-               $row = array();
-               $row['no'] = $no;
-               $row['c_datetime'] = $items->c_datetime;
-               $row['merchant_info'] = ' [' . $items->ref_merchantId . '] - ' . $items->name_merchant;
-               $row['submerchant_info'] = ' [' . $items->ref_subMerchantId . '] - ' . $items->name_submerchant;
-               $row['c_invoiceNo'] = $items->c_invoiceNo;
-               $row['c_type'] = $items->c_type;
-               $row['c_amount'] = number_format($items->c_amount, 2);
-               $row['c_mdr'] = $items->c_mdr;
-               $row['c_fee'] = number_format($items->c_fee, 2);
-               $row['c_issuerRrn'] = $items->c_issuerRrn;
-               $row['c_isSettlementRealtime'] = ($items->c_isSettlementRealtime == 1) ? 'Yes' : 'No';
-               $row['c_datetimeSettlement'] = ($items->c_isSettlementRealtime == 1) ? 'Realtime' : $items->c_datetimeSettlement;
-               $row['Merchant_Transaction_Id'] = $items->Merchant_Transaction_Id;
-
-               $action = '<a href="' . base_url('admin/qris_detail/' . $items->id) . '" class="btn btn-action-detail"><i class="fas fa-eye mr-2"></i>Detail</a> ';
-               $action .= '<a onclick="javascript: return confirm(\'Are you sure, want to resend notification again ??\')" href="' . base_url('admin/SendnotifikasiQRIS/' . $items->id . '/' . $items->ref_merchantId) . '" class="btn btn-action-resend"><i class="fas fa-paper-plane mr-2"></i>Resend</a>';
-               $row['action'] = $action;
-
-               $data[] = $row;
-            }
-
-            $output = array(
-               "draw" => $draw,
-               "recordsTotal" => $this->Qris->count_all_dt($search_name, $date_from_query, $date_to_query),
-               "recordsFiltered" => $this->Qris->count_filtered($search_name, $date_from_query, $date_to_query, $search_settlement, $search_rrn, $search_invoice, $search_transid),
-               "data" => $data,
-            );
-            echo json_encode($output);
+            $filters = [
+               'merchant' => $this->session->userdata('search_name_qris'),
+               'date_from' => $this->session->userdata('search_date_qris'),
+               'date_to' => $this->session->userdata('search_date_qris_to'),
+               'settlement' => $this->session->userdata('search_date_qris_settlement'),
+               'rrn' => $this->session->userdata('search_rrn'),
+               'invoice' => $this->session->userdata('search_invoice_no'),
+               'transid' => $this->session->userdata('search_transactionid_ht')
+            ];
+            $this->Qris->get_datatables_handler($filters);
+            exit;
          } catch (Throwable $e) {
-            $db_error = $this->db->error();
-            $error_msg = $e->getMessage();
-            if (!empty($db_error['message'])) {
-               $error_msg .= " (DB Error: " . $db_error['message'] . ")";
-            }
-            log_message('error', 'QRIS AJAX error: ' . $error_msg);
-            $this->session->set_flashdata('error', 'Error retrieving QRIS data: ' . $error_msg);
+            log_message('error', 'QRIS AJAX error: ' . $e->getMessage());
             echo json_encode(array(
                "draw" => intval($this->input->post("draw")),
                "recordsTotal" => 0,
                "recordsFiltered" => 0,
                "data" => array(),
+               "error" => "Error retrieving QRIS data: " . $e->getMessage(),
                "redirect" => base_url('admin/qris')
             ));
          }
@@ -881,11 +626,7 @@ class TransactionController extends CI_Controller
       $data['search_transid_qriss'] = $search_transid_qriss;
       $data['merchants'] = $this->Qris->get_merchant();
 
-      $this->load->view('templates/user_header.php', $data);
-      $this->load->view('templates/user_sidebar.php', $data);
-      $this->load->view('templates/user_topbar.php', $data);
       $this->load->view('qris/list', $data);
-      $this->load->view('templates/user_footer.php', $data);
    }
 
    public function resetqris()
@@ -923,11 +664,7 @@ class TransactionController extends CI_Controller
       }
       $data['breadcrumb_replace'] = [$id => $displayId];
 
-      $this->load->view('templates/user_header.php', $data);
-      $this->load->view('templates/user_sidebar.php', $data);
-      $this->load->view('templates/user_topbar.php', $data);
       $this->load->view('qris/detail_qris', $data);
-      $this->load->view('templates/user_footer.php', $data);
    }
 
    public function download_qris()
@@ -1096,36 +833,37 @@ class TransactionController extends CI_Controller
                throw new Exception("Database Error [" . $db_error['code'] . "]: " . $db_error['message']);
             }
 
-            $data = array();
+            $dataItems = array();
             $no = $start;
 
             foreach ($list as $items) {
                $no++;
                $row = array();
                $row['no'] = $no;
+               $row['id'] = $items->id;
+               $row['ref_merchantId'] = $items->ref_merchantId;
+               $row['ref_subMerchantId'] = $items->ref_subMerchantId;
+               $row['name_merchant'] = $items->name_merchant;
+               $row['name_submerchant'] = $items->name_submerchant;
                $row['c_datetime'] = $items->c_datetime;
-               $row['submerchant_info'] = ' [' . $items->ref_subMerchantId . '] - ' . $items->name_submerchant;
                $row['c_invoiceNo'] = $items->c_invoiceNo;
                $row['c_type'] = $items->c_type;
                $row['ref_cashinChannelId'] = $items->ref_cashinChannelId;
-               $row['c_amount'] = number_format($items->c_amount, 2);
+               $row['c_amount'] = $items->c_amount;
                $row['c_mdr'] = $items->c_mdr;
-               $row['c_fee'] = number_format($items->c_fee, 2);
-               $row['settlement_info'] = ($items->c_isSettlementRealtime == 1) ? 'Realtime' : ($items->c_datetimeSettlement ?: '-');
-               $row['Merchant_Transaction_Id'] = $items->Merchant_Transaction_Id ?: '-';
+               $row['c_fee'] = $items->c_fee;
+               $row['c_isSettlementRealtime'] = $items->c_isSettlementRealtime;
+               $row['c_datetimeSettlement'] = $items->c_datetimeSettlement;
+               $row['Merchant_Transaction_Id'] = $items->Merchant_Transaction_Id;
 
-               $action = '<a href="' . base_url('admin/ewallet_detail/' . $items->id) . '" class="btn btn-action-detail"><i class="fas fa-eye mr-2"></i>Detail</a> ';
-               $action .= '<a onclick="javascript: return confirm(\'Are you sure, want to resend notification again ??\')" href="' . base_url('admin/Sendnotifikasiewallet/' . $items->id) . '" class="btn btn-action-resend"><i class="fas fa-paper-plane mr-2"></i>Resend</a>';
-               $row['action'] = $action;
-
-               $data[] = $row;
+               $dataItems[] = $row;
             }
 
             $output = array(
                "draw" => $draw,
                "recordsTotal" => $this->Ewallet->count_all_dt($search_name, $date_from_query, $date_to_query),
                "recordsFiltered" => $this->Ewallet->count_filtered($search_name, $date_from_query, $date_to_query, $search_date_settlement, $search_invoice_no_ajax),
-               "data" => $data,
+               "data" => $dataItems,
             );
             echo json_encode($output);
          } catch (Throwable $e) {
@@ -1146,11 +884,7 @@ class TransactionController extends CI_Controller
       $data['merchants'] = $this->Ewallet->get_merchant();
 
 
-      $this->load->view('templates/user_header.php', $data);
-      $this->load->view('templates/user_sidebar.php', $data);
-      $this->load->view('templates/user_topbar.php', $data);
       $this->load->view('ewallet/ewallet_list', $data);
-      $this->load->view('templates/user_footer.php', $data);
    }
 
    public function resetewallet()
@@ -1284,39 +1018,36 @@ class TransactionController extends CI_Controller
                throw new Exception("Database Error [" . $db_error['code'] . "]: " . $db_error['message']);
             }
 
-            $data = array();
+            $dataItems = array();
             $no = $start;
             foreach ($list as $items) {
                $no++;
                $row = array();
                $row['no'] = $no;
-               $row['merchant_info'] = ' [' . $items->ref_merchantId . '] - ' . $items->name_merchant;
+               $row['id'] = $items->id;
+               $row['ref_merchantId'] = $items->ref_merchantId;
+               $row['name_merchant'] = $items->name_merchant;
                $row['c_datetime'] = $items->c_datetime;
                $row['c_invoiceNo'] = $items->c_invoiceNo;
                $row['c_merchantTransactionId'] = $items->c_merchantTransactionId;
                $row['ref_cashoutChannelId'] = $items->ref_cashoutChannelId;
                $row['c_accountNo'] = $items->c_accountNo;
                $row['c_beneficiaryAccountName'] = $items->c_beneficiaryAccountName;
-               $row['c_amount'] = number_format($items->c_amount, 2);
-               $row['c_fee'] = number_format($items->c_fee, 2);
+               $row['c_amount'] = $items->c_amount;
+               $row['c_fee'] = $items->c_fee;
                $row['c_status'] = $items->c_status;
+               $row['c_responseBody'] = $items->c_responseBody;
+               $row['ref_cashoutExternalId'] = $items->ref_cashoutExternalId;
+               $row['ref_cashoutExternalLogBifastId'] = $items->ref_cashoutExternalLogBifastId;
 
-               // Parsed Response Logic
-               $responseBody = json_decode($items->c_responseBody, true);
-               $row['parsedResponse'] = isset($responseBody['responseMessage']) ? $responseBody['responseMessage'] : (isset($responseBody['message']) ? $responseBody['message'] : '-');
-
-               $action = '<a href="' . base_url('admin/bi_fast_detail/' . $items->id) . '" class="btn btn-action-detail"><i class="fas fa-eye mr-2"></i>Detail</a> ';
-               $action .= '<a class="btn btn-action-resend btn-info-request" href="#" data-merchantTransactionId="' . $items->c_merchantTransactionId . '" data-ref_cashoutExternalId="' . $items->ref_cashoutExternalId . '" data-ref_cashoutExternalLogBifastId="' . $items->ref_cashoutExternalLogBifastId . '"><i class="fas fa-info-circle mr-2"></i>Info Request</a>';
-               $row['action'] = $action;
-
-               $data[] = $row;
+               $dataItems[] = $row;
             }
 
             $output = array(
                "draw" => $draw,
                "recordsTotal" => $this->BiFast->count_all_dt($search_name, $date_from_query, $date_to_query),
                "recordsFiltered" => $this->BiFast->count_filtered($search_name, $date_from_query, $date_to_query, $search_transid, $search_external_reff, $search_channel, $search_status),
-               "data" => $data,
+               "data" => $dataItems,
             );
             echo json_encode($output);
          } catch (Throwable $e) {
@@ -1370,11 +1101,7 @@ class TransactionController extends CI_Controller
 
 
       // Render view
-      $this->load->view('templates/user_header.php', $data);
-      $this->load->view('templates/user_sidebar.php', $data);
-      $this->load->view('templates/user_topbar.php', $data);
       $this->load->view('bifast/list', $data);
-      $this->load->view('templates/user_footer.php', $data);
    }
 
    public function resetbi_fast()
@@ -1413,11 +1140,7 @@ class TransactionController extends CI_Controller
       }
       $data['breadcrumb_replace'] = [$id => $displayId];
 
-      $this->load->view('templates/user_header.php', $data);
-      $this->load->view('templates/user_sidebar.php', $data);
-      $this->load->view('templates/user_topbar.php', $data);
       $this->load->view('bifast/detail', $data);
-      $this->load->view('templates/user_footer.php', $data);
    }
    public function download_bi_fast()
    {
@@ -1484,6 +1207,7 @@ class TransactionController extends CI_Controller
 
          $list = $this->VADynamic->get_datatables($search_name_vad, $search_date_vad, $search_va_number, $search_merchant_trxid, $search_date_vad_to);
          $dataItems = array();
+         $data = array();
          $no = $start;
 
          foreach ($list as $items) {
@@ -1495,30 +1219,16 @@ class TransactionController extends CI_Controller
             $row['name_submerchant'] = $items->name_submerchant;
             $row['c_merchantTransactionId'] = $items->c_merchantTransactionId;
             $row['ref_cashinChannelId'] = $items->ref_cashinChannelId;
-            if (!empty($items->ref_cashinExternalLogVaIdCreate)) {
-                $row['ref_cashinExternalId'] = '<a data-toggle="modal" href="#" 
-                    data-target="#detailVaDynamicChannelExternalModal" 
-                    data-merchanttransactionid="' . $items->c_merchantTransactionId . '" 
-                    data-ref_cashinexternalid="' . $items->ref_cashinExternalId . '" 
-                    data-ref_cashinexternallogvaidcreate="' . $items->ref_cashinExternalLogVaIdCreate . '" 
-                    class="detailVaDynamicChannelExternalAjax">' . $items->ref_cashinExternalId . '</a>';
-            } else {
-                $row['ref_cashinExternalId'] = $items->ref_cashinExternalId;
-            }
+            $row['ref_cashinExternalId'] = $items->ref_cashinExternalId;
+            $row['ref_cashinExternalLogVaIdCreate'] = $items->ref_cashinExternalLogVaIdCreate;
             $row['c_vaNumber'] = $items->c_vaNumber;
             $row['c_amount'] = $items->c_amount;
             $row['c_datetimeExpired'] = $items->c_datetimeExpired;
-
-            $status_class = 'secondary';
-            if ($items->c_status == 'PAID' || $items->c_status == 'SUCCESS')
-               $status_class = 'success';
-            if ($items->c_status == 'EXPIRED' || $items->c_status == 'FAILED')
-               $status_class = 'danger';
-            if ($items->c_status == 'PENDING')
-               $status_class = 'warning';
-            $row['c_status'] = '<span class="badge badge-' . $status_class . '">' . $items->c_status . '</span>';
+            $row['c_status'] = $items->c_status;
 
             $dataItems[] = $row;
+            $items->no = $no;
+            $data[] = $items;
          }
 
          $output = array(
@@ -1534,11 +1244,7 @@ class TransactionController extends CI_Controller
       $data['start'] = 0;
       $data['merchants'] = $this->VADynamic->get_merchant();
 
-      $this->load->view('templates/user_header.php', $data);
-      $this->load->view('templates/user_sidebar.php', $data);
-      $this->load->view('templates/user_topbar.php', $data);
       $this->load->view('virtualaccount/vadynamic', $data);
-      $this->load->view('templates/user_footer.php', $data);
    }
 
    public function resetVa_dynamic()
@@ -1646,29 +1352,17 @@ class TransactionController extends CI_Controller
                $no++;
                $row = array();
                $row['no'] = $no;
+               $row['id'] = $items->id;
                $row['c_datetimeRequest'] = $items->c_datetimeRequest;
-               $row['name_merchant'] = $items->name_merchant ?: '-';
+               $row['name_merchant'] = $items->name_merchant;
                $row['name_submerchant'] = $items->name_submerchant;
                $row['c_merchantTransactionId'] = $items->c_merchantTransactionId;
                $row['ref_cashinChannelId'] = $items->ref_cashinChannelId;
-               if (!empty($items->ref_cashinExternalLogVaIdCreate)) {
-                  $row['ref_cashinExternalId'] = '<a data-toggle="modal" href="#" 
-                        data-target="#detailVaDynamicChannelExternalModal" 
-                        data-merchanttransactionid="' . $items->c_merchantTransactionId . '" 
-                        data-ref_cashinexternalid="' . $items->ref_cashinExternalId . '" 
-                        data-ref_cashinexternallogvaidcreate="' . $items->ref_cashinExternalLogVaIdCreate . '" 
-                        class="detailVaDynamicChannelExternalAjax">' . $items->ref_cashinExternalId . '</a>';
-               } else {
-                  $row['ref_cashinExternalId'] = $items->ref_cashinExternalId;
-               }
+               $row['ref_cashinExternalId'] = $items->ref_cashinExternalId;
+               $row['ref_cashinExternalLogVaIdCreate'] = $items->ref_cashinExternalLogVaIdCreate;
                $row['c_vaNumber'] = $items->c_vaNumber;
                $row['c_amount'] = $items->c_amount;
-
-               $status_class = 'secondary';
-               if ($items->c_status == 'PAID' || $items->c_status == 'SUCCESS') $status_class = 'success';
-               elseif ($items->c_status == 'EXPIRED' || $items->c_status == 'FAILED') $status_class = 'danger';
-               elseif ($items->c_status == 'PENDING') $status_class = 'warning';
-               $row['c_status'] = '<span class="badge badge-' . $status_class . '">' . $items->c_status . '</span>';
+               $row['c_status'] = $items->c_status;
 
                $dataItems[] = $row;
             }
@@ -1697,11 +1391,7 @@ class TransactionController extends CI_Controller
       $data['varecurrings'] = [];
       $data['merchants'] = $this->VARecurring->get_merchant();
 
-      $this->load->view('templates/user_header.php', $data);
-      $this->load->view('templates/user_sidebar.php', $data);
-      $this->load->view('templates/user_topbar.php', $data);
       $this->load->view('virtualaccount/varecurring', $data);
-      $this->load->view('templates/user_footer.php', $data);
 
    }
 
@@ -1781,6 +1471,7 @@ class TransactionController extends CI_Controller
             }
 
             $dataItems = array();
+            $data = array();
             $no = $start;
 
             foreach ($list as $items) {
@@ -1792,37 +1483,16 @@ class TransactionController extends CI_Controller
                $row['name_submerchant'] = ' [' . ($items->ref_subMerchantId ?? '-') . '] - ' . ($items->name_submerchant ?? '-');
                $row['c_merchantTransactionId'] = $items->c_merchantTransactionId;
 
-               // Channel External with Modal link
-               if (!empty($items->ref_cashinExternalId)) {
-                  $logId = !empty($items->ref_cashinExternalLogQrisMpmIdCreate) ? $items->ref_cashinExternalLogQrisMpmIdCreate : '';
-                  $row['ref_cashinExternalId'] = '<a data-toggle="modal" href="#" 
-                        data-target="#detailQrisDynamicChannelExternalModal" 
-                        data-merchantTransactionId="' . $items->c_merchantTransactionId . '" 
-                        data-ref_cashinExternalId="' . $items->ref_cashinExternalId . '" 
-                        data-ref_cashinExternalLogQrisMpmIdCreate="' . $logId . '" 
-                        class="detailQrisDynamicChannelExternalAjax">' . $items->ref_cashinExternalId . '</a>';
-               } else {
-                  $row['ref_cashinExternalId'] = $items->ref_cashinExternalId ?? '-';
-               }
-
+               $row['ref_cashinExternalId'] = $items->ref_cashinExternalId;
+               $row['ref_cashinExternalLogQrisMpmIdCreate'] = $items->ref_cashinExternalLogQrisMpmIdCreate ?? '';
                $row['c_amount'] = $items->c_amount;
                $row['c_datetimeExpired'] = $items->c_datetimeExpired;
-
-               // Status with badges
-               $status_class = 'secondary';
-               $c_status = strtoupper($items->c_status);
-               if ($c_status == 'PAID' || $c_status == 'SUCCESS') $status_class = 'success';
-               elseif ($c_status == 'FAILED' || $c_status == 'EXPIRED') $status_class = 'danger';
-               elseif ($c_status == 'PENDING' || $c_status == 'CREATED') $status_class = 'warning';
-
-               $status_label = '<span class="badge badge-' . $status_class . '">' . $items->c_status . '</span>';
-               if ($c_status == "PAID") {
-                  $row['c_status'] = '<a href="' . base_url('admin/qris_detail/' . $items->ref_cashinPaymentQrisMpmId) . '" target="_blank">' . $status_label . '</a>';
-               } else {
-                  $row['c_status'] = $status_label;
-               }
+               $row['c_status'] = $items->c_status;
+               $row['ref_cashinPaymentQrisMpmId'] = $items->ref_cashinPaymentQrisMpmId ?? '';
 
                $dataItems[] = $row;
+               $items->no = $no;
+               $data[] = $items;
             }
 
             $output = array(
@@ -1847,11 +1517,7 @@ class TransactionController extends CI_Controller
       $data['merchants'] = $this->QRISDynamic->get_merchant();
       $data['search_reff_label'] = $search_reff_label;
 
-      $this->load->view('templates/user_header.php', $data);
-      $this->load->view('templates/user_sidebar.php', $data);
-      $this->load->view('templates/user_topbar.php', $data);
       $this->load->view('qris/qrisdynamic', $data);
-      $this->load->view('templates/user_footer.php', $data);
    }
 
    public function resetqris_dynamic()
@@ -1922,6 +1588,7 @@ class TransactionController extends CI_Controller
             }
 
             $dataItems = array();
+            $data = array();
             $no = $start;
 
             foreach ($list as $items) {
@@ -1933,36 +1600,17 @@ class TransactionController extends CI_Controller
                $row['ref_cashinChannelId'] = $items->ref_cashinChannelId;
                $row['c_merchantTransactionId'] = $items->c_merchantTransactionId;
 
-               // Channel External with Modal link
-               if (!empty($items->ref_cashinExternalLogEwalletIdCreate)) {
-                  $row['ref_cashinExternalId'] = '<a data-toggle="modal" href="#" 
-                        data-target="#detailQrisDynamicChannelExternalModal" 
-                        data-merchanttransactionid="' . $items->c_merchantTransactionId . '" 
-                        data-ref_cashinexternalid="' . $items->ref_cashinExternalId . '" 
-                        data-ref_cashinexternallogewalletidcreate="' . $items->ref_cashinExternalLogEwalletIdCreate . '" 
-                        class="detailEwalletDynamicChannelExternalAjax">' . $items->ref_cashinExternalId . '</a>';
-               } else {
-                  $row['ref_cashinExternalId'] = $items->ref_cashinExternalId;
-               }
-
+               $row['ref_cashinExternalId'] = $items->ref_cashinExternalId;
+               $row['ref_cashinExternalLogEwalletIdCreate'] = $items->ref_cashinExternalLogEwalletIdCreate ?? '';
                $row['c_amount'] = $items->c_amount;
                $row['c_datetimeExpired'] = $items->c_datetimeExpired;
-
-               // Status with badges and optional detail link
-               $status_class = 'secondary';
-               if (in_array(strtoupper($items->c_status), ['PAID', 'SUCCESS'])) $status_class = 'success';
-               elseif (in_array(strtoupper($items->c_status), ['FAILED', 'EXPIRED'])) $status_class = 'danger';
-               elseif (in_array(strtoupper($items->c_status), ['PENDING', 'CREATED'])) $status_class = 'warning';
-
-               $status_label = '<span class="badge badge-' . $status_class . '">' . $items->c_status . '</span>';
-               if (strtoupper($items->c_status) == "PAID") {
-                  $row['c_status'] = '<a href="' . base_url('admin/ewallet_detail/' . $items->ref_cashinPaymentEwalletId) . '" target="_blank">' . $status_label . '</a>';
-               } else {
-                  $row['c_status'] = $status_label;
-               }
+               $row['c_status'] = $items->c_status;
+               $row['ref_cashinPaymentEwalletId'] = $items->ref_cashinPaymentEwalletId ?? '';
                $row['simulation'] = '';
 
                $dataItems[] = $row;
+               $items->no = $no;
+               $data[] = $items;
             }
 
             $output = array(
@@ -1986,11 +1634,7 @@ class TransactionController extends CI_Controller
 
       $data['merchants'] = $this->EwalletDynamic->get_merchant();
 
-      $this->load->view('templates/user_header.php', $data);
-      $this->load->view('templates/user_sidebar.php', $data);
-      $this->load->view('templates/user_topbar.php', $data);
       $this->load->view('ewallet/ewallet_dynamic', $data);
-      $this->load->view('templates/user_footer.php', $data);
    }
 
    public function ewallet_detail($id = NULL)
@@ -2022,11 +1666,7 @@ class TransactionController extends CI_Controller
       // echo '</pre>';
       // exit;
 
-      $this->load->view('templates/user_header.php', $data);
-      $this->load->view('templates/user_sidebar.php', $data);
-      $this->load->view('templates/user_topbar.php', $data);
       $this->load->view('ewallet/ewallet_detail', $data);
-      $this->load->view('templates/user_footer.php', $data);
    }
 
    public function resetewallet_dynamic()
@@ -2096,29 +1736,16 @@ class TransactionController extends CI_Controller
                $no++;
                $row = array();
                $row['no'] = $no;
+               $row['id'] = $items->id;
                $row['c_datetimeRequest'] = $items->c_datetimeRequest;
-               $row['name_merchant'] = $items->name_merchant ?? '-';
-               $row['name_submerchant'] = '[' . ($items->ref_subMerchantId ?? '-') . '] ' . ($items->name_submerchant ?? '-');
+               $row['name_merchant'] = $items->name_merchant;
+               $row['ref_subMerchantId'] = $items->ref_subMerchantId;
+               $row['name_submerchant'] = $items->name_submerchant;
                $row['c_merchantTransactionId'] = $items->c_merchantTransactionId;
-               if (!empty($items->ref_cashinExternalId)) {
-                  $logId = !empty($items->ref_cashinExternalLogQrisMpmIdCreate) ? $items->ref_cashinExternalLogQrisMpmIdCreate : '';
-                  $row['ref_cashinExternalId'] = '<a data-toggle="modal" href="#" 
-                        data-target="#detailQrisDynamicChannelExternalModal" 
-                        data-merchantTransactionId="' . $items->c_merchantTransactionId . '" 
-                        data-ref_cashinExternalId="' . $items->ref_cashinExternalId . '" 
-                        data-ref_cashinExternalLogQrisMpmIdCreate="' . $logId . '" 
-                        class="detailQrisDynamicChannelExternalAjax">' . $items->ref_cashinExternalId . '</a>';
-               } else {
-                  $row['ref_cashinExternalId'] = $items->ref_cashinExternalId ?? '-';
-               }
+               $row['ref_cashinExternalId'] = $items->ref_cashinExternalId;
+               $row['ref_cashinExternalLogQrisMpmIdCreate'] = $items->ref_cashinExternalLogQrisMpmIdCreate;
                $row['c_amount'] = $items->c_amount;
-
-               $status_class = 'secondary';
-               if (in_array(strtoupper($items->c_status), ['PAID', 'SUCCESS'])) $status_class = 'success';
-               elseif (in_array(strtoupper($items->c_status), ['FAILED', 'EXPIRED'])) $status_class = 'danger';
-               elseif (in_array(strtoupper($items->c_status), ['PENDING', 'CREATED'])) $status_class = 'warning';
-
-               $row['c_status'] = '<span class="badge badge-' . $status_class . '">' . $items->c_status . '</span>';
+               $row['c_status'] = $items->c_status;
 
                $dataItems[] = $row;
             }
@@ -2144,11 +1771,7 @@ class TransactionController extends CI_Controller
 
       $data['merchants'] = $this->QRISRecurring->get_merchant();
 
-      $this->load->view('templates/user_header.php', $data);
-      $this->load->view('templates/user_sidebar.php', $data);
-      $this->load->view('templates/user_topbar.php', $data);
       $this->load->view('qris/qrisrecurring', $data);
-      $this->load->view('templates/user_footer.php', $data);
    }
 
    public function resetqris_recurring()
@@ -2192,9 +1815,10 @@ class TransactionController extends CI_Controller
                $no++;
                $row = array();
                $row['no'] = $no;
+               $row['id'] = $items->id;
                $row['c_datetime'] = $items->c_datetime;
                $row['c_type'] = $items->c_type;
-               $row['c_filename'] = '<a href="' . base_url('admin/download?filename=' . urlencode($items->c_filename)) . '" class="text-primary font-weight-bold">' . $items->c_filename . '</a>';
+               $row['c_filename'] = $items->c_filename;
                $row['c_status'] = $items->c_status;
                $row['c_remark'] = $items->c_remark;
 
@@ -2231,11 +1855,7 @@ class TransactionController extends CI_Controller
       $data['pagination'] = '';
       $data['start'] = 0;
 
-      $this->load->view('templates/user_header.php', $data);
-      $this->load->view('templates/user_sidebar.php', $data);
-      $this->load->view('templates/user_topbar.php', $data);
       $this->load->view('report/index', $data);
-      $this->load->view('templates/user_footer.php', $data);
    }
    public function resetdownload()
    {

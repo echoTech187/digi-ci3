@@ -32,12 +32,7 @@ class UserAccessController extends CI_Controller {
          ];
       }, $data['holidays']);
    
-      // Load views
-      $this->load->view('templates/user_header.php', $data);
-      $this->load->view('templates/user_sidebar.php', $data);
-      $this->load->view('templates/user_topbar.php', $data);
       $this->load->view('admin/holiday', $data);
-      $this->load->view('templates/user_footer.php', $data);
    }
 
    public function manageHoliday() 
@@ -124,12 +119,7 @@ class UserAccessController extends CI_Controller {
       $data['roles'] = $this->AdminModel->get_roles() != NULL ? $this->AdminModel->get_roles() : [];
       $data['user'] = $this->Model_user->view_user()->row_array();
    
-      // Load views
-      $this->load->view('templates/user_header.php', $data);
-      $this->load->view('templates/user_sidebar.php', $data);
-      $this->load->view('templates/user_topbar.php', $data);
       $this->load->view('admin/index', $data);
-      $this->load->view('templates/user_footer.php', $data);
    }
 
    public function manageUsers()

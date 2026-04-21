@@ -172,5 +172,39 @@ class History extends CI_Model {
         $query = $this->db->get();
         return $query->result_array();
     }
+
+    /**
+     * Standardized DataTables handler for History (PPOB) list.
+     */
+    public function get_datatables_handler($filters = [])
+    {
+        $this->load->library('datatables');
+        
+        $search_date = $filters['date'] ?? null;
+        $search_merchant = $filters['merchant'] ?? null;
+
+        $dt = $this->datatables->of('cashout_payment_ppob cpp')
+            ->select('cpp.*, m.c_name as name_merchant, c.c_invoiceNo')
+            ->join('merchant m', 'cpp.ref_merchantId = m.id', 'left')
+            ->join('cashout c', 'c.id = cpp.ref_cashoutId', 'left');
+
+        if ($search_date) {
+            $dt->where('cpp.c_datetime >=', $search_date . ' 00:00:00');
+            $dt->where('cpp.c_datetime <=', $search_date . ' 23:59:59');
+        }
+        if ($search_merchant) {
+            $dt->where('cpp.ref_merchantId', $search_merchant);
+        }
+
+        return $dt->set_column_order([null, 'm.c_name', 'cpp.c_datetime', 'cpp.ref_cashoutChannelId', 'c.c_invoiceNo', 'cpp.c_phone', 'cpp.c_amount', 'cpp.c_status'])
+            ->set_column_search(['cpp.id', 'm.c_name', 'c.c_invoiceNo', 'cpp.c_phone', 'cpp.ref_cashoutChannelId'])
+            ->set_default_order(['cpp.id' => 'desc'])
+            ->addColumn('no', function($row) {
+                static $no = null;
+                if ($no === null) $no = intval($this->input->post('start'));
+                return ++$no;
+            })
+            ->make(true);
+    }
 }
 ?>

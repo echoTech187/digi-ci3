@@ -368,7 +368,24 @@ class BiFast extends CI_Model {
                 $ResponseBody               = $result1_1->c_responseBody;
             }
 
-        } else if ($ref_cashoutExternalId == 'inacash' || $ref_cashoutExternalId == 'stm') {
+        } else if($ref_cashoutExternalId == 'inacash'){
+            $qtxt1_1    = "SELECT c_refId, c_partnerRefId, c_datetimeRequest, c_requestHeader, c_requestBody, c_datetimeResponse, c_responseHeader, c_responseBody FROM external_inacash_disbursement_transfer_bank WHERE id='$ref_cashoutExternalLogQrisMpmIdCreate'";
+            $query1_1   = $this->db->query($qtxt1_1);
+            $result1_1  = $query1_1->num_rows() ? $query1_1->row() : false;
+            if($result1_1) {
+                
+                $TransactionIdExternal1     = $result1_1->c_refId;
+                $TransactionIdExternal2     = $result1_1->c_partnerRefId;
+
+                $DatetimeRequest            = $result1_1->c_datetimeRequest;
+                $RequestHeader              = $result1_1->c_requestHeader;
+                $RequestBody                = $result1_1->c_requestBody;
+
+                $DatetimeResponse           = $result1_1->c_datetimeResponse;
+                $ResponseHeader             = $result1_1->c_responseHeader;
+                $ResponseBody               = $result1_1->c_responseBody;
+            }
+        } else if ($ref_cashoutExternalId == 'stm') {
 
             $qtxt1_1    = "SELECT client_trans_reference, refIdTransfer, c_datetimeRequest, c_requestHeader, c_requestBody, c_datetimeResponse, c_responseHeader, c_responseBody FROM external_stm_disbursement_transfer_bank WHERE id='$ref_cashoutExternalLogQrisMpmIdCreate'";
             $query1_1   = $this->db->query($qtxt1_1);

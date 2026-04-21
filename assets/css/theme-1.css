@@ -504,6 +504,17 @@ body {
     opacity: 1 !important;
 }
 
+[data-theme="dark"] .btn-dt-cancel {
+    border-color: var(--gray-300) !important;
+    color: var(--gray-900) !important;
+}
+
+[data-theme="dark"] .btn-dt-cancel:hover {
+    border-color: var(--gray-500) !important;
+    color: #fff !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+}
+
 /* ── DataTable Mobile Modernization ── */
 [data-theme="dark"] .dt-mobile-item {
     background-color: var(--bg-card) !important;
@@ -2481,13 +2492,14 @@ ul.sidebar {
     position: absolute;
     top: calc(100% + 8px);
     right: 0;
-    z-index: 1050;
+    z-index: 999;
     width: 320px;
+    /* max-height: calc(100vh - 120px); */
     background: var(--bg-card);
     border-radius: 14px;
     border: 1px solid var(--border-color);
     box-shadow: var(--shadow-lg);
-    overflow: visible; /* Allow Select2 dropdown to render outside panel */
+    overflow: hidden; /* Clip to rounded corners; body handles its own scroll */
 }
 
 .dt-more-panel.dt-panel-open {
@@ -2542,8 +2554,10 @@ ul.sidebar {
     display: flex;
     flex-direction: column;
     gap: 14px;
-    flex: 1;
+    flex: 1 1 auto; /* Shrink to allow footer to remain visible */
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    min-height: 0; /* Required for flex child to scroll properly */
 }
 
 .dt-more-field {

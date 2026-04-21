@@ -34,7 +34,7 @@
 <body>
 
 	<!-- Page Wrapper -->
-	<div class="container-fluid">
+	<div >
 
 		<!-- 404 Error Text -->
 		<div class="text-center">

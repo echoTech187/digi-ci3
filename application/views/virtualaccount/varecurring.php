@@ -10,7 +10,7 @@ $download_url = base_url('admin/download_VA_recurring') // Assuming this exists 
     . '&search_name_var='            . $search_name_var_value;
 ?>
 <!-- ── Page Header ── -->
-<div class="container-fluid pb-4">
+<div>
     <div class="dt-page-header">
         <div>
             <h4 class="dt-page-title">Recurring VA Transactions</h4>
@@ -214,17 +214,49 @@ $download_url = base_url('admin/download_VA_recurring') // Assuming this exists 
             {data: 'c_datetimeRequest',className: 'text-nowrap', render: function(data){
                 return moment(data).format('DD-MM-YYYY HH:mm:ss');
             }},
-            {data: 'name_merchant',className: 'text-nowrap'},
+            {
+                data: 'name_merchant',
+                className: 'text-nowrap',
+                render: function(data, type, row) {
+                    return row.ref_merchantId ? ' [' + row.ref_merchantId + '] ' + data : data;
+                }
+            },
             {data: 'name_submerchant',className: 'text-nowrap'},
             {data: 'c_merchantTransactionId',className: 'text-nowrap'},
             {data: 'ref_cashinChannelId',className: 'text-nowrap'},
-            {data: 'ref_cashinExternalId',className: 'text-nowrap'},
-            {data: 'c_vaNumber',className: 'text-nowrap'},
-            {data: 'c_amount',className: 'text-nowrap', render: function(data){
-                var val = typeof data === 'string' ? data.replace(/[^0-9.-]+/g,"") : data;
-                return '<span class="font-weight-bold text-dark">Rp ' + Number(val).toLocaleString('id-ID') + '</span>';
+            {
+                data: 'ref_cashinExternalId',
+                className: 'text-nowrap',
+                render: function(data, type, row) {
+                    if (data && row.ref_cashinExternalLogVaIdCreate) {
+                        return '<a data-toggle="modal" href="#" ' +
+                            'data-target="#detailVaDynamicChannelExternalModal" ' +
+                            'data-merchanttransactionid="' + row.c_merchantTransactionId + '" ' +
+                            'data-ref_cashinexternalid="' + data + '" ' +
+                            'data-ref_cashinexternallogvaidcreate="' + row.ref_cashinExternalLogVaIdCreate + '" ' +
+                            'class="detailVaDynamicChannelExternalAjax">' + data + '</a>';
+                    }
+                    return data || '-';
+                }
+            },
+            {data: 'c_vaNumber',className: 'text-nowrap', render: function(data){
+                return '<code>' + data + '</code>';
             }},
-            {data: 'c_status'}
+            {data: 'c_amount',className: 'text-nowrap', render: function(data){
+                return '<span class="font-weight-bold text-dark">Rp ' + number_format(data, 0, ',', '.') + '</span>';
+            }},
+            {
+                data: 'c_status',
+                className: 'text-nowrap',
+                render: function(data) {
+                    var status_class = 'secondary';
+                    var s = (data || '').toUpperCase();
+                    if (s == 'PAID' || s == 'SUCCESS') status_class = 'success';
+                    else if (s == 'EXPIRED' || s == 'FAILED') status_class = 'danger';
+                    else if (s == 'PENDING') status_class = 'warning';
+                    return '<span class="badge badge-' + status_class + '">' + data + '</span>';
+                }
+            }
         ], {
             "language": {
                 "processing": '<i class="fa fa-spinner fa-spin fa-2x fa-fw mx-auto d-block text-primary"></i>',

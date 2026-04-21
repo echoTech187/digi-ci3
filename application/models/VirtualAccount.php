@@ -390,5 +390,41 @@ class VirtualAccount extends CI_Model {
             $query = "select id,c_name from merchant ";
             return $this->db->query($query)->result();
         }
+
+    /**
+     * Standardized DataTables handler for Virtual Account list.
+     * Utilizes the optimized two-step Pre-Lookup query logic.
+     */
+    public function get_datatables_handler($filters = [])
+    {
+        $search_date = $filters['date'] ?? null;
+        $search_date_to = $filters['date_to'] ?? null;
+        $search_merchant = $filters['merchant'] ?? null;
+        $search_settlement = $filters['settlement'] ?? null;
+        $search_va = $filters['va_number'] ?? null;
+        $search_transid = $filters['transid'] ?? null;
+
+        $list = $this->get_datatables($search_date, $search_date_to, $search_merchant, $search_settlement, $search_va, $search_transid);
+        
+        $data = [];
+        $no = intval($this->input->post('start'));
+        foreach ($list as $va) {
+            $no++;
+            $row = (array)$va;
+            $row['no'] = $no;
+            $data[] = $row;
+        }
+
+        $output = [
+            "draw" => intval($this->input->post("draw")),
+            "recordsTotal" => $this->count_all_dt($search_date, $search_date_to, $search_merchant),
+            "recordsFiltered" => $this->count_filtered($search_date, $search_date_to, $search_merchant, $search_settlement, $search_va, $search_transid),
+            "data" => $data,
+        ];
+
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode($output));
     }
+}
 ?>

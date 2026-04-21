@@ -18,7 +18,7 @@ $download_url = base_url('admin/download_mutation')
     . "&search_date_mutation_to=" . $search_date_mutation_to_value;
 ?>
 
-<div class="container-fluid pb-4">
+<div>
     <!-- ── Page Header ── -->
     <div class="dt-page-header">
         <div>

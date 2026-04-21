@@ -42,14 +42,9 @@ class ServiceController extends CI_Controller {
                 $row['no'] = $no;
                 $row['c_caption'] = $items->c_caption;
                 $row['c_description'] = $items->c_description;
-                $row['c_fee'] = 'Rp ' . number_format($items->c_fee, 0, ',', '.');
+                $row['c_fee'] = $items->c_fee;
                 $row['c_channelGroup2'] = $items->c_channelGroup2;
-                
-                $c_name = isset($items->c_name) ? $items->c_name : (isset($items->c_caption) ? $items->c_caption : '');
-                $row['action'] = '
-                    <button class="btn btn-sm btn-dt-action-primary shadow-sm" data-toggle="modal" data-target="#editProductModal" onclick="editProduct(\'' . htmlspecialchars($items->id, ENT_QUOTES) . '\', \'' . htmlspecialchars($items->c_caption, ENT_QUOTES) . '\', \'' . htmlspecialchars($items->c_description, ENT_QUOTES) . '\', \'' . htmlspecialchars($items->c_fee, ENT_QUOTES) . '\', \'' . htmlspecialchars($items->c_channelGroup2, ENT_QUOTES) . '\')">
-                        <i class="fas fa-edit"></i> Edit
-                    </button>';
+                $row['id'] = $items->id;
 
                 $dataItems[] = $row;
             }
@@ -80,11 +75,7 @@ class ServiceController extends CI_Controller {
         $data['pagination'] = '';
         $data['start'] = 0;
 
-        $this->load->view('templates/user_header.php', $data);
-        $this->load->view('templates/user_sidebar.php', $data);
-        $this->load->view('templates/user_topbar.php', $data);
-        $this->load->view('product/' . $view_name . '.php', $data);
-        $this->load->view('templates/user_footer.php');
+        $this->load->view('product/' . $view_name, $data);
     }
 
     public function pulsa_reguler() {

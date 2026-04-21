@@ -1,5 +1,5 @@
 <!-- Begin Page Content -->
-<div class="container-fluid pb-5">
+<div>
     <!-- ── Page Header ── -->
     <div class="dt-page-header mb-4">
         <div>
@@ -276,9 +276,32 @@
         initServerDataTable("#recentActivityTable", "<?= base_url('admin/recent_mutations_json') ?>", [
             {data: 'date', className: "font-weight-bold text-gray-600"},
             {data: 'merchant', className: "font-weight-bold"},
-            {data: 'type'},
-            {data: 'amount', className:"text-right font-weight-bold text-dark"},
-            {data: 'status', className: 'text-center'}
+            {
+                data: 'type',
+                render: function(data) {
+                    return '<span class="badge text-dark border px-3 py-1 font-weight-bold small shadow-none">' + data + '</span>';
+                }
+            },
+            {
+                data: 'amount', 
+                className:"text-right font-weight-bold text-dark",
+                render: function(data) {
+                    return '<span class="text-primary">Rp ' + number_format(data) + '</span>';
+                }
+            },
+            {
+                data: 'status', 
+                className: 'text-center',
+                render: function(data) {
+                    var status_class = 'secondary';
+                    var s = (data || '').toUpperCase();
+                    if (['SUCCESS', 'PAID', 'SETTLEMENT'].indexOf(s) !== -1) status_class = 'success';
+                    else if (['PENDING', 'PROCESS'].indexOf(s) !== -1) status_class = 'warning';
+                    else if (['FAILED', 'REJECTED'].indexOf(s) !== -1) status_class = 'danger';
+                    
+                    return '<span class="badge badge-'+status_class+' rounded-pill px-3 py-1 shadow-none small font-weight-bold">'+data+'</span>';
+                }
+            }
         ], {
             "pageLength": 8,
             "lengthChange": false,

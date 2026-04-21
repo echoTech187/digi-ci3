@@ -42,17 +42,6 @@ class ChannelController extends CI_Controller {
             $row['c_feeType'] = $items->c_feeType;
             $row['c_fee'] = $items->c_fee;
 
-            // Direct Action Button (Simplified from Dropdown)
-            $row['action'] = '
-                <div class="text-center">
-                    <button class="btn btn-sm btn-outline-primary edit-cashin px-3 shadow-none font-weight-bold" 
-                        data-toggle="modal" data-target="#debitBalanceModal" 
-                        data-id="' . $items->id . '" 
-                        data-group="' . $items->c_channelGroup . '">
-                        <i class="fas fa-edit mr-1"></i> Edit
-                    </button>
-                </div>';
-
             $dataItems[] = $row;
          }
 
@@ -78,11 +67,7 @@ class ChannelController extends CI_Controller {
       $data['pagination'] = '';
       $data['start'] = 0;
 
-      $this->load->view('templates/user_header.php', $data);
-      $this->load->view('templates/user_sidebar.php', $data);
-      $this->load->view('templates/user_topbar.php', $data);
       $this->load->view('chanel/cashin', $data);
-      $this->load->view('templates/user_footer.php');
    }
 
    public function cashout()
@@ -115,17 +100,6 @@ class ChannelController extends CI_Controller {
             $row['c_feeType'] = $items->c_feeType;
             $row['c_fee'] = $items->c_fee;
 
-            // Direct Action Button (Simplified from Dropdown)
-            $row['action'] = '
-                <div class="text-center">
-                    <button class="btn btn-sm btn-outline-primary edit-cashout px-3 shadow-none font-weight-bold" 
-                        data-toggle="modal" data-target="#debitBalanceModal" 
-                        data-id="' . $items->id . '" 
-                        data-group="' . $items->c_channelGroup . '">
-                        <i class="fas fa-edit mr-1"></i> Edit
-                    </button>
-                </div>';
-
             $dataItems[] = $row;
          }
 
@@ -154,11 +128,7 @@ class ChannelController extends CI_Controller {
       // For the modal select
       $data['cashout_channels'] = $this->Chanel->get_cashout_channels_all(); // Need to verify this method exist
 
-      $this->load->view('templates/user_header.php', $data);
-      $this->load->view('templates/user_sidebar.php', $data);
-      $this->load->view('templates/user_topbar.php', $data);
       $this->load->view('chanel/cashout', $data);
-      $this->load->view('templates/user_footer.php');
    }
 
    public function createCashinChanel()

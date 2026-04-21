@@ -1,5 +1,5 @@
 <!-- Begin Page Content -->
-<div class="container-fluid pb-4">
+<div>
     <!-- ── Page Header ── -->
     <div class="dt-page-header">
         <div>
@@ -205,14 +205,43 @@
                 return moment(data).format('DD-MM-YYYY HH:mm:ss');
             }},
             {data: 'name_merchant',className: 'text-nowrap'},
-            {data: 'name_submerchant',className: 'text-nowrap'},
+            {
+                data: 'name_submerchant',
+                className: 'text-nowrap',
+                render: function(data, type, row) {
+                    return row.ref_subMerchantId ? ' [' + row.ref_subMerchantId + '] ' + data : '-';
+                }
+            },
             {data: 'c_merchantTransactionId', className: 'text-dark font-weight-bold text-nowrap'},
-            {data: 'ref_cashinExternalId',className: 'text-nowrap'},
+            {
+                data: 'ref_cashinExternalId',
+                className: 'text-nowrap',
+                render: function(data, type, row) {
+                    if (data && row.ref_cashinExternalLogQrisMpmIdCreate) {
+                        return '<a data-toggle="modal" href="#" ' +
+                            'data-target="#detailQrisDynamicChannelExternalModal" ' +
+                            'data-merchantTransactionId="' + row.c_merchantTransactionId + '" ' +
+                            'data-ref_cashinExternalId="' + data + '" ' +
+                            'data-ref_cashinExternalLogQrisMpmIdCreate="' + row.ref_cashinExternalLogQrisMpmIdCreate + '" ' +
+                            'class="detailQrisDynamicChannelExternalAjax">' + data + '</a>';
+                    }
+                    return data || '-';
+                }
+            },
             {data: 'c_amount',className: 'text-nowrap', render: function(data){
-                var val = typeof data === 'string' ? data.replace(/[^0-9.-]+/g,"") : data;
-                return '<span class="font-weight-bold text-dark">Rp ' + Number(val).toLocaleString('id-ID') + '</span>';
+                return '<span class="font-weight-bold text-dark">Rp ' + number_format(data, 0, ',', '.') + '</span>';
             }},
-            {data: 'c_status'}
+            {
+                data: 'c_status',
+                render: function(data) {
+                    var status_class = 'secondary';
+                    var s = (data || '').toUpperCase();
+                    if (['PAID', 'SUCCESS'].indexOf(s) !== -1) status_class = 'success';
+                    else if (['FAILED', 'EXPIRED'].indexOf(s) !== -1) status_class = 'danger';
+                    else if (['PENDING', 'CREATED'].indexOf(s) !== -1) status_class = 'warning';
+                    return '<span class="badge badge-' + status_class + '">' + data + '</span>';
+                }
+            }
         ], {
             "ordering": false,
             "language": {

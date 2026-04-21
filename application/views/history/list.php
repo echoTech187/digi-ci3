@@ -13,7 +13,7 @@ $download_url = base_url('admin/download_history')
 ?>
 
 <!-- ── Page Header ── -->
-<div class="container-fluid pb-4">
+<div>
 
     <div class="dt-page-header">
         <div>

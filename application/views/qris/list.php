@@ -22,7 +22,7 @@ $download_url = base_url('admin/download_qris')
 ?>
 
 <!-- ── Page Header ── -->
-<div class="container-fluid pb-4">
+<div>
 
     <div class="dt-page-header">
         <div>
@@ -176,8 +176,20 @@ $download_url = base_url('admin/download_qris')
             {data: 'c_datetime',className: 'text-nowrap', render: function(data){
                 return moment(data).format('DD-MM-YYYY HH:mm:ss');
             }},
-            {data: 'merchant_info',className: 'text-nowrap'},
-            {data: 'submerchant_info',className: 'text-nowrap'},
+            {
+                data: 'name_merchant',
+                className: 'text-nowrap',
+                render: function(data, type, row) {
+                    return ' [' + row.ref_merchantId + '] - ' + data;
+                }
+            },
+            {
+                data: 'name_submerchant',
+                className: 'text-nowrap',
+                render: function(data, type, row) {
+                    return ' [' + row.ref_subMerchantId + '] - ' + data;
+                }
+            },
             {data: 'c_invoiceNo',className: 'text-nowrap'},
             {data: 'Merchant_Transaction_Id',className: 'text-nowrap'},
             {data: 'c_type',className: 'text-nowrap'},
@@ -191,10 +203,34 @@ $download_url = base_url('admin/download_qris')
                 return 'Rp ' + number_format(data, 0, ',', '.');
             }},
             {data: 'c_issuerRrn',className: 'text-nowrap'},
-            {data: 'c_isSettlementRealtime',className: 'text-nowrap text-center'},
-            {data: 'c_datetimeSettlement',className: 'text-nowrap'},
+            {
+                data: 'c_isSettlementRealtime',
+                className: 'text-nowrap text-center',
+                render: function(data) {
+                    return (data == 1) ? 'Yes' : 'No';
+                }
+            },
+            {
+                data: 'c_datetimeSettlement',
+                className: 'text-nowrap',
+                render: function(data, type, row) {
+                    return (row.c_isSettlementRealtime == 1) ? 'Realtime' : (data || '-');
+                }
+            },
             
-            {data: 'action', orderable: false, searchable: false}
+            {
+                data: 'id', 
+                orderable: false, 
+                searchable: false,
+                render: function(data, type, row) {
+                    var baseUrl = "<?= base_url() ?>";
+                    var detailLink = baseUrl + 'admin/qris_detail/' + data;
+                    var resendLink = baseUrl + 'admin/SendnotifikasiQRIS/' + data + '/' + row.ref_merchantId;
+                    
+                    return '<a href="' + detailLink + '" class="btn btn-action-detail"><i class="fas fa-eye mr-2"></i>Detail</a> ' +
+                           '<a onclick="javascript: return confirm(\'Are you sure, want to resend notification again ??\')" href="' + resendLink + '" class="btn btn-action-resend"><i class="fas fa-paper-plane mr-2"></i>Resend</a>';
+                }
+            }
         ], {
             "ordering": false,
             "language": {

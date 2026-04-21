@@ -1,5 +1,5 @@
 <!-- Begin Page Content -->
-<div class="container-fluid pb-4">
+<div>
 
     <!-- ── Alert Messages ── -->
     <?php if ($this->session->flashdata('success')) : ?>
@@ -233,7 +233,7 @@
                 <!-- ── Section 1: Transaction Info ── -->
                 <div class="px-4 pt-4 pb-3">
                     <div class="d-flex align-items-center mb-3">
-                        <div class="" style="width:6px; height:18px; background: var(--primary); border-radius: 3px;"></div>
+                        <div style="width:6px; height:18px; background: var(--primary); border-radius: 3px;"></div>
                         <span class="font-weight-bold text-dark" style="font-size:12px; text-transform:uppercase; letter-spacing:0.6px;">Transaction Information</span>
                     </div>
 
@@ -250,16 +250,16 @@
                     <div class="row" style="gap:0;">
                         <div class="col-md-6 mb-3">
                             <label class="d-block text-muted mb-1" style="font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">Transaction ID 1</label>
-                            <div style="display:flex; align-items:center; background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:8px; padding:8px 12px;">
+                            <div style="display:flex; align-items:center; background:var(--bg-body); border:1.5px solid var(--border-color); border-radius:8px; padding:8px 12px;">
                                 <i class="fas fa-hashtag text-muted " style="font-size:11px;"></i>
-                                <input type="text" id="TransactionIdExternal1" class="border-0 bg-transparent p-0 text-dark font-weight-bold" style="font-size:12.5px; outline:none; width:100%;" readonly>
+                                <input type="text" id="TransactionIdExternal1" class="border-0 bg-transparent p-0 text-gray-900 font-weight-bold" style="font-size:12.5px; outline:none; width:100%;" readonly>
                             </div>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="d-block text-muted mb-1" style="font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">Transaction ID 2</label>
-                            <div style="display:flex; align-items:center; background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:8px; padding:8px 12px;">
+                            <div style="display:flex; align-items:center; background:var(--bg-body); border:1.5px solid var(--border-color); border-radius:8px; padding:8px 12px;">
                                 <i class="fas fa-hashtag text-muted " style="font-size:11px;"></i>
-                                <input type="text" id="TransactionIdExternal2" class="border-0 bg-transparent p-0 text-dark font-weight-bold" style="font-size:12.5px; outline:none; width:100%;" readonly>
+                                <input type="text" id="TransactionIdExternal2" class="border-0 bg-transparent p-0 text-gray-900 font-weight-bold" style="font-size:12.5px; outline:none; width:100%;" readonly>
                             </div>
                         </div>
                     </div>
@@ -270,16 +270,16 @@
                 <!-- ── Section 2: Request ── -->
                 <div class="px-4 pt-3 pb-3">
                     <div class="d-flex align-items-center mb-3">
-                        <div class="" style="width:6px; height:18px; background:#1cc88a; border-radius:3px;"></div>
+                        <div style="width:6px; height:18px; background:#1cc88a; border-radius:3px;"></div>
                         <span class="font-weight-bold text-dark" style="font-size:12px; text-transform:uppercase; letter-spacing:0.6px;">Request</span>
                     </div>
 
                     <!-- Request DateTime -->
                     <div class="mb-3">
                         <label class="d-block text-muted mb-1" style="font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;"><i class="fas fa-clock mr-1 mr-2"></i> Date Time</label>
-                        <div style="display:flex; align-items:center; background:#f0fff8; border:1.5px solid #b2f5e0; border-radius:8px; padding:8px 12px;">
-                            <i class="fas fa-calendar-check " style="color:#1cc88a; font-size:12px;"></i>
-                            <input type="text" id="RequestDatetime" class="border-0 bg-transparent p-0 font-weight-bold" style="font-size:12.5px; outline:none; width:100%; color:#0d7a52;" readonly>
+                        <div style="display:flex; align-items:center; background:var(--success-soft); border:1.5px solid var(--success); border-radius:8px; padding:8px 12px; opacity: 0.85;">
+                            <i class="fas fa-calendar-check " style="color:var(--success); font-size:12px;"></i>
+                            <input type="text" id="RequestDatetime" class="border-0 bg-transparent p-0 font-weight-bold" style="font-size:12.5px; outline:none; width:100%; color:var(--success);" readonly>
                         </div>
                     </div>
 
@@ -327,16 +327,16 @@
                 <!-- ── Section 3: Response ── -->
                 <div class="px-4 pt-3 pb-4">
                     <div class="d-flex align-items-center mb-3">
-                        <div class="" style="width:6px; height:18px; background:#f6c23e; border-radius:3px;"></div>
+                        <div style="width:6px; height:18px; background:#f6c23e; border-radius:3px;"></div>
                         <span class="font-weight-bold text-dark" style="font-size:12px; text-transform:uppercase; letter-spacing:0.6px;">Response</span>
                     </div>
 
                     <!-- Response DateTime -->
                     <div class="mb-3">
                         <label class="d-block text-muted mb-1" style="font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;"><i class="fas fa-clock mr-1 mr-2"></i> Date Time</label>
-                        <div style="display:flex; align-items:center; background:#fffbf0; border:1.5px solid #fde68a; border-radius:8px; padding:8px 12px;">
-                            <i class="fas fa-calendar-check " style="color:#f6c23e; font-size:12px;"></i>
-                            <input type="text" id="ResponseDatetime" class="border-0 bg-transparent p-0 font-weight-bold" style="font-size:12.5px; outline:none; width:100%; color:#92701a;" readonly>
+                        <div style="display:flex; align-items:center; background:var(--warning-soft); border:1.5px solid var(--warning); border-radius:8px; padding:8px 12px; opacity: 0.85;">
+                            <i class="fas fa-calendar-check " style="color:var(--warning); font-size:12px;"></i>
+                            <input type="text" id="ResponseDatetime" class="border-0 bg-transparent p-0 font-weight-bold" style="font-size:12.5px; outline:none; width:100%; color:var(--warning);" readonly>
                         </div>
                     </div>
 
@@ -382,7 +382,7 @@
             </div>
 
             <!-- Footer -->
-            <div class="modal-footer border-0 px-4 py-3" style="background:#f8fafc; border-top:1px solid #edf2f9 !important;">
+            <div class="modal-footer border-0 px-4 py-3" style="background:var(--bg-card); border-top:1px solid var(--border-color) !important;">
                 <button type="button" class="btn-dt-cancel" data-dismiss="modal">
                     <i class="fas fa-times mr-1 mr-2"></i> Close
                 </button>
@@ -397,7 +397,13 @@
         // Init Server-Side DataTable
         var table = initServerDataTable("#bifastTable", "<?= base_url('admin/bi_fast') ?>", [
             {data: 'no', orderable: false},
-            {data: 'merchant_info',className: 'text-nowrap'},
+            {
+                data: 'name_merchant',
+                className: 'text-nowrap',
+                render: function(data, type, row) {
+                    return ' [' + row.ref_merchantId + '] - ' + data;
+                }
+            },
             {data: 'c_datetime',className: 'text-nowrap', render: function(data){
                 return moment(data).format('DD-MM-YYYY HH:mm:ss');
             }},
@@ -407,12 +413,10 @@
             {data: 'c_accountNo',className: 'text-nowrap'},
             {data: 'c_beneficiaryAccountName',className: 'text-nowrap'},
             {data: 'c_amount',className: 'text-nowrap', render: function(data){
-                var val = typeof data === 'string' ? data.replace(/[^0-9.-]+/g,"") : data;
-                return 'Rp ' + Number(val).toLocaleString('id-ID');
+                return 'Rp ' + number_format(data, 0, ',', '.');
             }},
             {data: 'c_fee',className: 'text-nowrap', render: function(data){
-                var val = typeof data === 'string' ? data.replace(/[^0-9.-]+/g,"") : data;
-                return 'Rp ' + Number(val).toLocaleString('id-ID');
+                return 'Rp ' + number_format(data, 0, ',', '.');
             }},
             {data: 'c_status',className: 'text-nowrap', render: function(data) {
                 var badge = 'badge-secondary';
@@ -421,8 +425,35 @@
                 else if(data == 'Process' || data == 'Pending') badge = 'badge-primary';
                 return '<span class="badge badge-pill ' + badge + '">' + data + '</span>';
             }},
-            {data: 'parsedResponse',className: 'text-nowrap'},
-            {data: 'action', orderable: false, searchable: false}
+            {
+                data: 'c_responseBody',
+                className: 'text-nowrap',
+                render: function(data) {
+                    if (!data) return '-';
+                    try {
+                        var decoded = JSON.parse(data);
+                        return decoded.responseMessage || decoded.message || '-';
+                    } catch(e) {
+                        return '-';
+                    }
+                }
+            },
+            {
+                data: 'id', 
+                orderable: false, 
+                searchable: false,
+                render: function(data, type, row) {
+                    var baseUrl = "<?= base_url() ?>";
+                    var detailLink = baseUrl + 'admin/bi_fast_detail/' + data;
+                    
+                    return '<a href="' + detailLink + '" class="btn btn-action-detail"><i class="fas fa-eye mr-2"></i>Detail</a> ' +
+                           '<a class="btn btn-action-resend btn-info-request" href="#" ' +
+                           'data-merchantTransactionId="' + row.c_merchantTransactionId + '" ' +
+                           'data-ref_cashoutExternalId="' + row.ref_cashoutExternalId + '" ' +
+                           'data-ref_cashoutExternalLogBifastId="' + row.ref_cashoutExternalLogBifastId + '">' +
+                           '<i class="fas fa-info-circle mr-2"></i>Info Request</a>';
+                }
+            }
         ], {
             "ordering": false,
             "language": {

@@ -1,4 +1,4 @@
-<div class="container-fluid pb-4">
+<div>
 
     <!-- Page Header -->
     <div class="dt-page-header">
@@ -402,11 +402,110 @@
                 var ajaxUrl = "<?= base_url('admin/merchant') ?>";
                 var columns = [
                     { "data": "no", "orderable": false, "className": "ps-4 text-muted small" },
-                    { "data": "id" },
-                    { "data": "info","className": "text-left" },
-                    { "data": "balance", "orderable": false },
-                    { "data": "status", "orderable": false },
-                    { "data": "action", "orderable": false, "className": "text-center pe-4" }
+                    { 
+                        "data": "id",
+                        "render": function(data, type, row) {
+                            return '<span class="fw-bold text-dark">#' + data + '</span>';
+                        }
+                    },
+                    { 
+                        "data": "c_name",
+                        "className": "text-left",
+                        "render": function(data, type, row) {
+                            return '<div class="d-flex flex-column">' +
+                                   '    <span class="fw-bold text-dark">' + data + '</span>' +
+                                   '    <span class="text-muted small">' + row.c_email + '</span>' +
+                                   '</div>';
+                        }
+                    },
+                    { 
+                        "data": "c_balanceTotal",
+                        "orderable": false,
+                        "render": function(data, type, row) {
+                            var total = parseFloat(data);
+                            var hold = parseFloat(row.c_balanceHold);
+                            var available = total - hold;
+                            return '<div class="d-flex flex-column" style="min-width: 150px;">' +
+                                   '    <div class="d-flex justify-content-between small mb-1">' +
+                                   '        <span class="text-muted">Total:</span>' +
+                                   '        <span class="fw-bold text-dark">Rp ' + number_format(total, 0, ',', '.') + '</span>' +
+                                   '    </div>' +
+                                   '    <div class="d-flex justify-content-between small mb-1">' +
+                                   '        <span class="text-muted">Hold:</span>' +
+                                   '        <span class="text-warning fw-bold">Rp ' + number_format(hold, 0, ',', '.') + '</span>' +
+                                   '    </div>' +
+                                   '    <div class="d-flex justify-content-between small border-top pt-1 mt-1">' +
+                                   '        <span class="text-muted">Available:</span>' +
+                                   '        <span class="text-success fw-bold">Rp ' + number_format(available, 0, ',', '.') + '</span>' +
+                                   '    </div>' +
+                                   '</div>';
+                        }
+                    },
+                    { 
+                        "data": "c_status",
+                        "orderable": false,
+                        "render": function(data, type, row) {
+                            var status_class = (data == 'Active') ? 'bg-success' : 'bg-secondary';
+                            var openapi_class = (row.c_openapiStatus == 'Active') ? 'text-success' : 'text-muted';
+                            return '<div class="d-flex flex-column">' +
+                                   '    <span class="mb-2 badge ' + status_class + '-soft text-' + status_class.replace('-soft', '').replace('bg-', '') + ' rounded-pill px-3 py-1" style="width: fit-content;">' +
+                                   '        ' + data +
+                                   '    </span>' +
+                                   '    <span class="small ' + openapi_class + ' d-flex align-items-center gap-1">' +
+                                   '        <i class="fas fa-plug me-1"></i>OpenAPI: ' + row.c_openapiStatus +
+                                   '    </span>' +
+                                   '</div>';
+                        }
+                    },
+                    { 
+                        "data": "action",
+                        "orderable": false,
+                        "className": "text-center pe-4",
+                        "render": function(data, type, row) {
+                            var baseUrl = "<?= base_url() ?>";
+                            var actionHtml = '<div class="dropdown">' +
+                                '    <button class="btn btn-white btn-sm rounded shadow-none dropdown-toggle border px-3" type="button" data-toggle="dropdown" aria-expanded="false" data-boundary="viewport">' +
+                                '        <i class="fas fa-ellipsis-v text-muted mr-2"></i>Actions' +
+                                '    </button>' +
+                                '    <div class="dropdown-menu dropdown-menu-right border-0 shadow-lg p-2" style="min-width: 200px;">' +
+                                '        <a class="dropdown-item rounded-2 py-2" href="' + baseUrl + 'admin/editMerchant/' + row.id + '">' +
+                                '            <i class="fas fa-edit mr-2 text-info" style="width: 20px;"></i>Edit Merchant' +
+                                '        </a>' +
+                                '        <a class="dropdown-item rounded-2 py-2" href="' + baseUrl + 'admin/mutation/' + row.id + '">' +
+                                '            <i class="fas fa-exchange-alt mr-2 text-primary" style="width: 20px;"></i>Mutation Log' +
+                                '        </a>' +
+                                '        <a class="dropdown-item rounded-2 py-2" href="' + baseUrl + 'admin/submerchant/' + row.id + '">' +
+                                '            <i class="fas fa-users mr-2 text-success" style="width: 20px;"></i>Sub Accounts' +
+                                '        </a>';
+
+                            if (row.c_merchantLevel == 0) {
+                                actionHtml += '<button class="dropdown-item rounded-2 py-2 border-0 bg-transparent w-100 text-left" data-toggle="modal" data-target="#delegateModal" onClick="openDelegateModal(' + row.id + ', \'' + row.c_name.replace(/'/g, "\\'") + '\')">' +
+                                    '    <i class="fas fa-key mr-2 text-warning" style="width: 20px;"></i>Delegate' +
+                                    '</button>';
+                            }
+
+                            if (row.hasBalancePermission) {
+                                actionHtml += '<div class="dropdown-divider"></div>' +
+                                    '<button class="dropdown-item rounded-2 py-2 border-0 bg-transparent w-100 text-left" data-toggle="modal" data-target="#creditBalanceModal" onClick="detail(' + row.id + ', \'' + row.c_name.replace(/'/g, "\\'") + '\')">' +
+                                    '    <i class="fas fa-plus-circle mr-2 text-success" style="width: 20px;"></i>Credit Balance' +
+                                    '</button>' +
+                                    '<button class="dropdown-item rounded-2 py-2 border-0 bg-transparent w-100 text-left" data-toggle="modal" data-target="#debitBalanceModal" onClick="detaildebit(' + row.id + ', \'' + row.c_name.replace(/'/g, "\\'") + '\')">' +
+                                    '    <i class="fas fa-minus-circle mr-2 text-danger" style="width: 20px;"></i>Debit Balance' +
+                                    '</button>';
+                            }
+
+                            actionHtml += '<div class="dropdown-divider"></div>' +
+                                '        <a class="dropdown-item rounded-2 py-2" href="' + baseUrl + 'admin/settingcashinfee/' + row.id + '">' +
+                                '            <i class="fas fa-cog mr-2 text-secondary" style="width: 20px;"></i>Cashin Fee Settings' +
+                                '        </a>' +
+                                '        <a class="dropdown-item rounded-2 py-2" href="' + baseUrl + 'admin/settingcashoutfee/' + row.id + '">' +
+                                '            <i class="fas fa-cog mr-2 text-secondary" style="width: 20px;"></i>Cashout Fee Settings' +
+                                '        </a>' +
+                                '    </div>' +
+                                '</div>';
+                            return actionHtml;
+                        }
+                    }
                 ];
                 var table = initServerDataTable('#merchantTable', ajaxUrl, columns, {
                     "language": {

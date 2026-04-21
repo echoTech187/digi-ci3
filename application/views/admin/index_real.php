@@ -1,5 +1,5 @@
 <!-- Begin Page Content -->
-<div class="container-fluid pb-5">
+<div>
 
     <!-- ── Strategic Header ── -->
     <div class="dt-page-header mb-4">
@@ -221,7 +221,7 @@
                                             </div>
                                             <h6 class="font-weight-bold m-0">Expansion Opportunity</h6>
                                         </div>
-                                        <p class="small m-0 text-white-50" style="line-height: 1.6;">QRIS yield accounts for <?= round(($qris_current/$profit_current)*100, 1) ?>% of net income. Accelerate onboarding for street-level retail partners.</p>
+                                        <p class="small m-0 text-white-50" style="line-height: 1.6;">QRIS yield accounts for <?= $profit_current > 0 ? round(($qris_current / $profit_current) * 100, 1) : 0 ?>% of net income. Accelerate onboarding for street-level retail partners.</p>
                                     </div>
                                 </div>
                             </div>

@@ -28,7 +28,7 @@
 
     <!-- Brand -->
     <div class="sb-brand">
-        <a href="<?= base_url('admin/dashboard'); ?>" class="sb-brand-link">
+        <a href="<?= base_url('/admin'); ?>" class="sb-brand-link">
             <div class="sb-brand-icon">
                 <img src="<?= base_url('public/image/icon.png'); ?>" alt="Logo">
             </div>

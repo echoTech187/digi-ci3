@@ -1,7 +1,7 @@
 <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.17/index.global.min.js'></script>
 
 <!-- Begin Page Content -->
-<div class="container-fluid pb-4 w-100">
+<div class=" w-100">
 
     <!-- ── Page Header ── -->
     <div class="dt-page-header d-flex align-items-center justify-content-between">

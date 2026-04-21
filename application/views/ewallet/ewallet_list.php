@@ -1,5 +1,5 @@
 <!-- Begin Page Content -->
-<div class="container-fluid">
+<div >
 
     <!-- Page Header -->
     <div class="dt-page-header">
@@ -170,7 +170,13 @@
             {data: 'c_datetime',className: 'text-nowrap', render: function(data){
                 return moment(data).format('DD-MM-YYYY HH:mm:ss');
             }},
-            {data: 'submerchant_info',className: 'text-nowrap'},
+            {
+                data: 'name_submerchant',
+                className: 'text-nowrap',
+                render: function(data, type, row) {
+                    return ' [' + row.ref_subMerchantId + '] - ' + data;
+                }
+            },
             {data: 'c_invoiceNo',className: 'text-nowrap'},
             {data: 'c_type',className: 'text-nowrap'},
             {data: 'ref_cashinChannelId',className: 'text-nowrap'},
@@ -184,8 +190,26 @@
             {data: 'c_fee',className: 'text-nowrap', render: function(data){
                 return 'Rp ' + number_format(data, 0, ',', '.');
             }},
-            {data: 'settlement_info',className: 'text-nowrap'},
-            {data: 'action', orderable: false, searchable: false}
+            {
+                data: 'c_datetimeSettlement',
+                className: 'text-nowrap',
+                render: function(data, type, row) {
+                    return (row.c_isSettlementRealtime == 1) ? 'Realtime' : (data || '-');
+                }
+            },
+            {
+                data: 'id', 
+                orderable: false, 
+                searchable: false,
+                render: function(data, type, row) {
+                    var baseUrl = "<?= base_url() ?>";
+                    var detailLink = baseUrl + 'admin/ewallet_detail/' + data;
+                    var resendLink = baseUrl + 'admin/Sendnotifikasiewallet/' + data;
+                    
+                    return '<a href="' + detailLink + '" class="btn btn-action-detail"><i class="fas fa-eye mr-2"></i>Detail</a> ' +
+                           '<a onclick="javascript: return confirm(\'Are you sure, want to resend notification again ??\')" href="' + resendLink + '" class="btn btn-action-resend"><i class="fas fa-paper-plane mr-2"></i>Resend</a>';
+                }
+            }
         ], {
             "language": {
                 "processing": '<i class="fa fa-spinner fa-spin fa-2x fa-fw mx-auto d-block text-primary"></i>',

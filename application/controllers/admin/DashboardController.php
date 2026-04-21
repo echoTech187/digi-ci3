@@ -68,11 +68,7 @@ class DashboardController extends CI_Controller
       $data['merchant_count'] = $this->Dashboard_model->get_merchant_count();
       $data['maintenance_status'] = $this->Merchant->getMaintenanceStatus();
 
-      $this->load->view('templates/user_header.php', $data);
-      $this->load->view('templates/user_sidebar.php', $data);
-      $this->load->view('templates/user_topbar.php', $data);
       $this->load->view('admin/index_dashboard', $data);
-      $this->load->view('templates/user_footer.php');
    }
 
    public function recent_mutations_json()
@@ -86,9 +82,9 @@ class DashboardController extends CI_Controller
          $data[] = [
             'date' => date('H:i:s d/m/Y', strtotime($row->date)),
             'merchant' => $row->merchant,
-            'type' => '<span class="badge text-dark border px-3 py-1 font-weight-bold small shadow-none">' . $row->type . '</span>',
-            'amount' => '<span class="font-weight-bold text-primary">Rp ' . number_format($row->amount, 0, ',', '.') . '</span>',
-            'status' => $this->_get_status_badge($row->status)
+            'type' => $row->type,
+            'amount' => $row->amount,
+            'status' => $row->status
          ];
       }
 
@@ -100,158 +96,117 @@ class DashboardController extends CI_Controller
       ]);
    }
 
-   private function _get_status_badge($status)
-   {
-      $status_class = 'secondary';
-      if (in_array($status, ['Success', 'PAID', 'SETTLEMENT'])) $status_class = 'success';
-      if (in_array($status, ['Pending', 'PROCESS'])) $status_class = 'warning';
-      if (in_array($status, ['Failed', 'REJECTED'])) $status_class = 'danger';
-      
-      return '<span class="badge badge-'.$status_class.' rounded-pill px-3 py-1 shadow-none small font-weight-bold">'.$status.'</span>';
-   }
-
    public function analytics()
    {
       $data['title'] = 'Analytics';
       $data['user'] = $this->Model_user->view_user()->row_array();
       $role_id = $this->session->userdata('role');
 
-      $this->load->view('templates/user_header.php', $data);
-      $this->load->view('templates/user_sidebar.php', $data);
-      $this->load->view('templates/user_topbar.php', $data);
-      
       if ($this->rbac->has_permission($role_id, "no_action")) {
          $this->load->view('admin/index', $data);
-      } else {
-         $this->load->model('Qris');
-         $this->load->model('BiFast');
-         $this->load->model('VirtualAccount');
-         $this->load->model('Merchant');
-
-         // ── Period Calculation ──
-         $period = $this->input->get('period') ? $this->input->get('period') : 'last_month';
-         $data['current_period'] = $period;
-
-         switch ($period) {
-            case 'yesterday':
-                $date_from = date('Y-m-d', strtotime('-1 day'));
-                $date_to   = $date_from; 
-                // Previous: the day before yesterday
-                $prev_date_from = date('Y-m-d', strtotime('-2 days'));
-                $prev_date_to   = $prev_date_from;
-                $data['comparison_label'] = 'yesterday';
-                break;
-            case 'last_7_days':
-                $date_from = date('Y-m-d', strtotime('-7 days'));
-                $date_to   = date('Y-m-d');
-                // Previous: 7 days before those
-                $prev_date_from = date('Y-m-d', strtotime('-14 days'));
-                $prev_date_to   = date('Y-m-d', strtotime('-8 days'));
-                $data['comparison_label'] = 'last week';
-                break;
-            case 'last_month':
-            default:
-                $date_from = date('Y-m-01', strtotime('first day of last month'));
-                $date_to   = date('Y-m-d', strtotime('last day of last month'));
-                // Previous: the month before that
-                $prev_date_from = date('Y-m-01', strtotime('first day of -2 month'));
-                $prev_date_to   = date('Y-m-t', strtotime('last day of -2 month'));
-                $data['comparison_label'] = 'last month';
-                break;
-         }
-
-         // Format for QRIS (String YmdHis)
-         $date_from_qris = date('Ymd', strtotime($date_from))."000001";
-         $date_to_qris   = date('Ymd', strtotime($date_to))."235959";
-
-         $prev_date_from_qris = date('Ymd', strtotime($prev_date_from))."000001";
-         $prev_date_to_qris   = date('Ymd', strtotime($prev_date_to))."235959";
-
-         // Always set Date Range Label (Lightweight)
-         $data['date_range_label'] = date('d M Y', strtotime($date_from)) . ($date_from != $date_to ? ' - ' . date('d M Y', strtotime($date_to)) : '');
-         
-         // Always set Submerchants (Required for filter dropdown)
-         $data['submerchants'] = $this->Merchant->get_merchant(null, null, null);
-
-         // OPTIMIZATION: Implement 5-minute Period-Based Caching for Analytics
-         $cache_key = 'dash_analytics_' . $period;
-         $cache_timeout_key = $cache_key . '_timeout';
-         $cache_ttl = 300; // 5 minutes
-         
-         $last_cache_time = $this->session->userdata($cache_timeout_key);
-         
-         if ($last_cache_time && time() < $last_cache_time) {
-             // Load from Cache
-             $cached_data = $this->session->userdata($cache_key);
-             $data['current_stats'] = $cached_data['current_stats'];
-             $data['prev_stats'] = $cached_data['prev_stats'];
-             $data['success_rate'] = $cached_data['success_rate'];
-             $data['chart_data'] = $cached_data['chart_data'];
-             // Legacy support
-             $data['qris_summary_last_month'] = $cached_data['current_stats']['qris_raw'];
-             $data['disburse_summary_last_month'] = $cached_data['current_stats']['disburse_raw'];
-             $data['va_summary_last_month'] = $cached_data['current_stats']['va_raw'];
-         } else {
-             // ── Fetch Current Summaries ──
-             $qris_summary     = $this->Qris->get_summary($date_from_qris, $date_to_qris, "");
-             $disburse_summary = $this->BiFast->get_summary($date_from, $date_to, "");
-             $va_summary       = $this->VirtualAccount->get_summary($date_from, $date_to, "");
-
-             // ── Fetch Total Attempts (Success Rate Calculation) ──
-             $start_dt = $date_from . ' 00:00:00';
-             $end_dt   = $date_to . ' 23:59:59';
-
-             $total_cashin_attempts = $this->db->where('c_datetime >=', $start_dt)
-                                               ->where('c_datetime <=', $end_dt)
-                                               ->count_all_results('cashin');
-             $total_cashout_attempts = $this->db->where('c_datetime >=', $start_dt)
-                                                ->where('c_datetime <=', $end_dt)
-                                                ->count_all_results('cashout');
-             $total_attempts = ($total_cashin_attempts + $total_cashout_attempts) ?: 1; 
-             $total_paid = ($qris_summary[0]['qty'] + $disburse_summary[0]['qty'] + $va_summary[0]['qty']);
-             $data['success_rate'] = round(($total_paid / $total_attempts) * 100, 1);
-
-             // ── Fetch Previous Summaries ──
-             $qris_summary_prev     = $this->Qris->get_summary($prev_date_from_qris, $prev_date_to_qris, "");
-             $disburse_summary_prev = $this->BiFast->get_summary($prev_date_from, $prev_date_to, "");
-             $va_summary_prev       = $this->VirtualAccount->get_summary($prev_date_from, $prev_date_to, "");
-             
-             $data['current_stats'] = [
-                 'qris' => $qris_summary[0],
-                 'disburse' => $disburse_summary[0],
-                 'va' => $va_summary[0],
-                 'qris_raw' => $qris_summary,
-                 'disburse_raw' => $disburse_summary,
-                 'va_raw' => $va_summary
-             ];
-             $data['prev_stats'] = [
-                 'qris' => $qris_summary_prev[0],
-                 'disburse' => $disburse_summary_prev[0],
-                 'va' => $va_summary_prev[0]
-             ];
-             
-             // Legacy compatibility 
-             $data['qris_summary_last_month'] = $qris_summary; 
-             $data['disburse_summary_last_month'] = $disburse_summary;
-             $data['va_summary_last_month'] = $va_summary;
-             
-             $data['chart_data'] = $this->_get_period_chart_data($period, $date_from, $date_to);
-
-             // Save to Cache
-             $cache_data = [
-                 'current_stats' => $data['current_stats'],
-                 'prev_stats' => $data['prev_stats'],
-                 'success_rate' => $data['success_rate'],
-                 'chart_data' => $data['chart_data']
-             ];
-             $this->session->set_userdata($cache_key, $cache_data);
-             $this->session->set_userdata($cache_timeout_key, time() + $cache_ttl);
-         }
-
-         $this->load->view('admin/index_real', $data);
+         return;
       }
-      
-      $this->load->view('templates/user_footer.php');
+
+      $period = $this->input->get('period') ?: 'last_7_days';
+      $today = new DateTime('today');
+
+      switch ($period) {
+         case 'yesterday':
+            $current_start = (clone $today)->modify('-1 day');
+            $current_end = clone $current_start;
+            $previous_start = (clone $today)->modify('-2 days');
+            $previous_end = clone $previous_start;
+            $comparison_label = 'previous day';
+            $date_range_label = $current_start->format('d M Y');
+            break;
+
+         case 'last_month':
+            $current_start = (clone $today)->modify('first day of last month');
+            $current_end = (clone $today)->modify('last day of last month');
+            $previous_start = (clone $current_start)->modify('-1 month');
+            $previous_end = (clone $current_start)->modify('-1 day');
+            $comparison_label = 'previous month';
+            $date_range_label = $current_start->format('d M Y') . ' - ' . $current_end->format('d M Y');
+            break;
+
+         default:
+            $period = 'last_7_days';
+            $current_start = (clone $today)->modify('-6 days');
+            $current_end = clone $today;
+            $previous_start = (clone $current_start)->modify('-7 days');
+            $previous_end = (clone $current_start)->modify('-1 day');
+            $comparison_label = 'previous week';
+            $date_range_label = $current_start->format('d M Y') . ' - ' . $current_end->format('d M Y');
+            break;
+      }
+
+      $current_from = $current_start->format('Y-m-d');
+      $current_to = $current_end->format('Y-m-d');
+      $prev_from = $previous_start->format('Y-m-d');
+      $prev_to = $previous_end->format('Y-m-d');
+
+      $statsTemplate = ['amount' => 0, 'fee' => 0, 'fee_external' => 0];
+      $data['current_stats'] = [
+         'qris' => $statsTemplate,
+         'disburse' => $statsTemplate,
+         'va' => $statsTemplate,
+      ];
+      $data['prev_stats'] = $data['current_stats'];
+      $data['current_period'] = $period;
+      $data['comparison_label'] = $comparison_label;
+      $data['date_range_label'] = $date_range_label;
+
+      $channels = [
+         'qris' => ['table' => 'cashin_payment_qris_mpm', 'dateField' => 'c_datetimePayment', 'where' => []],
+         'va' => ['table' => 'cashin_payment_va', 'dateField' => 'c_datetimePayment', 'where' => []],
+         'disburse' => ['table' => 'cashout_payment_bifast', 'dateField' => 'c_datetime', 'where' => ['c_status' => 'SUCCESS']],
+      ];
+
+      foreach (['current' => ['from' => $current_from, 'to' => $current_to], 'prev' => ['from' => $prev_from, 'to' => $prev_to]] as $window => $range) {
+         foreach ($channels as $channel => $params) {
+            $this->db->select('COALESCE(SUM(c_amount), 0) as amount, COALESCE(SUM(c_fee), 0) as fee, COALESCE(SUM(c_feeExternal), 0) as fee_external');
+            $this->db->from($params['table']);
+            $this->db->where($params['dateField'] . ' >=', $range['from'] . ' 00:00:00');
+            $this->db->where($params['dateField'] . ' <=', $range['to'] . ' 23:59:59');
+
+            foreach ($params['where'] as $field => $value) {
+               $this->db->where($field, $value);
+            }
+
+            $row = $this->db->get()->row_array();
+            $stats = [
+               'amount' => (float) ($row['amount'] ?? 0),
+               'fee' => (float) ($row['fee'] ?? 0),
+               'fee_external' => (float) ($row['fee_external'] ?? 0),
+            ];
+
+            if ($window === 'current') {
+               $data['current_stats'][$channel] = $stats;
+            } else {
+               $data['prev_stats'][$channel] = $stats;
+            }
+         }
+      }
+
+      $disburse_total = $this->db->select('COUNT(id) as total')->from('cashout_payment_bifast')
+         ->where('c_datetime >=', $current_from . ' 00:00:00')
+         ->where('c_datetime <=', $current_to . ' 23:59:59')
+         ->get()->row_array();
+      $disburse_success = $this->db->select('COUNT(id) as total')->from('cashout_payment_bifast')
+         ->where('c_status', 'SUCCESS')
+         ->where('c_datetime >=', $current_from . ' 00:00:00')
+         ->where('c_datetime <=', $current_to . ' 23:59:59')
+         ->get()->row_array();
+
+      $data['success_rate'] = 0;
+      if (!empty($disburse_total['total'])) {
+         $data['success_rate'] = round((float) $disburse_success['total'] / (float) $disburse_total['total'] * 100, 1);
+      } else {
+         $data['success_rate'] = 100;
+      }
+
+      $data['chart_data'] = $this->_get_period_chart_data($period, $current_from, $current_to);
+      $this->load->view('admin/index_real', $data);
    }
 
    private function _get_period_chart_data($period, $date_from, $date_to)
@@ -477,10 +432,6 @@ class DashboardController extends CI_Controller
           $data['greeting'] = 'Good Evening';
       }
 
-      $this->load->view('templates/user_header.php', $data);
-      $this->load->view('templates/user_sidebar.php', $data);
-      $this->load->view('templates/user_topbar.php', $data);
       $this->load->view('admin/welcome', $data);
-      $this->load->view('templates/user_footer.php');
    }
 }

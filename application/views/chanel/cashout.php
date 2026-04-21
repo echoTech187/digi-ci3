@@ -1,5 +1,5 @@
 <!-- Begin Page Content -->
-<div class="container-fluid pb-4">
+<div>
 
     <!-- ── Page Header ── -->
     <div class="dt-page-header">
@@ -237,7 +237,21 @@
                 {data: 'c_fee', className: 'font-weight-bold text-dark text-nowrap', render: function(data, type, row) {
                     return 'Rp ' + number_format(data, 0, ',', '.');
                 }},
-                {data: 'action', orderable: false, className: 'text-center'}
+                {
+                    data: null, 
+                    orderable: false, 
+                    className: 'text-center',
+                    render: function(data, type, row) {
+                        return '<div class="text-center">' +
+                               '    <button class="btn btn-sm btn-outline-primary edit-cashout px-3 shadow-none font-weight-bold" ' +
+                               '        data-toggle="modal" data-target="#debitBalanceModal" ' +
+                               '        data-id="' + row.id + '" ' +
+                               '        data-group="' + row.c_channelGroup + '">' +
+                               '        <i class="fas fa-edit mr-1"></i> Edit' +
+                               '    </button>' +
+                               '</div>';
+                    }
+                }
             ], {
             "dom": 'rt<"dt-footer"<"dt-footer-info"i><"dt-footer-pager">>',
             "language": {

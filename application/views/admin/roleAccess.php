@@ -1,5 +1,5 @@
 <!-- Begin Page Content -->
-<div class="container-fluid">
+<div >
 
     <!-- ── Page Header ── -->
     <div class="dt-page-header">

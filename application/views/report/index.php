@@ -1,5 +1,5 @@
 <!-- Begin Page Content -->
-<div class="container-fluid pb-4">
+<div>
 
     <!-- ── Page Header ── -->
     <div class="dt-page-header">
@@ -69,7 +69,14 @@
                 {data: 'c_type', render: function(data) {
                     return '<span class="badge badge-light text-dark border px-2 py-1 text-uppercase" style="font-size:10px; letter-spacing:0.5px;">' + data + '</span>';
                 }},
-                {data: 'c_filename'},
+                {
+                    data: 'c_filename',
+                    className: 'text-nowrap',
+                    render: function(data) {
+                        var baseUrl = "<?= base_url() ?>";
+                        return '<a href="' + baseUrl + 'admin/download?filename=' + encodeURIComponent(data) + '" class="text-primary font-weight-bold">' + data + '</a>';
+                    }
+                },
                 {data: 'c_status', render: function(data) {
                     var d = (data || '').toUpperCase();
                     var cls = 'secondary';
