@@ -53,7 +53,7 @@ $download_url = base_url('admin/download_VA_recurring') // Assuming this exists 
                         <div class="dt-more-panel" id="vadynamicMoreFiltersPanel">
                             <div class="dt-more-panel-header">
                                 <span class="dt-more-panel-title"><i class="fas fa-filter mr-1 mr-2"></i> Advanced Filters</span>
-                                <a href="<?= base_url('admin/resetVa_dynamic'); ?>" class="dt-more-clear">Clear All</a>
+                                <a href="<?= base_url('admin/resetVa_recurring'); ?>" class="dt-more-clear">Clear All</a>
                             </div>
                             
                             <div class="dt-more-panel-body">

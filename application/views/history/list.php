@@ -64,7 +64,7 @@ $download_url = base_url('admin/download_history')
                         <div class="dt-more-panel" id="moreFiltersPanel">
                             <div class="dt-more-panel-header">
                                 <span class="dt-more-panel-title"><i class="fas fa-filter mr-1 mr-2"></i> Advanced Filters</span>
-                                <a href="<?= base_url('admin/resetewallet_dynamic'); ?>" class="dt-more-clear">Clear All</a>
+                                <a href="<?= base_url('admin/resetHistory'); ?>" class="dt-more-clear">Clear All</a>
                             </div>
 
                             <div class="dt-more-panel-body">

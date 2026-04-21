@@ -194,16 +194,16 @@ class AdminMerchant extends CI_Controller
          ['field' => 'c_phoneNumber', 'label' => 'Merchant Phone', 'rules' => 'trim'],
          ['field' => 'c_openapiIPAllow', 'label' => 'Whitelist IP', 'rules' => 'trim|required'],
          ['field' => 'c_openapiUrlCallbackQrisMpm', 'label' => 'OpenAPI Callback URL QRIS MPM', 'rules' => 'trim|required'],
-         ['field' => 'c_openapiUrlCallbackEwallet', 'label' => 'OpenAPI Callback URL E-wallet', 'rules' => 'trim|required'],
-         ['field' => 'c_openapiUrlCallbackVa', 'label' => 'OpenAPI Callback URL VA', 'rules' => 'trim|required'],
-         ['field' => 'c_openapiStatus', 'label' => 'OpenAPI Status', 'rules' => 'trim|required'],
          ['field' => 'c_password', 'label' => 'Merchant Password', 'rules' => 'trim|required'],
          ['field' => 'c_confirmPassword', 'label' => 'Merchant Confirm Password', 'rules' => 'trim|required|matches[c_password]'],
-         ['field' => 'c_gvconnectBusinessId', 'label' => 'GVConnect Business ID', 'rules' => 'trim'],
-         ['field' => 'c_gvconnectBusinessName', 'label' => 'GVConnect Business Name', 'rules' => 'trim'],
       ];
 
       $optionalFields = [
+         'c_openapiUrlCallbackEwallet',
+         'c_openapiUrlCallbackVa',
+         'c_openapiStatus',
+         'c_gvconnectBusinessId',
+         'c_gvconnectBusinessName',
          'c_openapiChannelVaDynamicCreate',
          'c_openapiChannelVaDynamicQuery',
          'c_openapiChannelVaDynamicCancel',
