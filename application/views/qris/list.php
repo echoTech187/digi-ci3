@@ -234,7 +234,6 @@ $download_url = base_url('admin/download_qris')
         ], {
             "ordering": false,
             "language": {
-                "processing": '<i class="fa fa-spinner fa-spin fa-2x fa-fw mx-auto d-block text-primary"></i>',
                 "info": "Showing _START_ – _END_ of _TOTAL_ results",
                 "infoEmpty": "No results to show",
                 "infoFiltered": "",

@@ -94,7 +94,6 @@
             "dom": 'rt<"dt-footer"<"dt-footer-info"i><"dt-footer-pager">>',
             "order": [[1, 'asc']],
             "language": {
-                "processing": '<i class="fa fa-spinner fa-spin fa-2x fa-fw mx-auto d-block text-primary"></i>',
                 "info": "Showing _START_ – _END_ of _TOTAL_ admins",
                 "infoEmpty": "No admins to show",
                 "zeroRecords": '<div class="text-center py-4 text-muted"><i class="fas fa-users fa-2x mb-2 d-block mr-2"></i> No admin accounts found.</div>'

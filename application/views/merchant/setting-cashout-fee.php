@@ -295,6 +295,7 @@
     </div>
 </div>
 
+<script src="<?= base_url('assets/js/server-datatables.js') ?>"></script>
 <script>
 $(document).ready(function() {
     // Initialize Select2 for modal with dropdownParent to fix focus/render issues
@@ -311,22 +312,7 @@ $(document).ready(function() {
         });
     });
 
-    // CSRF helper
-    const csrfName = $('meta[name="csrf-token-name"]').attr('content');
-    const csrfHash = $('meta[name="csrf-token-hash"]').attr('content');
-
-    var table = $('#cashoutTable').DataTable({
-            "processing": true,
-            "serverSide": true,
-            "ajax": {
-                "url": window.location.href,
-                "type": "POST",
-                "data": function(d) {
-                    if (csrfName) d[csrfName] = csrfHash;
-                    return d;
-                }
-            },
-            "columns": [
+    var table = initServerDataTable("#cashoutTable", window.location.href, [
                 { "data": "no", "className": "ps-4 text-muted small" },
                 { 
                     "data": "c_cashoutChannelGroup",
@@ -422,41 +408,12 @@ $(document).ready(function() {
                         `;
                     }
                 }
-            ],
-            "language": {
-                "processing": '<i class="fa fa-spinner fa-spin fa-2x fa-fw mx-auto d-block text-primary"></i>',
+            ], {
+            order: [[1, 'asc']],
+            language: {
                 "info": "Showing _START_ – _END_ of _TOTAL_ results",
                 "infoEmpty": "No results to show",
-                "infoFiltered": "",
                 "zeroRecords": '<div class="text-center py-4 text-muted"><i class="fas fa-inbox fa-2x mb-2 d-block mr-2"></i> No settings found.</div>'
-            },
-            "dom": 'rt<"dt-footer"<"dt-footer-info"i><"dt-footer-pager">>',
-            "drawCallback": function(settings) {
-                var api    = this.api();
-                var info   = api.page.info();
-                var $pager = $(api.table().container()).find('.dt-footer-pager');
-
-                var currPage   = info.page + 1;
-                var totalPages = info.pages || 1;
-
-                $pager.html(
-                    '<button class="dt-nav-btn dt-prev-btn" ' + (info.page === 0 ? 'disabled' : '') + '>' +
-                        '<i class="fas fa-chevron-left mr-2"></i> PREVIOUS' +
-                    '</button>' +
-                    '<span class="dt-page-counter">' +
-                        '<strong>' + currPage + '</strong> of <strong>' + totalPages + '</strong>' +
-                    '</span>' +
-                    '<button class="dt-nav-btn dt-next-btn" ' + (info.page >= totalPages - 1 ? 'disabled' : '') + '>' +
-                        'NEXT <i class="fas fa-chevron-right"></i>' +
-                    '</button>'
-                );
-
-                $pager.find('.dt-prev-btn').off('click').on('click', function() {
-                    if (!$(this).prop('disabled')) { api.page('previous').draw('page'); }
-                });
-                $pager.find('.dt-next-btn').off('click').on('click', function() {
-                    if (!$(this).prop('disabled')) { api.page('next').draw('page'); }
-                });
             }
         });
 

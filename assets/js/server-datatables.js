@@ -28,7 +28,7 @@ function initServerDataTable(tableId, ajaxUrl, columns, additionalOptions = {}) 
         "columns": columns,
         "ordering": false,
         "language": {
-            "processing": '<i class="fa fa-spinner fa-spin fa-2x fa-fw mx-auto d-block text-primary"></i>',
+            "processing": '<div class="dt-loader-inner"><div class="spinner-border text-primary" role="status"></div><div class="small font-weight-bold ml-2">PROCESSING DATA...</div></div>',
             "info": "Showing _START_ – _END_ of _TOTAL_ results",
             "infoEmpty": "No results to show",
             "infoFiltered": "",

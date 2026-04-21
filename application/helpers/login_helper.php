@@ -6,24 +6,25 @@ function is_logged_in()
     if (!$ci->session->userdata('email') && !$ci->session->userdata('c_email')) {
         redirect('auth');
     } else {
-        $actual_role_id = $ci->session->userdata('role');
-        if (!$actual_role_id) {
-            $actual_role_id = $ci->session->userdata('role_id'); 
+        // Detect effective Role ID (Prioritize 'role_id' as the primary access level identifier)
+        $role_id = $ci->session->userdata('role_id') ?: $ci->session->userdata('role');
+
+        $segment1 = strtolower($ci->uri->segment(1));
+        $segment2 = strtolower($ci->uri->segment(2));
+
+        // WHITELIST: Allow base segments that serve as entry points/dispatchers
+        $public_segments = ['admin', 'welcome', 'auth', 'user'];
+        if (in_array($segment1, $public_segments) && empty($segment2)) {
+            return;
         }
 
-        $segment1 = $ci->uri->segment(1);
-        $segment2 = $ci->uri->segment(2);
+        $current_url = $segment1 . ($segment2 ? '/' . $segment2 : '');
 
-        $current_url = strtolower($segment1);
-        if ($segment2) {
-            $current_url .= '/' . strtolower($segment2);
-        }
-
-        // REMOVED: Broad segment bypass for 'admin' and 'user' to ensure granular RBAC
-        // Combined Optimized Query: Check menu existence and access in one round-trip
+        // RBAC Check: Verify menu exists and user has access
         $ci->db->select('m.id as menu_id, am.id as access_id');
         $ci->db->from('user_menu m');
-        $ci->db->join('user_access_menu am', 'm.id = am.menu_id AND am.role_id = ' . (int)$actual_role_id, 'left');
+        // Use flexible comparison (without forced cast) to support string/int role IDs
+        $ci->db->join('user_access_menu am', 'm.id = am.menu_id AND am.role_id = ' . $ci->db->escape($role_id), 'left');
         $ci->db->where('m.url', $current_url);
         $check = $ci->db->get();
 

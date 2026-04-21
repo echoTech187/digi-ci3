@@ -203,7 +203,7 @@
                             
                             <div class="row g-4">
                                 <div class="col-md-6 mb-4">
-                                    <div class="p-4" style="background: rgba(255,255,255,0.05); border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px);">
+                                    <div class="p-4 h-100 d-flex flex-column" style="background: rgba(255,255,255,0.05); border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px);">
                                         <div class="d-flex align-items-center mb-3">
                                             <div class="bg-primary rounded-lg d-flex align-items-center justify-content-center mr-3" style="width: 38px; height: 38px; min-width: 38px;">
                                                 <i class="fas fa-lightbulb"></i>
@@ -214,7 +214,7 @@
                                     </div>
                                 </div>
                                 <div class="col-md-6 mb-4">
-                                    <div class="p-4" style="background: rgba(255,255,255,0.05); border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px);">
+                                    <div class="p-4 h-100 d-flex flex-column" style="background: rgba(255,255,255,0.05); border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px);">
                                         <div class="d-flex align-items-center mb-3">
                                             <div class="bg-emerald rounded-lg d-flex align-items-center justify-content-center mr-3" style="width: 38px; height: 38px; min-width: 38px; background: #10b981;">
                                                 <i class="fas fa-rocket"></i>
