@@ -72,12 +72,35 @@ defined('BASEPATH') or exit('No direct script access allowed');
 */
 $active_group = 'default';
 $query_builder = TRUE;
+
+// $db['default'] = array(
+// 	'dsn'	=> '',
+// 	'hostname' => 'localhost',
+// 	'username' => 'root',
+// 	'password' => 'root',
+// 	'database' => 'digi2',
+// 	'dbdriver' => 'mysqli',
+// 	'dbprefix' => '',
+// 	'pconnect' => FALSE,
+// 	'db_debug' => (ENVIRONMENT !== 'production'),
+// 	'cache_on' => FALSE,
+// 	'cachedir' => '',
+// 	'char_set' => 'utf8',
+// 	'dbcollat' => 'utf8_general_ci',
+// 	'swap_pre' => '',
+// 	'encrypt' => FALSE,
+// 	'compress' => FALSE,
+// 	'stricton' => FALSE,
+// 	'failover' => array(),
+// 	'save_queries' => TRUE
+// );
+
 $db['default'] = array(
 	'dsn'	=> '',
-	'hostname' => 'localhost',
-	'username' => 'root',
-	'password' => 'root',
-	'database' => 'digi2',
+	'hostname' => '110.239.88.113:3306',
+	'username' => 'eko',
+	'password' => 'PasswordBaru123!',
+	'database' => 'db_stagging',
 	'dbdriver' => 'mysqli',
 	'dbprefix' => '',
 	'pconnect' => FALSE,
@@ -96,10 +119,10 @@ $db['default'] = array(
 
 // $db['default'] = array(
 // 	'dsn'	=> '',
-// 	'hostname' => '110.239.88.113:3306',
+// 	'hostname' => '110.239.94.37:3306',
 // 	'username' => 'eko',
-// 	'password' => 'PasswordBaru123!',
-// 	'database' => 'db_stagging',
+// 	'password' => 'w%s@MN%3W6xoREwV7y?-',
+// 	'database' => 'db_prod',
 // 	'dbdriver' => 'mysqli',
 // 	'dbprefix' => '',
 // 	'pconnect' => FALSE,
@@ -109,8 +132,8 @@ $db['default'] = array(
 // 	'char_set' => 'utf8',
 // 	'dbcollat' => 'utf8_general_ci',
 // 	'swap_pre' => '',
-// 	'encrypt' => FALSE,
-// 	'compress' => FALSE,
+// 	'encrypt' => TRUE,
+// 	'compress' => TRUE,
 // 	'stricton' => FALSE,
 // 	'failover' => array(),
 // 	'save_queries' => TRUE
