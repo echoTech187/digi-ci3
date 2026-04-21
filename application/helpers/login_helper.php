@@ -14,9 +14,9 @@ function is_logged_in()
         $segment1 = $ci->uri->segment(1);
         $segment2 = $ci->uri->segment(2);
 
-        $current_url = $segment1;
+        $current_url = strtolower($segment1);
         if ($segment2) {
-            $current_url .= '/' . $segment2;
+            $current_url .= '/' . strtolower($segment2);
         }
 
         // Allow default dashboard routes

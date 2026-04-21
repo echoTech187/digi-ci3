@@ -9,6 +9,8 @@ class AdminMerchant extends CI_Controller
    {
       parent::__construct();
 
+      is_logged_in(); // Enforce RBAC access control globally
+
       global $internalUrlHit;
       global $externalUrlHit;
 

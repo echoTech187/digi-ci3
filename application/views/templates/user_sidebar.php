@@ -16,8 +16,8 @@
     $sb_role = ($actual_role_id == 1) ? 'Super Admin' : (($actual_role_id == 2) ? 'Merchant' : 'Supervisor'); 
 
     // Detect Current URL for Active State Mapping
-    $curr_url = $this->uri->segment(1);
-    if ($this->uri->segment(2)) $curr_url .= '/' . $this->uri->segment(2);
+    $curr_url = strtolower($this->uri->segment(1));
+    if ($this->uri->segment(2)) $curr_url .= '/' . strtolower($this->uri->segment(2));
 
     // Tarik Data Menu secara dinamis melalui RBAC
     $menus = $this->rbac->get_menus_by_role($actual_role_id);
