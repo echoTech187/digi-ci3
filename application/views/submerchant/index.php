@@ -128,8 +128,7 @@ $(document).ready(function() {
                        '</div>';
             }
         }
-    ], {
-        ]);
+    ]);
 
     // Global search with Debounce
     $('#dt-search').on('input', debounce(function() {
