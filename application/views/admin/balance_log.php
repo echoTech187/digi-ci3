@@ -91,16 +91,12 @@
 </div>
 
 <!-- ── External Scripts ── -->
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-
 <script>
 $(document).ready(function() {
     const table = initServerDataTable('#balanceLogTable', '<?= base_url("admin/balance_log") ?>', [
         {data: 'no', orderable: false, className: 'text-center'},
         {data: 'created_at', render: function(data){
-            return '<span class="font-weight-bold">' + moment(data).format('DD-MM-YYYY HH:mm:ss') + '</span>';
+            return '<span class="font-weight-bold">' + (data ? moment(data).format('DD-MM-YYYY HH:mm:ss') : '-') + '</span>';
         }},
         {data: 'merchant_id', render: function(data){
             return '<span class="badge badge-light text-dark border px-2 py-1">' + data + '</span>';
@@ -111,44 +107,10 @@ $(document).ready(function() {
             return '<span class="font-weight-bold text-dark">Rp ' + Number(val).toLocaleString('id-ID') + '</span>';
         }, className: 'text-right'}
     ], {
-        dom: 'rt<"dt-footer"<"dt-footer-info"i><"dt-footer-pager">>',
-        order: [[1, 'desc']],
-        language: {
-            "info": "Showing _START_ – _END_ of _TOTAL_ entries",
-            "infoEmpty": "No results to show",
-            "zeroRecords": '<div class="text-center py-4 text-muted"><i class="fas fa-inbox fa-2x mb-2 d-block mr-2"></i> No logs found.</div>'
-        },
-        drawCallback: function(settings) {
-            var api    = this.api();
-            var info   = api.page.info();
-            var $pager = $(api.table().container()).find('.dt-footer-pager');
-
-            var currPage   = info.page + 1;
-            var totalPages = info.pages || 1;
-
-            $pager.html(
-                '<button class="dt-nav-btn dt-prev-btn" ' + (info.page === 0 ? 'disabled' : '') + '>' +
-                    '<i class="fas fa-chevron-left mr-2"></i> PREVIOUS' +
-                '</button>' +
-                '<span class="dt-page-counter">' +
-                    '<strong>' + currPage + '</strong> of <strong>' + totalPages + '</strong>' +
-                '</span>' +
-                '<button class="dt-nav-btn dt-next-btn" ' + (info.page >= totalPages - 1 ? 'disabled' : '') + '>' +
-                    'NEXT <i class="fas fa-chevron-right"></i>' +
-                '</button>'
-            );
-
-            $pager.find('.dt-prev-btn').off('click').on('click', function() {
-                if (!$(this).prop('disabled')) { api.page('previous').draw('page'); }
-            });
-            $pager.find('.dt-next-btn').off('click').on('click', function() {
-                if (!$(this).prop('disabled')) { api.page('next').draw('page'); }
-            });
-        }
+        order: [[1, 'desc']]
     });
 
-    // Global Search Binding
-    // Optimized search with debounce
+    // Global Search Binding with debounce
     $('#dt-global-search').on('keyup', debounce(function() {
         table.search(this.value).draw();
     }, 400));
