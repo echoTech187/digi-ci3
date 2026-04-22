@@ -126,8 +126,8 @@ class Qris extends CI_Model {
         if ($searchValue) {
             $safeSearchValue = $this->db->escape_like_str($searchValue);
             
-            // Regex to strictly detect Trans IDs (GD/GR), Invoices (INV/QRIS), Pure RRNs (8+ digits), or Hex UUIDs.
-            $isTechnicalId = preg_match('/^([0-9]{8,30}|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-.*|(GD|GR)[0-9a-zA-Z]+|0000[0-9a-fA-F]+)$/i', $searchValue);
+            // Regex to strictly detect Trans IDs (GD/GR), Invoices (INV/QRIS), Pure RRNs (8+ digits), Hex UUIDs, or Alphanumeric Technical Codes.
+            $isTechnicalId = preg_match('/^([0-9]{8,30}|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-.*|(GD|GR)[0-9a-zA-Z]+|0000[0-9a-fA-F]+|[1-9][a-zA-Z0-9]{10,})$/i', $searchValue);
             $isInvoiceSearch = preg_match('/^(INV|QRIS)/i', $searchValue);
             
             if ($isTechnicalId) {
@@ -188,14 +188,15 @@ class Qris extends CI_Model {
                 // FAST INVOICE SEARCH
                 $this->db->where("cpq.ref_cashinId IN (SELECT id FROM cashin WHERE c_invoiceNo LIKE '$safeSearchValue%')", NULL, FALSE);
             } else {
-                // TEXT SEARCH: Merchant/Submerchant Names
+                // OPTIMIZED GLOBAL SEARCH (Names)
+                // MySQL CANNOT optimize 'JOIN + LIKE' on 23M rows. 
+                // Solution: Find matching Merchant IDs first from the small merchant table, then filter cpq via FK index.
                 if (strlen($searchValue) >= 4) {
                     $this->db->group_start();
-                    $this->db->like('m.c_name', $searchValue, 'after');
-                    $this->db->or_like('s.c_name', $searchValue, 'after');
+                    $this->db->where("cpq.ref_merchantId IN (SELECT id FROM merchant WHERE c_name LIKE '$safeSearchValue%')", NULL, FALSE);
+                    $this->db->or_where("cpq.ref_subMerchantId IN (SELECT id FROM submerchant WHERE c_name LIKE '$safeSearchValue%')", NULL, FALSE);
                     $this->db->group_end();
                 } else {
-                    // Prevent massive scan on short text queries
                     $this->db->where('1=0', NULL, FALSE);
                 }
             }
