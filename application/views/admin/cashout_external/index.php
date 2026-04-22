@@ -189,28 +189,6 @@
     </div>
 </div>
 
-        <style>
-            .dt-card { overflow: visible !important; }
-            .select2-container--default .select2-selection--single {
-                height: 38px !important;
-                border: 1px solid #d1d3e2 !important;
-                border-radius: 6px !important;
-                display: flex !important;
-                align-items: center !important;
-            }
-            .select2-container--default .select2-selection--single .select2-selection__arrow {
-                height: 36px !important;
-            }
-            .form-control {
-                height: 38px !important;
-                border-radius: 6px !important;
-            }
-            .card.h-100 { height: auto !important; }
-            .g-4, .gy-4 { --bs-gutter-y: 1.5rem; --bs-gutter-x: 1.5rem; }
-            /* Support for legacy Bootstrap 4 if g-x classes aren't available */
-            .modal-body .row > [class*='col-'] { margin-bottom: 15px; }
-            .modal-body .card { padding: 20px !important; }
-        </style>
         <script src="<?= base_url('assets/js/server-datatables.js') ?>"></script>
 <script>
 $(document).ready(function() {

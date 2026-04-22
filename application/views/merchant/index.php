@@ -391,12 +391,6 @@
         <!-- DataTables & Scripts -->
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script src="<?= base_url('assets/js/server-datatables.js') ?>"></script>
-        <style>
-            .dt-card { overflow: visible !important; }
-            .card-body { overflow: visible !important; }
-            .table-responsive { overflow: visible !important; }
-            @media (max-width: 991.98px) { .table-responsive { overflow-x: auto !important; -webkit-overflow-scrolling: touch; } }
-        </style>
         <script>
             $(document).ready(function() {
                 var ajaxUrl = "<?= base_url('admin/merchant') ?>";

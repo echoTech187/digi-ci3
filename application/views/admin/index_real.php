@@ -242,37 +242,6 @@
 
 </div>
 
-<style>
-/* Dashboard Specific Premium Styles */
-.dash-kpi-card {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    cursor: default;
-}
-.dash-kpi-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 25px 30px -5px rgba(0, 0, 0, 0.1), 0 15px 15px -10px rgba(0, 0, 0, 0.05) !important;
-}
-
-.bg-primary-soft { background-color: rgba(99, 102, 241, 0.1); }
-.text-emerald { color: #10b981; }
-.text-rose { color: #f43f5e; }
-
-@keyframes pulse-ring {
-    0% { transform: scale(.6); opacity: 1; }
-    80%, 100% { opacity: 0; }
-}
-.pulse-ring:before {
-    content: '';
-    position: absolute;
-    width: 300px;
-    height: 300px;
-    top: -40px;
-    left: -40px;
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 50%;
-    animation: pulse-ring 4s infinite cubic-bezier(0.215, 0.61, 0.355, 1);
-}
-</style>
 
 <script src="<?= base_url('assets/'); ?>vendor/chart.js/Chart.min.js"></script>
 <script>

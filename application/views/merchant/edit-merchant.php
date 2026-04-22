@@ -153,23 +153,5 @@
     </div>
 </div>
 
-<style>
-.letter-spacing-1 {
-    letter-spacing: 1px;
-}
-.opacity-75 {
-    opacity: 0.75;
-}
-.section-title {
-    font-size: 0.75rem;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-}
-.custom-select {
-    height: calc(1.5em + 1rem + 2px);
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
-}
-</style>
 
 

@@ -231,43 +231,6 @@
     </div>
 </div>
 
-<style>
-/* Dashboard Specific Premium Styles */
-.dash-kpi-card {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    cursor: default;
-}
-.dash-kpi-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
-}
-
-.bg-primary-soft { background-color: rgba(99, 102, 241, 0.1); }
-.bg-success-soft { background-color: rgba(16, 185, 129, 0.1); }
-
-.pulse {
-    animation: pulse-animation 2s infinite;
-}
-@keyframes pulse-animation {
-    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
-    70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
-    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
-}
-
-#recentActivityTable tbody tr {
-    transition: background 0.2s;
-}
-#recentActivityTable tbody tr:hover {
-    background-color: var(--gray-100) !important;
-}
-#recentActivityTable td {
-    padding: 20px 24px;
-    font-size: 14px;
-    color: var(--gray-700);
-    border-bottom: 1px solid var(--border-color);
-    vertical-align: middle;
-}
-</style>
 
 <script src="<?= base_url('assets/'); ?>vendor/chart.js/Chart.min.js"></script>
 <script type="text/javascript">

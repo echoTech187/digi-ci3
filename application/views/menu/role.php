@@ -52,9 +52,6 @@
         <?php endif; ?>
     </div>
 </div>
-<style>
-.card:hover { box-shadow: 0 8px 24px rgba(78,115,223,.12) !important; }
-</style>
 
 
 
