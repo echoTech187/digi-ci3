@@ -82,7 +82,7 @@ $route['admin/getCashoutChannelGroups'] = 'AdminMerchant/getCashoutChannelGroups
 $route['admin/editSettingCashoutFee/(:any)/(:any)'] = 'AdminMerchant/editSettingCashoutFee/$1/$2';
 $route['admin/deleteSettingCashoutFee/(:any)/(:any)'] = 'AdminMerchant/deleteSettingCashoutFee/$1/$2';
 $route['admin/resetMerchant'] = 'AdminMerchant/resetMerchant';
-$route['admin/searchMerchants'] = 'AdminMerchant/searchMerchants';
+$route['admin/merchant_spv/search'] = 'AdminMerchant/searchMerchants';
 $route['admin/fetchMerchantPermissions/(:any)'] = 'AdminMerchant/fetchMerchantPermissions/$1';
 $route['admin/saveDelegation/(:any)'] = 'AdminMerchant/saveDelegation/$1';
 
@@ -279,6 +279,20 @@ $route['admin/pubgmobile/(:any)/(:any)'] = 'admin/ServiceController/pubgmobile/$
 $route['admin/createProduk'] = 'admin/ServiceController/createProduk';
 $route['admin/createProduk/(:any)'] = 'admin/ServiceController/createProduk/$1';
 $route['admin/createProduk/(:any)/(:any)'] = 'admin/ServiceController/createProduk/$1/$2';
+
+// --- Cashin External Module Extraction Routes ---
+$route['admin/cashin/external'] = 'admin/CashinExternalController/index';
+$route['admin/cashin/external/ajax_list'] = 'admin/CashinExternalController/ajax_list';
+$route['admin/cashin/external/add'] = 'admin/CashinExternalController/add';
+$route['admin/cashin/external/update'] = 'admin/CashinExternalController/update';
+$route['admin/cashin/external/delete/(:any)'] = 'admin/CashinExternalController/delete/$1';
+
+// --- Cashout External Module Extraction Routes ---
+$route['admin/cashout/external'] = 'admin/CashoutExternalController/index';
+$route['admin/cashout/external/ajax_list'] = 'admin/CashoutExternalController/ajax_list';
+$route['admin/cashout/external/add'] = 'admin/CashoutExternalController/add';
+$route['admin/cashout/external/update'] = 'admin/CashoutExternalController/update';
+$route['admin/cashout/external/delete/(:any)'] = 'admin/CashoutExternalController/delete/$1';
 
 // --- Channel Module Extraction Routes ---
 $route['admin/cashin'] = 'admin/ChannelController/cashin';

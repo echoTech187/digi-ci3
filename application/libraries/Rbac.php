@@ -88,4 +88,19 @@ class Rbac {
 
         return $result;
     }
+    /**
+     * Clear all RBAC menu caches in the current session.
+     * Use this when menu structure or permissions change.
+     */
+    public function clear_menu_cache() {
+        $db_name = $this->CI->db->database;
+        $all_session = $this->CI->session->all_userdata();
+        $prefix = 'rbac_menu_cache_' . $db_name;
+        
+        foreach ($all_session as $key => $value) {
+            if (strpos($key, $prefix) === 0) {
+                $this->CI->session->unset_userdata($key);
+            }
+        }
+    }
 }

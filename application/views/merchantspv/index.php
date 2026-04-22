@@ -78,20 +78,20 @@
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg">
             <!-- Header Legacy Migrated -->
-<div class="modal-header modal-header-primary border-0 mh-premium">
-    <div class="d-flex align-items-center">
-        <div class="mh-icon-badge">
-            <i class="fas fa-store"></i>
-        </div>
-        <div class="mh-title-wrap">
-            <h6 class="mh-title"  id="registerMerchantSpvLabel">Register Merchant SPV</h6>
-            <small class="mh-subtitle" >Manage and process information details</small>
-        </div>
-    </div>
-    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" style="opacity:0.8;">
-        <span aria-hidden="true">&times;</span>
-    </button>
-</div>
+            <div class="modal-header modal-header-primary border-0 mh-premium">
+                <div class="d-flex align-items-center">
+                    <div class="mh-icon-badge">
+                        <i class="fas fa-store"></i>
+                    </div>
+                    <div class="mh-title-wrap">
+                        <h6 class="mh-title"  id="registerMerchantSpvLabel">Register Merchant SPV</h6>
+                        <small class="mh-subtitle" >Manage and process information details</small>
+                    </div>
+                </div>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" style="opacity:0.8;">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
             <div class="modal-body p-4 text-dark">
                 <form method="post" action="<?= base_url('admin/registerMerchantSpv'); ?>">
                     <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>">
@@ -223,28 +223,38 @@ $(document).ready(function() {
 
     // ── Select2 for Modal ──
     $('#registerMerchantSpv').on('shown.bs.modal', function () {
-        if (!$('#c_merchant_spv').hasClass("select2-hidden-accessible")) {
-            $('#c_merchant_spv').select2({
-                dropdownParent: $('#registerMerchantSpv'),
-                placeholder: 'Search Merchants...',
-                width: '100%',
-                minimumInputLength: 1,
-                ajax: {
-                    url: "<?= base_url('admin/searchMerchants'); ?>",
-                    dataType: 'json',
-                    delay: 250,
-                    data: function (params) { return { q: params.term }; },
-                    processResults: function (data) {
-                        return {
-                            results: $.map(data, function(item) {
-                                return { id: item.id, text: item.name };
-                            })
-                        };
-                    },
-                    cache: true
-                }
-            });
+        const $select = $('#c_merchant_spv');
+        
+        // Destroy existing instance to force re-init with correct AJAX settings
+        if ($select.hasClass("select2-hidden-accessible")) {
+            $select.select2('destroy').empty();
         }
+
+        $select.select2({
+            dropdownParent: $('#registerMerchantSpv'),
+            placeholder: 'Search Merchants...',
+            width: '100%',
+            minimumInputLength: 1,
+            ajax: {
+                url: "<?= base_url('admin/merchant_spv/search'); ?>",
+                dataType: 'json',
+                delay: 250,
+                data: function (params) { return { q: params.term }; },
+                processResults: function (data) {
+                    return {
+                        results: $.map(data, function(item) {
+                            return { id: item.id, text: item.name };
+                        })
+                    };
+                },
+                cache: true,
+                error: function (xhr, status, error) {
+                    // Ignore aborted requests (common when typing fast/deleting)
+                    if (xhr.status === 0) return;
+                    console.error("Select2 AJAX Error:", status, error);
+                }
+            }
+        });
     });
 
     // Ensure tooltips/popovers work if any

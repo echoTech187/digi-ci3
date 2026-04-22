@@ -123,6 +123,10 @@
                                         <span class="text-dark font-weight-bold"><?= $data['ref_cashinExternalId']; ?></span>
                                     </div>
                                     <div class="col-md-3 mb-2 mb-md-0 border-right">
+                                        <small class="text-muted d-block">Issuer RRN</small>
+                                        <span class="text-dark font-weight-bold"><?= $data['c_issuerRrn'] ?: '-'; ?></span>
+                                    </div>
+                                    <div class="col-md-2 mb-2 mb-md-0 border-right">
                                         <small class="text-muted d-block">Ext. Settlement</small>
                                         <span class="text-dark"><?= ($data['c_isSettlementRealtimeExternal'] == 1) ? 'Realtime' : ($data['c_datetimeSettlementExternal'] ?: '-'); ?></span>
                                     </div>

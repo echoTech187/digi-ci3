@@ -516,15 +516,15 @@ public function setMaintenanceStatus($newStatus) {
 
     public function get_merchants_by_supervisor_handler($supervisor_id)
     {
-        // Join merchant_supervisor_assignment and merchant
+        // Join merchant_supervisor and merchant
         $table = 'merchant';
-        $column_order  = ['id', 'c_name', 'c_balanceTotal', 'c_balanceHold', 'c_openapistatus', 'c_status'];
-        $column_search = ['c_name', 'id'];
+        $column_order  = ['merchant.id', 'merchant.c_name', 'merchant.c_balanceTotal', 'merchant.c_balanceHold', 'merchant.c_openapiStatus', 'merchant.c_status'];
+        $column_search = ['merchant.c_name', 'merchant.id'];
 
         $this->db->select('merchant.id');
         $this->db->from($table);
-        $this->db->join('merchant_supervisor_assignment', 'merchant_supervisor_assignment.ref_merchantId = merchant.id');
-        $this->db->where('merchant_supervisor_assignment.ref_supervisorId', $supervisor_id);
+        $this->db->join('merchant_supervisor', 'merchant.c_refSupervisor = merchant_supervisor.id');
+        $this->db->where('merchant.c_refSupervisor', $supervisor_id);
 
         $i = 0;
         foreach ($column_search as $item) {
@@ -581,13 +581,13 @@ public function setMaintenanceStatus($newStatus) {
             $data[] = $row;
         }
 
-        $this->db->join('merchant_supervisor_assignment', 'merchant_supervisor_assignment.ref_merchantId = merchant.id');
-        $this->db->where('merchant_supervisor_assignment.ref_supervisorId', $supervisor_id);
+        $this->db->join('merchant_supervisor', 'merchant.c_refSupervisor = merchant_supervisor.id');
+        $this->db->where('merchant.c_refSupervisor', $supervisor_id);
         $recordsTotal = $this->db->count_all_results($table);
 
         if ($this->input->post('search')['value']) {
-            $this->db->join('merchant_supervisor_assignment', 'merchant_supervisor_assignment.ref_merchantId = merchant.id');
-            $this->db->where('merchant_supervisor_assignment.ref_supervisorId', $supervisor_id);
+            $this->db->join('merchant_supervisor', 'merchant.c_refSupervisor = merchant_supervisor.id');
+            $this->db->where('merchant.c_refSupervisor', $supervisor_id);
             $i = 0;
             foreach ($column_search as $item) {
                 if ($i === 0) {

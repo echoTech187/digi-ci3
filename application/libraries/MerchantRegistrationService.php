@@ -74,11 +74,6 @@ class MerchantRegistrationService
                 throw new Exception("Merchant with ID {$merchantId} not found.");
             }
 
-            // Validasi apakah merchant sudah punya supervisor
-            if (!empty($merchant->c_refSupervisor)) {
-                throw new Exception("Merchant {$merchant->c_name} already belongs to another Supervisor.");
-            }
-
             // Update merchant dengan ID Supervisor yang baru
             $this->CI->db->where('id', $merchantId);
             $this->CI->db->update('merchant', ['c_refSupervisor' => $supervisorId]);

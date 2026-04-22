@@ -221,3 +221,27 @@ $(document).on('keypress', '.dt-search-input', function(e) {
         $(this).blur().focus(); 
     }
 });
+
+/**
+ * Global AJAX CSRF Injection
+ * Ensures all jQuery AJAX POST requests include the security token required by CI3.
+ */
+$(document).ajaxSend(function(event, jqXHR, settings) {
+    if (settings.type.toUpperCase() === 'POST') {
+        var csrfName = $('meta[name="csrf-token-name"]').attr('content');
+        var csrfHash = $('meta[name="csrf-token-hash"]').attr('content');
+        
+        if (csrfName && csrfHash) {
+            // Handle string data (serialized)
+            if (typeof settings.data === 'string') {
+                if (settings.data.indexOf(csrfName + '=') === -1) {
+                    settings.data += (settings.data ? '&' : '') + csrfName + '=' + csrfHash;
+                }
+            } 
+            // Handle object data
+            else if (typeof settings.data === 'object' && !(settings.data instanceof FormData)) {
+                settings.data[csrfName] = csrfHash;
+            }
+        }
+    }
+});

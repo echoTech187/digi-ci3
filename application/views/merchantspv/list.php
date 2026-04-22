@@ -90,7 +90,7 @@ $(document).ready(function() {
                 }
             },
             { 
-                "data": "c_openapistatus",
+                "data": "c_openapiStatus",
                 "render": function(data) {
                     let style = data === 'Active' ? 'success' : 'secondary';
                     return `<span class="badge badge-${style}">${data}</span>`;

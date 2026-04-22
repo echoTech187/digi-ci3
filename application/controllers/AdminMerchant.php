@@ -859,28 +859,46 @@ class AdminMerchant extends CI_Controller
       redirect("admin/merchant");
    }
 
-   public function searchMerchants()
-   {
-      $q = $this->input->get('q');
-      
-      $this->db->select('id, c_name');
-      $this->db->from('merchant');
-      $this->db->like('c_name', $q);
-      $this->db->where('(c_refSupervisor IS NULL OR c_refSupervisor = "" OR c_refSupervisor = 0)');
-      $this->db->limit(10); // optional: batasi hasil
-      $query = $this->db->get();
-      $results = $query->result();
+    public function searchMerchants()
+    {
+        // Clear any previous output buffers to ensure clean JSON
+        if (ob_get_length()) ob_clean();
+        
+        $q = $this->input->get('q');
+        
+        $this->db->select('m.id, m.c_name, s.c_name as supervisor_name');
+        $this->db->from('merchant m');
+        $this->db->join('merchant_supervisor s', 'm.c_refSupervisor = s.id', 'left');
+        $this->db->where('m.c_refSupervisor IS NULL');
+        
+        if (!empty($q)) {
+            $this->db->group_start();
+            $this->db->like('m.c_name', $q);
+            $this->db->or_like('m.id', $q);
+            $this->db->group_end();
+        }
+        
+        $this->db->limit(30); 
+        $query = $this->db->get();
+        $results = $query->result();
 
-      $data = [];
-      foreach ($results as $row) {
-         $data[] = [
-               'id' => $row->id,
-               'name' => $row->c_name // <- pakai key 'name'
-         ];
-      }
+        $data = [];
 
-      echo json_encode($data);
-   }
+        foreach ($results as $row) {
+            $displayText = $row->c_name;
+            $data[] = [
+                'id' => $row->id,
+                'name' => $displayText
+            ];
+        }
+
+        // If no results, and we have a query, provide a hint if possible (optional)
+        // For now, let's just ensure headers are correct.
+        
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode($data));
+    }
 
    /**
     * AJAX Methods for Merchant Delegation

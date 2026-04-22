@@ -16,7 +16,7 @@ class Qris extends CI_Model {
         } else if ($only_ids) {
             $this->db->select("cpq.id");
         } else {
-            $this->db->select("cpq.*, m.c_name as name_merchant, s.c_name as name_submerchant, c.c_invoiceNo, epq.c_issuerRrn,
+            $this->db->select("cpq.*, m.c_name as name_merchant, s.c_name as name_submerchant, c.c_invoiceNo, 
                                IF(cpq.c_type='Dynamic', cdq.c_merchantTransactionId, crq.c_merchantTransactionId) AS Merchant_Transaction_Id");
         }
         $this->db->from($this->table);
@@ -50,11 +50,6 @@ class Qris extends CI_Model {
             $this->db->join('cashin_recurring_qris_mpm crq', 'crq.id = cpq.ref_cashinRecurringQrisMpmId', 'left');
         }
 
-        // Callback/RRN joins (Only if full data, NEVER during ID fetch to prevent timeouts on missing index)
-        if ($needFullJoins) {
-            $this->db->join('external_paydgn_qris_mpm_callback epq', 'epq.ref_cashinPaymentQrisMpmId = cpq.id', 'left');
-        }
-
         if ($search_name) {
             $this->db->where('cpq.ref_merchantId', $search_name);
         }
@@ -64,12 +59,39 @@ class Qris extends CI_Model {
         }
         if ($search_rrn) {
             $safeRrn = $this->db->escape_str($search_rrn);
-            $epq_res = $this->db->query("SELECT ref_cashinPaymentQrisMpmId FROM external_paydgn_qris_mpm_callback WHERE c_issuerRrn = '$safeRrn' LIMIT 20")->result();
+            $matching_ids = [-1];
+
+            // 1. Legacy Paydgn Callback
+            $epq_res = $this->db->query("SELECT ref_cashinPaymentQrisMpmId FROM external_paydgn_qris_mpm_callback WHERE c_issuerRrn LIKE '$safeRrn%' LIMIT 50")->result();
             if (!empty($epq_res)) {
-                $this->db->where_in("cpq.id", array_column($epq_res, 'ref_cashinPaymentQrisMpmId'));
-            } else {
-                $this->db->where("1=0", NULL, FALSE); // No match found
+                $matching_ids = array_merge($matching_ids, array_column($epq_res, 'ref_cashinPaymentQrisMpmId'));
             }
+
+            // 2. New Snap Callback
+            $snap_res = $this->db->query("SELECT ref_cashinPaymentQrisMpmId FROM external_gvconnect_snap_qris_mpm_callback WHERE c_issuerRrn LIKE '$safeRrn%' LIMIT 50")->result();
+            if (!empty($snap_res)) {
+                $matching_ids = array_merge($matching_ids, array_column($snap_res, 'ref_cashinPaymentQrisMpmId'));
+            }
+
+            // 3. Inacash Callback
+            $ina_res = $this->db->query("SELECT ref_cashinPaymentQrisMpmId FROM external_inacash_qris_mpm_callback WHERE c_issuerRrn LIKE '$safeRrn%' LIMIT 50")->result();
+            if (!empty($ina_res)) {
+                $matching_ids = array_merge($matching_ids, array_column($ina_res, 'ref_cashinPaymentQrisMpmId'));
+            }
+
+            // 4. Paylabs Callback
+            $pl_res = $this->db->query("SELECT ref_cashinPaymentQrisMpmId FROM external_paylabs_qris_mpm_callback_payment WHERE c_issuerRrn LIKE '$safeRrn%' LIMIT 50")->result();
+            if (!empty($pl_res)) {
+                $matching_ids = array_merge($matching_ids, array_column($pl_res, 'ref_cashinPaymentQrisMpmId'));
+            }
+
+            // 5. Quantum Callback
+            $qu_res = $this->db->query("SELECT ref_cashinPaymentQrisMpmId FROM external_quantum_qris_mpm_calback_payment WHERE c_issuerRrn LIKE '$safeRrn%' LIMIT 50")->result();
+            if (!empty($qu_res)) {
+                $matching_ids = array_merge($matching_ids, array_column($qu_res, 'ref_cashinPaymentQrisMpmId'));
+            }
+
+            $this->db->where_in("cpq.id", array_unique($matching_ids));
         }
         if ($search_settlement) {
             $formatted_date = date('Y-m-d', strtotime($search_settlement));
@@ -141,6 +163,23 @@ class Qris extends CI_Model {
                 if (!empty($epq_res)) {
                     $matching_ids = array_merge($matching_ids, array_column($epq_res, 'ref_cashinPaymentQrisMpmId'));
                 }
+
+                // 5. Lookup RRN from Snap Callback
+                $snap_res = $this->db->query("SELECT ref_cashinPaymentQrisMpmId FROM external_gvconnect_snap_qris_mpm_callback WHERE c_issuerRrn LIKE '$safeSearchValue%' LIMIT 20")->result();
+                if (!empty($snap_res)) {
+                    $matching_ids = array_merge($matching_ids, array_column($snap_res, 'ref_cashinPaymentQrisMpmId'));
+                }
+
+                // 6. Lookup RRN from other providers
+                $ina_res = $this->db->query("SELECT ref_cashinPaymentQrisMpmId FROM external_inacash_qris_mpm_callback WHERE c_issuerRrn LIKE '$safeSearchValue%' LIMIT 20")->result();
+                if (!empty($ina_res)) {
+                    $matching_ids = array_merge($matching_ids, array_column($ina_res, 'ref_cashinPaymentQrisMpmId'));
+                }
+                
+                $pl_res = $this->db->query("SELECT ref_cashinPaymentQrisMpmId FROM external_paylabs_qris_mpm_callback_payment WHERE c_issuerRrn LIKE '$safeSearchValue%' LIMIT 20")->result();
+                if (!empty($pl_res)) {
+                    $matching_ids = array_merge($matching_ids, array_column($pl_res, 'ref_cashinPaymentQrisMpmId'));
+                }
                 
                 // Apply final IDs to Query Builder
                 $this->db->where_in('cpq.id', array_unique($matching_ids));
@@ -194,15 +233,14 @@ class Qris extends CI_Model {
         $ids = array_column($id_results, 'id');
         
         // STEP 2: Fetch full records for only these specific IDs
-        $this->db->select("cpq.*, m.c_name as name_merchant, s.c_name as name_submerchant, c.c_invoiceNo, epq.c_issuerRrn,
+        $this->db->select("cpq.*, m.c_name as name_merchant, s.c_name as name_submerchant, c.c_invoiceNo, 
                            IF(cpq.c_type='Dynamic', cdq.c_merchantTransactionId, crq.c_merchantTransactionId) AS Merchant_Transaction_Id");
         $this->db->from($this->table);
         $this->db->join('cashin c', 'c.id = cpq.ref_cashinId');
         $this->db->join('submerchant s', 'cpq.ref_subMerchantId = s.id');
         $this->db->join('merchant m', 'cpq.ref_merchantId = m.id');
-        $this->db->join('cashin_dynamic_qris_mpm cdq', 'cdq.ref_subMerchantId = cpq.ref_subMerchantId AND cdq.id = cpq.ref_cashinDynamicQrisMpmId', 'left');
-        $this->db->join('cashin_recurring_qris_mpm crq', 'crq.ref_subMerchantId = cpq.ref_subMerchantId AND crq.id = cpq.ref_cashinRecurringQrisMpmId', 'left');
-        $this->db->join('external_paydgn_qris_mpm_callback epq', 'epq.ref_subMerchantId = cpq.ref_subMerchantId AND epq.ref_cashinPaymentQrisMpmId = cpq.id', 'left');
+        $this->db->join('cashin_dynamic_qris_mpm cdq', 'cdq.id = cpq.ref_cashinDynamicQrisMpmId', 'left');
+        $this->db->join('cashin_recurring_qris_mpm crq', 'crq.id = cpq.ref_cashinRecurringQrisMpmId', 'left');
         
         $this->db->where_in('cpq.id', $ids);
         
@@ -232,12 +270,17 @@ class Qris extends CI_Model {
         return $query->row()->total;
     }
 
+    /**
+     * Optimized total count for large datasets (23M+ rows).
+     * Uses table metadata instead of real-time count to prevent timeouts.
+     */
     public function count_all_dt($search_name = null, $date_from = null, $date_to = null, $search_settlement = null, $search_rrn = null, $search_invoice = null, $search_transid = null)
     {
-        $table_name = explode(' ', $this->table)[0];
-        $query = $this->db->query("SELECT TABLE_ROWS FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '{$table_name}'");
-        $result = $query->row();
-        return $result ? (int)$result->TABLE_ROWS : 0;
+        $query = $this->db->query("SELECT TABLE_ROWS FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'cashin_payment_qris_mpm' AND TABLE_SCHEMA = '".$this->db->database."'");
+        if ($query && $row = $query->row()) {
+            return (int) $row->TABLE_ROWS;
+        }
+        return 0;
     }
 
 
@@ -256,20 +299,16 @@ class Qris extends CI_Model {
         cashin_payment_qris_mpm.c_amount, 
         cashin_payment_qris_mpm.c_mdr, 
         cashin_payment_qris_mpm.c_fee,
-        cashin_payment_qris_mpm.c_datetimePayment, cashin_payment_qris_mpm.c_isSettlementRealtime, 
+        cashin_payment_qris_mpm.c_datetimePayment,        cashin_payment_qris_mpm.c_isSettlementRealtime, 
         cashin_payment_qris_mpm.c_datetimeSettlement, cashin_payment_qris_mpm.c_isSettlementRealtimeExternal, 
         cashin_payment_qris_mpm.c_feeExternal, cashin_payment_qris_mpm.c_datetimeSettlementExternal,
-        external_paydgn_qris_mpm_callback.c_issuerRrn,
         IF(cashin_payment_qris_mpm.c_type='Dynamic', cashin_dynamic_qris_mpm.c_merchantTransactionId, cashin_recurring_qris_mpm.c_merchantTransactionId) AS Merchant_Transaction_Id
         FROM cashin_payment_qris_mpm 
         JOIN cashin on cashin.id = cashin_payment_qris_mpm.ref_cashinId
         JOIN submerchant on cashin_payment_qris_mpm.ref_subMerchantId = submerchant.id 
         JOIN merchant on cashin_payment_qris_mpm.ref_merchantId = merchant.id
-        LEFT JOIN cashin_dynamic_qris_mpm on (cashin_dynamic_qris_mpm.ref_subMerchantId = cashin_payment_qris_mpm.ref_subMerchantId AND cashin_dynamic_qris_mpm.id=cashin_payment_qris_mpm.ref_cashinDynamicQrisMpmId)
-        LEFT JOIN cashin_recurring_qris_mpm on (cashin_recurring_qris_mpm.ref_subMerchantId = cashin_payment_qris_mpm.ref_subMerchantId AND cashin_recurring_qris_mpm.id=cashin_payment_qris_mpm.ref_cashinRecurringQrisMpmId)
-        LEFT JOIN external_paydgn_qris_mpm_callback 
-			ON external_paydgn_qris_mpm_callback.ref_subMerchantId = cashin_payment_qris_mpm.ref_subMerchantId
-			AND external_paydgn_qris_mpm_callback.ref_cashinPaymentQrisMpmId = cashin_payment_qris_mpm.id";
+        LEFT JOIN cashin_dynamic_qris_mpm on cashin_dynamic_qris_mpm.id=cashin_payment_qris_mpm.ref_cashinDynamicQrisMpmId
+        LEFT JOIN cashin_recurring_qris_mpm on cashin_recurring_qris_mpm.id=cashin_payment_qris_mpm.ref_cashinRecurringQrisMpmId";
 
         $query .= " WHERE 1=1 ";
         
@@ -294,13 +333,23 @@ class Qris extends CI_Model {
         }
 
         if (!empty($search_rrn)) {
-            $query .= " AND external_paydgn_qris_mpm_callback.c_issuerRrn = '$search_rrn'";
+            // RRN search still uses Pre-Lookup (already efficient)
+            $matching_ids = $this->_get_ids_by_rrn($search_rrn);
+            if (!empty($matching_ids)) {
+                $query .= " AND cashin_payment_qris_mpm.id IN (" . implode(',', $matching_ids) . ")";
+            } else {
+                $query .= " AND 1=0";
+            }
         }
 
         $query .= " ORDER BY cashin_payment_qris_mpm.id DESC
                     LIMIT $start, $limit";
 
-        return $this->db->query($query)->result();
+        $res = $this->db->query($query)->result();
+        if (!empty($res)) {
+            $res = $this->_enrich_with_rrns($res);
+        }
+        return $res;
     }
 
     public function get_merchant_detail($id)
@@ -375,11 +424,15 @@ class Qris extends CI_Model {
                     JOIN cashin b ON b.id=a.ref_cashinId
                     JOIN merchant c ON a.ref_merchantId=c.id
                     JOIN submerchant d ON a.ref_subMerchantId=d.id
-                    LEFT JOIN cashin_dynamic_qris_mpm e ON (e.ref_merchantId=a.ref_merchantId AND e.ref_cashinPaymentQrisMpmId=a.id) 
-                    LEFT JOIN cashin_recurring_qris_mpm f ON (f.ref_merchantId=a.ref_merchantId AND e.ref_cashinPaymentQrisMpmId=a.id)
+                    LEFT JOIN cashin_dynamic_qris_mpm e ON e.id = a.ref_cashinDynamicQrisMpmId
+                    LEFT JOIN cashin_recurring_qris_mpm f ON f.id = a.ref_cashinRecurringQrisMpmId
                     WHERE a.id ='$id'";
 
-        return $this->db->query($query)->result_array();
+        $res = $this->db->query($query)->result_array();
+        if (!empty($res)) {
+            $res = $this->_enrich_with_rrns($res);
+        }
+        return $res;
     }
     
     public function get_merchant(){
@@ -410,7 +463,11 @@ class Qris extends CI_Model {
         }
 
         $list = $this->get_datatables($search_name, $date_from_query, $date_to_query, $search_settlement, $search_rrn, $search_invoice, $search_transid);
-        
+
+        if (!empty($list)) {
+            $list = $this->_enrich_with_rrns($list);
+        }
+
         $data = [];
         $no = intval($this->input->post('start'));
         foreach ($list as $items) {
@@ -435,6 +492,72 @@ class Qris extends CI_Model {
         $this->output
             ->set_content_type('application/json')
             ->set_output(json_encode($output));
+    }
+
+    /**
+     * Helper to fetch RRNs from multiple callback tables for a batch of transactions.
+     * Decoupled lookup prevents database timeout on joins.
+     */
+    private function _enrich_with_rrns($list) {
+        $ids = array_column($list, 'id');
+        if (empty($ids)) return $list;
+
+        $id_str = implode(',', $ids);
+        $rrn_map = []; // id => rrn
+
+        $tables = [
+            'external_paydgn_qris_mpm_callback' // ONLY INDEXED TABLE
+        ];
+
+        foreach ($tables as $t) {
+            $q = $this->db->query("SELECT ref_cashinPaymentQrisMpmId, c_issuerRrn FROM $t WHERE ref_cashinPaymentQrisMpmId IN ($id_str)");
+            if ($q) {
+                foreach ($q->result() as $row) {
+                    if (!isset($rrn_map[$row->ref_cashinPaymentQrisMpmId])) {
+                        $rrn_map[$row->ref_cashinPaymentQrisMpmId] = $row->c_issuerRrn;
+                    }
+                }
+            }
+        }
+
+        // Apply back to list
+        foreach ($list as &$item) {
+            $itemId = is_array($item) ? $item['id'] : $item->id;
+            $rrn = $rrn_map[$itemId] ?? null;
+            if (is_array($item)) {
+                $item['c_issuerRrn'] = $rrn;
+            } else {
+                $item->c_issuerRrn = $rrn;
+            }
+        }
+
+        return $list;
+    }
+
+    /**
+     * Helper to find IDs by RRN across all providers.
+     */
+    private function _get_ids_by_rrn($rrn) {
+        $safeRrn = $this->db->escape_str($rrn);
+        $ids = [];
+
+        $tables = [
+            'external_paydgn_qris_mpm_callback',
+            'external_gvconnect_snap_qris_mpm_callback',
+            'external_inacash_qris_mpm_callback',
+            'external_paylabs_qris_mpm_callback_payment',
+            'external_quantum_qris_mpm_calback_payment'
+        ];
+
+        foreach ($tables as $t) {
+            $q = $this->db->query("SELECT ref_cashinPaymentQrisMpmId FROM $t WHERE c_issuerRrn LIKE '$safeRrn%' LIMIT 50");
+            if ($q) {
+                foreach ($q->result() as $row) {
+                    if ($row->ref_cashinPaymentQrisMpmId) $ids[] = $row->ref_cashinPaymentQrisMpmId;
+                }
+            }
+        }
+        return array_unique($ids);
     }
 }
 ?>

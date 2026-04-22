@@ -361,5 +361,41 @@ class Chanel extends CI_Model {
             ->set_content_type('application/json')
             ->set_output(json_encode($output));
     }
+
+    /* --- Refactored External Merchant DataTables --- */
+
+    public function getCashinExternalDataTable() {
+        $this->load->library('datatables');
+
+        return $this->datatables->of('cashin_channel_x_merchant cxm')
+            ->select('cxm.*, m.c_name as merchant_name')
+            ->join('merchant m', 'm.id = cxm.ref_merchantId')
+            ->set_column_order([null, 'm.c_name', 'cxm.c_cashinChannelGroup', 'cxm.c_fee', 'cxm.c_status', null])
+            ->set_column_search(['m.c_name', 'cxm.c_cashinChannelGroup', 'cxm.ref_cashinChannelId', 'cxm.c_externalIdDefault'])
+            ->set_default_order(['cxm.id' => 'desc'])
+            ->addColumn('no', function ($row) {
+                static $no = null;
+                if ($no === null) $no = intval($this->input->post('start'));
+                return ++$no;
+            })
+            ->make(true);
+    }
+
+    public function getCashoutExternalDataTable() {
+        $this->load->library('datatables');
+
+        return $this->datatables->of('cashout_channel_x_merchant cxm')
+            ->select('cxm.*, m.c_name as merchant_name')
+            ->join('merchant m', 'm.id = cxm.ref_merchantId')
+            ->set_column_order([null, 'm.c_name', 'cxm.c_cashoutChannelGroup', 'cxm.c_fee', 'cxm.c_status', null])
+            ->set_column_search(['m.c_name', 'cxm.c_cashoutChannelGroup', 'cxm.ref_cashoutChannelId', 'cxm.c_externalIdDefault'])
+            ->set_default_order(['cxm.id' => 'desc'])
+            ->addColumn('no', function ($row) {
+                static $no = null;
+                if ($no === null) $no = intval($this->input->post('start'));
+                return ++$no;
+            })
+            ->make(true);
+    }
 }
 ?>

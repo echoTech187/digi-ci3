@@ -259,6 +259,7 @@ class Menu extends CI_Controller
          $this->db->delete('user_access_menu', $data);
       }
       
+      $this->rbac->clear_menu_cache();
       $this->session->set_flashdata('message', '<div class="alert alert-success" role="alert">Menu Access Modified!</div>');
    }
 
@@ -281,6 +282,7 @@ class Menu extends CI_Controller
       ];
 
       $this->Model_menu->insert_menu($data, 'user_menu');
+      $this->rbac->clear_menu_cache();
       $this->session->set_flashdata('message', 'New Menu Added Successfully!');
       echo json_encode(['status' => 'success']);
    }
@@ -298,6 +300,7 @@ class Menu extends CI_Controller
       ];
 
       $this->Model_menu->changeMenu(['id' => $id], $data, 'user_menu');
+      $this->rbac->clear_menu_cache();
       $this->session->set_flashdata('message', 'Menu Updated Successfully!');
       echo json_encode(['status' => 'success']);
    }
@@ -315,6 +318,7 @@ class Menu extends CI_Controller
       // Clean up access mappings
       $this->db->where('menu_id', $id)->delete('user_access_menu');
 
+      $this->rbac->clear_menu_cache();
       $this->session->set_flashdata('message', 'Menu Deleted Successfully!');
       echo json_encode(['status' => 'success']);
    }
