@@ -7,9 +7,9 @@ class AdminDownload extends CI_Model {
     var $column_search = array('ad.c_type', 'ad.c_filename', 'ad.c_status', 'ad.c_remark');
     var $order = array('ad.id' => 'desc');
 
-    private function _get_datatables_query($search_date = null)
+    private function _get_datatables_query($search_date = null, $include_order = true)
     {
-        // Emergency 3-second safeguard
+        // Emergency 10-second safeguard
         $this->db->query("SET SESSION max_execution_time = 10000");
         
         $this->db->select('ad.id, ad.c_datetime, ad.c_type, ad.c_filename, ad.c_status, ad.c_remark');
@@ -23,7 +23,7 @@ class AdminDownload extends CI_Model {
 
         $i = 0;
         foreach ($this->column_search as $item) {
-            if ($_POST['search']['value']) {
+            if (isset($_POST['search']['value']) && $_POST['search']['value']) {
                 if ($i === 0) {
                     $this->db->group_start();
                     $this->db->like($item, $_POST['search']['value']);
@@ -36,11 +36,13 @@ class AdminDownload extends CI_Model {
             $i++;
         }
 
-        if (isset($_POST['order'])) {
-            $this->db->order_by($this->column_order[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);
-        } else if (isset($this->order)) {
-            $order = $this->order;
-            $this->db->order_by(key($order), $order[key($order)]);
+        if ($include_order) {
+            if (isset($_POST['order'])) {
+                $this->db->order_by($this->column_order[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);
+            } else if (isset($this->order)) {
+                $order = $this->order;
+                $this->db->order_by(key($order), $order[key($order)]);
+            }
         }
     }
 
@@ -55,15 +57,8 @@ class AdminDownload extends CI_Model {
 
     public function count_filtered($search_date = null)
     {
-        $is_filtered = ($search_date || (isset($_POST['search']['value']) && !empty($_POST['search']['value'])));
-        if (!$is_filtered) {
-            return $this->count_all_dt($search_date);
-        }
-
-        $this->db->select('count(ad.id) as total');
-        $this->_get_datatables_query($search_date);
-        $query = $this->db->get();
-        return $query->row()->total;
+        $this->_get_datatables_query($search_date, false);
+        return $this->db->count_all_results();
     }
 
     public function count_all_dt($search_date = null)

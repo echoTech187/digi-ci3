@@ -25,9 +25,10 @@ $download_url = base_url('admin/download_VA_recurring') // Assuming this exists 
         <?php
             // Badge count for More Filters
             $extra_active = 0;
-            if ($this->session->userdata('search_name_vad'))      $extra_active++;
-            if ($this->session->userdata('search_va_number'))    $extra_active++;
-            if ($this->session->userdata('search_merchant_trxid')) $extra_active++;
+            if ($this->session->userdata('search_date_var'))      $extra_active++;
+            if ($this->session->userdata('search_date_var_to'))   $extra_active++;
+            if ($this->session->userdata('search_name_var'))      $extra_active++;
+            if ($this->session->userdata('search_submerchant_var')) $extra_active++;
         ?>
         <form id="varecurring_form" method="post" action="<?= base_url('admin/VA_recurring'); ?>">
             <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>">

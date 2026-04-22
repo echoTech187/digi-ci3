@@ -7,9 +7,9 @@ class BalanceLogModel extends CI_Model {
     var $column_search = array('mbhl.merchant_id', 'mbhl.merchant_name');
     var $order = array('mbhl.created_at' => 'desc');
 
-    private function _get_datatables_query()
+    private function _get_datatables_query($include_order = true)
     {
-        // Emergency 3-second safeguard
+        // Emergency 10-second safeguard
         $this->db->query("SET SESSION max_execution_time = 10000");
         
         $this->db->select('mbhl.id, mbhl.created_at, mbhl.merchant_id, mbhl.merchant_name, mbhl.add_to_available');
@@ -17,7 +17,7 @@ class BalanceLogModel extends CI_Model {
 
         $i = 0;
         foreach ($this->column_search as $item) {
-            if ($_POST['search']['value']) {
+            if (isset($_POST['search']['value']) && $_POST['search']['value']) {
                 if ($i === 0) {
                     $this->db->group_start();
                     $this->db->like($item, $_POST['search']['value']);
@@ -30,11 +30,13 @@ class BalanceLogModel extends CI_Model {
             $i++;
         }
 
-        if (isset($_POST['order'])) {
-            $this->db->order_by($this->column_order[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);
-        } else if (isset($this->order)) {
-            $order = $this->order;
-            $this->db->order_by(key($order), $order[key($order)]);
+        if ($include_order) {
+            if (isset($_POST['order'])) {
+                $this->db->order_by($this->column_order[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);
+            } else if (isset($this->order)) {
+                $order = $this->order;
+                $this->db->order_by(key($order), $order[key($order)]);
+            }
         }
     }
 
@@ -49,15 +51,8 @@ class BalanceLogModel extends CI_Model {
 
     public function count_filtered()
     {
-        $is_filtered = (isset($_POST['search']['value']) && !empty($_POST['search']['value']));
-        if (!$is_filtered) {
-            return $this->count_all_dt();
-        }
-
-        $this->db->select('count(mbhl.id) as total');
-        $this->_get_datatables_query();
-        $query = $this->db->get();
-        return $query->row()->total;
+        $this->_get_datatables_query(false); // pass false to exclude order_by
+        return $this->db->count_all_results();
     }
 
     public function count_all_dt()
