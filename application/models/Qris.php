@@ -8,7 +8,7 @@ class Qris extends CI_Model {
     var $column_search = array('cpq.id', 'm.c_name', 's.c_name', 'cdq.c_merchantTransactionId', 'crq.c_merchantTransactionId', 'epq.c_issuerRrn');
     var $order = array('cpq.id' => 'desc');
 
-    private function _get_datatables_query($search_name = null, $date_from = null, $date_to = null, $search_settlement = null, $search_rrn = null, $search_invoice = null, $search_transid = null, $only_ids = false, $count_only = false)
+    private function _get_datatables_query($search_name = null, $date_from = null, $date_to = null, $search_settlement = null, $search_rrn = null, $search_invoice = null, $search_transid = null, $only_ids = false, $count_only = false, $force_reverse = false)
     {
         $this->db->query("SET SESSION max_execution_time = 10000");
         if ($count_only) {
@@ -207,23 +207,52 @@ class Qris extends CI_Model {
                 $sort_col = $this->column_order[$sort_idx];
                 
                 if ($sort_col == 'Merchant_Transaction_Id') {
-                    $this->db->order_by("IF(cpq.c_type='Dynamic', cdq.c_merchantTransactionId, crq.c_merchantTransactionId)", $_POST['order']['0']['dir']);
+                    $dir = $_POST['order']['0']['dir'];
+                    if ($force_reverse) $dir = ($dir == 'asc' ? 'desc' : 'asc');
+                    $this->db->order_by("IF(cpq.c_type='Dynamic', cdq.c_merchantTransactionId, crq.c_merchantTransactionId)", $dir);
                 } else if ($sort_col) {
-                    $this->db->order_by($sort_col, $_POST['order']['0']['dir']);
+                    $dir = $_POST['order']['0']['dir'];
+                    if ($force_reverse) $dir = ($dir == 'asc' ? 'desc' : 'asc');
+                    $this->db->order_by($sort_col, $dir);
                 }
             } else if (isset($this->order)) {
                 $order = $this->order;
-                $this->db->order_by(key($order), $order[key($order)]);
+                $key = key($order);
+                $dir = $order[$key];
+                if ($force_reverse) $dir = ($dir == 'asc' ? 'desc' : 'asc');
+                $this->db->order_by($key, $dir);
             }
         }
     }
 
     public function get_datatables($search_name = null, $date_from = null, $date_to = null, $search_settlement = null, $search_rrn = null, $search_invoice = null, $search_transid = null)
     {
+        $start = (int) $_POST['start'];
+        $length = (int) $_POST['length'];
+        
+        // 1. Get filtered count to see if we are in the "deep half"
+        $total = $this->count_filtered($search_name, $date_from, $date_to, $search_settlement, $search_rrn, $search_invoice, $search_transid);
+        
+        $force_reverse = false;
+        $fetch_start = $start;
+        $fetch_length = $length;
+
+        // Optimization: If we are deep into the table (>50%), scan from the other end.
+        // This makes "Last Page" as fast as "First Page".
+        if ($total > 5000 && $start > ($total / 2)) {
+            $force_reverse = true;
+            $fetch_start = $total - $start - $length;
+            if ($fetch_start < 0) {
+                $fetch_length = $length + $fetch_start;
+                $fetch_start = 0;
+            }
+        }
+
         // STEP 1: Get only IDs matching filters/pagination (Fast)
-        $this->_get_datatables_query($search_name, $date_from, $date_to, $search_settlement, $search_rrn, $search_invoice, $search_transid, true);
-        if ($_POST['length'] != -1)
-            $this->db->limit($_POST['length'], $_POST['start']);
+        $this->_get_datatables_query($search_name, $date_from, $date_to, $search_settlement, $search_rrn, $search_invoice, $search_transid, true, false, $force_reverse);
+        if ($length != -1)
+            $this->db->limit($fetch_length, $fetch_start);
+            
         $query = $this->db->get();
         if (!is_object($query)) return array();
         $id_results = $query->result();
@@ -244,22 +273,35 @@ class Qris extends CI_Model {
         
         $this->db->where_in('cpq.id', $ids);
         
-        // Order must be re-applied to match sort from STEP 1
+        // Re-apply sorting to maintain order during fetch
         if (isset($_POST['order'])) {
             $sort_idx = $_POST['order']['0']['column'];
             $sort_col = $this->column_order[$sort_idx];
+            $dir = $_POST['order']['0']['dir'];
+            if ($force_reverse) $dir = ($dir == 'asc' ? 'desc' : 'asc');
+
             if ($sort_col == 'Merchant_Transaction_Id') {
-                $this->db->order_by("IF(cpq.c_type='Dynamic', cdq.c_merchantTransactionId, crq.c_merchantTransactionId)", $_POST['order']['0']['dir']);
+                $this->db->order_by("IF(cpq.c_type='Dynamic', cdq.c_merchantTransactionId, crq.c_merchantTransactionId)", $dir);
             } else if ($sort_col) {
-                $this->db->order_by($sort_col, $_POST['order']['0']['dir']);
+                $this->db->order_by($sort_col, $dir);
             }
         } else if (isset($this->order)) {
             $order = $this->order;
-            $this->db->order_by(key($order), $order[key($order)]);
+            $key = key($order);
+            $dir = $order[$key];
+            if ($force_reverse) $dir = ($dir == 'asc' ? 'desc' : 'asc');
+            $this->db->order_by($key, $dir);
         }
         
         $query = $this->db->get();
-        return is_object($query) ? $query->result() : array();
+        $final_results = is_object($query) ? $query->result() : array();
+
+        // If we used a reverse scan, we must flip the results back to the original intended order
+        if ($force_reverse && !empty($final_results)) {
+            $final_results = array_reverse($final_results);
+        }
+
+        return $final_results;
     }
 
     public function count_filtered($search_name = null, $date_from = null, $date_to = null, $search_settlement = null, $search_rrn = null, $search_invoice = null, $search_transid = null)
@@ -506,7 +548,11 @@ class Qris extends CI_Model {
         $rrn_map = []; // id => rrn
 
         $tables = [
-            'external_paydgn_qris_mpm_callback' // ONLY INDEXED TABLE
+            'external_paydgn_qris_mpm_callback',
+            'external_gvconnect_snap_qris_mpm_callback',
+            'external_inacash_qris_mpm_callback',
+            'external_paylabs_qris_mpm_callback_payment',
+            'external_quantum_qris_mpm_calback_payment'
         ];
 
         foreach ($tables as $t) {
