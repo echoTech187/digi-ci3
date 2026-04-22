@@ -10,7 +10,7 @@ class Qris extends CI_Model {
 
     private function _get_datatables_query($search_name = null, $date_from = null, $date_to = null, $search_settlement = null, $search_rrn = null, $search_invoice = null, $search_transid = null, $only_ids = false, $count_only = false, $force_reverse = false)
     {
-        $this->db->query("SET SESSION max_execution_time = 10000");
+        $this->db->query("SET SESSION max_execution_time = 30000");
         if ($count_only) {
             $this->db->select("count(cpq.id) as total");
         } else if ($only_ids) {
@@ -307,6 +307,13 @@ class Qris extends CI_Model {
 
     public function count_filtered($search_name = null, $date_from = null, $date_to = null, $search_settlement = null, $search_rrn = null, $search_invoice = null, $search_transid = null)
     {
+        $searchValue = $this->input->post('search')['value'];
+        $is_filtered = $search_name || $date_from || $date_to || $search_settlement || $search_rrn || $search_invoice || $search_transid || (!empty($searchValue));
+
+        if (!$is_filtered) {
+            return $this->count_all_dt();
+        }
+
         $this->_get_datatables_query($search_name, $date_from, $date_to, $search_settlement, $search_rrn, $search_invoice, $search_transid, false, true);
         $query = $this->db->get();
         if (!is_object($query) || $query->num_rows() == 0) return 0;
@@ -485,10 +492,12 @@ class Qris extends CI_Model {
 
     /**
      * Standardized DataTables handler for QRIS list.
-     * Utilizes the optimized two-step Pre-Lookup query logic.
+     * Utilizes the optimized two-step Pre-Lookup query logic with Datatables library.
      */
     public function get_datatables_handler($filters = [])
     {
+        $this->load->library('datatables');
+
         $search_name = $filters['merchant'] ?? null;
         $date_from = $filters['date_from'] ?? null;
         $date_to = $filters['date_to'] ?? null;
@@ -497,7 +506,7 @@ class Qris extends CI_Model {
         $search_invoice = $filters['invoice'] ?? null;
         $search_transid = $filters['transid'] ?? null;
 
-        // Format dates for query if they exist (following legacy logic)
+        // Format dates for query
         $date_from_query = null;
         $date_to_query = null;
         if (!empty($date_from) && !empty($date_to)) {
@@ -505,36 +514,28 @@ class Qris extends CI_Model {
             $date_to_query = date('Ymd', strtotime($date_to)) . "235959";
         }
 
+        // Optimized Fetch (Two-Step Lookup)
         $list = $this->get_datatables($search_name, $date_from_query, $date_to_query, $search_settlement, $search_rrn, $search_invoice, $search_transid);
 
         if (!empty($list)) {
             $list = $this->_enrich_with_rrns($list);
         }
 
-        $data = [];
-        $no = intval($this->input->post('start'));
-        foreach ($list as $items) {
-            $no++;
-            $row = (array)$items;
-            $row['no'] = $no;
-            $data[] = $row;
-        }
-
         $is_filtered = $search_name || $date_from || $date_to || $search_settlement || $search_rrn || $search_invoice || $search_transid || $this->input->post('search')['value'];
-        
         $recordsTotal = $this->count_all_dt($search_name, $date_from_query, $date_to_query);
         $recordsFiltered = $is_filtered ? $this->count_filtered($search_name, $date_from_query, $date_to_query, $search_settlement, $search_rrn, $search_invoice, $search_transid) : $recordsTotal;
 
-        $output = [
-            "draw" => intval($this->input->post("draw")),
-            "recordsTotal" => $recordsTotal,
-            "recordsFiltered" => $recordsFiltered,
-            "data" => $data,
-        ];
-
-        $this->output
-            ->set_content_type('application/json')
-            ->set_output(json_encode($output));
+        // Use Datatables Library for final processing and JSON output
+        return $this->datatables->of($this->table)
+            ->set_recordsTotal($recordsTotal)
+            ->set_recordsFiltered($recordsFiltered)
+            ->set_data($list)
+            ->addColumn('no', function($row) {
+                static $no = null;
+                if ($no === null) $no = intval($this->input->post('start'));
+                return ++$no;
+            })
+            ->make(true);
     }
 
     /**

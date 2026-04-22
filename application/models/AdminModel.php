@@ -93,33 +93,21 @@ class AdminModel extends CI_Model {
     }
     public function get_datatables_handler($filters = [])
     {
-        $list = $this->get_datatables();
-        
-        $data = [];
-        $no = intval($this->input->post('start'));
-        foreach ($list as $items) {
-            $no++;
-            $row = (array)$items;
-            $row['no'] = $no;
-            $data[] = $row;
-        }
+        $this->load->library('datatables');
 
-        $recordsTotal = $this->count_all();
-        
-        // Consistency: Use approx count if no filters, exact if filtered
-        $is_filtered = (!empty($this->input->post('search')['value']));
-        $recordsFiltered = $is_filtered ? $this->count_filtered() : $recordsTotal;
+        $dt = $this->datatables->of('admin a')
+            ->select('a.*, b.role_name')
+            ->join('roles b', 'a.role_id = b.id', 'left');
 
-        $output = [
-            "draw" => intval($this->input->post("draw")),
-            "recordsTotal" => $recordsTotal,
-            "recordsFiltered" => $recordsFiltered,
-            "data" => $data,
-        ];
-
-        $this->output
-            ->set_content_type('application/json')
-            ->set_output(json_encode($output));
+        return $dt->set_column_order(['a.c_email', 'a.c_name', 'a.c_status', 'a.c_level', 'b.role_name', null])
+            ->set_column_search(['a.c_email', 'a.c_name', 'a.c_level', 'b.role_name'])
+            ->set_default_order(['a.id' => 'desc'])
+            ->addColumn('no', function($row) {
+                static $no = null;
+                if ($no === null) $no = intval($this->input->post('start'));
+                return ++$no;
+            })
+            ->make(true);
     }
 }
 ?>

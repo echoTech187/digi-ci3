@@ -55,10 +55,13 @@ function initServerDataTable(tableId, ajaxUrl, columns, additionalOptions = {}) 
 
             // Render Info text with better formatting
             if ($info.length) {
-                var start = info.length > 0 ? info.start + 1 : 0;
-                var end = info.end;
                 var total = info.recordsDisplay;
-                $info.html('Showing <strong>' + end + '</strong> of <strong>' + number_format(total) + '</strong> results');
+                if (total === 0) {
+                    $info.html('Showing <strong>0</strong> of <strong>0</strong> results');
+                } else {
+                    var end = info.end;
+                    $info.html('Showing <strong>' + end + '</strong> of <strong>' + number_format(total) + '</strong> results');
+                }
             }
 
             // Render Pager
@@ -145,9 +148,22 @@ function initServerDataTable(tableId, ajaxUrl, columns, additionalOptions = {}) 
 
     // Merge default options with any additional options provided
     var finalOptions = $.extend(true, {}, defaultOptions, additionalOptions);
+    var table = $(tableId).DataTable(finalOptions);
+    var target = $(tableId).closest('.table-responsive');
+    if (!target.length) target = $(".table-responsive").first();
 
+    // Show loading state on init AND on every subsequent request (search, paginate)
+    target.addClass("dt-processing-active");
+    table.on('preXhr.dt', function() {
+        target.addClass("dt-processing-active");
+    });
+    table.on('xhr.dt', function (e, settings, json) {
+        target.removeClass("dt-processing-active");
+    });
     // Initialize and return the DataTable instance
-    return $(tableId).DataTable(finalOptions);
+    return table;
+
+
 }
 
 /**

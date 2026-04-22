@@ -188,8 +188,16 @@ class BiFast extends CI_Model {
 
     public function count_filtered($search_name = null, $date_from = null, $date_to = null, $search_transid = null, $search_external_reff = null, $search_channel = null, $search_status = null)
     {
+        $searchValue = $this->input->post('search')['value'];
+        $is_filtered = $search_name || $date_from || $date_to || $search_transid || $search_external_reff || $search_channel || $search_status || (!empty($searchValue));
+
+        if (!$is_filtered) {
+            return $this->count_all_dt();
+        }
+
         $this->_get_datatables_query($search_name, $date_from, $date_to, $search_transid, $search_external_reff, $search_channel, $search_status, false, true);
         $query = $this->db->get();
+        if (!is_object($query) || $query->num_rows() == 0) return 0;
         return $query->row()->total;
     }
 
@@ -474,6 +482,8 @@ class BiFast extends CI_Model {
 
     public function get_datatables_handler($filters = [])
     {
+        $this->load->library('datatables');
+
         $search_name = $filters['merchant'] ?? null;
         $date_from = $filters['date_from'] ?? null;
         $date_to = $filters['date_to'] ?? null;
@@ -486,33 +496,26 @@ class BiFast extends CI_Model {
         $date_from_query = !empty($date_from) ? date('Ymd', strtotime($date_from)) . "000001" : null;
         $date_to_query = !empty($date_to) ? date('Ymd', strtotime($date_to)) . "235959" : null;
 
+        // Optimized Fetch (Two-Step Lookup)
         $list = $this->get_datatables($search_name, $date_from_query, $date_to_query, $search_transid, $search_external_reff, $search_channel, $search_status);
         
-        $data = [];
-        $no = intval($this->input->post('start'));
-        foreach ($list as $items) {
-            $no++;
-            $row = (array)$items;
-            $row['no'] = $no;
-            $data[] = $row;
-        }
+        $searchValue = $this->input->post('search')['value'];
+        $is_filtered = $search_name || $date_from || $date_to || $search_transid || $search_external_reff || $search_channel || $search_status || (!empty($searchValue));
 
         $recordsTotal = $this->count_all_dt($search_name, $date_from_query, $date_to_query);
-        
-        // Consistency: Use approx count if no filters, exact if filtered
-        $is_filtered = $search_name || $date_from || $date_to || $search_transid || $search_external_reff || $search_channel || $search_status || (!empty($this->input->post('search')['value']));
         $recordsFiltered = $is_filtered ? $this->count_filtered($search_name, $date_from_query, $date_to_query, $search_transid, $search_external_reff, $search_channel, $search_status) : $recordsTotal;
 
-        $output = [
-            "draw" => intval($this->input->post("draw")),
-            "recordsTotal" => $recordsTotal,
-            "recordsFiltered" => $recordsFiltered,
-            "data" => $data,
-        ];
-
-        $this->output
-            ->set_content_type('application/json')
-            ->set_output(json_encode($output));
+        // Use Datatables Library for final processing and JSON output
+        return $this->datatables->of($this->table)
+            ->set_recordsTotal($recordsTotal)
+            ->set_recordsFiltered($recordsFiltered)
+            ->set_data($list)
+            ->addColumn('no', function($row) {
+                static $no = null;
+                if ($no === null) $no = intval($this->input->post('start'));
+                return ++$no;
+            })
+            ->make(true);
     }
 }
 ?>

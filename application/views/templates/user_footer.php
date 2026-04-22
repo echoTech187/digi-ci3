@@ -25,18 +25,25 @@
 
 <!-- Logout Modal-->
 <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
-                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">×</span>
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden; background: var(--bg-card, #1e293b);">
+            <div class="modal-header border-0 py-4 px-4 d-flex align-items-center">
+                <div class="d-flex align-items-center justify-content-center mr-3" style="width: 40px; height: 40px; border-radius: 50%; background: rgba(239, 68, 68, 0.1); color: #ef4444;">
+                    <i class="fas fa-sign-out-alt fa-lg"></i>
+                </div>
+                <h5 class="modal-title font-weight-bold" id="exampleModalLabel" style=" font-size: 1.25rem;">Ready to Leave?</h5>
+                <button class="close ml-auto" type="button" data-dismiss="modal" aria-label="Close" style="color: var(--text-muted, #94a3b8); text-shadow: none; opacity: 1;">
+                    <span aria-hidden="true" style="font-size: 1.5rem;">×</span>
                 </button>
             </div>
-            <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-                <a class="btn btn-primary" href="<?= base_url('auth/logout'); ?>">Logout</a>
+            <div class="modal-body px-4 py-4 text-muted" style="color: var(--text-muted, #94a3b8); font-size: 0.95rem; line-height: 1.6;">
+                Select <strong>"Logout"</strong> below if you are ready to end your current session and secure your account.
+            </div>
+            <div class="modal-footer border-0 px-4 py-4">
+                <button class="btn font-weight-bold px-4 py-2" type="button" data-dismiss="modal" style="border-radius: 12px; background: rgba(148, 163, 184, 0.1); color: var(--text-muted, #94a3b8); border: none;">Cancel</button>
+                <a class="btn font-weight-bold px-4 py-2" href="<?= base_url('auth/logout'); ?>" style="border-radius: 12px; background: #ef4444; color: white; border: none; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);">
+                    <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                </a>
             </div>
         </div>
     </div>
@@ -513,8 +520,35 @@
             }
             // Run initially and also on window resize to re-init if needed
             portFiltersToDrawer();
-            $(window).on('resize', function() {
+            $(window).on('resize', debounce(function() {
                 if (window.innerWidth <= 768) portFiltersToDrawer();
+            }, 250));
+        });
+    </script>
+    <!-- Global UX Enhancements -->
+    <script>
+        $(document).ready(function() {
+            // 1. Auto-hide Success Alerts (smooth slide up)
+            setTimeout(function() {
+                $('.alert-success').slideUp('slow');
+            }, 5000);
+
+            // 2. Fix Select2 Auto-Focus in Bootstrap Modals
+            $(document).on('select2:open', function() {
+                setTimeout(function() {
+                    let searchField = document.querySelector('.select2-container--open .select2-search__field');
+                    if (searchField) searchField.focus();
+                }, 10);
+            });
+            
+            // 3. Smooth Button Loading Logic
+            $(document).on('submit', 'form', function() {
+                let $btn = $(this).find('button[type="submit"]');
+                if (!$btn.hasClass('no-loader')) {
+                    let originalHtml = $btn.html();
+                    $btn.data('original-html', originalHtml);
+                    $btn.prop('disabled', true).html('<i class="fas fa-circle-notch fa-spin mr-2"></i> Processing...');
+                }
             });
         });
     </script>

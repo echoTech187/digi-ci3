@@ -28,8 +28,8 @@ class EwalletDynamic extends CI_Model
 
     private function _get_datatables_query($search_name = null, $search_date = null, $search_date_to = null, $search_transid = null, $search_status = null, $only_ids = false)
     {
-        // Emergency 3-second safeguard
-        $this->db->query("SET SESSION max_execution_time = 10000");
+        // Emergency safeguard
+        $this->db->query("SET SESSION max_execution_time = 30000");
         
         if ($only_ids) {
             $this->db->select("cde.id");
@@ -102,7 +102,9 @@ class EwalletDynamic extends CI_Model
 
     public function count_filtered($search_name = null, $search_date = null, $search_date_to = null, $search_transid = null, $search_status = null)
     {
-        $is_filtered = ($search_name || $search_date || $search_date_to || $search_transid || $search_status || (isset($_POST['search']['value']) && !empty($_POST['search']['value'])));
+        $searchValue = $this->input->post('search')['value'];
+        $is_filtered = $search_name || $search_date || $search_date_to || $search_transid || $search_status || (!empty($searchValue));
+
         if (!$is_filtered) {
             return $this->count_all_dt();
         }
@@ -112,7 +114,7 @@ class EwalletDynamic extends CI_Model
         $this->_apply_filters($search_name, $search_date, $search_date_to, $search_transid, $search_status);
 
         // Lean joins for global search
-        if (isset($_POST['search']['value']) && $_POST['search']['value']) {
+        if (!empty($searchValue)) {
             $this->db->join('submerchant s', 'cde.ref_subMerchantId = s.id', 'left');
             $this->db->join('merchant m', 'cde.ref_merchantId = m.id', 'left');
             
@@ -120,9 +122,9 @@ class EwalletDynamic extends CI_Model
             foreach ($this->column_search as $item) {
                 if ($i === 0) {
                     $this->db->group_start();
-                    $this->db->like($item, $_POST['search']['value']);
+                    $this->db->like($item, $searchValue);
                 } else {
-                    $this->db->or_like($item, $_POST['search']['value']);
+                    $this->db->or_like($item, $searchValue);
                 }
                 if (count($this->column_search) - 1 == $i)
                     $this->db->group_end();
@@ -131,6 +133,7 @@ class EwalletDynamic extends CI_Model
         }
 
         $query = $this->db->get();
+        if (!is_object($query) || $query->num_rows() == 0) return 0;
         return $query->row()->total;
     }
 
@@ -229,39 +232,34 @@ class EwalletDynamic extends CI_Model
 
     public function get_datatables_handler($filters = [])
     {
+        $this->load->library('datatables');
+
         $search_name = $filters['merchant'] ?? null;
         $search_date = $filters['date'] ?? null;
         $search_date_to = $filters['date_to'] ?? null;
         $search_transid = $filters['transid'] ?? null;
         $search_status = $filters['status'] ?? null;
 
+        // Optimized Fetch (Two-Step Lookup)
         $list = $this->get_datatables($search_name, $search_date, $search_date_to, $search_transid, $search_status);
         
-        $data = [];
-        $no = intval($this->input->post('start'));
-        foreach ($list as $items) {
-            $no++;
-            $row = (array)$items;
-            $row['no'] = $no;
-            $data[] = $row;
-        }
+        $searchValue = $this->input->post('search')['value'];
+        $is_filtered = $search_name || $search_date || $search_date_to || $search_transid || $search_status || (!empty($searchValue));
 
         $recordsTotal = $this->count_all_dt($search_name, $search_date, $search_date_to);
-        
-        // Consistency: Use approx count if no filters, exact if filtered
-        $is_filtered = $search_name || $search_date || $search_date_to || $search_transid || $search_status || (!empty($this->input->post('search')['value']));
         $recordsFiltered = $is_filtered ? $this->count_filtered($search_name, $search_date, $search_date_to, $search_transid, $search_status) : $recordsTotal;
 
-        $output = [
-            "draw" => intval($this->input->post("draw")),
-            "recordsTotal" => $recordsTotal,
-            "recordsFiltered" => $recordsFiltered,
-            "data" => $data,
-        ];
-
-        $this->output
-            ->set_content_type('application/json')
-            ->set_output(json_encode($output));
+        // Use Datatables Library for final processing and JSON output
+        return $this->datatables->of($this->table)
+            ->set_recordsTotal($recordsTotal)
+            ->set_recordsFiltered($recordsFiltered)
+            ->set_data($list)
+            ->addColumn('no', function($row) {
+                static $no = null;
+                if ($no === null) $no = intval($this->input->post('start'));
+                return ++$no;
+            })
+            ->make(true);
     }
 }
 ?>

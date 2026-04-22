@@ -10,8 +10,8 @@ class VirtualAccount extends CI_Model {
 
     private function _get_datatables_query($search_date = null, $search_date_to = null, $search_merchant = null, $search_settlement = null, $search_va = null, $search_transid = null, $only_ids = false, $count_only = false)
     {
-        // Emergency 3-second safeguard
-        $this->db->query("SET SESSION max_execution_time = 10000");
+        // Emergency safeguard
+        $this->db->query("SET SESSION max_execution_time = 30000");
 
         if ($count_only) {
             $this->db->select("count(cpv.id) as total");
@@ -234,8 +234,16 @@ class VirtualAccount extends CI_Model {
 
     public function count_filtered($search_date = null, $search_date_to = null, $search_merchant = null, $search_settlement = null, $search_va = null, $search_transid = null)
     {
+        $searchValue = $this->input->post('search')['value'];
+        $is_filtered = $search_date || $search_date_to || $search_merchant || $search_settlement || $search_va || $search_transid || (!empty($searchValue));
+
+        if (!$is_filtered) {
+            return $this->count_all_dt();
+        }
+
         $this->_get_datatables_query($search_date, $search_date_to, $search_merchant, $search_settlement, $search_va, $search_transid, false, true);
         $query = $this->db->get();
+        if (!is_object($query) || $query->num_rows() == 0) return 0;
         return $query->row()->total;
     }
 
@@ -389,10 +397,12 @@ class VirtualAccount extends CI_Model {
 
     /**
      * Standardized DataTables handler for Virtual Account list.
-     * Utilizes the optimized two-step Pre-Lookup query logic.
+     * Utilizes the optimized two-step Pre-Lookup query logic with Datatables library.
      */
     public function get_datatables_handler($filters = [])
     {
+        $this->load->library('datatables');
+
         $search_date = $filters['date'] ?? null;
         $search_date_to = $filters['date_to'] ?? null;
         $search_merchant = $filters['merchant'] ?? null;
@@ -400,32 +410,26 @@ class VirtualAccount extends CI_Model {
         $search_va = $filters['va_number'] ?? null;
         $search_transid = $filters['transid'] ?? null;
 
+        // Optimized Fetch (Two-Step Lookup)
         $list = $this->get_datatables($search_date, $search_date_to, $search_merchant, $search_settlement, $search_va, $search_transid);
-        
-        $data = [];
-        $no = intval($this->input->post('start'));
-        foreach ($list as $va) {
-            $no++;
-            $row = (array)$va;
-            $row['no'] = $no;
-            $data[] = $row;
-        }
 
-        $is_filtered = $search_date || $search_date_to || $search_merchant || $search_settlement || $search_va || $search_transid || $this->input->post('search')['value'];
+        $searchValue = $this->input->post('search')['value'];
+        $is_filtered = $search_date || $search_date_to || $search_merchant || $search_settlement || $search_va || $search_transid || (!empty($searchValue));
         
         $recordsTotal = $this->count_all_dt($search_date, $search_date_to, $search_merchant);
         $recordsFiltered = $is_filtered ? $this->count_filtered($search_date, $search_date_to, $search_merchant, $search_settlement, $search_va, $search_transid) : $recordsTotal;
 
-        $output = [
-            "draw" => intval($this->input->post("draw")),
-            "recordsTotal" => $recordsTotal,
-            "recordsFiltered" => $recordsFiltered,
-            "data" => $data,
-        ];
-
-        $this->output
-            ->set_content_type('application/json')
-            ->set_output(json_encode($output));
+        // Use Datatables Library for final processing and JSON output
+        return $this->datatables->of($this->table)
+            ->set_recordsTotal($recordsTotal)
+            ->set_recordsFiltered($recordsFiltered)
+            ->set_data($list)
+            ->addColumn('no', function($row) {
+                static $no = null;
+                if ($no === null) $no = intval($this->input->post('start'));
+                return ++$no;
+            })
+            ->make(true);
     }
 }
 ?>

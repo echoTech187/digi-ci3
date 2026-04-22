@@ -83,33 +83,20 @@ class BalanceLogModel extends CI_Model {
     }
     public function get_datatables_handler($filters = [])
     {
-        $list = $this->get_datatables();
-        
-        $data = [];
-        $no = intval($this->input->post('start'));
-        foreach ($list as $items) {
-            $no++;
-            $row = (array)$items;
-            $row['no'] = $no;
-            $data[] = $row;
-        }
+        $this->load->library('datatables');
 
-        $recordsTotal = $this->count_all_dt();
-        
-        // Consistency: Use approx count if no filters, exact if filtered
-        $is_filtered = (!empty($this->input->post('search')['value']));
-        $recordsFiltered = $is_filtered ? $this->count_filtered() : $recordsTotal;
+        $dt = $this->datatables->of('merchant_balance_hold_log mbhl')
+            ->select('mbhl.id, mbhl.created_at, mbhl.merchant_id, mbhl.merchant_name, mbhl.add_to_available');
 
-        $output = [
-            "draw" => intval($this->input->post("draw")),
-            "recordsTotal" => $recordsTotal,
-            "recordsFiltered" => $recordsFiltered,
-            "data" => $data,
-        ];
-
-        $this->output
-            ->set_content_type('application/json')
-            ->set_output(json_encode($output));
+        return $dt->set_column_order([null, 'mbhl.created_at', 'mbhl.merchant_id', 'mbhl.merchant_name', 'mbhl.add_to_available'])
+            ->set_column_search(['mbhl.merchant_id', 'mbhl.merchant_name'])
+            ->set_default_order(['mbhl.created_at' => 'desc'])
+            ->addColumn('no', function($row) {
+                static $no = null;
+                if ($no === null) $no = intval($this->input->post('start'));
+                return ++$no;
+            })
+            ->make(true);
     }
 }
 ?>

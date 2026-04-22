@@ -47,7 +47,7 @@
                             </a>
                         </div>
                     </div>
-                    <button type="button" class="btn-dt-action btn-dt-action-success border-0" data-toggle="modal" data-target="#registerMerchabntModal">
+                    <button type="button" class="btn-dt-action btn-dt-action-success border-0" data-toggle="modal" data-target="#registerMerchantModal">
                         <i class="fas fa-plus mr-2"></i> <span class="d-none d-md-block">Add Merchant</span>
                     </button>
                 </div>
@@ -93,7 +93,7 @@
                         </button>
                     </div>
                     <div class="modal-body p-4">
-                        <form method="post" action="<?php echo base_url('admin/createCreditBalance'); ?>">
+                        <form id="creditBalanceForm">
                             <div class="mb-4">
                                 <label class="form-label text-muted small fw-bold">Merchant Name</label>
                                 <input type="text" class="form-control border-0 py-2 fw-bold" readonly id="merchantName">
@@ -101,7 +101,7 @@
                             </div>
                             <div class="mb-4">
                                 <label class="form-label text-muted small fw-bold">Channel ID</label>
-                                <select name="channelId" class="form-select border-1 py-1" style="font-size: 13px;" required>
+                                <select id="creditChannelId" name="channelId" class="form-select border-1 py-1" style="font-size: 13px;" required>
                                     <option value="">Select Channel</option>
                                     <?php foreach ($cashin_channels as $cashin_channel): ?>
                                         <option value="<?php echo $cashin_channel->id; ?>"><?php echo $cashin_channel->id; ?></option>
@@ -110,7 +110,7 @@
                             </div>
                             <div class="mb-4">
                                 <label class="form-label text-muted small fw-bold">Description</label>
-                                <input type="text" class="form-control border-1 py-2" id="description" name="description" placeholder="e.g. Manual top-up" required>
+                                <input type="text" class="form-control border-1 py-2" id="creditDescription" name="description" placeholder="e.g. Manual top-up" required>
                             </div>
                             <div class="mb-4">
                                 <label class="form-label text-muted small fw-bold">Amount (IDR)</label>
@@ -122,7 +122,7 @@
                             </div>
                             <div class="modal-footer border-0 px-0 pb-0 mt-4">
                                 <button type="button" class="btn-dt-cancel" data-dismiss="modal">CANCEL</button>
-                                <button type="submit" class="btn-dt-apply px-4">
+                                <button type="submit" id="btnConfirmCredit" class="btn-dt-apply px-4">
                                     <i class="fas fa-check mr-2"></i> CONFIRM CREDIT
                                 </button>
                             </div>
@@ -151,7 +151,7 @@
                         </button>
                     </div>
                     <div class="modal-body p-4">
-                        <form method="post" action="<?php echo base_url('admin/createDebitBalance'); ?>">
+                        <form id="debitBalanceForm">
                             <div class="mb-4">
                                 <label class="form-label text-muted small fw-bold">Merchant Name</label>
                                 <input type="text" class="form-control border-0 py-2 fw-bold" readonly id="merchantNameDebit">
@@ -159,7 +159,7 @@
                             </div>
                             <div class="mb-4">
                                 <label class="form-label text-muted small fw-bold">Channel ID</label>
-                                <select name="channelId" class="form-select border-1 py-1" style="font-size: 13px;" required>
+                                <select id="debitChannelId" name="channelId" class="form-select border-1 py-1" style="font-size: 13px;" required>
                                     <option value="">Select Channel</option>
                                     <?php foreach ($cashout_channels as $cashout_channel): ?>
                                         <option value="<?php echo $cashout_channel->id; ?>"><?php echo $cashout_channel->id; ?></option>
@@ -168,7 +168,7 @@
                             </div>
                             <div class="mb-4">
                                 <label class="form-label text-muted small fw-bold">Description</label>
-                                <input type="text" class="form-control border-1 py-2" name="description" placeholder="e.g. Administrative deduction" required>
+                                <input type="text" class="form-control border-1 py-2" id="debitDescription" name="description" placeholder="e.g. Administrative deduction" required>
                             </div>
                             <div class="mb-4">
                                 <label class="form-label text-muted small fw-bold">Amount (IDR)</label>
@@ -180,7 +180,7 @@
                             </div>
                             <div class="modal-footer border-0 px-0 pb-0 mt-4">
                                 <button type="button" class="btn-dt-cancel" data-dismiss="modal">CANCEL</button>
-                                <button type="submit" class="btn-dt-apply px-4">
+                                <button type="submit" id="btnConfirmDebit" class="btn-dt-apply px-4">
                                     <i class="fas fa-check mr-2"></i> CONFIRM DEBIT
                                 </button>
                             </div>
@@ -191,7 +191,7 @@
         </div>
 
         <!-- Modal: Register Merchant -->
-        <div class="modal fade" id="registerMerchabntModal" tabindex="-1" aria-hidden="true">
+        <div class="modal fade" id="registerMerchantModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-lg modal-dialog-centered">
                 <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
                     <div class="modal-header modal-header-primary border-0 mh-premium">
@@ -200,7 +200,7 @@
                                 <i class="fas fa-store"></i>
                             </div>
                             <div class="mh-title-wrap">
-                                <h6 class="mh-title" id="registerMerchabntModalLabel">Register New Merchant</h6>
+                                <h6 class="mh-title" id="registerMerchantModalLabel">Register New Merchant</h6>
                                 <small class="mh-subtitle">Create and configure a new merchant account</small>
                             </div>
                         </div>
@@ -211,6 +211,11 @@
                     <div class="modal-body p-4 bg-light">
                         <?php if (validation_errors()): ?>
                             <div class="alert alert-danger border-0 shadow-sm mb-4"><?= validation_errors(); ?></div>
+                            <script>
+                                $(document).ready(function() {
+                                    $('#registerMerchantModal').modal('show');
+                                });
+                            </script>
                         <?php endif; ?>
                         
                         <form method="post" action="<?php echo base_url('admin/registerMerchant'); ?>" class="row g-3">
@@ -502,6 +507,7 @@
                     }
                 ];
                 var table = initServerDataTable('#merchantTable', ajaxUrl, columns);
+                window.merchantTableInstance = table; // Expose untuk digunakan oleh AJAX credit/debit refresh
 
                 table.on('xhr', function(e, settings, json) {
                     if (json && json.redirect) {
@@ -515,8 +521,28 @@
                 }, 400));
             });
 
-            function detail(id, name) { document.getElementById('merchantId').value = id; document.getElementById('merchantName').value = name; }
-            function detaildebit(id, name) { document.getElementById('merchantIdDebit').value = id; document.getElementById('merchantNameDebit').value = name; }
+            function detail(id, name) {
+                document.getElementById('merchantId').value = id;
+                document.getElementById('merchantName').value = name;
+                // Re-init Select2 dengan dropdownParent agar tidak terpotong modal (#12)
+                setTimeout(function() {
+                    $('#creditChannelId').select2({
+                        width: '100%',
+                        dropdownParent: $('#creditBalanceModal')
+                    });
+                }, 300);
+            }
+            function detaildebit(id, name) {
+                document.getElementById('merchantIdDebit').value = id;
+                document.getElementById('merchantNameDebit').value = name;
+                // Re-init Select2 dengan dropdownParent agar tidak terpotong modal (#12)
+                setTimeout(function() {
+                    $('#debitChannelId').select2({
+                        width: '100%',
+                        dropdownParent: $('#debitBalanceModal')
+                    });
+                }, 300);
+            }
 
             function formatNumber(input) {
                 let rawValue = input.value.replace(/[^0-9]/g, ''); 
@@ -603,39 +629,147 @@
                 $input.trigger('change');
             });
 
+            // #7: Confirm dialog sebelum save delegation (aksi kritis)
             $('#delegateForm').on('submit', function(e) {
                 e.preventDefault();
                 const id = $('#delegateMerchantId').val();
-                const $btn = $('#btnSaveDelegation');
-                const originalBtnHtml = $btn.html();
+                const merchantName = $('#delegateMerchantName').text();
+                const $form = $(this);
 
-                // Loading State
-                $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i> SAVING...');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Simpan Perubahan?',
+                    html: 'Permission untuk <strong>' + merchantName + '</strong> akan langsung berlaku setelah disimpan.',
+                    showCancelButton: true,
+                    confirmButtonText: '<i class="fas fa-save mr-1"></i> Ya, Simpan',
+                    cancelButtonText: 'Batal',
+                    confirmButtonColor: '#0d6efd',
+                    cancelButtonColor: '#6c757d'
+                }).then(function(result) {
+                    if (!result.isConfirmed) return;
 
+                    const $btn = $('#btnSaveDelegation');
+                    const originalBtnHtml = $btn.html();
+
+                    // Loading State
+                    $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i> SAVING...');
+
+                    $.ajax({
+                        url: '<?= base_url('admin/saveDelegation/') ?>' + id,
+                        type: 'POST',
+                        data: $form.serialize(),
+                        dataType: 'json',
+                        success: function(response) {
+                            if (response.status === 'success') { 
+                                Swal.fire({ 
+                                    icon: 'success', 
+                                    title: 'Tersimpan!', 
+                                    text: response.message,
+                                    timer: 2000,
+                                    showConfirmButton: false
+                                }); 
+                                $('#delegateModal').modal('hide'); 
+                            } else {
+                                Swal.fire({ icon: 'error', title: 'Gagal', text: response.message });
+                            }
+                        },
+                        error: function() {
+                            Swal.fire({ icon: 'error', title: 'Error', text: 'Tidak dapat terhubung ke server.' });
+                        },
+                        complete: function() {
+                            $btn.prop('disabled', false).html(originalBtnHtml);
+                        }
+                    });
+                });
+            });
+
+            // #2: Credit Balance form — AJAX agar tidak full page reload
+            $('#creditBalanceForm').on('submit', function(e) {
+                e.preventDefault();
+                var $btn = $('#btnConfirmCredit');
+                var originalHtml = $btn.html();
+                var rawAmount = $('#rawAmountCredit').val();
+                if (!rawAmount || parseInt(rawAmount) <= 0) {
+                    Swal.fire({ icon: 'warning', title: 'Perhatian', text: 'Masukkan jumlah amount yang valid.' });
+                    return;
+                }
+                $btn.prop('disabled', true).html('<i class="fas fa-circle-notch fa-spin mr-2"></i> Processing...');
                 $.ajax({
-                    url: '<?= base_url('admin/saveDelegation/') ?>' + id,
+                    url: '<?= base_url('admin/createCreditBalance') ?>',
                     type: 'POST',
-                    data: $(this).serialize(),
+                    data: {
+                        merchantId: $('#merchantId').val(),
+                        channelId: $('#creditChannelId').val(),
+                        description: $('#creditDescription').val(),
+                        amount: rawAmount,
+                        rawAmountCredit: rawAmount
+                    },
                     dataType: 'json',
                     success: function(response) {
-                        if (response.status === 'success') { 
-                            Swal.fire({ 
-                                icon: 'success', 
-                                title: 'Updated!', 
-                                text: response.message,
-                                timer: 2000,
-                                showConfirmButton: false
-                            }); 
-                            $('#delegateModal').modal('hide'); 
+                        if (response && response.status === 'success') {
+                            Swal.fire({ icon: 'success', title: 'Berhasil!', text: response.message || 'Credit balance berhasil ditambahkan.', timer: 2500, showConfirmButton: false });
+                            $('#creditBalanceModal').modal('hide');
+                            $('#creditBalanceForm')[0].reset();
+                            if (window.merchantTableInstance) window.merchantTableInstance.draw('page');
                         } else {
-                            Swal.fire({ icon: 'error', title: 'Error', text: response.message });
+                            Swal.fire({ icon: 'error', title: 'Gagal', text: (response && response.message) ? response.message : 'Terjadi kesalahan.' });
                         }
                     },
-                    error: function() {
-                        Swal.fire({ icon: 'error', title: 'Failed', text: 'Could not communicate with server.' });
+                    error: function(xhr) {
+                        // Fallback: jika server tidak mengembalikan JSON, submit form biasa
+                        if (xhr.status !== 200) {
+                            Swal.fire({ icon: 'error', title: 'Error', text: 'Tidak dapat terhubung ke server.' });
+                        } else {
+                            window.location.href = '<?= base_url('admin/createCreditBalance') ?>';
+                        }
                     },
                     complete: function() {
-                        $btn.prop('disabled', false).html(originalBtnHtml);
+                        $btn.prop('disabled', false).html(originalHtml);
+                    }
+                });
+            });
+
+            // #2: Debit Balance form — AJAX agar tidak full page reload
+            $('#debitBalanceForm').on('submit', function(e) {
+                e.preventDefault();
+                var $btn = $('#btnConfirmDebit');
+                var originalHtml = $btn.html();
+                var rawAmount = $('#rawAmountDebit').val();
+                if (!rawAmount || parseInt(rawAmount) <= 0) {
+                    Swal.fire({ icon: 'warning', title: 'Perhatian', text: 'Masukkan jumlah amount yang valid.' });
+                    return;
+                }
+                $btn.prop('disabled', true).html('<i class="fas fa-circle-notch fa-spin mr-2"></i> Processing...');
+                $.ajax({
+                    url: '<?= base_url('admin/createDebitBalance') ?>',
+                    type: 'POST',
+                    data: {
+                        merchantIdDebit: $('#merchantIdDebit').val(),
+                        channelId: $('#debitChannelId').val(),
+                        description: $('#debitDescription').val(),
+                        amount: rawAmount,
+                        rawAmountDebit: rawAmount
+                    },
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response && response.status === 'success') {
+                            Swal.fire({ icon: 'success', title: 'Berhasil!', text: response.message || 'Debit balance berhasil diproses.', timer: 2500, showConfirmButton: false });
+                            $('#debitBalanceModal').modal('hide');
+                            $('#debitBalanceForm')[0].reset();
+                            if (window.merchantTableInstance) window.merchantTableInstance.draw('page');
+                        } else {
+                            Swal.fire({ icon: 'error', title: 'Gagal', text: (response && response.message) ? response.message : 'Terjadi kesalahan.' });
+                        }
+                    },
+                    error: function(xhr) {
+                        if (xhr.status !== 200) {
+                            Swal.fire({ icon: 'error', title: 'Error', text: 'Tidak dapat terhubung ke server.' });
+                        } else {
+                            window.location.href = '<?= base_url('admin/createDebitBalance') ?>';
+                        }
+                    },
+                    complete: function() {
+                        $btn.prop('disabled', false).html(originalHtml);
                     }
                 });
             });

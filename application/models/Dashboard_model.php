@@ -99,21 +99,25 @@ class Dashboard_model extends CI_Model
     public function get_recent_mutations($limit = 10)
     {
         // Optimized: LIMIT inside subquery BEFORE JOIN to avoid scanning millions of rows
+        $today = date('Y-m-d');
+        $start_time = $today . ' 00:00:00';
+        $end_time = $today . ' 23:59:59';
+
         $sql = "
-            (SELECT t.date, CAST('QRIS' AS CHAR) as type, t.amount, CAST(m.c_status AS CHAR) as status, CAST(m.c_name AS CHAR) as merchant 
-             FROM (SELECT c_datetime as date, c_amount as amount, ref_merchantId FROM cashin_payment_qris_mpm ORDER BY c_datetime DESC LIMIT 5) t
+            (SELECT t.date, CAST('QRIS' AS CHAR) as type, t.amount, CAST('SUCCESS' AS CHAR) as status, CAST(m.c_name AS CHAR) as merchant 
+             FROM (SELECT c_datetime as date, c_amount as amount, ref_merchantId FROM cashin_payment_qris_mpm WHERE c_datetime >= '$start_time' AND c_datetime <= '$end_time' ORDER BY c_datetime DESC LIMIT 20) t
              JOIN merchant m ON m.id = t.ref_merchantId)
             UNION ALL
-            (SELECT t.date, CAST('VA' AS CHAR) as type, t.amount, CAST(m.c_status AS CHAR) as status, CAST(m.c_name AS CHAR) as merchant 
-             FROM (SELECT c_datetime as date, c_amount as amount, ref_merchantId FROM cashin_payment_va ORDER BY c_datetime DESC LIMIT 5) t
+            (SELECT t.date, CAST('VA' AS CHAR) as type, t.amount, CAST('SUCCESS' AS CHAR) as status, CAST(m.c_name AS CHAR) as merchant 
+             FROM (SELECT c_datetime as date, c_amount as amount, ref_merchantId FROM cashin_payment_va WHERE c_datetime >= '$start_time' AND c_datetime <= '$end_time' ORDER BY c_datetime DESC LIMIT 20) t
              JOIN merchant m ON m.id = t.ref_merchantId)
              UNION ALL
             (SELECT t.date, CAST('E-WALLET' AS CHAR) as type, t.amount, CAST('PAID' AS CHAR) as status, CAST(m.c_name AS CHAR) as merchant 
-             FROM (SELECT c_datetimePayment as date, c_amount as amount, ref_merchantId FROM cashin_payment_ewallet ORDER BY c_datetimePayment DESC LIMIT 5) t
+             FROM (SELECT c_datetimePayment as date, c_amount as amount, ref_merchantId FROM cashin_payment_ewallet WHERE c_datetimePayment >= '$start_time' AND c_datetimePayment <= '$end_time' ORDER BY c_datetimePayment DESC LIMIT 20) t
              JOIN merchant m ON m.id = t.ref_merchantId)
             UNION ALL
             (SELECT t.date, CAST('DISBURSE' AS CHAR) as type, t.amount, CAST(t.status AS CHAR) as status, CAST(m.c_name AS CHAR) as merchant 
-             FROM (SELECT c_datetime as date, c_amount as amount, c_status as status, ref_merchantId FROM cashout_payment_bifast WHERE c_status = 'SUCCESS' ORDER BY c_datetime DESC LIMIT 5) t
+             FROM (SELECT c_datetime as date, c_amount as amount, c_status as status, ref_merchantId FROM cashout_payment_bifast WHERE c_status = 'SUCCESS' AND c_datetime >= '$start_time' AND c_datetime <= '$end_time' ORDER BY c_datetime DESC LIMIT 20) t
              JOIN merchant m ON m.id = t.ref_merchantId)
             ORDER BY date DESC LIMIT $limit
         ";

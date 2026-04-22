@@ -19,6 +19,9 @@ class Datatables
     protected $edit_columns = [];
     protected $joins = [];
     protected $select = '*';
+    protected $manual_recordsTotal = NULL;
+    protected $manual_recordsFiltered = NULL;
+    protected $manual_data = NULL;
 
     public function __construct()
     {
@@ -115,40 +118,73 @@ class Datatables
     }
 
     /**
+     * Manually set recordsTotal
+     */
+    public function set_recordsTotal($total)
+    {
+        $this->manual_recordsTotal = $total;
+        return $this;
+    }
+
+    /**
+     * Manually set recordsFiltered
+     */
+    public function set_recordsFiltered($total)
+    {
+        $this->manual_recordsFiltered = $total;
+        return $this;
+    }
+
+    /**
+     * Manually set data
+     */
+    public function set_data($data)
+    {
+        $this->manual_data = $data;
+        return $this;
+    }
+
+    /**
      * Generate the response
      */
     public function make($json = TRUE)
     {
-        // 1. Calculate recordsTotal (Unfiltered by search, but filtered by static where/joins)
-        $recordsTotal = $this->count_all();
+        // 1. Use manual counts if provided, otherwise calculate
+        $recordsTotal = ($this->manual_recordsTotal !== NULL) ? $this->manual_recordsTotal : $this->count_all();
         
-        // 2. Prepare the main query on the CI builder
-        $this->apply_query($this->CI->db);
-        
-        // 3. Apply search filter
-        $this->apply_search($this->CI->db);
-        
-        // 4. Calculate recordsFiltered (Count after search)
-        // If no search is applied, recordsFiltered is the same as recordsTotal
-        $search_value = isset($_POST['search']['value']) ? $_POST['search']['value'] : '';
-        if ($search_value == '') {
-            $recordsFiltered = $recordsTotal;
+        // 2. Prepare result set
+        if ($this->manual_data !== NULL) {
+            $result = $this->manual_data;
+            $recordsFiltered = ($this->manual_recordsFiltered !== NULL) ? $this->manual_recordsFiltered : count($result);
+            
+            // Apply pagination to manual data
+            if (isset($_POST['length']) && $_POST['length'] != -1) {
+                $start = isset($_POST['start']) ? (int)$_POST['start'] : 0;
+                $length = (int)$_POST['length'];
+                $result = array_slice($result, $start, $length);
+            }
         } else {
-            // We clone the current builder state to perform the count without clearing it
-            $temp_db = clone $this->CI->db;
-            $recordsFiltered = $temp_db->count_all_results('', FALSE);
+            // Standard flow
+            $this->apply_query($this->CI->db);
+            $this->apply_search($this->CI->db);
+            
+            $search_value = isset($_POST['search']['value']) ? $_POST['search']['value'] : '';
+            if ($search_value == '') {
+                $recordsFiltered = $recordsTotal;
+            } else {
+                $temp_db = clone $this->CI->db;
+                $recordsFiltered = $temp_db->count_all_results('', FALSE);
+            }
+            
+            $this->apply_order($this->CI->db);
+            
+            if (isset($_POST['length']) && $_POST['length'] != -1) {
+                $this->CI->db->limit($_POST['length'], $_POST['start']);
+            }
+            
+            $query = $this->CI->db->get();
+            $result = $query->result();
         }
-        
-        // 5. Apply order and limit to the main builder
-        $this->apply_order($this->CI->db);
-        
-        // 6. Limit
-        if (isset($_POST['length']) && $_POST['length'] != -1) {
-            $this->CI->db->limit($_POST['length'], $_POST['start']);
-        }
-        
-        $query = $this->CI->db->get();
-        $result = $query->result();
         
         $data = [];
         $no = isset($_POST['start']) ? $_POST['start'] : 0;
@@ -262,5 +298,8 @@ class Datatables
         $this->edit_columns = [];
         $this->joins = [];
         $this->select = '*';
+        $this->manual_recordsTotal = NULL;
+        $this->manual_recordsFiltered = NULL;
+        $this->manual_data = NULL;
     }
 }

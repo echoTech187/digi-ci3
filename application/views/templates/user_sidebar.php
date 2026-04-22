@@ -52,10 +52,10 @@
                 $has_submenu = !empty($m['sub_menus']);
 
                 // Check if this menu or its submenus are active
-                $is_active = ($curr_url == $m['url']) ? true : false;
+                $is_active = ($curr_url == strtolower($m['url'])) ? true : false;
                 if ($has_submenu) {
                     foreach ($m['sub_menus'] as $sm) {
-                        if ($curr_url == $sm['url']) {
+                        if ($curr_url == strtolower($sm['url'])) {
                             $is_active = true;
                             break;
                         }
@@ -97,7 +97,7 @@
                         <div class="sb-flyout-title"><?= $m['title'] ?></div>
                         <ul class="sb-flyout-list">
                             <?php foreach ($m['sub_menus'] as $sm) : ?>
-                                <li class="sb-flyout-item <?= ($curr_url == $sm['url']) ? 'active' : '' ?>">
+                                <li class="sb-flyout-item <?= ($curr_url == strtolower($sm['url'])) ? 'active' : '' ?>">
                                     <a class="sb-flyout-link" href="<?= base_url($sm['url']) ?>">
                                         <?php if (!empty($sm['icon'])) : ?>
                                             <span class="sb-flyout-icon"><i class="<?= $sm['icon'] ?>"></i></span>
@@ -114,7 +114,7 @@
                     <div id="sbCollapse<?= $m['id'] ?>" class="collapse <?= $is_active ? 'show' : '' ?>" data-parent="#sb-accordion">
                         <ul class="sb-subnav">
                             <?php foreach ($m['sub_menus'] as $sm) : ?>
-                                <li class="sb-subnav-item <?= ($curr_url == $sm['url']) ? 'active' : '' ?>">
+                                <li class="sb-subnav-item <?= ($curr_url == strtolower($sm['url'])) ? 'active' : '' ?>">
                                     <a class="sb-subnav-link" href="<?= base_url($sm['url']) ?>">
                                         <?php if (!empty($sm['icon'])) : ?>
                                             <span class="sb-subnav-icon"><i class="<?= $sm['icon'] ?>"></i></span>

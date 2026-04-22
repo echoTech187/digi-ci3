@@ -98,7 +98,9 @@ class QRISRecurring extends CI_Model {
 
     public function count_filtered($search_name = null, $search_date = null, $search_date_to = null, $search_submerchant = null)
     {
-        $is_filtered = ($search_name || $search_date || $search_date_to || $search_submerchant || (isset($_POST['search']['value']) && !empty($_POST['search']['value'])));
+        $searchValue = $this->input->post('search')['value'];
+        $is_filtered = $search_name || $search_date || $search_date_to || $search_submerchant || (!empty($searchValue));
+
         if (!$is_filtered) {
             return $this->count_all_dt();
         }
@@ -108,7 +110,7 @@ class QRISRecurring extends CI_Model {
         $this->_apply_filters($search_name, $search_date, $search_date_to, $search_submerchant);
 
         // Lean joins based on active filters
-        if (isset($_POST['search']['value']) && $_POST['search']['value']) {
+        if (!empty($searchValue)) {
             $this->db->join('submerchant s', 'crqm.ref_subMerchantId = s.id', 'left');
             $this->db->join('merchant m', 'crqm.ref_merchantId = m.id', 'left');
             
@@ -116,9 +118,9 @@ class QRISRecurring extends CI_Model {
             foreach ($this->column_search as $item) {
                 if ($i === 0) {
                     $this->db->group_start();
-                    $this->db->like($item, $_POST['search']['value']);
+                    $this->db->like($item, $searchValue);
                 } else {
-                    $this->db->or_like($item, $_POST['search']['value']);
+                    $this->db->or_like($item, $searchValue);
                 }
                 if (count($this->column_search) - 1 == $i)
                     $this->db->group_end();
@@ -127,9 +129,40 @@ class QRISRecurring extends CI_Model {
         }
 
         $query = $this->db->get();
+        if (!is_object($query) || $query->num_rows() == 0) return 0;
         return $query->row()->total;
     }
 
+    public function get_datatables_handler($filters = [])
+    {
+        $this->load->library('datatables');
+
+        $search_name = $filters['merchant'] ?? null;
+        $search_date = $filters['date'] ?? null;
+        $search_date_to = $filters['date_to'] ?? null;
+        $search_submerchant = $filters['submerchant'] ?? null;
+
+        // Optimized Fetch (Two-Step Lookup)
+        $list = $this->get_datatables($search_name, $search_date, $search_date_to, $search_submerchant);
+        
+        $searchValue = $this->input->post('search')['value'];
+        $is_filtered = $search_name || $search_date || $search_date_to || $search_submerchant || (!empty($searchValue));
+
+        $recordsTotal = $this->count_all_dt($search_name, $search_date, $search_date_to);
+        $recordsFiltered = $is_filtered ? $this->count_filtered($search_name, $search_date, $search_date_to, $search_submerchant) : $recordsTotal;
+
+        // Use Datatables Library for final processing and JSON output
+        return $this->datatables->of($this->table)
+            ->set_recordsTotal($recordsTotal)
+            ->set_recordsFiltered($recordsFiltered)
+            ->set_data($list)
+            ->addColumn('no', function($row) {
+                static $no = null;
+                if ($no === null) $no = intval($this->input->post('start'));
+                return ++$no;
+            })
+            ->make(true);
+    }
     public function count_all_dt($search_name = null, $search_date = null, $search_date_to = null)
     {
         $table_name = explode(' ', $this->table)[0];
@@ -138,159 +171,10 @@ class QRISRecurring extends CI_Model {
         return $result ? (int)$result->TABLE_ROWS : 0;
     }
 
-    public function get_summary($search_name = null, $search_date = null, $search_date_to = null, $search_submerchant = null)
+    public function get_merchant()
     {
-        $this->db->select("COUNT(crqm.id) as qty, SUM(crqm.c_amount) as total_trx");
-        $this->db->from($this->table);
-        
-        // Only join if we are filtering by name or submerchant to avoid massive scan overhead
-        if ($search_submerchant) {
-            $this->db->join('submerchant s', 'crqm.ref_subMerchantId = s.id', 'left');
-        }
-        if ($search_name) {
-            $this->db->join('merchant m', 'crqm.ref_merchantId = m.id', 'left');
-        }
-
-        $this->_apply_filters($search_name, $search_date, $search_date_to, $search_submerchant);
-        return $this->db->get()->row();
-    }
-    
-    public function get_merchant(){
         $query = "select id,c_name from merchant ";
         return $this->db->query($query)->result();
-    }
-
-    public function getDataQrisRecurringChannelExternal($ref_cashinExternalId, $ref_cashinExternalLogQrisMpmIdCreate) {
-        $TransactionIdExternal1         = null;
-        $TransactionIdExternal2         = null;
-
-        $DatetimeRequest                = null;
-        $RequestHeader                  = null;
-        $RequestBody                    = null;
-
-        $DatetimeResponse               = null;
-        $ResponseHeader                 = null;
-        $ResponseBody                   = null;
-
-        $ref_cashinExternalId = strtolower($ref_cashinExternalId);
-
-        if ($ref_cashinExternalId == 'paylabs') {
-            $qtxt1_1    = "SELECT c_platformTradeNo, c_merchantTradeNo, c_datetimeRequest, c_requestHeader, c_requestBody, c_datetimeResponse, c_responseHeader, c_responseBody FROM external_paylabs_qris_mpm_create WHERE id='$ref_cashinExternalLogQrisMpmIdCreate'";
-            $query1_1   = $this->db->query($qtxt1_1);
-            $result1_1  = $query1_1->num_rows() ? $query1_1->row() : false;
-            if($result1_1) {
-                $TransactionIdExternal1     = $result1_1->c_platformTradeNo;
-                $TransactionIdExternal2     = $result1_1->c_merchantTradeNo;
-                $DatetimeRequest            = $result1_1->c_datetimeRequest;
-                $RequestHeader              = $result1_1->c_requestHeader;
-                $RequestBody                = $result1_1->c_requestBody;
-                $DatetimeResponse           = $result1_1->c_datetimeResponse;
-                $ResponseHeader             = $result1_1->c_responseHeader;
-                $ResponseBody               = $result1_1->c_responseBody;
-            }
-        } elseif ($ref_cashinExternalId == 'gvconnect') {
-            $qtxt1_1    = "SELECT c_partnerReferenceNo, c_referenceLabel, c_datetimeRequest, c_requestHeader, c_requestBody, c_datetimeResponse, c_responseHeader, c_responseBody FROM external_gvconnect_snap_qris_mpm_create WHERE id='$ref_cashinExternalLogQrisMpmIdCreate'";
-            $query1_1   = $this->db->query($qtxt1_1);
-            $result1_1  = $query1_1->num_rows() ? $query1_1->row() : false;
-            if($result1_1) {
-                $TransactionIdExternal1     = $result1_1->c_partnerReferenceNo;
-                $TransactionIdExternal2     = $result1_1->c_referenceLabel;
-                $DatetimeRequest            = $result1_1->c_datetimeRequest;
-                $RequestHeader              = $result1_1->c_requestHeader;
-                $RequestBody                = $result1_1->c_requestBody;
-                $DatetimeResponse           = $result1_1->c_datetimeResponse;
-                $ResponseHeader             = $result1_1->c_responseHeader;
-                $ResponseBody               = $result1_1->c_responseBody;
-            }
-        } elseif ($ref_cashinExternalId == 'paydgn') {
-            $qtxt1_1    = "SELECT refId, partnerRefId, c_datetimeRequest, c_requestHeader, c_requestBody, c_datetimeResponse, c_responseHeader, c_responseBody FROM external_paydgn_qris_mpm_create WHERE id='$ref_cashinExternalLogQrisMpmIdCreate'";
-            $query1_1   = $this->db->query($qtxt1_1);
-            $result1_1  = $query1_1->num_rows() ? $query1_1->row() : false;
-            if($result1_1) {
-                $TransactionIdExternal1     = $result1_1->refId;
-                $TransactionIdExternal2     = $result1_1->partnerRefId;
-                $DatetimeRequest            = $result1_1->c_datetimeRequest;
-                $RequestHeader              = $result1_1->c_requestHeader;
-                $RequestBody                = $result1_1->c_requestBody;
-                $DatetimeResponse           = $result1_1->c_datetimeResponse;
-                $ResponseHeader             = $result1_1->c_responseHeader;
-                $ResponseBody               = $result1_1->c_responseBody;
-            }
-        } elseif ($ref_cashinExternalId == 'ifp') {
-            $qtxt1_1    = "SELECT c_order_id, c_transaction_id, c_datetimeRequest, c_requestHeader, c_requestBody, c_datetimeResponse, c_responseHeader, c_responseBody FROM external_ifp_qris_mpm_create WHERE id='$ref_cashinExternalLogQrisMpmIdCreate'";
-            $query1_1   = $this->db->query($qtxt1_1);
-            $result1_1  = $query1_1->num_rows() ? $query1_1->row() : false;
-            if($result1_1) {
-                $TransactionIdExternal1     = $result1_1->c_order_id;
-                $TransactionIdExternal2     = $result1_1->c_transaction_id;
-                $DatetimeRequest            = $result1_1->c_datetimeRequest;
-                $RequestHeader              = $result1_1->c_requestHeader;
-                $RequestBody                = $result1_1->c_requestBody;
-                $DatetimeResponse           = $result1_1->c_datetimeResponse;
-                $ResponseHeader             = $result1_1->c_responseHeader;
-                $ResponseBody               = $result1_1->c_responseBody;
-            }
-        } elseif ($ref_cashinExternalId == 'inacash') {
-            $qtxt1_1    = "SELECT refId, partnerRefId, c_datetimeRequest, c_requestHeader, c_requestBody, c_datetimeResponse, c_responseHeader, c_responseBody FROM external_inacash_qris_mpm_create WHERE id='$ref_cashinExternalLogQrisMpmIdCreate'";
-            $query1_1   = $this->db->query($qtxt1_1);
-            $result1_1  = $query1_1->num_rows() ? $query1_1->row() : false;
-            if($result1_1) {
-                $TransactionIdExternal1     = $result1_1->refId;
-                $TransactionIdExternal2     = $result1_1->partnerRefId;
-                $DatetimeRequest            = $result1_1->c_datetimeRequest;
-                $RequestHeader              = $result1_1->c_requestHeader;
-                $RequestBody                = $result1_1->c_requestBody;
-                $DatetimeResponse           = $result1_1->c_datetimeResponse;
-                $ResponseHeader             = $result1_1->c_responseHeader;
-                $ResponseBody               = $result1_1->c_responseBody;
-            }
-        }
-
-        return array(
-            'TransactionIdExternal1'    => $TransactionIdExternal1, 
-            'TransactionIdExternal2'    => $TransactionIdExternal2, 
-            'RequestDatetime'           => $DatetimeRequest, 
-            'RequestHeader'             => json_decode($RequestHeader, true),
-            'RequestBody'               => json_decode($RequestBody, true),
-            'ResponseDatetime'          => $DatetimeResponse,
-            'ResponseHeader'            => json_decode($ResponseHeader, true),
-            'ResponseBody'              => json_decode($ResponseBody, true)
-        );
-    }
-    public function get_datatables_handler($filters = [])
-    {
-        $search_name = $filters['merchant'] ?? null;
-        $search_date = $filters['date'] ?? null;
-        $search_date_to = $filters['date_to'] ?? null;
-        $search_submerchant = $filters['submerchant'] ?? null;
-
-        $list = $this->get_datatables($search_name, $search_date, $search_date_to, $search_submerchant);
-        
-        $data = [];
-        $no = intval($this->input->post('start'));
-        foreach ($list as $items) {
-            $no++;
-            $row = (array)$items;
-            $row['no'] = $no;
-            $data[] = $row;
-        }
-
-        $recordsTotal = $this->count_all_dt($search_name, $search_date, $search_date_to);
-        
-        // Consistency: Use approx count if no filters, exact if filtered
-        $is_filtered = $search_name || $search_date || $search_date_to || $search_submerchant || (!empty($this->input->post('search')['value']));
-        $recordsFiltered = $is_filtered ? $this->count_filtered($search_name, $search_date, $search_date_to, $search_submerchant) : $recordsTotal;
-
-        $output = [
-            "draw" => intval($this->input->post("draw")),
-            "recordsTotal" => $recordsTotal,
-            "recordsFiltered" => $recordsFiltered,
-            "data" => $data,
-        ];
-
-        $this->output
-            ->set_content_type('application/json')
-            ->set_output(json_encode($output));
     }
 }
 ?>

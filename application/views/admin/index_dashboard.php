@@ -266,7 +266,7 @@
                 }
             }
         ], {
-            "pageLength": 8,
+            "pageLength": 50,
             "lengthChange": false,
             "searching": false,
             "info": false,

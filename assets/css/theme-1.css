@@ -4606,7 +4606,7 @@ div.dataTables_processing {
     width: 100% !important;
     height: 100% !important;
     margin: 0 !important;
-    background: rgba(15, 23, 42, 0.45) !important;
+    background: var(--bg-glass) !important;
     backdrop-filter: blur(4px) !important;
     border: none !important;
     display: none;
@@ -4618,15 +4618,15 @@ div.dataTables_processing[style*="display: block"] {
     display: flex !important;
 }
 .dt-loader-inner {
-    background: #1e293b;
+    background: var(--bg-card);
     padding: 1rem 2rem;
     border-radius: 12px;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
-    border: 1px solid rgba(255,255,255,0.1);
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--border-color);
     display: flex;
     align-items: center;
     gap: 15px;
-    color: #fff;
+    color: var(--gray-900);
 }
 .dt-loader-inner .spinner-border {
     width: 1.5rem;
@@ -4874,3 +4874,65 @@ div.dataTables_processing[style*="display: block"] {
 .opacity-75 { opacity: 0.75; }
 .section-title { font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; }
 .custom-select { height: auto !important; padding: 0.5rem 1rem !important; border-radius: 8px !important; }
+
+/* Smooth Modal Entrance */
+.modal.fade .modal-dialog {
+    transform: scale(0.95);
+    transition: transform 0.2s ease-out, opacity 0.2s ease-out;
+}
+.modal.show .modal-dialog {
+    transform: scale(1);
+}
+
+/* Enhanced Table Hover Experience */
+.table-hover tbody tr {
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent !important;
+}
+.table-hover tbody tr:hover {
+    background-color: var(--primary-soft) !important;
+    border-left: 3px solid var(--primary) !important;
+}
+
+/* Global Page Fade-In */
+#content-wrapper {
+    animation: pageFadeIn 0.5s ease-out;
+}
+@keyframes pageFadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Skeleton Shimmer Loader */
+.dt-skeleton-loader {
+    height: 400px;
+    width: 100%;
+    background: linear-gradient(90deg, var(--gray-100) 25%, var(--gray-200) 50%, var(--gray-100) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+.dt-skeleton-loader::after {
+    content: ''PROCESSING SECURE DATA'';
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--gray-500);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    opacity: 0.5;
+}
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+/* Prevent scrolling while DataTables is processing */
+.table-responsive.dt-processing-active {
+    overflow: hidden !important;
+    max-height: 400px; /* Optional: limit height while loading to keep indicator visible */
+}

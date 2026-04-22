@@ -90,35 +90,27 @@ class AdminDownload extends CI_Model {
     }
     public function get_datatables_handler($filters = [])
     {
+        $this->load->library('datatables');
         $search_date = $filters['date'] ?? null;
 
-        $list = $this->get_datatables($search_date);
-        
-        $data = [];
-        $no = intval($this->input->post('start'));
-        foreach ($list as $items) {
-            $no++;
-            $row = (array)$items;
-            $row['no'] = $no;
-            $data[] = $row;
+        $dt = $this->datatables->of('admin_download ad')
+            ->select('ad.id, ad.c_datetime, ad.c_type, ad.c_filename, ad.c_status, ad.c_remark');
+
+        if ($search_date) {
+            $formatted_date = date('Y-m-d', strtotime($search_date));
+            $dt->where('ad.c_datetime >=', $formatted_date . ' 00:00:00');
+            $dt->where('ad.c_datetime <=', $formatted_date . ' 23:59:59');
         }
 
-        $recordsTotal = $this->count_all_dt($search_date);
-        
-        // Consistency: Use approx count if no filters, exact if filtered
-        $is_filtered = $search_date || (!empty($this->input->post('search')['value']));
-        $recordsFiltered = $is_filtered ? $this->count_filtered($search_date) : $recordsTotal;
-
-        $output = [
-            "draw" => intval($this->input->post("draw")),
-            "recordsTotal" => $recordsTotal,
-            "recordsFiltered" => $recordsFiltered,
-            "data" => $data,
-        ];
-
-        $this->output
-            ->set_content_type('application/json')
-            ->set_output(json_encode($output));
+        return $dt->set_column_order([null, 'ad.c_datetime', 'ad.c_type', 'ad.c_filename', 'ad.c_status', 'ad.c_remark'])
+            ->set_column_search(['ad.c_type', 'ad.c_filename', 'ad.c_status', 'ad.c_remark'])
+            ->set_default_order(['ad.id' => 'desc'])
+            ->addColumn('no', function($row) {
+                static $no = null;
+                if ($no === null) $no = intval($this->input->post('start'));
+                return ++$no;
+            })
+            ->make(true);
     }
 }
 ?>

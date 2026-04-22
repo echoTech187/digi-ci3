@@ -45,24 +45,28 @@ class DashboardController extends CI_Controller
       // It will be loaded via AJAX DataTables in the view for faster initial page load
       $data['recent_mutations'] = []; 
 
-      // OPTIMIZATION: Implement 5-minute Caching for Dashboard Stats
-      // This prevents scanning 160M rows on every page hit
-      $cache_ttl = 300; // 5 minutes
-      $last_cache = $this->session->userdata('dash_stats_timeout');
+      // OPTIMIZATION: Implement 5-minute Global Caching for Dashboard Stats
+      // This prevents scanning 160M rows on every page hit, and shares the cache across ALL users.
+      $this->load->driver('cache', array('adapter' => 'file'));
+      $cache_key = 'global_dashboard_stats';
+      $cached_data = $this->cache->get($cache_key);
       
-      if ($last_cache && time() < $last_cache) {
-         $data['today_stats'] = $this->session->userdata('dash_today_stats');
-         $data['monthly_overview'] = $this->session->userdata('dash_monthly_overview');
-         $data['last_synced'] = $this->session->userdata('dash_stats_updated');
+      if ($cached_data !== FALSE) {
+         $data['today_stats'] = $cached_data['today_stats'];
+         $data['monthly_overview'] = $cached_data['monthly_overview'];
+         $data['last_synced'] = $cached_data['last_synced'];
       } else {
          $data['today_stats'] = $this->Dashboard_model->get_today_stats();
          $data['monthly_overview'] = $this->Dashboard_model->get_monthly_overview();
          $data['last_synced'] = date('H:i:s');
          
-         $this->session->set_userdata('dash_today_stats', $data['today_stats']);
-         $this->session->set_userdata('dash_monthly_overview', $data['monthly_overview']);
-         $this->session->set_userdata('dash_stats_updated', $data['last_synced']);
-         $this->session->set_userdata('dash_stats_timeout', time() + $cache_ttl);
+         $cache_payload = [
+            'today_stats' => $data['today_stats'],
+            'monthly_overview' => $data['monthly_overview'],
+            'last_synced' => $data['last_synced']
+         ];
+         // Cache for 300 seconds (5 minutes)
+         $this->cache->save($cache_key, $cache_payload, 300);
       }
 
       $data['merchant_count'] = $this->Dashboard_model->get_merchant_count();
@@ -74,26 +78,21 @@ class DashboardController extends CI_Controller
    public function recent_mutations_json()
    {
       $this->load->model('Dashboard_model');
-      $mutations = $this->Dashboard_model->get_recent_mutations(50); // Fetch more for scrolling/paging if needed
+      $this->load->library('datatables');
       
-      $data = [];
-      $no = 1;
-      foreach ($mutations as $row) {
-         $data[] = [
-            'date' => date('H:i:s d/m/Y', strtotime($row->date)),
-            'merchant' => $row->merchant,
-            'type' => $row->type,
-            'amount' => $row->amount,
-            'status' => $row->status
-         ];
-      }
-
-      echo json_encode([
-         "draw" => intval($this->input->post('draw')),
-         "recordsTotal" => count($data),
-         "recordsFiltered" => count($data),
-         "data" => $data
-      ]);
+      $mutations = $this->Dashboard_model->get_recent_mutations(50); 
+      
+      return $this->datatables
+         ->set_data($mutations)
+         ->set_recordsTotal(count($mutations))
+         ->set_recordsFiltered(count($mutations))
+         ->editColumn('date', function($row) {
+             return date('H:i:s d/m/Y', strtotime($row->date));
+         })
+         ->editColumn('amount', function($row) {
+             return round($row->amount);
+         })
+         ->make();
    }
 
    public function analytics()

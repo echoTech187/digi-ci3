@@ -1247,27 +1247,22 @@ class TransactionController extends CI_Controller
    }
    public function qris_dynamic_list()
    {
-      $this->load->model('QRISDynamiclist');
+      $this->load->model('QRISDynamic');
 
-      $start = $this->input->post("start");
-      $length = $this->input->post("length");
-      $search = $this->input->post("search")['value'];
-      $orderColumn = $this->input->post("order")[0]['column'];
-      $orderDir = $this->input->post("order")[0]['dir'];
-
-      // Fetch paginated data
-      $data = $this->QRISDynamiclist->get_qris_dynamic_data($start, $length, $search, $orderColumn, $orderDir);
-
-      // Count total records
-      $totalRecords = $this->QRISDynamiclist->count_all_qris_dynamic();
-      $filteredRecords = $this->QRISDynamiclist->count_filtered_qris_dynamic($search);
-
-      echo json_encode([
-         "draw" => intval($this->input->post("draw")),
-         "recordsTotal" => $totalRecords,
-         "recordsFiltered" => $filteredRecords,
-         "data" => $data
-      ]);
+      if ($this->input->is_ajax_request()) {
+         try {
+            return $this->QRISDynamic->get_datatables_handler();
+         } catch (Throwable $e) {
+            log_message('error', 'QRIS Dynamic List AJAX error: ' . $e->getMessage());
+            echo json_encode(array(
+               "draw" => intval($this->input->post("draw")),
+               "recordsTotal" => 0,
+               "recordsFiltered" => 0,
+               "data" => array(),
+               "error" => "Error retrieving QRIS dynamic data: " . $e->getMessage()
+            ));
+         }
+      }
    }
 
    public function qris_dynamic()
@@ -1590,89 +1585,87 @@ class TransactionController extends CI_Controller
 
    public function createCreditBalance()
    {
-
       $serviceName = "balance_merchant_module";
       is_logged_in();
 
-      $role_id = $this->session->userdata('role');
-
-
-
-      // $role_id = $this->session->userdata('role');
-
-
+      $isAjax = $this->input->is_ajax_request();
 
       $error = 0;
+      $errorMessage = '';
 
-      $merchantId = $_POST["merchantId"];
-      // var_dump($merchantId);
-      $channelId = $_POST["channelId"];
-      $description = $_POST["description"];
-      $amount = $_POST["rawAmountCredit"];
+      $merchantId  = $this->input->post('merchantId');
+      $channelId   = $this->input->post('channelId');
+      $description = $this->input->post('description');
+      $amount      = $this->input->post('rawAmountCredit');
 
       if (empty($merchantId)) {
          $error = 1;
-         $this->session->set_flashdata('error_message', 'merchantId still empty');
-         redirect('admin/merchant');
-      }
-
-      if (empty($channelId)) {
+         $errorMessage = 'Merchant ID tidak boleh kosong.';
+      } elseif (empty($channelId)) {
          $error = 1;
-         $this->session->set_flashdata('error_message', 'channelId still empty');
-         redirect('admin/merchant');
-      }
-
-      if (empty($description)) {
+         $errorMessage = 'Channel ID tidak boleh kosong.';
+      } elseif (empty($description)) {
          $error = 1;
-         $this->session->set_flashdata('error_message', 'description still empty');
-         redirect('admin/merchant');
-      }
-
-      if (empty($amount)) {
+         $errorMessage = 'Deskripsi tidak boleh kosong.';
+      } elseif (empty($amount)) {
          $error = 1;
-         $this->session->set_flashdata('error_message', 'amount still empty');
-         redirect('admin/merchant');
+         $errorMessage = 'Amount tidak boleh kosong.';
       }
 
-      if ($error == 0) {
+      if ($error == 1) {
+         if ($isAjax) {
+            header('Content-Type: application/json');
+            echo json_encode(['status' => 'error', 'message' => $errorMessage]);
+            return;
+         }
+         $this->session->set_flashdata('error_message', $errorMessage);
+         redirect('admin/merchant');
+         return;
+      }
 
-         $internalRequestBody = array(
-            "merchantId" => $merchantId,
-            "channelId" => $channelId,
-            'description' => $description,
-            'amount' => $amount
-         );
+      $internalRequestBody = array(
+         "merchantId" => $merchantId,
+         "channelId"  => $channelId,
+         'description' => $description,
+         'amount'      => $amount
+      );
 
-         $internalUrlHit = $this->internalUrlHit . "/Merchant/creditBalance";
+      $internalUrlHit = $this->internalUrlHit . "/Merchant/creditBalance";
 
-         $internalCurl = curl_init();
-         curl_setopt_array($internalCurl, array(
-            CURLOPT_URL => $internalUrlHit,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_TIMEOUT => 30,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_SSL_VERIFYHOST => 0,
-            CURLOPT_SSL_VERIFYPEER => 0,
-            CURLOPT_CUSTOMREQUEST => 'POST',
-            CURLOPT_POSTFIELDS => json_encode($internalRequestBody),
-            CURLOPT_HTTPHEADER => array(
-               'Content-Type: application/json'
-            ),
-         ));
+      $internalCurl = curl_init();
+      curl_setopt_array($internalCurl, array(
+         CURLOPT_URL            => $internalUrlHit,
+         CURLOPT_RETURNTRANSFER => true,
+         CURLOPT_TIMEOUT        => 30,
+         CURLOPT_FOLLOWLOCATION => true,
+         CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
+         CURLOPT_SSL_VERIFYHOST => 0,
+         CURLOPT_SSL_VERIFYPEER => 0,
+         CURLOPT_CUSTOMREQUEST  => 'POST',
+         CURLOPT_POSTFIELDS     => json_encode($internalRequestBody),
+         CURLOPT_HTTPHEADER     => array('Content-Type: application/json'),
+      ));
 
-         $responseInterlCurl = curl_exec($internalCurl);
-         curl_close($internalCurl);
+      $responseInterlCurl = curl_exec($internalCurl);
+      curl_close($internalCurl);
 
+      if ($isAjax) {
+         header('Content-Type: application/json');
          if ($responseInterlCurl !== false) {
-            $this->session->set_flashdata('success', 'Credit Balance Success.');
+            echo json_encode(['status' => 'success', 'message' => 'Credit balance berhasil ditambahkan.']);
+         } else {
+            echo json_encode(['status' => 'error', 'message' => 'Gagal menghubungi layanan internal.']);
          }
-         else {
-            $this->session->set_flashdata('error', 'Gagal mengirim data.');
-         }
-
-         redirect('admin/merchant');
+         return;
       }
+
+      // Fallback: non-AJAX (legacy redirect)
+      if ($responseInterlCurl !== false) {
+         $this->session->set_flashdata('success', 'Credit Balance Success.');
+      } else {
+         $this->session->set_flashdata('error', 'Gagal mengirim data.');
+      }
+      redirect('admin/merchant');
    }
 
    public function createDebitBalance()
@@ -1680,82 +1673,84 @@ class TransactionController extends CI_Controller
       $serviceName = "balance_merchant_module";
       is_logged_in();
 
-      $role_id = $this->session->userdata('role');
-
-
-
-
+      $isAjax = $this->input->is_ajax_request();
 
       $error = 0;
+      $errorMessage = '';
 
-      $merchantId = $_POST["merchantIdDebit"];
-      $channelId = $_POST["channelId"];
-      $description = $_POST["description"];
-      $amount = $_POST["rawAmountDebit"];
+      $merchantId  = $this->input->post('merchantIdDebit');
+      $channelId   = $this->input->post('channelId');
+      $description = $this->input->post('description');
+      $amount      = $this->input->post('rawAmountDebit');
 
       if (empty($merchantId)) {
          $error = 1;
-         $this->session->set_flashdata('error_message', 'merchantId still empty');
-         redirect('admin/merchant');
-      }
-
-      if (empty($channelId)) {
+         $errorMessage = 'Merchant ID tidak boleh kosong.';
+      } elseif (empty($channelId)) {
          $error = 1;
-         $this->session->set_flashdata('error_message', 'channelId still empty');
-         redirect('admin/merchant');
-      }
-
-      if (empty($description)) {
+         $errorMessage = 'Channel ID tidak boleh kosong.';
+      } elseif (empty($description)) {
          $error = 1;
-         $this->session->set_flashdata('error_message', 'description still empty');
-         redirect('admin/merchant');
-      }
-
-      if (empty($amount)) {
+         $errorMessage = 'Deskripsi tidak boleh kosong.';
+      } elseif (empty($amount)) {
          $error = 1;
-         $this->session->set_flashdata('error_message', 'amount still empty');
-         redirect('admin/merchant');
+         $errorMessage = 'Amount tidak boleh kosong.';
       }
 
-      if ($error == 0) {
+      if ($error == 1) {
+         if ($isAjax) {
+            header('Content-Type: application/json');
+            echo json_encode(['status' => 'error', 'message' => $errorMessage]);
+            return;
+         }
+         $this->session->set_flashdata('error_message', $errorMessage);
+         redirect('admin/merchant');
+         return;
+      }
 
-         $internalRequestBody = array(
-            "merchantId" => $merchantId,
-            "channelId" => $channelId,
-            'description' => $description,
-            'amount' => $amount
-         );
+      $internalRequestBody = array(
+         "merchantId" => $merchantId,
+         "channelId"  => $channelId,
+         'description' => $description,
+         'amount'      => $amount
+      );
 
-         $internalUrlHit = $this->internalUrlHit . "/Merchant/debitBalance";
+      $internalUrlHit = $this->internalUrlHit . "/Merchant/debitBalance";
 
-         $internalCurl = curl_init();
-         curl_setopt_array($internalCurl, array(
-            CURLOPT_URL => $internalUrlHit,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_TIMEOUT => 30,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_SSL_VERIFYHOST => 0,
-            CURLOPT_SSL_VERIFYPEER => 0,
-            CURLOPT_CUSTOMREQUEST => 'POST',
-            CURLOPT_POSTFIELDS => json_encode($internalRequestBody),
-            CURLOPT_HTTPHEADER => array(
-               'Content-Type: application/json'
-            ),
-         ));
+      $internalCurl = curl_init();
+      curl_setopt_array($internalCurl, array(
+         CURLOPT_URL            => $internalUrlHit,
+         CURLOPT_RETURNTRANSFER => true,
+         CURLOPT_TIMEOUT        => 30,
+         CURLOPT_FOLLOWLOCATION => true,
+         CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
+         CURLOPT_SSL_VERIFYHOST => 0,
+         CURLOPT_SSL_VERIFYPEER => 0,
+         CURLOPT_CUSTOMREQUEST  => 'POST',
+         CURLOPT_POSTFIELDS     => json_encode($internalRequestBody),
+         CURLOPT_HTTPHEADER     => array('Content-Type: application/json'),
+      ));
 
-         $responseInterlCurl = curl_exec($internalCurl);
-         curl_close($internalCurl);
+      $responseInterlCurl = curl_exec($internalCurl);
+      curl_close($internalCurl);
 
+      if ($isAjax) {
+         header('Content-Type: application/json');
          if ($responseInterlCurl !== false) {
-            $this->session->set_flashdata('success', 'Debit Balance Success.');
+            echo json_encode(['status' => 'success', 'message' => 'Debit balance berhasil diproses.']);
+         } else {
+            echo json_encode(['status' => 'error', 'message' => 'Gagal menghubungi layanan internal.']);
          }
-         else {
-            $this->session->set_flashdata('error', 'Gagal mengirim data.');
-         }
-
-         redirect('admin/merchant');
+         return;
       }
+
+      // Fallback: non-AJAX (legacy redirect)
+      if ($responseInterlCurl !== false) {
+         $this->session->set_flashdata('success', 'Debit Balance Success.');
+      } else {
+         $this->session->set_flashdata('error', 'Gagal mengirim data.');
+      }
+      redirect('admin/merchant');
    }
 
    public function download()

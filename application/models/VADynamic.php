@@ -342,39 +342,34 @@ class VADynamic extends CI_Model {
     }
     public function get_datatables_handler($filters = [])
     {
+        $this->load->library('datatables');
+
         $search_name = $filters['merchant'] ?? null;
         $search_date = $filters['date'] ?? null;
         $search_va = $filters['va_number'] ?? null;
         $search_trxid = $filters['merchant_trxid'] ?? null;
         $search_date_to = $filters['date_to'] ?? null;
 
+        // Optimized Fetch (Two-Step Lookup)
         $list = $this->get_datatables($search_name, $search_date, $search_va, $search_trxid, $search_date_to);
         
-        $data = [];
-        $no = intval($this->input->post('start'));
-        foreach ($list as $items) {
-            $no++;
-            $row = (array)$items;
-            $row['no'] = $no;
-            $data[] = $row;
-        }
-
-        $recordsTotal = $this->count_all_dt($search_name, $search_date, $search_date_to);
+        $searchValue = $this->input->post('search')['value'];
+        $is_filtered = $search_name || $search_date || $search_va || $search_trxid || $search_date_to || (!empty($searchValue));
         
-        // Consistency: Use approx count if no filters, exact if filtered
-        $is_filtered = $search_name || $search_date || $search_va || $search_trxid || $search_date_to || (!empty($this->input->post('search')['value']));
+        $recordsTotal = $this->count_all_dt($search_name, $search_date, $search_date_to);
         $recordsFiltered = $is_filtered ? $this->count_filtered($search_name, $search_date, $search_va, $search_trxid, $search_date_to) : $recordsTotal;
 
-        $output = [
-            "draw" => intval($this->input->post("draw")),
-            "recordsTotal" => $recordsTotal,
-            "recordsFiltered" => $recordsFiltered,
-            "data" => $data,
-        ];
-
-        $this->output
-            ->set_content_type('application/json')
-            ->set_output(json_encode($output));
+        // Use Datatables Library for final processing and JSON output
+        return $this->datatables->of($this->table)
+            ->set_recordsTotal($recordsTotal)
+            ->set_recordsFiltered($recordsFiltered)
+            ->set_data($list)
+            ->addColumn('no', function($row) {
+                static $no = null;
+                if ($no === null) $no = intval($this->input->post('start'));
+                return ++$no;
+            })
+            ->make(true);
     }
 }
 ?>

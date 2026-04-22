@@ -112,9 +112,18 @@ $(document).ready(function() {
         }
     });
 
-    // Global Search
-    $('#dt-global-search').on('keyup', function() {
+    // Global Search — dengan debounce 400ms agar tidak spam AJAX ke server
+    $('#dt-global-search').on('input', debounce(function() {
         table.search(this.value).draw();
+    }, 400));
+
+    // Update badge "Merchants Found" secara dinamis dari response server
+    table.on('xhr.dt', function(e, settings, json) {
+        if (json && json.recordsFiltered !== undefined) {
+            var count = json.recordsFiltered;
+            var label = count === 1 ? 'Merchant Found' : 'Merchants Found';
+            $('.badge.bg-white.text-primary').html('<i class="fas fa-store mr-1"></i> ' + count + ' ' + label);
+        }
     });
 });
 </script>

@@ -157,8 +157,16 @@ class Ewallet extends CI_Model {
 
     public function count_filtered($search_name = null, $date_from = null, $date_to = null, $search_date_settlement = null, $search_invoice_no = null)
     {
+        $searchValue = $this->input->post('search')['value'];
+        $is_filtered = $search_name || $date_from || $date_to || $search_date_settlement || $search_invoice_no || (!empty($searchValue));
+
+        if (!$is_filtered) {
+            return $this->count_all_dt();
+        }
+
         $this->_get_datatables_query($search_name, $date_from, $date_to, $search_date_settlement, $search_invoice_no, false, true);
         $query = $this->db->get();
+        if (!is_object($query) || $query->num_rows() == 0) return 0;
         return $query->row()->total;
     }
 
@@ -170,147 +178,16 @@ class Ewallet extends CI_Model {
         return $result ? (int)$result->TABLE_ROWS : 0;
     }
 
-
-    
-        public function ewallet_detail($id)
-        {
-            $query = "SELECT a.c_datetime, a.ref_merchantId, c.c_name AS name_merchant, a.ref_subMerchantId, 
-                        d.c_name AS name_submerchant, b.c_invoiceNo, 
-                        a.c_type, a.ref_cashinChannelId, 
-                        a.c_amount, a.c_mdr, a.c_fee, a.c_datetimePayment,
-                        a.c_isSettlementRealtime, a.c_datetimeSettlement,
-                        e.c_merchantTransactionId AS Merchant_Transaction_Id
-                        FROM cashin_payment_ewallet a   
-                        JOIN cashin b ON b.id=a.ref_cashinId
-                        JOIN merchant c ON a.ref_merchantId=c.id
-                        JOIN submerchant d ON a.ref_subMerchantId=d.id
-                        LEFT JOIN cashin_dynamic_ewallet e ON (e.ref_merchantId=a.ref_merchantId AND e.id=a.ref_cashinDynamicEwalletId) 
-                        WHERE a.id ='$id'";
-
-            return $this->db->query($query)->result_array();
-
-        }
-
-    public function insertEwalletDynamic($dataInsert2) {
-        foreach ($dataInsert2 as $key => $value) {
-            if (is_array($value)) {
-                $dataInsert2[$key] = json_encode($value);
-            }
-        }
-
-        $this->db->insert('cashin_dynamic_ewallet', $dataInsert2);
-        return ($this->db->affected_rows() != 1) ? false : true;
-    }
-    
-    public function updateEwalletDynamic($data, $id) {
-        $this->db->where('id', $id);
-        $this->db->update('cashin_dynamic_ewallet', $data);
-        return ($this->db->affected_rows() != 1) ? false : true;
-    }
-    public function get_detail_ewallet($idRequest2) {
-        $query = "select cdv.*, m.c_name, m.id from cashin_dynamic_ewallet cdv join merchant m on m.id = cdv.ref_merchantId where cdv.id = $idRequest2";
-        return $this->db->query($query)->result_array();
-    }
-
-    public function get_qris($limit, $start, $search_date_qris = null, $search_date_qris_to = null, $search_name_qris = null, $search_date_qris_settlement = null, $search_invoice_no = null)
-    {
-
-        $query = "SELECT 
-                    merchant.c_name as name_merchant,
-                    cashin_payment_qris_mpm.id, 
-                    cashin_payment_qris_mpm.c_datetime, 
-                    submerchant.c_name as name_submerchant, 
-                    cashin.c_invoiceNo, 
-                    cashin_payment_qris_mpm.c_type,
-                    cashin_payment_qris_mpm.ref_merchantId, 
-                    cashin_payment_qris_mpm.ref_subMerchantId, 
-                    cashin_payment_qris_mpm.c_amount, 
-                    cashin_payment_qris_mpm.c_mdr, 
-                    cashin_payment_qris_mpm.c_fee,
-                    cashin_payment_qris_mpm.c_datetimePayment, cashin_payment_qris_mpm.c_isSettlementRealtime, 
-                    cashin_payment_qris_mpm.c_datetimeSettlement, cashin_payment_qris_mpm.c_isSettlementRealtimeExternal, 
-                    cashin_payment_qris_mpm.c_feeExternal, cashin_payment_qris_mpm.c_datetimeSettlementExternal,
-                    IF(cashin_payment_qris_mpm.c_type='Dynamic', cashin_dynamic_qris_mpm.c_merchantTransactionId, cashin_recurring_qris_mpm.c_merchantTransactionId) AS Merchant_Transaction_Id
-                    FROM cashin_payment_qris_mpm 
-                    JOIN cashin on cashin.id = cashin_payment_qris_mpm.ref_cashinId
-                    JOIN submerchant on cashin_payment_qris_mpm.ref_subMerchantId = submerchant.id 
-                    JOIN merchant on cashin_payment_qris_mpm.ref_merchantId = merchant.id
-                    LEFT JOIN cashin_dynamic_qris_mpm on (cashin_dynamic_qris_mpm.ref_subMerchantId = cashin_payment_qris_mpm.ref_subMerchantId AND cashin_dynamic_qris_mpm.id=cashin_payment_qris_mpm.ref_cashinDynamicQrisMpmId)
-                    LEFT JOIN cashin_recurring_qris_mpm on (cashin_recurring_qris_mpm.ref_subMerchantId = cashin_payment_qris_mpm.ref_subMerchantId AND cashin_recurring_qris_mpm.id=cashin_payment_qris_mpm.ref_cashinRecurringQrisMpmId)";
-
-        $query .= " WHERE 1=1 ";
-
-        if (!empty($search_name_qris)) {
-            $query .= " and cashin_payment_qris_mpm.ref_merchantId = '$search_name_qris'";
-        }
-
-        if (!empty($search_date_qris) && !empty($search_date_qris_to)) {
-            // $search_date_qris = date('Y-m-d', strtotime($search_date_qris));
-            $query .= " and cashin_payment_qris_mpm.c_datetime >= '$search_date_qris' AND cashin_payment_qris_mpm.c_datetime <= '$search_date_qris_to'";
-        }
-
-        if (!empty($search_date_qris_settlement)) {
-            $formatted_date = date('Y-m-d', strtotime($search_date_qris_settlement));
-            $query .= " and cashin_payment_qris_mpm.c_datetimeSettlement >= '$formatted_date 00:00:00' AND cashin_payment_qris_mpm.c_datetimeSettlement <= '$formatted_date 23:59:59'";
-        }
-
-        if (!empty($search_invoice_no)) {
-            $query .= " and cashin.c_invoiceNo= '$search_invoice_no'";
-        }
-
-        $query .= " ORDER BY cashin_payment_qris_mpm.id DESC
-                    LIMIT $start, $limit";
-
-        return $this->db->query($query)->result();
-    }
-
-    public function count_qris($refMerchantId, $search_date_qris = null)
-    {
-        $this->db->from('cashin_payment_qris_mpm');
-        $this->db->join('cashin', 'cashin.id = cashin_payment_qris_mpm.ref_cashinId');
-        $this->db->join('merchant', 'merchant.id = cashin_payment_qris_mpm.ref_merchantId');
-        $this->db->join('submerchant', 'submerchant.id = cashin_payment_qris_mpm.ref_subMerchantId');
-        $this->db->where('cashin_payment_qris_mpm.ref_merchantId', $refMerchantId);
-
-        if ($search_date_qris) {
-            $this->db->where('cashin_payment_qris_mpm.c_datetime', $search_date_qris);
-        }
-
-        return $this->db->count_all_results();
-    }
-
     public function get_merchant()
     {
         $query = "select id,c_name from merchant ";
         return $this->db->query($query)->result();
     }
 
-    public function get_summary($date_from, $date_to, $refMerchantId = null) {
-        // $this->db->select('COUNT(id) as qty, SUM(c_amount) as amount, SUM(c_fee) as fee, SUM(c_feeExternal) as fee_external');
-        $query = "SELECT COUNT(a.id) as qty, SUM(a.c_amount) as amount, SUM(a.c_fee) as fee, SUM(a.c_feeExternal) as fee_external
-        FROM cashin_payment_ewallet a
-        WHERE a.c_datetimePayment  >= '$date_from' AND a.c_datetimePayment <= '$date_to'";
-
-        if (!empty($refMerchantId)) {
-            $query .= " AND a.ref_merchantId = '$refMerchantId'";
-        }
-
-        return $this->db->query($query)->result_array();
-    }
-
-    public function monthly_ewallet() {
-        $year = date('Y');
-        // Optimized: Avoid MONTH() index-killer
-        $query = "SELECT MONTH(c_datetimePayment) AS month, SUM(c_amount) AS amount
-                  FROM cashin_payment_ewallet 
-                  WHERE c_datetimePayment >= '$year-01-01 00:00:00' AND c_datetimePayment <= '$year-12-31 23:59:59'
-                  GROUP BY MONTH(c_datetimePayment)
-                  ORDER BY month";
-        return $this->db->query($query)->result_array();
-    }
-
     public function get_datatables_handler($filters = [])
     {
+        $this->load->library('datatables');
+
         $search_name = $filters['merchant'] ?? null;
         $date_from = $filters['date_from'] ?? null;
         $date_to = $filters['date_to'] ?? null;
@@ -321,33 +198,26 @@ class Ewallet extends CI_Model {
         $date_from_query = !empty($date_from) ? date('Ymd', strtotime($date_from)) . "000001" : null;
         $date_to_query = !empty($date_to) ? date('Ymd', strtotime($date_to)) . "235959" : null;
 
+        // Optimized Fetch (Two-Step Lookup)
         $list = $this->get_datatables($search_name, $date_from_query, $date_to_query, $search_date_settlement, $search_invoice_no);
         
-        $data = [];
-        $no = intval($this->input->post('start'));
-        foreach ($list as $items) {
-            $no++;
-            $row = (array)$items;
-            $row['no'] = $no;
-            $data[] = $row;
-        }
+        $searchValue = $this->input->post('search')['value'];
+        $is_filtered = $search_name || $date_from || $date_to || $search_date_settlement || $search_invoice_no || (!empty($searchValue));
 
         $recordsTotal = $this->count_all_dt($search_name, $date_from_query, $date_to_query);
-        
-        // Consistency: Use approx count if no filters, exact if filtered
-        $is_filtered = $search_name || $date_from || $date_to || $search_date_settlement || $search_invoice_no || (!empty($this->input->post('search')['value']));
         $recordsFiltered = $is_filtered ? $this->count_filtered($search_name, $date_from_query, $date_to_query, $search_date_settlement, $search_invoice_no) : $recordsTotal;
 
-        $output = [
-            "draw" => intval($this->input->post("draw")),
-            "recordsTotal" => $recordsTotal,
-            "recordsFiltered" => $recordsFiltered,
-            "data" => $data,
-        ];
-
-        $this->output
-            ->set_content_type('application/json')
-            ->set_output(json_encode($output));
+        // Use Datatables Library for final processing and JSON output
+        return $this->datatables->of($this->table)
+            ->set_recordsTotal($recordsTotal)
+            ->set_recordsFiltered($recordsFiltered)
+            ->set_data($list)
+            ->addColumn('no', function($row) {
+                static $no = null;
+                if ($no === null) $no = intval($this->input->post('start'));
+                return ++$no;
+            })
+            ->make(true);
     }
 }
 ?>
