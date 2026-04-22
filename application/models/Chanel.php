@@ -157,7 +157,7 @@ class Chanel extends CI_Model {
             return $this->db->query($query)->result();
         }
         public function get_cashin_chanel_external_id_default(){
-            $query = "SELECT c_externalIdDefault FROM cashin_channel GROUP BY c_externalIdDefault";
+            $query = "SELECT c_cashinExternalId as c_externalIdDefault FROM cashin_external_x_channel GROUP BY c_cashinExternalId";
             return $this->db->query($query)->result();
         }
         public function get_cashout_chanel($limit, $start){
@@ -173,13 +173,14 @@ class Chanel extends CI_Model {
             return $this->db->query($query)->result();
         }
         public function get_cashout_chanel_external_id_default(){
-            $query = "SELECT c_externalIdDefault FROM cashout_channel GROUP BY c_externalIdDefault";
+            $query = "SELECT c_cashoutExternalId as c_externalIdDefault FROM cashout_external_x_channel GROUP BY c_cashoutExternalId";
             return $this->db->query($query)->result();
         }
         public function get_cashout_channels($externalId, $channelGroup){
-            $this->db->from('cashout_channel');
-            $this->db->where('c_externalIdDefault', $externalId);
-            $this->db->where('c_channelGroup', $channelGroup);
+            $this->db->select('ref_cashoutChannelId as id');
+            $this->db->from('cashout_external_x_channel');
+            $this->db->where('c_cashoutExternalId', $externalId);
+            $this->db->where('c_cashoutChannelGroup', $channelGroup);
             return $this->db->get()->result();
         }
 
@@ -189,9 +190,10 @@ class Chanel extends CI_Model {
             return $this->db->get()->result();
         }
         public function get_cashin_channels($externalId, $channelGroup){
-            $this->db->from('cashin_channel');
-            $this->db->where('c_externalIdDefault', $externalId);
-            $this->db->where('c_channelGroup', $channelGroup);
+            $this->db->select('ref_cashinChannelId as id');
+            $this->db->from('cashin_external_x_channel');
+            $this->db->where('c_cashinExternalId', $externalId);
+            $this->db->where('c_cashinChannelGroup', $channelGroup);
             return $this->db->get()->result();
         }
         public function createCashinChannel($data) {
