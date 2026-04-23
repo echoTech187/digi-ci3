@@ -7,7 +7,7 @@
         </div>
         <div class="d-flex" style="gap:10px;">
             <button type="button" class="btn-dt-action btn-dt-action-primary" data-toggle="modal" data-target="#globalUpdateModal">
-                <i class="fas fa-globe mr-1 mr-2"></i> Global Update
+                <i class="fas fa-globe mr-1 mr-2"></i> Edit Mapping
             </button>
             <button type="button" class="btn-dt-action btn-dt-action-success add-btn" data-toggle="modal" data-target="#feeModal">
                 <i class="fas fa-plus mr-1 mr-2"></i> Add Mapping
@@ -52,7 +52,7 @@
     </div>
 </div>
 
-<!-- Global Update Modal -->
+<!-- Edit Mapping Modal -->
 <div class="modal fade" id="globalUpdateModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg">
@@ -88,7 +88,7 @@
                                             <i class="fas fa-globe text-primary fa-lg"></i>
                                         </div>
                                         <div class="choice-text">
-                                            <div class="fw-bold small mb-1">Global Update</div>
+                                            <div class="fw-bold small mb-1">Edit Mapping</div>
                                             <div class="smaller text-muted">Update channels for all merchants in a group</div>
                                         </div>
                                         <div class="choice-check position-absolute" style="top: 10px; right: 10px;">

@@ -7,7 +7,7 @@
         </div>
         <div class="d-flex" style="gap:10px;">
             <button type="button" class="btn-dt-action btn-dt-action-primary" data-toggle="modal" data-target="#globalUpdateModal">
-                <i class="fas fa-globe mr-1 mr-2"></i> Global Update
+                <i class="fas fa-globe mr-1 mr-2"></i> Edit Mapping
             </button>
             <button type="button" class="btn-dt-action btn-dt-action-success add-btn" data-toggle="modal" data-target="#feeModal">
                 <i class="fas fa-plus mr-1 mr-2"></i> Add Mapping
@@ -53,7 +53,7 @@
     </div>
 </div>
 
-<!-- Global Update Modal -->
+<!-- Edit Mapping Modal -->
 <div class="modal fade" id="globalUpdateModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg">
@@ -89,7 +89,7 @@
                                             <i class="fas fa-globe text-primary fa-lg"></i>
                                         </div>
                                         <div class="choice-text">
-                                            <div class="fw-bold small mb-1">Global Update</div>
+                                            <div class="fw-bold small mb-1">Edit Mapping</div>
                                             <div class="smaller text-muted">Update channels for all merchants in a group</div>
                                         </div>
                                         <div class="choice-check position-absolute" style="top: 10px; right: 10px;">
@@ -457,7 +457,7 @@ $(document).ready(function() {
 
     $('#c_cashinChannelGroup, #c_externalIdDefault').change(updateChannelIds);
 
-    // Global Update Type Toggle
+    // Edit Mapping Type Toggle
     $('input[name="update_type"]').change(function() {
         if ($(this).val() === 'merchant') {
             $('#merchantSelectGroup').slideDown(200);
@@ -468,7 +468,7 @@ $(document).ready(function() {
         }
     });
 
-    // Global update channel ID sync (Current)
+    // Edit Mapping channel ID sync (Current)
     function updateGlobalCurrentChannelIds() {
         let group = $('#global_current_group').val();
         let external = $('#global_current_external').val();
@@ -495,7 +495,7 @@ $(document).ready(function() {
     }
     $('#global_current_group, #global_current_external').change(updateGlobalCurrentChannelIds);
 
-    // Global update channel ID sync (New)
+    // Edit Mapping channel ID sync (New)
     function updateGlobalNewChannelIds() {
         let group = $('#global_new_group').val();
         let external = $('#global_new_external').val();
