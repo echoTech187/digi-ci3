@@ -259,6 +259,14 @@ class EwalletDynamic extends CI_Model
                 if ($no === null) $no = intval($this->input->post('start'));
                 return ++$no;
             })
+            ->addColumn('simulation', function($row) {
+                return '<button type="button" class="btn btn-sm btn-dt-action btn-dt-secondary detailEwalletDynamicChannelExternalAjax" 
+                        data-merchanttransactionid="' . $row->c_merchantTransactionId . '" 
+                        data-ref_cashinexternalid="' . $row->ref_cashinExternalId . '" 
+                        data-ref_cashinexternallogewalletidcreate="' . $row->ref_cashinExternalLogEwalletIdCreate . '">
+                        <i class="fas fa-info-circle mr-1"></i> DETAILS
+                    </button>';
+            })
             ->make(true);
     }
 }

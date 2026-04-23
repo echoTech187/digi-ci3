@@ -253,7 +253,13 @@
             {data: 'c_datetimeExpired',className: 'text-nowrap', render: function(data){
                 return data ? moment(data).format('DD-MM-YYYY HH:mm:ss') : '-';
             }},
-            {data: 'c_status',className: 'text-nowrap', className: 'text-center'},
+            {data: 'c_status', className: 'text-center', render: function(data) {
+                var badge = 'secondary';
+                if (data == 'Paid' || data == 'Success') badge = 'success';
+                if (data == 'Pending' || data == 'Created') badge = 'warning';
+                if (data == 'Failed' || data == 'Expired') badge = 'danger';
+                return '<span class="badge badge-' + badge + '-soft text-' + badge + ' px-3 py-1 rounded-pill">' + data.toUpperCase() + '</span>';
+            }},
             {data: 'simulation', orderable: false, className: 'text-center'}
         ]);
 

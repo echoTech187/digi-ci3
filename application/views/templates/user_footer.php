@@ -533,7 +533,7 @@
         $(document).ready(function() {
             // 1. Auto-hide Success Alerts (smooth slide up)
             setTimeout(function() {
-                $('.alert-success').slideUp('slow');
+                $('.alert').slideUp('slow');
             }, 5000);
 
             // 2. Fix Select2 Auto-Focus in Bootstrap Modals
