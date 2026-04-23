@@ -239,6 +239,7 @@
                     if (!$el.hasClass('select2-hidden-accessible')) {
                         $el.select2({
                             width: '100%',
+                            dropdownAutoWidth: true,
                             minimumResultsForSearch: 0
                         });
                     }
@@ -251,6 +252,7 @@
                 $panel.find('select').not('.select2-hidden-accessible').each(function() {
                     $(this).select2({
                         width: '100%',
+                        dropdownAutoWidth: true,
                         dropdownParent: $panel,
                         minimumResultsForSearch: 0
                     });
@@ -464,6 +466,7 @@
                                     $select.select2('destroy');
                                     $select.select2({
                                         width: '100%',
+                                        dropdownAutoWidth: true,
                                         dropdownParent: $target.closest('.dt-more-panel'),
                                         minimumResultsForSearch: 0
                                     });

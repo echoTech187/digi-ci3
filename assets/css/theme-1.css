@@ -4828,13 +4828,17 @@ div.dataTables_processing[style*="display: block"] {
     color: white !important;
 }
 .select2-results__option[aria-selected=true] {
-    background-color: #f8f9fc !important;
+    background-color: transparent !important;
     color: #4e73df !important;
     font-weight: bold;
 }
 .select2-container--default .select2-selection--single .select2-selection__rendered {
     color: #4e73df !important;
     font-weight: 600 !important;
+}
+.select2-results__option--selected {
+    background-color: #4e73df !important;
+    color: white !important;
 }
 
 /* Welcome Page Animation & Assets */
@@ -5006,4 +5010,27 @@ div.dataTables_processing[style*="display: block"] {
 .swal2-container {
     backdrop-filter: blur(4px) !important;
     background: rgba(0,0,0,0.25) !important;
+}
+
+
+button[type="submit"][disabled] , button[type="submit"][disabled]:hover {
+    cursor: not-allowed !important;
+    opacity: 0.7 !important;
+    transition: all 0.2s ease-in-out;
+    background-color:var(--bg-body);
+    border-color:var(--border-color);
+    color:var(--text-color);
+}
+
+button:not([disabled]) {
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+button:not([disabled]):hover {
+    transform: translateY(-1px);
+}
+
+button:disabled:hover {
+    transform: none;
 }

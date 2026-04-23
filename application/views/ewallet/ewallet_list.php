@@ -247,6 +247,7 @@
         // Select2 init for More panel merchant select
         $('.select2-more').select2({
             width: '100%',
+            dropdownAutoWidth: true,
             dropdownParent: $morePanel,
             minimumResultsForSearch: 5
         });

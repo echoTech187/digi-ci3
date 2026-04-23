@@ -273,6 +273,7 @@ $download_url = base_url('admin/download_qris')
         // Select2 inside panel
         $('.qris-select2').select2({
             width: '100%',
+            dropdownAutoWidth: true,
             dropdownParent: $morePanel,
             minimumResultsForSearch: 5
         });

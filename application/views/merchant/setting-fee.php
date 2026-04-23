@@ -315,6 +315,7 @@ $(document).ready(function() {
             }
             $(this).select2({
                 dropdownParent: $modal,
+                dropdownAutoWidth: true,
                 width: '100%'
             });
         });

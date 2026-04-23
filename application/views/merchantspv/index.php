@@ -232,6 +232,7 @@ $(document).ready(function() {
 
         $select.select2({
             dropdownParent: $('#registerMerchantSpv'),
+            dropdownAutoWidth: true,
             placeholder: 'Search Merchants...',
             width: '100%',
             minimumInputLength: 1,

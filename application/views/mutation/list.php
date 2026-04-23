@@ -151,6 +151,7 @@ $(document).ready(function() {
     // Select2 integration inside filters panel
     const channelSelect = $('.select2-channel').select2({
         width: '100%',
+        dropdownAutoWidth: true,
         dropdownParent: $('#moreFiltersPanel'),
         minimumResultsForSearch: 5,
         placeholder: "All Channels",

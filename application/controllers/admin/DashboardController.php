@@ -280,13 +280,13 @@ class DashboardController extends CI_Controller
          if ($status === 'Not Active') {
             $this->Merchant->setAllOpenApiStatus('Not Active');
             $this->Merchant->setMaintenanceStatus('Not Active');
-            $message = 'All merchants API are Not Active (Maintenance OFF)';
-            $action = 'Maintenance OFF';
+            $message = 'All merchants API are Active (Maintenance ON)';
+            $action = 'Maintenance ON';
         } elseif ($status === 'Active') {
             $this->Merchant->setActiveMerchantsOpenApiStatus('Active');
             $this->Merchant->setMaintenanceStatus('Active');
-            $message = 'All merchants API are Active (Maintenance ON)';
-            $action = 'Maintenance ON';
+            $message = 'All merchants API are Not Active (Maintenance OFF)';
+            $action = 'Maintenance OFF';
         }
 
          $email = $this->session->userdata('c_email') !== NULL ? $this->session->userdata('c_email') : 'Unknown';

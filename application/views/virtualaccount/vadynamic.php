@@ -293,6 +293,7 @@
         // Select2 inside panel
         $('.vadynamic-select2').select2({
             width: '100%',
+            dropdownAutoWidth: true,
             dropdownParent: $morePanel,
             minimumResultsForSearch: 5
         });

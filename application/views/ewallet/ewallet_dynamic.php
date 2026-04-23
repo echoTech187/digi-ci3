@@ -265,6 +265,7 @@
         // Select2 inside toolbar
         $('.ewallet-dynamic-select2').select2({
             width: '100%',
+            dropdownAutoWidth: true,
             dropdownParent: $('.dt-toolbar'),
             minimumResultsForSearch: 5
         });

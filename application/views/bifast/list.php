@@ -128,7 +128,7 @@
                                 <!-- Status -->
                                 <div class="dt-more-field">
                                     <label class="dt-more-label"><i class="fas fa-info-circle mr-1 mr-2"></i> Transaction Status</label>
-                                    <select name="search_status_transaction_bifast" class="dt-more-select">
+                                    <select name="search_status_transaction_bifast" class="dt-more-select bifast-select2">
                                         <option value="">All Statuses</option>
                                         <?php foreach(['Pending', 'Process', 'Success', 'Failed', 'Init', 'Timeout'] as $st): ?>
                                             <option value="<?= $st; ?>" <?= ($status_val == $st) ? 'selected' : ''; ?>><?= $st; ?></option>
@@ -490,6 +490,7 @@
         // Select2 inside panel
         $('.bifast-select2').select2({
             width: '100%',
+            dropdownAutoWidth: true,
             dropdownParent: $morePanel,
             minimumResultsForSearch: 5
         });

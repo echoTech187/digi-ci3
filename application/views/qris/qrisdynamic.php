@@ -287,6 +287,7 @@
         // Select2 inside toolbar/panel (Merchant chip)
         $('.qris-dynamic-select2').select2({
             width: '100%',
+            dropdownAutoWidth: true,
             dropdownParent: $('.dt-toolbar'),
             minimumResultsForSearch: 5
         });
@@ -294,6 +295,7 @@
         // Select2 for ALL selects inside the More Filters panel (e.g. Status)
         $('#qrisMoreFiltersPanel select').not('.select2-hidden-accessible').select2({
             width: '100%',
+            dropdownAutoWidth: true,
             dropdownParent: $('#qrisMoreFiltersPanel'),
             minimumResultsForSearch: 0
         });

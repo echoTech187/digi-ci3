@@ -137,6 +137,7 @@ $(document).ready(function () {
         theme: 'bootstrap-5',
         placeholder: "All Channel",
         allowClear: true,
+        dropdownAutoWidth: true,
         width: '100%'
     });
 

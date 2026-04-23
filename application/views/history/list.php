@@ -188,7 +188,8 @@ $download_url = base_url('admin/download_history')
 
         // Select2 for the toolbar
         $('.history-select2').select2({
-            width: '100%'
+            width: '100%',
+            dropdownAutoWidth: true
         });
     });
 </script>

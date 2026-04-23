@@ -249,6 +249,7 @@ $download_url = base_url('admin/download_VA')
         // Select2 inside panel
         $('.va-select2').select2({
             width: '100%',
+            dropdownAutoWidth: true,
             dropdownParent: $morePanel,
             minimumResultsForSearch: 5
         });

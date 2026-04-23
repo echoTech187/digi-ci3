@@ -528,6 +528,7 @@
                 setTimeout(function() {
                     $('#creditChannelId').select2({
                         width: '100%',
+                        dropdownAutoWidth: true,
                         dropdownParent: $('#creditBalanceModal')
                     });
                 }, 300);
@@ -539,6 +540,7 @@
                 setTimeout(function() {
                     $('#debitChannelId').select2({
                         width: '100%',
+                        dropdownAutoWidth: true,
                         dropdownParent: $('#debitBalanceModal')
                     });
                 }, 300);

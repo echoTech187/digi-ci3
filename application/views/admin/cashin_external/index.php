@@ -16,14 +16,12 @@
     <?php if ($this->session->flashdata('success')): ?>
         <div class="alert alert-success border-0 shadow-sm alert-dismissible fade show mb-4" role="alert">
             <i class="fas fa-check-circle mr-2"></i> <?= $this->session->flashdata('success'); ?>
-            <button type="button" class="btn-close" data-dismiss="alert" aria-label="Close"></button>
         </div>
     <?php endif; ?>
 
     <?php if ($this->session->flashdata('error')): ?>
         <div class="alert alert-danger border-0 shadow-sm alert-dismissible fade show mb-4" role="alert">
             <i class="fas fa-exclamation-circle mr-2"></i> <?= $this->session->flashdata('error'); ?>
-            <button type="button" class="btn-close" data-dismiss="alert" aria-label="Close"></button>
         </div>
     <?php endif; ?>
 
@@ -203,7 +201,11 @@ $(document).ready(function() {
             if ($(this).hasClass('select2-hidden-accessible')) {
                 $(this).select2('destroy');
             }
-            $(this).select2({ dropdownParent: $modal, width: '100%' });
+            $(this).select2({ 
+                dropdownParent: $modal, 
+                dropdownAutoWidth: true,
+                width: '100%' 
+            });
         });
     });
 
