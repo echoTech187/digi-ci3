@@ -48,6 +48,9 @@
 	<!-- Reusable Scripts -->
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
 	<script src="<?= base_url('assets/'); ?>js/server-datatables.js"></script>
+	<!-- SweetAlert2 (Global) -->
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 	<link href="<?= base_url('assets/'); ?>css/theme-1.css?v=<?= time(); ?>" rel="stylesheet">
 </head>
 

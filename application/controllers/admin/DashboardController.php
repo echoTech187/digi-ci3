@@ -267,8 +267,7 @@ class DashboardController extends CI_Controller
    public function toggleOpenApiStatus()
    {
       if ($this->input->method() === 'post') {
-         $input = json_decode($this->input->raw_input_stream, true);
-         $status = isset($input['status']) ? $input['status'] : null;
+         $status = $this->input->post('status');
 
          if (!in_array($status, ['Not Active', 'Active'])) {
             http_response_code(400);
@@ -281,13 +280,13 @@ class DashboardController extends CI_Controller
          if ($status === 'Not Active') {
             $this->Merchant->setAllOpenApiStatus('Not Active');
             $this->Merchant->setMaintenanceStatus('Not Active');
-            $message = 'All merchants API are Not Active (Maintenance ON)';
-            $action = 'Maintenance ON';
+            $message = 'All merchants API are Not Active (Maintenance OFF)';
+            $action = 'Maintenance OFF';
         } elseif ($status === 'Active') {
             $this->Merchant->setActiveMerchantsOpenApiStatus('Active');
             $this->Merchant->setMaintenanceStatus('Active');
-            $message = 'All merchants API are Active (Maintenance OFF)';
-            $action = 'Maintenance OFF';
+            $message = 'All merchants API are Active (Maintenance ON)';
+            $action = 'Maintenance ON';
         }
 
          $email = $this->session->userdata('c_email') !== NULL ? $this->session->userdata('c_email') : 'Unknown';

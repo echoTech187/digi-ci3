@@ -160,38 +160,105 @@
                     fetch("<?= base_url('admin/getMaintenanceStatus') ?>")
                     .then(response => response.json())
                     .then(data => {
-                        toggle.checked = (data.status === 'Not Active'); 
+                        toggle.checked = (data.status === 'Active'); 
                     })
                     .catch(error => {
                         console.error('Error fetching maintenance status:', error);
                     });
 
                     toggle.addEventListener('change', function () {
-                        const status = toggle.checked ? 'Not Active' : 'Active';
+                        const status = toggle.checked ? 'Active' : 'Not Active';
+                        const originalState = !toggle.checked;
+                        const isEnabling = toggle.checked;
 
-                        // Show confirmation before proceeding
-                        const confirmMessage = `Are you sure you want to set OpenAPI status to "${status}"?`;
-                        if (!confirm(confirmMessage)) {
-                            toggle.checked = !toggle.checked; // Revert toggle if cancelled
-                            return;
-                        }
+                        // Revert immediately until confirmed
+                        toggle.checked = originalState;
 
-                        // Proceed with AJAX request if confirmed
-                        fetch("<?= base_url('admin/toggleOpenApiStatus') ?>", {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-Requested-With': 'XMLHttpRequest'
+                        Swal.fire({
+                            html: `
+                                <div style="display:flex; flex-direction:column; align-items:center; gap:12px; padding: 8px 0;">
+                                    <div style="width:52px; height:52px; border-radius:50%; background:rgba(239,68,68,0.1); display:flex; align-items:center; justify-content:center;">
+                                        <i class="fas fa-network-wired" style="font-size:22px; color:#ef4444;"></i>
+                                    </div>
+                                    <h5 style="font-weight:700; margin:0; font-size:1.1rem;">Change Maintenance Mode?</h5>
+                                    <p style="color:var(--gray-500, #94a3b8); font-size:0.92rem; margin:0; line-height:1.6;">
+                                        Are you sure you want to set Maintenance Mode to <strong>"${status}"</strong>?<br>
+                                        <span style="font-size:0.82rem; opacity:0.7;">${isEnabling ? 'This will disable all merchant API access.' : 'This will re-enable all merchant API access.'}</span>
+                                    </p>
+                                </div>
+                            `,
+                            showCancelButton: true,
+                            confirmButtonText: `<i class="fas fa-check mr-1"></i> Yes, set to ${status}`,
+                            cancelButtonText: 'Cancel',
+                            customClass: {
+                                popup:             'swal2-premium-popup',
+                                confirmButton:     'swal2-premium-confirm',
+                                cancelButton:      'swal2-premium-cancel',
+                                actions:           'swal2-premium-actions'
                             },
-                            body: JSON.stringify({ status: status })
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            alert(data.message);
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            alert("An error occurred while updating OpenAPI status.");
+                            buttonsStyling: false,
+                            focusConfirm: false
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                toggle.checked = !originalState; // Optimistically apply change
+
+                                const csrfName = document.querySelector('meta[name="csrf-token-name"]')?.getAttribute('content');
+                                const csrfHash = document.querySelector('meta[name="csrf-token-hash"]')?.getAttribute('content');
+                                const formData = new FormData();
+                                formData.append('status', status);
+                                if (csrfName && csrfHash) {
+                                    formData.append(csrfName, csrfHash);
+                                }
+
+                                fetch("<?= base_url('admin/toggleOpenApiStatus') ?>", {
+                                    method: 'POST',
+                                    headers: {
+                                        'X-Requested-With': 'XMLHttpRequest'
+                                    },
+                                    body: formData
+                                })
+                                .then(response => {
+                                    if (!response.ok) throw new Error('Network response was not ok');
+                                    return response.json();
+                                })
+                                .then(data => {
+                                    Swal.fire({
+                                        html: `
+                                            <div style="display:flex; flex-direction:column; align-items:center; gap:10px; padding:8px 0;">
+                                                <div style="width:52px; height:52px; border-radius:50%; background:rgba(28,200,138,0.1); display:flex; align-items:center; justify-content:center;">
+                                                    <i class="fas fa-check-circle" style="font-size:24px; color:#1cc88a;"></i>
+                                                </div>
+                                                <h5 style="font-weight:700; margin:0;">Updated!</h5>
+                                                <p style="color:var(--gray-500,#94a3b8); font-size:0.9rem; margin:0;">${data.message || 'Maintenance Mode has been updated.'}</p>
+                                            </div>
+                                        `,
+                                        showConfirmButton: false,
+                                        timer: 2500,
+                                        customClass: { popup: 'swal2-premium-popup' },
+                                        buttonsStyling: false
+                                    });
+                                })
+                                .catch(error => {
+                                    console.error('Error:', error);
+                                    toggle.checked = originalState; // Revert on error
+                                    Swal.fire({
+                                        html: `
+                                            <div style="display:flex; flex-direction:column; align-items:center; gap:10px; padding:8px 0;">
+                                                <div style="width:52px; height:52px; border-radius:50%; background:rgba(239,68,68,0.1); display:flex; align-items:center; justify-content:center;">
+                                                    <i class="fas fa-exclamation-triangle" style="font-size:24px; color:#ef4444;"></i>
+                                                </div>
+                                                <h5 style="font-weight:700; margin:0;">Error</h5>
+                                                <p style="color:var(--gray-500,#94a3b8); font-size:0.9rem; margin:0;">An error occurred while updating Maintenance Mode.</p>
+                                            </div>
+                                        `,
+                                        showConfirmButton: true,
+                                        confirmButtonText: 'OK',
+                                        customClass: { popup: 'swal2-premium-popup', confirmButton: 'swal2-premium-confirm' },
+                                        buttonsStyling: false
+                                    });
+                                });
+                            }
+                            // If dismissed/cancelled, toggle stays reverted (originalState)
                         });
                     });
                 }
