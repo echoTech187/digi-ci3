@@ -286,6 +286,7 @@ $route['admin/cashin/external/ajax_list'] = 'admin/CashinExternalController/ajax
 $route['admin/cashin/external/add'] = 'admin/CashinExternalController/add';
 $route['admin/cashin/external/update'] = 'admin/CashinExternalController/update';
 $route['admin/cashin/external/delete/(:any)'] = 'admin/CashinExternalController/delete/$1';
+$route['admin/cashin/external/bulk_update'] = 'admin/CashinExternalController/bulk_update';
 
 // --- Cashout External Module Extraction Routes ---
 $route['admin/cashout/external'] = 'admin/CashoutExternalController/index';
@@ -293,6 +294,7 @@ $route['admin/cashout/external/ajax_list'] = 'admin/CashoutExternalController/aj
 $route['admin/cashout/external/add'] = 'admin/CashoutExternalController/add';
 $route['admin/cashout/external/update'] = 'admin/CashoutExternalController/update';
 $route['admin/cashout/external/delete/(:any)'] = 'admin/CashoutExternalController/delete/$1';
+$route['admin/cashout/external/bulk_update'] = 'admin/CashoutExternalController/bulk_update';
 
 // --- Channel Module Extraction Routes ---
 $route['admin/cashin'] = 'admin/ChannelController/cashin';

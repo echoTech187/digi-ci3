@@ -4959,6 +4959,14 @@ div.dataTables_processing[style*="display: block"] {
     box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5) !important;
 }
 
+[data-theme="dark"] .swal2-premium-popup .swal2-title {
+    color: #f8fafc !important;
+}
+
+[data-theme="dark"] .swal2-premium-popup .swal2-html-container {
+    color: #94a3b8 !important;
+}
+
 .swal2-premium-popup .swal2-html-container {
     margin: 0 !important;
     padding: 0 !important;
@@ -5033,4 +5041,186 @@ button:not([disabled]):hover {
 
 button:disabled:hover {
     transform: none;
+}
+
+/* Premium Choice Cards (Radio Replacement) */
+.update-choice-card {
+    cursor: pointer;
+    display: block;
+}
+
+.update-choice-card .choice-content {
+    background: #fff;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1.5px solid #e2e8f0 !important;
+    position: relative;
+    overflow: hidden;
+    border-radius: 10px;
+}
+.choice-icon {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    right: -20px;
+    top: 0;
+    z-index: 0;
+    overflow: hidden;
+}
+.choice-icon i {
+    display: flex;
+    font-size: 120px;
+    opacity: 0.12;
+    justify-content: flex-end;
+    align-items: center;
+    transition: all 0.3s ease;
+    filter: brightness(0);
+    transition: all 0.3s ease;
+}
+
+
+.update-choice-card:hover .choice-content {
+    border-color: var(--primary) !important;
+    background: rgba(var(--primary-rgb), 0.02);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+.update-choice-card:hover .choice-icon i {
+    opacity: 0.17;
+    transform: scale(1.05);
+}
+
+.update-choice-card input:checked + .choice-content {
+    border-color: var(--primary) !important;
+    background: rgba(var(--primary-rgb), 0.05);
+    box-shadow: 0 0 0 1px var(--primary);
+}
+
+.update-choice-card .check-circle {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #cbd5e1;
+    border-radius: 50%;
+    position: relative;
+    transition: all 0.2s ease;
+    background: #fff;
+}
+
+.update-choice-card input:checked + .choice-content .check-circle {
+    border-color: var(--primary);
+    background: var(--primary);
+}
+
+.update-choice-card input:checked + .choice-content .check-circle::after {
+    content: '';
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: #fff;
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+[data-theme="dark"] .choice-icon i {
+    filter: brightness(1);
+}
+
+[data-theme="dark"] .update-choice-card .choice-content {
+    background: var(--bg-card);
+    border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .update-choice-card:hover .choice-content {
+    background: rgba(var(--primary-rgb), 0.1);
+    border-color: var(--primary) !important;
+}
+
+[data-theme="dark"] .update-choice-card input:checked + .choice-content {
+    background: rgba(var(--primary-rgb), 0.15);
+    border-color: var(--primary) !important;
+}
+
+[data-theme="dark"] .update-choice-card .check-circle {
+    background: var(--bg-body);
+    border-color: #475569;
+}
+
+[data-theme="dark"] .choice-text .text-muted {
+    color: var(--gray-500) !important;
+}
+.choice-text {
+    position: relative;
+    z-index: 1;
+}
+
+.update-choice-card:hover .choice-content {
+    border-color: var(--primary) !important;
+    background: rgba(var(--primary-rgb), 0.02);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+
+.update-choice-card input:checked + .choice-content {
+    border-color: var(--primary) !important;
+    background: rgba(var(--primary-rgb), 0.05);
+    box-shadow: 0 0 0 1px var(--primary);
+}
+
+.update-choice-card .check-circle {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #cbd5e1;
+    border-radius: 50%;
+    position: relative;
+    transition: all 0.2s ease;
+    background: #fff;
+}
+
+.update-choice-card input:checked + .choice-content .check-circle {
+    border-color: var(--primary);
+    background: var(--primary);
+}
+
+.update-choice-card input:checked + .choice-content .check-circle::after {
+    content: '';
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: #fff;
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+[data-theme="dark"] .update-choice-card .choice-content {
+    background: var(--bg-card);
+    border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .update-choice-card:hover .choice-content {
+    background: rgba(var(--primary-rgb), 0.1);
+    border-color: var(--primary) !important;
+}
+
+[data-theme="dark"] .update-choice-card input:checked + .choice-content {
+    background: rgba(var(--primary-rgb), 0.15);
+    border-color: var(--primary) !important;
+}
+
+[data-theme="dark"] .update-choice-card .check-circle {
+    background: var(--bg-body);
+    border-color: #475569;
+}
+
+[data-theme="dark"] .choice-text .text-muted {
+    color: var(--gray-500) !important;
+}
+
+[data-theme="dark"] .choice-text .fw-bold {
+    color: var(--gray-900);
+}
+.smaller{
+    font-size: 80% !important;
+    
 }

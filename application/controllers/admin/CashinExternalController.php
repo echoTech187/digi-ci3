@@ -89,6 +89,53 @@ class CashinExternalController extends CI_Controller {
         redirect('admin/cashin/external');
     }
 
+    public function bulk_update() {
+        $updateType      = $this->input->post('update_type');
+        $merchantId      = $this->input->post('ref_merchantId');
+        $currentGroup    = $this->input->post('current_group');
+        $currentExternal = $this->input->post('current_externalId');
+        $currentChannel  = $this->input->post('current_cashinChannelId');
+        $newGroup        = $this->input->post('new_group');
+        $newExternal     = $this->input->post('new_externalId');
+        $newChannel      = $this->input->post('new_cashinChannelId');
+
+        // Validation: Group is always required
+        if (empty($updateType) || empty($currentGroup) || empty($newGroup)) {
+            $this->session->set_flashdata('error', 'Update Type, Current Group, and New Group are required');
+            redirect('admin/cashin/external');
+        }
+
+        if ($updateType === 'merchant' && empty($merchantId)) {
+            $this->session->set_flashdata('error', 'Merchant must be selected for Merchant update type');
+            redirect('admin/cashin/external');
+        }
+
+        // Check if anything is actually changing
+        if ($currentGroup === $newGroup && empty($newExternal) && empty($newChannel)) {
+            $this->session->set_flashdata('error', 'No changes detected in configuration');
+            redirect('admin/cashin/external');
+        }
+
+        $data = [
+            'update_type'     => $updateType,
+            'merchant_id'     => $merchantId,
+            'current_group'    => $currentGroup,
+            'current_external' => $currentExternal,
+            'current_channel'  => $currentChannel,
+            'new_group'        => $newGroup,
+            'new_external'     => $newExternal,
+            'new_channel'      => $newChannel
+        ];
+
+        if ($this->Chanel->updateCashinChannelGlobal($data)) {
+            $msg = ($updateType === 'merchant') ? 'Channel update successful for selected merchant' : 'Global channel group update successful';
+            $this->session->set_flashdata('success', $msg);
+        } else {
+            $this->session->set_flashdata('error', 'Failed to perform channel update');
+        }
+        redirect('admin/cashin/external');
+    }
+
     private function _validate() {
         $rules = [
             ['field' => 'ref_merchantId',       'label' => 'Merchant',           'rules' => 'required'],

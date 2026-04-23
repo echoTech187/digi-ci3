@@ -333,6 +333,88 @@ class Chanel extends CI_Model {
             $this->db->where("c_channelGroup !=", "ppob");
             return $this->db->get()->row();
         }
+    
+    public function updateCashinChannelGlobal($data) {
+        $updateType      = $data['update_type'];
+        $merchantId      = $data['merchant_id'] ?? null;
+        $currentGroup    = $data['current_group'];
+        $currentExternal = $data['current_external'] ?? null;
+        $currentChannel  = $data['current_channel'] ?? null;
+        $newGroup        = $data['new_group'];
+        $newExternal     = $data['new_external'] ?? null;
+        $newChannel      = $data['new_channel'] ?? null;
+
+        // Where Clauses
+        if ($updateType === 'merchant' && !empty($merchantId)) {
+            $this->db->where('ref_merchantId', $merchantId);
+        }
+        
+        $this->db->where('c_cashinChannelGroup', $currentGroup);
+
+        if (!empty($currentExternal)) {
+            $this->db->where('c_externalIdDefault', $currentExternal);
+        }
+        
+        if (!empty($currentChannel)) {
+            $this->db->where('ref_cashinChannelId', $currentChannel);
+        }
+
+        // Update Data
+        $update = [
+            'c_cashinChannelGroup' => $newGroup
+        ];
+
+        if (!empty($newExternal)) {
+            $update['c_externalIdDefault'] = $newExternal;
+        }
+
+        if (!empty($newChannel)) {
+            $update['ref_cashinChannelId'] = $newChannel;
+        }
+
+        return $this->db->update('cashin_channel_x_merchant', $update);
+    }
+
+    public function updateCashoutChannelGlobal($data) {
+        $updateType      = $data['update_type'];
+        $merchantId      = $data['merchant_id'] ?? null;
+        $currentGroup    = $data['current_group'];
+        $currentExternal = $data['current_external'] ?? null;
+        $currentChannel  = $data['current_channel'] ?? null;
+        $newGroup        = $data['new_group'];
+        $newExternal     = $data['new_external'] ?? null;
+        $newChannel      = $data['new_channel'] ?? null;
+
+        // Where Clauses
+        if ($updateType === 'merchant' && !empty($merchantId)) {
+            $this->db->where('ref_merchantId', $merchantId);
+        }
+        
+        $this->db->where('c_cashoutChannelGroup', $currentGroup);
+
+        if (!empty($currentExternal)) {
+            $this->db->where('c_externalIdDefault', $currentExternal);
+        }
+        
+        if (!empty($currentChannel)) {
+            $this->db->where('ref_cashoutChannelId', $currentChannel);
+        }
+
+        // Update Data
+        $update = [
+            'c_cashoutChannelGroup' => $newGroup
+        ];
+
+        if (!empty($newExternal)) {
+            $update['c_externalIdDefault'] = $newExternal;
+        }
+
+        if (!empty($newChannel)) {
+            $update['ref_cashoutChannelId'] = $newChannel;
+        }
+
+        return $this->db->update('cashout_channel_x_merchant', $update);
+    }
     public function get_datatables_handler($table, $column_order, $column_search, $order, $where = [])
     {
         $this->load->library('datatables');
