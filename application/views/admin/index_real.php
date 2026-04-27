@@ -147,7 +147,7 @@
             <div class="card border-0 shadow-sm dt-card h-100" style="border-radius: 24px;">
                 <div class="card-header border-0 bg-transparent py-4 px-4 d-flex align-items-center justify-content-between">
                     <div>
-                        <h6 class="m-0 font-weight-bold text-gray-900" style="font-size: 1rem;">Yield Analysis Trend</h6>
+                        <h6 class="font-weight-bold text-gray-900" style="font-size: 1rem;">Yield Analysis Trend</h6>
                         <p class="m-0 text-muted small mt-1">Growth progression in total platform volume over selected period</p>
                     </div>
                 </div>
@@ -163,7 +163,7 @@
         <div class="col-xl-4 col-lg-5">
             <div class="card border-0 shadow-sm dt-card h-100" style="border-radius: 24px;">
                 <div class="card-header border-0 bg-transparent py-4 px-4">
-                    <h6 class="m-0 font-weight-bold text-gray-900" style="font-size: 1rem;">Net Contribution Mix</h6>
+                    <h6 class="font-weight-bold text-gray-900" style="font-size: 1rem;">Net Contribution Mix</h6>
                     <p class="m-0 text-muted small mt-1">Direct profit distribution (Fee - Cost)</p>
                 </div>
                 <div class="card-body px-4 pb-4">

@@ -131,7 +131,7 @@
             <div class="card border-0 shadow-sm dt-card h-100" style="border-radius: 24px; background: white;">
                 <div class="card-header border-0 bg-transparent pt-4 px-4 pb-0 d-flex align-items-center justify-content-between">
                     <div>
-                        <h6 class="m-0 font-weight-bold text-gray-900" style="font-size: 1rem;">Transaction Trends</h6>
+                        <h6 class="font-weight-bold text-gray-900" style="font-size: 1rem;">Transaction Trends</h6>
                         <p class="m-0 text-muted small mt-1">Yearly volume distribution across core payment channels</p>
                     </div>
                     <div class="d-flex gap-2 pr-2">
@@ -155,7 +155,7 @@
         <div class="col-xl-4 col-lg-5 mb-4">
             <div class="card border-0 shadow-sm dt-card h-100" style="border-radius: 24px; background: white;">
                 <div class="card-header border-0 bg-transparent pt-4 px-4 pb-0">
-                    <h6 class="m-0 font-weight-bold text-gray-900" style="font-size: 1rem;">Channel Mix (Today)</h6>
+                    <h6 class="font-weight-bold text-gray-900" style="font-size: 1rem;">Channel Mix (Today)</h6>
                     <p class="m-0 text-muted small mt-1">Share of successful transaction qty</p>
                 </div>
                 <div class="card-body px-4 pb-4 d-flex flex-column justify-content-center">
@@ -195,7 +195,7 @@
             <div class="card border-0 shadow-sm dt-card" style="border-radius: 24px; overflow: hidden; background: white;">
                 <div class="dt-toolbar border-0 d-flex align-items-center justify-content-between" style="padding: 28px;">
                     <div class="d-flex align-items-center gap-3">
-                        <h6 class="m-0 font-weight-bold text-gray-900" style="font-size: 1.1rem;">Ecosystem Real-time Activity</h6>
+                        <h6 class="font-weight-bold text-gray-900" style="font-size: 1.1rem;">Ecosystem Real-time Activity</h6>
                         <div class="d-flex align-items-center gap-2 bg-success-soft text-success px-3 py-1 rounded-pill">
                             <div style="width: 8px; height: 8px; border-radius: 50%; background: #059669; box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.1);" class="pulse"></div>
                             <span style="font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">LIVE FEED</span>
