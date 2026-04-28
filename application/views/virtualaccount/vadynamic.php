@@ -128,20 +128,20 @@
     <div class="modal-dialog modal-lg border-0">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
             <!-- Header Legacy Migrated -->
-<div class="modal-header modal-header-primary border-0 mh-premium">
-    <div class="d-flex align-items-center">
-        <div class="mh-icon-badge">
-            <i class="fas fa-info-circle"></i>
-        </div>
-        <div class="mh-title-wrap">
-            <h6 class="mh-title"  id="detailVaDynamicChannelExternalModalLabel">External Log Details</h6>
-            <small class="mh-subtitle" >View comprehensive information details</small>
-        </div>
-    </div>
-    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" style="opacity:0.8;">
-        <span aria-hidden="true">&times;</span>
-    </button>
-</div>
+            <div class="modal-header modal-header-primary border-0 mh-premium">
+                <div class="d-flex align-items-center">
+                    <div class="mh-icon-badge">
+                        <i class="fas fa-info-circle"></i>
+                    </div>
+                    <div class="mh-title-wrap">
+                        <h6 class="mh-title"  id="detailVaDynamicChannelExternalModalLabel">External Log Details</h6>
+                        <small class="mh-subtitle" >View comprehensive information details</small>
+                    </div>
+                </div>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" style="opacity:0.8;">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
             <div class="modal-body p-4 bg-light">
                 <div class="row mb-4">
                     <div class="col-md-4">

@@ -640,6 +640,29 @@ $(document).ready(function() {
         });
     <?php endif; ?>
 
+    $(document).on('click', '.delete-btn', function(e) {
+        e.preventDefault();
+        const url = $(this).data('href');
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "This configuration will be permanently deleted!",
+            icon: 'warning',
+            showCancelButton: true,
+            customClass: {
+                popup: 'swal2-premium-popup',
+                confirmButton: 'swal2-premium-confirm',
+                cancelButton: 'swal2-premium-cancel',
+                actions: 'swal2-premium-actions'
+            },
+            buttonsStyling: false,
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = url;
+            }
+        });
+    });
+
     $('#dt-search').on('keyup', function() { table.search(this.value).draw(); });
 });
 </script>

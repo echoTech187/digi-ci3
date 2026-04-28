@@ -198,7 +198,7 @@ $(document).ready(function() {
                                 </li>
                                 <li class="dropdown-divider"></li>
                                 <li>
-                                    <a class="dropdown-item py-2 text-danger" href="#">
+                                    <a class="dropdown-item py-2 text-danger delete-btn" href="javascript:void(0)" data-href="<?= base_url('admin/deleteMerchantSpv/') ?>${row.id}">
                                         <i class="fas fa-trash-alt mr-2"></i> Delete
                                     </a>
                                 </li>
@@ -259,6 +259,29 @@ $(document).ready(function() {
     });
 
     // Ensure tooltips/popovers work if any
+
+    $(document).on('click', '.delete-btn', function(e) {
+        e.preventDefault();
+        const url = $(this).data('href');
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "This supervisor and their access will be permanently deleted!",
+            icon: 'warning',
+            showCancelButton: true,
+            customClass: {
+                popup: 'swal2-premium-popup',
+                confirmButton: 'swal2-premium-confirm',
+                cancelButton: 'swal2-premium-cancel',
+                actions: 'swal2-premium-actions'
+            },
+            buttonsStyling: false,
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = url;
+            }
+        });
+    });
 });
 </script>
 

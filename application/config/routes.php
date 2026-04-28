@@ -66,6 +66,7 @@ $route['admin/merchant_spv'] = 'AdminMerchant/merchant_spv';
 $route['admin/listMerchants/(:any)'] = 'AdminMerchant/listMerchants/$1';
 $route['admin/registerMerchant'] = 'AdminMerchant/registerMerchant';
 $route['admin/registerMerchantSpv'] = 'AdminMerchant/registerMerchantSpv';
+$route['admin/deleteMerchantSpv/(:any)'] = 'AdminMerchant/deleteMerchantSpv/$1';
 $route['admin/editMerchant/(:any)'] = 'AdminMerchant/editMerchant/$1';
 $route['admin/updateMerchant/(:any)'] = 'AdminMerchant/updateMerchant/$1';
 $route['admin/settingcashinfee/(:any)'] = 'AdminMerchant/settingcashinfee/$1';

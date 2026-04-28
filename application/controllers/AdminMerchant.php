@@ -277,6 +277,34 @@ class AdminMerchant extends CI_Controller
       }
    }
 
+   public function deleteMerchantSpv($id)
+   {
+      if (!$id) {
+         $this->session->set_flashdata('error', 'Supervisor ID missing.');
+         redirect('admin/merchant_spv');
+      }
+
+      $this->db->trans_start();
+
+      // 1. Unassign merchants from this supervisor
+      $this->db->where('c_refSupervisor', $id);
+      $this->db->update('merchant', ['c_refSupervisor' => NULL]);
+
+      // 2. Delete the supervisor
+      $this->db->where('id', $id);
+      $this->db->delete('merchant_supervisor');
+
+      $this->db->trans_complete();
+
+      if ($this->db->trans_status() === FALSE) {
+         $this->session->set_flashdata('error', 'Failed to delete supervisor.');
+      } else {
+         $this->session->set_flashdata('success', 'Supervisor deleted successfully.');
+      }
+
+      redirect('admin/merchant_spv');
+   }
+
    public function editMerchant($merchant_id)
    {
       $this->load->library('form_validation');
