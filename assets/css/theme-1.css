@@ -5227,3 +5227,25 @@ button:disabled:hover {
     font-size: 80% !important;
     
 }
+/* -- Premium Dropdown Polish -- */
+.avatar-glow-sm { width: 42px; height: 42px; padding: 2px; background: linear-gradient(135deg, var(--primary), #8B77FF); border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+.bg-light-subtle { background-color: var(--gray-50) !important; }
+[data-theme=" dark\] .bg-light-subtle { background-color: var(--gray-100) !important; }
+.dropdown-icon-wrap { width: 32px; height: 32px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.bg-primary-soft { background-color: var(--primary-soft) !important; color: var(--primary) !important; }
+.bg-info-soft { background-color: var(--info-soft) !important; color: var(--info) !important; }
+.bg-warning-soft { background-color: var(--warning-soft) !important; color: var(--warning) !important; }
+.bg-danger-soft { background-color: var(--danger-soft) !important; color: var(--danger) !important; }
+.badge-primary-soft { background-color: var(--primary-soft); color: var(--primary); }
+.rounded-lg { border-radius: 12px !important; }
+.custom-switch-premium .custom-control-label::before { height: 1.25rem; width: 2.25rem; border-radius: 1rem; background-color: var(--gray-300); border: none; }
+.custom-switch-premium .custom-control-label::after { width: calc(1.25rem - 4px); height: calc(1.25rem - 4px); background-color: #fff; border-radius: 1rem; top: calc(0.25rem + 2px); left: calc(-2.25rem + 2px); transition: transform .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out; }
+.custom-switch-premium .custom-control-input:checked ~ .custom-control-label::before { background-color: var(--primary); }
+.custom-switch-premium .custom-control-input:checked ~ .custom-control-label::after { transform: translateX(1rem); }
+
+/* -- SweetAlert2 Premium Polish -- */
+.swal2-premium-popup { border-radius: 24px !important; padding: 2rem !important; background: var(--bg-card) !important; border: 1px solid var(--border-color) !important; box-shadow: var(--shadow-lg) !important; }
+.swal2-premium-confirm { background: var(--primary) !important; color: #fff !important; border-radius: 12px !important; padding: 12px 30px !important; font-weight: 700 !important; font-size: 0.95rem !important; box-shadow: 0 4px 15px var(--primary-glow) !important; transition: all 0.3s ease !important; }
+.swal2-premium-confirm:hover { background: var(--primary-hover) !important; transform: translateY(-2px) !important; }
+.swal2-premium-cancel { background: var(--gray-100) !important; color: var(--gray-600) !important; border-radius: 12px !important; padding: 12px 30px !important; font-weight: 700 !important; font-size: 0.95rem !important; margin-right: 10px !important; }
+.swal2-premium-actions { gap: 12px !important; margin-top: 2rem !important; }

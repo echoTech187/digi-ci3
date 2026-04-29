@@ -81,39 +81,79 @@
                     </a>
 
                     <!-- Dropdown - User Information -->
-                    <div class="dropdown-menu dropdown-menu-right shadow-lg border-0 animated--grow-in mt-2" aria-labelledby="userDropdown" style="border-radius: 12px; min-width: 200px;">
-                        <div class="px-4 py-3 border-bottom d-lg-none">
-                            <p class="text-xs font-weight-bold text-uppercase text-muted mb-1">Signed in as</p>
-                            <p class="font-weight-bold text-dark mb-0"><?= $user['c_name']; ?></p>
-                        </div>
-
-                        <?php if ($user['role_id'] != 4): ?>
-                            <div class="dropdown-item py-2 px-4 border-bottom">
-                                <div class="d-flex align-items-center justify-content-between" style="gap:10px">
-                                    <div class="d-flex align-items-center">
-                                        <i class="fas fa-network-wired fa-sm fa-fw mr-3 text-gray-400"></i>
-                                        <span class="text-xs font-weight-bold text-uppercase text-muted" style="letter-spacing: 0.5px;">Maintenance Mode</span>
-                                    </div>
-                                    <div class="custom-control custom-switch custom-switch-premium p-0 m-0" style="min-height: auto;">
-                                        <input type="checkbox" class="custom-control-input" id="toggleMaintenanceButton">
-                                        <label class="custom-control-label" for="toggleMaintenanceButton" style="padding: 0; min-height: 20px; font-size: 0 !important; cursor: pointer;">&nbsp;</label>
-                                    </div>
+                    <div class="dropdown-menu dropdown-menu-right shadow-lg border-0 animated--grow-in mt-3 p-0 overflow-hidden" aria-labelledby="userDropdown" style="border-radius: 20px; width: 280px; background: var(--bg-glass); backdrop-filter: blur(10px);">
+                        <!-- Header Section -->
+                        <div class="px-4 py-4 border-bottom bg-light-subtle d-flex align-items-center">
+                            <div class="mr-3">
+                                <div class="avatar-glow-sm">
+                                    <img src="<?= base_url('assets/img/profile/default.jpg') ?>" style="width: 100%; height: 100%; object-fit: cover; border-radius: 10px;">
                                 </div>
                             </div>
-                        <?php endif; ?>
-                        <a class="dropdown-item py-2 px-4" href="<?= base_url('user/changePassword'); ?>">
-                            <div class="d-flex align-items-center">
-                                <i class="fas fa-lock fa-sm fa-fw mr-3 text-gray-400"></i>
-                                <span>Change Password</span>
+                            <div class="flex-grow-1 overflow-hidden">
+                                <h6 class="font-weight-bold text-dark mb-0 text-truncate"><?= $user['c_name']; ?></h6>
+                                <code class="text-muted small text-truncate d-block" style="font-size: 10px;"><?= $user['c_email'] ?? ''; ?></code>
                             </div>
-                        </a>
-                        <div class="dropdown-divider my-0"></div>
-                        <a class="dropdown-item py-2 px-4 text-danger" href="<?= base_url('auth/logout'); ?>" data-toggle="modal" data-target="#logoutModal">
-                            <div class="d-flex align-items-center">
-                                <i class="fas fa-sign-out-alt fa-sm fa-fw mr-3"></i>
-                                <span>Logout</span>
+                        </div>
+
+                        <!-- Account Stats Section -->
+                        <div class="px-4 py-3 bg-white">
+                            <div class="row no-gutters mb-2">
+                                <div class="col-6">
+                                    <p class="text-xs font-weight-bold text-uppercase text-muted mb-1" style="letter-spacing: 0.5px;">Role ID</p>
+                                    <span class="badge badge-light border font-weight-bold px-2 py-1" style="font-size: 10px;">#<?= $user['role_id'] ?? '0'; ?></span>
+                                </div>
+                                <div class="col-6 text-right">
+                                    <p class="text-xs font-weight-bold text-uppercase text-muted mb-1" style="letter-spacing: 0.5px;">Level</p>
+                                    <span class="badge badge-primary-soft text-primary font-weight-bold px-2 py-1" style="font-size: 10px;">Admin</span>
+                                </div>
                             </div>
-                        </a>
+                            <div class="d-flex align-items-center justify-content-between">
+                                <span class="text-xs font-weight-bold text-uppercase text-muted" style="letter-spacing: 0.5px;">Status</span>
+                                <span class="badge badge-pill badge-success px-2 py-0 font-weight-bold" style="font-size: 9px;">ACTIVE</span>
+                            </div>
+                        </div>
+
+                        <div class="dropdown-divider m-0" style="opacity: 0.05;"></div>
+                        
+                        <!-- Menu Section -->
+                        <div class="p-2">
+                            <?php if ($user['role_id'] != 4): ?>
+                                <div class="dropdown-item py-2 px-3 rounded-lg border-bottom mb-1">
+                                    <div class="d-flex align-items-center justify-content-between" style="gap:10px">
+                                        <div class="d-flex align-items-center">
+                                            <div class="dropdown-icon-wrap mr-3 bg-info-soft text-info">
+                                                <i class="fas fa-network-wired fa-sm"></i>
+                                            </div>
+                                            <span class="font-weight-bold small">Maintenance Mode</span>
+                                        </div>
+                                        <div class="custom-control custom-switch custom-switch-premium p-0 m-0" style="min-height: auto;">
+                                            <input type="checkbox" class="custom-control-input" id="toggleMaintenanceButton">
+                                            <label class="custom-control-label" for="toggleMaintenanceButton" style="padding: 0; min-height: 20px; font-size: 0 !important; cursor: pointer;">&nbsp;</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
+
+                            <a class="dropdown-item py-2 px-3 rounded-lg" href="<?= base_url('user/changePassword'); ?>">
+                                <div class="d-flex align-items-center">
+                                    <div class="dropdown-icon-wrap mr-3 bg-warning-soft text-warning">
+                                        <i class="fas fa-lock fa-sm"></i>
+                                    </div>
+                                    <span class="font-weight-bold small">Change Password</span>
+                                </div>
+                            </a>
+                            
+                            <div class="dropdown-divider my-2" style="opacity: 0.05;"></div>
+                            
+                            <a class="dropdown-item py-2 px-3 rounded-lg text-danger" href="<?= base_url('auth/logout'); ?>" data-toggle="modal" data-target="#logoutModal">
+                                <div class="d-flex align-items-center">
+                                    <div class="dropdown-icon-wrap mr-3 bg-danger-soft text-danger">
+                                        <i class="fas fa-sign-out-alt fa-sm"></i>
+                                    </div>
+                                    <span class="font-weight-bold small">Logout Account</span>
+                                </div>
+                            </a>
+                        </div>
                     </div>
                 </li>
             </ul>

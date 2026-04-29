@@ -24,26 +24,27 @@
 </a>
 
 <!-- Logout Modal-->
-<div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden; background: var(--bg-card, #1e293b);">
-            <div class="modal-header border-0 py-4 px-4 d-flex align-items-center">
-                <div class="d-flex align-items-center justify-content-center mr-3" style="width: 40px; height: 40px; border-radius: 50%; background: rgba(239, 68, 68, 0.1); color: #ef4444;">
-                    <i class="fas fa-sign-out-alt fa-lg"></i>
+<div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="logoutModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 400px;">
+        <div class="modal-content border-0 shadow-premium overflow-hidden" style="border-radius: 24px; background: var(--bg-card);">
+            <div class="modal-body p-0">
+                <div class="p-4 text-center">
+                    <div class="d-inline-flex align-items-center justify-content-center mb-4" style="width: 80px; height: 80px; border-radius: 24px; background: rgba(231, 74, 59, 0.1); color: #e74a3b;">
+                        <i class="fas fa-sign-out-alt fa-3x"></i>
+                    </div>
+                    <h4 class="font-weight-bold text-dark mb-2" id="logoutModalLabel">Ready to Leave?</h4>
+                    <p class="text-muted px-3" style="font-size: 0.95rem; line-height: 1.6;">
+                        Select <strong>"Logout"</strong> below if you are ready to end your current session and secure your account.
+                    </p>
                 </div>
-                <h5 class="modal-title font-weight-bold" id="exampleModalLabel" style=" font-size: 1.25rem;">Ready to Leave?</h5>
-                <button class="close ml-auto" type="button" data-dismiss="modal" aria-label="Close" style="color: var(--text-muted, #94a3b8); text-shadow: none; opacity: 1;">
-                    <span aria-hidden="true" style="font-size: 1.5rem;">×</span>
-                </button>
-            </div>
-            <div class="modal-body px-4 py-4 text-muted" style="color: var(--text-muted, #94a3b8); font-size: 0.95rem; line-height: 1.6;">
-                Select <strong>"Logout"</strong> below if you are ready to end your current session and secure your account.
-            </div>
-            <div class="modal-footer border-0 px-4 py-4">
-                <button class="btn font-weight-bold px-4 py-2" type="button" data-dismiss="modal" style="border-radius: 12px; background: rgba(148, 163, 184, 0.1); color: var(--text-muted, #94a3b8); border: none;">Cancel</button>
-                <a class="btn font-weight-bold px-4 py-2" href="<?= base_url('auth/logout'); ?>" style="border-radius: 12px; background: #ef4444; color: white; border: none; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);">
-                    <i class="fas fa-sign-out-alt mr-2"></i>Logout
-                </a>
+                <div class="px-4 pb-4 d-flex flex-column gap-2">
+                    <a class="btn btn-block py-3 font-weight-bold" href="<?= base_url('auth/logout'); ?>" style="border-radius: 14px; background: #e74a3b; color: white; border: none; box-shadow: 0 4px 15px rgba(231, 74, 59, 0.25); font-size: 1rem;">
+                        <i class="fas fa-sign-out-alt mr-2"></i>Logout Account
+                    </a>
+                    <button class="btn btn-block py-3 font-weight-bold text-muted border-0 mt-2" type="button" data-dismiss="modal" style="border-radius: 14px; background: var(--gray-100); font-size: 0.9rem;">
+                        Maybe later
+                    </button>
+                </div>
             </div>
         </div>
     </div>

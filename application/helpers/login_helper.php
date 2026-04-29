@@ -3,14 +3,29 @@
 function is_logged_in()
 {
     $ci = get_instance();
-    if (!$ci->session->userdata('email') && !$ci->session->userdata('c_email')) {
-        redirect('auth');
+    $segment1 = strtolower($ci->uri->segment(1));
+    $segment2 = strtolower($ci->uri->segment(2));
+    $email = $ci->session->userdata('c_email') ?: $ci->session->userdata('email');
+
+    if (!$email) {
+        // If no session and not on auth page, redirect to login
+        if ($segment1 !== 'auth') {
+            redirect('auth');
+        }
     } else {
+        // Exempt auth controller from DB check to prevent redirect loops (especially during logout)
+        if ($segment1 === 'auth') {
+            return;
+        }
+
+        // Verify user existence in DB to prevent "null offset" errors if session is stale or user was deleted
+        $user = $ci->db->get_where('admin', ['c_email' => $email])->row_array();
+        if (!$user) {
+            redirect('auth/logout');
+        }
+
         // Detect effective Role ID (Prioritize 'role_id' as the primary access level identifier)
         $role_id = $ci->session->userdata('role_id') ?: $ci->session->userdata('role');
-
-        $segment1 = strtolower($ci->uri->segment(1));
-        $segment2 = strtolower($ci->uri->segment(2));
 
         // WHITELIST: Allow base segments that serve as entry points/dispatchers
         $public_segments = ['admin', 'welcome', 'auth', 'user'];
