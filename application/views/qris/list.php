@@ -6,13 +6,13 @@ $search_date_qris_settlement_value = $this->session->userdata('search_date_qris_
 $search_name_qris_value            = $this->session->userdata('search_name_qris') ?: '';
 $search_transactionid_ht_value     = $this->session->userdata('search_transactionid_ht') ?: '';
 $search_rrn_value                  = $this->session->userdata('search_rrn') ?: '';
+$search_invoice_no_value          = $this->session->userdata('search_invoice_no') ?: '';
 
-// Badge count for More Filters
+// Badge count for More Filters (excludes transaction ID and RRN which are now in global search)
 $extra_active = 0;
 if ($search_name_qris_value)            $extra_active++;
 if ($search_date_qris_settlement_value) $extra_active++;
-if ($search_transactionid_ht_value)     $extra_active++;
-if ($search_rrn_value)                  $extra_active++;
+// search_invoice_no, search_transactionid_ht, search_rrn are in global search
 
 $download_url = base_url('admin/download_qris')
     . '?search_date_qris='            . $search_date_qris_value
@@ -53,7 +53,7 @@ $download_url = base_url('admin/download_qris')
                 <!-- LEFT: Global Search -->
                 <div class="dt-search-wrapper">
                     <i class="fas fa-search dt-search-icon"></i>
-                    <input type="text" id="qrisGlobalSearch" class="dt-search-input" placeholder="Search by Trans ID, or RRN...">
+                    <input type="text" id="qrisGlobalSearch" class="dt-search-input" placeholder="Search by Invoice, Trans ID, or RRN..." value="<?= $search_transactionid_ht_value ?: ($search_rrn_value ?: $search_invoice_no_value); ?>">
                 </div>
 
                 <!-- RIGHT: Primary chips + More Filters trigger -->
@@ -108,17 +108,7 @@ $download_url = base_url('admin/download_qris')
                                     <input type="date" name="search_date_qris_settlement" class="dt-more-input" value="<?= $search_date_qris_settlement_value; ?>">
                                 </div>
 
-                                <!-- Transaction ID -->
-                                <div class="dt-more-field">
-                                    <label class="dt-more-label"><i class="fas fa-hashtag mr-1 mr-2"></i> Transaction ID</label>
-                                    <input type="text" name="search_transactionid_ht" class="dt-more-input" placeholder="TXN-..." value="<?= $search_transactionid_ht_value; ?>">
-                                </div>
-
-                                <!-- RRN -->
-                                <div class="dt-more-field">
-                                    <label class="dt-more-label"><i class="fas fa-barcode mr-1 mr-2"></i> RRN</label>
-                                    <input type="text" name="search_rrn" class="dt-more-input" placeholder="RRN..." value="<?= $search_rrn_value; ?>">
-                                </div>
+                                <!-- Transaction ID & RRN moved to Global Search -->
                             </div>
 
                             <div class="dt-more-panel-footer">
@@ -232,7 +222,10 @@ $download_url = base_url('admin/download_qris')
                 }
             }
         ], {
-            "order": [[1, 'desc']]
+            "order": [[1, 'desc']],
+            "search": {
+                "search": "<?= $search_transactionid_ht_value ?: ($search_rrn_value ?: $search_invoice_no_value) ?>"
+            }
         });
 
         table.on('xhr', function(e, settings, json) {

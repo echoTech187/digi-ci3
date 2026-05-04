@@ -33,7 +33,7 @@ $id = $this->uri->segment(3);
             <!-- LEFT: Global Search -->
             <div class="dt-search-wrapper">
                 <i class="fas fa-search dt-search-icon"></i>
-                <input type="text" id="dt-search" class="dt-search-input" placeholder="Search submerchants...">
+                <input type="text" id="dt-search" class="dt-search-input" placeholder="Search by name, ID, or email...">
             </div>
 
             <!-- RIGHT: Actions -->
@@ -129,6 +129,16 @@ $(document).ready(function() {
             }
         }
     ]);
+
+    // Apply Global Search filter if search_val exists in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const searchVal = urlParams.get('search_val');
+    if (searchVal) {
+        setTimeout(() => {
+            table.search(searchVal).draw();
+            $('#dt-search').val(searchVal);
+        }, 500);
+    }
 
     // Global search with Debounce
     $('#dt-search').on('input', debounce(function() {

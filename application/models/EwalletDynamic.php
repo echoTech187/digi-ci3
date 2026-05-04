@@ -45,19 +45,38 @@ class EwalletDynamic extends CI_Model
 
         $this->_apply_filters($search_name, $search_date, $search_date_to, $search_transid, $search_status);
 
-        $i = 0;
-        foreach ($this->column_search as $item) {
-            if (isset($_POST['search']['value']) && $_POST['search']['value']) {
-                if ($i === 0) {
-                    $this->db->group_start();
-                    $this->db->like($item, $_POST['search']['value']);
-                } else {
-                    $this->db->or_like($item, $_POST['search']['value']);
-                }
-                if (count($this->column_search) - 1 == $i)
-                    $this->db->group_end();
+        $searchValue = isset($_POST['search']['value']) ? trim($_POST['search']['value']) : '';
+        if ($searchValue) {
+            $safeSearch = $this->db->escape_str($searchValue);
+            
+            // TRULY SMART SEARCH: 
+            // 1. Always try finding ID matches first (Fast Indexed Lookup)
+            $matching_ids = [-1];
+            
+            // Check in technical ID columns
+            $res = $this->db->query("SELECT id FROM cashin_dynamic_ewallet WHERE c_merchantTransactionId LIKE '$safeSearch%' LIMIT 100")->result();
+            if (!empty($res)) $matching_ids = array_merge($matching_ids, array_column($res, 'id'));
+            
+            if (is_numeric($searchValue) && strlen($searchValue) < 15) {
+                $matching_ids[] = (int)$searchValue;
             }
-            $i++;
+
+            $matching_ids = array_unique($matching_ids);
+
+            // 2. Decide strategy: If IDs found, use them. If not, search by Name.
+            if (count($matching_ids) > 1) {
+                $this->db->where_in('cde.id', $matching_ids);
+            } else {
+                // FALLBACK: Name search if no specific ID matched (min 3 chars)
+                if (strlen($searchValue) >= 3) {
+                    $this->db->group_start();
+                    $this->db->like('s.c_name', $searchValue, 'both');
+                    $this->db->or_like('m.c_name', $searchValue, 'both');
+                    $this->db->group_end();
+                } else {
+                    $this->db->where('1=0', NULL, FALSE);
+                }
+            }
         }
 
         if (isset($_POST['order'])) {
@@ -102,7 +121,7 @@ class EwalletDynamic extends CI_Model
 
     public function count_filtered($search_name = null, $search_date = null, $search_date_to = null, $search_transid = null, $search_status = null)
     {
-        $searchValue = $this->input->post('search')['value'];
+        $searchValue = isset($_POST['search']['value']) ? trim($_POST['search']['value']) : '';
         $is_filtered = $search_name || $search_date || $search_date_to || $search_transid || $search_status || (!empty($searchValue));
 
         if (!$is_filtered) {
@@ -113,22 +132,28 @@ class EwalletDynamic extends CI_Model
         $this->db->from($this->table);
         $this->_apply_filters($search_name, $search_date, $search_date_to, $search_transid, $search_status);
 
-        // Lean joins for global search
+        // Truly Smart Search in Count
         if (!empty($searchValue)) {
-            $this->db->join('submerchant s', 'cde.ref_subMerchantId = s.id', 'left');
-            $this->db->join('merchant m', 'cde.ref_merchantId = m.id', 'left');
-            
-            $i = 0;
-            foreach ($this->column_search as $item) {
-                if ($i === 0) {
+            $safeSearch = $this->db->escape_str($searchValue);
+            $matching_ids = [-1];
+            $res = $this->db->query("SELECT id FROM cashin_dynamic_ewallet WHERE c_merchantTransactionId LIKE '$safeSearch%' LIMIT 100")->result();
+            if (!empty($res)) $matching_ids = array_merge($matching_ids, array_column($res, 'id'));
+            if (is_numeric($searchValue) && strlen($searchValue) < 15) $matching_ids[] = (int)$searchValue;
+            $matching_ids = array_unique($matching_ids);
+
+            if (count($matching_ids) > 1) {
+                $this->db->where_in('cde.id', $matching_ids);
+            } else {
+                $this->db->join('submerchant s', 'cde.ref_subMerchantId = s.id', 'left');
+                $this->db->join('merchant m', 'cde.ref_merchantId = m.id', 'left');
+                if (strlen($searchValue) >= 3) {
                     $this->db->group_start();
-                    $this->db->like($item, $searchValue);
-                } else {
-                    $this->db->or_like($item, $searchValue);
-                }
-                if (count($this->column_search) - 1 == $i)
+                    $this->db->like('s.c_name', $searchValue, 'both');
+                    $this->db->or_like('m.c_name', $searchValue, 'both');
                     $this->db->group_end();
-                $i++;
+                } else {
+                    $this->db->where('1=0', NULL, FALSE);
+                }
             }
         }
 
@@ -139,10 +164,10 @@ class EwalletDynamic extends CI_Model
 
     public function count_all_dt($search_name = null, $search_date = null, $search_date_to = null)
     {
-        $table_name = explode(' ', $this->table)[0];
-        $query = $this->db->query("SELECT TABLE_ROWS FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '{$table_name}'");
-        $result = $query->row();
-        return $result ? (int)$result->TABLE_ROWS : 0;
+        $this->db->select("count(id) as total");
+        $this->db->from($this->table);
+        $query = $this->db->get();
+        return $query->row()->total;
     }
 
     public function get_summary($search_name = null, $search_date = null, $search_date_to = null, $search_transid = null, $search_status = null)

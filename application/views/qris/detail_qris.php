@@ -10,18 +10,18 @@
 
     <div class="card border-0 shadow-sm dt-card">
         <!-- Header Legacy Migrated -->
-<div class="modal-header modal-header-primary  border-0 py-3 mh-premium">
-    <div class="d-flex align-items-center">
-        <div class="mh-icon-badge">
-            <i class="fas fa-star"></i>
+        <div class="modal-header modal-header-primary  border-0 py-3 mh-premium">
+            <div class="d-flex align-items-center">
+                <div class="mh-icon-badge">
+                    <i class="fas fa-star"></i>
+                </div>
+                <div class="mh-title-wrap">
+                    <h6 class="mh-title">QRIS TRANSACTION INFO</h6>
+                    <small class="mh-subtitle">Lihat detail informasi lengkap</small>
+                </div>
+            </div>
+            
         </div>
-        <div class="mh-title-wrap">
-            <h6 class="mh-title">QRIS TRANSACTION INFO</h6>
-            <small class="mh-subtitle">Lihat detail informasi lengkap</small>
-        </div>
-    </div>
-    
-</div>
         <div class="card-body">
             <!-- <?php
                 // echo "<pre>";
@@ -118,7 +118,7 @@
                             <label class="dt-more-label text-muted mb-1 uppercase small">External Provider Data</label>
                             <div class="p-3 bg-white border rounded-lg">
                                 <div class="row">
-                                    <div class="col-md-3 mb-2 mb-md-0 border-right">
+                                    <div class="col-md-2 mb-2 mb-md-0 border-right">
                                         <small class="text-muted d-block">External ID</small>
                                         <span class="text-dark font-weight-bold"><?= $data['ref_cashinExternalId']; ?></span>
                                     </div>
@@ -126,15 +126,15 @@
                                         <small class="text-muted d-block">Issuer RRN</small>
                                         <span class="text-dark font-weight-bold"><?= $data['c_issuerRrn'] ?: '-'; ?></span>
                                     </div>
-                                    <div class="col-md-2 mb-2 mb-md-0 border-right">
+                                    <div class="col-md-3 mb-2 mb-md-0 border-right">
                                         <small class="text-muted d-block">Ext. Settlement</small>
                                         <span class="text-dark"><?= ($data['c_isSettlementRealtimeExternal'] == 1) ? 'Realtime' : ($data['c_datetimeSettlementExternal'] ?: '-'); ?></span>
                                     </div>
-                                    <div class="col-md-3 mb-2 mb-md-0 border-right text-right">
+                                    <div class="col-md-2 mb-2 mb-md-0 border-right text-right">
                                         <small class="text-muted d-block">Ext. MDR</small>
                                         <span class="text-danger">Rp <?= number_format($data['c_mdrExternal'], 0, ',', '.'); ?></span>
                                     </div>
-                                    <div class="col-md-3 text-right">
+                                    <div class="col-md-2 text-right">
                                         <small class="text-muted d-block">Ext. Fee</small>
                                         <span class="text-danger">Rp <?= number_format($data['c_feeExternal'], 0, ',', '.'); ?></span>
                                     </div>

@@ -16,8 +16,8 @@
             // Badge count for More Filters
             $extra_active = 0;
             if ($this->session->userdata('search_name_vad'))      $extra_active++;
-            if ($this->session->userdata('search_va_number'))    $extra_active++;
-            if ($this->session->userdata('search_merchant_trxid')) $extra_active++;
+            if ($this->session->userdata('search_date_vad'))      $extra_active++;
+            if ($this->session->userdata('search_date_vad_to'))   $extra_active++;
         ?>
         <form id="vadynamic_form" method="post" action="<?= base_url('admin/Va_dynamic'); ?>">
             <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>">
@@ -25,7 +25,7 @@
                 <!-- LEFT: Global Search -->
                 <div class="dt-search-wrapper">
                     <i class="fas fa-search dt-search-icon"></i>
-                    <input type="text" id="vadynamicGlobalSearch" class="dt-search-input" placeholder="Search by Channel, Merchant, or ID...">
+                    <input type="text" id="vadynamicGlobalSearch" class="dt-search-input" placeholder="Search by Channel, Merchant, or ID..." value="<?= $this->session->userdata('search_merchant_trxid'); ?>">
                 </div>
                 <!-- RIGHT: Filters -->
                 <div class="dt-toolbar-filters">
@@ -73,17 +73,7 @@
                                     </select>
                                 </div>
                                 
-                                <!-- VA Number -->
-                                <div class="dt-more-field">
-                                    <label class="dt-more-label"><i class="fas fa-credit-card mr-1 mr-2"></i> VA Number</label>
-                                    <input type="text" name="search_va_number" class="dt-more-input" placeholder="e.g. 8806..." value="<?= $this->session->userdata('search_va_number'); ?>">
-                                </div>
                                 
-                                <!-- Merchant Trx ID -->
-                                <div class="dt-more-field">
-                                    <label class="dt-more-label"><i class="fas fa-hashtag mr-1 mr-2"></i> Merchant Trx ID</label>
-                                    <input type="text" name="search_merchant_trxid" class="dt-more-input" placeholder="e.g. TRX123..." value="<?= $this->session->userdata('search_merchant_trxid'); ?>">
-                                </div>
                             </div>
                             <div class="dt-more-panel-footer">
                                 <button type="submit" name="submit" class="btn-dt-apply btn-dt-action-primary shadow-sm">
@@ -232,15 +222,13 @@
                 data: 'ref_cashinExternalId',
                 className: 'text-nowrap',
                 render: function(data, type, row) {
-                    if (row.ref_cashinExternalLogVaIdCreate) {
-                        return '<a data-toggle="modal" href="#" ' +
-                            'data-target="#detailVaDynamicChannelExternalModal" ' +
-                            'data-merchanttransactionid="' + row.c_merchantTransactionId + '" ' +
-                            'data-ref_cashinexternalid="' + data + '" ' +
-                            'data-ref_cashinexternallogvaidcreate="' + row.ref_cashinExternalLogVaIdCreate + '" ' +
-                            'class="detailVaDynamicChannelExternalAjax">' + data + '</a>';
-                    }
-                    return data || '-';
+                    if (!data) return '-';
+                    return '<a href="javascript:void(0)" class="detailVaDynamicChannelExternalAjax font-weight-bold text-primary" ' +
+                           'data-merchanttransactionid="' + row.c_merchantTransactionId + '" ' +
+                           'data-ref_cashinexternalid="' + data + '" ' +
+                           'data-id="' + row.id + '" ' +
+                           'data-ref_cashinexternallogvaidcreate="' + row.ref_cashinExternalLogVaIdCreate + '">' +
+                           data + '</a>';
                 }
             },
             {data: 'c_vaNumber',className: 'text-nowrap', render: function(data){
@@ -270,6 +258,12 @@
         $('#vadynamicGlobalSearch').on('input', debounce(function() {
             table.search(this.value).draw();
         }, 400));
+
+        // Trigger initial search if value exists (Deep Linking)
+        var initSearch = $('#vadynamicGlobalSearch').val();
+        if (initSearch) {
+            table.search(initSearch).draw();
+        }
         // ── More Filters dropdown ──
         var $moreBtn   = $('#vadynamicMoreFiltersBtn');
         var $morePanel = $('#vadynamicMoreFiltersPanel');
@@ -302,6 +296,7 @@
             e.preventDefault();
             var merchantTransactionId = $(this).data('merchanttransactionid');
             var ref_cashinExternalId = $(this).data('ref_cashinexternalid'); 
+            var parentId = $(this).data('id');
             var ref_cashinExternalLogVaIdCreate = $(this).data('ref_cashinexternallogvaidcreate'); 
             // Handle potential variations in data attribute naming by jQuery
             if (!ref_cashinExternalLogVaIdCreate) {
@@ -318,6 +313,7 @@
                 data: {
                     '<?php echo $this->security->get_csrf_token_name(); ?>': '<?php echo $this->security->get_csrf_hash(); ?>',
                     ref_cashinExternalId: ref_cashinExternalId,
+                    parentId: parentId,
                     ref_cashinExternalLogVaIdCreate: ref_cashinExternalLogVaIdCreate
                 },
                 dataType: "json",

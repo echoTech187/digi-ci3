@@ -10,13 +10,15 @@ class BiFast extends CI_Model {
 
     private function _get_datatables_query($search_name = null, $date_from = null, $date_to = null, $search_transid = null, $search_external_reff = null, $search_channel = null, $search_status = null, $only_ids = false, $count_only = false)
     {
-        // Emergency 3-second safeguard
+        // Emergency safeguard
         $this->db->query("SET SESSION max_execution_time = 10000");
+        
+        $searchValue = isset($_POST['search']['value']) ? $_POST['search']['value'] : '';
 
         if ($count_only) {
-            $this->db->select("count(cpb.id) as total");
+            $this->db->select("count(DISTINCT cpb.ref_cashoutId) as total");
         } else if ($only_ids) {
-            $this->db->select("cpb.id");
+            $this->db->select("MAX(cpb.id) as id");
         } else {
             $this->db->select("cpb.*, m.c_name AS name_merchant, c.c_invoiceNo, mab.c_beneficiaryAccountName,
                                COALESCE(epb.c_responseBody, egb.c_responseBody) AS c_responseBody");
@@ -25,7 +27,6 @@ class BiFast extends CI_Model {
         $this->db->from($this->table);
         
         // Essential joins for base data
-        $searchValue = isset($_POST['search']['value']) ? $_POST['search']['value'] : '';
         $isInvoiceSearch = (preg_match('/^BIFAST|^INV/i', $searchValue));
         $sort_col = isset($_POST['order']['0']['column']) ? $this->column_order[$_POST['order']['0']['column']] : '';
 
@@ -58,7 +59,7 @@ class BiFast extends CI_Model {
             $this->db->where('cpb.c_datetime >=', $date_from);
             $this->db->where('cpb.c_datetime <=', $date_to);
         }
-        if ($search_transid) {
+        if ($search_transid && !$searchValue) {
             $this->db->where('cpb.c_merchantTransactionId', $search_transid);
         }
         if ($search_status) {
@@ -66,7 +67,7 @@ class BiFast extends CI_Model {
         }
         
         // Handle External Channel and External Reff ID filters
-        if ($search_channel || $search_external_reff) {
+        if (($search_channel || $search_external_reff) && !$searchValue) {
             if ($search_channel == "paylabs") {
                 // Channel selected: paylabs
                 if ($search_external_reff) {
@@ -126,29 +127,71 @@ class BiFast extends CI_Model {
         }
 
         if ($searchValue) {
-            $isTechnicalSearch = (preg_match('/^(BIFAST|INV)/i', $searchValue));
-            $i = 0;
-            foreach ($this->column_search as $item) {
-                // EMERGENCY OPTIMIZATION: Skip searching name columns if search value is a technical ID prefix
-                // This prevents expensive JOINs and OR conditions on 82M rows.
-                if ($isTechnicalSearch && in_array($item, ['m.c_name', 'mab.c_beneficiaryAccountName'])) {
-                    continue;
-                }
+            $safeSearch = $this->db->escape_str($searchValue);
+            
+            // TRULY SMART SEARCH: 
+            // 1. Always try finding ID matches first (Fast Indexed Lookup)
+            $matching_ids = [-1];
+            
+            // Check in technical ID columns (Merchant Trans ID & Account No)
+            $cpb_res = $this->db->query("SELECT id FROM cashout_payment_bifast WHERE c_merchantTransactionId LIKE '$safeSearch%' OR c_accountNo LIKE '$safeSearch%' LIMIT 100")->result();
+            if (!empty($cpb_res)) $matching_ids = array_merge($matching_ids, array_column($cpb_res, 'id'));
+            
+            // Check in Invoice No (via sub-query lookup)
+            $inv_res = $this->db->query("SELECT id FROM cashout WHERE c_invoiceNo LIKE '$safeSearch%' LIMIT 50")->result();
+            $inv_ids = array_column($inv_res, 'id');
 
-                if ($i === 0) {
-                    $this->db->group_start();
-                    $this->db->like($item, $searchValue, 'after');
-                } else {
-                    $this->db->or_like($item, $searchValue, 'after');
-                }
-                $i++;
+            if (is_numeric($searchValue) && strlen($searchValue) < 15) {
+                $matching_ids[] = (int)$searchValue;
             }
-            if ($i > 0) $this->db->group_end();
+
+            $matching_ids = array_unique($matching_ids);
+
+            // 2. Decide strategy: If IDs or Invoices found, use them. If not, search by Name.
+            if (count($matching_ids) > 1 || !empty($inv_ids)) {
+                $this->db->group_start();
+                if (count($matching_ids) > 1) {
+                    $this->db->where_in('cpb.id', $matching_ids);
+                }
+                if (!empty($inv_ids)) {
+                    if (count($matching_ids) > 1) {
+                        $this->db->or_where_in('cpb.ref_cashoutId', $inv_ids);
+                    } else {
+                        $this->db->where_in('cpb.ref_cashoutId', $inv_ids);
+                    }
+                }
+                $this->db->group_end();
+            } else {
+                // FALLBACK: Name search if no specific ID matched (min 3 chars)
+                if (strlen($searchValue) >= 3) {
+                    $this->db->like('m.c_name', $searchValue, 'both');
+                } else {
+                    $this->db->where('1=0', NULL, FALSE);
+                }
+            }
         }
 
+        // Deduplication
+        // Deduplication: Always group by invoice ID
+        $this->db->group_by('cpb.ref_cashoutId');
+
         if (!$count_only) {
-            // Disable user-driven sorting for performance; use stable default ordering.
-            $this->db->order_by('cpb.id', 'desc');
+            if (isset($_POST['order'])) {
+                $sort_col = $this->column_order[$_POST['order']['0']['column']];
+                if ($only_ids && ($sort_col == 'cpb.id' || $sort_col == 'id')) {
+                    $this->db->order_by('id', $_POST['order']['0']['dir'], FALSE);
+                } else if ($sort_col) {
+                    $this->db->order_by($sort_col, $_POST['order']['0']['dir']);
+                }
+            } else if (isset($this->order)) {
+                $order = $this->order;
+                $key = key($order);
+                if ($only_ids && ($key == 'cpb.id' || $key == 'id')) {
+                    $this->db->order_by('id', $order[$key], FALSE);
+                } else {
+                    $this->db->order_by($key, $order[$key]);
+                }
+            }
         }
     }
 
@@ -169,8 +212,8 @@ class BiFast extends CI_Model {
         $this->db->select("cpb.*, m.c_name AS name_merchant, c.c_invoiceNo, mab.c_beneficiaryAccountName,
                            COALESCE(epb.c_responseBody, egb.c_responseBody, eif.c_responseBody, epd.c_responseBody) AS c_responseBody");
         $this->db->from($this->table);
-        $this->db->join('cashout c', 'c.id = cpb.ref_cashoutId');
-        $this->db->join('merchant m', 'm.id = cpb.ref_merchantId');
+        $this->db->join('cashout c', 'c.id = cpb.ref_cashoutId', 'left');
+        $this->db->join('merchant m', 'm.id = cpb.ref_merchantId', 'left');
         $this->db->join('merchant_account_bank mab', 'mab.c_beneficiaryAccountNo = cpb.c_accountNo AND mab.ref_cashoutChannelId = cpb.ref_cashoutChannelId AND mab.ref_merchantId = cpb.ref_merchantId', 'left');
         $this->db->join('external_paylabs_disbursement_transfer_bank epb', 'epb.ref_cashoutPaymentBifastId = cpb.id', 'left');
         $this->db->join('external_gvconnect_snap_disbursement_transfer_bank egb', 'egb.ref_cashoutPaymentBifastId = cpb.id', 'left');
@@ -203,10 +246,15 @@ class BiFast extends CI_Model {
 
     public function count_all_dt($search_name = null, $date_from = null, $date_to = null)
     {
-        $table_name = explode(' ', $this->table)[0];
-        $query = $this->db->query("SELECT TABLE_ROWS FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '{$table_name}'");
-        $result = $query->row();
-        return $result ? (int)$result->TABLE_ROWS : 0;
+        $this->db->select("count(DISTINCT cpb.ref_cashoutId) as total");
+        $this->db->from($this->table);
+        if ($search_name) $this->db->where('cpb.ref_merchantId', $search_name);
+        if ($date_from && $date_to) {
+            $this->db->where('cpb.c_datetime >=', $date_from);
+            $this->db->where('cpb.c_datetime <=', $date_to);
+        }
+        $query = $this->db->get();
+        return $query->row()->total;
     }
 
 
@@ -505,17 +553,28 @@ class BiFast extends CI_Model {
         $recordsTotal = $this->count_all_dt($search_name, $date_from_query, $date_to_query);
         $recordsFiltered = $is_filtered ? $this->count_filtered($search_name, $date_from_query, $date_to_query, $search_transid, $search_external_reff, $search_channel, $search_status) : $recordsTotal;
 
-        // Use Datatables Library for final processing and JSON output
-        return $this->datatables->of($this->table)
+        // Trick the library to NOT re-slice our already-paginated $list
+        $original_start = $_POST['start'];
+        $_POST['start'] = 0; 
+
+        $output = $this->datatables->of($this->table)
             ->set_recordsTotal($recordsTotal)
             ->set_recordsFiltered($recordsFiltered)
             ->set_data($list)
-            ->addColumn('no', function($row) {
+            ->addColumn('no', function($row) use ($original_start) {
                 static $no = null;
-                if ($no === null) $no = intval($this->input->post('start'));
+                if ($no === null) $no = intval($original_start);
                 return ++$no;
             })
-            ->make(true);
+            ->make(false);
+            
+        // Restore original start and output JSON
+        $_POST['start'] = $original_start;
+        $output['draw'] = intval($this->input->post('draw'));
+        
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode($output));
     }
 }
 ?>

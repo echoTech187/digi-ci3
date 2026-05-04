@@ -32,12 +32,13 @@
             $search_date_ewallet_settlement_value = $this->session->userdata('search_date_ewallet_settlement') ?: '';
             $search_name_ewallet_value            = $this->session->userdata('search_name_ewallet') ?: '';
             $search_invoice_no_value              = $this->session->userdata('search_invoice_no') ?: '';
+            $search_transid_ewallet_value         = $this->session->userdata('search_transid_ewallet') ?: '';
 
-            // Count active extra filters for badge
+            // Count active extra filters for badge (excludes invoice_no which is now in global search)
             $extra_active = 0;
             if ($search_name_ewallet_value)            $extra_active++;
             if ($search_date_ewallet_settlement_value) $extra_active++;
-            if ($search_invoice_no_value)              $extra_active++;
+            // search_invoice_no is now in the global search input, excluded from advanced badge
         ?>
         <form id="ewallet_form" method="post" action="<?= base_url('admin/ewallet'); ?>">
             <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>">
@@ -46,7 +47,7 @@
                 <!-- LEFT: Global Search -->
                 <div class="dt-search-wrapper">
                     <i class="fas fa-search dt-search-icon"></i>
-                    <input type="text" id="ewalletGlobalSearch" class="dt-search-input" placeholder="Search by Trans ID...">
+                    <input type="text" id="ewalletGlobalSearch" class="dt-search-input" placeholder="Search by Invoice or Trans ID..." value="<?= $search_invoice_no_value ?: $search_transid_ewallet_value; ?>">
                 </div>
 
                 <!-- RIGHT: Primary chips + More Filters trigger -->
@@ -101,11 +102,7 @@
                                     <input type="date" name="search_date_ewallet_settlement" class="dt-more-input" value="<?= $search_date_ewallet_settlement_value; ?>">
                                 </div>
 
-                                <!-- Invoice No -->
-                                <div class="dt-more-field">
-                                    <label class="dt-more-label"><i class="fas fa-file-invoice mr-1 mr-2"></i> Invoice No</label>
-                                    <input type="text" name="search_invoice_no" class="dt-more-input" placeholder="INV-..." value="<?= $search_invoice_no_value; ?>">
-                                </div>
+                                <!-- Invoice No removed from here as it is handled by Global Search -->
                             </div>
 
                             <div class="dt-more-panel-footer">
@@ -211,12 +208,21 @@
                 }
             }
         ], {
-            "order": [[1, 'desc']]
+            "order": [[1, 'desc']],
+            "search": {
+                "search": "<?= $search_invoice_no_value ?: $search_transid_ewallet_value ?>"
+            }
         });
 
-        // Global search with Debounce
+        // Global search with Debounce (Sync with hidden form field)
         $('#ewalletGlobalSearch').on('input', debounce(function() {
-            table.search(this.value).draw();
+            const val = this.value;
+            // Option 1: Trigger DataTable search directly
+            table.search(val).draw();
+            
+            // Option 2: If we want it to persist across reloads via the 'invoice' parameter,
+            // we could update the session, but DataTable's built-in search doesn't do that by default.
+            // For consistency with how the user got here, we'll let it be.
         }, 400));
 
         // ── More Filters dropdown toggle ──

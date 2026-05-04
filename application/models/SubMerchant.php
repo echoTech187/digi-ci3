@@ -4,16 +4,21 @@ class SubMerchant extends CI_Model
 {
     private function _get_datatables_query($id)
     {
-        $this->db->from('merchant');
-        $this->db->where('parent_merchant_id', $id);
-        $this->db->where('c_merchantLevel >', 0);
+        $this->db->select('m.*, s.c_gvconnectBusinessId, s.c_gvconnectBusinessName, s.c_gvconnectGVConnectKey, s.c_gvconnectStaticQrisRaw, s.c_gvconnectStaticVaBni, s.c_gvconnectStaticVaBca, s.c_gvconnectStaticVaCimb, s.c_gvconnectStaticVaPermata');
+        $this->db->from('merchant m');
+        $this->db->join('submerchant s', 's.ref_merchantId = m.id', 'left');
+        $this->db->where('m.parent_merchant_id', $id);
+        $this->db->where('m.c_merchantLevel >', 0);
 
         if (isset($_POST['search']['value']) && $_POST['search']['value'] != "") {
             $search = $_POST['search']['value'];
             $this->db->group_start();
-            $this->db->like('c_name', $search);
-            $this->db->or_like('c_email', $search);
-            $this->db->or_like('id', $search);
+            $this->db->like('m.c_name', $search);
+            $this->db->or_like('m.c_email', $search);
+            $this->db->or_like('m.id', $search);
+            $this->db->or_like('m.c_status', $search);
+            $this->db->or_like('s.c_gvconnectBusinessId', $search);
+            $this->db->or_like('s.c_gvconnectBusinessName', $search);
             $this->db->group_end();
         }
 
@@ -75,12 +80,13 @@ class SubMerchant extends CI_Model
     public function get_datatables_handler($id)
     {
         $this->load->library('datatables');
-        return $this->datatables->of('merchant')
-            ->where('parent_merchant_id', $id)
-            ->where('c_merchantLevel >', 0)
-            ->set_column_order([null, 'c_name', 'c_email', 'c_gvconnectBusinessId', 'c_status'])
-            ->set_column_search(['c_name', 'c_email', 'id'])
-            ->set_default_order(['id' => 'desc'])
+        return $this->datatables->of('merchant m')
+            ->join('submerchant s', 's.ref_merchantId = m.id', 'left')
+            ->where('m.parent_merchant_id', $id)
+            ->where('m.c_merchantLevel >', 0)
+            ->set_column_order([null, 'm.c_name', 'm.c_email', 's.c_gvconnectBusinessId', 'm.c_status'])
+            ->set_column_search(['m.c_name', 'm.c_email', 'm.id', 'm.c_status', 's.c_gvconnectBusinessId', 's.c_gvconnectBusinessName'])
+            ->set_default_order(['m.id' => 'desc'])
             ->addColumn('no', function($row) {
                 static $no = null;
                 if ($no === null) $no = intval($this->input->post('start'));

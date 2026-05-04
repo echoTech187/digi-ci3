@@ -66,7 +66,7 @@ class AdminMerchant extends CI_Controller
       $data['title'] = 'Merchant';
       $data['user'] = $this->Model_user->view_user()->row_array();
 
-      $search_merchant = $this->input->post('search_merchant');
+      $search_merchant = $this->input->get('search_merchant') ?: $this->input->post('search_merchant');
       if ($search_merchant !== null) {
          $this->session->set_userdata('search_merchant', $search_merchant);
       } else {

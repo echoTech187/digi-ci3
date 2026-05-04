@@ -444,4 +444,395 @@ class DashboardController extends CI_Controller
 
       $this->load->view('admin/welcome', $data);
    }
+
+   /**
+    * Unified Global Search Handler
+    * Searches across Menus, Merchants, QRIS, VA, and E-Wallet.
+    */
+   public function globalSearch()
+   {
+      $query = $this->input->get('q');
+      if (!$query || strlen($query) < 2) {
+         echo json_encode([]);
+         return;
+      }
+
+      $results = [];
+      $role_id = $this->session->userdata('role') ?: $this->session->userdata('role_id');
+
+      // 1. Search Menus & Submenus
+      $this->db->select('m.title as menu_title, m.url as menu_url, m.icon as menu_icon');
+      $this->db->from('user_menu m');
+      $this->db->join('user_access_menu a', 'a.menu_id = m.id');
+      $this->db->where('a.role_id', $role_id);
+      $this->db->where('m.is_active', 1);
+      $this->db->group_start();
+      $this->db->like('m.title', $query);
+      $this->db->or_like('m.url', $query);
+      $this->db->group_end();
+      $this->db->limit(10);
+      $menus = $this->db->get()->result();
+      
+      foreach ($menus as $m) {
+         if ($m->menu_url === '#') continue;
+         $results[] = [
+            'title' => $m->menu_title,
+            'url' => base_url($m->menu_url),
+            'category' => 'Navigation',
+            'icon' => $m->menu_icon ?: 'fas fa-link'
+         ];
+      }
+
+      // 2. Search Merchants & Submerchants (Name, ID, Email, Business ID)
+      $this->db->select('id, c_name, c_email');
+      $this->db->from('merchant');
+      $this->db->group_start();
+      $this->db->like('c_name', $query);
+      $this->db->or_like('id', $query);
+      $this->db->or_like('c_email', $query);
+      $this->db->group_end();
+      $this->db->order_by('id', 'DESC');
+      $this->db->limit(5);
+      $merchants = $this->db->get()->result();
+      foreach ($merchants as $m) {
+         $results[] = [
+            'title' => $m->c_name . " (#" . $m->id . ")",
+            'url' => base_url('admin/merchant?search_merchant=' . $m->id),
+            'category' => 'Merchant',
+            'icon' => 'fas fa-store'
+         ];
+      }
+
+      // Search Submerchants (Level > 0)
+      $this->db->select('m.id, m.c_name, m.c_email, m.parent_merchant_id, s.c_gvconnectBusinessId');
+      $this->db->from('merchant m');
+      $this->db->join('submerchant s', 's.ref_merchantId = m.id', 'left');
+      $this->db->where('m.c_merchantLevel >', 0);
+      $this->db->group_start();
+      $this->db->like('m.c_name', $query);
+      $this->db->or_like('m.id', $query);
+      $this->db->or_like('s.c_gvconnectBusinessId', $query);
+      $this->db->group_end();
+      $this->db->order_by('m.id', 'DESC');
+      $this->db->limit(5);
+      $submerchants = $this->db->get()->result();
+      foreach ($submerchants as $sm) {
+         $results[] = [
+            'title' => $sm->c_name . " (Sub of #" . $sm->parent_merchant_id . ")",
+            'url' => base_url('admin/submerchant/' . $sm->parent_merchant_id . '?search_val=' . $sm->id),
+            'category' => 'Sub Merchant',
+            'icon' => 'fas fa-store-alt'
+         ];
+      }
+
+      // 3. Search E-Wallet (Invoice, Merchant Trans ID)
+      if (strlen($query) >= 4 && $this->db->table_exists('cashin_payment_ewallet')) {
+         $this->db->select("cpe.id, cde.c_merchantTransactionId, cpe.c_amount, c.c_invoiceNo");
+         $this->db->from('cashin_payment_ewallet cpe');
+         $this->db->join('cashin c', 'c.id = cpe.ref_cashinId', 'left');
+         $this->db->join('cashin_dynamic_ewallet cde', 'cde.id = cpe.ref_cashinDynamicEwalletId', 'left');
+         $this->db->group_start();
+         $this->db->like('cde.c_merchantTransactionId', $query);
+         $this->db->or_like('c.c_invoiceNo', $query);
+         $this->db->group_end();
+         $this->db->order_by('cpe.id', 'DESC');
+         $this->db->limit(3);
+         $q_ew = $this->db->get();
+         if ($q_ew) {
+            foreach ($q_ew->result() as $r) {
+               if (stripos($r->c_invoiceNo, $query) !== false) {
+                  $url_id = $r->c_invoiceNo;
+                  $url_param = 'invoice';
+                  $title = $r->c_invoiceNo;
+               } else {
+                  $url_id = $r->c_merchantTransactionId;
+                  $url_param = 'transid';
+                  $title = $r->c_merchantTransactionId;
+               }
+
+               $results[] = [
+                  'title' => $title . " - Rp " . number_format($r->c_amount),
+                  'url' => base_url('admin/ewallet?' . $url_param . '=' . $url_id),
+                  'category' => 'E-Wallet',
+                  'icon' => 'fas fa-wallet'
+               ];
+            }
+         }
+      }
+
+      // 4. Search QRIS
+      if (strlen($query) >= 4 && ($this->db->table_exists('cashin_payment_qris_mpm') || $this->db->table_exists('cashin_payment_qris'))) {
+         $table_qris = $this->db->table_exists('cashin_payment_qris_mpm') ? 'cashin_payment_qris_mpm' : 'cashin_payment_qris';
+         $table_dyn = $table_qris . '_dynamic';
+         if ($table_qris == 'cashin_payment_qris_mpm') $table_dyn = 'cashin_dynamic_qris_mpm';
+         $table_rec = $table_qris . '_recurring';
+         if ($table_qris == 'cashin_payment_qris_mpm') $table_rec = 'cashin_recurring_qris_mpm';
+
+         $this->db->select("MAX(q.id) as id, MAX(c.c_invoiceNo) as c_invoiceNo, MAX(q.c_amount) as c_amount, MAX(IF(q.c_type='Dynamic', cdq.c_merchantTransactionId, crq.c_merchantTransactionId)) AS Merchant_Transaction_Id");
+         $this->db->from($table_qris . ' q');
+         $this->db->join('cashin c', 'c.id = q.ref_cashinId', 'left');
+         
+         if ($table_qris == 'cashin_payment_qris_mpm') {
+            $this->db->join($table_dyn . ' cdq', 'cdq.id = q.ref_cashinDynamicQrisMpmId', 'left');
+            $this->db->join($table_rec . ' crq', 'crq.id = q.ref_cashinRecurringQrisMpmId', 'left');
+         } else {
+            $this->db->join($table_dyn . ' cdq', 'cdq.id = q.ref_cashinDynamicQrisId', 'left');
+            $this->db->join($table_rec . ' crq', 'crq.id = q.ref_cashinRecurringQrisId', 'left');
+         }
+         
+         // RRN Pre-lookup
+         $rrn_ids = [-1];
+         if (is_numeric($query) && strlen($query) >= 8) {
+            $tables_cb = [
+               'external_paydgn_qris_mpm_callback', 'external_gvconnect_snap_qris_mpm_callback',
+               'external_inacash_qris_mpm_callback', 'external_paylabs_qris_mpm_callback_payment',
+               'external_quantum_qris_mpm_calback_payment'
+            ];
+            foreach ($tables_cb as $t_cb) {
+               if (!$this->db->table_exists($t_cb)) continue;
+               $col_cb = ($t_cb == 'external_quantum_qris_mpm_calback_payment') ? 'c_transactionId' : 'c_issuerRrn';
+               $q_cb = $this->db->query("SELECT ref_cashinPaymentQrisMpmId FROM $t_cb WHERE $col_cb LIKE '$query%' LIMIT 5");
+               if ($q_cb) {
+                  foreach ($q_cb->result() as $row_cb) if ($row_cb->ref_cashinPaymentQrisMpmId) $rrn_ids[] = $row_cb->ref_cashinPaymentQrisMpmId;
+               }
+            }
+         }
+
+         $this->db->group_start();
+         $this->db->like('c.c_invoiceNo', $query);
+         $this->db->or_like('q.id', $query);
+         $this->db->or_like('cdq.c_merchantTransactionId', $query);
+         $this->db->or_like('crq.c_merchantTransactionId', $query);
+         if (count($rrn_ids) > 1) $this->db->or_where_in('q.id', $rrn_ids);
+         $this->db->group_end();
+         $this->db->group_by('c.c_invoiceNo');
+         $this->db->order_by('id', 'DESC');
+         $this->db->limit(3);
+         $q_qris = $this->db->get();
+         if ($q_qris) {
+            foreach ($q_qris->result() as $r) {
+               if (stripos($r->c_invoiceNo, $query) !== false) {
+                  $title = $r->c_invoiceNo;
+                  $url_param = 'invoice=' . $r->c_invoiceNo;
+               } else if (stripos($r->Merchant_Transaction_Id, $query) !== false) {
+                  $title = $r->Merchant_Transaction_Id;
+                  $url_param = 'transid=' . $r->Merchant_Transaction_Id;
+               } else if (isset($rrn_ids) && in_array($r->id, $rrn_ids)) {
+                  $title = $query; // Show the RRN that was searched
+                  $url_param = 'rrn=' . $query;
+               } else {
+                  $title = $r->Merchant_Transaction_Id ?: $r->c_invoiceNo;
+                  $url_param = 'invoice=' . $r->c_invoiceNo;
+               }
+
+               $results[] = [
+                  'title' => $title . " - Rp " . number_format($r->c_amount),
+                  'url' => base_url('admin/qris?' . $url_param),
+                  'category' => 'QRIS Transaction',
+                  'icon' => 'fas fa-qrcode'
+               ];
+            }
+         }
+      }
+
+      // 5. Search VA
+      if (strlen($query) >= 5 && $this->db->table_exists('cashin_payment_va')) {
+         $this->db->select("MAX(cpv.id) as id, c.c_invoiceNo, MAX(cpv.c_vaNumber) as c_vaNumber, MAX(cpv.c_amount) as c_amount, MAX(IF(cpv.c_type='Dynamic', cdv.c_merchantTransactionId, crv.c_merchantTransactionId)) AS Merchant_Transaction_Id");
+         $this->db->from('cashin_payment_va cpv');
+         $this->db->join('cashin c', 'c.id = cpv.ref_cashinId', 'left');
+         $this->db->join('cashin_dynamic_va cdv', 'cdv.id = cpv.ref_cashinDynamicVaId', 'left');
+         $this->db->join('cashin_recurring_va crv', 'crv.id = cpv.ref_cashinRecurringVaId', 'left');
+         $this->db->group_start();
+         $this->db->like('cpv.c_vaNumber', $query);
+         $this->db->or_like('c.c_invoiceNo', $query);
+         $this->db->or_like('cdv.c_merchantTransactionId', $query);
+         $this->db->or_like('crv.c_merchantTransactionId', $query);
+         $this->db->group_end();
+         $this->db->group_by('c.c_invoiceNo');
+         $this->db->order_by('id', 'DESC');
+         $this->db->limit(5);
+          $q_va = $this->db->get();
+          if ($q_va) {
+             foreach ($q_va->result() as $r) {
+                if (stripos($r->c_invoiceNo, $query) !== false) {
+                   $url_id = $r->c_invoiceNo;
+                   $url_param = 'invoice';
+                   $title = $r->c_invoiceNo;
+                } else if ($r->Merchant_Transaction_Id && stripos($r->Merchant_Transaction_Id, $query) !== false) {
+                   $url_id = $r->Merchant_Transaction_Id;
+                   $url_param = 'transid';
+                   $title = $r->Merchant_Transaction_Id;
+                } else {
+                   $url_id = $r->c_vaNumber;
+                   $url_param = 'va_number';
+                   $title = $r->c_vaNumber;
+                }
+                
+                $results[] = [
+                   'title' => $title . " - Rp " . number_format($r->c_amount),
+                   'url' => base_url('admin/virtual_account?' . $url_param . '=' . $url_id),
+                   'category' => 'Virtual Account',
+                   'icon' => 'fas fa-university'
+                ];
+             }
+          }
+       }
+
+       // 5.1 Search VA Dynamic (Pending/All)
+       if (strlen($query) >= 5 && $this->db->table_exists('cashin_dynamic_va')) {
+          $this->db->select("id, c_merchantTransactionId, c_vaNumber, c_amount");
+          $this->db->from('cashin_dynamic_va');
+          $this->db->group_start();
+          $this->db->like('c_vaNumber', $query);
+          $this->db->or_like('c_merchantTransactionId', $query);
+          $this->db->group_end();
+          $this->db->order_by('id', 'DESC');
+          $this->db->limit(3);
+          $q_vad = $this->db->get();
+          if ($q_vad) {
+             foreach ($q_vad->result() as $r) {
+                // Contextual logic: if search matches VA, use VA as title and param. Else use Trans ID.
+                $matchValue = (stripos($r->c_vaNumber, $query) !== false) ? $r->c_vaNumber : $r->c_merchantTransactionId;
+                
+                $results[] = [
+                   'title' => $matchValue . " - Rp " . number_format($r->c_amount),
+                   'url' => base_url('admin/Va_dynamic?transid=' . $matchValue),
+                   'category' => 'VA Dynamic',
+                   'icon' => 'fas fa-university'
+                ];
+             }
+          }
+       }
+
+       // 5.2 Search VA Recurring (Pending/All)
+       if (strlen($query) >= 5 && $this->db->table_exists('cashin_recurring_va')) {
+          $this->db->select("id, c_merchantTransactionId, c_vaNumber, c_amount");
+          $this->db->from('cashin_recurring_va');
+          $this->db->group_start();
+          $this->db->like('c_vaNumber', $query);
+          $this->db->or_like('c_merchantTransactionId', $query);
+          $this->db->group_end();
+          $this->db->order_by('id', 'DESC');
+          $this->db->limit(3);
+          $q_var = $this->db->get();
+          if ($q_var) {
+             foreach ($q_var->result() as $r) {
+                $matchValue = (stripos($r->c_vaNumber, $query) !== false) ? $r->c_vaNumber : $r->c_merchantTransactionId;
+                
+                $results[] = [
+                   'title' => $matchValue . " - Rp " . number_format($r->c_amount),
+                   'url' => base_url('admin/VA_recurring?transid=' . $matchValue),
+                   'category' => 'VA Recurring',
+                   'icon' => 'fas fa-university'
+                ];
+             }
+          }
+       }
+
+      // 6. Search BI-FAST
+      if (strlen($query) >= 4 && $this->db->table_exists('cashout_payment_bifast')) {
+         $this->db->select("cpb.id, cpb.c_merchantTransactionId, cpb.c_amount, cpb.c_accountNo, c.c_invoiceNo");
+         $this->db->from('cashout_payment_bifast cpb');
+         $this->db->join('cashout c', 'c.id = cpb.ref_cashoutId', 'left');
+         $this->db->group_start();
+         $this->db->like('cpb.c_merchantTransactionId', $query);
+         $this->db->or_like('c.c_invoiceNo', $query);
+         $this->db->or_like('cpb.c_accountNo', $query);
+         $this->db->group_end();
+         $this->db->order_by('cpb.id', 'DESC');
+         $this->db->limit(5);
+         $q_bf = $this->db->get();
+         if ($q_bf) {
+            foreach ($q_bf->result() as $r) {
+               if (stripos($r->c_invoiceNo, $query) !== false) {
+                  $url_id = $r->c_invoiceNo;
+                  $url_param = 'invoice';
+                  $title = $r->c_invoiceNo;
+               } else if ($r->c_merchantTransactionId && stripos($r->c_merchantTransactionId, $query) !== false) {
+                  $url_id = $r->c_merchantTransactionId;
+                  $url_param = 'transid';
+                  $title = $r->c_merchantTransactionId;
+               } else if ($r->c_accountNo && stripos($r->c_accountNo, $query) !== false) {
+                  $url_id = $r->c_accountNo;
+                  $url_param = 'transid';
+                  $title = $r->c_accountNo;
+               } else {
+                  $url_id = $r->c_invoiceNo;
+                  $url_param = 'invoice';
+                  $title = $r->c_merchantTransactionId ?: $r->c_invoiceNo;
+               }
+               
+               $results[] = [
+                  'title' => $title . " - Rp " . number_format($r->c_amount),
+                  'url' => base_url('admin/bi_fast?' . $url_param . '=' . $url_id),
+                  'category' => 'BI-FAST Disbursement',
+                  'icon' => 'fas fa-exchange-alt'
+               ];
+            }
+         }
+      }
+
+      // 7. Search PPOB / Services (History)
+      if (strlen($query) >= 4 && $this->db->table_exists('cashout_payment_ppob')) {
+         $this->db->select("cpp.id, c.c_invoiceNo, cpp.c_amount, cpp.c_phone");
+         $this->db->from('cashout_payment_ppob cpp');
+         $this->db->join('cashout c', 'c.id = cpp.ref_cashoutId', 'left');
+         $this->db->group_start();
+         $this->db->like('c.c_invoiceNo', $query);
+         $this->db->or_like('cpp.c_phone', $query);
+         $this->db->group_end();
+         $this->db->order_by('cpp.id', 'DESC');
+         $this->db->limit(5);
+         $q_ppob = $this->db->get();
+         if ($q_ppob) {
+            foreach ($q_ppob->result() as $r) {
+               if (stripos($r->c_invoiceNo, $query) !== false) {
+                  $title = $r->c_invoiceNo;
+               } else if (stripos($r->c_phone, $query) !== false) {
+                  $title = $r->c_phone;
+               } else {
+                  $title = $r->c_invoiceNo;
+               }
+               $results[] = [
+                  'title' => $title . " - Rp " . number_format($r->c_amount),
+                  'url' => base_url('admin/history?invoice=' . $r->c_invoiceNo),
+                  'category' => 'Services / PPOB',
+                  'icon' => 'fas fa-history'
+               ];
+            }
+         }
+      }
+
+      // 8. Search Dynamic / Recurring Requests (Pre-Payment Logs)
+      $dynamic_tables = [
+         'cashin_dynamic_qris_mpm' => ['url' => 'admin/qris_dynamic', 'cat' => 'QRIS Dynamic Req'],
+         'cashin_dynamic_va' => ['url' => 'admin/Va_dynamic', 'cat' => 'VA Dynamic Req'],
+         'cashin_dynamic_ewallet' => ['url' => 'admin/ewallet_dynamic', 'cat' => 'E-Wallet Dynamic Req'],
+         'cashin_recurring_qris_mpm' => ['url' => 'admin/qris_recurring', 'cat' => 'QRIS Recurring Req'],
+         'cashin_recurring_va' => ['url' => 'admin/VA_recurring', 'cat' => 'VA Recurring Req']
+      ];
+
+      foreach ($dynamic_tables as $table => $info) {
+         if (strlen($query) >= 6 && $this->db->table_exists($table)) {
+            $this->db->select("id, c_merchantTransactionId, c_amount");
+            $this->db->from($table);
+            $this->db->like('c_merchantTransactionId', $query);
+            $this->db->order_by('id', 'DESC');
+            $this->db->limit(2);
+            $q_dyn = $this->db->get();
+            if ($q_dyn) {
+               foreach ($q_dyn->result() as $r) {
+                  $results[] = [
+                     'title' => $r->c_merchantTransactionId . " - Rp " . number_format($r->c_amount),
+                     'url' => base_url($info['url'] . '?transid=' . $r->c_merchantTransactionId),
+                     'category' => $info['cat'],
+                     'icon' => 'fas fa-file-invoice'
+                  ];
+               }
+            }
+         }
+      }
+
+      echo json_encode(array_slice($results, 0, 15));
+   }
 }

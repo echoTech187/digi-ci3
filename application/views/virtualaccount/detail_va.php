@@ -122,11 +122,11 @@
                             <label class="dt-more-label text-muted mb-1 uppercase small">External Provider Data</label>
                             <div class="p-3 bg-white border rounded-lg">
                                 <div class="row">
-                                    <div class="col-md-4 mb-2 mb-md-0 border-right">
+                                    <div class="col-md-2 mb-2 mb-md-0 border-right">
                                         <small class="text-muted d-block">External ID</small>
                                         <span class="text-dark font-weight-bold"><?= $data['ref_cashinExternalId']; ?></span>
                                     </div>
-                                    <div class="col-md-4 mb-2 mb-md-0 border-right">
+                                    <div class="col-md-2 mb-2 mb-md-0 border-right">
                                         <small class="text-muted d-block">Ext. Settlement</small>
                                         <span class="text-dark"><?= ($data['c_isSettlementRealtimeExternal'] == 1) ? 'Realtime' : ($data['c_datetimeSettlementExternal'] ?: '-'); ?></span>
                                     </div>

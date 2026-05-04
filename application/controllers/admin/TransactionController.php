@@ -295,6 +295,15 @@ class TransactionController extends CI_Controller
       $this->load->model('History');
       is_logged_in();
 
+      if (!$this->input->is_ajax_request()) {
+          $search_invoice_ppob = $this->input->get('invoice') ?: ($this->input->post('search_invoice_ppob') ?: '');
+          if (!$this->input->get('invoice') && !$this->input->post('search_invoice_ppob')) {
+              $this->session->unset_userdata('last_search_ppob');
+          }
+      } else {
+          $search_invoice_ppob = $this->session->userdata('search_invoice_ppob');
+      }
+
       $search_merchant_purchase = $this->input->post('search_merchant_purchase');
       $search_date_purchase = $this->input->post('search_date_purchase');
 
@@ -311,12 +320,30 @@ class TransactionController extends CI_Controller
          $search_merchant_purchase = $this->session->userdata('search_merchant_purchase');
       }
 
+      $this->session->set_userdata('search_invoice_ppob', $search_invoice_ppob);
+
       // Intercept AJAX request for DataTables
       if ($this->input->is_ajax_request()) {
          try {
+            // Sync session with global search input
+            $dtSearch = $this->input->post('search')['value'] ?? '';
+            $oldSearch = $this->session->userdata('last_search_ppob');
+
+            if ($dtSearch === '' && $oldSearch !== '' && $oldSearch !== null) {
+                $this->session->unset_userdata('search_date_purchase');
+                $this->session->unset_userdata('search_merchant_purchase');
+                $this->session->unset_userdata('search_invoice_ppob');
+            }
+
+            if ($dtSearch !== '') {
+                $this->session->set_userdata('search_invoice_ppob', $dtSearch);
+                $this->session->set_userdata('last_search_ppob', $dtSearch);
+            }
+
             $filters = [
-               'date' => $search_date_purchase,
-               'merchant' => $search_merchant_purchase
+               'date' => $this->session->userdata('search_date_purchase'),
+               'merchant' => $this->session->userdata('search_merchant_purchase'),
+               'invoice' => $this->session->userdata('search_invoice_ppob')
             ];
             $this->History->get_datatables_handler($filters);
             return;
@@ -393,17 +420,45 @@ class TransactionController extends CI_Controller
       $data['title'] = 'Virtual Account';
       $data['user'] = $this->Model_user->view_user()->row_array();
 
-      $filters = ['search_date_va', 'search_date_va_to', 'search_name_va', 'search_va_number', 'search_date_va_settlement', 'search_va_transid'];
-      foreach ($filters as $filter) {
-         $val = $this->input->post($filter);
-         if ($val !== null) {
-            $this->session->set_userdata($filter, $val);
-            $data[$filter] = $val;
-         }
-         else {
-            $data[$filter] = $this->session->userdata($filter);
-         }
+      $search_name_va = $this->input->get('merchant') ?: $this->input->post('search_name_va');
+      $search_date_va = $this->input->get('date') ?: $this->input->post('search_date_va');
+      $search_date_va_to = $this->input->get('date_to') ?: $this->input->post('search_date_va_to');
+      $search_date_va_settlement = $this->input->get('settlement') ?: $this->input->post('search_date_va_settlement');
+
+      // Technical ID Search (Global Search): Reset if landing on clean URL (no GET/POST)
+      if (!$this->input->is_ajax_request()) {
+          $search_va_number = $this->input->get('va_number') ?: ($this->input->post('search_va_number') ?: '');
+          $search_va_transid = $this->input->get('transid') ?: ($this->input->post('search_va_transid') ?: '');
+          $search_invoice_no = $this->input->get('invoice') ?: ($this->input->post('search_invoice_no') ?: '');
+          
+          if (!$this->input->get('va_number') && !$this->input->post('search_va_number') && 
+              !$this->input->get('transid') && !$this->input->post('search_va_transid') &&
+              !$this->input->get('invoice') && !$this->input->post('search_invoice_no')) {
+              $this->session->unset_userdata('last_search_va');
+          }
+      } else {
+          $search_va_number = $this->session->userdata('search_va_number');
+          $search_va_transid = $this->session->userdata('search_va_transid');
+          $search_invoice_no = $this->session->userdata('search_invoice_no');
       }
+
+      // Store in session (Standard fields)
+      if ($search_name_va !== null) $this->session->set_userdata('search_name_va', $search_name_va);
+      if ($search_date_va !== null) $this->session->set_userdata('search_date_va', $search_date_va);
+      if ($search_date_va_to !== null) $this->session->set_userdata('search_date_va_to', $search_date_va_to);
+      if ($search_date_va_settlement !== null) $this->session->set_userdata('search_date_va_settlement', $search_date_va_settlement);
+      
+      // Store technical IDs
+      $this->session->set_userdata('search_va_number', $search_va_number);
+      $this->session->set_userdata('search_va_transid', $search_va_transid);
+      $this->session->set_userdata('search_invoice_no', $search_invoice_no);
+
+      $data['search_name_va'] = $this->session->userdata('search_name_va');
+      $data['search_date_va'] = $this->session->userdata('search_date_va');
+      $data['search_date_va_to'] = $this->session->userdata('search_date_va_to');
+      $data['search_date_va_settlement'] = $this->session->userdata('search_date_va_settlement');
+      $data['search_va_number'] = $this->session->userdata('search_va_number');
+      $data['search_va_transid'] = $this->session->userdata('search_va_transid');
 
       if ($this->input->post() && empty($data['search_name_va']) && ($data['search_date_va'] || $data['search_date_va_settlement'])) {
          $this->session->set_flashdata('error_message', 'Tanggal pencarian, Tanggal Settlement harus diisi');
@@ -417,6 +472,28 @@ class TransactionController extends CI_Controller
       // Handle DataTables AJAX Request
       if ($this->input->is_ajax_request()) {
          try {
+            // Sync session with global search input
+            $dtSearch = $this->input->post('search')['value'] ?? '';
+            $oldSearch = $this->session->userdata('last_search_va');
+            
+            // If user explicitly clears the search box, reset all filters for this module
+            if ($dtSearch === '' && $oldSearch !== '' && $oldSearch !== null) {
+                $this->session->unset_userdata('search_date_va');
+                $this->session->unset_userdata('search_date_va_to');
+                $this->session->unset_userdata('search_name_va');
+                $this->session->unset_userdata('search_date_va_settlement');
+                $this->session->unset_userdata('search_va_number');
+                $this->session->unset_userdata('search_va_transid');
+                $this->session->unset_userdata('search_invoice_no');
+            }
+
+            // Only update session from AJAX search box if it's NOT empty
+            // This prevents clearing a deep-linked search when navigating pages
+            if ($dtSearch !== '') {
+                $this->session->set_userdata('search_va_number', $dtSearch);
+                $this->session->set_userdata('last_search_va', $dtSearch);
+            }
+
             $filters = [
                'date' => $this->session->userdata('search_date_va'),
                'date_to' => $this->session->userdata('search_date_va_to'),
@@ -533,49 +610,45 @@ class TransactionController extends CI_Controller
       $data['user'] = $this->Model_user->view_user()->row_array();
 
       // Get & Store filters
-      $search_rrn = $this->input->post('search_rrn');
-      $search_name_qris = $this->input->post('search_name_qris');
-      $search_date_qris = $this->input->post('search_date_qris');
-      $search_date_qris_to = $this->input->post('search_date_qris_to');
-      $search_date_qris_settlement = $this->input->post('search_date_qris_settlement');
-      $search_invoice_no = $this->input->post('search_invoice_no');
-      $search_transid_qriss = $this->input->post('search_transactionid_ht');
+      $search_name_qris = $this->input->get('merchant') ?: $this->input->post('search_name_qris');
+      $search_date_qris = $this->input->get('date_from') ?: $this->input->post('search_date_qris');
+      $search_date_qris_to = $this->input->get('date_to') ?: $this->input->post('search_date_qris_to');
+      $search_date_qris_settlement = $this->input->get('settlement') ?: $this->input->post('search_date_qris_settlement');
 
+      // Technical ID Search (Global Search): Reset if landing on clean URL (no GET/POST)
+      if (!$this->input->is_ajax_request()) {
+          $search_rrn = $this->input->get('rrn') ?: ($this->input->post('search_rrn') ?: '');
+          $search_invoice_no = $this->input->get('invoice') ?: ($this->input->post('search_invoice_no') ?: '');
+          $search_transid_qriss = $this->input->get('transid') ?: ($this->input->post('search_transactionid_ht') ?: '');
+          
+          if (!$this->input->get('rrn') && !$this->input->post('search_rrn') && 
+              !$this->input->get('invoice') && !$this->input->post('search_invoice_no') &&
+              !$this->input->get('transid') && !$this->input->post('search_transactionid_ht')) {
+              $this->session->unset_userdata('last_search_qris');
+          }
+      } else {
+          $search_rrn = $this->session->userdata('search_rrn');
+          $search_invoice_no = $this->session->userdata('search_invoice_no');
+          $search_transid_qriss = $this->session->userdata('search_transactionid_ht');
+      }
 
-      if ($search_transid_qriss !== null)
-         $this->session->set_userdata('search_transactionid_ht', $search_transid_qriss);
-      else
-         $search_transid_qriss = $this->session->userdata('search_transactionid_ht');
+       // Store in session (Standard & Technical fields)
+       if ($search_name_qris !== null) $this->session->set_userdata('search_name_qris', $search_name_qris);
+       if ($search_date_qris !== null) $this->session->set_userdata('search_date_qris', $search_date_qris);
+       if ($search_date_qris_to !== null) $this->session->set_userdata('search_date_qris_to', $search_date_qris_to);
+       if ($search_date_qris_settlement !== null) $this->session->set_userdata('search_date_qris_settlement', $search_date_qris_settlement);
+       if ($search_invoice_no !== null) $this->session->set_userdata('search_invoice_no', $search_invoice_no);
+       if ($search_rrn !== null) $this->session->set_userdata('search_rrn', $search_rrn);
+       if ($search_transid_qriss !== null) $this->session->set_userdata('search_transactionid_ht', $search_transid_qriss);
 
-      if ($search_rrn !== null)
-         $this->session->set_userdata('search_rrn', $search_rrn);
-      else
-         $search_rrn = $this->session->userdata('search_rrn');
-
-      if ($search_name_qris !== null)
-         $this->session->set_userdata('search_name_qris', $search_name_qris);
-      else
-         $search_name_qris = $this->session->userdata('search_name_qris');
-
-      if ($search_date_qris !== null)
-         $this->session->set_userdata('search_date_qris', $search_date_qris);
-      else
-         $search_date_qris = $this->session->userdata('search_date_qris');
-
-      if ($search_date_qris_to !== null)
-         $this->session->set_userdata('search_date_qris_to', $search_date_qris_to);
-      else
-         $search_date_qris_to = $this->session->userdata('search_date_qris_to');
-
-      if ($search_date_qris_settlement !== null)
-         $this->session->set_userdata('search_date_qris_settlement', $search_date_qris_settlement);
-      else
-         $search_date_qris_settlement = $this->session->userdata('search_date_qris_settlement');
-
-      if ($search_invoice_no !== null)
-         $this->session->set_userdata('search_invoice_no', $search_invoice_no);
-      else
-         $search_invoice_no = $this->session->userdata('search_invoice_no');
+       // Re-read from session for view
+       $search_name_qris = $this->session->userdata('search_name_qris');
+       $search_date_qris = $this->session->userdata('search_date_qris');
+       $search_date_qris_to = $this->session->userdata('search_date_qris_to');
+       $search_date_qris_settlement = $this->session->userdata('search_date_qris_settlement');
+       $search_invoice_no = $this->session->userdata('search_invoice_no');
+       $search_rrn = $this->session->userdata('search_rrn');
+       $search_transid_qriss = $this->session->userdata('search_transactionid_ht');
 
       // Summary defaults
       $qty = $total_trx = $total_fee = $total_fee_ext = $profit = 0;
@@ -588,6 +661,28 @@ class TransactionController extends CI_Controller
       // Handle DataTables AJAX Request
       if ($this->input->is_ajax_request()) {
          try {
+            // Sync session with global search input
+            $dtSearch = $this->input->post('search')['value'] ?? '';
+            $oldSearch = $this->session->userdata('last_search_qris');
+
+            // If user explicitly clears the search box, reset all filters for this module
+            if ($dtSearch === '' && $oldSearch !== '' && $oldSearch !== null) {
+                $this->session->unset_userdata('search_date_qris');
+                $this->session->unset_userdata('search_date_qris_to');
+                $this->session->unset_userdata('search_name_qris');
+                $this->session->unset_userdata('search_date_qris_settlement');
+                $this->session->unset_userdata('search_transactionid_ht');
+                $this->session->unset_userdata('search_rrn');
+                $this->session->unset_userdata('search_invoice_no');
+            }
+
+            // Only update session from AJAX search box if it's NOT empty
+            // This prevents clearing a deep-linked search when navigating pages
+            if ($dtSearch !== '') {
+                $this->session->set_userdata('search_invoice_no', $dtSearch);
+                $this->session->set_userdata('last_search_qris', $dtSearch);
+            }
+
             $filters = [
                'merchant' => $this->session->userdata('search_name_qris'),
                'date_from' => $this->session->userdata('search_date_qris'),
@@ -712,18 +807,29 @@ class TransactionController extends CI_Controller
       $data['title'] = 'Ewallet';
       $data['user'] = $this->Model_user->view_user()->row_array();
 
-      $search_name_ewallet = $this->input->post('search_name_ewallet');
-      $search_date_ewallet = $this->input->post('search_date_ewallet');
-      $search_date_ewallet_to = $this->input->post('search_date_ewallet_to');
-      $search_date_ewallet_settlement = $this->input->post('search_date_ewallet_settlement');
-      $search_invoice_no = $this->input->post('search_invoice_no');
+      $search_name_ewallet = $this->input->get('merchant') ?: $this->input->post('search_name_ewallet');
+      $search_date_ewallet = $this->input->get('date_from') ?: $this->input->post('search_date_ewallet');
+      $search_date_ewallet_to = $this->input->get('date_to') ?: $this->input->post('search_date_ewallet_to');
+      $search_date_ewallet_settlement = $this->input->get('settlement') ?: $this->input->post('search_date_ewallet_settlement');
+      
+      if (!$this->input->is_ajax_request()) {
+          $search_invoice_no = $this->input->get('invoice') ?: ($this->input->post('search_invoice_no') ?: '');
+          $search_transid_ewallet = $this->input->get('transid') ?: ($this->input->post('search_transid_ewallet') ?: '');
+
+          if (!$this->input->get('invoice') && !$this->input->post('search_invoice_no') &&
+              !$this->input->get('transid') && !$this->input->post('search_transid_ewallet')) {
+              $this->session->unset_userdata('last_search_ewallet');
+          }
+      } else {
+          $search_invoice_no = $this->session->userdata('search_invoice_no');
+          $search_transid_ewallet = $this->session->userdata('search_transid_ewallet');
+      }
 
       $total_trx = 0;
       $total_fee = 0;
       $total_fee_ext = 0;
       $qty = 0;
       $profit = 0;
-
 
       if ($search_name_ewallet) {
          $this->session->set_userdata('search_name_ewallet', $search_name_ewallet);
@@ -753,11 +859,18 @@ class TransactionController extends CI_Controller
          $search_date_ewallet_settlement = $this->session->userdata('search_date_ewallet_settlement');
       }
 
-      if ($search_invoice_no) {
+      if ($search_invoice_no !== null) {
          $this->session->set_userdata('search_invoice_no', $search_invoice_no);
       }
       else {
          $search_invoice_no = $this->session->userdata('search_invoice_no');
+      }
+
+      if ($search_transid_ewallet !== null) {
+         $this->session->set_userdata('search_transid_ewallet', $search_transid_ewallet);
+      }
+      else {
+         $search_transid_ewallet = $this->session->userdata('search_transid_ewallet');
       }
 
 
@@ -800,17 +913,50 @@ class TransactionController extends CI_Controller
       $config['num_tag_open'] = '<li class="page-item"><span class="page-link">';
       $config['num_tag_close'] = '</span></li>';
 
-      $this->pagination->initialize($config);
+      // Sync optional URL parameters (from Global Search redirect or Deep Links)
+      $getInvoice = $this->input->get('invoice');
+      if ($getInvoice) {
+          $this->session->set_userdata('search_invoice_no', $getInvoice);
+          $this->session->set_userdata('last_search_ewallet', $getInvoice);
+      }
+      
+      $getTransId = $this->input->get('transid');
+      if ($getTransId) {
+          $this->session->set_userdata('search_transid_ewallet', $getTransId);
+          $this->session->set_userdata('last_search_ewallet', $getTransId);
+      }
 
       // Handle DataTables AJAX Request
       if ($this->input->is_ajax_request()) {
          try {
+            // Sync session with global search input
+            $dtSearch = $this->input->post('search')['value'] ?? '';
+            $oldSearch = $this->session->userdata('last_search_ewallet');
+
+            // If user explicitly clears the search box, reset all filters for this module
+            if ($dtSearch === '' && $oldSearch !== '' && $oldSearch !== null) {
+                $this->session->unset_userdata('search_date_ewallet');
+                $this->session->unset_userdata('search_date_ewallet_to');
+                $this->session->unset_userdata('search_name_ewallet');
+                $this->session->unset_userdata('search_date_ewallet_settlement');
+                $this->session->unset_userdata('search_invoice_no');
+                $this->session->unset_userdata('search_transid_ewallet');
+            }
+
+            // Only update session from AJAX search box if it's NOT empty
+            // This prevents clearing a deep-linked search when navigating pages
+            if ($dtSearch !== '') {
+                $this->session->set_userdata('search_invoice_no', $dtSearch);
+                $this->session->set_userdata('last_search_ewallet', $dtSearch);
+            }
+
             $filters = [
                'merchant' => $this->session->userdata('search_name_ewallet'),
                'date_from' => $this->session->userdata('search_date_ewallet'),
                'date_to' => $this->session->userdata('search_date_ewallet_to'),
                'settlement' => $this->session->userdata('search_date_ewallet_settlement'),
-               'invoice' => $this->session->userdata('search_invoice_no')
+               'invoice' => $this->session->userdata('search_invoice_no'),
+               'transid' => $this->session->userdata('search_transid_ewallet')
             ];
             return $this->Ewallet->get_datatables_handler($filters);
          } catch (Throwable $e) {
@@ -842,6 +988,8 @@ class TransactionController extends CI_Controller
       $this->session->unset_userdata('search_name_ewallet');
       $this->session->unset_userdata('search_date_ewallet_settlement');
       $this->session->unset_userdata('search_invoice_no');
+      $this->session->unset_userdata('search_transid_ewallet');
+      $this->session->unset_userdata('last_search_ewallet');
       redirect('admin/ewallet');
    }
 
@@ -898,10 +1046,19 @@ class TransactionController extends CI_Controller
       $data['user'] = $this->Model_user->view_user()->row_array();
 
       // Read all search filters
+      // Technical ID Search (Global Search): Reset if landing on clean URL (no GET/POST)
+      if (!$this->input->is_ajax_request()) {
+          $search_transid_bifast = $this->input->get('transid') ?: ($this->input->get('invoice') ?: ($this->input->post('search_transid_bifast') ?: ''));
+          if (!$this->input->get('transid') && !$this->input->get('invoice') && !$this->input->post('search_transid_bifast')) {
+              $this->session->unset_userdata('last_search_bifast');
+          }
+      } else {
+          $search_transid_bifast = $this->session->userdata('search_transid_bifast');
+      }
+
       $search_name_bifast = $this->input->post('search_name_bifast') != NULL ? $this->input->post('search_name_bifast') : $this->session->userdata('search_name_bifast');
       $search_date_bifast = $this->input->post('search_date_bifast') != NULL ? $this->input->post('search_date_bifast') : $this->session->userdata('search_date_bifast');
       $search_date_bifast_to = $this->input->post('search_date_bifast_to') != NULL ? $this->input->post('search_date_bifast_to') : $this->session->userdata('search_date_bifast_to');
-      $search_transid_bifast = $this->input->post('search_transid_bifast') != NULL ? $this->input->post('search_transid_bifast') : $this->session->userdata('search_transid_bifast');
       $search_external_reff_id = $this->input->post('search_external_reff_id') != NULL ? $this->input->post('search_external_reff_id') : $this->session->userdata('search_external_reff_id');
       $search_channel_bifast = $this->input->post('search_channel_bifast') != NULL ? $this->input->post('search_channel_bifast') : $this->session->userdata('search_channel_bifast');
       $search_status_transaction_bifast = $this->input->post('search_status_transaction_bifast') != NULL ? $this->input->post('search_status_transaction_bifast') : $this->session->userdata('search_status_transaction_bifast');
@@ -939,6 +1096,28 @@ class TransactionController extends CI_Controller
       // Handle DataTables AJAX Request
       if ($this->input->is_ajax_request()) {
          try {
+            // Sync session with global search input
+            $dtSearch = $this->input->post('search')['value'] ?? '';
+            $oldSearch = $this->session->userdata('last_search_bifast');
+
+            // If user explicitly clears the search box, reset all filters for this module
+            if ($dtSearch === '' && $oldSearch !== '' && $oldSearch !== null) {
+                $this->session->unset_userdata('search_date_bifast');
+                $this->session->unset_userdata('search_date_bifast_to');
+                $this->session->unset_userdata('search_name_bifast');
+                $this->session->unset_userdata('search_status_transaction_bifast');
+                $this->session->unset_userdata('search_transid_bifast');
+                $this->session->unset_userdata('search_channel_bifast');
+                $this->session->unset_userdata('search_external_reff_id');
+            }
+
+            // Only update session from AJAX search box if it's NOT empty
+            // This prevents clearing a deep-linked search when navigating pages
+            if ($dtSearch !== '') {
+                $this->session->set_userdata('search_transid_bifast', $dtSearch);
+                $this->session->set_userdata('last_search_bifast', $dtSearch);
+            }
+
             $filters = [
                'merchant' => $this->session->userdata('search_name_bifast'),
                'date_from' => $this->session->userdata('search_date_bifast'),
@@ -1082,12 +1261,25 @@ class TransactionController extends CI_Controller
       $data['title'] = 'VA Dynamic';
       $data['user'] = $this->Model_user->view_user()->row_array();
 
-      // Read filters from POST or Session
+      // Technical ID Search (Global Search): Reset if landing on clean URL (no GET/POST)
+      if (!$this->input->is_ajax_request()) {
+          $search_merchant_trxid = $this->input->get('transid') ?: ($this->input->post('search_merchant_trxid') ?: '');
+          if (!$this->input->get('transid') && !$this->input->post('search_merchant_trxid') && !$this->input->get('va_number')) {
+              $this->session->unset_userdata('search_name_vad');
+              $this->session->unset_userdata('search_date_vad');
+              $this->session->unset_userdata('search_date_vad_to');
+              $this->session->unset_userdata('search_va_number');
+              $this->session->unset_userdata('search_merchant_trxid');
+              $this->session->unset_userdata('last_search_vad');
+          }
+      } else {
+          $search_merchant_trxid = $this->session->userdata('search_merchant_trxid');
+      }
+
       $search_name_vad = $this->input->post('search_name_vad') != NULL ? $this->input->post('search_name_vad') : $this->session->userdata('search_name_vad');
       $search_date_vad = $this->input->post('search_date_vad') != NULL ? $this->input->post('search_date_vad') : $this->session->userdata('search_date_vad');
       $search_date_vad_to = $this->input->post('search_date_vad_to') != NULL ? $this->input->post('search_date_vad_to') : $this->session->userdata('search_date_vad_to');
-      $search_va_number = $this->input->post('search_va_number') != NULL ? $this->input->post('search_va_number') : $this->session->userdata('search_va_number');
-      $search_merchant_trxid = $this->input->post('search_merchant_trxid') != NULL ? $this->input->post('search_merchant_trxid') : $this->session->userdata('search_merchant_trxid');
+      $search_va_number = $this->input->get('va_number') ? $this->input->get('va_number') : ($this->input->post('search_va_number') != NULL ? $this->input->post('search_va_number') : $this->session->userdata('search_va_number'));
 
       // Store in Session
       $this->session->set_userdata([
@@ -1101,6 +1293,23 @@ class TransactionController extends CI_Controller
       // Handle DataTables AJAX
       if ($this->input->is_ajax_request()) {
          try {
+            // Sync session with global search input
+            $dtSearch = $this->input->post('search')['value'] ?? '';
+            $oldSearch = $this->session->userdata('last_search_vad');
+
+            if ($dtSearch === '' && $oldSearch !== '' && $oldSearch !== null) {
+                $this->session->unset_userdata('search_date_vad');
+                $this->session->unset_userdata('search_date_vad_to');
+                $this->session->unset_userdata('search_name_vad');
+                $this->session->unset_userdata('search_va_number');
+                $this->session->unset_userdata('search_merchant_trxid');
+            }
+
+            if ($dtSearch !== '') {
+                $this->session->set_userdata('search_merchant_trxid', $dtSearch);
+                $this->session->set_userdata('last_search_vad', $dtSearch);
+            }
+
             $filters = [
                'merchant' => $this->session->userdata('search_name_vad'),
                'date' => $this->session->userdata('search_date_vad'),
@@ -1134,6 +1343,7 @@ class TransactionController extends CI_Controller
       $this->session->unset_userdata('search_date_vad_to');
       $this->session->unset_userdata('search_va_number');
       $this->session->unset_userdata('search_merchant_trxid');
+      $this->session->unset_userdata('last_search_vad');
       redirect('admin/Va_dynamic');
    }
    public function VA_recurring()
@@ -1147,6 +1357,25 @@ class TransactionController extends CI_Controller
 
       $data['title'] = 'VA Recurring';
       $data['user'] = $this->Model_user->view_user()->row_array();
+
+      // Technical ID Search (Global Search): Reset if landing on clean URL (no GET/POST)
+      if (!$this->input->is_ajax_request()) {
+          $search_transid_var = $this->input->get('transid') ?: ($this->input->post('search_transid_var') ?: '');
+          $search_va_number = $this->input->get('va_number') ?: ($this->input->post('search_va_number') ?: '');
+          
+          if (!$this->input->get('transid') && !$this->input->get('va_number') && !$this->input->post('search_name_var')) {
+              $this->session->unset_userdata('search_date_var');
+              $this->session->unset_userdata('search_date_var_to');
+              $this->session->unset_userdata('search_name_var');
+              $this->session->unset_userdata('search_submerchant_var');
+              $this->session->unset_userdata('search_transid_var');
+              $this->session->unset_userdata('search_va_number_var');
+              $this->session->unset_userdata('last_search_var');
+          }
+      } else {
+          $search_transid_var = $this->session->userdata('search_transid_var');
+          $search_va_number = $this->session->userdata('search_va_number_var');
+      }
 
       $search_name_var = $this->input->post('search_name_var');
       $search_date_var = $this->input->post('search_date_var');
@@ -1173,7 +1402,10 @@ class TransactionController extends CI_Controller
       else
          $search_submerchant_var = $this->session->userdata('search_submerchant_var');
 
-      $config['total_rows'] = $this->VARecurring->count_filtered($search_name_var, $search_date_var, $search_submerchant_var);
+      $this->session->set_userdata('search_transid_var', $search_transid_var);
+      $this->session->set_userdata('search_va_number_var', $search_va_number);
+
+      $config['total_rows'] = $this->VARecurring->count_filtered($search_name_var, $search_date_var, $search_submerchant_var, $search_va_number, $search_transid_var);
       $config['base_url'] = base_url('admin/VA_recurring');
       $config['per_page'] = 10;
       $config['uri_segment'] = 3;
@@ -1209,10 +1441,28 @@ class TransactionController extends CI_Controller
       if ($this->input->is_ajax_request()) {
          $this->db->db_debug = FALSE;
          try {
+            // Sync session with global search input
+            $dtSearch = $this->input->post('search')['value'] ?? '';
+            $oldSearch = $this->session->userdata('last_search_var');
+
+            if ($dtSearch === '' && $oldSearch !== '' && $oldSearch !== null) {
+                $this->session->unset_userdata('search_date_var');
+                $this->session->unset_userdata('search_date_var_to');
+                $this->session->unset_userdata('search_name_var');
+                $this->session->unset_userdata('search_submerchant_var');
+                $this->session->unset_userdata('search_transid_var');
+            }
+
+            if ($dtSearch !== '') {
+                $this->session->set_userdata('search_transid_var', $dtSearch);
+                $this->session->set_userdata('last_search_var', $dtSearch);
+            }
+
             $filters = [
                'merchant' => $this->session->userdata('search_name_var'),
                'date' => $this->session->userdata('search_date_var'),
                'submerchant' => $this->session->userdata('search_submerchant_var'),
+               'transid' => $this->session->userdata('search_transid_var'),
             ];
             return $this->VARecurring->get_datatables_handler($filters);
          } catch (Throwable $e) {
@@ -1236,15 +1486,14 @@ class TransactionController extends CI_Controller
 
    }
 
-   public function resetVa_recurring()
-   {
+    public function resetVa_recurring()
+    {
+       $this->session->unset_userdata('search_date_var');
+       $this->session->unset_userdata('search_name_var');
+       $this->session->unset_userdata('search_submerchant_var');
+       redirect('admin/VA_recurring');
+    }
 
-      $this->session->unset_userdata('search_date_var');
-      $this->session->unset_userdata('search_name_var');
-      $this->session->unset_userdata('search_submerchant_var');
-      redirect('admin/VA_recurring');
-
-   }
    public function qris_dynamic_list()
    {
       $this->load->model('QRISDynamic');
@@ -1274,10 +1523,25 @@ class TransactionController extends CI_Controller
       $data['user'] = $this->Model_user->view_user()->row_array();
 
       // Read filters from POST or Session
+      // Technical ID Search (Global Search): Reset if landing on clean URL (no GET/POST)
+      if (!$this->input->is_ajax_request()) {
+          $search_transid_qd = $this->input->get('transid') ?: ($this->input->post('search_transid_qd') ?: '');
+          if (!$this->input->get('transid') && !$this->input->post('search_transid_qd')) {
+              $this->session->unset_userdata('search_date_qd');
+              $this->session->unset_userdata('search_date_qd_to');
+              $this->session->unset_userdata('search_name_qd');
+              $this->session->unset_userdata('search_transid_qd');
+              $this->session->unset_userdata('search_status_transaction_qd');
+              $this->session->unset_userdata('search_reff_label');
+              $this->session->unset_userdata('last_search_qd');
+          }
+      } else {
+          $search_transid_qd = $this->session->userdata('search_transid_qd');
+      }
+
       $search_name_qd = $this->input->post('search_name_qd') != NULL ? $this->input->post('search_name_qd') : $this->session->userdata('search_name_qd');
       $search_date_qd = $this->input->post('search_date_qd') != NULL ? $this->input->post('search_date_qd') : $this->session->userdata('search_date_qd');
       $search_date_qd_to = $this->input->post('search_date_qd_to') != NULL ? $this->input->post('search_date_qd_to') : $this->session->userdata('search_date_qd_to');
-      $search_transid_qd = $this->input->post('search_transid_qd') != NULL ? $this->input->post('search_transid_qd') : $this->session->userdata('search_transid_qd');
       $search_status_transaction_qd = $this->input->post('search_status_transaction_qd') != NULL ? $this->input->post('search_status_transaction_qd') : $this->session->userdata('search_status_transaction_qd');
       $search_reff_label = $this->input->post('search_reff_label') != NULL ? $this->input->post('search_reff_label') : $this->session->userdata('search_reff_label');
 
@@ -1293,6 +1557,24 @@ class TransactionController extends CI_Controller
 
       if ($this->input->is_ajax_request()) {
          try {
+            // Sync session with global search input
+            $dtSearch = $this->input->post('search')['value'] ?? '';
+            $oldSearch = $this->session->userdata('last_search_qd');
+
+            if ($dtSearch === '' && $oldSearch !== '' && $oldSearch !== null) {
+                $this->session->unset_userdata('search_date_qd');
+                $this->session->unset_userdata('search_date_qd_to');
+                $this->session->unset_userdata('search_name_qd');
+                $this->session->unset_userdata('search_status_transaction_qd');
+                $this->session->unset_userdata('search_transid_qd');
+                $this->session->unset_userdata('search_reff_label');
+            }
+
+            if ($dtSearch !== '') {
+                $this->session->set_userdata('search_transid_qd', $dtSearch);
+                $this->session->set_userdata('last_search_qd', $dtSearch);
+            }
+
             $filters = [
                'merchant' => $this->session->userdata('search_name_qd'),
                'date' => $this->session->userdata('search_date_qd'),
@@ -1328,6 +1610,7 @@ class TransactionController extends CI_Controller
       $this->session->unset_userdata('search_transid_qd');
       $this->session->unset_userdata('search_status_transaction_qd');
       $this->session->unset_userdata('search_reff_label');
+      $this->session->unset_userdata('last_search_qd');
       redirect('admin/qris_dynamic');
    }
 
@@ -1340,10 +1623,24 @@ class TransactionController extends CI_Controller
       $data['title'] = 'E-Wallet Dynamic';
       $data['user'] = $this->Model_user->view_user()->row_array();
 
+      // Technical ID Search (Global Search): Reset if landing on clean URL (no GET/POST)
+      if (!$this->input->is_ajax_request()) {
+          $search_transid_qd = $this->input->get('transid') ?: ($this->input->post('search_transid_qd') ?: '');
+          if (!$this->input->get('transid') && !$this->input->post('search_transid_qd')) {
+              $this->session->unset_userdata('search_date_qd');
+              $this->session->unset_userdata('search_date_qd_to');
+              $this->session->unset_userdata('search_name_qd');
+              $this->session->unset_userdata('search_transid_qd');
+              $this->session->unset_userdata('search_status_transaction_qd');
+              $this->session->unset_userdata('last_search_ewd');
+          }
+      } else {
+          $search_transid_qd = $this->session->userdata('search_transid_qd');
+      }
+
       $search_date_qd = $this->input->post('search_date_qd');
       $search_date_qd_to = $this->input->post('search_date_qd_to');
       $search_name_qd = $this->input->post('search_name_qd');
-      $search_transid_qd = $this->input->post('search_transid_qd');
       $search_status_transaction_qd = $this->input->post('search_status_transaction_qd');
 
       // Sync Session
@@ -1362,10 +1659,7 @@ class TransactionController extends CI_Controller
       else
          $search_name_qd = $this->session->userdata('search_name_qd');
 
-      if ($search_transid_qd !== null)
-         $this->session->set_userdata('search_transid_qd', $search_transid_qd);
-      else
-         $search_transid_qd = $this->session->userdata('search_transid_qd');
+      $this->session->set_userdata('search_transid_qd', $search_transid_qd);
 
       if ($search_status_transaction_qd !== null)
          $this->session->set_userdata('search_status_transaction_qd', $search_status_transaction_qd);
@@ -1374,6 +1668,23 @@ class TransactionController extends CI_Controller
 
       if ($this->input->is_ajax_request()) {
          try {
+            // Sync session with global search input
+            $dtSearch = $this->input->post('search')['value'] ?? '';
+            $oldSearch = $this->session->userdata('last_search_ewd');
+
+            if ($dtSearch === '' && $oldSearch !== '' && $oldSearch !== null) {
+                $this->session->unset_userdata('search_date_qd');
+                $this->session->unset_userdata('search_date_qd_to');
+                $this->session->unset_userdata('search_name_qd');
+                $this->session->unset_userdata('search_status_transaction_qd');
+                $this->session->unset_userdata('search_transid_qd');
+            }
+
+            if ($dtSearch !== '') {
+                $this->session->set_userdata('search_transid_qd', $dtSearch);
+                $this->session->set_userdata('last_search_ewd', $dtSearch);
+            }
+
             $filters = [
                'merchant' => $this->session->userdata('search_name_qd'),
                'date' => $this->session->userdata('search_date_qd'),
@@ -1438,6 +1749,7 @@ class TransactionController extends CI_Controller
       $this->session->unset_userdata('search_name_qd');
       $this->session->unset_userdata('search_transid_qd');
       $this->session->unset_userdata('search_status_transaction_qd');
+      $this->session->unset_userdata('last_search_ewd');
       redirect('admin/ewallet_dynamic');
    }
 
@@ -1454,6 +1766,7 @@ class TransactionController extends CI_Controller
       $search_date_qr_to = $this->input->post('search_date_qr_to');
       $search_name_qr = $this->input->post('search_name_qr');
       $search_submerchant_qr = $this->input->post('search_submerchant_qr');
+      $search_transid_qr = $this->input->get('transid') ?: $this->input->post('search_transid_qr');
 
       // Sync Session
       if ($search_date_qr !== null)
@@ -1476,12 +1789,18 @@ class TransactionController extends CI_Controller
       else
          $search_submerchant_qr = $this->session->userdata('search_submerchant_qr');
 
+      if ($search_transid_qr !== null)
+         $this->session->set_userdata('search_transid_qr', $search_transid_qr);
+      else
+         $search_transid_qr = $this->session->userdata('search_transid_qr');
+
       if ($this->input->is_ajax_request()) {
          try {
             $filters = [
                'merchant' => $this->session->userdata('search_name_qr'),
                'date' => $this->session->userdata('search_date_qr'),
                'date_to' => $this->session->userdata('search_date_qr_to'),
+               'transid' => $this->session->userdata('search_transid_qr'),
                'submerchant' => $this->session->userdata('search_submerchant_qr')
             ];
             return $this->QRISRecurring->get_datatables_handler($filters);
@@ -1502,14 +1821,15 @@ class TransactionController extends CI_Controller
       $this->load->view('qris/qrisrecurring', $data);
    }
 
-   public function resetqris_recurring()
-   {
-      $this->session->unset_userdata('search_date_qr');
-      $this->session->unset_userdata('search_date_qr_to');
-      $this->session->unset_userdata('search_name_qr');
-      $this->session->unset_userdata('search_submerchant_qr');
-      redirect('admin/qris_recurring');
-   }
+    public function resetqris_recurring()
+    {
+       $this->session->unset_userdata('search_date_qr');
+       $this->session->unset_userdata('search_date_qr_to');
+       $this->session->unset_userdata('search_name_qr');
+       $this->session->unset_userdata('search_submerchant_qr');
+       $this->session->unset_userdata('search_transid_qr');
+       redirect('admin/qris_recurring');
+    }
 
    public function report()
    {
@@ -1927,7 +2247,6 @@ class TransactionController extends CI_Controller
    }
    public function getDetailQrisDynamicChannelExternal()
    {
-
       if (!$this->session->userdata('c_email')) {
          redirect('auth');
       }
@@ -1936,6 +2255,7 @@ class TransactionController extends CI_Controller
       $this->load->model('QRISDynamic');
 
       $ref_cashinExternalId = $this->input->post('ref_cashinExternalId');
+      $parentId = $this->input->post('parentId');
       $ref_cashinExternalLogQrisMpmIdCreate = $this->input->post('ref_cashinExternalLogQrisMpmIdCreate');
 
       if (empty($ref_cashinExternalId)) {
@@ -1943,7 +2263,7 @@ class TransactionController extends CI_Controller
          return;
       }
 
-      $detailData = $this->QRISDynamic->getDataQrisDynamicChannelExternal($ref_cashinExternalId, $ref_cashinExternalLogQrisMpmIdCreate);
+      $detailData = $this->QRISDynamic->getDataQrisDynamicChannelExternal($ref_cashinExternalId, $ref_cashinExternalLogQrisMpmIdCreate, $parentId);
       echo json_encode($detailData);
    }
 
@@ -1993,7 +2313,6 @@ class TransactionController extends CI_Controller
 
    public function getDetailEwalletChannelExternal()
    {
-
       if (!$this->session->userdata('c_email')) {
          redirect('auth');
       }
@@ -2002,6 +2321,7 @@ class TransactionController extends CI_Controller
       $this->load->model('QRISDynamic');
 
       $ref_cashinExternalId = $this->input->post('ref_cashinExternalId');
+      $parentId = $this->input->post('parentId');
       $ref_cashinExternalLogQrisMpmIdCreate = $this->input->post('ref_cashinExternalLogQrisMpmIdCreate');
 
       if (empty($ref_cashinExternalId)) {
@@ -2009,7 +2329,7 @@ class TransactionController extends CI_Controller
          return;
       }
 
-      $detailData = $this->QRISDynamic->getDataQrisDynamicChannelExternal($ref_cashinExternalId, $ref_cashinExternalLogQrisMpmIdCreate);
+      $detailData = $this->QRISDynamic->getDataQrisDynamicChannelExternal($ref_cashinExternalId, $ref_cashinExternalLogQrisMpmIdCreate, $parentId);
       echo json_encode($detailData);
    }
 
@@ -2023,6 +2343,7 @@ class TransactionController extends CI_Controller
       $this->load->model('VADynamic');
 
       $ref_cashinExternalId = $this->input->post('ref_cashinExternalId');
+      $parentId = $this->input->post('parentId');
       $ref_cashinExternalLogVaIdCreate = $this->input->post('ref_cashinExternalLogVaIdCreate');
 
       if (empty($ref_cashinExternalId)) {
@@ -2030,7 +2351,7 @@ class TransactionController extends CI_Controller
          return;
       }
 
-      $detailData = $this->VADynamic->getDataVaDynamicChannelExternal($ref_cashinExternalId, $ref_cashinExternalLogVaIdCreate);
+      $detailData = $this->VADynamic->getDataVaDynamicChannelExternal($ref_cashinExternalId, $ref_cashinExternalLogVaIdCreate, $parentId);
       echo json_encode($detailData);
    }
 
@@ -2044,6 +2365,7 @@ class TransactionController extends CI_Controller
       $this->load->model('VARecurring');
 
       $ref_cashinExternalId = $this->input->post('ref_cashinExternalId');
+      $parentId = $this->input->post('parentId');
       $ref_cashinExternalLogVaIdCreate = $this->input->post('ref_cashinExternalLogVaIdCreate');
 
       if (empty($ref_cashinExternalId)) {
@@ -2051,7 +2373,7 @@ class TransactionController extends CI_Controller
          return;
       }
 
-      $detailData = $this->VARecurring->getDataVaRecurringChannelExternal($ref_cashinExternalId, $ref_cashinExternalLogVaIdCreate);
+      $detailData = $this->VARecurring->getDataVaRecurringChannelExternal($ref_cashinExternalId, $ref_cashinExternalLogVaIdCreate, $parentId);
       echo json_encode($detailData);
    }
 
@@ -2065,6 +2387,7 @@ class TransactionController extends CI_Controller
       $this->load->model('QRISRecurring');
 
       $ref_cashinExternalId = $this->input->post('ref_cashinExternalId');
+      $parentId = $this->input->post('parentId');
       $ref_cashinExternalLogQrisMpmIdCreate = $this->input->post('ref_cashinExternalLogQrisMpmIdCreate');
 
       if (empty($ref_cashinExternalId)) {
@@ -2072,7 +2395,7 @@ class TransactionController extends CI_Controller
          return;
       }
 
-      $detailData = $this->QRISRecurring->getDataQrisRecurringChannelExternal($ref_cashinExternalId, $ref_cashinExternalLogQrisMpmIdCreate);
+      $detailData = $this->QRISRecurring->getDataQrisRecurringChannelExternal($ref_cashinExternalId, $ref_cashinExternalLogQrisMpmIdCreate, $parentId);
       echo json_encode($detailData);
    }
 

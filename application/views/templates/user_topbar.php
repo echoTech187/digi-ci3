@@ -59,6 +59,17 @@
                     <?php endforeach; ?>
                 </ol>
             </nav>
+            
+            <!-- Global Search -->
+            <div class="d-none d-lg-block ml-4 flex-grow-1" style="max-width: 450px;">
+                <div class="premium-search-container">
+                    <input type="text" class="form-control premium-search-input" placeholder="Search menus, merchants, or transactions (ID, VA, RRN, Inv)..." id="globalSearchInput" autocomplete="off">
+                    <i class="fas fa-search search-icon" id="globalSearchIcon"></i>
+                    <i class="fas fa-spinner fa-spin search-loader" id="globalSearchLoader"></i>
+                    <div class="search-badge">⌘ K</div>
+                    <div id="searchResultsDropdown" class="search-results-dropdown"></div>
+                </div>
+            </div>
 
             <!-- Topbar Navbar -->
             <ul class="navbar-nav ml-auto align-items-center">
@@ -192,6 +203,77 @@
                     html.setAttribute('data-theme', newTheme);
                     localStorage.setItem('theme', newTheme);
                     updateThemeIcon(newTheme);
+                });
+
+                // Global Search Keyboard Shortcut
+                document.addEventListener('keydown', function(e) {
+                    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+                        e.preventDefault();
+                        document.getElementById('globalSearchInput').focus();
+                    }
+                });
+
+                // Global Search Real-time Logic
+                const searchInput = document.getElementById('globalSearchInput');
+                const resultsDropdown = document.getElementById('searchResultsDropdown');
+                let searchTimeout;
+
+                async function performSearch(query) {
+                    if (query.length < 2) {
+                        resultsDropdown.style.display = 'none';
+                        return;
+                    }
+
+                    clearTimeout(searchTimeout);
+                    searchTimeout = setTimeout(async () => {
+                        const loader = document.getElementById('globalSearchLoader');
+                        const icon = document.getElementById('globalSearchIcon');
+                        
+                        if (loader && icon) {
+                            loader.style.display = 'block';
+                            icon.style.display = 'none';
+                        }
+
+                        try {
+                            const response = await fetch(`<?= base_url('admin/globalSearch'); ?>?q=${encodeURIComponent(query)}`);
+                            const results = await response.json();
+
+                            // Display Results
+                            if (results.length > 0) {
+                                resultsDropdown.innerHTML = results.map(res => `
+                                    <div class="search-result-item" onclick="window.location.href='${res.url}'">
+                                        <div class="result-icon"><i class="${res.icon}"></i></div>
+                                        <div class="result-info">
+                                            <div class="result-title">${res.title}</div>
+                                            <div class="result-category">${res.category}</div>
+                                        </div>
+                                    </div>
+                                `).join('');
+                                resultsDropdown.style.display = 'block';
+                            } else {
+                                resultsDropdown.innerHTML = '<div class="p-3 text-center text-muted small"><i class="fas fa-search mb-2 d-block"></i>No matching results found</div>';
+                                resultsDropdown.style.display = 'block';
+                            }
+                        } catch (error) {
+                            console.error('Search error:', error);
+                        } finally {
+                            if (loader && icon) {
+                                loader.style.display = 'none';
+                                icon.style.display = 'block';
+                            }
+                        }
+                    }, 300);
+                }
+
+                if (searchInput) {
+                    searchInput.addEventListener('input', (e) => performSearch(e.target.value));
+                    searchInput.addEventListener('focus', (e) => { if(e.target.value.length > 1) resultsDropdown.style.display = 'block'; });
+                }
+
+                document.addEventListener('click', (e) => {
+                    if (searchInput && !searchInput.contains(e.target) && !resultsDropdown.contains(e.target)) {
+                        resultsDropdown.style.display = 'none';
+                    }
                 });
 
                 // Maintenance toggle logic

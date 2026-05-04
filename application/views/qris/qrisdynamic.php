@@ -19,9 +19,11 @@
         <?php
             // Badge count for More Filters
             $extra_active = 0;
-            if ($this->session->userdata('search_transid_qd'))             $extra_active++;
+            if ($this->session->userdata('search_date_qd'))             $extra_active++;
+            if ($this->session->userdata('search_date_qd_to'))          $extra_active++;
+            if ($this->session->userdata('search_name_qd'))             $extra_active++;
             if ($this->session->userdata('search_status_transaction_qd')) $extra_active++;
-            if ($this->session->userdata('search_reff_label'))            $extra_active++;
+            if ($this->session->userdata('search_reff_label'))           $extra_active++;
         ?>
 
         <form id="qris_dynamic_form" method="post" action="<?= base_url('admin/qris_dynamic'); ?>">
@@ -31,7 +33,7 @@
                 <!-- LEFT: Global Search -->
                 <div class="dt-search-wrapper">
                     <i class="fas fa-search dt-search-icon"></i>
-                    <input type="text" id="qrisDynamicGlobalSearch" class="dt-search-input" placeholder="Search by Merchant, ID, or Reference...">
+                    <input type="text" id="qrisDynamicGlobalSearch" class="dt-search-input" placeholder="Search by Merchant, ID, or Reference..." value="<?= $this->session->userdata('search_transid_qd'); ?>">
                 </div>
 
                 <!-- RIGHT: Filters -->
@@ -81,11 +83,6 @@
                                             <?php endforeach; ?>
                                         </select>
                                     </div>
-                                </div>
-                                <!-- Transaction ID -->
-                                <div class="dt-more-field">
-                                    <label class="dt-more-label"><i class="fas fa-hashtag mr-1 mr-2"></i> Merchant Trans ID</label>
-                                    <input type="text" name="search_transid_qd" class="dt-more-input" placeholder="e.g. TX12345..." value="<?= $this->session->userdata('search_transid_qd'); ?>">
                                 </div>
                                 
                                 <!-- Status -->
@@ -244,7 +241,15 @@
             {data: 'name_merchant',className: 'text-nowrap'},
             {data: 'name_submerchant',className: 'text-nowrap'},
             {data: 'c_merchantTransactionId', className: 'text-dark font-weight-bold text-nowrap'},
-            {data: 'ref_cashinExternalId',className: 'text-nowrap'},
+            {data: 'ref_cashinExternalId', className: 'text-nowrap', render: function(data, type, row) {
+                if (!data) return '-';
+                return '<a href="javascript:void(0)" class="detailQrisDynamicChannelExternalAjax font-weight-bold text-primary" ' +
+                       'data-merchanttransactionid="' + row.c_merchantTransactionId + '" ' +
+                       'data-ref_cashinexternalid="' + data + '" ' +
+                       'data-id="' + row.id + '" ' +
+                       'data-ref_cashinexternallogqrismpmidcreate="' + row.ref_cashinExternalLogQrisMpmIdCreate + '">' +
+                       data + '</a>';
+            }},
             {data: 'c_amount',className: 'text-nowrap', render: function(data){
                 var val = typeof data === 'string' ? data.replace(/[^0-9.-]+/g,"") : data;
                 return '<span class="font-weight-bold text-dark">Rp ' + Number(val).toLocaleString('id-ID') + '</span>';
@@ -259,6 +264,12 @@
         $('#qrisDynamicGlobalSearch').on('input', debounce(function() {
             table.search(this.value).draw();
         }, 400));
+
+        // Trigger initial search if value exists (Deep Linking)
+        var initSearch = $('#qrisDynamicGlobalSearch').val();
+        if (initSearch) {
+            table.search(initSearch).draw();
+        }
 
         // ── More Filters dropdown ──
         var $moreBtn   = $('#qrisMoreFiltersBtn');
@@ -305,7 +316,9 @@
             e.preventDefault();
             var merchantTransactionId = $(this).data('merchanttransactionid');
             var ref_cashinExternalId = $(this).data('ref_cashinexternalid'); 
+            var parentId = $(this).data('id');
             var ref_cashinExternalLogQrisMpmIdCreate = $(this).data('ref_cashinexternallogqrismpmidcreate'); 
+
             if (!ref_cashinExternalLogQrisMpmIdCreate) {
                 ref_cashinExternalLogQrisMpmIdCreate = $(this).attr('data-ref_cashinExternalLogQrisMpmIdCreate');
             }
@@ -321,6 +334,7 @@
                 method: "POST",
                 data: {
                     ref_cashinExternalId: ref_cashinExternalId,
+                    parentId: parentId,
                     ref_cashinExternalLogQrisMpmIdCreate: ref_cashinExternalLogQrisMpmIdCreate,
                     "<?= $this->security->get_csrf_token_name(); ?>": "<?= $this->security->get_csrf_hash(); ?>"
                 },

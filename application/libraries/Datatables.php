@@ -155,13 +155,19 @@ class Datatables
         // 2. Prepare result set
         if ($this->manual_data !== NULL) {
             $result = $this->manual_data;
-            $recordsFiltered = ($this->manual_recordsFiltered !== NULL) ? $this->manual_recordsFiltered : count($result);
             
-            // Apply pagination to manual data
-            if (isset($_POST['length']) && $_POST['length'] != -1) {
-                $start = isset($_POST['start']) ? (int)$_POST['start'] : 0;
-                $length = (int)$_POST['length'];
-                $result = array_slice($result, $start, $length);
+            // If manual counts are NOT provided, we assume $result is the FULL dataset and we must paginate it
+            // If manual counts ARE provided, we assume $result is ALREADY paginated
+            if ($this->manual_recordsFiltered === NULL) {
+                $recordsFiltered = count($result);
+                if (isset($_POST['length']) && $_POST['length'] != -1) {
+                    $start = isset($_POST['start']) ? (int)$_POST['start'] : 0;
+                    $length = (int)$_POST['length'];
+                    $result = array_slice($result, $start, $length);
+                }
+            } else {
+                $recordsFiltered = $this->manual_recordsFiltered;
+                // SKIP array_slice because we assume the model already handled it
             }
         } else {
             // Standard flow
@@ -273,15 +279,7 @@ class Datatables
 
     protected function count_all()
     {
-        // Optimization for very large tables if no complex where is set
-        if (empty($this->where) && empty($this->joins)) {
-            $table_name = explode(' ', $this->table)[0];
-            $query = $this->CI->db->query("SELECT TABLE_ROWS FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '{$table_name}'");
-            $result = $query->row();
-            if ($result) return (int) $result->TABLE_ROWS;
-        }
-
-        // Use a temporary clone to avoid polluting the main builder
+        // Accurate real count
         $temp_db = clone $this->CI->db;
         $this->apply_query($temp_db);
         return $temp_db->count_all_results('', FALSE);

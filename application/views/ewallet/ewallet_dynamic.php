@@ -21,7 +21,6 @@
             if ($this->session->userdata('search_date_qd')) $extra_active++;
             if ($this->session->userdata('search_date_qd_to')) $extra_active++;
             if ($this->session->userdata('search_status_transaction_qd')) $extra_active++;
-            if ($this->session->userdata('search_transid_qd'))             $extra_active++;
         ?>
 
         <!-- ── Toolbar ── -->
@@ -32,7 +31,7 @@
                 <!-- LEFT: Global Search -->
                 <div class="dt-search-wrapper">
                     <i class="fas fa-search dt-search-icon"></i>
-                    <input type="text" id="ewalletDynamicGlobalSearch" class="dt-search-input" placeholder="Search Transaction, Merchant, or ID...">
+                    <input type="text" id="ewalletDynamicGlobalSearch" class="dt-search-input" placeholder="Search Transaction, Merchant, or ID..." value="<?= $this->session->userdata('search_transid_qd'); ?>">
                 </div>
 
                 <!-- RIGHT: Filters -->
@@ -95,11 +94,6 @@
                                     </select>
                                 </div>
                                 
-                                <!-- Transaction ID -->
-                                <div class="dt-more-field">
-                                    <label class="dt-more-label"><i class="fas fa-hashtag mr-1 mr-2"></i> Merchant Trans ID</label>
-                                    <input type="text" name="search_transid_qd" class="dt-more-input" placeholder="e.g. TX12345..." value="<?= $this->session->userdata('search_transid_qd'); ?>">
-                                </div>
                             </div>
 
                             <div class="dt-more-panel-footer">
@@ -245,7 +239,14 @@
             {data: 'name_submerchant',className: 'text-nowrap'},
             {data: 'ref_cashinChannelId',className: 'text-nowrap'},
             {data: 'c_merchantTransactionId', className: 'text-dark font-weight-bold text-nowrap'},
-            {data: 'ref_cashinExternalId', className: 'text-center'},
+            {data: 'ref_cashinExternalId', className: 'text-nowrap', render: function(data, type, row) {
+                if (!data) return '-';
+                return '<a href="javascript:void(0)" class="detailEwalletDynamicChannelExternalAjax font-weight-bold text-primary" ' +
+                       'data-merchanttransactionid="' + row.c_merchantTransactionId + '" ' +
+                       'data-ref_cashinexternalid="' + data + '" ' +
+                       'data-ref_cashinexternallogewalletidcreate="' + row.ref_cashinExternalLogEwalletIdCreate + '">' +
+                       data + '</a>';
+            }},
             {data: 'c_amount',className: 'text-nowrap', render: function(data){
                 var val = typeof data === 'string' ? data.replace(/[^0-9.-]+/g,"") : data;
                 return '<span class="font-weight-bold text-dark">Rp ' + Number(val).toLocaleString('id-ID') + '</span>';
@@ -267,6 +268,12 @@
         $('#ewalletDynamicGlobalSearch').on('input', debounce(function() {
             table.search(this.value).draw();
         }, 400));
+
+        // Trigger initial search if value exists (Deep Linking)
+        var initSearch = $('#ewalletDynamicGlobalSearch').val();
+        if (initSearch) {
+            table.search(initSearch).draw();
+        }
 
         // Select2 inside toolbar
         $('.ewallet-dynamic-select2').select2({

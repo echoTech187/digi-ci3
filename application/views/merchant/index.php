@@ -34,7 +34,7 @@
                 <!-- LEFT: Global Search -->
                 <div class="dt-search-wrapper">
                     <i class="fas fa-search dt-search-icon"></i>
-                    <input type="text" id="merchantGlobalSearch" class="dt-search-input" placeholder="Search by name, ID, or email..." value="<?= $this->session->userdata('search_merchant'); ?>">
+                    <input type="text" id="merchantGlobalSearch" class="dt-search-input" placeholder="Search by name, ID, email, or Business ID..." value="<?= $this->session->userdata('search_merchant'); ?>">
                 </div>
 
                 <!-- RIGHT: Filters & Actions -->

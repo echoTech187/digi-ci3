@@ -48,13 +48,40 @@ class Mutation_model extends CI_Model
             }
         }
 
-        // Standard DataTables Search
-        if (isset($_POST['search']['value']) && $_POST['search']['value'] != "") {
-            $search = $_POST['search']['value'];
-            $this->db->group_start();
-            $this->db->like('mutation.id', $search);
-            $this->db->or_like('mutation.c_potition', $search);
-            $this->db->group_end();
+        // TRULY SMART SEARCH
+        $searchValue = isset($_POST['search']['value']) ? trim($_POST['search']['value']) : '';
+        if ($searchValue != "") {
+            $safeSearch = $this->db->escape_str($searchValue);
+            $matching_ids = [-1];
+            
+            // 1. Direct ID match
+            if (is_numeric($searchValue) && strlen($searchValue) < 15) {
+                $matching_ids[] = (int)$searchValue;
+            }
+
+            // 2. Search by Invoice No in linked cashin/cashout
+            $inv_res_in = $this->db->query("SELECT id FROM cashin WHERE c_invoiceNo LIKE '$safeSearch%' LIMIT 50")->result();
+            if (!empty($inv_res_in)) {
+                $ids_in = array_column($inv_res_in, 'id');
+                $mut_res = $this->db->query("SELECT id FROM mutation WHERE ref_cashinId IN (".implode(',', $ids_in).") LIMIT 50")->result();
+                if (!empty($mut_res)) $matching_ids = array_merge($matching_ids, array_column($mut_res, 'id'));
+            }
+
+            $inv_res_out = $this->db->query("SELECT id FROM cashout WHERE c_invoiceNo LIKE '$safeSearch%' LIMIT 50")->result();
+            if (!empty($inv_res_out)) {
+                $ids_out = array_column($inv_res_out, 'id');
+                $mut_res = $this->db->query("SELECT id FROM mutation WHERE ref_cashoutId IN (".implode(',', $ids_out).") LIMIT 50")->result();
+                if (!empty($mut_res)) $matching_ids = array_merge($matching_ids, array_column($mut_res, 'id'));
+            }
+
+            $matching_ids = array_unique($matching_ids);
+
+            if (count($matching_ids) > 1) {
+                $this->db->where_in('mutation.id', $matching_ids);
+            } else {
+                // Fallback to position search if no specific ID found
+                $this->db->like('mutation.c_potition', $searchValue);
+            }
         }
 
         // Standard DataTables Order
@@ -111,12 +138,33 @@ class Mutation_model extends CI_Model
             }
         }
 
-        if (isset($_POST['search']['value']) && $_POST['search']['value'] != "") {
-            $search = $_POST['search']['value'];
-            $this->db->group_start();
-            $this->db->like('mutation.id', $search);
-            $this->db->or_like('mutation.c_potition', $search);
-            $this->db->group_end();
+        // TRULY SMART SEARCH in Count
+        $searchValue = isset($_POST['search']['value']) ? trim($_POST['search']['value']) : '';
+        if ($searchValue != "") {
+            $safeSearch = $this->db->escape_str($searchValue);
+            $matching_ids = [-1];
+            if (is_numeric($searchValue) && strlen($searchValue) < 15) $matching_ids[] = (int)$searchValue;
+
+            $inv_res_in = $this->db->query("SELECT id FROM cashin WHERE c_invoiceNo LIKE '$safeSearch%' LIMIT 50")->result();
+            if (!empty($inv_res_in)) {
+                $ids_in = array_column($inv_res_in, 'id');
+                $mut_res = $this->db->query("SELECT id FROM mutation WHERE ref_cashinId IN (".implode(',', $ids_in).") LIMIT 50")->result();
+                if (!empty($mut_res)) $matching_ids = array_merge($matching_ids, array_column($mut_res, 'id'));
+            }
+
+            $inv_res_out = $this->db->query("SELECT id FROM cashout WHERE c_invoiceNo LIKE '$safeSearch%' LIMIT 50")->result();
+            if (!empty($inv_res_out)) {
+                $ids_out = array_column($inv_res_out, 'id');
+                $mut_res = $this->db->query("SELECT id FROM mutation WHERE ref_cashoutId IN (".implode(',', $ids_out).") LIMIT 50")->result();
+                if (!empty($mut_res)) $matching_ids = array_merge($matching_ids, array_column($mut_res, 'id'));
+            }
+
+            $matching_ids = array_unique($matching_ids);
+            if (count($matching_ids) > 1) {
+                $this->db->where_in('mutation.id', $matching_ids);
+            } else {
+                $this->db->like('mutation.c_potition', $searchValue);
+            }
         }
 
         $query = $this->db->get();

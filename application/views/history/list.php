@@ -42,7 +42,7 @@ $download_url = base_url('admin/download_history')
                 <!-- LEFT: Global Search -->
                 <div class="dt-search-wrapper">
                     <i class="fas fa-search dt-search-icon"></i>
-                    <input type="text" id="historyGlobalSearch" class="dt-search-input" placeholder="Search by Invoice, Phone, or ID...">
+                    <input type="text" id="historyGlobalSearch" class="dt-search-input" placeholder="Search by Invoice, or Phone..." value="<?= $this->session->userdata('search_invoice_ppob'); ?>">
                 </div>
                 <!-- RIGHT: Filters -->
                 <div class="dt-toolbar-filters">
@@ -185,6 +185,12 @@ $download_url = base_url('admin/download_history')
         $('#historyGlobalSearch').on('input', debounce(function() {
             table.search(this.value).draw();
         }, 400));
+
+        // Trigger initial search if value exists (Deep Linking)
+        var initSearch = $('#historyGlobalSearch').val();
+        if (initSearch) {
+            table.search(initSearch).draw();
+        }
 
         // Select2 for the toolbar
         $('.history-select2').select2({

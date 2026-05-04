@@ -12,12 +12,12 @@
     <!-- ── Main Data Card ── -->
     <div class="card border-0 shadow-sm dt-card">
         <!-- ── Toolbar ── -->
-         <?php
+        <?php
             // Badge count for More Filters
             $extra_active = 0;
-            if ($this->session->userdata('search_name_vad'))      $extra_active++;
-            if ($this->session->userdata('search_va_number'))    $extra_active++;
-            if ($this->session->userdata('search_merchant_trxid')) $extra_active++;
+            if ($this->session->userdata('search_date_qr'))      $extra_active++;
+            if ($this->session->userdata('search_date_qr_to'))   $extra_active++;
+            if ($this->session->userdata('search_name_qr'))      $extra_active++;
         ?>
         <form id="qris_recurring_form" method="post" action="<?= base_url('admin/qris_recurring'); ?>">
             <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>">
@@ -25,7 +25,7 @@
                 <!-- LEFT: Global Search -->
                 <div class="dt-search-wrapper">
                     <i class="fas fa-search dt-search-icon"></i>
-                    <input type="text" id="qrisRecurringGlobalSearch" class="dt-search-input" placeholder="Search by Merchant, ID, or Reference...">
+                    <input type="text" id="qrisRecurringGlobalSearch" class="dt-search-input" placeholder="Search by Merchant, ID, or Reference..." value="<?= $this->session->userdata('search_transid_qr'); ?>">
                 </div>
                 
                 <!-- RIGHT: Filters -->
@@ -217,15 +217,13 @@
                 data: 'ref_cashinExternalId',
                 className: 'text-nowrap',
                 render: function(data, type, row) {
-                    if (data && row.ref_cashinExternalLogQrisMpmIdCreate) {
-                        return '<a data-toggle="modal" href="#" ' +
-                            'data-target="#detailQrisDynamicChannelExternalModal" ' +
-                            'data-merchantTransactionId="' + row.c_merchantTransactionId + '" ' +
-                            'data-ref_cashinExternalId="' + data + '" ' +
-                            'data-ref_cashinExternalLogQrisMpmIdCreate="' + row.ref_cashinExternalLogQrisMpmIdCreate + '" ' +
-                            'class="detailQrisDynamicChannelExternalAjax">' + data + '</a>';
-                    }
-                    return data || '-';
+                    if (!data) return '-';
+                    return '<a href="javascript:void(0)" class="detailQrisDynamicChannelExternalAjax font-weight-bold text-primary" ' +
+                           'data-merchanttransactionid="' + row.c_merchantTransactionId + '" ' +
+                           'data-ref_cashinexternalid="' + data + '" ' +
+                           'data-id="' + row.id + '" ' +
+                           'data-ref_cashinexternallogqrismpmidcreate="' + row.ref_cashinExternalLogQrisMpmIdCreate + '">' +
+                           data + '</a>';
                 }
             },
             {data: 'c_amount',className: 'text-nowrap', render: function(data){
@@ -267,6 +265,12 @@
         $('#qrisRecurringGlobalSearch').on('input', debounce(function() {
             table.search(this.value).draw();
         }, 400));
+
+        // Trigger initial search if value exists (Deep Linking)
+        var initSearch = $('#qrisRecurringGlobalSearch').val();
+        if (initSearch) {
+            table.search(initSearch).draw();
+        }
         // Select2 inside toolbar
         $('.qris-recurring-select2').select2({
             width: '100%',
@@ -279,8 +283,8 @@
             e.preventDefault();
             var merchantTransactionId = $(this).data('merchanttransactionid');
             var ref_cashinExternalId = $(this).data('ref_cashinexternalid'); 
-            var ref_cashinExternalLogQrisMpmIdCreate = $(this).data('ref_cashinextallogqrismpmidcreate') || $(this).data('ref_cashinexternallogqrismpmidcreate'); 
-            // Handle potential variations in data attribute naming by jQuery
+            var parentId = $(this).data('id');
+            var ref_cashinExternalLogQrisMpmIdCreate = $(this).data('ref_cashinexternallogqrismpmidcreate'); 
             if (!ref_cashinExternalLogQrisMpmIdCreate) {
                 ref_cashinExternalLogQrisMpmIdCreate = $(this).attr('data-ref_cashinExternalLogQrisMpmIdCreate');
             }
@@ -295,6 +299,7 @@
                 data: {
                     '<?php echo $this->security->get_csrf_token_name(); ?>': '<?php echo $this->security->get_csrf_hash(); ?>',
                     ref_cashinExternalId: ref_cashinExternalId,
+                    parentId: parentId,
                     ref_cashinExternalLogQrisMpmIdCreate: ref_cashinExternalLogQrisMpmIdCreate
                 },
                 dataType: "json",

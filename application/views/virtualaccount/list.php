@@ -6,13 +6,13 @@ $search_date_va_settlement_value = $this->session->userdata('search_date_va_sett
 $search_name_va_value            = $this->session->userdata('search_name_va') ?: '';
 $search_va_number_value          = $this->session->userdata('search_va_number') ?: '';
 $search_va_transid_value         = $this->session->userdata('search_va_transid') ?: '';
+$search_invoice_no_value         = $this->session->userdata('search_invoice_no') ?: '';
 
-// Badge count for More Filters
+// Badge count for More Filters (excludes VA number and trans ID which are now in global search)
 $extra_active = 0;
 if ($search_name_va_value)            $extra_active++;
 if ($search_date_va_settlement_value) $extra_active++;
-if ($search_va_number_value)          $extra_active++;
-if ($search_va_transid_value)         $extra_active++;
+// VA number, trans ID, invoice are in global search
 
 $download_url = base_url('admin/download_VA')
     . '?search_date_va='            . $search_date_va_value
@@ -50,7 +50,7 @@ $download_url = base_url('admin/download_VA')
                 <!-- LEFT: Global Search -->
                 <div class="dt-search-wrapper">
                     <i class="fas fa-search dt-search-icon"></i>
-                    <input type="text" id="vaGlobalSearch" class="dt-search-input" placeholder="Search by VA No, or Trans ID...">
+                    <input type="text" id="vaGlobalSearch" class="dt-search-input" placeholder="Search by VA Number, Invoice, or Trans ID..." value="<?= $search_va_number_value ?: ($search_va_transid_value ?: ($this->session->userdata('search_invoice_no') ?: '')); ?>">
                 </div>
 
                 <!-- RIGHT: Primary chips + More Filters trigger -->
@@ -105,17 +105,7 @@ $download_url = base_url('admin/download_VA')
                                     <input type="date" name="search_date_va_settlement" class="dt-more-input" value="<?= $search_date_va_settlement_value; ?>">
                                 </div>
 
-                                <!-- VA Number -->
-                                <div class="dt-more-field">
-                                    <label class="dt-more-label"><i class="fas fa-credit-card mr-1 mr-2"></i> VA Number</label>
-                                    <input type="text" name="search_va_number" class="dt-more-input" placeholder="e.g. 8810..." value="<?= $search_va_number_value; ?>">
-                                </div>
-
-                                <!-- Merchant Trans ID -->
-                                <div class="dt-more-field">
-                                    <label class="dt-more-label"><i class="fas fa-hashtag mr-1 mr-2"></i> Merchant Trans ID</label>
-                                    <input type="text" name="search_va_transid" class="dt-more-input" placeholder="ID..." value="<?= $search_va_transid_value; ?>">
-                                </div>
+                                <!-- VA Number & Trans ID moved to Global Search -->
                             </div>
 
                             <div class="dt-more-panel-footer">
@@ -214,7 +204,10 @@ $download_url = base_url('admin/download_VA')
                 }
             }
         ], {
-            "order": [[1, 'desc']]
+            "order": [[1, 'desc']],
+            "search": {
+                "search": "<?= $search_va_number_value ?: ($search_va_transid_value ?: $search_invoice_no_value) ?>"
+            }
         });
 
         // Global search with Debounce

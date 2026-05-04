@@ -61,13 +61,11 @@
             $channel_val   = $this->session->userdata('search_channel_bifast') ?: '';
             $external_val  = $this->session->userdata('search_external_reff_id') ?: '';
 
-            // Badge count for More Filters (Anything except Date Range)
+            // Badge count for More Filters (Exclude those moved to global search)
             $extra_active = 0;
             if ($merchant_val)  $extra_active++;
             if ($status_val)    $extra_active++;
-            if ($transid_val)   $extra_active++;
             if ($channel_val)   $extra_active++;
-            if ($external_val)  $extra_active++;
         ?>
 
         <!-- ── Toolbar ── -->
@@ -78,7 +76,7 @@
                 <!-- LEFT: Global Search -->
                 <div class="dt-search-wrapper">
                     <i class="fas fa-search dt-search-icon"></i>
-                    <input type="text" id="bifastGlobalSearch" class="dt-search-input" placeholder="Search by Trans ID, or Account No...">
+                    <input type="text" id="bifastGlobalSearch" class="dt-search-input" placeholder="Search by Trans ID, Invoice, or Account No..." value="<?= $transid_val; ?>">
                 </div>
 
                 <!-- RIGHT: Primary chips + More Filters trigger -->
@@ -136,11 +134,6 @@
                                     </select>
                                 </div>
 
-                                <!-- Trans ID -->
-                                <div class="dt-more-field">
-                                    <label class="dt-more-label"><i class="fas fa-hashtag mr-1 mr-2"></i> Merchant Trans ID</label>
-                                    <input type="text" name="search_transid_bifast" class="dt-more-input" placeholder="TRX-..." value="<?= $transid_val; ?>">
-                                </div>
 
                                 <!-- Channel -->
                                 <div class="dt-more-field">
@@ -153,11 +146,6 @@
                                     </select>
                                 </div>
 
-                                <!-- External Reff -->
-                                <div class="dt-more-field">
-                                    <label class="dt-more-label"><i class="fas fa-fingerprint mr-1 mr-2"></i> External Reff ID</label>
-                                    <input type="text" name="search_external_reff_id" class="dt-more-input" placeholder="REF-..." value="<?= $external_val; ?>">
-                                </div>
                             </div>
 
                             <div class="dt-more-panel-footer">
@@ -214,19 +202,19 @@
 
             <!-- Header -->
             <div class="modal-header modal-header-primary border-0 mh-premium">
-    <div class="d-flex align-items-center">
-        <div class="mh-icon-badge">
-            <i class="fas fa-paper-plane"></i>
-        </div>
-        <div class="mh-title-wrap">
-            <h6 class="mh-title" id="detailBiFastChannelExternalModalLabel">Detail Disbursement</h6>
-            <small class="mh-subtitle" id="detailBiFastSubtitle">Channel External</small>
-        </div>
-    </div>
-    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" style="opacity:0.8;">
-        <span aria-hidden="true">&times;</span>
-    </button>
-</div>
+                <div class="d-flex align-items-center">
+                    <div class="mh-icon-badge">
+                        <i class="fas fa-paper-plane"></i>
+                    </div>
+                    <div class="mh-title-wrap">
+                        <h6 class="mh-title" id="detailBiFastChannelExternalModalLabel">Detail Disbursement</h6>
+                        <small class="mh-subtitle" id="detailBiFastSubtitle">Channel External</small>
+                    </div>
+                </div>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" style="opacity:0.8;">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
 
             <div class="modal-body p-0">
 
@@ -455,7 +443,10 @@
                 }
             }
         ], {
-            "order": [[2, 'desc']]
+            "order": [[2, 'desc']],
+            "search": {
+                "search": "<?= $transid_val ?>"
+            }
         });
 
         // Global search

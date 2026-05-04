@@ -59,8 +59,9 @@ function initServerDataTable(tableId, ajaxUrl, columns, additionalOptions = {}) 
                 if (total === 0) {
                     $info.html('Showing <strong>0</strong> of <strong>0</strong> results');
                 } else {
+                    var start = info.start + 1;
                     var end = info.end;
-                    $info.html('Showing <strong>' + end + '</strong> of <strong>' + number_format(total) + '</strong> results');
+                    $info.html('Showing <strong>' + start + ' – ' + end + '</strong> of <strong>' + number_format(total) + '</strong> results');
                 }
             }
 

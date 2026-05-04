@@ -75,19 +75,48 @@ class History extends CI_Model {
             $this->db->where('cpp.ref_merchantId', $search_merchant);
         }
 
-        $i = 0;
-        foreach ($this->column_search as $item) {
-            if (isset($_POST['search']['value']) && $_POST['search']['value']) {
-                if ($i === 0) {
-                    $this->db->group_start();
-                    $this->db->like($item, $_POST['search']['value']);
-                } else {
-                    $this->db->or_like($item, $_POST['search']['value']);
-                }
-                if (count($this->column_search) - 1 == $i)
-                    $this->db->group_end();
+        $searchValue = isset($_POST['search']['value']) ? trim($_POST['search']['value']) : '';
+        if ($searchValue) {
+            $safeSearch = $this->db->escape_str($searchValue);
+            
+            // TRULY SMART SEARCH: 
+            // 1. Always try finding ID matches first (Fast Indexed Lookup)
+            $matching_ids = [-1];
+            $matching_inv_ids = [-1];
+
+            // A. Check Invoice Number (Fast Lookup)
+            $inv_res = $this->db->query("SELECT id FROM cashin WHERE c_invoiceNo LIKE '$safeSearch%' LIMIT 50")->result();
+            if (!empty($inv_res)) $matching_inv_ids = array_merge($matching_inv_ids, array_column($inv_res, 'id'));
+
+            // B. Check ID & Phone Number match
+            $cpp_res = $this->db->query("SELECT id FROM cashout_payment_ppob WHERE c_phone LIKE '$safeSearch%' OR ref_cashoutChannelId LIKE '$safeSearch%' LIMIT 100")->result();
+            if (!empty($cpp_res)) $matching_ids = array_merge($matching_ids, array_column($cpp_res, 'id'));
+            
+            // C. Direct PK match
+            if (is_numeric($searchValue) && strlen($searchValue) < 15) {
+                $matching_ids[] = (int)$searchValue;
             }
-            $i++;
+
+            $matching_ids = array_unique($matching_ids);
+            $matching_inv_ids = array_unique($matching_inv_ids);
+
+            // 2. Decide strategy
+            if (count($matching_ids) > 1 || count($matching_inv_ids) > 1) {
+                $this->db->group_start();
+                if (count($matching_ids) > 1) $this->db->where_in('cpp.id', $matching_ids);
+                if (count($matching_inv_ids) > 1) {
+                    if (count($matching_ids) > 1) $this->db->or_where_in('cpp.ref_cashoutId', $matching_inv_ids);
+                    else $this->db->where_in('cpp.ref_cashoutId', $matching_inv_ids);
+                }
+                $this->db->group_end();
+            } else {
+                // FALLBACK: Name search if no specific ID matched (min 3 chars)
+                if (strlen($searchValue) >= 3) {
+                    $this->db->like('m.c_name', $searchValue, 'both');
+                } else {
+                    $this->db->where('1=0', NULL, FALSE);
+                }
+            }
         }
 
         if (isset($_POST['order'])) {
@@ -126,20 +155,32 @@ class History extends CI_Model {
             $this->db->where('cpp.ref_merchantId', $search_merchant);
         }
 
-        if (isset($_POST['search']['value']) && $_POST['search']['value']) {
-            $this->db->join('merchant m', 'cpp.ref_merchantId = m.id', 'left');
-            $this->db->join('cashout c', 'c.id = cpp.ref_cashoutId', 'left');
-            $i = 0;
-            foreach ($this->column_search as $item) {
-                if ($i === 0) {
-                    $this->db->group_start();
-                    $this->db->like($item, $_POST['search']['value']);
-                } else {
-                    $this->db->or_like($item, $_POST['search']['value']);
+        $searchValue = isset($_POST['search']['value']) ? trim($_POST['search']['value']) : '';
+        if (!empty($searchValue)) {
+            $safeSearch = $this->db->escape_str($searchValue);
+            $matching_ids = [-1];
+            $matching_inv_ids = [-1];
+            $inv_res = $this->db->query("SELECT id FROM cashin WHERE c_invoiceNo LIKE '$safeSearch%' LIMIT 50")->result();
+            if (!empty($inv_res)) $matching_inv_ids = array_merge($matching_inv_ids, array_column($inv_res, 'id'));
+            $cpp_res = $this->db->query("SELECT id FROM cashout_payment_ppob WHERE c_phone LIKE '$safeSearch%' OR ref_cashoutChannelId LIKE '$safeSearch%' LIMIT 100")->result();
+            if (!empty($cpp_res)) $matching_ids = array_merge($matching_ids, array_column($cpp_res, 'id'));
+            if (is_numeric($searchValue) && strlen($searchValue) < 15) $matching_ids[] = (int)$searchValue;
+            
+            if (count($matching_ids) > 1 || count($matching_inv_ids) > 1) {
+                $this->db->group_start();
+                if (count($matching_ids) > 1) $this->db->where_in('cpp.id', array_unique($matching_ids));
+                if (count($matching_inv_ids) > 1) {
+                    if (count($matching_ids) > 1) $this->db->or_where_in('cpp.ref_cashoutId', array_unique($matching_inv_ids));
+                    else $this->db->where_in('cpp.ref_cashoutId', array_unique($matching_inv_ids));
                 }
-                if (count($this->column_search) - 1 == $i)
-                    $this->db->group_end();
-                $i++;
+                $this->db->group_end();
+            } else {
+                $this->db->join('merchant m', 'cpp.ref_merchantId = m.id', 'left');
+                if (strlen($searchValue) >= 3) {
+                    $this->db->like('m.c_name', $searchValue, 'both');
+                } else {
+                    $this->db->where('1=0', NULL, FALSE);
+                }
             }
         }
 
@@ -194,6 +235,9 @@ class History extends CI_Model {
         }
         if ($search_merchant) {
             $dt->where('cpp.ref_merchantId', $search_merchant);
+        }
+        if (isset($filters['invoice']) && $filters['invoice']) {
+            $dt->where('c.c_invoiceNo', $filters['invoice']);
         }
 
         return $dt->set_column_order([null, 'm.c_name', 'cpp.c_datetime', 'cpp.ref_cashoutChannelId', 'c.c_invoiceNo', 'cpp.c_phone', 'cpp.c_amount', 'cpp.c_status'])

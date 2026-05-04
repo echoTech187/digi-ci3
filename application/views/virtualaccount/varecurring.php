@@ -36,7 +36,7 @@ $download_url = base_url('admin/download_VA_recurring') // Assuming this exists 
                 <!-- LEFT: Global Search -->
                 <div class="dt-search-wrapper">
                     <i class="fas fa-search dt-search-icon"></i>
-                    <input type="text" id="vaRecurringGlobalSearch" class="dt-search-input" placeholder="Search by Channel, Merchant, or ID...">
+                    <input type="text" id="vaRecurringGlobalSearch" class="dt-search-input" placeholder="Search by Channel, Merchant, or ID..." value="<?= $this->session->userdata('search_transid_var'); ?>">
                 </div>
                 <!-- RIGHT: Filters -->
                 <div class="dt-toolbar-filters">
@@ -229,15 +229,13 @@ $download_url = base_url('admin/download_VA_recurring') // Assuming this exists 
                 data: 'ref_cashinExternalId',
                 className: 'text-nowrap',
                 render: function(data, type, row) {
-                    if (data && row.ref_cashinExternalLogVaIdCreate) {
-                        return '<a data-toggle="modal" href="#" ' +
-                            'data-target="#detailVaDynamicChannelExternalModal" ' +
-                            'data-merchanttransactionid="' + row.c_merchantTransactionId + '" ' +
-                            'data-ref_cashinexternalid="' + data + '" ' +
-                            'data-ref_cashinexternallogvaidcreate="' + row.ref_cashinExternalLogVaIdCreate + '" ' +
-                            'class="detailVaDynamicChannelExternalAjax">' + data + '</a>';
-                    }
-                    return data || '-';
+                    if (!data) return '-';
+                    return '<a href="javascript:void(0)" class="detailVaDynamicChannelExternalAjax font-weight-bold text-primary" ' +
+                           'data-merchanttransactionid="' + row.c_merchantTransactionId + '" ' +
+                           'data-ref_cashinexternalid="' + data + '" ' +
+                           'data-id="' + row.id + '" ' +
+                           'data-ref_cashinexternallogvaidcreate="' + row.ref_cashinExternalLogVaIdCreate + '">' +
+                           data + '</a>';
                 }
             },
             {data: 'c_vaNumber',className: 'text-nowrap', render: function(data){
@@ -283,11 +281,18 @@ $download_url = base_url('admin/download_VA_recurring') // Assuming this exists 
         $('#vaRecurringGlobalSearch').on('input', debounce(function() {
             table.search(this.value).draw();
         }, 400));
+
+        // Trigger initial search if value exists (Deep Linking)
+        var initSearch = $('#vaRecurringGlobalSearch').val();
+        if (initSearch) {
+            table.search(initSearch).draw();
+        }
         // Detail AJAX
         $(document).on('click', '.detailVaDynamicChannelExternalAjax', function(e) {
             e.preventDefault();
             var merchantTransactionId = $(this).data('merchanttransactionid');
             var ref_cashinExternalId = $(this).data('ref_cashinexternalid'); 
+            var parentId = $(this).data('id');
             var ref_cashinExternalLogVaIdCreate = $(this).data('ref_cashinexternallogvaidcreate'); 
             // Handle potential variations in data attribute naming by jQuery
             if (!ref_cashinExternalLogVaIdCreate) {
@@ -304,6 +309,7 @@ $download_url = base_url('admin/download_VA_recurring') // Assuming this exists 
                 data: {
                     '<?php echo $this->security->get_csrf_token_name(); ?>': '<?php echo $this->security->get_csrf_hash(); ?>',
                     ref_cashinExternalId: ref_cashinExternalId,
+                    parentId: parentId,
                     ref_cashinExternalLogVaIdCreate: ref_cashinExternalLogVaIdCreate
                 },
                 dataType: "json",

@@ -6,19 +6,26 @@ class VARecurring extends CI_Model {
     var $column_search = array('crv.c_vaNumber', 'crv.c_merchantTransactionId', 's.c_name', 'm.c_name');
     var $order = array('crv.id' => 'desc');
 
-    private function _get_datatables_query($search_name = null, $search_date = null, $search_sub = null, $only_ids = false)
+    private function _get_datatables_query($search_name = null, $search_date = null, $search_sub = null, $search_va = null, $search_trxid = null, $only_ids = false, $count_only = false)
     {
         // Emergency 3-second safeguard
         $this->db->query("SET SESSION max_execution_time = 10000");
         
-        if ($only_ids) {
+        if ($count_only) {
+            $this->db->select("count(crv.id) as total");
+        } else if ($only_ids) {
             $this->db->select("crv.id");
         } else {
             $this->db->select("crv.*, s.c_name as name_submerchant, m.c_name as name_merchant");
         }
         $this->db->from($this->table);
         
-        if (!$only_ids || $_POST['search']['value']) {
+        $searchValue = isset($_POST['search']['value']) ? trim($_POST['search']['value']) : '';
+        $sort_col = isset($_POST['order']['0']['column']) ? $this->column_order[$_POST['order']['0']['column']] : '';
+
+        // Join only if needed
+        $isTextSearch = $searchValue && !preg_match('/^([0-9]{8,}|(GD|INV|QRIS|VA|EWALLET|BIF)[0-9a-zA-Z_-]+)/i', $searchValue);
+        if (!$only_ids && !$count_only || $search_name || $isTextSearch || strpos($sort_col, 's.') !== false || strpos($sort_col, 'm.') !== false) {
             $this->db->join('submerchant s', 's.id = crv.ref_subMerchantId', 'left');
             $this->db->join('merchant m', 'm.id = crv.ref_merchantId', 'left');
         }
@@ -38,34 +45,73 @@ class VARecurring extends CI_Model {
         if ($search_sub) {
             $this->db->where('crv.ref_subMerchantId', $search_sub);
         }
-
-        $i = 0;
-        foreach ($this->column_search as $item) {
-            if (isset($_POST['search']['value']) && $_POST['search']['value']) {
-                if ($i === 0) {
-                    $this->db->group_start();
-                    $this->db->like($item, $_POST['search']['value']);
-                } else {
-                    $this->db->or_like($item, $_POST['search']['value']);
-                }
-                if (count($this->column_search) - 1 == $i)
-                    $this->db->group_end();
-            }
-            $i++;
+        if ($search_va) {
+            $this->db->group_start();
+            $this->db->where('crv.c_vaNumber', $search_va);
+            $this->db->or_where('crv.c_merchantTransactionId', $search_va);
+            $this->db->group_end();
+        }
+        if ($search_trxid) {
+            $this->db->group_start();
+            $this->db->where('crv.c_merchantTransactionId', $search_trxid);
+            $this->db->or_where('crv.c_vaNumber', $search_trxid);
+            $this->db->group_end();
         }
 
-        if (isset($_POST['order'])) {
-            $this->db->order_by($this->column_order[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);
-        } else if (isset($this->order)) {
-            $order = $this->order;
-            $this->db->order_by(key($order), $order[key($order)]);
+        if ($searchValue) {
+            $safeSearch = $this->db->escape_str($searchValue);
+            
+            // TRULY SMART SEARCH: 
+            // 1. Always try finding ID matches first (Fast Indexed Lookup)
+            $matching_ids = [-1];
+            
+            // Check in technical ID columns
+            $res_va = $this->db->query("SELECT id FROM cashin_recurring_va WHERE c_vaNumber LIKE '$safeSearch%' LIMIT 50")->result();
+            if (!empty($res_va)) $matching_ids = array_merge($matching_ids, array_column($res_va, 'id'));
+            
+            $res_trx = $this->db->query("SELECT id FROM cashin_recurring_va WHERE c_merchantTransactionId LIKE '$safeSearch%' LIMIT 50")->result();
+            if (!empty($res_trx)) $matching_ids = array_merge($matching_ids, array_column($res_trx, 'id'));
+
+            if (is_numeric($searchValue) && strlen($searchValue) < 15) {
+                $matching_ids[] = (int)$searchValue;
+            }
+
+            $matching_ids = array_unique($matching_ids);
+
+            // 2. Decide strategy: If IDs found, use them. If not, search by Name.
+            if (count($matching_ids) > 1) {
+                $this->db->where_in('crv.id', $matching_ids);
+            } else {
+                // FALLBACK: Name search if no specific ID matched
+                if (strlen($searchValue) >= 3) {
+                    // Ensure joins are present for name search fallback
+                    $this->db->join('submerchant s', 'crv.ref_subMerchantId = s.id', 'left');
+                    $this->db->join('merchant m', 'crv.ref_merchantId = m.id', 'left');
+                    
+                    $this->db->group_start();
+                    $this->db->like('s.c_name', $searchValue, 'both');
+                    $this->db->or_like('m.c_name', $searchValue, 'both');
+                    $this->db->group_end();
+                } else {
+                    $this->db->where('1=0', NULL, FALSE);
+                }
+            }
+        }
+
+        if (!$count_only) {
+            if (isset($_POST['order'])) {
+                $this->db->order_by($this->column_order[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);
+            } else if (isset($this->order)) {
+                $order = $this->order;
+                $this->db->order_by(key($order), $order[key($order)]);
+            }
         }
     }
 
-    public function get_datatables($search_name = null, $search_date = null, $search_sub = null)
+    public function get_datatables($search_name = null, $search_date = null, $search_sub = null, $search_va = null, $search_trxid = null)
     {
         // STEP 1: Get matching IDs only
-        $this->_get_datatables_query($search_name, $search_date, $search_sub, true);
+        $this->_get_datatables_query($search_name, $search_date, $search_sub, $search_va, $search_trxid, true);
         if ($_POST['length'] != -1)
             $this->db->limit($_POST['length'], $_POST['start']);
         $query = $this->db->get();
@@ -94,53 +140,15 @@ class VARecurring extends CI_Model {
         return $query->result();
     }
 
-    public function count_filtered($search_name = null, $search_date = null, $search_sub = null)
+    public function count_filtered($search_name = null, $search_date = null, $search_sub = null, $search_va = null, $search_trxid = null)
     {
-        $is_filtered = ($search_name || $search_date || $search_sub || (isset($_POST['search']['value']) && !empty($_POST['search']['value'])));
+        $searchValue = isset($_POST['search']['value']) ? $_POST['search']['value'] : null;
+        $is_filtered = ($search_name || $search_date || $search_sub || $search_va || $search_trxid || (isset($searchValue) && !empty($searchValue)));
         if (!$is_filtered) {
             return $this->count_all_dt();
         }
 
-        $this->db->select('count(DISTINCT crv.id) as total');
-        $this->db->from($this->table);
-        
-        // Lean joins based on active filters
-        if (isset($_POST['search']['value']) && $_POST['search']['value']) {
-            $this->db->join('submerchant s', 's.id = crv.ref_subMerchantId', 'left');
-            $this->db->join('merchant m', 'm.id = crv.ref_merchantId', 'left');
-        }
-        
-        if ($search_name) {
-            $this->db->where('crv.ref_merchantId', $search_name);
-        }
-        if ($search_date) {
-            $formatted_date = date('Y-m-d', strtotime($search_date));
-            if (!empty($_SESSION['search_date_var_to'])) {
-                $formatted_date_to = date('Y-m-d', strtotime($_SESSION['search_date_var_to']));
-                $this->db->where("crv.c_datetimeRequest >= '$formatted_date 00:00:00' AND crv.c_datetimeRequest <= '$formatted_date_to 23:59:59'");
-            } else {
-                $this->db->where("crv.c_datetimeRequest >= '$formatted_date 00:00:00' AND crv.c_datetimeRequest <= '$formatted_date 23:59:59'");
-            }
-        }
-        if ($search_sub) {
-            $this->db->where('crv.ref_subMerchantId', $search_sub);
-        }
-
-        if (isset($_POST['search']['value']) && $_POST['search']['value']) {
-            $i = 0;
-            foreach ($this->column_search as $item) {
-                if ($i === 0) {
-                    $this->db->group_start();
-                    $this->db->like($item, $_POST['search']['value']);
-                } else {
-                    $this->db->or_like($item, $_POST['search']['value']);
-                }
-                if (count($this->column_search) - 1 == $i)
-                    $this->db->group_end();
-                $i++;
-            }
-        }
-
+        $this->_get_datatables_query($search_name, $search_date, $search_sub, $search_va, $search_trxid, false, true);
         $query = $this->db->get();
         return $query->row()->total;
     }
@@ -171,10 +179,10 @@ class VARecurring extends CI_Model {
 
     public function count_all_dt($search_name = null, $search_date = null, $search_date_to = null)
     {
-        $table_name = explode(' ', $this->table)[0];
-        $query = $this->db->query("SELECT TABLE_ROWS FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '{$table_name}'");
-        $result = $query->row();
-        return $result ? (int)$result->TABLE_ROWS : 0;
+        $this->db->select("count(id) as total");
+        $this->db->from($this->table);
+        $query = $this->db->get();
+        return $query->row()->total;
     }
 
     public function get_varecurring($limit, $start, $search_date_var = null, $search_name_var= null, $search_submerchant_var= null) {
@@ -223,7 +231,7 @@ class VARecurring extends CI_Model {
             return $this->db->query($query)->result();
         }
 
-    public function getDataVaRecurringChannelExternal($ref_cashinExternalId, $ref_cashinExternalLogVaIdCreate) {
+    public function getDataVaRecurringChannelExternal($ref_cashinExternalId, $ref_cashinExternalLogVaIdCreate, $parentId = null) {
         $TransactionIdExternal1         = null;
         $TransactionIdExternal2         = null;
 
@@ -236,6 +244,7 @@ class VARecurring extends CI_Model {
         $ResponseBody                   = null;
 
         $ref_cashinExternalId = strtolower($ref_cashinExternalId);
+        $result1_1 = false;
 
         if ($ref_cashinExternalId == 'ifp') {
             $qtxt1_1    = "SELECT c_orderId, c_transactionId, c_datetimeRequest, c_requestHeader, c_requestBody, c_datetimeResponse, c_responseHeader, c_responseBody FROM external_ifp_va_create WHERE id='$ref_cashinExternalLogVaIdCreate'";
@@ -328,15 +337,17 @@ class VARecurring extends CI_Model {
         $search_name = $filters['merchant'] ?? null;
         $search_date = $filters['date'] ?? null;
         $search_sub = $filters['submerchant'] ?? null;
+        $search_va = $filters['va_number'] ?? null;
+        $search_trxid = $filters['merchant_trxid'] ?? null;
 
         // Optimized Fetch (Two-Step Lookup)
-        $list = $this->get_datatables($search_name, $search_date, $search_sub);
+        $list = $this->get_datatables($search_name, $search_date, $search_sub, $search_va, $search_trxid);
         
         $searchValue = $this->input->post('search')['value'];
-        $is_filtered = $search_name || $search_date || $search_sub || (!empty($searchValue));
+        $is_filtered = $search_name || $search_date || $search_sub || $search_va || $search_trxid || (!empty($searchValue));
         
         $recordsTotal = $this->count_all_dt($search_name, $search_date);
-        $recordsFiltered = $is_filtered ? $this->count_filtered($search_name, $search_date, $search_sub) : $recordsTotal;
+        $recordsFiltered = $is_filtered ? $this->count_filtered($search_name, $search_date, $search_sub, $search_va, $search_trxid) : $recordsTotal;
 
         // Use Datatables Library for final processing and JSON output
         return $this->datatables->of($this->table)
