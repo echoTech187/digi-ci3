@@ -50,7 +50,8 @@ $download_url = base_url('admin/download_VA')
                 <!-- LEFT: Global Search -->
                 <div class="dt-search-wrapper">
                     <i class="fas fa-search dt-search-icon"></i>
-                    <input type="text" id="vaGlobalSearch" class="dt-search-input" placeholder="Search by VA Number, Invoice, or Trans ID..." value="<?= $search_va_number_value ?: ($search_va_transid_value ?: ($this->session->userdata('search_invoice_no') ?: '')); ?>">
+                    <?php $active_va_search = $search_va_number_value ?: ($search_va_transid_value ?: $search_invoice_no_value); ?>
+                    <input type="text" id="vaGlobalSearch" class="dt-search-input" placeholder="<?= $active_va_search ?: 'Search by VA Number, Invoice, or Trans ID...'; ?>" value="<?= $active_va_search; ?>">
                 </div>
 
                 <!-- RIGHT: Primary chips + More Filters trigger -->
@@ -136,12 +137,12 @@ $download_url = base_url('admin/download_VA')
                         <th>No</th>
                         <th>Date Payment</th>
                         <th>Merchant</th>
+                        <th>Trans ID</th>
+                        <th>VA Number</th>
+                        <th>VA Custom ID</th>
                         <th>Invoice No</th>
                         <th>Channel Id</th>
                         <th>Type</th>
-                        <th>VA Number</th>
-                        <th>VA Custom ID</th>
-                        <th>Trans ID</th>
                         <th>Amount</th>
                         <th>Fee</th>
                         <th>Realtime?</th>
@@ -164,12 +165,12 @@ $download_url = base_url('admin/download_VA')
                 return moment(data).format('DD-MM-YYYY HH:mm:ss');
             }},
             {data: 'merchant_name',className: 'text-nowrap'},
+            {data: 'Merchant_Transaction_Id',className: 'text-nowrap'},
+            {data: 'c_vaNumber',className: 'text-nowrap'},
+            {data: 'c_custom',className: 'text-nowrap'},
             {data: 'c_invoiceNo',className: 'text-nowrap'},
             {data: 'ref_cashinChannelId',className: 'text-nowrap'},
             {data: 'c_type',className: 'text-nowrap'},
-            {data: 'c_vaNumber',className: 'text-nowrap'},
-            {data: 'c_custom',className: 'text-nowrap'},
-            {data: 'Merchant_Transaction_Id',className: 'text-nowrap'},
             {data: 'c_amount',className: 'text-nowrap', render: function(data){
                 return 'Rp ' + number_format(data, 0, ',', '.');
             }},
@@ -199,8 +200,16 @@ $download_url = base_url('admin/download_VA')
                     var detailLink = baseUrl + 'admin/VA_detail/' + data;
                     var resendLink = baseUrl + 'admin/SendnotifikasiVA/' + data + '/' + row.ref_merchantId;
                     
-                    return '<a href="' + detailLink + '" class="btn btn-action-detail"><i class="fas fa-eye mr-2"></i>Detail</a> ' +
-                           '<a onclick="javascript: return confirm(\'Are you sure, want to resend notification again ??\')" href="' + resendLink + '" class="btn btn-action-resend"><i class="fas fa-paper-plane mr-2"></i>Resend</a>';
+                    return `
+                        <div class="dropdown">
+                            <button class="btn btn-sm text-white rounded-circle p-2 border-0 bg-transparent" type="button" data-toggle="dropdown"><i class="fas fa-ellipsis-v"></i></button>
+                            <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg">
+                                <li><a href="${detailLink}" class="dropdown-item"><i class="fas fa-eye text-primary mr-2"></i> Detail</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a onclick="javascript: return confirm('Are you sure, want to resend notification again ??')" href="${resendLink}" class="dropdown-item"><i class="fas fa-paper-plane text-warning mr-2"></i> Resend</a></li>
+                            </ul>
+                        </div>
+                    `;
                 }
             }
         ], {

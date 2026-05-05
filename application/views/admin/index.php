@@ -9,18 +9,39 @@
         </div>
     </div>
 
-    <!-- ── Alert Messages ── -->
-    <?php if ($this->session->flashdata('success')) : ?>
-        <div class="alert alert-success border-0 shadow-sm animate__animated animate__fadeIn mb-4">
-            <i class="fas fa-check-circle "></i> <?= $this->session->flashdata('success'); ?>
-        </div>
-    <?php endif; ?>
+    <!-- Alerts Standardized to Swal2 Premium -->
+    <script>
+        $(document).ready(function() {
+            <?php 
+            $successMsg = $this->session->flashdata('success') ?: $this->session->flashdata('message');
+            if ($successMsg) : 
+            ?>
+                Swal.fire({
+                    title: 'Success!',
+                    text: '<?= $successMsg; ?>',
+                    icon: 'success',
+                    customClass: {
+                        popup: 'swal2-premium-popup',
+                        confirmButton: 'swal2-premium-confirm'
+                    },
+                    buttonsStyling: false
+                });
+            <?php endif; ?>
 
-    <?php if ($this->session->flashdata('message')) : ?>
-        <div class="alert alert-info border-0 shadow-sm animate__animated animate__fadeIn mb-4">
-            <i class="fas fa-info-circle "></i> <?= $this->session->flashdata('message'); ?>
-        </div>
-    <?php endif; ?>
+            <?php if ($this->session->flashdata('error')) : ?>
+                Swal.fire({
+                    title: 'Error!',
+                    html: '<?= trim(str_replace(["\r", "\n"], '', $this->session->flashdata('error'))); ?>',
+                    icon: 'error',
+                    customClass: {
+                        popup: 'swal2-premium-popup',
+                        confirmButton: 'swal2-premium-confirm'
+                    },
+                    buttonsStyling: false
+                });
+            <?php endif; ?>
+        });
+    </script>
 
     <!-- ── Main Data Card ── -->
     <div class="card border-0 shadow-sm dt-card">
@@ -75,19 +96,30 @@
                 }},
                 { data: 'role_name', className: 'text-dark' },
                 {
-                    data: null,
-                    orderable: false,
+                    data: null, 
+                    orderable: false, 
                     className: 'text-center',
                     render: function(data, type, row) {
-                        return '<button type="button" class="btn-dt-chip-action btn-dt-secondary edit-btn" ' +
-                            'data-toggle="modal" data-target=".manageUserModal" ' +
-                            'data-id="' + row.id + '" ' +
-                            'data-name="' + row.c_name + '" ' +
-                            'data-role="' + row.role_id + '" ' +
-                            'data-status="' + row.c_status + '" ' +
-                            'data-level="' + row.c_level + '">' +
-                            '<i class="fas fa-edit mr-1 mr-2"></i> Manage' +
-                        '</button>';
+                        return `
+                            <div class="dropdown">
+                                <button class="btn btn-sm text-muted rounded-circle p-2 border-0 bg-transparent" type="button" data-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end shadow border-0 py-2">
+                                    <li>
+                                        <button type="button" class="dropdown-item py-2 edit-btn" 
+                                            data-toggle="modal" data-target=".manageUserModal" 
+                                            data-id="${row.id}" 
+                                            data-name="${row.c_name}" 
+                                            data-role="${row.role_id}" 
+                                            data-status="${row.c_status}" 
+                                            data-level="${row.c_level}">
+                                            <i class="fas fa-edit text-primary mr-2"></i> Manage Account
+                                        </button>
+                                    </li>
+                                </ul>
+                            </div>
+                        `;
                     }
                 }
             ]);

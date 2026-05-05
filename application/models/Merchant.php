@@ -2,9 +2,27 @@
 
 class Merchant extends CI_Model
 {
+    private static $cached_total = null;
  
+    private function get_allowed_columns($hasBalancePermission = null) {
+        $role_id = $this->session->userdata('role');
+        if ($hasBalancePermission === null) {
+            $hasBalancePermission = $this->load->library('rbac') ? $this->rbac->has_permission($role_id, 'balance_merchant_module') : true;
+        }
+
+        $cols = 'id, c_name, c_email, c_phoneNumber, c_status, c_merchantLevel, c_openapiStatus, c_openapiUrlCallbackQrisMpm, c_openapiUrlCallbackVa, c_openapiUrlCallbackEwallet, c_openapiIPAllow, c_openapiSecurityType, c_refSupervisor, ref_entity';
+        
+        if ($hasBalancePermission) {
+            $cols .= ', c_balanceTotal, c_balanceHold';
+        } else {
+            $cols .= ', (NULL) AS c_balanceTotal, (NULL) AS c_balanceHold';
+        }
+
+        return $cols;
+    }
+
     public function get_merchant($limit = null, $start = null, $search_merchant = null, $count_only = false) {
-        $this->db->select('*');
+        $this->db->select($this->get_allowed_columns(), FALSE);
         $this->db->from('merchant');
         
         if ($search_merchant) {
@@ -35,11 +53,13 @@ class Merchant extends CI_Model
     }
     
     public function getMerchantById($id) {
+        $this->db->select('id, c_name, c_email, c_status, c_merchantLevel, c_balanceTotal, c_balanceHold, c_openapistatus');
         $this->db->where('id', $id);
-        $query = $this->db->get('merchant'); // Adjust table name if necessary
-        return $query->row_array(); // Return a single merchant as an associative array
+        $query = $this->db->get('merchant');
+        return $query->row_array();
     }
     public function get_merchants() {
+        $this->db->select('id, c_name, c_email, c_status, c_merchantLevel, c_balanceTotal, c_balanceHold, c_openapistatus');
         $query = $this->db->get('merchant');
         return $query->result_array();
     }
@@ -131,7 +151,12 @@ public function setMaintenanceStatus($newStatus) {
 }
 
     public function get_merchant_by_id($merchant_id) {
-        return $this->db->get_where('merchant', ['id' => $merchant_id])->row_array();
+        $this->db->select($this->get_allowed_columns(), FALSE);
+        $this->db->select('s.c_gvconnectBusinessId');
+        $this->db->from('merchant m');
+        $this->db->join('submerchant s', 's.ref_merchantId = m.id', 'left');
+        $this->db->where('m.id', $merchant_id);
+        return $this->db->get()->row_array();
     }
 
     public function update_merchant($merchant_id, $data) {
@@ -142,11 +167,15 @@ public function setMaintenanceStatus($newStatus) {
     /* Server-Side DataTables Helpers */
     private function _get_datatables_query($table, $column_order, $column_search, $order, $where = [], $count_only = false)
     {
-        // Emergency 3-second safeguard
-        $this->db->query("SET SESSION max_execution_time = 10000");
+        // Emergency 30-second safeguard
+        $this->db->query("SET SESSION max_execution_time = 30000");
         
         if (!$count_only) {
-            $this->db->select('*');
+            if (strpos($table, 'merchant') !== false && strpos($table, 'supervisor') === false && strpos($table, 'channel') === false) {
+                $this->db->select('id, c_name, c_email, c_balanceTotal, c_status, c_merchantLevel, c_openapistatus');
+            } else {
+                $this->db->select('*');
+            }
         }
         $this->db->from($table);
         
@@ -202,6 +231,8 @@ public function setMaintenanceStatus($newStatus) {
 
     public function count_all_dt($table, $where = [])
     {
+        if (empty($where) && self::$cached_total !== null) return self::$cached_total;
+
         if (!empty($where)) {
             $this->db->select('count(id) as total');
             $this->db->from($table);
@@ -210,10 +241,20 @@ public function setMaintenanceStatus($newStatus) {
             return $query->row()->total;
         }
 
+        // ULTRA-FAST: Use table status estimates for recordsTotal
         $table_name = explode(' ', $table)[0];
-        $query = $this->db->query("SELECT TABLE_ROWS FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ?", [$table_name]);
-        $result = $query->row();
-        return $result ? (int)$result->TABLE_ROWS : 0;
+        $q = $this->db->query("SHOW TABLE STATUS LIKE '{$table_name}'");
+        $res = $q->row();
+        if ($res && isset($res->Rows)) {
+            self::$cached_total = (int)$res->Rows;
+            return self::$cached_total;
+        }
+
+        $this->db->select("count(id) as total");
+        $this->db->from($table_name);
+        $query = $this->db->get();
+        self::$cached_total = $query->row() ? (int)$query->row()->total : 0;
+        return self::$cached_total;
     }
 
     /**
@@ -286,7 +327,16 @@ public function setMaintenanceStatus($newStatus) {
     {
         $this->load->library('datatables');
         
+        $cols = $this->get_allowed_columns($hasBalancePermission);
+        // Prefix columns with 'm.' for the join/from context
+        $prefixedCols = implode(', ', array_map(function($col) {
+            $col = trim($col);
+            if (strpos($col, '(') !== false) return $col; // Don't prefix (NULL)
+            return 'm.' . $col;
+        }, explode(',', $cols)));
+
         return $this->datatables->of('merchant m')
+            ->select($prefixedCols)
             ->set_column_order([null, 'm.id', 'm.c_name', 'm.c_balanceTotal', 'm.c_status', null])
             ->set_column_search(['m.id', 'm.c_name', 'm.c_email'])
             ->set_default_order(['m.id' => 'desc'])
@@ -343,11 +393,20 @@ public function setMaintenanceStatus($newStatus) {
             ->make(true);
     }
 
-    public function get_merchants_by_supervisor_handler($supervisor_id)
+    public function get_merchants_by_supervisor_handler($supervisor_id, $hasBalancePermission = false)
     {
         $this->load->library('datatables');
 
+        $cols = $this->get_allowed_columns($hasBalancePermission);
+        // Prefix with merchant.
+        $prefixedCols = implode(', ', array_map(function($col) {
+            $col = trim($col);
+            if (strpos($col, '(') !== false) return $col; // Don't prefix (NULL)
+            return 'merchant.' . $col;
+        }, explode(',', $cols)));
+
         return $this->datatables->of('merchant')
+            ->select($prefixedCols)
             ->set_column_order(['merchant.id', 'merchant.c_name', 'merchant.c_balanceTotal', 'merchant.c_balanceHold', 'merchant.c_openapiStatus', 'merchant.c_status'])
             ->set_column_search(['merchant.c_name', 'merchant.id'])
             ->set_default_order(['merchant.id' => 'desc'])

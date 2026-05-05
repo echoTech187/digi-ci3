@@ -25,7 +25,8 @@
                 <!-- LEFT: Global Search -->
                 <div class="dt-search-wrapper">
                     <i class="fas fa-search dt-search-icon"></i>
-                    <input type="text" id="vadynamicGlobalSearch" class="dt-search-input" placeholder="Search by Channel, Merchant, or ID..." value="<?= $this->session->userdata('search_merchant_trxid'); ?>">
+                    <?php $active_vad_search = $this->session->userdata('search_merchant_trxid'); ?>
+                    <input type="text" id="vadynamicGlobalSearch" class="dt-search-input" placeholder="<?= $active_vad_search ?: 'Search by Channel, Merchant, or ID...'; ?>" value="<?= $active_vad_search; ?>">
                 </div>
                 <!-- RIGHT: Filters -->
                 <div class="dt-toolbar-filters">
@@ -99,9 +100,9 @@
                         <th>MERCHANT</th>
                         <th>SUB MERCHANT</th>
                         <th>TRANS ID</th>
+                        <th>VA NUMBER</th>
                         <th>CHANNEL</th>
                         <th>EXTERNAL ID</th>
-                        <th>VA NUMBER</th>
                         <th>AMOUNT</th>
                         <th>EXPIRED</th>
                         <th>STATUS</th>
@@ -217,6 +218,9 @@
             },
             {data: 'name_submerchant',className: 'text-nowrap'},
             {data: 'c_merchantTransactionId',className: 'text-nowrap'},
+            {data: 'c_vaNumber',className: 'text-nowrap', render: function(data){
+                return '<code>' + data + '</code>';
+            }},
             {data: 'ref_cashinChannelId',className: 'text-nowrap'},
             {
                 data: 'ref_cashinExternalId',
@@ -231,9 +235,6 @@
                            data + '</a>';
                 }
             },
-            {data: 'c_vaNumber',className: 'text-nowrap', render: function(data){
-                return '<code>' + data + '</code>';
-            }},
             {data: 'c_amount',className: 'text-nowrap', render: function(data){
                 return '<span class="font-weight-bold text-dark">Rp ' + number_format(data, 0, ',', '.') + '</span>';
             }},

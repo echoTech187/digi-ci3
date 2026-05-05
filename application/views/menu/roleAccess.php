@@ -14,12 +14,39 @@
         </div>
     </div>
 
-    <!-- ── Alert ── -->
-    <?php if ($this->session->flashdata('message')): ?>
-        <div class="alert alert-success border-0 shadow-sm animate__animated animate__fadeIn mb-4">
-            <i class="fas fa-check-circle "></i> <?= $this->session->flashdata('message'); ?>
-        </div>
-    <?php endif; ?>
+    <!-- Alerts Standardized to Swal2 Premium -->
+    <script>
+        $(document).ready(function() {
+            <?php 
+            $successMsg = $this->session->flashdata('success') ?: $this->session->flashdata('message');
+            if ($successMsg) : 
+            ?>
+                Swal.fire({
+                    title: 'Success!',
+                    text: '<?= $successMsg; ?>',
+                    icon: 'success',
+                    customClass: {
+                        popup: 'swal2-premium-popup',
+                        confirmButton: 'swal2-premium-confirm'
+                    },
+                    buttonsStyling: false
+                });
+            <?php endif; ?>
+
+            <?php if ($this->session->flashdata('error')) : ?>
+                Swal.fire({
+                    title: 'Error!',
+                    html: '<?= trim(str_replace(["\r", "\n"], '', $this->session->flashdata('error'))); ?>',
+                    icon: 'error',
+                    customClass: {
+                        popup: 'swal2-premium-popup',
+                        confirmButton: 'swal2-premium-confirm'
+                    },
+                    buttonsStyling: false
+                });
+            <?php endif; ?>
+        });
+    </script>
 
     <!-- ── Access Configuration Card ── -->
     <div class="card border-0 shadow-sm dt-card">
@@ -98,13 +125,23 @@
                             </label>
                         </td>
                         <td class="text-center">
-                            <div class="btn-group">
-                                <button type="button" class="btn btn-sm btn-icon-only text-primary edit-menu-btn" data-id="<?= $m['id']; ?>" title="Edit Menu">
-                                    <i class="fas fa-edit"></i>
+                            <div class="dropdown">
+                                <button class="btn btn-light btn-sm rounded-circle shadow-none p-2" type="button" data-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-ellipsis-v text-muted"></i>
                                 </button>
-                                <button type="button" class="btn btn-sm btn-icon-only text-danger delete-menu-btn" data-id="<?= $m['id']; ?>" data-title="<?= $m['title']; ?>" title="Delete Menu">
-                                    <i class="fas fa-trash"></i>
-                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg p-2" style="border-radius: 12px; min-width: 150px;">
+                                    <li>
+                                        <button class="dropdown-item rounded-2 py-2 edit-menu-btn" data-id="<?= $m['id']; ?>">
+                                            <i class="fas fa-edit text-primary mr-2"></i> Edit Menu
+                                        </button>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <button class="dropdown-item rounded-2 py-2 text-danger delete-menu-btn" data-id="<?= $m['id']; ?>" data-title="<?= $m['title']; ?>">
+                                            <i class="fas fa-trash mr-2"></i> Delete Menu
+                                        </button>
+                                    </li>
+                                </ul>
                             </div>
                         </td>
                     </tr>

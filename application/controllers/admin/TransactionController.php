@@ -296,8 +296,13 @@ class TransactionController extends CI_Controller
       is_logged_in();
 
       if (!$this->input->is_ajax_request()) {
-          $search_invoice_ppob = $this->input->get('invoice') ?: ($this->input->post('search_invoice_ppob') ?: '');
-          if (!$this->input->get('invoice') && !$this->input->post('search_invoice_ppob')) {
+          $search_invoice_ppob = $this->input->get('invoice') ?: ($this->input->get('transid') ?: ($this->input->get('phone') ?: ($this->input->post('search_invoice_ppob') ?: '')));
+          
+          if ($this->input->get('invoice') || $this->input->get('transid') || $this->input->get('phone')) {
+              $this->session->set_userdata('last_search_ppob', $search_invoice_ppob);
+          }
+
+          if (!$this->input->get('invoice') && !$this->input->get('transid') && !$this->input->get('phone') && !$this->input->post('search_invoice_ppob')) {
               $this->session->unset_userdata('last_search_ppob');
           }
       } else {
@@ -1762,11 +1767,26 @@ class TransactionController extends CI_Controller
       $data['title'] = 'QRIS Recurring';
       $data['user'] = $this->Model_user->view_user()->row_array();
 
+      // Technical ID Search (Global Search): Reset if landing on clean URL (no GET/POST)
+      if (!$this->input->is_ajax_request()) {
+          $search_transid_qr = $this->input->get('transid') ?: ($this->input->post('search_transid_qr') ?: '');
+          
+          if (!$this->input->get('transid') && !$this->input->post('search_name_qr')) {
+              $this->session->unset_userdata('search_date_qr');
+              $this->session->unset_userdata('search_date_qr_to');
+              $this->session->unset_userdata('search_name_qr');
+              $this->session->unset_userdata('search_submerchant_qr');
+              $this->session->unset_userdata('search_transid_qr');
+              $this->session->unset_userdata('last_search_qr');
+          }
+      } else {
+          $search_transid_qr = $this->session->userdata('search_transid_qr');
+      }
+
       $search_date_qr = $this->input->post('search_date_qr');
       $search_date_qr_to = $this->input->post('search_date_qr_to');
       $search_name_qr = $this->input->post('search_name_qr');
       $search_submerchant_qr = $this->input->post('search_submerchant_qr');
-      $search_transid_qr = $this->input->get('transid') ?: $this->input->post('search_transid_qr');
 
       // Sync Session
       if ($search_date_qr !== null)
@@ -1789,13 +1809,27 @@ class TransactionController extends CI_Controller
       else
          $search_submerchant_qr = $this->session->userdata('search_submerchant_qr');
 
-      if ($search_transid_qr !== null)
-         $this->session->set_userdata('search_transid_qr', $search_transid_qr);
-      else
-         $search_transid_qr = $this->session->userdata('search_transid_qr');
+      $this->session->set_userdata('search_transid_qr', $search_transid_qr);
 
       if ($this->input->is_ajax_request()) {
          try {
+            // Sync session with global search input
+            $dtSearch = $this->input->post('search')['value'] ?? '';
+            $oldSearch = $this->session->userdata('last_search_qr');
+
+            if ($dtSearch === '' && $oldSearch !== '' && $oldSearch !== null) {
+                $this->session->unset_userdata('search_date_qr');
+                $this->session->unset_userdata('search_date_qr_to');
+                $this->session->unset_userdata('search_name_qr');
+                $this->session->unset_userdata('search_submerchant_qr');
+                $this->session->unset_userdata('search_transid_qr');
+            }
+
+            if ($dtSearch !== '') {
+                $this->session->set_userdata('search_transid_qr', $dtSearch);
+                $this->session->set_userdata('last_search_qr', $dtSearch);
+            }
+
             $filters = [
                'merchant' => $this->session->userdata('search_name_qr'),
                'date' => $this->session->userdata('search_date_qr'),

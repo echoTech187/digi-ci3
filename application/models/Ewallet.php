@@ -2,14 +2,15 @@
 
 class Ewallet extends CI_Model {
     var $table = 'cashin_payment_ewallet cpe';
-    var $column_order = array(null, 'cpe.c_datetime', 's.c_name', 'c.c_invoiceNo', 'cpe.c_type', 'cpe.ref_cashinChannelId', 'cpe.c_amount', 'cpe.c_mdr', 'cpe.c_fee', 'cpe.c_datetimeSettlement', 'cde.c_merchantTransactionId', null);
+    var $column_order = array(null, 'cpe.c_datetime', 's.c_name', 'cde.c_merchantTransactionId', 'c.c_invoiceNo', 'cpe.c_type', 'cpe.ref_cashinChannelId', 'cpe.c_amount', 'cpe.c_mdr', 'cpe.c_fee', 'cpe.c_datetimeSettlement', null);
     var $column_search = array('cpe.id', 'c.c_invoiceNo', 'cde.c_merchantTransactionId', 's.c_name', 'm.c_name');
     var $order = array('cpe.id' => 'desc');
+    private static $cached_total = null;
 
     private function _get_datatables_query($search_name = null, $date_from = null, $date_to = null, $search_date_settlement = null, $search_invoice_no = null, $search_transid = null, $only_ids = false, $count_only = false)
     {
-        // Emergency 3-second safeguard
-        $this->db->query("SET SESSION max_execution_time = 3000");
+        // Emergency 30-second safeguard
+        $this->db->query("SET SESSION max_execution_time = 30000");
         
         $searchValue = isset($_POST['search']['value']) ? $_POST['search']['value'] : '';
 
@@ -18,7 +19,7 @@ class Ewallet extends CI_Model {
         } else if ($only_ids) {
             $this->db->select("MAX(cpe.id) as id");
         } else {
-            $this->db->select("cpe.*, m.c_name as name_merchant, s.c_name as name_submerchant, c.c_invoiceNo, 
+            $this->db->select("cpe.id, cpe.c_datetime, cpe.c_type, cpe.c_amount, cpe.c_mdr, cpe.c_fee, cpe.c_datetimeSettlement, cpe.ref_merchantId, cpe.ref_subMerchantId, cpe.ref_cashinId, cpe.ref_cashinChannelId, cpe.ref_cashinDynamicEwalletId, m.c_name as name_merchant, s.c_name as name_submerchant, c.c_invoiceNo, 
                                cde.c_merchantTransactionId AS Merchant_Transaction_Id");
         }
         $this->db->from($this->table);
@@ -69,40 +70,69 @@ class Ewallet extends CI_Model {
         }
 
         if ($searchValue) {
-            $safeSearch = $this->db->escape_str($searchValue);
+            $safeSearchValue = $this->db->escape_str($searchValue);
             
-            // TRULY SMART SEARCH: 
-            // 1. Always try finding ID matches first (Fast Indexed Lookup)
-            $matching_ids = [-1];
-            $matching_inv_ids = [-1];
+            // CACHING LOGIC: Prevent redundant scans across multiple calls (count + fetch)
+            static $cached_ids = null;
+            static $cached_inv_ids = null;
+            static $last_query = null;
 
-            // A. Check Invoice Number (Fast Lookup)
-            $inv_res = $this->db->query("SELECT id FROM cashin WHERE c_invoiceNo LIKE '$safeSearch%' LIMIT 50")->result();
-            if (!empty($inv_res)) $matching_inv_ids = array_merge($matching_inv_ids, array_column($inv_res, 'id'));
+            if ($cached_ids === null || $last_query !== $searchValue) {
+                $last_query = $searchValue;
+                $matching_ids = [-1];
+                $matching_inv_ids = [-1];
 
-            // B. Check Transaction ID match (via dynamic ewallet lookup)
-            $cde_res = $this->db->query("SELECT id FROM cashin_dynamic_ewallet WHERE c_merchantTransactionId LIKE '$safeSearch%' LIMIT 50")->result();
-            if (!empty($cde_res)) {
-                $cde_ids = array_column($cde_res, 'id');
-                $cpe_res = $this->db->query("SELECT id FROM cashin_payment_ewallet WHERE ref_cashinDynamicEwalletId IN (".implode(',', $cde_ids).") LIMIT 50")->result();
-                if (!empty($cpe_res)) $matching_ids = array_merge($matching_ids, array_column($cpe_res, 'id'));
+                $extracted_date = null;
+                // Improved regex to handle various formats
+                if (preg_match('/(?:GD|TRX|VA|EW|BF|_)([0-9]{6})/i', $searchValue, $matches)) {
+                    $yymmdd = $matches[1];
+                    $year = "20" . substr($yymmdd, 0, 2);
+                    $month = substr($yymmdd, 2, 2);
+                    $day = substr($yymmdd, 4, 2);
+                    if (checkdate($month, $day, $year)) {
+                        $extracted_date = "$year-$month-$day";
+                    }
+                }
+
+                $op = (strlen($searchValue) >= 15) ? '=' : 'LIKE';
+                $val = (strlen($searchValue) >= 15) ? "'$safeSearchValue'" : "'$safeSearchValue%'";
+
+                // 1. Priority: Check Transaction ID match (via dynamic ewallet lookup)
+                $cde_res = $this->db->query("SELECT id FROM cashin_dynamic_ewallet WHERE c_merchantTransactionId $op $val LIMIT 50")->result();
+                if (!empty($cde_res)) {
+                    $cde_ids = array_column($cde_res, 'id');
+                    $cpe_res = $this->db->query("SELECT id FROM cashin_payment_ewallet WHERE ref_cashinDynamicEwalletId IN (".implode(',', $cde_ids).") LIMIT 50")->result();
+                    if (!empty($cpe_res)) $matching_ids = array_merge($matching_ids, array_column($cpe_res, 'id'));
+                }
+
+                // 2. Check Invoice Number (Only if specific ID not found)
+                if (count($matching_ids) <= 1 || strlen($searchValue) < 15) {
+                    if (strlen($searchValue) >= 4) {
+                        $inv_q = "SELECT id FROM cashin WHERE c_invoiceNo $op $val ";
+                        if ($extracted_date) {
+                            $inv_q .= " AND (c_datetime >= '$extracted_date 00:00:00' AND c_datetime <= '$extracted_date 23:59:59') ";
+                        }
+                        $inv_res = $this->db->query($inv_q . " LIMIT 50")->result();
+                        if (!empty($inv_res)) $matching_inv_ids = array_merge($matching_inv_ids, array_column($inv_res, 'id'));
+                    }
+                }
+
+                // 3. Direct PK match
+                if (is_numeric($searchValue) && strlen($searchValue) < 15) {
+                    $matching_ids[] = (int)$searchValue;
+                }
+
+                $cached_ids = array_unique($matching_ids);
+                $cached_inv_ids = array_unique($matching_inv_ids);
             }
-
-            // C. Direct PK match
-            if (is_numeric($searchValue) && strlen($searchValue) < 15) {
-                $matching_ids[] = (int)$searchValue;
-            }
-
-            $matching_ids = array_unique($matching_ids);
-            $matching_inv_ids = array_unique($matching_inv_ids);
 
             // 2. Decide strategy
-            if (count($matching_ids) > 1 || count($matching_inv_ids) > 1) {
+            if (count($cached_ids) > 1 || count($cached_inv_ids) > 1) {
                 $this->db->group_start();
-                if (count($matching_ids) > 1) $this->db->where_in('cpe.id', $matching_ids);
-                if (count($matching_inv_ids) > 1) {
-                    if (count($matching_ids) > 1) $this->db->or_where_in('cpe.ref_cashinId', $matching_inv_ids);
-                    else $this->db->where_in('cpe.ref_cashinId', $matching_inv_ids);
+                if (count($cached_ids) > 1) $this->db->where_in('cpe.id', $cached_ids);
+                if (count($cached_inv_ids) > 1) {
+                    if (count($cached_ids) > 1) $this->db->or_where_in('cpe.ref_cashinId', $cached_inv_ids);
+                    else $this->db->where_in('cpe.ref_cashinId', $cached_inv_ids);
                 }
                 $this->db->group_end();
             } else {
@@ -198,6 +228,18 @@ class Ewallet extends CI_Model {
 
     public function count_all_dt($search_name = null, $date_from = null, $date_to = null)
     {
+        if (self::$cached_total !== null) return self::$cached_total;
+
+        // If no filters, use the fastest possible estimate from metadata (Instant)
+        if (!$search_name && !$date_from && !$date_to) {
+            $q = $this->db->query("SHOW TABLE STATUS LIKE 'cashin_payment_ewallet'");
+            $res = $q->row();
+            if ($res && isset($res->Rows) && $res->Rows > 10000) {
+                self::$cached_total = (int)$res->Rows;
+                return self::$cached_total;
+            }
+        }
+
         $this->db->select("count(DISTINCT cpe.ref_cashinId) as total");
         $this->db->from($this->table);
         if ($search_name) $this->db->where('cpe.ref_merchantId', $search_name);
@@ -206,7 +248,8 @@ class Ewallet extends CI_Model {
             $this->db->where('cpe.c_datetime <=', $date_to);
         }
         $query = $this->db->get();
-        return $query->row()->total;
+        self::$cached_total = $query->row() ? (int)$query->row()->total : 0;
+        return self::$cached_total;
     }
 
     public function get_merchant()

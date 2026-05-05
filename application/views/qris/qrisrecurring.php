@@ -25,7 +25,8 @@
                 <!-- LEFT: Global Search -->
                 <div class="dt-search-wrapper">
                     <i class="fas fa-search dt-search-icon"></i>
-                    <input type="text" id="qrisRecurringGlobalSearch" class="dt-search-input" placeholder="Search by Merchant, ID, or Reference..." value="<?= $this->session->userdata('search_transid_qr'); ?>">
+                    <?php $active_qr_search = $this->session->userdata('search_transid_qr'); ?>
+                    <input type="text" id="qrisRecurringGlobalSearch" class="dt-search-input" placeholder="<?= $active_qr_search ?: 'Search by Merchant, ID, or Reference...'; ?>" value="<?= $active_qr_search; ?>">
                 </div>
                 
                 <!-- RIGHT: Filters -->

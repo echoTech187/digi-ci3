@@ -57,12 +57,15 @@ class History extends CI_Model {
     var $column_search = array('cpp.id', 'm.c_name', 'c.c_invoiceNo', 'cpp.c_phone', 'cpp.ref_cashoutChannelId');
     var $order = array('cpp.id' => 'desc');
 
+    // Request-level caching
+    private static $cached_total = null;
+
     private function _get_datatables_query($search_date = null, $search_merchant = null)
     {
-        // Emergency 3-second safeguard
-        $this->db->query("SET SESSION max_execution_time = 10000");
+        // Emergency 30-second safeguard
+        $this->db->query("SET SESSION max_execution_time = 30000");
         
-        $this->db->select('cpp.*, m.c_name as name_merchant, c.c_invoiceNo');
+        $this->db->select('cpp.id, cpp.c_datetime, cpp.ref_cashoutChannelId, cpp.c_phone, cpp.c_amount, cpp.c_status, m.c_name as name_merchant, c.c_invoiceNo');
         $this->db->from($this->table);
         $this->db->join('merchant m', 'cpp.ref_merchantId = m.id', 'left');
         $this->db->join('cashout c', 'c.id = cpp.ref_cashoutId', 'left');
@@ -85,7 +88,7 @@ class History extends CI_Model {
             $matching_inv_ids = [-1];
 
             // A. Check Invoice Number (Fast Lookup)
-            $inv_res = $this->db->query("SELECT id FROM cashin WHERE c_invoiceNo LIKE '$safeSearch%' LIMIT 50")->result();
+            $inv_res = $this->db->query("SELECT id FROM cashout WHERE c_invoiceNo LIKE '$safeSearch%' LIMIT 50")->result();
             if (!empty($inv_res)) $matching_inv_ids = array_merge($matching_inv_ids, array_column($inv_res, 'id'));
 
             // B. Check ID & Phone Number match
@@ -160,7 +163,7 @@ class History extends CI_Model {
             $safeSearch = $this->db->escape_str($searchValue);
             $matching_ids = [-1];
             $matching_inv_ids = [-1];
-            $inv_res = $this->db->query("SELECT id FROM cashin WHERE c_invoiceNo LIKE '$safeSearch%' LIMIT 50")->result();
+            $inv_res = $this->db->query("SELECT id FROM cashout WHERE c_invoiceNo LIKE '$safeSearch%' LIMIT 50")->result();
             if (!empty($inv_res)) $matching_inv_ids = array_merge($matching_inv_ids, array_column($inv_res, 'id'));
             $cpp_res = $this->db->query("SELECT id FROM cashout_payment_ppob WHERE c_phone LIKE '$safeSearch%' OR ref_cashoutChannelId LIKE '$safeSearch%' LIMIT 100")->result();
             if (!empty($cpp_res)) $matching_ids = array_merge($matching_ids, array_column($cpp_res, 'id'));
@@ -190,10 +193,22 @@ class History extends CI_Model {
 
     public function count_all_dt($search_date = null, $search_merchant = null)
     {
+        if (self::$cached_total !== null) return self::$cached_total;
+
+        // ULTRA-FAST: Use table status estimates for recordsTotal
         $table_name = explode(' ', $this->table)[0];
-        $query = $this->db->query("SELECT TABLE_ROWS FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '{$table_name}'");
-        $result = $query->row();
-        return $result ? (int)$result->TABLE_ROWS : 0;
+        $q = $this->db->query("SHOW TABLE STATUS LIKE '{$table_name}'");
+        $res = $q->row();
+        if ($res && isset($res->Rows) && $res->Rows > 10000) {
+            self::$cached_total = (int)$res->Rows;
+            return self::$cached_total;
+        }
+
+        $this->db->select("count(id) as total");
+        $this->db->from($table_name);
+        $query = $this->db->get();
+        self::$cached_total = $query->row() ? (int)$query->row()->total : 0;
+        return self::$cached_total;
     }
 
     public function get_summary($search_date = null, $search_merchant = null)
@@ -237,7 +252,8 @@ class History extends CI_Model {
             $dt->where('cpp.ref_merchantId', $search_merchant);
         }
         if (isset($filters['invoice']) && $filters['invoice']) {
-            $dt->where('c.c_invoiceNo', $filters['invoice']);
+            $searchVal = $this->db->escape_str($filters['invoice']);
+            $dt->where("(c.c_invoiceNo = '$searchVal' OR cpp.c_phone LIKE '$searchVal%' OR cpp.ref_cashoutChannelId LIKE '$searchVal%')", NULL, FALSE);
         }
 
         return $dt->set_column_order([null, 'm.c_name', 'cpp.c_datetime', 'cpp.ref_cashoutChannelId', 'c.c_invoiceNo', 'cpp.c_phone', 'cpp.c_amount', 'cpp.c_status'])

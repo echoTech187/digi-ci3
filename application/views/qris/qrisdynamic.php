@@ -33,7 +33,8 @@
                 <!-- LEFT: Global Search -->
                 <div class="dt-search-wrapper">
                     <i class="fas fa-search dt-search-icon"></i>
-                    <input type="text" id="qrisDynamicGlobalSearch" class="dt-search-input" placeholder="Search by Merchant, ID, or Reference..." value="<?= $this->session->userdata('search_transid_qd'); ?>">
+                    <?php $active_qd_search = $this->session->userdata('search_transid_qd'); ?>
+                    <input type="text" id="qrisDynamicGlobalSearch" class="dt-search-input" placeholder="<?= $active_qd_search ?: 'Search by Merchant, ID, or Reference...'; ?>" value="<?= $active_qd_search; ?>">
                 </div>
 
                 <!-- RIGHT: Filters -->

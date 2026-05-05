@@ -63,7 +63,35 @@
             <!-- Global Search -->
             <div class="d-none d-lg-block ml-4 flex-grow-1" style="max-width: 450px;">
                 <div class="premium-search-container">
-                    <input type="text" class="form-control premium-search-input" placeholder="Search menus, merchants, or transactions (ID, VA, RRN, Inv)..." id="globalSearchInput" autocomplete="off">
+                    <?php
+                        $segment2 = $this->uri->segment(2);
+                        $active_term = '';
+                        
+                        if ($segment2 == 'qris') {
+                            $active_term = $this->session->userdata('last_search_qris') ?: ($this->session->userdata('search_transactionid_ht') ?: ($this->session->userdata('search_rrn') ?: $this->session->userdata('search_invoice_no')));
+                        } elseif ($segment2 == 'virtual_account') {
+                            $active_term = $this->session->userdata('search_va_transid') ?: ($this->session->userdata('search_va_number') ?: $this->session->userdata('search_invoice_no'));
+                        } elseif ($segment2 == 'ewallet') {
+                            $active_term = $this->session->userdata('search_transid_ewallet') ?: $this->session->userdata('search_invoice_no');
+                        } elseif ($segment2 == 'bi_fast') {
+                            $active_term = $this->session->userdata('search_transid_bifast') ?: $this->session->userdata('search_invoice_no');
+                        } elseif ($segment2 == 'history') {
+                            $active_term = $this->session->userdata('search_invoice_ppob');
+                        } elseif ($segment2 == 'qris_dynamic') {
+                            $active_term = $this->session->userdata('search_transid_qd');
+                        } elseif ($segment2 == 'ewallet_dynamic') {
+                            $active_term = $this->session->userdata('search_transid_qd');
+                        } elseif ($segment2 == 'qris_recurring') {
+                            $active_term = $this->session->userdata('search_transid_qr');
+                        } elseif ($segment2 == 'Va_dynamic') {
+                            $active_term = $this->session->userdata('search_merchant_trxid');
+                        } elseif ($segment2 == 'VA_recurring') {
+                            $active_term = $this->session->userdata('search_transid_var');
+                        }
+                        
+                        $topbar_placeholder = $active_term ?: "Search transactions (ID, VA, RRN, Inv)...";
+                    ?>
+                    <input type="text" class="form-control premium-search-input" placeholder="<?= htmlspecialchars($topbar_placeholder); ?>" id="globalSearchInput" autocomplete="off">
                     <i class="fas fa-search search-icon" id="globalSearchIcon"></i>
                     <i class="fas fa-spinner fa-spin search-loader" id="globalSearchLoader"></i>
                     <div class="search-badge">⌘ K</div>
@@ -87,7 +115,7 @@
                 <!-- Nav Item - User Information -->
                 <li class="nav-item dropdown no-arrow ">
                     <a class="nav-link dropdown-toggle navbar-user-info pr-0 rounded-circle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <span class=" d-none d-lg-inline"><?= $user['c_name']; ?></span>
+                        
                         <img class="navbar-avatar" src="<?= base_url('assets/img/profile/default.jpg') ?>">
                     </a>
 

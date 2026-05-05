@@ -65,7 +65,7 @@
     ?>
 
     <!-- ── Growth KPI Cards (Glassmorphism Transform) ── -->
-    <div class="row mb-5 g-4">
+    <div class="row mb-5 gr-3">
         
         <!-- QRIS Growth -->
         <div class="col-xl-3 col-md-6">
@@ -75,10 +75,10 @@
                         <span>QRIS GROWTH</span>
                         <i class="fas fa-qrcode"></i>
                     </div>
-                    <h3 class="font-weight-bold mb-3" style="font-size: 1.4rem;">Rp <?= number_format($qris_current, 0, ',', '.') ?></h3>
+                    <h3 class="font-weight-bold mb-3 d-flex align-items-baseline" style="font-size: 1.2rem; white-space: nowrap; gap: 8px;"><span style="margin-right: 2px;">Rp</span><?= number_format($qris_current, 0, ',', '.') ?></h3>
                     <div class="mt-auto d-flex align-items-center gap-2">
                         <?= render_growth_badge($qris_current, $qris_prev) ?>
-                        <span class="small" style="opacity: 0.8;">vs <?= $comparison_label ?></span>
+                        <span class="small" style="opacity: 0.8; white-space: nowrap;">vs&nbsp;<?= $comparison_label ?></span>
                     </div>
                 </div>
             </div>
@@ -92,10 +92,10 @@
                         <span>PLATFORM YIELD</span>
                         <i class="fas fa-hand-holding-usd"></i>
                     </div>
-                    <h3 class="font-weight-bold mb-3" style="font-size: 1.4rem;">Rp <?= number_format($profit_current, 0, ',', '.') ?></h3>
+                    <h3 class="font-weight-bold mb-3 d-flex align-items-baseline" style="font-size: 1.2rem; white-space: nowrap; gap: 8px;"><span style="margin-right: 2px;">Rp</span><?= number_format($profit_current, 0, ',', '.') ?></h3>
                     <div class="mt-auto d-flex align-items-center gap-2">
                         <?= render_growth_badge($profit_current, $profit_prev) ?>
-                        <span class="small" style="opacity: 0.8;">net vs <?= $comparison_label ?></span>
+                        <span class="small" style="opacity: 0.8; white-space: nowrap;">net vs&nbsp;<?= $comparison_label ?></span>
                     </div>
                 </div>
             </div>
@@ -109,10 +109,10 @@
                         <span>DISBURSE VOL.</span>
                         <i class="fas fa-exchange-alt"></i>
                     </div>
-                    <h3 class="font-weight-bold mb-3" style="font-size: 1.4rem;">Rp <?= number_format($disburse_current, 0, ',', '.') ?></h3>
+                    <h3 class="font-weight-bold mb-3 d-flex align-items-baseline" style="font-size: 1.2rem; white-space: nowrap; gap: 8px;"><span style="margin-right: 2px;">Rp</span><?= number_format($disburse_current, 0, ',', '.') ?></h3>
                     <div class="mt-auto d-flex align-items-center gap-2">
                         <?= render_growth_badge($disburse_current, $disburse_prev) ?>
-                        <span class="small" style="opacity: 0.8;">vs <?= $comparison_label ?></span>
+                        <span class="small" style="opacity: 0.8; white-space: nowrap;">vs&nbsp;<?= $comparison_label ?></span>
                     </div>
                 </div>
             </div>
@@ -131,7 +131,7 @@
                         <span class="badge rounded-pill px-3 py-1" style="background: rgba(255,255,255,0.2); font-size: 10px; color: white;">
                              <i class="fas <?= ($success_rate >= 95 ? 'fa-check' : 'fa-exclamation-triangle'); ?> mr-1"></i> <?= ($success_rate >= 95 ? 'HIGH' : 'NORMAL'); ?>
                         </span>
-                        <span class="small" style="opacity: 0.8;">integrity score</span>
+                        <span class="small" style="opacity: 0.8; white-space: nowrap;">integrity score</span>
                     </div>
                 </div>
             </div>
@@ -140,18 +140,18 @@
     </div>
 
     <!-- ── Analysis Depth Sections ── -->
-    <div class="row g-4 mb-5">
+    <div class="row gr-3 mb-5 d-flex align-items-stretch">
 
         <!-- Area Chart -->
-        <div class="col-xl-8 col-lg-7">
-            <div class="card border-0 shadow-sm dt-card h-100" style="border-radius: 24px;">
+        <div class="col-12 col-xl-8 d-flex flex-column">
+            <div class="card border-0 shadow-sm dt-card h-100 d-flex flex-column" style="border-radius: 24px; min-height: 520px;">
                 <div class="card-header border-0 bg-transparent py-4 px-4 d-flex align-items-center justify-content-between">
                     <div>
                         <h6 class="font-weight-bold text-gray-900" style="font-size: 1rem;">Yield Analysis Trend</h6>
                         <p class="m-0 text-muted small mt-1">Growth progression in total platform volume over selected period</p>
                     </div>
                 </div>
-                <div class="card-body px-4 pb-4">
+                <div class="card-body px-4 pb-4 flex-grow-1">
                     <div class="chart-area" style="height: 380px;">
                         <canvas id="myAreaChart"></canvas>
                     </div>
@@ -160,13 +160,13 @@
         </div>
 
         <!-- Pie Chart -->
-        <div class="col-xl-4 col-lg-5">
-            <div class="card border-0 shadow-sm dt-card h-100" style="border-radius: 24px;">
+        <div class="col-12 col-xl-4 d-flex flex-column">
+            <div class="card border-0 shadow-sm dt-card h-100 d-flex flex-column" style="border-radius: 24px; min-height: 520px;">
                 <div class="card-header border-0 bg-transparent py-4 px-4">
                     <h6 class="font-weight-bold text-gray-900" style="font-size: 1rem;">Net Contribution Mix</h6>
                     <p class="m-0 text-muted small mt-1">Direct profit distribution (Fee - Cost)</p>
                 </div>
-                <div class="card-body px-4 pb-4">
+                <div class="card-body px-4 pb-4 flex-grow-1">
                     <div class="chart-pie pt-4 mb-4" style="height: 280px; position: relative;">
                         <canvas id="channelPieChart"></canvas>
                         <div style="position: absolute; top: 55%; left: 50%; transform: translate(-50%, -50%); text-align: center; pointer-events: none;">
@@ -202,7 +202,7 @@
                             <p class="mb-5 text-white-50" style="line-height: 1.8; font-size: 15px; max-width: 600px;">Our BI engine has analyzed the data for the selected period. These actionable insights are designed to maximize ecosystem efficiency and partner profitability.</p>
                             
                             <div class="row g-4">
-                                <div class="col-md-6 mb-4">
+                                <div class="col-12 col-xl-6 mb-4">
                                     <div class="p-4 h-100 d-flex flex-column" style="background: rgba(255,255,255,0.05); border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px);">
                                         <div class="d-flex align-items-center mb-3">
                                             <div class="bg-primary rounded-lg d-flex align-items-center justify-content-center mr-3" style="width: 38px; height: 38px; min-width: 38px;">
@@ -213,7 +213,7 @@
                                         <p class="small m-0 text-white-50" style="line-height: 1.6;">Volume peaks between 7PM - 10PM. Schedule intense background operations after 1AM to ensure zero-latency periods during high traffic.</p>
                                     </div>
                                 </div>
-                                <div class="col-md-6 mb-4">
+                                <div class="col-12 col-xl-6 mb-4">
                                     <div class="p-4 h-100 d-flex flex-column" style="background: rgba(255,255,255,0.05); border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px);">
                                         <div class="d-flex align-items-center mb-3">
                                             <div class="bg-emerald rounded-lg d-flex align-items-center justify-content-center mr-3" style="width: 38px; height: 38px; min-width: 38px; background: #10b981;">
@@ -330,7 +330,13 @@
           yAxes: [{
             gridLines: { color: "rgba(241, 245, 249, 1)", zeroLineColor: "rgba(241, 245, 249, 1)", drawBorder: false },
             ticks: {
-              callback: function(value) { return 'Rp' + number_format(value); },
+              callback: function(value) { 
+                  if (value >= 1e12) return 'Rp ' + (value / 1e12).toFixed(1) + ' T';
+                  if (value >= 1e9) return 'Rp ' + (value / 1e9).toFixed(1) + ' B';
+                  if (value >= 1e6) return 'Rp ' + (value / 1e6).toFixed(1) + ' M';
+                  if (value >= 1e3) return 'Rp ' + (value / 1e3).toFixed(1) + ' K';
+                  return 'Rp ' + number_format(value); 
+              },
               maxTicksLimit: 7,
               padding: 15,
               fontStyle: '600'

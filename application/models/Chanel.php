@@ -5,11 +5,16 @@ class Chanel extends CI_Model {
     var $column_order = array(null, 'cc.id', 'cc.c_channelGroup', 'cc.c_description', 'cc.c_externalIdDefault', 'cc.c_feeType', 'cc.c_fee', null);
     var $column_search = array('cc.id', 'cc.c_channelGroup', 'cc.c_description', 'cc.c_externalIdDefault');
     var $order = array('cc.id' => 'asc');
+    private static $cached_total = null;
 
     private function _get_datatables_query($table, $column_order, $column_search, $order, $where = [])
     {
-        // Emergency 3-second safeguard
-        $this->db->query("SET SESSION max_execution_time = 10000");
+        // Emergency 30-second safeguard
+        $this->db->query("SET SESSION max_execution_time = 30000");
+        if (strpos($table, 'cashin_channel') !== false && strpos($table, 'merchant') === false) {
+            $prefix = (strpos($table, ' ') !== false) ? explode(' ', $table)[1] . '.' : '';
+            $this->db->select("{$prefix}id, {$prefix}c_channelGroup, {$prefix}c_description, {$prefix}c_externalIdDefault, {$prefix}c_feeType, {$prefix}c_fee, {$prefix}c_status");
+        }
         
         $this->db->from($table);
         
@@ -63,6 +68,8 @@ class Chanel extends CI_Model {
 
     public function count_all_dt($table, $where = [])
     {
+        if (empty($where) && self::$cached_total !== null) return self::$cached_total;
+
         if (!empty($where)) {
             $this->db->select('count(id) as total');
             $this->db->from($table);
@@ -71,10 +78,20 @@ class Chanel extends CI_Model {
             return $query->row()->total;
         }
 
+        // ULTRA-FAST: Use table status estimates for recordsTotal
         $table_name = explode(' ', $table)[0];
-        $query = $this->db->query("SELECT TABLE_ROWS FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '{$table_name}'");
-        $result = $query->row();
-        return $result ? (int)$result->TABLE_ROWS : 0;
+        $q = $this->db->query("SHOW TABLE STATUS LIKE '{$table_name}'");
+        $res = $q->row();
+        if ($res && isset($res->Rows)) {
+            self::$cached_total = (int)$res->Rows;
+            return self::$cached_total;
+        }
+
+        $this->db->select("count(id) as total");
+        $this->db->from($table_name);
+        $query = $this->db->get();
+        self::$cached_total = $query->row() ? (int)$query->row()->total : 0;
+        return self::$cached_total;
     }
 
         public function get_pulsa_reguler($limit, $start, $provider = null) {
@@ -419,7 +436,18 @@ class Chanel extends CI_Model {
     {
         $this->load->library('datatables');
 
+        // Extracting table name to handle aliases if present
+        $tableName = explode(' ', $table)[0];
+        $alias = count(explode(' ', $table)) > 1 ? explode(' ', $table)[1] : null;
+
+        $cols = '*';
+        if ($tableName == 'cashout_channel') {
+            $prefix = $alias ? $alias . '.' : '';
+            $cols = "{$prefix}id, {$prefix}c_caption, {$prefix}c_description, {$prefix}c_fee, {$prefix}c_channelGroup, {$prefix}c_channelGroup2, {$prefix}c_externalIdDefault, {$prefix}c_feeType, {$prefix}c_amountMin, {$prefix}c_amountMax";
+        }
+
         return $this->datatables->of($table)
+            ->select($cols)
             ->set_column_order($column_order)
             ->set_column_search($column_search)
             ->set_default_order($order)
@@ -438,7 +466,7 @@ class Chanel extends CI_Model {
         $this->load->library('datatables');
 
         return $this->datatables->of('cashin_channel_x_merchant cxm')
-            ->select('cxm.*, m.c_name as merchant_name')
+            ->select('cxm.id, cxm.ref_merchantId, cxm.c_cashinChannelGroup, cxm.ref_cashinChannelId, cxm.c_externalIdDefault, cxm.c_feeType, cxm.c_fee, cxm.c_feePercetange, cxm.c_settlementInterval, cxm.c_amountMin, cxm.c_amountMax, cxm.c_status, m.c_name as merchant_name')
             ->join('merchant m', 'm.id = cxm.ref_merchantId')
             ->set_column_order([null, 'm.c_name', 'cxm.c_cashinChannelGroup', 'cxm.c_fee', 'cxm.c_status', null])
             ->set_column_search(['m.c_name', 'cxm.c_cashinChannelGroup', 'cxm.ref_cashinChannelId', 'cxm.c_externalIdDefault'])
@@ -455,7 +483,7 @@ class Chanel extends CI_Model {
         $this->load->library('datatables');
 
         return $this->datatables->of('cashout_channel_x_merchant cxm')
-            ->select('cxm.*, m.c_name as merchant_name')
+            ->select('cxm.id, cxm.ref_merchantId, cxm.c_cashoutChannelGroup, cxm.ref_cashoutChannelId, cxm.c_externalIdDefault, cxm.c_feeType, cxm.c_fee, cxm.c_feePercetange, cxm.c_amountMin, cxm.c_amountMax, cxm.c_status, m.c_name as merchant_name')
             ->join('merchant m', 'm.id = cxm.ref_merchantId')
             ->set_column_order([null, 'm.c_name', 'cxm.c_cashoutChannelGroup', 'cxm.c_fee', 'cxm.c_status', null])
             ->set_column_search(['m.c_name', 'cxm.c_cashoutChannelGroup', 'cxm.ref_cashoutChannelId', 'cxm.c_externalIdDefault'])

@@ -59,10 +59,13 @@ $route['admin/getMaintenanceStatus'] = 'admin/DashboardController/getMaintenance
 $route['admin/globalSearch'] = 'admin/DashboardController/globalSearch';
 $route['admin/syncAvailableBalanceMerchant'] = 'admin/DashboardController/syncAvailableBalanceMerchant';
 $route['admin/recent_mutations_json'] = 'admin/DashboardController/recent_mutations_json';
+$route['admin/ajax_today_stats_json'] = 'admin/DashboardController/ajax_today_stats_json';
+$route['admin/ajax_monthly_stats_json'] = 'admin/DashboardController/ajax_monthly_stats_json';
 $route['welcome'] = 'admin/DashboardController/welcome';
 
 // --- Merchant Module Extraction Routes ---
 $route['admin/merchant'] = 'AdminMerchant/merchant';
+$route['admin/addMerchant'] = 'AdminMerchant/addMerchant';
 $route['admin/merchant_spv'] = 'AdminMerchant/merchant_spv';
 $route['admin/listMerchants/(:any)'] = 'AdminMerchant/listMerchants/$1';
 $route['admin/registerMerchant'] = 'AdminMerchant/registerMerchant';
@@ -285,6 +288,8 @@ $route['admin/createProduk/(:any)/(:any)'] = 'admin/ServiceController/createProd
 // --- Cashin External Module Extraction Routes ---
 $route['admin/cashin/external'] = 'admin/CashinExternalController/index';
 $route['admin/cashin/external/ajax_list'] = 'admin/CashinExternalController/ajax_list';
+$route['admin/cashin/external/add_view'] = 'admin/CashinExternalController/add_view';
+$route['admin/cashin/external/edit_view/(:any)'] = 'admin/CashinExternalController/edit_view/$1';
 $route['admin/cashin/external/add'] = 'admin/CashinExternalController/add';
 $route['admin/cashin/external/update'] = 'admin/CashinExternalController/update';
 $route['admin/cashin/external/delete/(:any)'] = 'admin/CashinExternalController/delete/$1';
@@ -293,6 +298,8 @@ $route['admin/cashin/external/bulk_update'] = 'admin/CashinExternalController/bu
 // --- Cashout External Module Extraction Routes ---
 $route['admin/cashout/external'] = 'admin/CashoutExternalController/index';
 $route['admin/cashout/external/ajax_list'] = 'admin/CashoutExternalController/ajax_list';
+$route['admin/cashout/external/add_view'] = 'admin/CashoutExternalController/add_view';
+$route['admin/cashout/external/edit_view/(:any)'] = 'admin/CashoutExternalController/edit_view/$1';
 $route['admin/cashout/external/add'] = 'admin/CashoutExternalController/add';
 $route['admin/cashout/external/update'] = 'admin/CashoutExternalController/update';
 $route['admin/cashout/external/delete/(:any)'] = 'admin/CashoutExternalController/delete/$1';

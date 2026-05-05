@@ -61,37 +61,72 @@ class Dashboard_model extends CI_Model
     public function get_monthly_overview()
     {
         $year = date('Y');
+        $current_month = (int)date('m');
         $channels = ['qris', 'va', 'ewallet', 'disburse'];
-        $data = [];
+        
+        $this->load->driver('cache', array('adapter' => 'file'));
+        $history_cache_key = "dashboard_monthly_history_{$year}_v1";
+        $history = $this->cache->get($history_cache_key) ?: [];
 
+        $data = [];
         foreach ($channels as $channel) {
-            $table = '';
-            $date_field = '';
+            $table = ''; $date_field = ''; $status_field = '';
             switch ($channel) {
                 case 'qris': $table = 'cashin_payment_qris_mpm'; $date_field = 'c_datetimePayment'; break;
                 case 'va': $table = 'cashin_payment_va'; $date_field = 'c_datetimePayment'; break;
                 case 'ewallet': $table = 'cashin_payment_ewallet'; $date_field = 'c_datetimePayment'; break;
-                case 'disburse': $table = 'cashout_payment_bifast'; $date_field = 'c_datetime'; $wheres = ['c_status' => 'SUCCESS']; break;
+                case 'disburse': $table = 'cashout_payment_bifast'; $date_field = 'c_datetime'; $status_field = 'c_status'; break;
             }
 
-            $this->db->select("MONTH($date_field) as month, SUM(c_amount) as amount");
-            $this->db->from($table);
-            // SARGable Date Range to allow index usage on the YEAR
-            $this->db->where("$date_field >=", $year . '-01-01 00:00:00');
-            $this->db->where("$date_field <=", $year . '-12-31 23:59:59');
-            
-            if ($channel == 'disburse') {
-                $this->db->where('c_status', 'SUCCESS');
-            }
-            
-            $monthly = $this->db->group_by("MONTH($date_field)")->get()->result_array();
+            // 1. Initialize channel data with 0s
+            $channel_data = array_fill(0, 12, 0);
 
-            $formatted = array_fill(1, 12, 0);
-            foreach ($monthly as $row) {
-                $formatted[(int)$row['month']] = (float)$row['amount'];
+            // 2. Load past months from history cache if available
+            $needs_full_recalc = false;
+            if (isset($history[$channel])) {
+                for ($m = 1; $m < $current_month; $m++) {
+                    $channel_data[$m - 1] = $history[$channel][$m - 1];
+                }
+            } else {
+                $needs_full_recalc = true;
             }
-            $data[$channel] = array_values($formatted);
+
+            // 3. Query DB
+            if ($needs_full_recalc) {
+                // First time: Query everything up to now with grouping
+                $this->db->select("MONTH($date_field) as month, SUM(c_amount) as amount");
+                $this->db->from($table);
+                $this->db->where("$date_field >=", $year . '-01-01 00:00:00');
+                $this->db->where("$date_field <=", date('Y-m-d') . ' 23:59:59');
+                if ($status_field !== '') $this->db->where($status_field, 'SUCCESS');
+                
+                $results = $this->db->group_by("MONTH($date_field)")->get()->result_array();
+                foreach ($results as $row) {
+                    $m = (int)$row['month'];
+                    $channel_data[$m - 1] = (float)$row['amount'];
+                }
+            } else {
+                // Regular: ONLY query current month TOTAL (ULTRA FAST - NO GROUP BY)
+                $this->db->select("SUM(c_amount) as amount");
+                $this->db->from($table);
+                $this->db->where("$date_field >=", $year . '-' . str_pad($current_month, 2, '0', STR_PAD_LEFT) . '-01 00:00:00');
+                $this->db->where("$date_field <=", date('Y-m-d') . ' 23:59:59');
+                if ($status_field !== '') $this->db->where($status_field, 'SUCCESS');
+                
+                $row = $this->db->get()->row_array();
+                $channel_data[$current_month - 1] = (float)($row['amount'] ?? 0);
+            }
+
+            $data[$channel] = $channel_data;
         }
+
+        // 4. Update history cache for past months
+        $history_payload = [];
+        foreach ($data as $chan => $months) {
+            $history_payload[$chan] = $months;
+        }
+        // Cache history for 24 hours (it only changes when a month rolls over or if we force recalc)
+        $this->cache->save($history_cache_key, $history_payload, 86400);
 
         return $data;
     }

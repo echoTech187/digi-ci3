@@ -37,12 +37,24 @@
                                         <td class="text-center font-weight-bold text-muted"><?= $i++ ?></td>
                                         <td class="font-weight-bold text-dark"><?= $r['role']; ?></td>
                                         <td class="text-center">
-                                            <a href="<?= base_url('admin/roleaccess/') . $r['id']; ?>" class="btn btn-sm btn-dt-action-primary shadow-sm mr-1">
-                                                <i class="fas fa-key fa-sm mr-1 mr-2"></i> Access
-                                            </a>
-                                            <a href="<?= base_url('admin/deleteRole/') . $r['id']; ?>" class="btn btn-sm btn-dt-secondary border shadow-sm text-danger" onclick="return confirm('Are you sure you want to delete this role?')">
-                                                <i class="fas fa-trash fa-sm mr-1 mr-2"></i> Delete
-                                            </a>
+                                            <div class="dropdown">
+                                                <button class="btn btn-light btn-sm rounded-circle shadow-none p-2" type="button" data-toggle="dropdown" aria-expanded="false">
+                                                    <i class="fas fa-ellipsis-v text-muted"></i>
+                                                </button>
+                                                <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg p-2" style="border-radius: 12px; min-width: 160px;">
+                                                    <li>
+                                                        <a class="dropdown-item rounded-2 py-2" href="<?= base_url('admin/roleaccess/') . $r['id']; ?>">
+                                                            <i class="fas fa-key text-primary mr-2"></i> Access Rights
+                                                        </a>
+                                                    </li>
+                                                    <li><hr class="dropdown-divider"></li>
+                                                    <li>
+                                                        <a class="dropdown-item rounded-2 py-2 text-danger" href="<?= base_url('admin/deleteRole/') . $r['id']; ?>" onclick="return confirm('Are you sure you want to delete this role?')">
+                                                            <i class="fas fa-trash mr-2"></i> Delete Role
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                            </div>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>

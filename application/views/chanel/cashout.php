@@ -29,18 +29,39 @@
             </div>
         </div>
 
-        <!-- ── Alert Messages ── -->
-        <?php if ($this->session->flashdata('message')): ?>
-            <div class="alert alert-success mx-4 mt-3 mb-0 border-0 shadow-sm animate__animated animate__fadeIn">
-                <i class="fas fa-check-circle "></i> <?= $this->session->flashdata('message'); ?>
-            </div>
-        <?php endif; ?>
+        <!-- Alerts Standardized to Swal2 Premium -->
+        <script>
+            $(document).ready(function() {
+                <?php 
+                $successMsg = $this->session->flashdata('success') ?: $this->session->flashdata('message');
+                if ($successMsg) : 
+                ?>
+                    Swal.fire({
+                        title: 'Success!',
+                        text: '<?= $successMsg; ?>',
+                        icon: 'success',
+                        customClass: {
+                            popup: 'swal2-premium-popup',
+                            confirmButton: 'swal2-premium-confirm'
+                        },
+                        buttonsStyling: false
+                    });
+                <?php endif; ?>
 
-        <?php if ($this->session->flashdata('error')): ?>
-            <div class="alert alert-danger mx-4 mt-3 mb-0 border-0 shadow-sm animate__animated animate__fadeIn">
-                <i class="fas fa-exclamation-circle "></i> <?= $this->session->flashdata('error'); ?>
-            </div>
-        <?php endif; ?>
+                <?php if ($this->session->flashdata('error')) : ?>
+                    Swal.fire({
+                        title: 'Error!',
+                        html: '<?= trim(str_replace(["\r", "\n"], '', $this->session->flashdata('error'))); ?>',
+                        icon: 'error',
+                        customClass: {
+                            popup: 'swal2-premium-popup',
+                            confirmButton: 'swal2-premium-confirm'
+                        },
+                        buttonsStyling: false
+                    });
+                <?php endif; ?>
+            });
+        </script>
 
         <!-- ── Table ── -->
         <div class="table-responsive">
@@ -242,14 +263,23 @@
                     orderable: false, 
                     className: 'text-center',
                     render: function(data, type, row) {
-                        return '<div class="text-center">' +
-                               '    <button class="btn btn-sm btn-outline-primary edit-cashout px-3 shadow-none font-weight-bold" ' +
-                               '        data-toggle="modal" data-target="#debitBalanceModal" ' +
-                               '        data-id="' + row.id + '" ' +
-                               '        data-group="' + row.c_channelGroup + '">' +
-                               '        <i class="fas fa-edit mr-1"></i> Edit' +
-                               '    </button>' +
-                               '</div>';
+                        return `
+                            <div class="dropdown">
+                                <button class="btn btn-sm text-muted rounded-circle p-2 border-0 bg-transparent" type="button" data-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end shadow border-0 py-2">
+                                    <li>
+                                        <button type="button" class="dropdown-item py-2 edit-cashout" 
+                                            data-toggle="modal" data-target="#debitBalanceModal" 
+                                            data-id="${row.id}" 
+                                            data-group="${row.c_channelGroup}">
+                                            <i class="fas fa-edit text-primary mr-2"></i> Edit Channel
+                                        </button>
+                                    </li>
+                                </ul>
+                            </div>
+                        `;
                     }
                 }
             ]);

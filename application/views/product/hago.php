@@ -158,10 +158,21 @@ $(document).ready(function() {
             searchable: false, 
             className: 'text-center',
             render: function(data, type, row) {
-                return '<button class="btn btn-sm btn-dt-action-primary shadow-sm" data-toggle="modal" data-target="#editProductModal" ' +
-                       'onclick="editProduct(\'' + (row.id || '').replace(/'/g, "\\'") + '\', \'' + (row.c_caption || '').replace(/'/g, "\\'") + '\', \'' + (row.c_description || '').replace(/'/g, "\\'") + '\', \'' + row.c_fee + '\')">' +
-                       '<i class="fas fa-edit"></i> Edit' +
-                       '</button>';
+                return `
+                    <div class="dropdown">
+                        <button class="btn btn-sm text-muted rounded-circle p-2 border-0 bg-transparent" type="button" data-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow border-0 py-2">
+                            <li>
+                                <button type="button" class="dropdown-item py-2" 
+                                    onclick="editProduct('${(row.id || '').replace(/'/g, "\\'")}', '${(row.c_caption || '').replace(/'/g, "\\'")}', '${(row.c_description || '').replace(/'/g, "\\'")}', '${row.c_fee}')">
+                                    <i class="fas fa-edit text-primary mr-2"></i> Edit Product
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                `;
             }
         }
     ], {

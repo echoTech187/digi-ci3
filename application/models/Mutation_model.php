@@ -2,11 +2,12 @@
 
 class Mutation_model extends CI_Model
 {
+    private static $cached_total = null;
  
     private function _get_datatables_query($id, $search_date_mutation = null, $position = null, $channel = null, $search_date_mutation_to = null)
     {
-        // Emergency 3-second safeguard
-        $this->db->query("SET SESSION max_execution_time = 10000");
+        // Emergency 30-second safeguard
+        $this->db->query("SET SESSION max_execution_time = 30000");
         
         $this->db->select("
             mutation.id, 
@@ -173,11 +174,16 @@ class Mutation_model extends CI_Model
 
     public function count_all_dt($id)
     {
-        $this->db->select('count(mutation.id) as total');
+        if (self::$cached_total !== null) return self::$cached_total;
+
+        // Use table status estimates if no filters beyond merchant ID are needed 
+        // (Mutation is always filtered by merchantId, so we still do a count but optimized)
+        $this->db->select('count(id) as total');
         $this->db->from('mutation');
         $this->db->where('ref_merchantId', $id);
         $query = $this->db->get();
-        return $query->row()->total;
+        self::$cached_total = $query->row() ? (int)$query->row()->total : 0;
+        return self::$cached_total;
     }
 
     public function get_mutations($limit, $start, $id, $search_date_mutation = null, $position = null, $channel = null)
@@ -190,6 +196,7 @@ class Mutation_model extends CI_Model
 
     public function get_merchant($id)
     {
+        $this->db->select('id, c_name, c_email, c_status, c_merchantLevel, c_balanceTotal, c_balanceHold, c_openapiStatus', FALSE);
         return $this->db->where('id', $id)->get('merchant')->result();
     }
 
@@ -262,7 +269,7 @@ class Mutation_model extends CI_Model
         $this->load->library('datatables');
         
         // Safeguard
-        $this->db->query("SET SESSION max_execution_time = 10000");
+        $this->db->query("SET SESSION max_execution_time = 30000");
 
         $search_date = $filters['date'] ?? null;
         $search_date_to = $filters['date_to'] ?? null;

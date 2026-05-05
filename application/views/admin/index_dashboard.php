@@ -14,7 +14,7 @@
         <div class="d-flex align-items-center gap-3">
              <div class="text-right mr-3 d-none d-md-block">
                 <small class="text-muted d-block font-weight-bold" style="font-size: 10px; text-transform: uppercase; letter-spacing: 1px;">Cloud Sync Active</small>
-                <small class="text-primary font-weight-bold" style="font-size: 11px;">Last updated: <?= $last_synced; ?></small>
+                <small class="text-primary font-weight-bold" style="font-size: 11px;">Last updated: <span id="stat_last_synced">Loading...</span></small>
             </div>
             <div class="d-flex align-items-center gap-2 px-3 py-2 btn-dt-chip-action" style="border-radius: 12px; backdrop-filter: blur(10px); border: 1px solid var(--border-color);">
                 <span class="position-relative d-flex">
@@ -27,7 +27,7 @@
     </div>
 
     <!-- ── KPI Summary Grid (Glassmorphism Transformation) ── -->
-    <div class="row mb-4 g-3">
+    <div class="row mb-4 gr-3">
         <!-- Today's Volume -->
         <div class="col-xl-3 col-md-6">
             <div class="card border-0 shadow-sm dash-kpi-card" style="background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%); color: white; border-radius: 20px; overflow: hidden; position: relative;">
@@ -41,10 +41,10 @@
                         </div>
                     </div>
                     <h6 class="font-weight-bold mb-1" style="opacity: 0.8; font-size: 11px; text-transform: uppercase; letter-spacing: 1px;">Net Volume</h6>
-                    <h3 class="font-weight-bold mb-3" style="font-size: 1.6rem; letter-spacing: -0.5px;">Rp <?= number_format($today_stats['total_volume'], 0, ',', '.'); ?></h3>
+                    <h3 class="font-weight-bold mb-3 d-flex align-items-baseline" style="font-size: 1.4rem; letter-spacing: -0.5px; white-space: nowrap; gap: 10px;"><span>Rp</span><span id="stat_total_volume">...</span></h3>
                     <div class="d-flex align-items-center mt-auto">
                         <div class="px-2 py-1 rounded-pill d-flex align-items-center" style="background: rgba(255,255,255,0.15); font-size: 10px;">
-                            <i class="fas fa-arrow-up mr-1" style="font-size: 8px;"></i> <?= number_format($today_stats['total_qty'], 0, ',', '.'); ?> Settled 
+                            <i class="fas fa-arrow-up mr-1" style="font-size: 8px;"></i> <span id="stat_total_qty">...</span>&nbsp;Settled 
                         </div>
                     </div>
                 </div>
@@ -64,10 +64,10 @@
                         </div>
                     </div>
                     <h6 class="font-weight-bold mb-1" style="opacity: 0.8; font-size: 11px; text-transform: uppercase; letter-spacing: 1px;">QRIS Performance</h6>
-                    <h3 class="font-weight-bold mb-3" style="font-size: 1.6rem; letter-spacing: -0.5px;">Rp <?= number_format($today_stats['qris']['amount'], 0, ',', '.'); ?></h3>
+                    <h3 class="font-weight-bold mb-3 d-flex align-items-baseline" style="font-size: 1.4rem; letter-spacing: -0.5px; white-space: nowrap; gap: 10px;"><span>Rp</span><span id="stat_qris_amount">...</span></h3>
                     <div class="d-flex align-items-center mt-auto">
                         <div class="px-2 py-1 rounded-pill d-flex align-items-center" style="background: rgba(255,255,255,0.15); font-size: 10px;">
-                            <i class="fas fa-check-circle mr-1" style="font-size: 8px;"></i> <?= number_format($today_stats['qris']['qty'], 0, ',', '.'); ?> Successful
+                            <i class="fas fa-check-circle mr-1" style="font-size: 8px;"></i> <span id="stat_qris_qty">...</span>&nbsp;Successful
                         </div>
                     </div>
                 </div>
@@ -87,10 +87,10 @@
                         </div>
                     </div>
                     <h6 class="font-weight-bold mb-1" style="opacity: 0.8; font-size: 11px; text-transform: uppercase; letter-spacing: 1px;">BI-FAST Disbursement</h6>
-                    <h3 class="font-weight-bold mb-3" style="font-size: 1.6rem; letter-spacing: -0.5px;">Rp <?= number_format($today_stats['disburse']['amount'], 0, ',', '.'); ?></h3>
+                    <h3 class="font-weight-bold mb-3 d-flex align-items-baseline" style="font-size: 1.4rem; letter-spacing: -0.5px; white-space: nowrap; gap: 10px;"><span>Rp</span><span id="stat_disburse_amount">...</span></h3>
                     <div class="d-flex align-items-center mt-auto">
                         <div class="px-2 py-1 rounded-pill d-flex align-items-center" style="background: rgba(255,255,255,0.15); font-size: 10px;">
-                            <i class="fas fa-bolt mr-1" style="font-size: 8px;"></i> <?= number_format($today_stats['disburse']['qty'], 0, ',', '.'); ?> Processed
+                            <i class="fas fa-bolt mr-1" style="font-size: 8px;"></i> <span id="stat_disburse_qty">...</span>&nbsp;Processed
                         </div>
                     </div>
                 </div>
@@ -125,10 +125,10 @@
     </div>
 
     <!-- ── Charts Section ── -->
-    <div class="row mb-5">
+    <div class="row mb-5 d-flex align-items-stretch">
         <!-- Area Chart: Transaction Trends -->
-        <div class="col-xl-8 col-lg-7 mb-4">
-            <div class="card border-0 shadow-sm dt-card h-100" style="border-radius: 24px; background: white;">
+        <div class="col-12 col-xl-8 mb-4 d-flex flex-column">
+            <div class="card border-0 shadow-sm dt-card h-100 d-flex flex-column" style="border-radius: 24px; background: white; min-height: 520px;">
                 <div class="card-header border-0 bg-transparent pt-4 px-4 pb-0 d-flex align-items-center justify-content-between">
                     <div>
                         <h6 class="font-weight-bold text-gray-900" style="font-size: 1rem;">Transaction Trends</h6>
@@ -143,7 +143,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="card-body px-4 pb-4">
+                <div class="card-body px-4 pb-4 flex-grow-1">
                     <div class="chart-area" style="height: 380px;">
                         <canvas id="mainAreaChart"></canvas>
                     </div>
@@ -152,18 +152,18 @@
         </div>
 
         <!-- Donut Chart: Channel Mix -->
-        <div class="col-xl-4 col-lg-5 mb-4">
-            <div class="card border-0 shadow-sm dt-card h-100" style="border-radius: 24px; background: white;">
+        <div class="col-12 col-xl-4 mb-4 d-flex flex-column">
+            <div class="card border-0 shadow-sm dt-card h-100 d-flex flex-column" style="border-radius: 24px; background: white; min-height: 520px;">
                 <div class="card-header border-0 bg-transparent pt-4 px-4 pb-0">
                     <h6 class="font-weight-bold text-gray-900" style="font-size: 1rem;">Channel Mix (Today)</h6>
                     <p class="m-0 text-muted small mt-1">Share of successful transaction qty</p>
                 </div>
-                <div class="card-body px-4 pb-4 d-flex flex-column justify-content-center">
+                <div class="card-body px-4 pb-4 d-flex flex-column justify-content-center flex-grow-1">
                     <div class="chart-pie mb-4" style="height: 280px; position: relative;">
                         <canvas id="channelDonutChart"></canvas>
                         <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; pointer-events: none;">
                             <span class="d-block text-muted" style="font-size: 10px; text-transform: uppercase; font-weight: 800; letter-spacing: 1px;">Total Qty</span>
-                            <span class="h4 font-weight-bolder text-dark mb-0"><?= number_format($today_stats['total_qty'], 0, ',', '.'); ?></span>
+                            <span class="h4 font-weight-bolder text-dark mb-0" id="stat_total_qty_donut">...</span>
                         </div>
                     </div>
                     <div class="grid d-flex flex-wrap justify-content-center gap-3">
@@ -294,7 +294,7 @@
                     label: "QRIS",
                     borderColor: "#6366f1",
                     backgroundColor: "rgba(99, 102, 241, 0.05)",
-                    data: <?= json_encode($monthly_overview['qris']); ?>,
+                    data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                     lineTension: 0.4,
                     pointRadius: 4,
                     pointBackgroundColor: "#fff",
@@ -306,7 +306,7 @@
                     label: "Disburse",
                     borderColor: "#f59e0b",
                     backgroundColor: "rgba(245, 158, 11, 0.05)",
-                    data: <?= json_encode($monthly_overview['disburse']); ?>,
+                    data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                     lineTension: 0.4,
                     pointRadius: 4,
                     pointBackgroundColor: "#fff",
@@ -323,7 +323,13 @@
                 yAxes: [{
                     gridLines: { color: "rgba(241, 245, 249, 1)", zeroLineColor: "rgba(241, 245, 249, 1)", drawBorder: false },
                     ticks: {
-                        callback: function(value) { return 'Rp' + number_format(value); },
+                        callback: function(value) { 
+                            if (value >= 1e12) return 'Rp ' + (value / 1e12).toFixed(1) + ' T';
+                            if (value >= 1e9) return 'Rp ' + (value / 1e9).toFixed(1) + ' B';
+                            if (value >= 1e6) return 'Rp ' + (value / 1e6).toFixed(1) + ' M';
+                            if (value >= 1e3) return 'Rp ' + (value / 1e3).toFixed(1) + ' K';
+                            return 'Rp ' + number_format(value); 
+                        },
                         maxTicksLimit: 7,
                         padding: 15,
                         fontStyle: '600'
@@ -364,12 +370,7 @@
         data: {
             labels: ["QRIS", "VA", "E-Wallet", "Disburse"],
             datasets: [{
-                data: [
-                    <?= $today_stats['qris']['qty']; ?>,
-                    <?= $today_stats['va']['qty']; ?>,
-                    <?= $today_stats['ewallet']['qty']; ?>,
-                    <?= $today_stats['disburse']['qty']; ?>
-                ],
+                data: [0, 0, 0, 0],
                 backgroundColor: ['#6366f1', '#10b981', '#3b82f6', '#f59e0b'],
                 hoverBackgroundColor: ['#4f46e5', '#059669', '#2563eb', '#d97706'],
                 hoverBorderColor: "#fff",
@@ -400,4 +401,53 @@
             },
         },
     });
+
+    // --- Asynchronous Dashboard Stats Loading (SPLIT) ---
+    function loadTodayStats() {
+        $.ajax({
+            url: "<?= base_url('admin/ajax_today_stats_json'); ?>",
+            type: "GET",
+            dataType: "json",
+            success: function(resp) {
+                // Update Numeric Labels
+                $("#stat_last_synced").text(resp.last_synced);
+                $("#stat_total_volume").text(number_format(Math.round(resp.today_stats.total_volume)));
+                $("#stat_total_qty").text(number_format(resp.today_stats.total_qty));
+                $("#stat_total_qty_donut").text(number_format(resp.today_stats.total_qty));
+                
+                $("#stat_qris_amount").text(number_format(Math.round(resp.today_stats.qris.amount)));
+                $("#stat_qris_qty").text(number_format(resp.today_stats.qris.qty));
+                
+                $("#stat_disburse_amount").text(number_format(Math.round(resp.today_stats.disburse.amount)));
+                $("#stat_disburse_qty").text(number_format(resp.today_stats.disburse.qty));
+
+                // Update Donut Chart
+                channelDonutChart.data.datasets[0].data = [
+                    resp.today_stats.qris.qty,
+                    resp.today_stats.va.qty,
+                    resp.today_stats.ewallet.qty,
+                    resp.today_stats.disburse.qty
+                ];
+                channelDonutChart.update();
+            }
+        });
+    }
+
+    function loadMonthlyStats() {
+        $.ajax({
+            url: "<?= base_url('admin/ajax_monthly_stats_json'); ?>",
+            type: "GET",
+            dataType: "json",
+            success: function(resp) {
+                // Update Line Chart
+                mainAreaChart.data.datasets[0].data = resp.monthly_overview.qris;
+                mainAreaChart.data.datasets[1].data = resp.monthly_overview.disburse;
+                mainAreaChart.update();
+            }
+        });
+    }
+
+    // Trigger loads
+    loadTodayStats();
+    loadMonthlyStats();
 </script>

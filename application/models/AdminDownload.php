@@ -6,11 +6,12 @@ class AdminDownload extends CI_Model {
     var $column_order = array(null, 'ad.c_datetime', 'ad.c_type', 'ad.c_filename', 'ad.c_status', 'ad.c_remark');
     var $column_search = array('ad.c_type', 'ad.c_filename', 'ad.c_status', 'ad.c_remark');
     var $order = array('ad.id' => 'desc');
+    private static $cached_total = null;
 
     private function _get_datatables_query($search_date = null, $include_order = true)
     {
-        // Emergency 10-second safeguard
-        $this->db->query("SET SESSION max_execution_time = 10000");
+        // Emergency 30-second safeguard
+        $this->db->query("SET SESSION max_execution_time = 30000");
         
         $this->db->select('ad.id, ad.c_datetime, ad.c_type, ad.c_filename, ad.c_status, ad.c_remark');
         $this->db->from($this->table);
@@ -63,10 +64,22 @@ class AdminDownload extends CI_Model {
 
     public function count_all_dt($search_date = null)
     {
+        if (self::$cached_total !== null) return self::$cached_total;
+
+        // ULTRA-FAST: Use table status estimates for recordsTotal
         $table_name = explode(' ', $this->table)[0];
-        $query = $this->db->query("SELECT TABLE_ROWS FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '{$table_name}'");
-        $result = $query->row();
-        return $result ? (int)$result->TABLE_ROWS : 0;
+        $q = $this->db->query("SHOW TABLE STATUS LIKE '{$table_name}'");
+        $res = $q->row();
+        if ($res && isset($res->Rows)) {
+            self::$cached_total = (int)$res->Rows;
+            return self::$cached_total;
+        }
+
+        $this->db->select("count(id) as total");
+        $this->db->from($table_name);
+        $query = $this->db->get();
+        self::$cached_total = $query->row() ? (int)$query->row()->total : 0;
+        return self::$cached_total;
     }
 
     public function get_download($limit, $start, $search_date = null) {

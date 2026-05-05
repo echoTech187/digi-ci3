@@ -3,8 +3,9 @@
 class VirtualAccount extends CI_Model {
     
     // DataTables variables
+    private static $cached_total = null;
     var $table = 'cashin_payment_va cpv';
-    var $column_order = array(null, 'cpv.c_datetime', 'm.c_name', 'c.c_invoiceNo', 'cpv.ref_cashinChannelId', 'cpv.c_type', 'cpv.c_vaNumber', 'egv.c_custom', 'cpv.c_amount', 'cpv.c_fee', 'cpv.c_isSettlementRealtime', 'cpv.c_datetimeSettlement', null); 
+    var $column_order = array(null, 'cpv.c_datetime', 'm.c_name', 'Merchant_Transaction_Id', 'cpv.c_vaNumber', 'egv.c_custom', 'c.c_invoiceNo', 'cpv.ref_cashinChannelId', 'cpv.c_type', 'cpv.c_amount', 'cpv.c_fee', 'cpv.c_isSettlementRealtime', 'cpv.c_datetimeSettlement', null); 
     var $column_search = array('cpv.id', 'm.c_name', 'c.c_invoiceNo', 'cpv.c_vaNumber', 'cdv.c_merchantTransactionId', 'crv.c_merchantTransactionId', 'egv.c_custom');
     var $order = array('cpv.id' => 'desc');
 
@@ -15,11 +16,11 @@ class VirtualAccount extends CI_Model {
         $searchValue = isset($_POST['search']['value']) ? $_POST['search']['value'] : '';
 
         if ($count_only) {
-            $this->db->select("count(DISTINCT cpv.ref_cashinId) as total");
+            $this->db->select("count(*) as total");
         } else if ($only_ids) {
-            $this->db->select("MAX(cpv.id) as id");
+            $this->db->select("cpv.id");
         } else {
-            $this->db->select("cpv.*, c.c_invoiceNo, m.c_name AS merchant_name, s.c_name AS submerchant_name, 
+            $this->db->select("cpv.id, cpv.c_datetime, cpv.c_type, cpv.c_vaNumber, cpv.c_amount, cpv.c_fee, cpv.c_isSettlementRealtime, cpv.c_datetimeSettlement, cpv.ref_merchantId, cpv.ref_subMerchantId, cpv.ref_cashinId, cpv.ref_cashinChannelId, cpv.ref_cashinDynamicVaId, cpv.ref_cashinRecurringVaId, c.c_invoiceNo, m.c_name AS merchant_name, s.c_name AS submerchant_name, 
                                IF(cpv.c_type = 'Dynamic', cdv.c_merchantTransactionId, crv.c_merchantTransactionId) AS Merchant_Transaction_Id,
                                egv.c_custom");
         }
@@ -132,52 +133,83 @@ class VirtualAccount extends CI_Model {
         if ($searchValue) {
             $safeSearchValue = $this->db->escape_str($searchValue);
             
-            // TRULY SMART SEARCH: 
-            // 1. Always try finding ID matches first (Fast Indexed Lookup)
-            $matching_ids = [-1];
-            $matching_inv_ids = [-1];
+            // CACHING LOGIC: Prevent redundant scans across multiple calls (count + fetch)
+            static $cached_ids = null;
+            static $cached_inv_ids = null;
+            static $last_query = null;
 
-            // A. Check Invoice Number (Fast Lookup)
-            $inv_res = $this->db->query("SELECT id FROM cashin WHERE c_invoiceNo LIKE '$safeSearchValue%' LIMIT 50")->result();
-            if (!empty($inv_res)) $matching_inv_ids = array_merge($matching_inv_ids, array_column($inv_res, 'id'));
+            if ($cached_ids === null || $last_query !== $searchValue) {
+                $last_query = $searchValue;
+                $matching_ids = [-1];
+                $matching_inv_ids = [-1];
 
-            // B. Check VA Number & Custom Data
-            $cpv_res = $this->db->query("SELECT id FROM cashin_payment_va WHERE c_vaNumber LIKE '$safeSearchValue%' LIMIT 50")->result();
-            if (!empty($cpv_res)) $matching_ids = array_merge($matching_ids, array_column($cpv_res, 'id'));
-            
-            $egv_res = $this->db->query("SELECT ref_cashinPaymentVaId FROM external_gvpay_va_callback_payment WHERE c_custom LIKE '$safeSearchValue%' LIMIT 50")->result();
-            if (!empty($egv_res)) $matching_ids = array_merge($matching_ids, array_column($egv_res, 'ref_cashinPaymentVaId'));
+                $extracted_date = null;
+                // Improved regex to handle various formats
+                if (preg_match('/(?:GD|TRX|VA|EW|BF|_)([0-9]{6})/i', $searchValue, $matches)) {
+                    $yymmdd = $matches[1];
+                    $year = "20" . substr($yymmdd, 0, 2);
+                    $month = substr($yymmdd, 2, 2);
+                    $day = substr($yymmdd, 4, 2);
+                    if (checkdate($month, $day, $year)) {
+                        $extracted_date = "$year-$month-$day";
+                    }
+                }
 
-            // C. Check Transaction IDs from Dynamic/Recurring
-            $cdv_res = $this->db->query("SELECT id FROM cashin_dynamic_va WHERE c_merchantTransactionId LIKE '$safeSearchValue%' LIMIT 20")->result();
-            if (!empty($cdv_res)) {
-                $cdv_ids = array_column($cdv_res, 'id');
-                $cpv_res = $this->db->query("SELECT id FROM cashin_payment_va WHERE ref_cashinDynamicVaId IN (".implode(',', $cdv_ids).") LIMIT 50")->result();
-                if (!empty($cpv_res)) $matching_ids = array_merge($matching_ids, array_column($cpv_res, 'id'));
+                $op = (strlen($searchValue) >= 15) ? '=' : 'LIKE';
+                $val = (strlen($searchValue) >= 15) ? "'$safeSearchValue'" : "'$safeSearchValue%'";
+
+                // 1. Priority: Check Transaction IDs from Dynamic/Recurring
+                $cdv_res = $this->db->query("SELECT id FROM cashin_dynamic_va WHERE c_merchantTransactionId $op $val LIMIT 20")->result();
+                if (!empty($cdv_res)) {
+                    $cdv_ids = array_column($cdv_res, 'id');
+                    $cpv_res = $this->db->query("SELECT id FROM cashin_payment_va WHERE ref_cashinDynamicVaId IN (".implode(',', $cdv_ids).") LIMIT 50")->result();
+                    if (!empty($cpv_res)) $matching_ids = array_merge($matching_ids, array_column($cpv_res, 'id'));
+                }
+                
+                $crv_res = $this->db->query("SELECT id FROM cashin_recurring_va WHERE c_merchantTransactionId $op $val LIMIT 20")->result();
+                if (!empty($crv_res)) {
+                    $crv_ids = array_column($crv_res, 'id');
+                    $cpv_res = $this->db->query("SELECT id FROM cashin_payment_va WHERE ref_cashinRecurringVaId IN (".implode(',', $crv_ids).") LIMIT 50")->result();
+                    if (!empty($cpv_res)) $matching_ids = array_merge($matching_ids, array_column($cpv_res, 'id'));
+                }
+
+                // 2. Check VA Number & Custom Data
+                if (count($matching_ids) <= 1) {
+                    $cpv_res = $this->db->query("SELECT id FROM cashin_payment_va WHERE c_vaNumber $op $val LIMIT 50")->result();
+                    if (!empty($cpv_res)) $matching_ids = array_merge($matching_ids, array_column($cpv_res, 'id'));
+                    
+                    $egv_res = $this->db->query("SELECT ref_cashinPaymentVaId FROM external_gvpay_va_callback_payment WHERE c_custom $op $val LIMIT 50")->result();
+                    if (!empty($egv_res)) $matching_ids = array_merge($matching_ids, array_column($egv_res, 'ref_cashinPaymentVaId'));
+                }
+
+                // 3. Check Invoice Number (Only if specific ID not found)
+                if (count($matching_ids) <= 1 || strlen($searchValue) < 15) {
+                    if (strlen($searchValue) >= 4) {
+                        $inv_q = "SELECT id FROM cashin WHERE c_invoiceNo $op $val ";
+                        if ($extracted_date) {
+                            $inv_q .= " AND (c_datetime >= '$extracted_date 00:00:00' AND c_datetime <= '$extracted_date 23:59:59') ";
+                        }
+                        $inv_res = $this->db->query($inv_q . " LIMIT 50")->result();
+                        if (!empty($inv_res)) $matching_inv_ids = array_merge($matching_inv_ids, array_column($inv_res, 'id'));
+                    }
+                }
+
+                // 4. Direct PK match
+                if (is_numeric($searchValue) && strlen($searchValue) < 15) {
+                    $matching_ids[] = (int)$searchValue;
+                }
+
+                $cached_ids = array_unique($matching_ids);
+                $cached_inv_ids = array_unique($matching_inv_ids);
             }
-            
-            $crv_res = $this->db->query("SELECT id FROM cashin_recurring_va WHERE c_merchantTransactionId LIKE '$safeSearchValue%' LIMIT 20")->result();
-            if (!empty($crv_res)) {
-                $crv_ids = array_column($crv_res, 'id');
-                $cpv_res = $this->db->query("SELECT id FROM cashin_payment_va WHERE ref_cashinRecurringVaId IN (".implode(',', $crv_ids).") LIMIT 50")->result();
-                if (!empty($cpv_res)) $matching_ids = array_merge($matching_ids, array_column($cpv_res, 'id'));
-            }
-
-            // D. Direct PK match
-            if (is_numeric($searchValue) && strlen($searchValue) < 15) {
-                $matching_ids[] = (int)$searchValue;
-            }
-
-            $matching_ids = array_unique($matching_ids);
-            $matching_inv_ids = array_unique($matching_inv_ids);
 
             // 2. Decide strategy
-            if (count($matching_ids) > 1 || count($matching_inv_ids) > 1) {
+            if (count($cached_ids) > 1 || count($cached_inv_ids) > 1) {
                 $this->db->group_start();
-                if (count($matching_ids) > 1) $this->db->where_in('cpv.id', $matching_ids);
-                if (count($matching_inv_ids) > 1) {
-                    if (count($matching_ids) > 1) $this->db->or_where_in('cpv.ref_cashinId', $matching_inv_ids);
-                    else $this->db->where_in('cpv.ref_cashinId', $matching_inv_ids);
+                if (count($cached_ids) > 1) $this->db->where_in('cpv.id', $cached_ids);
+                if (count($cached_inv_ids) > 1) {
+                    if (count($cached_ids) > 1) $this->db->or_where_in('cpv.ref_cashinId', $cached_inv_ids);
+                    else $this->db->where_in('cpv.ref_cashinId', $cached_inv_ids);
                 }
                 $this->db->group_end();
             } else {
@@ -197,9 +229,9 @@ class VirtualAccount extends CI_Model {
             }
         }
         
-        // Deduplication: Only group if NOT counting total
+        // No grouping needed as ref_cashinId is unique
         if (!$count_only) {
-            $this->db->group_by('cpv.ref_cashinId');
+            // $this->db->group_by('cpv.ref_cashinId');
         }
 
         if (!$count_only) {
@@ -280,7 +312,19 @@ class VirtualAccount extends CI_Model {
 
     public function count_all_dt($search_date = null, $search_date_to = null, $search_merchant = null)
     {
-        $this->db->select("count(DISTINCT cpv.ref_cashinId) as total");
+        if (self::$cached_total !== null) return self::$cached_total;
+
+        // If no filters, use the fastest possible estimate from metadata (Instant)
+        if (!$search_date && !$search_date_to && !$search_merchant) {
+            $q = $this->db->query("SHOW TABLE STATUS LIKE 'cashin_payment_va'");
+            $res = $q->row();
+            if ($res && isset($res->Rows) && $res->Rows > 10000) {
+                self::$cached_total = (int)$res->Rows;
+                return self::$cached_total;
+            }
+        }
+
+        $this->db->select("count(*) as total");
         $this->db->from($this->table);
         if ($search_merchant) $this->db->where('cpv.ref_merchantId', $search_merchant);
         if ($search_date && $search_date_to) {

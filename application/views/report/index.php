@@ -26,9 +26,6 @@
                     <label class="dt-filter-label">Filter Date</label>
                     <input type="date" id="search_date" class="dt-more-input" value="<?= $search_date; ?>" style="min-width:160px;">
                 </div>
-                <a href="<?= base_url('admin/resetdownload'); ?>" class="btn-dt-chip-action btn-dt-action-primary border-0">
-                    <i class="fas fa-undo mr-1 mr-2"></i> Reset Filter
-                </a>
             </div>
             
         </div>

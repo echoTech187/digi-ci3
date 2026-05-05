@@ -3,7 +3,7 @@
     <div class="dt-page-header">
         <div>
             <h4 class="dt-page-title"><?= $title; ?></h4>
-            <p class="dt-page-subtitle">Manage merchant account details, callback configurations and system status</p>
+            <p class="dt-page-subtitle">Create and configure a new merchant account with granular permissions</p>
         </div>
     </div>
 
@@ -11,7 +11,7 @@
         <div class="col-lg-8">
             <div class="card border-0 shadow-sm dt-card">
                 <div class="card-header bg-white py-3 border-0">
-                    <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-edit mr-2"></i> Merchant Configuration Form</h6>
+                    <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-plus-circle mr-2"></i> Merchant Registration Form</h6>
                 </div>
                 <div class="card-body p-4 pt-0">
                     <!-- Alerts Standardized to Swal2 Premium -->
@@ -45,7 +45,7 @@
                         });
                     </script>
 
-                    <form action="<?= base_url('admin/updateMerchant/' . $merchant['id']); ?>" method="post">
+                    <form action="<?= base_url('admin/registerMerchant'); ?>" method="post">
                         
                         <!-- Account Information -->
                         <div class="section-title mb-4 mt-0 text-primary font-weight-bold small text-uppercase letter-spacing-1">
@@ -54,23 +54,27 @@
                         <div class="row">
                             <div class="col-md-6 mb-4">
                                 <label class="font-weight-bold text-gray-700 small">Merchant Name</label>
-                                <input type="text" name="c_name" class="form-control" 
-                                       value="<?= set_value('c_name', isset($merchant['c_name']) ? $merchant['c_name'] : ''); ?>" required>
+                                <input type="text" name="c_name" class="form-control" placeholder="ABC Store" required>
                             </div>
                             <div class="col-md-6 mb-4">
                                 <label class="font-weight-bold text-gray-700 small">Merchant Email</label>
-                                <input type="email" name="c_email" class="form-control" 
-                                       value="<?= set_value('c_email', isset($merchant['c_email']) ? $merchant['c_email'] : ''); ?>" required>
+                                <input type="email" name="c_email" class="form-control" placeholder="owner@abc.com" required>
                             </div>
                             <div class="col-md-6 mb-4">
                                 <label class="font-weight-bold text-gray-700 small">Merchant Phone</label>
-                                <input type="text" name="c_phoneNumber" class="form-control" 
-                                       value="<?= set_value('c_phoneNumber', isset($merchant['c_phoneNumber']) ? $merchant['c_phoneNumber'] : ''); ?>">
+                                <input type="text" name="c_phoneNumber" class="form-control" placeholder="08123xxx">
                             </div>
                             <div class="col-md-6 mb-4">
                                 <label class="font-weight-bold text-gray-700 small">GVConnect Business ID</label>
-                                <input type="text" name="c_gvconnectBusinessId" class="form-control" 
-                                       value="<?= set_value('c_gvconnectBusinessId', isset($merchant['c_gvconnectBusinessId']) ? $merchant['c_gvconnectBusinessId'] : ''); ?>">
+                                <input type="text" name="c_gvconnectBusinessId" class="form-control" placeholder="24090200001">
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <label class="font-weight-bold text-gray-700 small">Password</label>
+                                <input type="password" name="c_password" class="form-control" required>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <label class="font-weight-bold text-gray-700 small">Confirm Password</label>
+                                <input type="password" name="c_confirmPassword" class="form-control" required>
                             </div>
                         </div>
 
@@ -82,29 +86,21 @@
                         </div>
                         <div class="form-group mb-4">
                             <label class="font-weight-bold text-gray-700 small">Whitelist IP (semicolon separated)</label>
-                            <input type="text" name="c_openapiIPAllow" class="form-control" 
-                                   value="<?= set_value('c_openapiIPAllow', isset($merchant['c_openapiIPAllow']) ? $merchant['c_openapiIPAllow'] : ''); ?>"
-                                   placeholder="1.2.3.4; 5.6.7.8">
+                            <input type="text" name="c_openapiIPAllow" class="form-control" placeholder="1.2.3.4; 5.6.7.8">
                             <small class="text-muted">Restrict API access to these IP addresses</small>
                         </div>
                         <div class="row">
                             <div class="col-md-12 mb-4">
                                 <label class="font-weight-bold text-gray-700 small">Callback QRIS MPM</label>
-                                <input type="text" name="c_openapiUrlCallbackQrisMpm" class="form-control" 
-                                       value="<?= set_value('c_openapiUrlCallbackQrisMpm', isset($merchant['c_openapiUrlCallbackQrisMpm']) ? $merchant['c_openapiUrlCallbackQrisMpm'] : ''); ?>"
-                                       placeholder="https://api.your.com/callback">
+                                <input type="text" name="c_openapiUrlCallbackQrisMpm" class="form-control" placeholder="https://api.your.com/callback">
                             </div>
                             <div class="col-md-12 mb-4">
                                 <label class="font-weight-bold text-gray-700 small">Callback E-wallet</label>
-                                <input type="text" name="c_openapiUrlCallbackEwallet" class="form-control" 
-                                       value="<?= set_value('c_openapiUrlCallbackEwallet', isset($merchant['c_openapiUrlCallbackEwallet']) ? $merchant['c_openapiUrlCallbackEwallet'] : ''); ?>"
-                                       placeholder="https://api.your.com/callback">
+                                <input type="text" name="c_openapiUrlCallbackEwallet" class="form-control" placeholder="https://api.your.com/callback">
                             </div>
                             <div class="col-md-12 mb-4">
                                 <label class="font-weight-bold text-gray-700 small">Callback VA</label>
-                                <input type="text" name="c_openapiUrlCallbackVa" class="form-control" 
-                                       value="<?= set_value('c_openapiUrlCallbackVa', isset($merchant['c_openapiUrlCallbackVa']) ? $merchant['c_openapiUrlCallbackVa'] : ''); ?>"
-                                       placeholder="https://api.your.com/callback">
+                                <input type="text" name="c_openapiUrlCallbackVa" class="form-control" placeholder="https://api.your.com/callback">
                             </div>
                         </div>
 
@@ -131,8 +127,7 @@
                                     'c_openapiChannelVaRecurringCancel' => 'VA Recurring Cancel'
                                 ];
                                 foreach ($va_checkboxes as $key => $label) {
-                                    $checked = (isset($merchant[$key]) && $merchant[$key] == '1') ? 'checked' : '';
-                                    echo '<div class="mb-3"><div class="custom-control custom-switch"><input type="checkbox" class="custom-control-input" id="'.$key.'" name="'.$key.'" value="1" '.$checked.'><label class="custom-control-label small fw-bold text-muted" for="'.$key.'">'.$label.'</label></div></div>';
+                                    echo '<div class="mb-3"><div class="custom-control custom-switch"><input type="checkbox" class="custom-control-input" id="'.$key.'" name="'.$key.'" value="1"><label class="custom-control-label small fw-bold text-muted" for="'.$key.'">'.$label.'</label></div></div>';
                                 }
                                 ?>
                             </div>
@@ -153,8 +148,7 @@
                                     'c_openapiChannelEwalletDynamicCancel' => 'E-wallet Cancel'
                                 ];
                                 foreach ($qris_checkboxes as $key => $label) {
-                                    $checked = (isset($merchant[$key]) && $merchant[$key] == '1') ? 'checked' : '';
-                                    echo '<div class="mb-3"><div class="custom-control custom-switch"><input type="checkbox" class="custom-control-input" id="'.$key.'" name="'.$key.'" value="1" '.$checked.'><label class="custom-control-label small fw-bold text-muted" for="'.$key.'">'.$label.'</label></div></div>';
+                                    echo '<div class="mb-3"><div class="custom-control custom-switch"><input type="checkbox" class="custom-control-input" id="'.$key.'" name="'.$key.'" value="1"><label class="custom-control-label small fw-bold text-muted" for="'.$key.'">'.$label.'</label></div></div>';
                                 }
                                 ?>
                             </div>
@@ -172,34 +166,16 @@
                                     'c_allowTransferFromDashboard' => 'Allow Dashboard Transfer'
                                 ];
                                 foreach ($transfer_checkboxes as $key => $label) {
-                                    $checked = (isset($merchant[$key]) && $merchant[$key] == '1') ? 'checked' : '';
-                                    echo '<div class="mb-3"><div class="custom-control custom-switch"><input type="checkbox" class="custom-control-input" id="'.$key.'" name="'.$key.'" value="1" '.$checked.'><label class="custom-control-label small fw-bold text-muted" for="'.$key.'">'.$label.'</label></div></div>';
+                                    echo '<div class="mb-3"><div class="custom-control custom-switch"><input type="checkbox" class="custom-control-input" id="'.$key.'" name="'.$key.'" value="1"><label class="custom-control-label small fw-bold text-muted" for="'.$key.'">'.$label.'</label></div></div>';
                                 }
                                 ?>
                             </div>
                         </div>
 
-                        <hr class="my-4" style="border-top: 1px dashed #e3e6f0;">
-
-                        <!-- System Status -->
-                        <div class="section-title mb-4 text-primary font-weight-bold small text-uppercase letter-spacing-1">
-                            <i class="fas fa-cog mr-2"></i> System Status
-                        </div>
-                        <div class="form-group mb-5">
-                            <label class="font-weight-bold text-gray-700 small">OpenAPI Access Status</label>
-                            <select name="c_openapiStatus" class="form-control custom-select">
-                                <option value="Pending" <?= (isset($merchant['c_openapiStatus']) && $merchant['c_openapiStatus'] == 'Pending') ? 'selected' : ''; ?>>🕒 Pending Approval</option>
-                                <option value="Active" <?= (isset($merchant['c_openapiStatus']) && $merchant['c_openapiStatus'] == 'Active') ? 'selected' : ''; ?>>✅ Active Access</option>
-                                <option value="Not Active" <?= (isset($merchant['c_openapiStatus']) && $merchant['c_openapiStatus'] == 'Not Active') ? 'selected' : ''; ?>>❌ Deactivated</option>
-                                <option value="Blocked" <?= (isset($merchant['c_openapiStatus']) && $merchant['c_openapiStatus'] == 'Blocked') ? 'selected' : ''; ?>>🚫 Blocked</option>
-                                <option value="Freeze" <?= (isset($merchant['c_openapiStatus']) && $merchant['c_openapiStatus'] == 'Freeze') ? 'selected' : ''; ?>>❄️ Account Frozen</option>
-                            </select>
-                        </div>
-
-                        <div class="d-flex justify-content-end mt-4">
+                        <div class="d-flex justify-content-end mt-5 pt-3 border-top">
                             <a href="<?= base_url('admin/merchant'); ?>" class="btn btn-light px-4 py-2 mr-3 font-weight-bold small text-uppercase">Cancel</a>
                             <button type="submit" class="btn-dt-action btn-dt-action-primary px-5 py-2">
-                                <i class="fas fa-save mr-2"></i> Save Changes
+                                <i class="fas fa-save mr-2"></i> Register Merchant
                             </button>
                         </div>
                     </form>
@@ -212,24 +188,14 @@
                 <div class="card-body p-4">
                     <div class="d-flex align-items-center mb-4">
                         <div class="icon-shape bg-white text-primary rounded-circle mr-3" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
-                            <i class="fas fa-store"></i>
+                            <i class="fas fa-info-circle"></i>
                         </div>
-                        <h5 class="font-weight-bold mb-0">Merchant Profile</h5>
+                        <h5 class="font-weight-bold mb-0">Registration Guide</h5>
                     </div>
-                    
-                    <div class="mb-4">
-                        <div class="small opacity-75 mb-1 text-uppercase letter-spacing-1 font-weight-bold">Business Name</div>
-                        <div class="h5 mb-0 font-weight-bold"><?= $merchant['c_name']; ?></div>
-                    </div>
-                    
-                    <div class="mb-4">
-                        <div class="small opacity-75 mb-1 text-uppercase letter-spacing-1 font-weight-bold">Account Email</div>
-                        <div class="mb-0 font-weight-bold" style="word-break: break-all;"><?= $merchant['c_email']; ?></div>
-                    </div>
-                    
-                    <div>
-                        <div class="small opacity-75 mb-1 text-uppercase letter-spacing-1 font-weight-bold">Merchant ID</div>
-                        <div class="mb-0 font-weight-bold">#<?= $merchant['id']; ?></div>
+                    <p class="small mb-4 opacity-75">Fill out the form to create a new merchant. All account credentials will be generated and emailed to the merchant upon activation.</p>
+                    <div class="mb-3">
+                        <div class="small opacity-75 mb-1 text-uppercase letter-spacing-1 font-weight-bold">Status</div>
+                        <div class="h5 mb-0 font-weight-bold">New Registration</div>
                     </div>
                 </div>
             </div>
@@ -237,20 +203,20 @@
             <div class="card border-0 shadow-sm dt-card">
                 <div class="card-body p-4">
                     <h6 class="font-weight-bold text-gray-800 mb-3 d-flex align-items-center">
-                        <i class="fas fa-lightbulb text-warning mr-2"></i> Integration Tips
+                        <i class="fas fa-lightbulb text-warning mr-2"></i> Quick Tips
                     </h6>
                     <ul class="list-unstyled mb-0 small text-muted" style="line-height: 1.8;">
                         <li class="mb-3 d-flex align-items-start">
                             <i class="fas fa-check-circle text-success mt-1 mr-2"></i>
-                            <span>Use <strong>HTTPS</strong> for all callback endpoints to ensure data security.</span>
+                            <span>Passwords must match and be at least 6 characters.</span>
                         </li>
                         <li class="mb-3 d-flex align-items-start">
                             <i class="fas fa-check-circle text-success mt-1 mr-2"></i>
-                            <span>Implement signature verification to validate that incoming webhooks are from us.</span>
+                            <span>Service permissions can be modified later in the edit page.</span>
                         </li>
                         <li class="d-flex align-items-start">
                             <i class="fas fa-check-circle text-success mt-1 mr-2"></i>
-                            <span>Ensure your server responds with a <code>200 OK</code> status promptly.</span>
+                            <span>Whitelist IP ensures only authorized servers can call the API.</span>
                         </li>
                     </ul>
                 </div>

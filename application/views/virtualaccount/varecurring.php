@@ -36,7 +36,8 @@ $download_url = base_url('admin/download_VA_recurring') // Assuming this exists 
                 <!-- LEFT: Global Search -->
                 <div class="dt-search-wrapper">
                     <i class="fas fa-search dt-search-icon"></i>
-                    <input type="text" id="vaRecurringGlobalSearch" class="dt-search-input" placeholder="Search by Channel, Merchant, or ID..." value="<?= $this->session->userdata('search_transid_var'); ?>">
+                    <?php $active_var_search = $this->session->userdata('search_transid_var'); ?>
+                    <input type="text" id="vaRecurringGlobalSearch" class="dt-search-input" placeholder="<?= $active_var_search ?: 'Search by Channel, Merchant, or ID...'; ?>" value="<?= $active_var_search; ?>">
                 </div>
                 <!-- RIGHT: Filters -->
                 <div class="dt-toolbar-filters">
@@ -103,9 +104,9 @@ $download_url = base_url('admin/download_VA_recurring') // Assuming this exists 
                         <th>Merchant</th>
                         <th>Sub Merchant</th>
                         <th>Merchant Trans ID</th>
+                        <th>VA Number</th>
                         <th>Channel ID</th>
                         <th>External ID</th>
-                        <th>VA Number</th>
                         <th>Amount</th>
                         <th>Status</th>
                     </tr>
@@ -224,6 +225,9 @@ $download_url = base_url('admin/download_VA_recurring') // Assuming this exists 
             },
             {data: 'name_submerchant',className: 'text-nowrap'},
             {data: 'c_merchantTransactionId',className: 'text-nowrap'},
+            {data: 'c_vaNumber',className: 'text-nowrap', render: function(data){
+                return '<code>' + data + '</code>';
+            }},
             {data: 'ref_cashinChannelId',className: 'text-nowrap'},
             {
                 data: 'ref_cashinExternalId',
@@ -238,9 +242,7 @@ $download_url = base_url('admin/download_VA_recurring') // Assuming this exists 
                            data + '</a>';
                 }
             },
-            {data: 'c_vaNumber',className: 'text-nowrap', render: function(data){
-                return '<code>' + data + '</code>';
-            }},
+            
             {data: 'c_amount',className: 'text-nowrap', render: function(data){
                 return '<span class="font-weight-bold text-dark">Rp ' + number_format(data, 0, ',', '.') + '</span>';
             }},

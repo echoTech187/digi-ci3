@@ -31,7 +31,8 @@
                 <!-- LEFT: Global Search -->
                 <div class="dt-search-wrapper">
                     <i class="fas fa-search dt-search-icon"></i>
-                    <input type="text" id="ewalletDynamicGlobalSearch" class="dt-search-input" placeholder="Search Transaction, Merchant, or ID..." value="<?= $this->session->userdata('search_transid_qd'); ?>">
+                    <?php $active_ed_search = $this->session->userdata('search_transid_qd'); ?>
+                    <input type="text" id="ewalletDynamicGlobalSearch" class="dt-search-input" placeholder="<?= $active_ed_search ?: 'Search Transaction, Merchant, or ID...'; ?>" value="<?= $active_ed_search; ?>">
                 </div>
 
                 <!-- RIGHT: Filters -->

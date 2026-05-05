@@ -1,33 +1,39 @@
 <!-- Begin Page Content -->
 <div>
 
-    <!-- ── Alert Messages ── -->
-    <?php if ($this->session->flashdata('success')) : ?>
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="fas fa-check-circle mr-2"></i> <?= $this->session->flashdata('success'); ?>
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
-    <?php endif; ?>
+    <!-- Alerts Standardized to Swal2 Premium -->
+    <script>
+        $(document).ready(function() {
+            <?php if ($this->session->flashdata('success')) : ?>
+                Swal.fire({
+                    title: 'Success!',
+                    text: '<?= $this->session->flashdata('success'); ?>',
+                    icon: 'success',
+                    customClass: {
+                        popup: 'swal2-premium-popup',
+                        confirmButton: 'swal2-premium-confirm'
+                    },
+                    buttonsStyling: false
+                });
+            <?php endif; ?>
 
-    <?php if ($this->session->flashdata('error')) : ?>
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="fas fa-exclamation-circle mr-2"></i> <?= $this->session->flashdata('error'); ?>
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
-    <?php endif; ?>
-
-    <?php if ($this->session->flashdata('error_message')) : ?>
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="fas fa-exclamation-circle mr-2"></i> <?= $this->session->flashdata('error_message'); ?>
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
-    <?php endif; ?>
+            <?php 
+            $errorMsg = $this->session->flashdata('error') ?: $this->session->flashdata('error_message');
+            if ($errorMsg) : 
+            ?>
+                Swal.fire({
+                    title: 'Error!',
+                    html: '<?= trim(str_replace(["\r", "\n"], '', $errorMsg)); ?>',
+                    icon: 'error',
+                    customClass: {
+                        popup: 'swal2-premium-popup',
+                        confirmButton: 'swal2-premium-confirm'
+                    },
+                    buttonsStyling: false
+                });
+            <?php endif; ?>
+        });
+    </script>
 
     <!-- ── Page Header ── -->
     <div class="dt-page-header">
@@ -76,7 +82,7 @@
                 <!-- LEFT: Global Search -->
                 <div class="dt-search-wrapper">
                     <i class="fas fa-search dt-search-icon"></i>
-                    <input type="text" id="bifastGlobalSearch" class="dt-search-input" placeholder="Search by Trans ID, Invoice, or Account No..." value="<?= $transid_val; ?>">
+                    <input type="text" id="bifastGlobalSearch" class="dt-search-input" placeholder="<?= $transid_val ?: 'Search by Trans ID, Invoice, or Account No...'; ?>" value="<?= $transid_val; ?>">
                 </div>
 
                 <!-- RIGHT: Primary chips + More Filters trigger -->
@@ -177,8 +183,8 @@
                         <th style="width: 50px;">No</th>
                         <th>Merchant</th>
                         <th>Date Request</th>
-                        <th>Invoice No</th>
                         <th>Merchant Trans ID</th>
+                        <th>Invoice No</th>
                         <th>Channel</th>
                         <th>Account No</th>
                         <th>Beneficiary Name</th>
@@ -395,8 +401,8 @@
             {data: 'c_datetime',className: 'text-nowrap', render: function(data){
                 return moment(data).format('DD-MM-YYYY HH:mm:ss');
             }},
-            {data: 'c_invoiceNo',className: 'text-nowrap'},
             {data: 'c_merchantTransactionId',className: 'text-nowrap'},
+            {data: 'c_invoiceNo',className: 'text-nowrap'},
             {data: 'ref_cashoutChannelId',className: 'text-nowrap'},
             {data: 'c_accountNo',className: 'text-nowrap'},
             {data: 'c_beneficiaryAccountName',className: 'text-nowrap'},
@@ -434,12 +440,20 @@
                     var baseUrl = "<?= base_url() ?>";
                     var detailLink = baseUrl + 'admin/bi_fast_detail/' + data;
                     
-                    return '<a href="' + detailLink + '" class="btn btn-action-detail"><i class="fas fa-eye mr-2"></i>Detail</a> ' +
-                           '<a class="btn btn-action-resend btn-info-request" href="#" ' +
-                           'data-merchantTransactionId="' + row.c_merchantTransactionId + '" ' +
-                           'data-ref_cashoutExternalId="' + row.ref_cashoutExternalId + '" ' +
-                           'data-ref_cashoutExternalLogBifastId="' + row.ref_cashoutExternalLogBifastId + '">' +
-                           '<i class="fas fa-info-circle mr-2"></i>Info Request</a>';
+                    return `
+                        <div class="dropdown">
+                            <button class="btn btn-sm text-white rounded-circle p-2 border-0 bg-transparent" type="button" data-toggle="dropdown"><i class="fas fa-ellipsis-v"></i></button>
+                            <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg">
+                                <li><a href="${detailLink}" class="dropdown-item"><i class="fas fa-eye text-primary mr-2"></i> Detail</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item btn-info-request" href="#" 
+                                    data-merchantTransactionId="${row.c_merchantTransactionId}" 
+                                    data-ref_cashoutExternalId="${row.ref_cashoutExternalId}" 
+                                    data-ref_cashoutExternalLogBifastId="${row.ref_cashoutExternalLogBifastId}">
+                                    <i class="fas fa-info-circle text-info mr-2"></i> Info Request</a></li>
+                            </ul>
+                        </div>
+                    `;
                 }
             }
         ], {

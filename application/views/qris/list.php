@@ -31,12 +31,36 @@ $download_url = base_url('admin/download_qris')
         </div>
     </div>
 
-    <?php if ($this->session->flashdata('success')): ?>
-        <div class="alert alert-success"><?= $this->session->flashdata('success'); ?></div>
-    <?php endif; ?>
-    <?php if ($this->session->flashdata('error')): ?>
-        <div class="alert alert-danger"><?= $this->session->flashdata('error'); ?></div>
-    <?php endif; ?>
+    <!-- Alerts Standardized to Swal2 Premium -->
+    <script>
+        $(document).ready(function() {
+            <?php if ($this->session->flashdata('success')) : ?>
+                Swal.fire({
+                    title: 'Success!',
+                    text: '<?= $this->session->flashdata('success'); ?>',
+                    icon: 'success',
+                    customClass: {
+                        popup: 'swal2-premium-popup',
+                        confirmButton: 'swal2-premium-confirm'
+                    },
+                    buttonsStyling: false
+                });
+            <?php endif; ?>
+
+            <?php if ($this->session->flashdata('error')) : ?>
+                Swal.fire({
+                    title: 'Error!',
+                    html: '<?= trim(str_replace(["\r", "\n"], '', $this->session->flashdata('error'))); ?>',
+                    icon: 'error',
+                    customClass: {
+                        popup: 'swal2-premium-popup',
+                        confirmButton: 'swal2-premium-confirm'
+                    },
+                    buttonsStyling: false
+                });
+            <?php endif; ?>
+        });
+    </script>
 
     <!-- ── KPI Summary Cards ── -->
     
@@ -53,7 +77,8 @@ $download_url = base_url('admin/download_qris')
                 <!-- LEFT: Global Search -->
                 <div class="dt-search-wrapper">
                     <i class="fas fa-search dt-search-icon"></i>
-                    <input type="text" id="qrisGlobalSearch" class="dt-search-input" placeholder="Search by Invoice, Trans ID, or RRN..." value="<?= $search_transactionid_ht_value ?: ($search_rrn_value ?: $search_invoice_no_value); ?>">
+                    <?php $active_qris_search = $search_transactionid_ht_value ?: ($search_rrn_value ?: $search_invoice_no_value); ?>
+                    <input type="text" id="qrisGlobalSearch" class="dt-search-input" placeholder="<?= $active_qris_search ?: 'Search by Invoice, Trans ID, or RRN...'; ?>" value="<?= $active_qris_search; ?>">
                 </div>
 
                 <!-- RIGHT: Primary chips + More Filters trigger -->
@@ -140,13 +165,13 @@ $download_url = base_url('admin/download_qris')
                         <th>Date Payment</th>
                         <th>Merchant</th>
                         <th>Sub Merchant</th>
-                        <th>Invoice No</th>
                         <th>Trans ID</th>
+                        <th>RRN</th>
+                        <th>Invoice No</th>
                         <th>Type</th>
                         <th>Amount</th>
                         <th>MDR</th>
                         <th>Fee</th>
-                        <th>RRN</th>
                         <th>Realtime?</th>
                         <th>Date Settlement</th>
                         <th>Action</th>
@@ -180,8 +205,9 @@ $download_url = base_url('admin/download_qris')
                     return ' [' + row.ref_subMerchantId + '] - ' + data;
                 }
             },
-            {data: 'c_invoiceNo',className: 'text-nowrap'},
             {data: 'Merchant_Transaction_Id',className: 'text-nowrap'},
+            {data: 'c_issuerRrn',className: 'text-nowrap'},
+            {data: 'c_invoiceNo',className: 'text-nowrap'},
             {data: 'c_type',className: 'text-nowrap'},
             {data: 'c_amount',className: 'text-nowrap', render: function(data){
                 return 'Rp ' + number_format(data, 0, ',', '.');
@@ -192,7 +218,6 @@ $download_url = base_url('admin/download_qris')
             {data: 'c_fee',className: 'text-nowrap', render: function(data){
                 return 'Rp ' + number_format(data, 0, ',', '.');
             }},
-            {data: 'c_issuerRrn',className: 'text-nowrap'},
             {
                 data: 'c_isSettlementRealtime',
                 className: 'text-nowrap text-center',
@@ -217,8 +242,16 @@ $download_url = base_url('admin/download_qris')
                     var detailLink = baseUrl + 'admin/qris_detail/' + data;
                     var resendLink = baseUrl + 'admin/SendnotifikasiQRIS/' + data + '/' + row.ref_merchantId;
                     
-                    return '<a href="' + detailLink + '" class="btn btn-action-detail"><i class="fas fa-eye mr-2"></i>Detail</a> ' +
-                           '<a onclick="javascript: return confirm(\'Are you sure, want to resend notification again ??\')" href="' + resendLink + '" class="btn btn-action-resend"><i class="fas fa-paper-plane mr-2"></i>Resend</a>';
+                    return `
+                        <div class="dropdown">
+                            <button class="btn btn-sm text-white rounded-circle p-2 border-0 bg-transparent" type="button" data-toggle="dropdown"><i class="fas fa-ellipsis-v"></i></button>
+                            <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg">
+                                <li><a href="${detailLink}" class="dropdown-item"><i class="fas fa-eye text-primary mr-2"></i> Detail</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a onclick="javascript: return confirm('Are you sure, want to resend notification again ??')" href="${resendLink}" class="dropdown-item"><i class="fas fa-paper-plane text-warning mr-2"></i> Resend</a></li>
+                            </ul>
+                        </div>
+                    `;
                 }
             }
         ], {

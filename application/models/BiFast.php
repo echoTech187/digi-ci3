@@ -4,14 +4,15 @@ class BiFast extends CI_Model {
 
     // DataTables variables
     var $table = 'cashout_payment_bifast cpb';
-    var $column_order = array(null, 'm.c_name', 'cpb.c_datetime', 'c.c_invoiceNo', 'cpb.c_merchantTransactionId', 'cpb.ref_cashoutChannelId', 'cpb.c_accountNo', 'mab.c_beneficiaryAccountName', 'cpb.c_amount', 'cpb.c_fee', 'cpb.c_status', null, null);
+    var $column_order = array(null, 'm.c_name', 'cpb.c_datetime', 'cpb.c_merchantTransactionId', 'c.c_invoiceNo', 'cpb.ref_cashoutChannelId', 'cpb.c_accountNo', 'mab.c_beneficiaryAccountName', 'cpb.c_amount', 'cpb.c_fee', 'cpb.c_status', null, null);
     var $column_search = array('cpb.id', 'm.c_name', 'cpb.c_merchantTransactionId', 'cpb.c_accountNo', 'mab.c_beneficiaryAccountName');
+    private static $cached_total = null;
     var $order = array('cpb.id' => 'desc');
 
     private function _get_datatables_query($search_name = null, $date_from = null, $date_to = null, $search_transid = null, $search_external_reff = null, $search_channel = null, $search_status = null, $only_ids = false, $count_only = false)
     {
         // Emergency safeguard
-        $this->db->query("SET SESSION max_execution_time = 10000");
+        $this->db->query("SET SESSION max_execution_time = 30000");
         
         $searchValue = isset($_POST['search']['value']) ? $_POST['search']['value'] : '';
 
@@ -20,7 +21,7 @@ class BiFast extends CI_Model {
         } else if ($only_ids) {
             $this->db->select("MAX(cpb.id) as id");
         } else {
-            $this->db->select("cpb.*, m.c_name AS name_merchant, c.c_invoiceNo, mab.c_beneficiaryAccountName,
+            $this->db->select("cpb.id, cpb.c_datetime, cpb.c_merchantTransactionId, cpb.ref_cashoutChannelId, cpb.c_accountNo, cpb.c_amount, cpb.c_fee, cpb.c_status, cpb.ref_merchantId, cpb.ref_cashoutId, m.c_name AS name_merchant, c.c_invoiceNo, mab.c_beneficiaryAccountName,
                                COALESCE(epb.c_responseBody, egb.c_responseBody) AS c_responseBody");
         }
         
@@ -127,43 +128,72 @@ class BiFast extends CI_Model {
         }
 
         if ($searchValue) {
-            $safeSearch = $this->db->escape_str($searchValue);
+            $safeSearchValue = $this->db->escape_str($searchValue);
             
-            // TRULY SMART SEARCH: 
-            // 1. Always try finding ID matches first (Fast Indexed Lookup)
-            $matching_ids = [-1];
-            
-            // Check in technical ID columns (Merchant Trans ID & Account No)
-            $cpb_res = $this->db->query("SELECT id FROM cashout_payment_bifast WHERE c_merchantTransactionId LIKE '$safeSearch%' OR c_accountNo LIKE '$safeSearch%' LIMIT 100")->result();
-            if (!empty($cpb_res)) $matching_ids = array_merge($matching_ids, array_column($cpb_res, 'id'));
-            
-            // Check in Invoice No (via sub-query lookup)
-            $inv_res = $this->db->query("SELECT id FROM cashout WHERE c_invoiceNo LIKE '$safeSearch%' LIMIT 50")->result();
-            $inv_ids = array_column($inv_res, 'id');
+            // CACHING LOGIC: Prevent redundant scans across multiple calls (count + fetch)
+            static $cached_ids = null;
+            static $cached_inv_ids = null;
+            static $last_query = null;
 
-            if (is_numeric($searchValue) && strlen($searchValue) < 15) {
-                $matching_ids[] = (int)$searchValue;
+            if ($cached_ids === null || $last_query !== $searchValue) {
+                $last_query = $searchValue;
+                $matching_ids = [-1];
+                $matching_inv_ids = [-1];
+
+                $extracted_date = null;
+                // Improved regex to handle various formats
+                if (preg_match('/(?:GD|TRX|VA|EW|BF|_)([0-9]{6})/i', $searchValue, $matches)) {
+                    $yymmdd = $matches[1];
+                    $year = "20" . substr($yymmdd, 0, 2);
+                    $month = substr($yymmdd, 2, 2);
+                    $day = substr($yymmdd, 4, 2);
+                    if (checkdate($month, $day, $year)) {
+                        $extracted_date = "$year-$month-$day";
+                    }
+                }
+
+                $op = (strlen($searchValue) >= 15) ? '=' : 'LIKE';
+                $val = (strlen($searchValue) >= 15) ? "'$safeSearchValue'" : "'$safeSearchValue%'";
+
+                // 1. Priority: Check technical ID columns (Merchant Trans ID & Account No)
+                $cpb_res = $this->db->query("SELECT id FROM cashout_payment_bifast WHERE c_merchantTransactionId $op $val OR c_accountNo $op $val LIMIT 100")->result();
+                if (!empty($cpb_res)) $matching_ids = array_merge($matching_ids, array_column($cpb_res, 'id'));
+
+                // 2. Check Invoice Number (Only if specific ID not found)
+                if (count($matching_ids) <= 1 || strlen($searchValue) < 15) {
+                    if (strlen($searchValue) >= 4) {
+                        $inv_q = "SELECT id FROM cashout WHERE c_invoiceNo $op $val ";
+                        if ($extracted_date) {
+                            $inv_q .= " AND (c_datetime >= '$extracted_date 00:00:00' AND c_datetime <= '$extracted_date 23:59:59') ";
+                        }
+                        $inv_res = $this->db->query($inv_q . " LIMIT 50")->result();
+                        if (!empty($inv_res)) $matching_inv_ids = array_merge($matching_inv_ids, array_column($inv_res, 'id'));
+                    }
+                }
+
+                // 3. Direct PK match
+                if (is_numeric($searchValue) && strlen($searchValue) < 15) {
+                    $matching_ids[] = (int)$searchValue;
+                }
+
+                $cached_ids = array_unique($matching_ids);
+                $cached_inv_ids = array_unique($matching_inv_ids);
             }
 
-            $matching_ids = array_unique($matching_ids);
-
-            // 2. Decide strategy: If IDs or Invoices found, use them. If not, search by Name.
-            if (count($matching_ids) > 1 || !empty($inv_ids)) {
+            // 2. Decide strategy
+            if (count($cached_ids) > 1 || count($cached_inv_ids) > 1) {
                 $this->db->group_start();
-                if (count($matching_ids) > 1) {
-                    $this->db->where_in('cpb.id', $matching_ids);
-                }
-                if (!empty($inv_ids)) {
-                    if (count($matching_ids) > 1) {
-                        $this->db->or_where_in('cpb.ref_cashoutId', $inv_ids);
-                    } else {
-                        $this->db->where_in('cpb.ref_cashoutId', $inv_ids);
-                    }
+                if (count($cached_ids) > 1) $this->db->where_in('cpb.id', $cached_ids);
+                if (count($cached_inv_ids) > 1) {
+                    if (count($cached_ids) > 1) $this->db->or_where_in('cpb.ref_cashoutId', $cached_inv_ids);
+                    else $this->db->where_in('cpb.ref_cashoutId', $cached_inv_ids);
                 }
                 $this->db->group_end();
             } else {
                 // FALLBACK: Name search if no specific ID matched (min 3 chars)
                 if (strlen($searchValue) >= 3) {
+                    // Ensure joins for name search fallback
+                    $this->db->join('merchant m', 'cpb.ref_merchantId = m.id', 'left');
                     $this->db->like('m.c_name', $searchValue, 'both');
                 } else {
                     $this->db->where('1=0', NULL, FALSE);
@@ -246,6 +276,18 @@ class BiFast extends CI_Model {
 
     public function count_all_dt($search_name = null, $date_from = null, $date_to = null)
     {
+        if (self::$cached_total !== null) return self::$cached_total;
+
+        // If no filters, use the fastest possible estimate from metadata (Instant)
+        if (!$search_name && !$date_from && !$date_to) {
+            $q = $this->db->query("SHOW TABLE STATUS LIKE 'cashout_payment_bifast'");
+            $res = $q->row();
+            if ($res && isset($res->Rows) && $res->Rows > 10000) {
+                self::$cached_total = (int)$res->Rows;
+                return self::$cached_total;
+            }
+        }
+
         $this->db->select("count(DISTINCT cpb.ref_cashoutId) as total");
         $this->db->from($this->table);
         if ($search_name) $this->db->where('cpb.ref_merchantId', $search_name);
@@ -254,7 +296,8 @@ class BiFast extends CI_Model {
             $this->db->where('cpb.c_datetime <=', $date_to);
         }
         $query = $this->db->get();
-        return $query->row()->total;
+        self::$cached_total = $query->row() ? (int)$query->row()->total : 0;
+        return self::$cached_total;
     }
 
 

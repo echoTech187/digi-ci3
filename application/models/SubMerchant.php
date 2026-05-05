@@ -2,9 +2,13 @@
 
 class SubMerchant extends CI_Model
 {
+    private static $cached_total = null;
+
     private function _get_datatables_query($id)
     {
-        $this->db->select('m.*, s.c_gvconnectBusinessId, s.c_gvconnectBusinessName, s.c_gvconnectGVConnectKey, s.c_gvconnectStaticQrisRaw, s.c_gvconnectStaticVaBni, s.c_gvconnectStaticVaBca, s.c_gvconnectStaticVaCimb, s.c_gvconnectStaticVaPermata');
+        // Emergency safeguard
+        $this->db->query("SET SESSION max_execution_time = 30000");
+        $this->db->select('m.id, m.c_name, m.c_email, m.c_status, m.c_merchantLevel, NULL as c_gvconnectBusinessId, NULL as c_gvconnectBusinessName, s.c_gvconnectGVConnectKey, s.c_gvconnectStaticQrisRaw, s.c_gvconnectStaticVaBni, s.c_gvconnectStaticVaBca, s.c_gvconnectStaticVaCimb, s.c_gvconnectStaticVaPermata', FALSE);
         $this->db->from('merchant m');
         $this->db->join('submerchant s', 's.ref_merchantId = m.id', 'left');
         $this->db->where('m.parent_merchant_id', $id);
@@ -54,12 +58,15 @@ class SubMerchant extends CI_Model
 
     public function count_all_dt($id)
     {
+        if (self::$cached_total !== null) return self::$cached_total;
+
         $this->db->select('count(id) as total');
         $this->db->from('merchant');
         $this->db->where('parent_merchant_id', $id);
         $this->db->where('c_merchantLevel >', 0);
         $query = $this->db->get();
-        return $query->row()->total;
+        self::$cached_total = $query->row() ? (int)$query->row()->total : 0;
+        return self::$cached_total;
     }
 
     public function create_submerchant($data)
@@ -81,6 +88,7 @@ class SubMerchant extends CI_Model
     {
         $this->load->library('datatables');
         return $this->datatables->of('merchant m')
+            ->select('m.id, m.c_name, m.c_email, m.c_status, m.c_merchantLevel, s.c_gvconnectBusinessId, s.c_gvconnectBusinessName, s.c_gvconnectGVConnectKey, s.c_gvconnectStaticQrisRaw, s.c_gvconnectStaticVaBni, s.c_gvconnectStaticVaBca, s.c_gvconnectStaticVaCimb, s.c_gvconnectStaticVaPermata', FALSE)
             ->join('submerchant s', 's.ref_merchantId = m.id', 'left')
             ->where('m.parent_merchant_id', $id)
             ->where('m.c_merchantLevel >', 0)

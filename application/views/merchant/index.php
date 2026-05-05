@@ -8,22 +8,36 @@
         </div>
     </div>
 
-    <!-- Alerts -->
-    <?php if ($this->session->flashdata('success')) : ?>
-        <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm mb-4" role="alert">
-            <i class="fas fa-check-circle mr-2"></i>
-            <?php echo $this->session->flashdata('success'); ?>
-            <button type="button" class="btn-close" data-dismiss="alert" aria-label="Close"></button>
-        </div>
-    <?php endif; ?>
+    <!-- Alerts Standardized to Swal2 Premium -->
+    <script>
+        $(document).ready(function() {
+            <?php if ($this->session->flashdata('success')) : ?>
+                Swal.fire({
+                    title: 'Success!',
+                    text: '<?= $this->session->flashdata('success'); ?>',
+                    icon: 'success',
+                    customClass: {
+                        popup: 'swal2-premium-popup',
+                        confirmButton: 'swal2-premium-confirm'
+                    },
+                    buttonsStyling: false
+                });
+            <?php endif; ?>
 
-    <?php if ($this->session->flashdata('error')) : ?>
-        <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm mb-4" role="alert">
-            <i class="fas fa-exclamation-circle mr-2"></i>
-            <?php echo $this->session->flashdata('error'); ?>
-            <button type="button" class="btn-close" data-dismiss="alert" aria-label="Close"></button>
-        </div>
-    <?php endif; ?>
+            <?php if ($this->session->flashdata('error')) : ?>
+                Swal.fire({
+                    title: 'Error!',
+                    html: '<?= trim(str_replace(["\r", "\n"], '', $this->session->flashdata('error'))); ?>',
+                    icon: 'error',
+                    customClass: {
+                        popup: 'swal2-premium-popup',
+                        confirmButton: 'swal2-premium-confirm'
+                    },
+                    buttonsStyling: false
+                });
+            <?php endif; ?>
+        });
+    </script>
 
     <!-- Data Table Card -->
     <div class="card dt-card border-0 shadow-sm">
@@ -39,17 +53,9 @@
 
                 <!-- RIGHT: Filters & Actions -->
                 <div class="dt-toolbar-filters">
-                    <div class="dt-filter-group">
-                        <label class="dt-filter-label">&nbsp;</label>
-                        <div class="d-flex" style="gap:6px;">
-                            <a href="<?= base_url('admin/resetMerchant'); ?>" class="btn-dt-chip-action btn-dt-secondary">
-                                <i class="fas fa-undo mr-1"></i>
-                            </a>
-                        </div>
-                    </div>
-                    <button type="button" class="btn-dt-action btn-dt-action-success border-0" data-toggle="modal" data-target="#registerMerchantModal">
+                    <a href="<?= base_url('admin/addMerchant'); ?>" class="btn-dt-action btn-dt-action-success border-0 text-decoration-none d-flex align-items-center">
                         <i class="fas fa-plus mr-2"></i> <span class="d-none d-md-block">Add Merchant</span>
-                    </button>
+                    </a>
                 </div>
             </div>
         </form>
@@ -190,158 +196,6 @@
             </div>
         </div>
 
-        <!-- Modal: Register Merchant -->
-        <div class="modal fade" id="registerMerchantModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-lg modal-dialog-centered">
-                <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
-                    <div class="modal-header modal-header-primary border-0 mh-premium">
-                        <div class="d-flex align-items-center">
-                            <div class="mh-icon-badge">
-                                <i class="fas fa-store"></i>
-                            </div>
-                            <div class="mh-title-wrap">
-                                <h6 class="mh-title" id="registerMerchantModalLabel">Register New Merchant</h6>
-                                <small class="mh-subtitle">Create and configure a new merchant account</small>
-                            </div>
-                        </div>
-                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body p-4 bg-light">
-                        <?php if (validation_errors()): ?>
-                            <div class="alert alert-danger border-0 shadow-sm mb-4"><?= validation_errors(); ?></div>
-                            <script>
-                                $(document).ready(function() {
-                                    $('#registerMerchantModal').modal('show');
-                                });
-                            </script>
-                        <?php endif; ?>
-                        
-                        <form method="post" action="<?php echo base_url('admin/registerMerchant'); ?>" class="row g-3">
-                            <div class="col-md-12">
-                                <h6 class="text-primary fw-bold mb-3 border-bottom pb-2">Account Information</h6>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label small fw-bold text-muted">Merchant Name</label>
-                                <input type="text" class="form-control border-1" required name="c_name" placeholder="ABC Store">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label small fw-bold text-muted">Merchant Email</label>
-                                <input type="email" class="form-control border-1" required name="c_email" placeholder="owner@abc.com">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label small fw-bold text-muted">Merchant Phone</label>
-                                <input type="text" class="form-control border-1" name="c_phoneNumber" placeholder="08123xxx">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label small fw-bold text-muted">GVConnect Business ID</label>
-                                <input type="text" class="form-control border-1" name="c_gvconnectBusinessId" placeholder="24090200001">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label small fw-bold text-muted">Password</label>
-                                <input type="password" class="form-control border-1" required name="c_password">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label small fw-bold text-muted">Confirm Password</label>
-                                <input type="password" class="form-control border-1" required name="c_confirmPassword">
-                            </div>
-
-                            <div class="col-md-12 mt-4">
-                                <h6 class="text-primary fw-bold mb-3 border-bottom pb-2">OpenAPI Configuration</h6>
-                            </div>
-                            <div class="col-md-12 mb-2">
-                                <label class="form-label small fw-bold text-muted">Whitelist IP (semicolon separated)</label>
-                                <input type="text" class="form-control border-1" name="c_openapiIPAllow" placeholder="1.2.3.4; 5.6.7.8">
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label small fw-bold text-muted">Callback QRIS MPM</label>
-                                <input type="text" class="form-control border-1" required name="c_openapiUrlCallbackQrisMpm" placeholder="https://api.your.com/callback">
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label small fw-bold text-muted">Callback E-wallet</label>
-                                <input type="text" class="form-control border-1" required name="c_openapiUrlCallbackEwallet" placeholder="https://api.your.com/callback">
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label small fw-bold text-muted">Callback VA</label>
-                                <input type="text" class="form-control border-1" required name="c_openapiUrlCallbackVa" placeholder="https://api.your.com/callback">
-                            </div>
-
-                            <div class="col-md-12 mt-4">
-                                <h6 class="text-primary fw-bold mb-3 border-bottom pb-2">Service Permissions</h6>
-                                <div class="row pt-2">
-                                    <div class="col-md-4 border-end">
-                                        <div class="d-flex align-items-center gap-1 mb-3 h6">
-                                            <div class="bg-primary-soft text-primary rounded-pill px-2 py-1" style="background-color: rgba(13, 110, 253, 0.1); font-size: 10px;">
-                                                <i class="fas fa-university"></i>
-                                            </div>
-                                            <span class="fw-bold small text-dark mt-1 text-uppercase">Virtual Account</span>
-                                        </div>
-                                        <?php
-                                        $va_checkboxes = [
-                                            'c_openapiChannelVaDynamicCreate' => 'VA Dynamic Create',
-                                            'c_openapiChannelVaDynamicQuery' => 'VA Dynamic Query',
-                                            'c_openapiChannelVaDynamicCancel' => 'VA Dynamic Cancel',
-                                            'c_openapiChannelVaRecurringCreate' => 'VA Recurring Create',
-                                            'c_openapiChannelVaRecurringCancel' => 'VA Recurring Cancel'
-                                        ];
-                                        foreach ($va_checkboxes as $key => $label) {
-                                            echo '<div class="mb-3"><div class="form-check form-switch"><input class="form-check-input" type="checkbox" name="'.$key.'" value="1"><label class="form-check-label small fw-bold text-muted">'.$label.'</label></div></div>';
-                                        }
-                                        ?>
-                                    </div>
-                                    <div class="col-md-4 border-end">
-                                        <div class="d-flex align-items-center gap-1 mb-3 h6">
-                                            <div class="bg-success-soft text-success rounded-pill px-2 py-1" style="background-color: rgba(25, 135, 84, 0.1); font-size: 10px;">
-                                                <i class="fas fa-qrcode"></i>
-                                            </div>
-                                            <span class="fw-bold small text-dark mt-1 text-uppercase">QRIS & E-Wallet</span>
-                                        </div>
-                                        <?php
-                                        $qris_checkboxes = [
-                                            'c_openapiChannelQrisMpmDynamicCreate' => 'QRIS MPM Create',
-                                            'c_openapiChannelQrisMpmDynamicQuery' => 'QRIS MPM Query',
-                                            'c_openapiChannelQrisMpmDynamicCancel' => 'QRIS MPM Cancel',
-                                            'c_openapiChannelEwalletDynamicCreate' => 'E-wallet Create',
-                                            'c_openapiChannelEwalletDynamicQuery' => 'E-wallet Query',
-                                            'c_openapiChannelEwalletDynamicCancel' => 'E-wallet Cancel'
-                                        ];
-                                        foreach ($qris_checkboxes as $key => $label) {
-                                            echo '<div class="mb-3"><div class="form-check form-switch"><input class="form-check-input" type="checkbox" name="'.$key.'" value="1"><label class="form-check-label small fw-bold text-muted">'.$label.'</label></div></div>';
-                                        }
-                                        ?>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="d-flex align-items-center gap-1 mb-3 h6">
-                                            <div class="bg-warning-soft text-warning rounded-pill px-2 py-1" style="background-color: rgba(255, 193, 7, 0.1); font-size: 10px;">
-                                                <i class="fas fa-exchange-alt"></i>
-                                            </div>
-                                            <span class="fw-bold small text-dark mt-1 text-uppercase">Transfer</span>
-                                        </div>
-                                        <?php
-                                        $transfer_checkboxes = [
-                                            'c_openapiChannelTransferToBifast' => 'BI-FAST Transfer',
-                                            'c_openapiChannelTransferToRealtimeOnline' => 'Realtime Online Transfer',
-                                            'c_allowTransferFromDashboard' => 'Allow Dashboard Transfer'
-                                        ];
-                                        foreach ($transfer_checkboxes as $key => $label) {
-                                            echo '<div class="mb-3"><div class="form-check form-switch"><input class="form-check-input" type="checkbox" name="'.$key.'" value="1"><label class="form-check-label small fw-bold text-muted">'.$label.'</label></div></div>';
-                                        }
-                                        ?>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="modal-footer border-0 px-0 pb-0 mt-4 w-100 justify-content-end">
-                                <button type="button" class="btn-dt-cancel" data-dismiss="modal">CANCEL</button>
-                                <button type="submit" class="btn-dt-apply px-4">
-                                    <i class="fas fa-save mr-2"></i> REGISTER MERCHANT
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
 
         <!-- Modal: Delegate Access -->
         <div class="modal fade" id="delegateModal" tabindex="-1" aria-hidden="true">
@@ -461,48 +315,26 @@
                         "orderable": false,
                         "className": "text-center pe-4",
                         "render": function(data, type, row) {
-                            var baseUrl = "<?= base_url() ?>";
-                            var actionHtml = '<div class="dropdown">' +
-                                '    <button class="btn btn-white btn-sm rounded shadow-none dropdown-toggle border px-3" type="button" data-toggle="dropdown" aria-expanded="false" data-boundary="viewport">' +
-                                '        <i class="fas fa-ellipsis-v text-muted mr-2"></i>Actions' +
-                                '    </button>' +
-                                '    <div class="dropdown-menu dropdown-menu-right border-0 shadow-lg p-2" style="min-width: 200px;">' +
-                                '        <a class="dropdown-item rounded-2 py-2" href="' + baseUrl + 'admin/editMerchant/' + row.id + '">' +
-                                '            <i class="fas fa-edit mr-2 text-info" style="width: 20px;"></i>Edit Merchant' +
-                                '        </a>' +
-                                '        <a class="dropdown-item rounded-2 py-2" href="' + baseUrl + 'admin/mutation/' + row.id + '">' +
-                                '            <i class="fas fa-exchange-alt mr-2 text-primary" style="width: 20px;"></i>Mutation Log' +
-                                '        </a>' +
-                                '        <a class="dropdown-item rounded-2 py-2" href="' + baseUrl + 'admin/submerchant/' + row.id + '">' +
-                                '            <i class="fas fa-users mr-2 text-success" style="width: 20px;"></i>Sub Accounts' +
-                                '        </a>';
-
-                            if (row.c_merchantLevel == 0) {
-                                actionHtml += '<button class="dropdown-item rounded-2 py-2 border-0 bg-transparent w-100 text-left" data-toggle="modal" data-target="#delegateModal" onClick="openDelegateModal(' + row.id + ', \'' + row.c_name.replace(/'/g, "\\'") + '\')">' +
-                                    '    <i class="fas fa-key mr-2 text-warning" style="width: 20px;"></i>Delegate' +
-                                    '</button>';
-                            }
-
-                            if (row.hasBalancePermission) {
-                                actionHtml += '<div class="dropdown-divider"></div>' +
-                                    '<button class="dropdown-item rounded-2 py-2 border-0 bg-transparent w-100 text-left" data-toggle="modal" data-target="#creditBalanceModal" onClick="detail(' + row.id + ', \'' + row.c_name.replace(/'/g, "\\'") + '\')">' +
-                                    '    <i class="fas fa-plus-circle mr-2 text-success" style="width: 20px;"></i>Credit Balance' +
-                                    '</button>' +
-                                    '<button class="dropdown-item rounded-2 py-2 border-0 bg-transparent w-100 text-left" data-toggle="modal" data-target="#debitBalanceModal" onClick="detaildebit(' + row.id + ', \'' + row.c_name.replace(/'/g, "\\'") + '\')">' +
-                                    '    <i class="fas fa-minus-circle mr-2 text-danger" style="width: 20px;"></i>Debit Balance' +
-                                    '</button>';
-                            }
-
-                            actionHtml += '<div class="dropdown-divider"></div>' +
-                                '        <a class="dropdown-item rounded-2 py-2" href="' + baseUrl + 'admin/settingcashinfee/' + row.id + '">' +
-                                '            <i class="fas fa-cog mr-2 text-secondary" style="width: 20px;"></i>Cashin Fee Settings' +
-                                '        </a>' +
-                                '        <a class="dropdown-item rounded-2 py-2" href="' + baseUrl + 'admin/settingcashoutfee/' + row.id + '">' +
-                                '            <i class="fas fa-cog mr-2 text-secondary" style="width: 20px;"></i>Cashout Fee Settings' +
-                                '        </a>' +
-                                '    </div>' +
-                                '</div>';
-                            return actionHtml;
+                            var baseUrl = "<?= base_url(); ?>"; 
+                            return `
+                                <div class="dropdown">
+                                    <button class="btn btn-sm text-muted rounded-circle p-2 border-0 bg-transparent" type="button" data-toggle="dropdown"><i class="fas fa-ellipsis-v"></i></button>
+                                    <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg">
+                                        <li><a class="dropdown-item py-2" href="${baseUrl}admin/editMerchant/${row.id}"><i class="fas fa-edit mr-2 text-info"></i> Edit Merchant</a></li>
+                                        <li><a class="dropdown-item py-2" href="${baseUrl}admin/mutation/${row.id}"><i class="fas fa-exchange-alt mr-2 text-primary"></i> Mutation Log</a></li>
+                                        <li><a class="dropdown-item py-2" href="${baseUrl}admin/submerchant/${row.id}"><i class="fas fa-users mr-2 text-success"></i> Sub Accounts</a></li>
+                                        ${row.c_merchantLevel == 0 ? `<li><button class="dropdown-item py-2 border-0 bg-transparent w-100 text-left" data-toggle="modal" data-target="#delegateModal" onClick="openDelegateModal(${row.id}, '${row.c_name.replace(/'/g, "\\'")}')"><i class="fas fa-key mr-2 text-warning"></i> Delegate</button></li>` : ''}
+                                        ${row.hasBalancePermission ? `
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li><button class="dropdown-item py-2 border-0 bg-transparent w-100 text-left" data-toggle="modal" data-target="#creditBalanceModal" onClick="detail(${row.id}, '${row.c_name.replace(/'/g, "\\'")}')"><i class="fas fa-plus-circle mr-2 text-success"></i> Credit Balance</button></li>
+                                            <li><button class="dropdown-item py-2 border-0 bg-transparent w-100 text-left" data-toggle="modal" data-target="#debitBalanceModal" onClick="detaildebit(${row.id}, '${row.c_name.replace(/'/g, "\\'")}')"><i class="fas fa-minus-circle mr-2 text-danger"></i> Debit Balance</button></li>
+                                        ` : ''}
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item py-2" href="${baseUrl}admin/settingcashinfee/${row.id}"><i class="fas fa-cog mr-2 text-secondary"></i> Cashin Fee</a></li>
+                                        <li><a class="dropdown-item py-2" href="${baseUrl}admin/settingcashoutfee/${row.id}"><i class="fas fa-cog mr-2 text-secondary"></i> Cashout Fee</a></li>
+                                    </ul>
+                                </div>
+                            `;
                         }
                     }
                 ];

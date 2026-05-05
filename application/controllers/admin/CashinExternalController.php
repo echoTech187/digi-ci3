@@ -17,6 +17,7 @@ class CashinExternalController extends CI_Controller {
         $data['user'] = $this->Model_user->view_user()->row_array();
         
         // Data for modals
+        $this->db->select('id, c_name, c_email');
         $data['merchants'] = $this->db->get_where('merchant', ['c_status' => 'Active', 'c_merchantLevel' => 0])->result();
         $data['channel_groups'] = $this->Chanel->get_cashin_chanel_group();
         $data['channel_external_id_defaults'] = $this->Chanel->get_cashin_chanel_external_id_default();
@@ -29,8 +30,40 @@ class CashinExternalController extends CI_Controller {
         return $this->Chanel->getCashinExternalDataTable();
     }
 
+    public function add_view() {
+        $data['title'] = 'Add Cashin External Mapping';
+        $data['user'] = $this->Model_user->view_user()->row_array();
+        
+        $this->db->select('id, c_name, c_email');
+        $data['merchants'] = $this->db->get_where('merchant', ['c_status' => 'Active', 'c_merchantLevel' => 0])->result();
+        $data['channel_groups'] = $this->Chanel->get_cashin_chanel_group();
+        $data['channel_external_id_defaults'] = $this->Chanel->get_cashin_chanel_external_id_default();
+        
+        $this->load->view('admin/cashin_external/add', $data);
+    }
+
+    public function edit_view($id) {
+        if (!$id) redirect('admin/cashin/external');
+        
+        $data['title'] = 'Edit Cashin External Mapping';
+        $data['user'] = $this->Model_user->view_user()->row_array();
+        $data['mapping'] = $this->db->get_where('cashin_channel_x_merchant', ['id' => $id])->row_array();
+        
+        if (!$data['mapping']) {
+            $this->session->set_flashdata('error', 'Mapping not found');
+            redirect('admin/cashin/external');
+        }
+
+        $this->db->select('id, c_name, c_email');
+        $data['merchants'] = $this->db->get_where('merchant', ['c_status' => 'Active', 'c_merchantLevel' => 0])->result();
+        $data['channel_groups'] = $this->Chanel->get_cashin_chanel_group();
+        $data['channel_external_id_defaults'] = $this->Chanel->get_cashin_chanel_external_id_default();
+        
+        $this->load->view('admin/cashin_external/edit', $data);
+    }
+
     public function add() {
-        $this->_validate();
+        $this->_validate('add');
 
         $data = [
             'ref_merchantId'        => $this->input->post('ref_merchantId'),
@@ -56,7 +89,7 @@ class CashinExternalController extends CI_Controller {
 
     public function update() {
         $id = $this->input->post('id');
-        $this->_validate();
+        $this->_validate('edit', $id);
 
         $data = [
             'ref_merchantId'        => $this->input->post('ref_merchantId'),
@@ -136,7 +169,7 @@ class CashinExternalController extends CI_Controller {
         redirect('admin/cashin/external');
     }
 
-    private function _validate() {
+    private function _validate($mode = 'add', $id = null) {
         $rules = [
             ['field' => 'ref_merchantId',       'label' => 'Merchant',           'rules' => 'required'],
             ['field' => 'ref_cashinChannelId',      'label' => 'Channel ID',          'rules' => 'required'],
@@ -153,7 +186,11 @@ class CashinExternalController extends CI_Controller {
         $this->form_validation->set_rules($rules);
         if ($this->form_validation->run() == FALSE) {
             $this->session->set_flashdata('error', validation_errors());
-            redirect('admin/cashin/external');
+            if ($mode == 'add') {
+                redirect('admin/cashin/external/add_view');
+            } else {
+                redirect('admin/cashin/external/edit_view/' . $id);
+            }
         }
     }
 }

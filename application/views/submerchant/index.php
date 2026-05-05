@@ -12,19 +12,36 @@ $id = $this->uri->segment(3);
     </div>
 
     <!-- Alerts -->
-    <?php if ($this->session->flashdata('success')): ?>
-        <div class="alert alert-success border-left-success shadow-sm alert-dismissible fade show mb-4" role="alert">
-            <i class="fas fa-check-circle "></i> <?= $this->session->flashdata('success'); ?>
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        </div>
-    <?php endif; ?>
+    <!-- Alerts Standardized to Swal2 Premium -->
+    <script>
+        $(document).ready(function() {
+            <?php if ($this->session->flashdata('success')) : ?>
+                Swal.fire({
+                    title: 'Success!',
+                    text: '<?= $this->session->flashdata('success'); ?>',
+                    icon: 'success',
+                    customClass: {
+                        popup: 'swal2-premium-popup',
+                        confirmButton: 'swal2-premium-confirm'
+                    },
+                    buttonsStyling: false
+                });
+            <?php endif; ?>
 
-    <?php if ($this->session->flashdata('error')): ?>
-        <div class="alert alert-danger border-left-danger shadow-sm alert-dismissible fade show mb-4" role="alert">
-            <i class="fas fa-exclamation-circle "></i> <?= $this->session->flashdata('error'); ?>
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        </div>
-    <?php endif; ?>
+            <?php if ($this->session->flashdata('error')) : ?>
+                Swal.fire({
+                    title: 'Error!',
+                    html: '<?= trim(str_replace(["\r", "\n"], '', $this->session->flashdata('error'))); ?>',
+                    icon: 'error',
+                    customClass: {
+                        popup: 'swal2-premium-popup',
+                        confirmButton: 'swal2-premium-confirm'
+                    },
+                    buttonsStyling: false
+                });
+            <?php endif; ?>
+        });
+    </script>
 
     <!-- ── Main Data Card ── -->
     <div class="card border-0 shadow-sm dt-card">
@@ -95,37 +112,45 @@ $(document).ready(function() {
             orderable: false,
             render: function(data, type, row) {
                 var baseUrl = "<?= base_url() ?>";
-                return '<div class="dropdown">' +
-                       '    <button class="btn btn-sm btn-light border dropdown-toggle" type="button" data-toggle="dropdown">' +
-                       '        Actions' +
-                       '    </button>' +
-                       '    <div class="dropdown-menu dropdown-menu-right shadow-sm border-0">' +
-                       '        <a class="dropdown-item py-2" href="' + baseUrl + 'admin/submerchant/' + data + '">' +
-                       '            <i class="fas fa-users mr-2 text-success"></i>Sub Accounts' +
-                       '        </a>' +
-                       '        <div class="dropdown-divider"></div>' +
-                       '        <button type="button" class="dropdown-item py-2 edit-sub-btn" ' +
-                       '            data-toggle="modal" data-target="#subMerchantModal"' +
-                       '            data-id="' + data + '"' +
-                       '            data-name="' + row.c_name + '"' +
-                       '            data-email="' + row.c_email + '"' +
-                       '            data-merchantid="' + row.parent_merchant_id + '"' +
-                       '            data-businessname="' + row.c_gvconnectBusinessName + '"' +
-                       '            data-businessid="' + row.c_gvconnectBusinessId + '"' +
-                       '            data-key="' + row.c_gvconnectGVConnectKey + '"' +
-                       '            data-qris="' + row.c_gvconnectStaticQrisRaw + '"' +
-                       '            data-bni="' + row.c_gvconnectStaticVaBni + '"' +
-                       '            data-bca="' + row.c_gvconnectStaticVaBca + '"' +
-                       '            data-cimb="' + row.c_gvconnectStaticVaCimb + '"' +
-                       '            data-permata="' + row.c_gvconnectStaticVaPermata + '"' +
-                       '            data-status="' + row.c_status + '">' +
-                       '            <i class="fas fa-edit mr-2 text-info"></i>Edit Details' +
-                       '        </button>' +
-                       '        <a class="dropdown-item py-2" href="' + baseUrl + 'admin/mutation/' + data + '">' +
-                       '            <i class="fas fa-exchange-alt mr-2 text-warning"></i>Mutations' +
-                       '        </a>' +
-                       '    </div>' +
-                       '</div>';
+                return `
+                    <div class="dropdown">
+                        <button class="btn btn-sm text-muted rounded-circle p-2 border-0 bg-transparent" type="button" data-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow border-0 py-2">
+                            <li>
+                                <a class="dropdown-item py-2" href="${baseUrl}admin/submerchant/${data}">
+                                    <i class="fas fa-users mr-2 text-success"></i>Sub Accounts
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <button type="button" class="dropdown-item py-2 edit-sub-btn" 
+                                    data-toggle="modal" data-target="#subMerchantModal"
+                                    data-id="${data}"
+                                    data-name="${row.c_name}"
+                                    data-email="${row.c_email}"
+                                    data-merchantid="${row.parent_merchant_id}"
+                                    data-businessname="${row.c_gvconnectBusinessName}"
+                                    data-businessid="${row.c_gvconnectBusinessId}"
+                                    data-key="${row.c_gvconnectGVConnectKey}"
+                                    data-qris="${row.c_gvconnectStaticQrisRaw}"
+                                    data-bni="${row.c_gvconnectStaticVaBni}"
+                                    data-bca="${row.c_gvconnectStaticVaBca}"
+                                    data-cimb="${row.c_gvconnectStaticVaCimb}"
+                                    data-permata="${row.c_gvconnectStaticVaPermata}"
+                                    data-status="${row.c_status}">
+                                    <i class="fas fa-edit mr-2 text-info"></i>Edit Details
+                                </button>
+                            </li>
+                            <li>
+                                <a class="dropdown-item py-2" href="${baseUrl}admin/mutation/${data}">
+                                    <i class="fas fa-exchange-alt mr-2 text-warning"></i>Mutations
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                `;
             }
         }
     ]);

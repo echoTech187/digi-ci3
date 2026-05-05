@@ -2,14 +2,19 @@
 
 class VARecurring extends CI_Model {
     var $table = 'cashin_recurring_va crv';
-    var $column_order = array(null, 'crv.c_datetimeRequest', 'm.c_name', 's.c_name', 'crv.c_merchantTransactionId', 'crv.ref_cashinChannelId', 'crv.ref_cashinExternalId', 'crv.c_vaNumber', 'crv.c_amount', 'crv.c_status');
+    var $column_order = array(null, 'crv.c_datetimeRequest', 'm.c_name', 's.c_name', 'crv.c_merchantTransactionId', 'crv.c_vaNumber', 'crv.ref_cashinChannelId', 'crv.ref_cashinExternalId', 'crv.c_amount', 'crv.c_status');
     var $column_search = array('crv.c_vaNumber', 'crv.c_merchantTransactionId', 's.c_name', 'm.c_name');
     var $order = array('crv.id' => 'desc');
+    
+    // Request-level caching to prevent redundant pre-lookups
+    private static $cached_ids = null;
+    private static $cached_total = null;
+    private static $cached_inv_ids = null;
 
     private function _get_datatables_query($search_name = null, $search_date = null, $search_sub = null, $search_va = null, $search_trxid = null, $only_ids = false, $count_only = false)
     {
-        // Emergency 3-second safeguard
-        $this->db->query("SET SESSION max_execution_time = 10000");
+        // Emergency 30-second safeguard
+        $this->db->query("SET SESSION max_execution_time = 30000");
         
         if ($count_only) {
             $this->db->select("count(crv.id) as total");
@@ -61,22 +66,24 @@ class VARecurring extends CI_Model {
         if ($searchValue) {
             $safeSearch = $this->db->escape_str($searchValue);
             
-            // TRULY SMART SEARCH: 
-            // 1. Always try finding ID matches first (Fast Indexed Lookup)
-            $matching_ids = [-1];
-            
-            // Check in technical ID columns
-            $res_va = $this->db->query("SELECT id FROM cashin_recurring_va WHERE c_vaNumber LIKE '$safeSearch%' LIMIT 50")->result();
-            if (!empty($res_va)) $matching_ids = array_merge($matching_ids, array_column($res_va, 'id'));
-            
-            $res_trx = $this->db->query("SELECT id FROM cashin_recurring_va WHERE c_merchantTransactionId LIKE '$safeSearch%' LIMIT 50")->result();
-            if (!empty($res_trx)) $matching_ids = array_merge($matching_ids, array_column($res_trx, 'id'));
+            if (self::$cached_ids === null) {
+                // 1. Always try finding ID matches first (Fast Indexed Lookup)
+                $matching_ids = [-1];
+                
+                // Check in technical ID columns
+                $res_va = $this->db->query("SELECT id FROM cashin_recurring_va WHERE c_vaNumber LIKE '$safeSearch%' LIMIT 50")->result();
+                if (!empty($res_va)) $matching_ids = array_merge($matching_ids, array_column($res_va, 'id'));
+                
+                $res_trx = $this->db->query("SELECT id FROM cashin_recurring_va WHERE c_merchantTransactionId LIKE '$safeSearch%' LIMIT 50")->result();
+                if (!empty($res_trx)) $matching_ids = array_merge($matching_ids, array_column($res_trx, 'id'));
 
-            if (is_numeric($searchValue) && strlen($searchValue) < 15) {
-                $matching_ids[] = (int)$searchValue;
+                if (is_numeric($searchValue) && strlen($searchValue) < 15) {
+                    $matching_ids[] = (int)$searchValue;
+                }
+
+                self::$cached_ids = array_unique($matching_ids);
             }
-
-            $matching_ids = array_unique($matching_ids);
+            $matching_ids = self::$cached_ids;
 
             // 2. Decide strategy: If IDs found, use them. If not, search by Name.
             if (count($matching_ids) > 1) {
@@ -179,10 +186,21 @@ class VARecurring extends CI_Model {
 
     public function count_all_dt($search_name = null, $search_date = null, $search_date_to = null)
     {
+        if (self::$cached_total !== null) return self::$cached_total;
+
+        // ULTRA-FAST: Use table status estimates for recordsTotal
+        $q = $this->db->query("SHOW TABLE STATUS LIKE 'cashin_recurring_va'");
+        $res = $q->row();
+        if ($res && isset($res->Rows) && $res->Rows > 10000) {
+            self::$cached_total = (int)$res->Rows;
+            return self::$cached_total;
+        }
+
         $this->db->select("count(id) as total");
         $this->db->from($this->table);
         $query = $this->db->get();
-        return $query->row()->total;
+        self::$cached_total = $query->row() ? (int)$query->row()->total : 0;
+        return self::$cached_total;
     }
 
     public function get_varecurring($limit, $start, $search_date_var = null, $search_name_var= null, $search_submerchant_var= null) {

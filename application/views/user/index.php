@@ -8,7 +8,39 @@
             <h1 class="h3 text-dark"><?= $title; ?></h1>
         </div>
         <div class="card-body">
-            <?= $this->session->flashdata('message'); ?>
+            <!-- Alerts Standardized to Swal2 Premium -->
+            <script>
+                $(document).ready(function() {
+                    <?php 
+                    $successMsg = $this->session->flashdata('success') ?: $this->session->flashdata('message');
+                    if ($successMsg) : 
+                    ?>
+                        Swal.fire({
+                            title: 'Success!',
+                            text: '<?= strip_tags($successMsg); ?>',
+                            icon: 'success',
+                            customClass: {
+                                popup: 'swal2-premium-popup',
+                                confirmButton: 'swal2-premium-confirm'
+                            },
+                            buttonsStyling: false
+                        });
+                    <?php endif; ?>
+
+                    <?php if ($this->session->flashdata('error')) : ?>
+                        Swal.fire({
+                            title: 'Error!',
+                            html: '<?= trim(str_replace(["\r", "\n"], '', $this->session->flashdata('error'))); ?>',
+                            icon: 'error',
+                            customClass: {
+                                popup: 'swal2-premium-popup',
+                                confirmButton: 'swal2-premium-confirm'
+                            },
+                            buttonsStyling: false
+                        });
+                    <?php endif; ?>
+                });
+            </script>
             <div class="card mb-3" style="max-width: 540px;">
                 <div class="row no-gutters">
                     <div class="col-md-4">

@@ -16,19 +16,36 @@
     
 
     <!-- Alerts -->
-    <?php if ($this->session->flashdata('success')): ?>
-        <div class="alert alert-success border-0 shadow-sm alert-dismissible fade show mb-4" role="alert">
-            <i class="fas fa-check-circle "></i> <?= $this->session->flashdata('success'); ?>
-            <button type="button" class="btn-close" data-dismiss="alert" aria-label="Close"></button>
-        </div>
-    <?php endif; ?>
+    <!-- Alerts Standardized to Swal2 Premium -->
+    <script>
+        $(document).ready(function() {
+            <?php if ($this->session->flashdata('success')) : ?>
+                Swal.fire({
+                    title: 'Success!',
+                    text: '<?= $this->session->flashdata('success'); ?>',
+                    icon: 'success',
+                    customClass: {
+                        popup: 'swal2-premium-popup',
+                        confirmButton: 'swal2-premium-confirm'
+                    },
+                    buttonsStyling: false
+                });
+            <?php endif; ?>
 
-    <?php if ($this->session->flashdata('error')): ?>
-        <div class="alert alert-danger border-0 shadow-sm alert-dismissible fade show mb-4" role="alert">
-            <i class="fas fa-exclamation-circle "></i> <?= $this->session->flashdata('error'); ?>
-            <button type="button" class="btn-close" data-dismiss="alert" aria-label="Close"></button>
-        </div>
-    <?php endif; ?>
+            <?php if ($this->session->flashdata('error')) : ?>
+                Swal.fire({
+                    title: 'Error!',
+                    html: '<?= trim(str_replace(["\r", "\n"], '', $this->session->flashdata('error'))); ?>',
+                    icon: 'error',
+                    customClass: {
+                        popup: 'swal2-premium-popup',
+                        confirmButton: 'swal2-premium-confirm'
+                    },
+                    buttonsStyling: false
+                });
+            <?php endif; ?>
+        });
+    </script>
 
     <!-- ── Main Data Card ── -->
     <div class="card border-0 shadow-sm dt-card">

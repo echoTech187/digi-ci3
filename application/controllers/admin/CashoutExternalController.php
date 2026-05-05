@@ -17,6 +17,7 @@ class CashoutExternalController extends CI_Controller {
         $data['user'] = $this->Model_user->view_user()->row_array();
         
         // Data for modals
+        $this->db->select('id, c_name, c_email');
         $data['merchants'] = $this->db->get_where('merchant', ['c_status' => 'Active', 'c_merchantLevel' => 0])->result();
         $data['channel_groups'] = $this->Chanel->get_cashout_chanel_group();
         $data['channel_external_id_defaults'] = $this->Chanel->get_cashout_chanel_external_id_default();
@@ -29,8 +30,40 @@ class CashoutExternalController extends CI_Controller {
         return $this->Chanel->getCashoutExternalDataTable();
     }
 
+    public function add_view() {
+        $data['title'] = 'Add Cashout External Mapping';
+        $data['user'] = $this->Model_user->view_user()->row_array();
+        
+        $this->db->select('id, c_name, c_email');
+        $data['merchants'] = $this->db->get_where('merchant', ['c_status' => 'Active', 'c_merchantLevel' => 0])->result();
+        $data['channel_groups'] = $this->Chanel->get_cashout_chanel_group();
+        $data['channel_external_id_defaults'] = $this->Chanel->get_cashout_chanel_external_id_default();
+        
+        $this->load->view('admin/cashout_external/add', $data);
+    }
+
+    public function edit_view($id) {
+        if (!$id) redirect('admin/cashout/external');
+        
+        $data['title'] = 'Edit Cashout External Mapping';
+        $data['user'] = $this->Model_user->view_user()->row_array();
+        $data['mapping'] = $this->db->get_where('cashout_channel_x_merchant', ['id' => $id])->row_array();
+        
+        if (!$data['mapping']) {
+            $this->session->set_flashdata('error', 'Mapping not found');
+            redirect('admin/cashout/external');
+        }
+
+        $this->db->select('id, c_name, c_email');
+        $data['merchants'] = $this->db->get_where('merchant', ['c_status' => 'Active', 'c_merchantLevel' => 0])->result();
+        $data['channel_groups'] = $this->Chanel->get_cashout_chanel_group();
+        $data['channel_external_id_defaults'] = $this->Chanel->get_cashout_chanel_external_id_default();
+        
+        $this->load->view('admin/cashout_external/edit', $data);
+    }
+
     public function add() {
-        $this->_validate();
+        $this->_validate('add');
 
         $data = [
             'ref_merchantId'        => $this->input->post('ref_merchantId'),
@@ -55,7 +88,7 @@ class CashoutExternalController extends CI_Controller {
 
     public function update() {
         $id = $this->input->post('id');
-        $this->_validate();
+        $this->_validate('edit', $id);
 
         $data = [
             'ref_merchantId'        => $this->input->post('ref_merchantId'),
@@ -134,7 +167,7 @@ class CashoutExternalController extends CI_Controller {
         redirect('admin/cashout/external');
     }
 
-    private function _validate() {
+    private function _validate($mode = 'add', $id = null) {
         $rules = [
             ['field' => 'ref_merchantId',        'label' => 'Merchant',           'rules' => 'required'],
             ['field' => 'ref_cashoutChannelId',      'label' => 'Channel ID',          'rules' => 'required'],
@@ -150,7 +183,11 @@ class CashoutExternalController extends CI_Controller {
         $this->form_validation->set_rules($rules);
         if ($this->form_validation->run() == FALSE) {
             $this->session->set_flashdata('error', validation_errors());
-            redirect('admin/cashout/external');
+            if ($mode == 'add') {
+                redirect('admin/cashout/external/add_view');
+            } else {
+                redirect('admin/cashout/external/edit_view/' . $id);
+            }
         }
     }
 }

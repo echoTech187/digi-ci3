@@ -12,18 +12,36 @@
         
     </div>
 
-    <!-- ── Alert Messages ── -->
-    <?php if ($this->session->flashdata('success')) : ?>
-        <div class="alert alert-success border-0 shadow-sm animate__animated animate__fadeIn mb-4" style="border-radius: 12px; background: #ecfdf5; color: #065f46; border-left: 4px solid #10b981 !important;">
-            <i class="fas fa-check-circle "></i> <?= $this->session->flashdata('success'); ?>
-        </div>
-    <?php endif; ?>
+    <!-- Alerts Standardized to Swal2 Premium -->
+    <script>
+        $(document).ready(function() {
+            <?php if ($this->session->flashdata('success')) : ?>
+                Swal.fire({
+                    title: 'Success!',
+                    text: '<?= $this->session->flashdata('success'); ?>',
+                    icon: 'success',
+                    customClass: {
+                        popup: 'swal2-premium-popup',
+                        confirmButton: 'swal2-premium-confirm'
+                    },
+                    buttonsStyling: false
+                });
+            <?php endif; ?>
 
-    <?php if ($this->session->flashdata('error')) : ?>
-        <div class="alert alert-danger border-0 shadow-sm animate__animated animate__fadeIn mb-4" style="border-radius: 12px; background: #fef2f2; color: #991b1b; border-left: 4px solid #ef4444 !important;">
-            <i class="fas fa-exclamation-circle "></i> <?= $this->session->flashdata('error'); ?>
-        </div>
-    <?php endif; ?>
+            <?php if ($this->session->flashdata('error')) : ?>
+                Swal.fire({
+                    title: 'Error!',
+                    html: '<?= trim(str_replace(["\r", "\n"], '', $this->session->flashdata('error'))); ?>',
+                    icon: 'error',
+                    customClass: {
+                        popup: 'swal2-premium-popup',
+                        confirmButton: 'swal2-premium-confirm'
+                    },
+                    buttonsStyling: false
+                });
+            <?php endif; ?>
+        });
+    </script>
 
     <!-- ── Desktop Calendar ── -->
     <div class="d-none d-md-block">

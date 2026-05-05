@@ -50,9 +50,6 @@
                                 <button type="submit" name="submit" class="btn-dt-chip-action btn-dt-primary">
                                     <i class="fas fa-filter mr-1 mr-2"></i> Apply
                                 </button>
-                                <a href="<?php echo base_url('admin/resetMutation/'. $id); ?>" class="btn-dt-chip-action btn-dt-secondary">
-                                    <i class="fas fa-undo mr-1 mr-2"></i> Reset
-                                </a>
                                 <a href="<?php echo $download_url; ?>" class="btn-dt-chip-action btn-dt-action-success border-0">
                                     <i class="fas fa-download"></i> <span class="d-none d-md-block">Export</span>
                                 </a>

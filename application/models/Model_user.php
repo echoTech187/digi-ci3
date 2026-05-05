@@ -26,6 +26,7 @@ class Model_user extends CI_Model
 
     public function saldo()
     {
+        $this->db->select('id, c_name, c_email, c_status, c_merchantLevel, c_balanceTotal, c_balanceHold, c_openapiStatus', FALSE);
         $merchant = $this->db->get_where('merchant', ['c_email' => $this->session->userdata('c_email')])->row();
         if ($merchant) {
            

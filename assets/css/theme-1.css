@@ -772,7 +772,7 @@ body {
 /* ── Select2 Global Theme Overrides ── */
 [data-theme="dark"] .select2-container--default .select2-selection--single,
 [data-theme="dark"] .select2-container--default .select2-selection--multiple {
-    background-color: var(--bg-body) !important;
+    background-color: transparent !important;
     border-color: var(--border-color) !important;
 }
 
@@ -1049,6 +1049,10 @@ body {
     color: var(--gray-400);
     pointer-events: none;
     font-weight: 500;
+}
+.btn.focus, .btn:focus{
+    outline: none !important;
+    box-shadow: none !important;
 }
 
 .btn-login {
@@ -3916,6 +3920,10 @@ div.dataTables_processing[style*="display: block"] {
     gap: 72px !important;
 }
 
+.gr-3{
+    row-gap:18px !important
+}
+
 .fw-light{
     font-weight: 300 !important;
 }
@@ -4260,7 +4268,7 @@ div.dataTables_processing[style*="display: block"] {
     }
 }
 .btn-icon-only { width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center; border-radius: 8px; transition: 0.2s; }
-.btn-icon-only:hover { background-color: #f1f3f9; }
+.btn-icon-only:hover { background-color:transparent!important; }
 
 .dt-toggle-switch {
     position: relative;
@@ -5382,4 +5390,14 @@ button:disabled:hover {
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+}
+
+.alert{
+    display: flex;
+    align-items: center;
+    gap:12px !important;
+}
+
+.alert > i {
+    font-size: 1.2rem !important;
 }

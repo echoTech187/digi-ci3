@@ -42,7 +42,8 @@ $download_url = base_url('admin/download_history')
                 <!-- LEFT: Global Search -->
                 <div class="dt-search-wrapper">
                     <i class="fas fa-search dt-search-icon"></i>
-                    <input type="text" id="historyGlobalSearch" class="dt-search-input" placeholder="Search by Invoice, or Phone..." value="<?= $this->session->userdata('search_invoice_ppob'); ?>">
+                    <?php $active_ppob_search = $this->session->userdata('search_invoice_ppob'); ?>
+                    <input type="text" id="historyGlobalSearch" class="dt-search-input" placeholder="<?= $active_ppob_search ?: 'Search by Invoice, or Phone...'; ?>" value="<?= $active_ppob_search; ?>">
                 </div>
                 <!-- RIGHT: Filters -->
                 <div class="dt-toolbar-filters">

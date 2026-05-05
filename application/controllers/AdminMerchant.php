@@ -157,7 +157,9 @@ class AdminMerchant extends CI_Controller
 
       if ($this->input->is_ajax_request()) {
          try {
-            return $this->Merchant->get_merchants_by_supervisor_handler($supervisorId);
+            $role_id = $this->session->userdata('role');
+            $hasBalancePermission = $this->rbac->has_permission($role_id, 'balance_merchant_module');
+            return $this->Merchant->get_merchants_by_supervisor_handler($supervisorId, $hasBalancePermission);
          } catch (Exception $e) {
             log_message('error', 'Supervisor Assigned Merchants AJAX error: ' . $e->getMessage());
             echo json_encode([
@@ -192,8 +194,8 @@ class AdminMerchant extends CI_Controller
          ['field' => 'c_name', 'label' => 'Merchant Name', 'rules' => 'trim|required'],
          ['field' => 'c_email', 'label' => 'Merchant Email', 'rules' => 'trim|required|valid_email'],
          ['field' => 'c_phoneNumber', 'label' => 'Merchant Phone', 'rules' => 'trim'],
-         ['field' => 'c_openapiIPAllow', 'label' => 'Whitelist IP', 'rules' => 'trim|required'],
-         ['field' => 'c_openapiUrlCallbackQrisMpm', 'label' => 'OpenAPI Callback URL QRIS MPM', 'rules' => 'trim|required'],
+         // ['field' => 'c_openapiIPAllow', 'label' => 'Whitelist IP', 'rules' => 'trim|required'],
+         // ['field' => 'c_openapiUrlCallbackQrisMpm', 'label' => 'OpenAPI Callback URL QRIS MPM', 'rules' => 'trim|required'],
          ['field' => 'c_password', 'label' => 'Merchant Password', 'rules' => 'trim|required'],
          ['field' => 'c_confirmPassword', 'label' => 'Merchant Confirm Password', 'rules' => 'trim|required|matches[c_password]'],
       ];
@@ -234,9 +236,9 @@ class AdminMerchant extends CI_Controller
       if ($this->form_validation->run() == FALSE) {
          $errors = validation_errors('<li>', '</li>');
          $this->session->set_flashdata('error', '<ul>' . $errors . '</ul>');
-         redirect('admin/merchant');
+         redirect('admin/addMerchant');
       } else {
-         $this->load->library('MerchantRegistrationService');
+         $this->load->library('MerchantRegistrationService', null, 'MerchantRegistrationService');
          
          try {
              $this->MerchantRegistrationService->registerMerchant(
@@ -254,9 +256,23 @@ class AdminMerchant extends CI_Controller
       }
    }
 
+   public function addMerchant()
+   {
+      $this->load->model('Merchant');
+
+      if (!$this->session->userdata('c_email')) {
+         redirect('auth');
+      }
+
+      $data['title'] = 'Register New Merchant';
+      $data['user'] = $this->Model_user->view_user()->row_array();
+
+      $this->load->view('merchant/add-merchant', $data);
+   }
+
    public function registerMerchantSpv() 
    {
-      $this->load->library('MerchantRegistrationService');
+      $this->load->library('MerchantRegistrationService', null, 'MerchantRegistrationService');
 
       try {
           // Lemparkan seluruh data POST ke service layer
@@ -345,9 +361,12 @@ class AdminMerchant extends CI_Controller
 
       // Rules validasi
       $rules = [
-         ['field' => 'c_openapiUrlCallbackQrisMpm', 'label' => 'URL Callback Qris Mpm', 'rules' => 'required|valid_url'],
-         ['field' => 'c_openapiUrlCallbackVa',      'label' => 'URL Callback VA',       'rules' => 'required|valid_url'],
-         ['field' => 'c_openapiUrlCallbackEwallet', 'label' => 'URL Callback Ewallet',  'rules' => 'required|valid_url'],
+         ['field' => 'c_name', 'label' => 'Merchant Name', 'rules' => 'trim|required'],
+         ['field' => 'c_email', 'label' => 'Merchant Email', 'rules' => 'trim|required|valid_email'],
+         ['field' => 'c_phoneNumber', 'label' => 'Merchant Phone', 'rules' => 'trim'],
+         ['field' => 'c_openapiUrlCallbackQrisMpm', 'label' => 'URL Callback Qris Mpm', 'rules' => 'valid_url'],
+         ['field' => 'c_openapiUrlCallbackVa',      'label' => 'URL Callback VA',       'rules' => 'valid_url'],
+         ['field' => 'c_openapiUrlCallbackEwallet', 'label' => 'URL Callback Ewallet',  'rules' => 'valid_url'],
          ['field' => 'c_openapiStatus',             'label' => 'OpenAPI Status',        'rules' => 'required'],
       ];
       $this->form_validation->set_rules($rules);
@@ -358,20 +377,66 @@ class AdminMerchant extends CI_Controller
          redirect('admin/editMerchant/' . $merchant_id);
       } else {
          $data = [
+            'c_name'                      => $this->input->post('c_name'),
+            'c_email'                     => $this->input->post('c_email'),
+            'c_phoneNumber'               => $this->input->post('c_phoneNumber'),
             'c_openapiUrlCallbackQrisMpm' => $this->input->post('c_openapiUrlCallbackQrisMpm'),
             'c_openapiUrlCallbackVa'      => $this->input->post('c_openapiUrlCallbackVa'),
             'c_openapiUrlCallbackEwallet' => $this->input->post('c_openapiUrlCallbackEwallet'),
             'c_openapiIPAllow'            => $this->input->post('c_openapiIPAllow'),
-            'c_openapiSecurityType'       => $this->input->post('c_openapiSecurityType'),
             'c_openapiStatus'             => $this->input->post('c_openapiStatus'),
+            
+            // Service Permissions (Checkboxes)
+            'c_openapiChannelVaDynamicCreate'     => $this->input->post('c_openapiChannelVaDynamicCreate') ? '1' : '0',
+            'c_openapiChannelVaDynamicQuery'      => $this->input->post('c_openapiChannelVaDynamicQuery') ? '1' : '0',
+            'c_openapiChannelVaDynamicCancel'     => $this->input->post('c_openapiChannelVaDynamicCancel') ? '1' : '0',
+            'c_openapiChannelVaRecurringCreate'   => $this->input->post('c_openapiChannelVaRecurringCreate') ? '1' : '0',
+            'c_openapiChannelVaRecurringCancel'   => $this->input->post('c_openapiChannelVaRecurringCancel') ? '1' : '0',
+            
+            'c_openapiChannelQrisMpmDynamicCreate' => $this->input->post('c_openapiChannelQrisMpmDynamicCreate') ? '1' : '0',
+            'c_openapiChannelQrisMpmDynamicQuery'  => $this->input->post('c_openapiChannelQrisMpmDynamicQuery') ? '1' : '0',
+            'c_openapiChannelQrisMpmDynamicCancel' => $this->input->post('c_openapiChannelQrisMpmDynamicCancel') ? '1' : '0',
+            
+            'c_openapiChannelEwalletDynamicCreate' => $this->input->post('c_openapiChannelEwalletDynamicCreate') ? '1' : '0',
+            'c_openapiChannelEwalletDynamicQuery'  => $this->input->post('c_openapiChannelEwalletDynamicQuery') ? '1' : '0',
+            'c_openapiChannelEwalletDynamicCancel' => $this->input->post('c_openapiChannelEwalletDynamicCancel') ? '1' : '0',
+            
+            'c_openapiChannelTransferToBifast'          => $this->input->post('c_openapiChannelTransferToBifast') ? '1' : '0',
+            'c_openapiChannelTransferToRealtimeOnline'  => $this->input->post('c_openapiChannelTransferToRealtimeOnline') ? '1' : '0',
+            'c_allowTransferFromDashboard'              => $this->input->post('c_allowTransferFromDashboard') ? '1' : '0',
          ];
 
+         // Security Type update based on IP
+         $data['c_openapiSecurityType'] = !empty($data['c_openapiIPAllow']) ? 'Whitelist IP' : 'Not Both';
+
+         $this->db->trans_begin();
          $result = $this->Merchant->update_merchant($merchant_id, $data);
+         
+         // Update submerchant table for GVConnect fields
+         $gvId = $this->input->post('c_gvconnectBusinessId');
+         $gvName = $this->input->post('c_gvconnectBusinessName');
+         
+         if ($gvId !== null || $gvName !== null) {
+            $updSub = [];
+            if ($gvId !== null) $updSub['c_gvconnectBusinessId'] = $gvId;
+            if ($gvName !== null) $updSub['c_gvconnectBusinessName'] = $gvName;
+            
+            $this->db->where('ref_merchantId', $merchant_id);
+            $this->db->update('submerchant', $updSub);
+         }
+
+         if ($this->db->trans_status() === FALSE) {
+            $this->db->trans_rollback();
+            $result = false;
+         } else {
+            $this->db->trans_commit();
+            $result = true;
+         }
 
          if ($result) {
-            $this->session->set_flashdata('success', 'Merchant berhasil diupdate.');
+            $this->session->set_flashdata('success', 'Merchant successfully updated.');
          } else {
-            $this->session->set_flashdata('error', 'Gagal mengupdate merchant.');
+            $this->session->set_flashdata('error', 'Failed to update merchant.');
          }
 
          redirect('admin/editMerchant/' . $merchant_id);
