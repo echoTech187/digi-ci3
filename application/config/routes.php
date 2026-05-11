@@ -61,6 +61,8 @@ $route['admin/syncAvailableBalanceMerchant'] = 'admin/DashboardController/syncAv
 $route['admin/recent_mutations_json'] = 'admin/DashboardController/recent_mutations_json';
 $route['admin/ajax_today_stats_json'] = 'admin/DashboardController/ajax_today_stats_json';
 $route['admin/ajax_monthly_stats_json'] = 'admin/DashboardController/ajax_monthly_stats_json';
+$route['admin/ajax_dashboard_metadata_json'] = 'admin/DashboardController/ajax_dashboard_metadata_json';
+$route['admin/ajax_analytics_data_json'] = 'admin/DashboardController/ajax_analytics_data_json';
 $route['welcome'] = 'admin/DashboardController/welcome';
 
 // --- Merchant Module Extraction Routes ---

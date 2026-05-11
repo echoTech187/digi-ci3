@@ -18,16 +18,21 @@ function is_logged_in()
             return;
         }
 
-        // Verify user existence in DB to prevent "null offset" errors if session is stale or user was deleted
-        $user = $ci->db->get_where('admin', ['c_email' => $email])->row_array();
-        if (!$user) {
-            redirect('auth/logout');
+        // Verify user existence in DB (Optimized with Session caching for 5 minutes)
+        $user_verify_key = 'auth_user_verify_'.md5($email);
+        $last_verify = $ci->session->userdata($user_verify_key);
+        if (!$last_verify || (time() - $last_verify) > 300) {
+            $user = $ci->db->get_where('admin', ['c_email' => $email])->row_array();
+            if (!$user) {
+                redirect('auth/logout');
+            }
+            $ci->session->set_userdata($user_verify_key, time());
         }
 
-        // Detect effective Role ID (Prioritize 'role_id' as the primary access level identifier)
+        // Detect effective Role ID
         $role_id = $ci->session->userdata('role_id') ?: $ci->session->userdata('role');
 
-        // WHITELIST: Allow base segments that serve as entry points/dispatchers
+        // WHITELIST
         $public_segments = ['admin', 'welcome', 'auth', 'user'];
         if (in_array($segment1, $public_segments) && empty($segment2)) {
             return;
@@ -35,17 +40,41 @@ function is_logged_in()
 
         $current_url = $segment1 . ($segment2 ? '/' . $segment2 : '');
 
-        // RBAC Check: Verify menu exists and user has access
-        $ci->db->select('m.id as menu_id, am.id as access_id');
-        $ci->db->from('user_menu m');
-        // Use flexible comparison (without forced cast) to support string/int role IDs
-        $ci->db->join('user_access_menu am', 'm.id = am.menu_id AND am.role_id = ' . $ci->db->escape($role_id), 'left');
-        $ci->db->where('m.url', $current_url);
-        $check = $ci->db->get();
+        // RBAC Check: Optimized using Rbac library cache (NO DB Hit if cached)
+        $ci->load->library('rbac');
+        $menus = $ci->rbac->get_menus_by_role($role_id);
+        
+        $has_access = false;
+        $url_found_in_menu = false;
 
-        if ($check->num_rows() > 0) {
-            $result = $check->row_array();
-            if (!$result['access_id']) {
+        // Traverse menu tree to find current URL
+        foreach ($menus as $m) {
+            if (strtolower($m['url']) === $current_url) {
+                $url_found_in_menu = true;
+                $has_access = true; // If found in get_menus_by_role, they HAVE access
+                break;
+            }
+            if (!empty($m['sub_menus'])) {
+                foreach ($m['sub_menus'] as $sm) {
+                    if (strtolower($sm['url']) === $current_url) {
+                        $url_found_in_menu = true;
+                        $has_access = true;
+                        break 2;
+                    }
+                }
+            }
+        }
+
+        // If the URL is NOT in the user_menu table at all, we allow it (e.g. utility pages)
+        // But if it IS in the table and they don't have access, we block it.
+        // To be safe, we only block if we explicitly know they don't have access.
+        
+        if (!$has_access) {
+            // Check if it exists in DB at all for ANYONE
+            $ci->db->select('id')->from('user_menu')->where('url', $current_url)->limit(1);
+            $exists_in_db = $ci->db->get()->num_rows() > 0;
+            
+            if ($exists_in_db) {
                 redirect('auth/blocked');
             }
         }

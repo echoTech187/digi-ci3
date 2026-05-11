@@ -18,10 +18,10 @@
             </div>
             <div class="d-flex align-items-center gap-2 px-3 py-2 btn-dt-chip-action" style="border-radius: 12px; backdrop-filter: blur(10px); border: 1px solid var(--border-color);">
                 <span class="position-relative d-flex">
-                    <span class="animate-ping position-absolute h-full w-full rounded-full bg-<?= ($maintenance_status == 'Active' ? 'success' : 'danger'); ?> opacity-75" style="width: 8px; height: 8px;"></span>
-                    <span class="relative rounded-full bg-<?= ($maintenance_status == 'Active' ? 'success' : 'danger'); ?>" style="width: 8px; height: 8px;"></span>
+                    <span id="maintenance_ping" class="position-absolute h-full w-full rounded-full bg-secondary opacity-75" style="width: 8px; height: 8px;"></span>
+                    <span id="maintenance_dot" class="relative rounded-full bg-secondary" style="width: 8px; height: 8px;"></span>
                 </span>
-                <span class="font-weight-bold" style="color: var(--gray-700); letter-spacing: 0.5px; font-size: 12px;">System: <?= ($maintenance_status == 'Active' ? 'Online' : 'Maintenance'); ?></span>
+                <span class="font-weight-bold" style="color: var(--gray-700); letter-spacing: 0.5px; font-size: 12px;">System: <span id="maintenance_label"><span class="skeleton-box" style="width: 60px;"></span></span></span>
             </div>
         </div>
     </div>
@@ -41,10 +41,10 @@
                         </div>
                     </div>
                     <h6 class="font-weight-bold mb-1" style="opacity: 0.8; font-size: 11px; text-transform: uppercase; letter-spacing: 1px;">Net Volume</h6>
-                    <h3 class="font-weight-bold mb-3 d-flex align-items-baseline" style="font-size: 1.4rem; letter-spacing: -0.5px; white-space: nowrap; gap: 10px;"><span>Rp</span><span id="stat_total_volume">...</span></h3>
+                    <h3 class="font-weight-bold mb-3 d-flex align-items-baseline" style="font-size: 1.4rem; letter-spacing: -0.5px; white-space: nowrap; gap: 10px;"><span>Rp</span><span id="stat_total_volume"><span class="skeleton-box" style="width: 120px;"></span></span></h3>
                     <div class="d-flex align-items-center mt-auto">
                         <div class="px-2 py-1 rounded-pill d-flex align-items-center" style="background: rgba(255,255,255,0.15); font-size: 10px;">
-                            <i class="fas fa-arrow-up mr-1" style="font-size: 8px;"></i> <span id="stat_total_qty">...</span>&nbsp;Settled 
+                            <i class="fas fa-arrow-up mr-1" style="font-size: 8px;"></i> <span id="stat_total_qty"><span class="skeleton-box" style="width: 30px;"></span></span>&nbsp;Settled 
                         </div>
                     </div>
                 </div>
@@ -64,10 +64,10 @@
                         </div>
                     </div>
                     <h6 class="font-weight-bold mb-1" style="opacity: 0.8; font-size: 11px; text-transform: uppercase; letter-spacing: 1px;">QRIS Performance</h6>
-                    <h3 class="font-weight-bold mb-3 d-flex align-items-baseline" style="font-size: 1.4rem; letter-spacing: -0.5px; white-space: nowrap; gap: 10px;"><span>Rp</span><span id="stat_qris_amount">...</span></h3>
+                    <h3 class="font-weight-bold mb-3 d-flex align-items-baseline" style="font-size: 1.4rem; letter-spacing: -0.5px; white-space: nowrap; gap: 10px;"><span>Rp</span><span id="stat_qris_amount"><span class="skeleton-box" style="width: 100px;"></span></span></h3>
                     <div class="d-flex align-items-center mt-auto">
                         <div class="px-2 py-1 rounded-pill d-flex align-items-center" style="background: rgba(255,255,255,0.15); font-size: 10px;">
-                            <i class="fas fa-check-circle mr-1" style="font-size: 8px;"></i> <span id="stat_qris_qty">...</span>&nbsp;Successful
+                            <i class="fas fa-check-circle mr-1" style="font-size: 8px;"></i> <span id="stat_qris_qty"><span class="skeleton-box" style="width: 30px;"></span></span>&nbsp;Successful
                         </div>
                     </div>
                 </div>
@@ -87,10 +87,10 @@
                         </div>
                     </div>
                     <h6 class="font-weight-bold mb-1" style="opacity: 0.8; font-size: 11px; text-transform: uppercase; letter-spacing: 1px;">BI-FAST Disbursement</h6>
-                    <h3 class="font-weight-bold mb-3 d-flex align-items-baseline" style="font-size: 1.4rem; letter-spacing: -0.5px; white-space: nowrap; gap: 10px;"><span>Rp</span><span id="stat_disburse_amount">...</span></h3>
+                    <h3 class="font-weight-bold mb-3 d-flex align-items-baseline" style="font-size: 1.4rem; letter-spacing: -0.5px; white-space: nowrap; gap: 10px;"><span>Rp</span><span id="stat_disburse_amount"><span class="skeleton-box" style="width: 100px;"></span></span></h3>
                     <div class="d-flex align-items-center mt-auto">
                         <div class="px-2 py-1 rounded-pill d-flex align-items-center" style="background: rgba(255,255,255,0.15); font-size: 10px;">
-                            <i class="fas fa-bolt mr-1" style="font-size: 8px;"></i> <span id="stat_disburse_qty">...</span>&nbsp;Processed
+                            <i class="fas fa-bolt mr-1" style="font-size: 8px;"></i> <span id="stat_disburse_qty"><span class="skeleton-box" style="width: 30px;"></span></span>&nbsp;Processed
                         </div>
                     </div>
                 </div>
@@ -110,7 +110,7 @@
                         </div>
                     </div>
                     <h6 class="font-weight-bold mb-1" style="opacity: 0.8; font-size: 11px; text-transform: uppercase; letter-spacing: 1px;">Ecosystem Partners</h6>
-                    <h3 class="font-weight-bold mb-3" style="font-size: 1.6rem; letter-spacing: -0.5px;"><?= number_format($merchant_count, 0, ',', '.'); ?> Accounts</h3>
+                    <h3 class="font-weight-bold mb-3" style="font-size: 1.6rem; letter-spacing: -0.5px;"><span id="stat_merchant_count"><span class="skeleton-box" style="width: 80px;"></span></span> Accounts</h3>
                     <div class="d-flex align-items-center mt-auto">
                         <div class="px-2 py-1 rounded-pill d-flex align-items-center" style="background: rgba(255,255,255,0.15); font-size: 10px;">
                             <i class="fas fa-user-check mr-1" style="font-size: 8px;"></i> All Active
@@ -403,6 +403,29 @@
     });
 
     // --- Asynchronous Dashboard Stats Loading (SPLIT) ---
+    function loadMetadata() {
+        $.ajax({
+            url: "<?= base_url('admin/ajax_dashboard_metadata_json'); ?>",
+            type: "GET",
+            dataType: "json",
+            success: function(resp) {
+                $("#stat_merchant_count").text(number_format(resp.merchant_count));
+                
+                var is_active = (resp.maintenance_status === 'Active');
+                $("#maintenance_label").text(is_active ? 'Online' : 'Maintenance');
+                
+                $("#maintenance_dot").removeClass('bg-secondary bg-success bg-danger')
+                    .addClass(is_active ? 'bg-success' : 'bg-danger');
+                
+                $("#maintenance_ping").removeClass('bg-secondary bg-success bg-danger')
+                    .addClass(is_active ? 'bg-success' : 'bg-danger');
+                
+                if (is_active) $("#maintenance_ping").addClass('animate-ping');
+                else $("#maintenance_ping").removeClass('animate-ping');
+            }
+        });
+    }
+
     function loadTodayStats() {
         $.ajax({
             url: "<?= base_url('admin/ajax_today_stats_json'); ?>",
@@ -448,6 +471,7 @@
     }
 
     // Trigger loads
+    loadMetadata();
     loadTodayStats();
     loadMonthlyStats();
 </script>

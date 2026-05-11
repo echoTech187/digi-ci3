@@ -37,11 +37,24 @@ class DashboardController extends CI_Controller
       $data['title'] = 'Dashboard';
       $data['user'] = $this->Model_user->view_user()->row_array();
       $data['recent_mutations'] = []; 
-      $data['merchant_count'] = $this->Dashboard_model->get_merchant_count();
-      $data['maintenance_status'] = $this->Merchant->getMaintenanceStatus();
 
-      // We no longer calculate stats here to ensure INSTANT page load
+      // We no longer calculate stats or metadata here to ensure INSTANT page load
       $this->load->view('admin/index_dashboard', $data);
+   }
+
+   public function ajax_dashboard_metadata_json()
+   {
+      if (!$this->input->is_ajax_request()) return;
+      session_write_close();
+      $this->load->model('Dashboard_model');
+      $this->load->model('Merchant');
+      
+      $data = [
+         'merchant_count' => $this->Dashboard_model->get_merchant_count(),
+         'maintenance_status' => $this->Merchant->getMaintenanceStatus()
+      ];
+
+      return $this->output->set_content_type('application/json')->set_output(json_encode($data));
    }
 
    public function ajax_today_stats_json()
@@ -126,10 +139,48 @@ class DashboardController extends CI_Controller
          case 'yesterday':
             $current_start = (clone $today)->modify('-1 day');
             $current_end = clone $current_start;
+            $date_range_label = $current_start->format('d M Y');
+            $comparison_label = 'prev. day';
+            break;
+
+         case 'last_month':
+            $current_start = (clone $today)->modify('first day of last month');
+            $current_end = (clone $today)->modify('last day of last month');
+            $date_range_label = $current_start->format('d M Y') . ' - ' . $current_end->format('d M Y');
+            $comparison_label = 'prev. month';
+            break;
+
+         default:
+            $period = 'last_7_days';
+            $current_start = (clone $today)->modify('-6 days');
+            $current_end = clone $today;
+            $date_range_label = $current_start->format('d M Y') . ' - ' . $current_end->format('d M Y');
+            $comparison_label = 'prev. week';
+            break;
+      }
+
+      $data['current_period'] = $period;
+      $data['date_range_label'] = $date_range_label;
+      $data['comparison_label'] = $comparison_label;
+
+      $this->load->view('admin/index_real', $data);
+   }
+
+   public function ajax_analytics_data_json()
+   {
+      if (!$this->input->is_ajax_request()) return;
+      session_write_close();
+      
+      $period = $this->input->get('period') ?: 'last_7_days';
+      $today = new DateTime('today');
+
+      switch ($period) {
+         case 'yesterday':
+            $current_start = (clone $today)->modify('-1 day');
+            $current_end = clone $current_start;
             $previous_start = (clone $today)->modify('-2 days');
             $previous_end = clone $previous_start;
             $comparison_label = 'prev. day';
-            $date_range_label = $current_start->format('d M Y');
             break;
 
          case 'last_month':
@@ -138,7 +189,6 @@ class DashboardController extends CI_Controller
             $previous_start = (clone $current_start)->modify('-1 month');
             $previous_end = (clone $current_start)->modify('-1 day');
             $comparison_label = 'prev. month';
-            $date_range_label = $current_start->format('d M Y') . ' - ' . $current_end->format('d M Y');
             break;
 
          default:
@@ -148,7 +198,6 @@ class DashboardController extends CI_Controller
             $previous_start = (clone $current_start)->modify('-7 days');
             $previous_end = (clone $current_start)->modify('-1 day');
             $comparison_label = 'prev. week';
-            $date_range_label = $current_start->format('d M Y') . ' - ' . $current_end->format('d M Y');
             break;
       }
 
@@ -158,11 +207,8 @@ class DashboardController extends CI_Controller
       $prev_to = $previous_end->format('Y-m-d');
 
       $statsTemplate = ['amount' => 0, 'fee' => 0, 'fee_external' => 0];
-      $data['current_stats'] = ['qris' => $statsTemplate, 'disburse' => $statsTemplate, 'va' => $statsTemplate];
-      $data['prev_stats'] = $data['current_stats'];
-      $data['current_period'] = $period;
-      $data['comparison_label'] = $comparison_label;
-      $data['date_range_label'] = $date_range_label;
+      $current_stats = ['qris' => $statsTemplate, 'disburse' => $statsTemplate, 'va' => $statsTemplate];
+      $prev_stats = $current_stats;
 
       $channels = [
          'qris' => ['table' => 'cashin_payment_qris_mpm', 'dateField' => 'c_datetimePayment', 'where' => []],
@@ -179,36 +225,79 @@ class DashboardController extends CI_Controller
             foreach ($params['where'] as $field => $value) $this->db->where($field, $value);
 
             $row = $this->db->get()->row_array();
-            $stats = ['amount' => (float)($row['amount'] ?? 0), 'fee' => (float)($row['fee'] ?? 0), 'fee_external' => (float)($row['fee_external'] ?? 0)];
-
-            if ($window === 'current') $data['current_stats'][$channel] = $stats;
-            else $data['prev_stats'][$channel] = $stats;
+            $res = ['amount' => (float)($row['amount'] ?? 0), 'fee' => (float)($row['fee'] ?? 0), 'fee_external' => (float)($row['fee_external'] ?? 0)];
+            if ($window === 'current') $current_stats[$channel] = $res;
+            else $prev_stats[$channel] = $res;
          }
       }
 
-      $disburse_total = $this->db->select('COUNT(id) as total')->from('cashout_payment_bifast')->where('c_datetime >=', $current_from . ' 00:00:00')->where('c_datetime <=', $current_to . ' 23:59:59')->get()->row_array();
-      $disburse_success = $this->db->select('COUNT(id) as total')->from('cashout_payment_bifast')->where('c_status', 'SUCCESS')->where('c_datetime >=', $current_from . ' 00:00:00')->where('c_datetime <=', $current_to . ' 23:59:59')->get()->row_array();
+      // Success Rate calculation (Based on Disburse stability as per original logic)
+      $this->db->select('count(*) as total');
+      $this->db->from('cashout_payment_bifast');
+      $this->db->where('c_datetime >=', $current_from . ' 00:00:00');
+      $this->db->where('c_datetime <=', $current_to . ' 23:59:59');
+      $total_disburse = $this->db->get()->row()->total;
 
-      $data['success_rate'] = !empty($disburse_total['total']) ? round((float)$disburse_success['total'] / (float)$disburse_total['total'] * 100, 1) : 100;
-      $data['chart_data'] = $this->_get_period_chart_data($period, $current_from, $current_to);
-      $this->load->view('admin/index_real', $data);
+      $this->db->select('count(*) as success');
+      $this->db->from('cashout_payment_bifast');
+      $this->db->where('c_datetime >=', $current_from . ' 00:00:00');
+      $this->db->where('c_datetime <=', $current_to . ' 23:59:59');
+      $this->db->where('c_status', 'SUCCESS');
+      $success_disburse = $this->db->get()->row()->success;
+
+      $success_rate = ($total_disburse > 0) ? round(($success_disburse / $total_disburse) * 100, 1) : 100;
+
+      // Chart Data
+      $chart_data = $this->_get_period_chart_data($period, $current_from, $current_to);
+
+      $response = [
+         'current_stats' => $current_stats,
+         'prev_stats' => $prev_stats,
+         'success_rate' => $success_rate,
+         'chart_data' => $chart_data,
+         'comparison_label' => $comparison_label
+      ];
+
+      return $this->output->set_content_type('application/json')->set_output(json_encode($response));
    }
 
    private function _get_period_chart_data($period, $date_from, $date_to)
    {
-       $labels = []; $values = [];
-       if ($period == 'yesterday') {
-           for ($i = 0; $i < 24; $i++) { $labels[] = str_pad($i, 2, "0", STR_PAD_LEFT) . ":00"; $values[$i] = 0; }
-            $query = $this->db->select('HOUR(c_datetime) as hour, SUM(c_amount) as amount')->from('cashin_payment_qris_mpm')->where('c_datetime >=', $date_from . ' 00:00:00')->where('c_datetime <=', $date_from . ' 23:59:59')->group_by('HOUR(c_datetime)')->get()->result_array();
-           foreach ($query as $row) $values[(int)$row['hour']] = (float)$row['amount'];
-       } else {
-           $start = new DateTime($date_from); $end = new DateTime($date_to); $range = new DatePeriod($start, new DateInterval('P1D'), $end->modify('+1 day'));
-           foreach ($range as $date) { $labels[] = $date->format('d M'); $values[$date->format('Y-m-d')] = 0; }
-           $this->db->select("DATE(c_datetime) as date, SUM(c_amount) as amount")->from('cashin_payment_qris_mpm')->where('c_datetime >=', $date_from . ' 00:00:00')->where('c_datetime <=', $date_to . ' 23:59:59')->group_by("DATE(c_datetime)");
-           foreach ($this->db->get()->result_array() as $row) if (isset($values[$row['date']])) $values[$row['date']] = (float)$row['amount'];
-           $values = array_values($values);
-       }
-       return ['labels' => $labels, 'values' => $values];
+      $labels = []; $values = [];
+      if ($period == 'yesterday') {
+         for ($i = 0; $i < 24; $i++) { 
+            $labels[] = str_pad($i, 2, "0", STR_PAD_LEFT) . ":00"; 
+            $values[$i] = 0; 
+         }
+         $query = $this->db->select('HOUR(c_datetime) as hour, SUM(c_amount) as amount')
+               ->from('cashin_payment_qris_mpm')
+               ->where('c_datetime >=', $date_from . ' 00:00:00')
+               ->where('c_datetime <=', $date_from . ' 23:59:59')
+               ->group_by('HOUR(c_datetime)')
+               ->get()
+               ->result_array();
+         foreach ($query as $row) $values[(int)$row['hour']] = (float)$row['amount'];
+      } else {
+         $start = new DateTime($date_from); 
+         $end = new DateTime($date_to); 
+         $range = new DatePeriod($start, new DateInterval('P1D'), $end->modify('+1 day'));
+         foreach ($range as $date) { 
+            $labels[] = $date->format('d M'); 
+            $values[$date->format('Y-m-d')] = 0; 
+         }
+         $this->db->select("DATE(c_datetime) as date, SUM(c_amount) as amount")
+                  ->from('cashin_payment_qris_mpm')
+                  ->where('c_datetime >=', $date_from . ' 00:00:00')
+                  ->where('c_datetime <=', $date_to . ' 23:59:59')
+                  ->group_by("DATE(c_datetime)");
+         foreach ($this->db->get()->result_array() as $row) {
+            if (isset($values[$row['date']])) {
+               $values[$row['date']] = (float)$row['amount'];
+            }
+         }
+         $values = array_values($values);
+      }
+      return ['labels' => $labels, 'values' => $values];
    }
 
    public function toggleOpenApiStatus()

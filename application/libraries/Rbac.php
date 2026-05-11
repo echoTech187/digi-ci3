@@ -3,6 +3,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Rbac {
     protected $CI;
+    private $_permissions = null;
+    private $_menu_tree   = null;
 
     public function __construct() {
         $this->CI =& get_instance();
@@ -17,24 +19,40 @@ class Rbac {
      * @return bool
      */
     public function has_permission($role_id, $permission) {
-        $query = $this->CI->db
-            ->select('rp.*')
-            ->from('role_permissions rp')
-            ->join('permissions p', 'rp.permission_id = p.id')
-            ->where('rp.role_id', $role_id)
-            ->where('p.permission_name', $permission)
-            ->get();
-        return $query->num_rows() > 0;
+        $perms = $this->get_permissions_by_role($role_id);
+        foreach ($perms as $p) {
+            if ($p['permission_name'] === $permission) return true;
+        }
+        return false;
     }
 
     public function get_permissions_by_role($role_id) {
+        if ($this->_permissions !== null) {
+            return $this->_permissions;
+        }
+
+        $db_name = $this->CI->db->database;
+        $cache_key = 'rbac_perms_cache_' . $db_name . '_' . $role_id;
+
+        // 1. Try Session Cache
+        if ($this->CI->session->has_userdata($cache_key)) {
+            $this->_permissions = $this->CI->session->userdata($cache_key);
+            return $this->_permissions;
+        }
+
+        // 2. Fetch from DB
         $query = $this->CI->db
             ->select('p.permission_name')
             ->from('role_permissions rp')
             ->join('permissions p', 'rp.permission_id = p.id')
             ->where('rp.role_id', $role_id)
             ->get();
-        return $query->result_array();
+        $this->_permissions = $query->result_array();
+
+        // 3. Store in Session
+        $this->CI->session->set_userdata($cache_key, $this->_permissions);
+
+        return $this->_permissions;
     }
 
     /**
@@ -44,12 +62,17 @@ class Rbac {
      * @return array
      */
     public function get_menus_by_role($role_id) {
+        if ($this->_menu_tree !== null) {
+            return $this->_menu_tree;
+        }
+
         $db_name = $this->CI->db->database;
         $cache_key = 'rbac_menu_cache_' . $db_name . '_' . $role_id;
         
         // 1. Check Session Cache first to avoid Remote DB latency
         if ($this->CI->session->has_userdata($cache_key)) {
-            return $this->CI->session->userdata($cache_key);
+            $this->_menu_tree = $this->CI->session->userdata($cache_key);
+            return $this->_menu_tree;
         }
 
         // 2. Fetch from DB if not cached
@@ -85,6 +108,7 @@ class Rbac {
 
         // 3. Store in Session Cache
         $this->CI->session->set_userdata($cache_key, $result);
+        $this->_menu_tree = $result;
 
         return $result;
     }
@@ -93,12 +117,16 @@ class Rbac {
      * Use this when menu structure or permissions change.
      */
     public function clear_menu_cache() {
+        $this->_permissions = null;
+        $this->_menu_tree = null;
+        
         $db_name = $this->CI->db->database;
         $all_session = $this->CI->session->all_userdata();
-        $prefix = 'rbac_menu_cache_' . $db_name;
+        $prefix_menu = 'rbac_menu_cache_' . $db_name;
+        $prefix_perms = 'rbac_perms_cache_' . $db_name;
         
         foreach ($all_session as $key => $value) {
-            if (strpos($key, $prefix) === 0) {
+            if (strpos($key, $prefix_menu) === 0 || strpos($key, $prefix_perms) === 0) {
                 $this->CI->session->unset_userdata($key);
             }
         }
