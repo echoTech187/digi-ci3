@@ -8,7 +8,7 @@ class SubMerchant extends CI_Model
     {
         // Emergency safeguard
         $this->db->query("SET SESSION max_execution_time = 30000");
-        $this->db->select('m.id, m.c_name, m.c_email, m.c_status, m.c_merchantLevel', FALSE);
+        $this->db->select('m.id, m.c_name, m.c_email, m.c_status, m.c_merchantLevel, NULL as c_gvconnectBusinessId, NULL as c_gvconnectBusinessName, s.c_gvconnectGVConnectKey, s.c_gvconnectStaticQrisRaw, s.c_gvconnectStaticVaBni, s.c_gvconnectStaticVaBca, s.c_gvconnectStaticVaCimb, s.c_gvconnectStaticVaPermata', FALSE);
         $this->db->from('merchant m');
         $this->db->join('submerchant s', 's.ref_merchantId = m.id', 'left');
         $this->db->where('m.parent_merchant_id', $id);
@@ -21,11 +21,13 @@ class SubMerchant extends CI_Model
             $this->db->or_like('m.c_email', $search);
             $this->db->or_like('m.id', $search);
             $this->db->or_like('m.c_status', $search);
+            $this->db->or_like('s.c_gvconnectBusinessId', $search);
+            $this->db->or_like('s.c_gvconnectBusinessName', $search);
             $this->db->group_end();
         }
 
         if (isset($_POST['order'])) {
-            $column_order = [null, 'c_name', 'c_email', 'c_status'];
+            $column_order = [null, 'c_name', 'c_email', 'c_gvconnectBusinessId', 'c_status'];
             $this->db->order_by($column_order[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);
         } else {
             $this->db->order_by('id', 'DESC');
@@ -86,12 +88,12 @@ class SubMerchant extends CI_Model
     {
         $this->load->library('datatables');
         return $this->datatables->of('merchant m')
-            ->select('m.id, m.c_name, m.c_email, m.c_status, m.c_merchantLevel', FALSE)
+            ->select('m.id, m.c_name, m.c_email, m.c_status, m.c_merchantLevel, s.c_gvconnectBusinessId, s.c_gvconnectBusinessName, s.c_gvconnectGVConnectKey, s.c_gvconnectStaticQrisRaw, s.c_gvconnectStaticVaBni, s.c_gvconnectStaticVaBca, s.c_gvconnectStaticVaCimb, s.c_gvconnectStaticVaPermata', FALSE)
             ->join('submerchant s', 's.ref_merchantId = m.id', 'left')
             ->where('m.parent_merchant_id', $id)
             ->where('m.c_merchantLevel >', 0)
-            ->set_column_order([null, 'm.c_name', 'm.c_email', 'm.c_status'])
-            ->set_column_search(['m.c_name', 'm.c_email', 'm.id', 'm.c_status'])
+            ->set_column_order([null, 'm.c_name', 'm.c_email', 's.c_gvconnectBusinessId', 'm.c_status'])
+            ->set_column_search(['m.c_name', 'm.c_email', 'm.id', 'm.c_status', 's.c_gvconnectBusinessId', 's.c_gvconnectBusinessName'])
             ->set_default_order(['m.id' => 'desc'])
             ->addColumn('no', function($row) {
                 static $no = null;
