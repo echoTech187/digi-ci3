@@ -151,7 +151,15 @@ public function setMaintenanceStatus($newStatus) {
 }
 
     public function get_merchant_by_id($merchant_id) {
-        $this->db->select($this->get_allowed_columns(), FALSE);
+        $cols = $this->get_allowed_columns();
+        // Prefix columns with 'm.' for the join context
+        $prefixedCols = implode(', ', array_map(function($col) {
+            $col = trim($col);
+            if (strpos($col, '(') !== false) return $col; // Don't prefix (NULL)
+            return 'm.' . $col;
+        }, explode(',', $cols)));
+
+        $this->db->select($prefixedCols, FALSE);
         $this->db->select('s.c_gvconnectBusinessId');
         $this->db->from('merchant m');
         $this->db->join('submerchant s', 's.ref_merchantId = m.id', 'left');

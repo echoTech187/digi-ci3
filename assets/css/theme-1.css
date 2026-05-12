@@ -268,14 +268,15 @@ body {
 
 /* ── Button Normalization ── */
 [data-theme="dark"] .btn-light {
-    background-color: var(--gray-100) !important;
-    border-color: var(--border-color) !important;
-    color: var(--gray-800) !important;
+    background-color: transparent !important;
+    border-color: transparent !important;
+    color: white !important;
 }
 
 [data-theme="dark"] .btn-light:hover {
-    background-color: var(--gray-200) !important;
-    color: var(--gray-900) !important;
+    background-color: transparent !important;
+    border-color: transparent !important;
+    color: white !important;
 }
 
 [data-theme="dark"] .btn-default {
@@ -5472,3 +5473,97 @@ button:disabled:hover {
 .alert > i {
     font-size: 1.2rem !important;
 }
+
+/* ── [FIX] DataTable Action Dropdown Clipping & Premium Styling ── */
+.table-responsive {
+    /* Allow dropdowns to overflow the table container */
+    overflow: visible !important;
+    padding-bottom: 80px; /* Safety padding for bottom rows */
+}
+
+/* Premium Action Dropdown Menu - Global for all DT tables */
+.table-responsive .dropdown {
+    position: relative !important;
+    display: inline-block !important;
+}
+
+.table-responsive .dropdown-menu {
+    background: #1e293b !important; /* Elegant dark slate background */
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 14px !important;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2) !important;
+    padding: 8px !important;
+    min-width: 210px !important;
+    z-index: 1060 !important;
+    
+    /* Manual override for position to bypass Popper.js issues */
+    position: absolute !important;
+    top: 100% !important;
+    right: 0 !important;
+    left: auto !important;
+    transform: none !important;
+    margin-top: 8px !important;
+    
+    transform-origin: top right;
+    animation: dropdownFadeIn 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+
+
+@keyframes dropdownFadeIn {
+    from { opacity: 0; transform: translateY(-8px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.table-responsive .dropdown-item {
+    color: #e2e8f0 !important;
+    border-radius: 10px !important;
+    padding: 10px 16px !important;
+    font-size: 0.85rem !important;
+    font-weight: 500 !important;
+    display: flex !important;
+    align-items: center !important;
+    transition: all 0.2s ease !important;
+    margin-bottom: 2px !important;
+    border: none !important;
+    background: transparent !important;
+}
+
+.table-responsive .dropdown-item:last-child {
+    margin-bottom: 0 !important;
+}
+
+.table-responsive .dropdown-item i {
+    width: 24px;
+    text-align: center;
+    font-size: 1rem;
+    margin-right: 12px;
+}
+
+.table-responsive .dropdown-item:hover {
+    background: rgba(255, 255, 255, 0.05) !important;
+    color: #fff !important;
+    transform: translateX(4px);
+}
+
+.table-responsive .dropdown-divider {
+    border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
+    margin: 6px 8px !important;
+}
+
+/* Light Mode Overrides */
+[data-theme="light"] .table-responsive .dropdown-menu {
+    background: #ffffff !important;
+    border-color: #e2e8f0 !important;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+}
+
+[data-theme="light"] .table-responsive .dropdown-item {
+    color: #475569 !important;
+}
+
+[data-theme="light"] .table-responsive .dropdown-item:hover {
+    background: #f1f5f9 !important;
+    color: var(--primary) !important;
+}
+

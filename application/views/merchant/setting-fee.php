@@ -65,9 +65,6 @@
                         <button type="button" class="btn-dt-chip-action btn-dt-primary" data-toggle="modal" data-target="#bulkModal">
                             <i class="fas fa-layer-group mr-1 mr-2"></i> Bulk Add
                         </button>
-                        <button type="button" class="btn-dt-chip-action btn-dt-secondary" onclick="location.reload()">
-                            <i class="fas fa-sync-alt"></i>
-                        </button>
                     </div>
                 </div>
             </div>
@@ -413,7 +410,7 @@ $(document).ready(function() {
                                 <button class="btn btn-light btn-sm rounded-circle shadow-none p-2" type="button" data-toggle="dropdown" aria-expanded="false">
                                     <i class="fas fa-ellipsis-v text-muted"></i>
                                 </button>
-                                <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg p-2">
+                                <ul class="dropdown-menu dropdown-menu-right">
                                     <li>
                                         <button class="dropdown-item rounded-2 py-2 edit-btn" 
                                                 data-toggle="modal" data-target="#feeModal"

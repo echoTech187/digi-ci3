@@ -319,10 +319,10 @@
                             return `
                                 <div class="dropdown">
                                     <button class="btn btn-sm text-muted rounded-circle p-2 border-0 bg-transparent" type="button" data-toggle="dropdown"><i class="fas fa-ellipsis-v"></i></button>
-                                    <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg">
-                                        <li><a class="dropdown-item py-2" href="${baseUrl}admin/editMerchant/${row.id}"><i class="fas fa-edit mr-2 text-info"></i> Edit Merchant</a></li>
-                                        <li><a class="dropdown-item py-2" href="${baseUrl}admin/mutation/${row.id}"><i class="fas fa-exchange-alt mr-2 text-primary"></i> Mutation Log</a></li>
-                                        <li><a class="dropdown-item py-2" href="${baseUrl}admin/submerchant/${row.id}"><i class="fas fa-users mr-2 text-success"></i> Sub Accounts</a></li>
+                                    <ul class="dropdown-menu dropdown-menu-right">
+                                        <li><a class="dropdown-item py-2" href="${baseUrl}admin/editMerchant/${row.id}"><i class="fas fa-edit text-info"></i> Edit Merchant</a></li>
+                                        <li><a class="dropdown-item py-2" href="${baseUrl}admin/mutation/${row.id}"><i class="fas fa-exchange-alt text-primary"></i> Mutation Log</a></li>
+                                        <li><a class="dropdown-item py-2" href="${baseUrl}admin/submerchant/${row.id}"><i class="fas fa-users text-success"></i> Sub Accounts</a></li>
                                         ${row.c_merchantLevel == 0 ? `<li><button class="dropdown-item py-2 border-0 bg-transparent w-100 text-left" data-toggle="modal" data-target="#delegateModal" onClick="openDelegateModal(${row.id}, '${row.c_name.replace(/'/g, "\\'")}')"><i class="fas fa-key mr-2 text-warning"></i> Delegate</button></li>` : ''}
                                         ${row.hasBalancePermission ? `
                                             <li><hr class="dropdown-divider"></li>

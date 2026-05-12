@@ -65,9 +65,6 @@
                         <button type="button" class="btn-dt-chip-action btn-dt-primary" data-toggle="modal" data-target="#bulkModal">
                             <i class="fas fa-layer-group mr-1 mr-2"></i> Bulk Add
                         </button>
-                        <button type="button" class="btn-dt-chip-action btn-dt-secondary" onclick="location.reload()">
-                            <i class="fas fa-sync-alt"></i>
-                        </button>
                     </div>
                 </div>
             </div>
