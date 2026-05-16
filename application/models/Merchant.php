@@ -182,7 +182,7 @@ public function setMaintenanceStatus($newStatus) {
             if (strpos($table, 'merchant') !== false && strpos($table, 'supervisor') === false && strpos($table, 'channel') === false) {
                 $this->db->select('id, c_name, c_email, c_balanceTotal, c_status, c_merchantLevel, c_openapistatus');
             } else {
-                $this->db->select('*');
+                $this->db->select('id');
             }
         }
         $this->db->from($table);

@@ -114,7 +114,7 @@
 
                 <!-- Nav Item - User Information -->
                 <li class="nav-item dropdown no-arrow ">
-                    <a class="nav-link dropdown-toggle navbar-user-info pr-0 rounded-circle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <a class="nav-link dropdown-toggle navbar-user-info pr-0 rounded-circle" href="#" id="userDropdown" role="button" data-toggle="dropdown" data-boundary="viewport" aria-haspopup="true" aria-expanded="false">
                         
                         <img class="navbar-avatar" src="<?= base_url('assets/img/profile/default.jpg') ?>">
                     </a>
@@ -157,7 +157,7 @@
                         <!-- Menu Section -->
                         <div class="p-2">
                             <?php if ($user['role_id'] != 4): ?>
-                                <div class="dropdown-item py-2 px-3 rounded-lg border-bottom mb-1">
+                                <div class="dropdown-item px-3 rounded-lg border-bottom mb-1">
                                     <div class="d-flex align-items-center justify-content-between" style="gap:10px">
                                         <div class="d-flex align-items-center">
                                             <div class="dropdown-icon-wrap mr-3 bg-info-soft text-info">
@@ -173,7 +173,7 @@
                                 </div>
                             <?php endif; ?>
 
-                            <a class="dropdown-item py-2 px-3 rounded-lg" href="<?= base_url('user/changePassword'); ?>">
+                            <a class="dropdown-item px-3 rounded-lg" href="<?= base_url('user/changePassword'); ?>">
                                 <div class="d-flex align-items-center">
                                     <div class="dropdown-icon-wrap mr-3 bg-warning-soft text-warning">
                                         <i class="fas fa-lock fa-sm"></i>
@@ -184,7 +184,7 @@
                             
                             <div class="dropdown-divider my-2" style="opacity: 0.05;"></div>
                             
-                            <a class="dropdown-item py-2 px-3 rounded-lg text-danger" href="<?= base_url('auth/logout'); ?>" data-toggle="modal" data-target="#logoutModal">
+                            <a class="dropdown-item px-3 rounded-lg text-danger" href="<?= base_url('auth/logout'); ?>" data-toggle="modal" data-target="#logoutModal">
                                 <div class="d-flex align-items-center">
                                     <div class="dropdown-icon-wrap mr-3 bg-danger-soft text-danger">
                                         <i class="fas fa-sign-out-alt fa-sm"></i>

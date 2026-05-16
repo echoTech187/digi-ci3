@@ -20,13 +20,6 @@
                     <input type="text" id="dt-global-search" class="dt-search-input" placeholder="Search logs...">
                 </div>
             </div>
-            <div class="dt-toolbar-right">
-                <div class="dt-filter-group">
-                    <button type="button" class="btn-dt-chip-action" onclick="window.location.reload()">
-                        <i class="fas fa-sync-alt mr-2"></i> Refresh
-                    </button>
-                </div>
-            </div>
         </div>
 
         <div class="px-4 pb-4">

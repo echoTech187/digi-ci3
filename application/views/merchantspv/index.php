@@ -201,18 +201,18 @@ $(document).ready(function() {
                 render: function(data, type, row) {
                     return `
                         <div class="dropdown">
-                            <button class="btn btn-sm text-muted rounded-circle p-2 border-0 bg-transparent" type="button" data-toggle="dropdown" aria-expanded="false">
+                            <button class="btn btn-sm rounded-circle p-2 border-0 bg-transparent" type="button" data-toggle="dropdown" data-boundary="viewport" aria-expanded="false">
                                 <i class="fas fa-ellipsis-v"></i>
                             </button>
-                            <ul class="dropdown-menu dropdown-menu-end shadow border-0 py-2">
+                            <ul class="dropdown-menu dropdown-menu-right shadow border-0 py-2">
                                 <li>
-                                    <a class="dropdown-item py-2" href="<?= base_url('admin/listMerchants/') ?>${row.id}">
+                                    <a class="dropdown-item" href="<?= base_url('admin/listMerchants/') ?>${row.id}">
                                         <i class="fas fa-store text-primary mr-2"></i> View Merchants
                                     </a>
                                 </li>
                                 <li class="dropdown-divider"></li>
                                 <li>
-                                    <a class="dropdown-item py-2 text-danger delete-btn" href="javascript:void(0)" data-href="<?= base_url('admin/deleteMerchantSpv/') ?>${row.id}">
+                                    <a class="dropdown-item text-danger delete-btn" href="javascript:void(0)" data-href="<?= base_url('admin/deleteMerchantSpv/') ?>${row.id}">
                                         <i class="fas fa-trash-alt mr-2"></i> Delete
                                     </a>
                                 </li>

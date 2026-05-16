@@ -44,4 +44,78 @@ class ReportController extends CI_Controller {
 
       $this->load->view('admin/balance_log', $data);
    }
+   
+   public function report()
+   {
+      $this->load->model('AdminDownload');
+      is_logged_in();
+
+      $search_date = $this->input->post('search_date');
+      if (!$search_date && !$this->input->is_ajax_request()) {
+         $search_date = $this->session->userdata('search_date');
+      }
+
+      if ($this->input->is_ajax_request()) {
+         try {
+            $filters = [
+               'date' => $this->session->userdata('search_date') ?: $this->input->post('search_date')
+            ];
+            return $this->AdminDownload->get_datatables_handler($filters);
+         } catch (Throwable $e) {
+            log_message('error', 'Report AJAX error: ' . $e->getMessage());
+            echo json_encode(array(
+               "draw" => intval($this->input->post("draw")),
+               "recordsTotal" => 0,
+               "recordsFiltered" => 0,
+               "data" => array(),
+               "error" => "Error retrieving report data: " . $e->getMessage()
+            ));
+         }
+      }
+
+      if ($search_date) {
+         $this->session->set_userdata('search_date', $search_date);
+      }
+
+      $data['title'] = 'Report';
+      $data['user'] = $this->Model_user->view_user()->row_array();
+      $data['search_date'] = $search_date;
+      $data['downloads'] = [];
+      $data['pagination'] = '';
+      $data['start'] = 0;
+
+      $this->load->view('report/index', $data);
+   }
+
+   public function resetdownload()
+   {
+      $this->session->unset_userdata('search_date');
+      redirect('admin/report');
+   }
+
+   public function download()
+   {
+      $filename = $this->input->get('filename');
+
+      if (!empty($filename)) {
+         // Standard report download path
+         $filepath = '/var/www/download_report/' . $filename;
+
+         if (file_exists($filepath)) {
+            header('Content-Description: File Transfer');
+            header('Content-Type: application/octet-stream');
+            header('Content-Disposition: attachment; filename="' . basename($filepath) . '"');
+            header('Expires: 0');
+            header('Cache-Control: must-revalidate');
+            header('Pragma: public');
+            header('Content-Length: ' . filesize($filepath));
+
+            readfile($filepath);
+         } else {
+            echo 'File not found.';
+         }
+      } else {
+         echo 'Filename parameter is missing.';
+      }
+   }
 }

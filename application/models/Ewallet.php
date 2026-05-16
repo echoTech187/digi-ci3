@@ -55,8 +55,6 @@ class Ewallet extends CI_Model {
                 $this->db->group_start();
                 // Match Invoice No
                 $this->db->where_in('cpe.ref_cashinId', "SELECT id FROM cashin WHERE c_invoiceNo LIKE '$safeInv%'", FALSE);
-                // Match Merchant Trans ID (Legacy support for combined search)
-                $this->db->or_where_in('cpe.ref_cashinDynamicEwalletId', "SELECT id FROM cashin_dynamic_ewallet WHERE c_merchantTransactionId LIKE '$safeInv%'", FALSE);
                 $this->db->group_end();
             }
         }

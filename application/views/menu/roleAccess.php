@@ -126,10 +126,10 @@
                         </td>
                         <td class="text-center">
                             <div class="dropdown">
-                                <button class="btn btn-light btn-sm rounded-circle shadow-none p-2" type="button" data-toggle="dropdown" aria-expanded="false">
+                                <button class="btn btn-sm rounded-circle shadow-none p-2" type="button" data-toggle="dropdown" data-boundary="viewport" aria-expanded="false">
                                     <i class="fas fa-ellipsis-v text-muted"></i>
                                 </button>
-                                <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg p-2" style="border-radius: 12px; min-width: 150px;">
+                                <ul class="dropdown-menu dropdown-menu-right border-0 shadow-lg p-2" style="border-radius: 12px; min-width: 150px;">
                                     <li>
                                         <button class="dropdown-item rounded-2 py-2 edit-menu-btn" data-id="<?= $m['id']; ?>">
                                             <i class="fas fa-edit text-primary mr-2"></i> Edit Menu

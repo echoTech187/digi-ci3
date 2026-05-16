@@ -54,7 +54,7 @@
     </div>
 
     <!-- ── Main Data Card ── -->
-    <div class="card border-0 shadow-sm dt-card">
+    <div class="card dt-card border-0 shadow-sm">
 
         <!-- ── Toolbar ── -->
         <?php
@@ -176,27 +176,29 @@
         </form>
 
         <!-- ── Table ── -->
-        <div class="table-responsive">
-            <table class="table dt-table mb-0" id="bifastTable" style="width:100%">
-                <thead>
-                    <tr>
-                        <th style="width: 50px;">No</th>
-                        <th>Merchant</th>
-                        <th>Date Request</th>
-                        <th>Merchant Trans ID</th>
-                        <th>Invoice No</th>
-                        <th>Channel</th>
-                        <th>Account No</th>
-                        <th>Beneficiary Name</th>
-                        <th>Amount</th>
-                        <th>Fee</th>
-                        <th>Status</th>
-                        <th>Information</th>
-                        <th style="min-width: 140px;">Action</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table dt-table mb-0" id="bifastTable">
+                    <thead>
+                        <tr>
+                            <th style="width: 50px;">No</th>
+                            <th>Merchant</th>
+                            <th>Date Request</th>
+                            <th>Merchant Trans ID</th>
+                            <th>Invoice No</th>
+                            <th>Channel</th>
+                            <th>Account No</th>
+                            <th>Beneficiary Name</th>
+                            <th>Amount</th>
+                            <th>Fee</th>
+                            <th>Status</th>
+                            <th>Information</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
@@ -442,8 +444,8 @@
                     
                     return `
                         <div class="dropdown">
-                            <button class="btn btn-sm text-white rounded-circle p-2 border-0 bg-transparent" type="button" data-toggle="dropdown"><i class="fas fa-ellipsis-v"></i></button>
-                            <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg">
+                            <button class="btn btn-sm rounded-circle p-2 border-0 bg-transparent" type="button" data-toggle="dropdown" data-boundary="viewport"><i class="fas fa-ellipsis-v"></i></button>
+                            <ul class="dropdown-menu dropdown-menu-right border-0 shadow-lg">
                                 <li><a href="${detailLink}" class="dropdown-item"><i class="fas fa-eye text-primary mr-2"></i> Detail</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item btn-info-request" href="#" 

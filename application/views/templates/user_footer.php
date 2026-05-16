@@ -348,6 +348,48 @@
                 }
             });
 
+            /* ── GLOBAL FIX: Prevent DataTables Dropdown Clipping (Desktop) ── */
+            // This 'ports' the dropdown to the body when opened to escape any .table-responsive or .card clipping.
+            $(document).on('show.bs.dropdown', '.table-responsive .dropdown', function() {
+                if (window.innerWidth > 768) {
+                    var $dropdown = $(this).find('.dropdown-menu');
+                    var $toggle = $(this).find('[data-toggle="dropdown"]');
+                    
+                    // Mark and move to body
+                    $dropdown.data('original-parent', $(this));
+                    $dropdown.detach().appendTo('body');
+                    
+                    var offset = $toggle.offset();
+                    $dropdown.css({
+                        'display': 'block',
+                        'position': 'absolute',
+                        'top': offset.top + $toggle.outerHeight() + 2,
+                        'left': offset.left - ($dropdown.outerWidth() - $toggle.outerWidth()),
+                        'z-index': 9999,
+                        'opacity': '0' // Start hidden for animation
+                    }).animate({ 'opacity': '1' }, 150);
+                }
+            });
+
+            $(document).on('hide.bs.dropdown', '.table-responsive .dropdown', function() {
+                if (window.innerWidth > 768) {
+                    var $dropdown = $('body > .dropdown-menu');
+                    if ($dropdown.length) {
+                        var $parent = $dropdown.data('original-parent');
+                        if ($parent) {
+                            $dropdown.detach().appendTo($parent).css({
+                                'display': '',
+                                'position': '',
+                                'top': '',
+                                'left': '',
+                                'z-index': '',
+                                'opacity': ''
+                            });
+                        }
+                    }
+                }
+            });
+
             /* ── Universal Filter Porter (Mobile) ── */
             function portFiltersToDrawer() {
                 if (window.innerWidth <= 768) {

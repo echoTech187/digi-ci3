@@ -30,7 +30,7 @@ function is_logged_in()
         }
 
         // Detect effective Role ID
-        $role_id = $ci->session->userdata('role_id') ?: $ci->session->userdata('role');
+        $role_id = $ci->session->userdata('role') ?: $ci->session->userdata('role_id');
 
         // WHITELIST
         $public_segments = ['admin', 'welcome', 'auth', 'user'];

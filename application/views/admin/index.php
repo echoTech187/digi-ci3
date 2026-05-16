@@ -102,12 +102,12 @@
                     render: function(data, type, row) {
                         return `
                             <div class="dropdown">
-                                <button class="btn btn-sm text-muted rounded-circle p-2 border-0 bg-transparent" type="button" data-toggle="dropdown" aria-expanded="false">
+                                <button class="btn btn-sm rounded-circle p-2 border-0 bg-transparent" type="button" data-toggle="dropdown" data-boundary="viewport" aria-expanded="false">
                                     <i class="fas fa-ellipsis-v"></i>
                                 </button>
-                                <ul class="dropdown-menu dropdown-menu-end shadow border-0 py-2">
+                                <ul class="dropdown-menu dropdown-menu-right shadow border-0 py-2">
                                     <li>
-                                        <button type="button" class="dropdown-item py-2 edit-btn" 
+                                        <button type="button" class="dropdown-item edit-btn" 
                                             data-toggle="modal" data-target=".manageUserModal" 
                                             data-id="${row.id}" 
                                             data-name="${row.c_name}" 

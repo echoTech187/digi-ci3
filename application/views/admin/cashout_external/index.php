@@ -281,8 +281,8 @@ $(document).ready(function() {
             "render": function(data, type, row) {
                 return `
                     <div class="dropdown">
-                        <button class="btn btn-sm text-muted rounded-circle p-2 border-0 bg-transparent" type="button" data-toggle="dropdown"><i class="fas fa-ellipsis-v"></i></button>
-                        <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg">
+                        <button class="btn btn-sm rounded-circle p-2 border-0 bg-transparent" type="button" data-toggle="dropdown" data-boundary="viewport"><i class="fas fa-ellipsis-v"></i></button>
+                        <ul class="dropdown-menu dropdown-menu-right border-0 shadow-lg">
                             <li><a class="dropdown-item" href="<?= base_url('admin/cashout/external/edit_view') ?>/${row.id}"><i class="fas fa-edit text-primary mr-2"></i> Edit</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item text-danger delete-btn" href="javascript:void(0)" data-href="<?= base_url('admin/cashout/external/delete') ?>/${row.id}"><i class="fas fa-trash mr-2"></i> Delete</a></li>

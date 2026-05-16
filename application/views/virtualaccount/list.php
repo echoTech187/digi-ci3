@@ -202,8 +202,8 @@ $download_url = base_url('admin/download_VA')
                     
                     return `
                         <div class="dropdown">
-                            <button class="btn btn-sm text-white rounded-circle p-2 border-0 bg-transparent" type="button" data-toggle="dropdown"><i class="fas fa-ellipsis-v"></i></button>
-                            <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg">
+                            <button class="btn btn-sm rounded-circle p-2 border-0 bg-transparent" type="button" data-toggle="dropdown" data-boundary="viewport"><i class="fas fa-ellipsis-v"></i></button>
+                            <ul class="dropdown-menu dropdown-menu-right border-0 shadow-lg">
                                 <li><a href="${detailLink}" class="dropdown-item"><i class="fas fa-eye text-primary mr-2"></i> Detail</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a onclick="javascript: return confirm('Are you sure, want to resend notification again ??')" href="${resendLink}" class="dropdown-item"><i class="fas fa-paper-plane text-warning mr-2"></i> Resend</a></li>

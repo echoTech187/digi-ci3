@@ -45,6 +45,10 @@ class Auth extends CI_Controller
         if (empty($recaptchaResponse)) {
             $data['title'] = 'Login Admin GIDI';
             $data['error_message'] = 'Please complete the reCAPTCHA verification!';
+            
+            $secrets = $this->config->item('secrets');
+            $data['recaptcha_site_key'] = $secrets['recaptcha_site_key'];
+
             $this->load->view('templates/auth_header.php', $data);
             $this->load->view('auth/login', $data);
             $this->load->view('templates/auth_footer.php');
@@ -59,26 +63,38 @@ class Auth extends CI_Controller
         if (!$response['success']) {
             $this->session->set_flashdata('message', '<div class="alert alert-danger" role="alert">reCAPTCHA validation failed!</div>');
             $data['title'] = 'Login Admin GIDI';
+            $data['recaptcha_site_key'] = $secrets['recaptcha_site_key'];
+
             $this->load->view('templates/auth_header.php', $data);
             $this->load->view('auth/login', $data);
             $this->load->view('templates/auth_footer.php');
             return; // Stop further execution
         }
 
-        $admin = $this->db->get_where('admin', ['c_email' => $c_email])->row_array();
+        $this->db->select('admin.*, roles.role_name');
+        $this->db->from('admin');
+        $this->db->join('roles', 'admin.role_id = roles.id', 'left');
+        $this->db->where('admin.c_email', $c_email);
+        $admin = $this->db->get()->row_array();
 
         if ($admin) {
             if ($admin['c_status'] == 'Active') {
                 if (password_verify($adminPassword, $admin['c_password'])) {
                     $data = [
                         'id' => $admin['id'],
+                        'c_name' => $admin['c_name'],
                         'c_email' => $admin['c_email'],
                         'ref_entity' => $admin['ref_entity'],
-                        'role_id' => $admin['c_level'],
-                        'role'  => $admin['role_id']
+                        'role_id' => $admin['c_level'], // Keep for backward compatibility if needed
+                        'role'  => $admin['role_id'],   // The actual Role ID
+                        'role_name' => $admin['role_name'] ?: 'No Role'
                     ];
 
                     $this->session->set_userdata($data);
+
+                    // Clear any stale RBAC cache for this session
+                    $this->load->library('rbac');
+                    $this->rbac->clear_menu_cache();
 
                     redirect('admin');
                 } else {

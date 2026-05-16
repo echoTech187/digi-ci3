@@ -318,20 +318,20 @@
                             var baseUrl = "<?= base_url(); ?>"; 
                             return `
                                 <div class="dropdown">
-                                    <button class="btn btn-sm text-muted rounded-circle p-2 border-0 bg-transparent" type="button" data-toggle="dropdown"><i class="fas fa-ellipsis-v"></i></button>
+                                    <button class="btn btn-sm rounded-circle p-2 border-0 bg-transparent" type="button" data-toggle="dropdown" data-boundary="viewport"><i class="fas fa-ellipsis-v"></i></button>
                                     <ul class="dropdown-menu dropdown-menu-right">
-                                        <li><a class="dropdown-item py-2" href="${baseUrl}admin/editMerchant/${row.id}"><i class="fas fa-edit text-info"></i> Edit Merchant</a></li>
-                                        <li><a class="dropdown-item py-2" href="${baseUrl}admin/mutation/${row.id}"><i class="fas fa-exchange-alt text-primary"></i> Mutation Log</a></li>
-                                        <li><a class="dropdown-item py-2" href="${baseUrl}admin/submerchant/${row.id}"><i class="fas fa-users text-success"></i> Sub Accounts</a></li>
-                                        ${row.c_merchantLevel == 0 ? `<li><button class="dropdown-item py-2 border-0 bg-transparent w-100 text-left" data-toggle="modal" data-target="#delegateModal" onClick="openDelegateModal(${row.id}, '${row.c_name.replace(/'/g, "\\'")}')"><i class="fas fa-key mr-2 text-warning"></i> Delegate</button></li>` : ''}
+                                        <li><a class="dropdown-item" href="${baseUrl}admin/editMerchant/${row.id}"><i class="fas fa-edit text-info"></i> Edit Merchant</a></li>
+                                        <li><a class="dropdown-item" href="${baseUrl}admin/mutation/${row.id}"><i class="fas fa-exchange-alt text-primary"></i> Mutation Log</a></li>
+                                        <li><a class="dropdown-item" href="${baseUrl}admin/submerchant/${row.id}"><i class="fas fa-users text-success"></i> Sub Accounts</a></li>
+                                        ${row.c_merchantLevel == 0 ? `<li><button class="dropdown-item" data-toggle="modal" data-target="#delegateModal" onClick="openDelegateModal(${row.id}, '${row.c_name.replace(/'/g, "\\'")}')"><i class="fas fa-key text-warning"></i> Delegate</button></li>` : ''}
                                         ${row.hasBalancePermission ? `
                                             <li><hr class="dropdown-divider"></li>
-                                            <li><button class="dropdown-item py-2 border-0 bg-transparent w-100 text-left" data-toggle="modal" data-target="#creditBalanceModal" onClick="detail(${row.id}, '${row.c_name.replace(/'/g, "\\'")}')"><i class="fas fa-plus-circle mr-2 text-success"></i> Credit Balance</button></li>
-                                            <li><button class="dropdown-item py-2 border-0 bg-transparent w-100 text-left" data-toggle="modal" data-target="#debitBalanceModal" onClick="detaildebit(${row.id}, '${row.c_name.replace(/'/g, "\\'")}')"><i class="fas fa-minus-circle mr-2 text-danger"></i> Debit Balance</button></li>
+                                            <li><button class="dropdown-item" data-toggle="modal" data-target="#creditBalanceModal" onClick="detail(${row.id}, '${row.c_name.replace(/'/g, "\\'")}')"><i class="fas fa-plus-circle text-success"></i> Credit Balance</button></li>
+                                            <li><button class="dropdown-item" data-toggle="modal" data-target="#debitBalanceModal" onClick="detaildebit(${row.id}, '${row.c_name.replace(/'/g, "\\'")}')"><i class="fas fa-minus-circle text-danger"></i> Debit Balance</button></li>
                                         ` : ''}
                                         <li><hr class="dropdown-divider"></li>
-                                        <li><a class="dropdown-item py-2" href="${baseUrl}admin/settingcashinfee/${row.id}"><i class="fas fa-cog mr-2 text-secondary"></i> Cashin Fee</a></li>
-                                        <li><a class="dropdown-item py-2" href="${baseUrl}admin/settingcashoutfee/${row.id}"><i class="fas fa-cog mr-2 text-secondary"></i> Cashout Fee</a></li>
+                                        <li><a class="dropdown-item" href="${baseUrl}admin/settingcashinfee/${row.id}"><i class="fas fa-cog text-secondary"></i> Cashin Fee</a></li>
+                                        <li><a class="dropdown-item" href="${baseUrl}admin/settingcashoutfee/${row.id}"><i class="fas fa-cog text-secondary"></i> Cashout Fee</a></li>
                                     </ul>
                                 </div>
                             `;

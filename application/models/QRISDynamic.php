@@ -398,9 +398,5 @@ class QRISDynamic extends CI_Model
         $query = "select id,c_name from merchant ";
         return $this->db->query($query)->result();
     }
-
-    public function test_method() {
-        return "Model updated";
-    }
 }
 ?>

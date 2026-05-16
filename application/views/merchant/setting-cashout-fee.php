@@ -392,10 +392,10 @@ $(document).ready(function() {
                     "render": function(data, type, row) {
                         return `
                             <div class="dropdown">
-                                <button class="btn btn-light btn-sm rounded-circle shadow-none p-2" type="button" data-toggle="dropdown" aria-expanded="false">
-                                    <i class="fas fa-ellipsis-v text-muted"></i>
+                                <button class="btn btn-sm rounded-circle shadow-none p-2" type="button" data-toggle="dropdown" data-boundary="viewport" aria-expanded="false">
+                                    <i class="fas fa-ellipsis-v"></i>
                                 </button>
-                                <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg p-2">
+                                <ul class="dropdown-menu dropdown-menu-right border-0 shadow-lg p-2">
                                     <li>
                                         <button class="dropdown-item rounded-2 py-2 edit-btn" 
                                                 data-toggle="modal" data-target="#feeModal"

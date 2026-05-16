@@ -2015,7 +2015,7 @@ ul.sidebar {
     border: none !important;
     box-shadow: var(--shadow-md) !important;
     background: var(--bg-card) !important;
-    overflow: visible;
+    overflow: auto !important;
 }
 
 /* ── Toolbar ── */
@@ -2491,8 +2491,6 @@ ul.sidebar {
     z-index: 1000;
     color: #fff;
 }
-/* Premium DataTables Processing Loader */
-.dt-card, .dt-card .card-body, .table-responsive, .dataTables_wrapper { position: relative !important; }
 
 div.dataTables_processing {
     position: absolute !important;
@@ -4564,10 +4562,17 @@ tr.saved  { opacity: 1; }
     flex-wrap: nowrap;
 }
 
-/* Prevent table clipping for dropdowns (Only if not using responsive scroll) */
-.dt-card { overflow: visible !important; }
-.card-body { overflow: visible !important; }
-.table-responsive { overflow-x: auto !important; }
+/* Prevent table clipping for dropdowns */
+.table-responsive {
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+    display: block !important;
+}
+
+.card, .dt-card, .card-body {
+    overflow: visible !important;
+    position: relative;
+}
 table.dataTable{
     margin-top: 0!important;
     margin-bottom: 0!important;
@@ -4677,7 +4682,7 @@ table.dataTable{
 
 
 /* Unified Premium DataTables Processing Loader */
-.dataTables_wrapper { position: relative !important; }
+.table-responsive .dataTables_wrapper { position: relative !important; }
 div.dataTables_processing {
     position: absolute !important;
     top: 0 !important;
@@ -4885,7 +4890,6 @@ div.dataTables_processing[style*="display: block"] {
 
 
 /* Custom Select2 & Modal Styles for External Mapping */
-.dt-card { overflow: visible !important; }
 .select2-container--default .select2-selection--single {
     height: 38px !important;
     border: 1px solid #d1d3e2 !important;
@@ -5474,38 +5478,23 @@ button:disabled:hover {
     font-size: 1.2rem !important;
 }
 
-/* ── [FIX] DataTable Action Dropdown Clipping & Premium Styling ── */
-.table-responsive {
-    /* Allow dropdowns to overflow the table container */
-    overflow: visible !important;
-    padding-bottom: 80px; /* Safety padding for bottom rows */
-}
-
 /* Premium Action Dropdown Menu - Global for all DT tables */
 .table-responsive .dropdown {
     position: relative !important;
     display: inline-block !important;
 }
 
-.table-responsive .dropdown-menu {
-    background: #1e293b !important; /* Elegant dark slate background */
+.table-responsive .dropdown-menu,
+body > .dropdown-menu {
+    /* Basic styling for premium menu */
+    background: #1e293b !important;
     border: 1px solid rgba(255, 255, 255, 0.08) !important;
     border-radius: 14px !important;
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2) !important;
-    padding: 8px !important;
+    padding: 15px 8px!important;
     min-width: 210px !important;
     z-index: 1060 !important;
-    
-    /* Manual override for position to bypass Popper.js issues */
-    position: absolute !important;
-    top: 100% !important;
-    right: 0 !important;
-    left: auto !important;
-    transform: none !important;
-    margin-top: 8px !important;
-    
     transform-origin: top right;
-    animation: dropdownFadeIn 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 
@@ -5515,10 +5504,27 @@ button:disabled:hover {
     to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-.table-responsive .dropdown-item {
-    color: #e2e8f0 !important;
+@keyframes dropdownFadeInUp {
+    from { opacity: 0; transform: translateY(8px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ── Smart Dropup Logic ── 
+   Automatically flips the dropdown to open upwards for the last 3 rows 
+   to prevent clipping by the table/card container.
+*/
+.table-responsive tr:nth-last-child(-n+3) .dropdown-menu {
+    bottom: 100% !important;
+    top: auto !important;
+    margin-top: 0 !important;
+    margin-bottom: 8px !important;
+    transform-origin: bottom right !important;
+    animation: dropdownFadeInUp 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.table-responsive .dropdown-item, .dropdown-item {
     border-radius: 10px !important;
-    padding: 10px 16px !important;
+    padding: 0.25rem 1rem !important;
     font-size: 0.85rem !important;
     font-weight: 500 !important;
     display: flex !important;
@@ -5529,30 +5535,35 @@ button:disabled:hover {
     background: transparent !important;
 }
 
-.table-responsive .dropdown-item:last-child {
+.table-responsive .dropdown-item:last-child,
+body > .dropdown-menu .dropdown-item:last-child {
     margin-bottom: 0 !important;
 }
 
-.table-responsive .dropdown-item i {
+.table-responsive .dropdown-item i,
+body > .dropdown-menu .dropdown-item i {
     width: 24px;
     text-align: center;
     font-size: 1rem;
     margin-right: 12px;
 }
 
-.table-responsive .dropdown-item:hover {
+.table-responsive .dropdown-item:hover,
+body > .dropdown-menu .dropdown-item:hover {
     background: rgba(255, 255, 255, 0.05) !important;
     color: #fff !important;
     transform: translateX(4px);
 }
 
-.table-responsive .dropdown-divider {
+.table-responsive .dropdown-divider,
+body > .dropdown-menu .dropdown-divider {
     border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
     margin: 6px 8px !important;
 }
 
 /* Light Mode Overrides */
-[data-theme="light"] .table-responsive .dropdown-menu {
+[data-theme="light"] .table-responsive .dropdown-menu,
+[data-theme="light"] body > .dropdown-menu {
     background: #ffffff !important;
     border-color: #e2e8f0 !important;
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
@@ -5562,7 +5573,8 @@ button:disabled:hover {
     color: #475569 !important;
 }
 
-[data-theme="light"] .table-responsive .dropdown-item:hover {
+[data-theme="light"] .table-responsive .dropdown-item:hover,
+[data-theme="light"] body > .dropdown-menu .dropdown-item:hover {
     background: #f1f5f9 !important;
     color: var(--primary) !important;
 }

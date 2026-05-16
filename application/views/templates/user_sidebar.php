@@ -3,17 +3,19 @@
     // Dynamic User Data Extraction for Profile Block
     $sb_name = $this->session->userdata('c_name');
     if (!$sb_name) {
-        $sb_name = $this->session->userdata('name');
+        $sb_name = $this->session->userdata('c_name');
         if (!$sb_name) {
-            $sb_name = 'Administrator';
+            $sb_name = 'No Name';
         }
     }
     
-    $actual_role_id = $this->session->userdata('role');
-    if (!$actual_role_id) {
-        $actual_role_id = $this->session->userdata('role_id'); 
+    $actual_role_id = $this->session->userdata('role') ?: $this->session->userdata('role_id');
+    
+    $sb_role = $this->session->userdata('role_name');
+    if (!$sb_role) {
+        $role_query = $this->db->get_where('roles', ['id' => $actual_role_id])->row_array();
+        $sb_role = $role_query ? $role_query['role_name'] : 'No Role';
     }
-    $sb_role = ($actual_role_id == 1) ? 'Super Admin' : (($actual_role_id == 2) ? 'Merchant' : 'Supervisor'); 
 
     // Detect Current URL for Active State Mapping
     $curr_url = strtolower($this->uri->segment(1));

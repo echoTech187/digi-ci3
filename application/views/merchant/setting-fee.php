@@ -407,8 +407,8 @@ $(document).ready(function() {
                     "render": function(data, type, row) {
                         return `
                             <div class="dropdown">
-                                <button class="btn btn-light btn-sm rounded-circle shadow-none p-2" type="button" data-toggle="dropdown" aria-expanded="false">
-                                    <i class="fas fa-ellipsis-v text-muted"></i>
+                                <button class="btn btn-sm rounded-circle shadow-none p-2" type="button" data-toggle="dropdown" data-boundary="viewport" aria-expanded="false">
+                                    <i class="fas fa-ellipsis-v"></i>
                                 </button>
                                 <ul class="dropdown-menu dropdown-menu-right">
                                     <li>

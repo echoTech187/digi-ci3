@@ -52,16 +52,7 @@ $id = $this->uri->segment(3);
                 <i class="fas fa-search dt-search-icon"></i>
                 <input type="text" id="dt-search" class="dt-search-input" placeholder="Search by name, ID, or email...">
             </div>
-
-            <!-- RIGHT: Actions -->
-            <div class="dt-toolbar-filters">
-                <div class="dt-filter-group">
-                    <label class="dt-filter-label">&nbsp;</label>
-                    <button type="button" class="btn-dt-chip-action btn-dt-secondary" onclick="location.reload()">
-                        <i class="fas fa-sync-alt mr-1 mr-2"></i> Refresh
-                    </button>
-                </div>
-            </div>
+            
         </div>
 
         <!-- ── Table ── -->
@@ -114,18 +105,18 @@ $(document).ready(function() {
                 var baseUrl = "<?= base_url() ?>";
                 return `
                     <div class="dropdown">
-                        <button class="btn btn-sm text-muted rounded-circle p-2 border-0 bg-transparent" type="button" data-toggle="dropdown" aria-expanded="false">
+                        <button class="btn btn-sm rounded-circle p-2 border-0 bg-transparent" type="button" data-toggle="dropdown" data-boundary="viewport" aria-expanded="false">
                             <i class="fas fa-ellipsis-v"></i>
                         </button>
-                        <ul class="dropdown-menu dropdown-menu-end shadow border-0 py-2">
+                        <ul class="dropdown-menu dropdown-menu-right shadow border-0 py-2">
                             <li>
-                                <a class="dropdown-item py-2" href="${baseUrl}admin/submerchant/${data}">
+                                <a class="dropdown-item" href="${baseUrl}admin/submerchant/${data}">
                                     <i class="fas fa-users mr-2 text-success"></i>Sub Accounts
                                 </a>
                             </li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
-                                <button type="button" class="dropdown-item py-2 edit-sub-btn" 
+                                <button type="button" class="dropdown-item edit-sub-btn" 
                                     data-toggle="modal" data-target="#subMerchantModal"
                                     data-id="${data}"
                                     data-name="${row.c_name}"
@@ -144,7 +135,7 @@ $(document).ready(function() {
                                 </button>
                             </li>
                             <li>
-                                <a class="dropdown-item py-2" href="${baseUrl}admin/mutation/${data}">
+                                <a class="dropdown-item" href="${baseUrl}admin/mutation/${data}">
                                     <i class="fas fa-exchange-alt mr-2 text-warning"></i>Mutations
                                 </a>
                             </li>
