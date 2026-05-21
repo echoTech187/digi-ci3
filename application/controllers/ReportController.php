@@ -90,7 +90,7 @@ class ReportController extends CI_Controller {
    public function resetdownload()
    {
       $this->session->unset_userdata('search_date');
-      redirect('admin/report');
+      redirect('report/download');
    }
 
    public function download()

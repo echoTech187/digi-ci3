@@ -45,7 +45,7 @@
                         });
                     </script>
 
-                    <form action="<?= base_url('admin/registerMerchant'); ?>" method="post">
+                    <form action="<?= base_url('merchant/manage/register'); ?>" method="post">
                         
                         <!-- Account Information -->
                         <div class="section-title mb-4 mt-0 text-primary font-weight-bold small text-uppercase letter-spacing-1">
@@ -173,8 +173,8 @@
                         </div>
 
                         <div class="d-flex justify-content-end mt-5 pt-3 border-top">
-                            <a href="<?= base_url('admin/merchant'); ?>" class="btn btn-light px-4 py-2 mr-3 font-weight-bold small text-uppercase">Cancel</a>
-                            <button type="submit" class="btn-dt-action btn-dt-action-primary px-5 py-2">
+                            <a href="<?= base_url('merchant/manage'); ?>" class="btn btn-light px-4 py-2 mr-3 font-weight-bold small text-uppercase">Cancel</a>
+                            <button type="submit" class="btn-dt-action btn-dt-action-success px-5 py-2">
                                 <i class="fas fa-save mr-2"></i> Register Merchant
                             </button>
                         </div>
@@ -183,42 +183,35 @@
             </div>
         </div>
 
-        <div class="col-lg-4">
-            <div class="card border-0 shadow-sm mb-4 bg-gradient-primary text-white" style="border-radius: 12px; overflow: hidden;">
-                <div class="card-body p-4">
-                    <div class="d-flex align-items-center mb-4">
-                        <div class="icon-shape bg-white text-primary rounded-circle mr-3" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
-                            <i class="fas fa-info-circle"></i>
-                        </div>
-                        <h5 class="font-weight-bold mb-0">Registration Guide</h5>
-                    </div>
-                    <p class="small mb-4 opacity-75">Fill out the form to create a new merchant. All account credentials will be generated and emailed to the merchant upon activation.</p>
-                    <div class="mb-3">
-                        <div class="small opacity-75 mb-1 text-uppercase letter-spacing-1 font-weight-bold">Status</div>
-                        <div class="h5 mb-0 font-weight-bold">New Registration</div>
-                    </div>
-                </div>
-            </div>
 
-            <div class="card border-0 shadow-sm dt-card">
-                <div class="card-body p-4">
-                    <h6 class="font-weight-bold text-gray-800 mb-3 d-flex align-items-center">
-                        <i class="fas fa-lightbulb text-warning mr-2"></i> Quick Tips
-                    </h6>
-                    <ul class="list-unstyled mb-0 small text-muted" style="line-height: 1.8;">
-                        <li class="mb-3 d-flex align-items-start">
-                            <i class="fas fa-check-circle text-success mt-1 mr-2"></i>
-                            <span>Passwords must match and be at least 6 characters.</span>
-                        </li>
-                        <li class="mb-3 d-flex align-items-start">
-                            <i class="fas fa-check-circle text-success mt-1 mr-2"></i>
-                            <span>Service permissions can be modified later in the edit page.</span>
-                        </li>
-                        <li class="d-flex align-items-start">
-                            <i class="fas fa-check-circle text-success mt-1 mr-2"></i>
-                            <span>Whitelist IP ensures only authorized servers can call the API.</span>
-                        </li>
-                    </ul>
+        
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm dt-card h-100">
+                <div class="card-header bg-white py-3 border-0 d-flex align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-book-open mr-2"></i> Instructions Guide</h6>
+                </div>
+                <div class="card-body p-4 pt-0">
+                    <p class="text-muted small mb-4">Fill out the form to create a new merchant. All account credentials will be generated and emailed to the merchant upon activation.</p>
+                    
+                    <div class="p-3 mb-3" >
+                        <div class="font-weight-bold mb-1 text-dark" style="font-size: 13px;"><i class="fas fa-user-circle text-primary mr-2"></i> Account Information</div>
+                        <p class="text-muted small mb-0">Passwords must match and be at least 6 characters. The GVConnect Business ID is optional but recommended.</p>
+                    </div>
+                    
+                    <div class="p-3 mb-3" >
+                        <div class="font-weight-bold mb-1 text-dark" style="font-size: 13px;"><i class="fas fa-key text-primary mr-2"></i> OpenAPI Configuration</div>
+                        <p class="text-muted small mb-0">Whitelist IP ensures only authorized servers can call the API. Separate multiple IPs with a semicolon (;).</p>
+                    </div>
+                    
+                    <div class="p-3 mb-3" >
+                        <div class="font-weight-bold mb-1 text-dark" style="font-size: 13px;"><i class="fas fa-shield-alt text-primary mr-2"></i> Service Permissions</div>
+                        <p class="text-muted small mb-0">Toggle the specific channel permissions this merchant is allowed to use. These can be modified later in the edit page.</p>
+                    </div>
+                    
+                    <div class="p-3" style="background-color: rgba(25, 135, 84, 0.1); border: 1px dashed rgba(25, 135, 84, 0.5); border-radius: 8px;">
+                        <div class="font-weight-bold mb-1 text-success" style="font-size: 13px;"><i class="fas fa-info-circle mr-2"></i> Status</div>
+                        <h5 class="mb-0 font-weight-bold text-success">New Registration</h5>
+                    </div>
                 </div>
             </div>
         </div>

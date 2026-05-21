@@ -29,7 +29,7 @@ class MerchantSubAccountController extends CI_Controller
       if (!$id) $id = $this->uri->segment(3);
       if (!$id) {
          $this->session->set_flashdata('error', 'Merchant ID not found.');
-         redirect('admin/merchant');
+         redirect('merchant/manage');
       }
 
       $data['title'] = 'Sub Account';
@@ -63,7 +63,7 @@ class MerchantSubAccountController extends CI_Controller
    {
       $id = $this->uri->segment(3);
       $this->session->unset_userdata('search_submerchant');
-      redirect("admin/submerchant/$id");
+      redirect("merchant/sub-account/$id");
    }
 
    public function registersubMerchant()
@@ -87,7 +87,7 @@ class MerchantSubAccountController extends CI_Controller
       if ($this->form_validation->run() == FALSE) {
          $errors = validation_errors('<li>', '</li>');
          $this->session->set_flashdata('error', '<ul>' . $errors . '</ul>');
-         redirect('admin/submerchant/' . $this->input->post('ref_merchantId'));
+         redirect('merchant/sub-account/' . $this->input->post('ref_merchantId'));
       } else {
          $data = [];
          $subData = [];
@@ -118,7 +118,7 @@ class MerchantSubAccountController extends CI_Controller
             $this->session->set_flashdata('error', 'Failed to register Submerchant.');
          }
 
-         redirect('admin/submerchant/' . $parent_id);
+         redirect('merchant/sub-account/' . $parent_id);
       }
    }
 
@@ -155,7 +155,7 @@ class MerchantSubAccountController extends CI_Controller
       }
 
       $refMerchantId = $this->input->post('ref_merchantId');
-      redirect('admin/submerchant/' . $refMerchantId);
+      redirect('merchant/sub-account/' . $refMerchantId);
    }
 
    public function get_submerchants()

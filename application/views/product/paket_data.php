@@ -1,10 +1,37 @@
 <!-- Begin Page Content -->
 <div>
     <!-- ── Page Header ── -->
-    <div class="dt-page-header">
+        <div class="dt-page-header">
         <div>
             <h4 class="dt-page-title"><?= $title; ?></h4>
             <p class="dt-page-subtitle">Manage Internet Data Packages and denominations by provider.</p>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <button type="button" class="btn-dt-action btn-dt-action-primary border-0 d-flex align-items-center shadow-sm" id="toggleGuideBtn" >
+                <i class="fas fa-book-open mr-2"></i> <span class="d-none d-md-block">Instructions Guide</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ── Toggleable Page Instructional Drawer ── -->
+    <div class="drawer-overlay" id="instructionOverlay"></div>
+    <div class="drawer-right" id="instructionDrawer">
+        <div class="drawer-header">
+            <h6 class="drawer-title"><i class="fas fa-book mr-2"></i> Product Guide</h6>
+            <button type="button" class="drawer-close" id="closeDrawerBtn">&times;</button>
+        </div>
+        <div class="drawer-body">
+            <p class="drawer-desc">This product catalog allows administrators to manage top-up products, denominations, and pricing.</p>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-gamepad text-primary mr-2"></i> Product List</div>
+                <p class="drawer-card-text">Audit PPOB/Game denomination catalog settings, including display caption, internal description, and pricing details.</p>
+            </div>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-tag text-primary mr-2"></i> Pricing Setup</div>
+                <p class="drawer-card-text">Configure product sale prices. Pricing updates affect merchant fee calculations and payment checkout rates instantly.</p>
+            </div>
         </div>
     </div>
 
@@ -39,8 +66,9 @@
         <div class="card-body p-0">
             <!-- Add Product Modal -->
             <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content border-0 shadow-sm">
+                
+                <div class="modal-dialog modal-lg modal-dialog-centered">
+                    <div class="modal-content border-0 shadow-sm" style="border-radius:16px;overflow:hidden;">
                         <div class="modal-header modal-header-primary border-0 mh-premium">
                             <div class="d-flex align-items-center">
                                 <div class="mh-icon-badge">
@@ -55,8 +83,22 @@
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         </div>
-                        <div class="modal-body p-4 bg-light">
-                            <form method="post" action="<?php echo base_url('admin/ServiceController/createProduk'); ?>">
+                        <form method="post" action="<?php echo base_url('admin/ServiceController/createProduk'); ?>
+                            <div class="modal-body p-0 bg-light">
+                                <div class="d-flex g-0 w-100 flex-column flex-lg-row">
+                                    <div class="col-lg-4 p-4 d-flex flex-column mb-0" style="background:#202328;border-right:1px solid rgba(255,255,255,0.05);color:#fff;">
+                                        <div class="d-flex align-items-center mb-3">
+                                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mr-3" style="width:40px;height:40px;flex-shrink:0;"><i class="fas fa-wifi fa-lg"></i></div>
+                                            <h6 class="fw-bold text-primary mb-0" style="font-size:15px;">Data Package Guide</h6>
+                                        </div>
+                                        <p class="text-muted small mb-3" style="font-size:12px;line-height:1.5;">Register a new internet data package for a specific provider.</p>
+                                        <div class="p-3 mb-3" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;">
+                                            <h6 class="fw-bold text-white mb-1 d-flex align-items-center" style="font-size:12px;"><i class="fas fa-broadcast-tower text-primary mr-2"></i> Pricing Note</h6>
+                                            <p class="text-muted mb-0" style="font-size:11px;line-height:1.4;">Set competitive pricing. Data packages are auto-synced to merchant product catalogues after creation.</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-8 p-4 bg-light mb-0">
+                                        ">
                                 <div class="mb-3">
                                     <label class="form-label small fw-bold text-muted">Provider</label>
                                     <select name="channelgroup2" class="form-control border-1" required>
@@ -81,14 +123,16 @@
                                     <label class="form-label small fw-bold text-muted">Price</label>
                                     <input type="number" class="form-control border-1" name="price" required>
                                 </div>
-                                <div class="modal-footer border-0 px-0 pb-0 mt-4">
-                                    <button type="button" class="btn-dt-cancel" data-dismiss="modal">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer px-4 py-3 border-0 bg-white justify-content-end">
+                                <button type="button" class="btn-dt-cancel" data-dismiss="modal">Close</button>
                                     <button type="submit" class="btn-dt-apply px-4">
                                         <i class="fas fa-save mr-2"></i> Save Package
                                     </button>
-                                </div>
-                            </form>
-                        </div>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -123,8 +167,9 @@
 
             <!-- Edit Product Modal -->
             <div class="modal fade" id="editProductModal" tabindex="-1" aria-labelledby="editProductModalLabel" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content border-0 shadow-lg">
+                
+                <div class="modal-dialog modal-lg modal-dialog-centered">
+                    <div class="modal-content border-0 shadow-lg" style="border-radius:16px;overflow:hidden;">
                         <div class="modal-header modal-header-primary border-0 mh-premium">
                             <div class="d-flex align-items-center">
                                 <div class="mh-icon-badge">
@@ -139,8 +184,22 @@
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         </div>
-                        <div class="modal-body p-4 bg-light">
-                            <form method="post" action="<?php echo base_url('admin/ServiceController/updateProduct'); ?>">
+                        <form method="post" action="<?php echo base_url('admin/ServiceController/updateProduct'); ?>
+                            <div class="modal-body p-0 bg-light">
+                                <div class="d-flex g-0 w-100 flex-column flex-lg-row">
+                                    <div class="col-lg-4 p-4 d-flex flex-column mb-0" style="background:#202328;border-right:1px solid rgba(255,255,255,0.05);color:#fff;">
+                                        <div class="d-flex align-items-center mb-3">
+                                            <div class="bg-warning text-dark rounded-circle d-flex align-items-center justify-content-center mr-3" style="width:40px;height:40px;flex-shrink:0;"><i class="fas fa-edit fa-lg"></i></div>
+                                            <h6 class="fw-bold text-warning mb-0" style="font-size:15px;">Edit Guide</h6>
+                                        </div>
+                                        <p class="text-muted small mb-3" style="font-size:12px;line-height:1.5;">Update data package details. Price changes apply immediately to all merchant catalogues.</p>
+                                        <div class="p-3 mb-3" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;">
+                                            <h6 class="fw-bold text-white mb-1 d-flex align-items-center" style="font-size:12px;"><i class="fas fa-exclamation-circle text-warning mr-2"></i> Price Impact</h6>
+                                            <p class="text-muted mb-0" style="font-size:11px;line-height:1.4;">Price updates affect active merchant fee calculations. Review fee settings after any price changes.</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-8 p-4 bg-light mb-0">
+                                        ">
                                 <input type="hidden" name="view_name" value="paket_data">
                                 <input type="hidden" id="edit_product_id" name="id">
                                 <div class="mb-3">
@@ -165,14 +224,16 @@
                                     <label class="form-label small fw-bold text-muted">Price / Fee (IDR)</label>
                                     <input type="number" class="form-control border-1" id="edit_price" name="price" required>
                                 </div>
-                                <div class="modal-footer border-0 px-0 pb-0 mt-4">
-                                    <button type="button" class="btn-dt-cancel" data-dismiss="modal">Cancel</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer px-4 py-3 border-0 bg-white justify-content-end">
+                                <button type="button" class="btn-dt-cancel" data-dismiss="modal">Cancel</button>
                                     <button type="submit" class="btn-dt-apply px-4">
                                         <i class="fas fa-save mr-2"></i> Save Changes
                                     </button>
-                                </div>
-                            </form>
-                        </div>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -183,7 +244,19 @@
 <script src="<?= base_url('assets/js/server-datatables.js') ?>"></script>
 <script>
 $(document).ready(function() {
-    window.productTable = initServerDataTable('#productTable', "<?= base_url('admin/paket_data') ?>", [
+    // Instructions Guide drawer handlers
+    $('#toggleGuideBtn').on('click', function() {
+        $('#instructionDrawer').addClass('open');
+        $('#instructionOverlay').addClass('open');
+        $('body').css('overflow', 'hidden'); // Lock background scroll
+    });
+
+    $('#closeDrawerBtn, #instructionOverlay').on('click', function() {
+        $('#instructionDrawer').removeClass('open');
+        $('#instructionOverlay').removeClass('open');
+        $('body').css('overflow', ''); // Unlock scroll
+    });
+    window.productTable = initServerDataTable('#productTable', "<?= base_url('product/paket-data') ?>", [
         { data: 'no' },
         { 
             data: 'c_channelGroup2',
@@ -227,7 +300,7 @@ $(document).ready(function() {
         }
     ], {
         "ajax": {
-            "url": "<?= base_url('admin/paket_data') ?>",
+            "url": "<?= base_url('product/paket-data') ?>",
             "type": "POST",
             "data": function (d) {
                 var csrfName = $('meta[name="csrf-token-name"]').attr('content');

@@ -6,6 +6,38 @@
             <h4 class="dt-page-title">Dynamic VA Transactions</h4>
             <p class="dt-page-subtitle">Monitor and manage all dynamic virtual account activities.</p>
         </div>
+        <div class="d-flex" style="gap:10px;">
+            <button type="button" class="btn-dt-action btn-dt-action-primary border-0 d-flex align-items-center shadow-sm" id="toggleGuideBtn" >
+                <i class="fas fa-book-open mr-2"></i> <span class="d-none d-md-block">Instructions Guide</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ── Toggleable Page Instructional Drawer ── -->
+    <div class="drawer-overlay" id="instructionOverlay"></div>
+    <div class="drawer-right" id="instructionDrawer">
+        <div class="drawer-header">
+            <h6 class="drawer-title"><i class="fas fa-book mr-2"></i> VA Dynamic Guide</h6>
+            <button type="button" class="drawer-close" id="closeDrawerBtn">&times;</button>
+        </div>
+        <div class="drawer-body">
+            <p class="drawer-desc">This ledger displays dynamically generated Virtual Accounts and transaction statuses in real-time.</p>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-university text-primary mr-2"></i> Virtual Account Payments</div>
+                <p class="drawer-card-text">Monitor virtual account statuses, payment channels, amounts, and transaction expiry states.</p>
+            </div>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-search text-primary mr-2"></i> Search Filter</div>
+                <p class="drawer-card-text">Quickly search through transactions by VA Number, Merchant ID, or Channel ID in the search input.</p>
+            </div>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-code text-primary mr-2"></i> Log Inspector</div>
+                <p class="drawer-card-text">Click any transaction's External ID to inspect API headers, request payloads, and response bodies from the provider.</p>
+            </div>
+        </div>
     </div>
     <!-- ── KPI Summary Cards ── -->
     
@@ -19,7 +51,7 @@
             if ($this->session->userdata('search_date_vad'))      $extra_active++;
             if ($this->session->userdata('search_date_vad_to'))   $extra_active++;
         ?>
-        <form id="vadynamic_form" method="post" action="<?= base_url('admin/Va_dynamic'); ?>">
+        <form id="vadynamic_form" method="post" action="<?= base_url('virtual-account/dynamic'); ?>">
             <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>">
             <div class="dt-toolbar">
                 <!-- LEFT: Global Search -->
@@ -46,7 +78,7 @@
                         <div class="dt-more-panel" id="vadynamicMoreFiltersPanel">
                             <div class="dt-more-panel-header">
                                 <span class="dt-more-panel-title"><i class="fas fa-filter mr-1 mr-2"></i> Advanced Filters</span>
-                                <a href="<?= base_url('admin/resetVa_dynamic'); ?>" class="dt-more-clear">Clear All</a>
+                                <a href="<?= base_url('virtual-account/dynamic/reset'); ?>" class="dt-more-clear">Clear All</a>
                             </div>
                             
                             <div class="dt-more-panel-body">
@@ -134,6 +166,17 @@
                 </button>
             </div>
             <div class="modal-body p-4 bg-light">
+                <!-- Guide Banner -->
+                <div class="d-flex align-items-start pb-4" id="detail-guide-banner">
+                    <div class="d-flex align-items-start p-3 w-100" style="background:rgba(78,115,223,0.06);border:1px solid rgba(78,115,223,0.12);border-radius:12px;">
+                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mr-3 flex-shrink-0" style="width:32px;height:32px;"><i class="fas fa-university" style="font-size:13px;"></i></div>
+                        <div>
+                            <h6 class="fw-bold mb-1" style="font-size:12px;color:var(--text-dark);">VA Dynamic Detail</h6>
+                            <p class="text-muted mb-0" style="font-size:11px;line-height:1.5;">View virtual account dynamic payment details including VA number, bank routing, customer info, and settlement status from the channel.</p>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="row mb-4">
                     <div class="col-md-4">
                         <div class="small text-uppercase font-weight-bold text-muted mb-1">Provider</div>
@@ -199,12 +242,21 @@
         </div>
     </div>
 </div>
-<!-- SweetAlert2 -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script type="text/javascript">
     $(document).ready(function() {
+        // Drawer Logic
+        $('#toggleGuideBtn').on('click', function() {
+            $('#instructionDrawer, #instructionOverlay').addClass('open');
+            $('body').css('overflow', 'hidden');
+        });
+
+        $('#closeDrawerBtn, #instructionOverlay').on('click', function() {
+            $('#instructionDrawer, #instructionOverlay').removeClass('open');
+            $('body').css('overflow', '');
+        });
+
         // Init Server-Side DataTable
-        var table = initServerDataTable("#vadynamicTable", "<?= base_url('admin/Va_dynamic') ?>", [
+        var table = initServerDataTable("#vadynamicTable", "<?= base_url('virtual-account/dynamic') ?>", [
             {data: 'no', orderable: false},
             {data: 'c_datetimeRequest',className: 'text-nowrap', render: function(data){
                 return moment(data).format('DD-MM-YYYY HH:mm:ss');
@@ -309,7 +361,7 @@
             $('#cashinExternalId, #TransactionIdExternal1, #TransactionIdExternal2, #RequestDatetime, #ResponseDatetime').text('...');
             $('#RequestHeader, #RequestBody, #ResponseHeader, #ResponseBody').text('Loading...');
             $.ajax({
-                url: "<?php echo base_url('admin/getDetailVaDynamicChannelExternal'); ?>",
+                url: "<?php echo base_url('virtual-account/dynamic/channel/external'); ?>",
                 method: "POST",
                 data: {
                     '<?php echo $this->security->get_csrf_token_name(); ?>': '<?php echo $this->security->get_csrf_hash(); ?>',

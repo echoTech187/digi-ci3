@@ -6,22 +6,29 @@ class MerchantRegistrationService
 
     public function __construct()
     {
-        // Mendapatkan instance utama CodeIgniter
+        // Get the main CodeIgniter instance
         $this->CI =& get_instance();
-        // Me-load library database jika belum
+        // Load database library if not already loaded
         $this->CI->load->database();
     }
 
     /**
-     * Meregistrasikan Merchant Supervisor baru
+     * Register a new Merchant Supervisor
      * 
-     * @param array $requestData Data $_POST dari form
-     * @return bool
-     * @throws Exception Jika validasi atau query gagal
+     * @param array $requestData $_POST data from form
+     * @return bool|array
+     * @throws Exception If validation or query fails
      */
     public function registerSupervisor($requestData)
     {
-        // 1. Validasi Password
+        // 1. Validate Required Fields Presence
+        $requiredFields = ['c_name', 'c_username', 'c_email', 'c_status', 'c_password', 'c_confirmPassword'];
+        foreach ($requiredFields as $field) {
+            if (!isset($requestData[$field]) || trim($requestData[$field]) === '') {
+                throw new Exception('All fields marked with * are required.');
+            }
+        }
+        // 2. Validate Password Matching
         if ($requestData['c_password'] !== $requestData['c_confirmPassword']) {
             throw new Exception('Password not match');
         }
@@ -29,7 +36,7 @@ class MerchantRegistrationService
         // 2. Hash Password
         $hashedPassword = password_hash($requestData['c_password'], PASSWORD_DEFAULT);
 
-        // Siapkan data untuk tabel merchant_supervisor
+        // Prepare data for merchant_supervisor table
         $dataSupervisor = [
             'c_name'         => $requestData['c_name'],
             'c_username'     => $requestData['c_username'],
@@ -39,20 +46,35 @@ class MerchantRegistrationService
             'c_created_date' => date('Y-m-d H:i:s')
         ];
 
-        // 3. Memulai Database Transaction
+        $db_debug = $this->CI->db->db_debug;
+        $this->CI->db->db_debug = FALSE;
+
+        // 3. Begin Database Transaction
         $this->CI->db->trans_start();
 
-        // Insert ke merchant_supervisor
-        $this->CI->db->insert('merchant_supervisor', $dataSupervisor);
+        // Insert into merchant_supervisor
+        $success = $this->CI->db->insert('merchant_supervisor', $dataSupervisor);
+        if (!$success) {
+            $err = $this->CI->db->error();
+            $this->CI->db->trans_rollback();
+            $this->CI->db->db_debug = $db_debug;
+            return $err;
+        }
         $supervisorId = $this->CI->db->insert_id();
 
-        // 4. Update tabel merchant untuk meng-assign supervisor_id
+        // 4. Update merchant table to assign supervisor_id
         if (!empty($requestData['c_merchant_spv']) && is_array($requestData['c_merchant_spv'])) {
-            $this->assignMerchantsToSupervisor($requestData['c_merchant_spv'], $supervisorId);
+            $errAssign = $this->assignMerchantsToSupervisor($requestData['c_merchant_spv'], $supervisorId);
+            if ($errAssign !== true) {
+                $this->CI->db->trans_rollback();
+                $this->CI->db->db_debug = $db_debug;
+                return $errAssign;
+            }
         }
 
-        // Commit transaksi
+        // Commit transaction
         $this->CI->db->trans_complete();
+        $this->CI->db->db_debug = $db_debug;
 
         if ($this->CI->db->trans_status() === FALSE) {
             throw new Exception('Database transaction failed. Data rolled back.');
@@ -62,30 +84,114 @@ class MerchantRegistrationService
     }
 
     /**
-     * Assign merchant ke supervisor tertentu
+     * Update Merchant Supervisor
+     * 
+     * @param int $id Supervisor ID
+     * @param array $requestData $_POST data from form
+     * @return bool|array
+     * @throws Exception If validation or transaction fails
+     */
+    public function updateSupervisor($id, $requestData)
+    {
+        // 1. Validate Required Fields Presence
+        $requiredFields = ['c_name', 'c_username', 'c_email', 'c_status'];
+        foreach ($requiredFields as $field) {
+            if (!isset($requestData[$field]) || trim($requestData[$field]) === '') {
+                throw new Exception('All fields marked with * are required.');
+            }
+        }
+        // 2. Prepare update data for merchant_supervisor table
+        $dataSupervisor = [
+            'c_name'     => $requestData['c_name'],
+            'c_username' => $requestData['c_username'],
+            'c_email'    => $requestData['c_email'],
+            'c_status'   => $requestData['c_status'],
+        ];
+
+        // 2. Hash Password if provided
+        if (!empty($requestData['c_password'])) {
+            if ($requestData['c_password'] !== $requestData['c_confirmPassword']) {
+                throw new Exception('Password not match');
+            }
+            $dataSupervisor['c_password'] = password_hash($requestData['c_password'], PASSWORD_DEFAULT);
+        }
+
+        $db_debug = $this->CI->db->db_debug;
+        $this->CI->db->db_debug = FALSE;
+
+        // 3. Begin Database Transaction
+        $this->CI->db->trans_start();
+
+        // Update merchant_supervisor
+        $this->CI->db->where('id', $id);
+        $success = $this->CI->db->update('merchant_supervisor', $dataSupervisor);
+        if (!$success) {
+            $err = $this->CI->db->error();
+            $this->CI->db->trans_rollback();
+            $this->CI->db->db_debug = $db_debug;
+            return $err;
+        }
+
+        // 4. Reset previous merchant assignments for this supervisor
+        $this->CI->db->where('c_refSupervisor', $id);
+        $successReset = $this->CI->db->update('merchant', ['c_refSupervisor' => NULL]);
+        if (!$successReset) {
+            $err = $this->CI->db->error();
+            $this->CI->db->trans_rollback();
+            $this->CI->db->db_debug = $db_debug;
+            return $err;
+        }
+
+        // 5. Update merchant table to assign new supervisor_id
+        if (!empty($requestData['c_merchant_spv']) && is_array($requestData['c_merchant_spv'])) {
+            $errAssign = $this->assignMerchantsToSupervisor($requestData['c_merchant_spv'], $id);
+            if ($errAssign !== true) {
+                $this->CI->db->trans_rollback();
+                $this->CI->db->db_debug = $db_debug;
+                return $errAssign;
+            }
+        }
+
+        // Commit transaction
+        $this->CI->db->trans_complete();
+        $this->CI->db->db_debug = $db_debug;
+
+        if ($this->CI->db->trans_status() === FALSE) {
+            throw new Exception('Database transaction failed. Data rolled back.');
+        }
+
+        return true;
+    }
+
+    /**
+     * Assign merchants to a specific supervisor
      */
     private function assignMerchantsToSupervisor($merchantIds, $supervisorId)
     {
         foreach ($merchantIds as $merchantId) {
-            // Ambil data merchant
+            // Fetch merchant data
             $merchant = $this->CI->db->get_where('merchant', ['id' => $merchantId])->row();
 
             if (!$merchant) {
                 throw new Exception("Merchant with ID {$merchantId} not found.");
             }
 
-            // Update merchant dengan ID Supervisor yang baru
+            // Update merchant with new Supervisor ID
             $this->CI->db->where('id', $merchantId);
-            $this->CI->db->update('merchant', ['c_refSupervisor' => $supervisorId]);
+            $success = $this->CI->db->update('merchant', ['c_refSupervisor' => $supervisorId]);
+            if (!$success) {
+                return $this->CI->db->error();
+            }
         }
+        return true;
     }
 
     /**
-     * Mendaftarkan Merchant Baru
+     * Register a new Merchant
      * 
-     * @param array $postData Data dari $_POST
-     * @param array $formValidationRules Rules validasi untuk mapping data
-     * @param array $optionalFields Field opsional
+     * @param array $postData Data from $_POST
+     * @param array $formValidationRules Validation rules for data mapping
+     * @param array $optionalFields Optional fields
      * @return bool
      * @throws Exception
      */
@@ -93,7 +199,7 @@ class MerchantRegistrationService
     {
         $data = [];
         
-        // Mapping data dari POST
+        // Map data from $_POST
         foreach ($formValidationRules as $rule) {
             $field = $rule['field'];
             if (in_array($field, $optionalFields)) {
@@ -113,10 +219,10 @@ class MerchantRegistrationService
         unset($data['c_gvconnectBusinessId']);
         unset($data['c_gvconnectBusinessName']);
 
-        // Hashing password
+        // Hash password
         $data['c_password'] = password_hash($data['c_password'], PASSWORD_DEFAULT);
 
-        // Generate ID (sebaiknya diganti ke UUID atau auto-increment di masa depan)
+        // Generate ID (should be replaced with UUID or auto-increment in the future)
         $merchantId = rand(1111, 4444);
         $data['id'] = $merchantId;
 
@@ -135,14 +241,8 @@ class MerchantRegistrationService
         
         unset($data['c_confirmPassword']);
 
-        // Insert menggunakan Model
+        // Insert using Model
         $this->CI->load->model('Merchant');
-        $result = $this->CI->Merchant->create_merchant($data, $gvconnectBusinessId, $gvconnectBusinessName);
-
-        if ($result !== true) {
-            throw new Exception('Failed to insert data: ' . json_encode($result));
-        }
-
-        return true;
+        return $this->CI->Merchant->create_merchant($data, $gvconnectBusinessId, $gvconnectBusinessName);
     }
 }

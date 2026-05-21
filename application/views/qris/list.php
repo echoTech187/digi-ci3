@@ -14,7 +14,7 @@ if ($search_name_qris_value)            $extra_active++;
 if ($search_date_qris_settlement_value) $extra_active++;
 // search_invoice_no, search_transactionid_ht, search_rrn are in global search
 
-$download_url = base_url('admin/download_qris')
+$download_url = base_url('finance/qris/download')
     . '?search_date_qris='            . $search_date_qris_value
     . '&search_date_qris_to='         . $search_date_qris_to_value
     . '&search_date_qris_settlement=' . $search_date_qris_settlement_value
@@ -23,11 +23,45 @@ $download_url = base_url('admin/download_qris')
 
 <!-- ── Page Header ── -->
 <div>
+    <!-- ── Toggleable Page Instructional Drawer ── -->
+    <div class="drawer-overlay" id="instructionOverlay"></div>
+    <div class="drawer-right" id="instructionDrawer">
+        <div class="drawer-header">
+            <h6 class="drawer-title"><i class="fas fa-book mr-2"></i> QRIS Transactions Guide</h6>
+            <button type="button" class="drawer-close" id="closeDrawerBtn">&times;</button>
+        </div>
+        <div class="drawer-body">
+            <p class="drawer-desc">Track and audit payments received via QRIS MPM (Merchant Presented Mode) dynamic codes.</p>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-qrcode text-primary mr-2"></i> Dynamic Generation</div>
+                <p class="drawer-card-text">Dynamic QR codes are generated for each transaction with a pre-configured expiry time.</p>
+            </div>
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-key text-primary mr-2"></i> Retrieval & RRN</div>
+                <p class="drawer-card-text">Use the Reference Retrieval Number (RRN) from the acquiring bank to trace credit settlements.</p>
+            </div>
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-bell text-primary mr-2"></i> Resend Callbacks</div>
+                <p class="drawer-card-text">Push status updates back to the merchant's callback URL in case of transport timeouts.</p>
+            </div>
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-sliders-h text-primary mr-2"></i> Advanced Querying</div>
+                <p class="drawer-card-text">Filter by specific merchant names, RRNs, invoice numbers, or payment status.</p>
+            </div>
+        </div>
+    </div>
 
-    <div class="dt-page-header">
+
+    <div class="dt-page-header d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h4 class="dt-page-title">QRIS Transactions</h4>
-            <p class="dt-page-subtitle">Manage and monitor all QRIS payment activity.</p>
+            <h4 class="dt-page-title mb-1">QRIS Transactions</h4>
+            <p class="dt-page-subtitle mb-0">Manage and monitor all QRIS payment activity.</p>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <button type="button" class="btn btn-light border shadow-sm mr-2 d-flex align-items-center" id="toggleGuideBtn">
+                <i class="fas fa-book-open text-primary mr-2"></i> <span class="d-none d-md-block">Instructions Guide</span>
+            </button>
         </div>
     </div>
 
@@ -70,7 +104,7 @@ $download_url = base_url('admin/download_qris')
     <div class="card border-0 shadow-sm dt-card">
 
         <!-- ── Toolbar ── -->
-        <form id="qris_form" method="post" action="<?= base_url('admin/qris'); ?>">
+        <form id="qris_form" method="post" action="<?= base_url('finance/qris'); ?>">
             <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>">
 
             <div class="dt-toolbar">
@@ -101,7 +135,7 @@ $download_url = base_url('admin/download_qris')
                         <div class="dt-more-panel" id="qrisMoreFiltersPanel">
                             <div class="dt-more-panel-header">
                                 <span class="dt-more-panel-title"><i class="fas fa-filter mr-1 mr-2"></i> Advanced filters</span>
-                                <a href="<?= base_url('admin/resetqris'); ?>" class="dt-more-clear">Clear All</a>
+                                <a href="<?= base_url('finance/qris/reset'); ?>" class="dt-more-clear">Clear All</a>
                             </div>
 
                             <div class="dt-more-panel-body">
@@ -186,7 +220,7 @@ $download_url = base_url('admin/download_qris')
 <script type="text/javascript">
     $(document).ready(function() {
         // Init Server-Side DataTable
-        var table = initServerDataTable("#qrisTable", "<?= base_url('admin/qris') ?>", [
+        var table = initServerDataTable("#qrisTable", "<?= base_url('finance/qris') ?>", [
             {data: 'no', orderable: false},
             {data: 'c_datetime',className: 'text-nowrap', render: function(data){
                 return moment(data).format('DD-MM-YYYY HH:mm:ss');
@@ -239,8 +273,8 @@ $download_url = base_url('admin/download_qris')
                 searchable: false,
                 render: function(data, type, row) {
                     var baseUrl = "<?= base_url() ?>";
-                    var detailLink = baseUrl + 'admin/qris_detail/' + data;
-                    var resendLink = baseUrl + 'admin/SendnotifikasiQRIS/' + data + '/' + row.ref_merchantId;
+                    var detailLink = baseUrl + 'finance/qris/detail/' + data;
+                    var resendLink = baseUrl + 'qris/notification/resend/' + data + '/' + row.ref_merchantId;
                     
                     return `
                         <div class="dropdown">
@@ -248,7 +282,7 @@ $download_url = base_url('admin/download_qris')
                             <ul class="dropdown-menu dropdown-menu-right border-0 shadow-lg">
                                 <li><a href="${detailLink}" class="dropdown-item"><i class="fas fa-eye text-primary mr-2"></i> Detail</a></li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a onclick="javascript: return confirm('Are you sure, want to resend notification again ??')" href="${resendLink}" class="dropdown-item"><i class="fas fa-paper-plane text-warning mr-2"></i> Resend</a></li>
+                                <li><button class="dropdown-item resend-notif-btn" data-href="${resendLink}"><i class="fas fa-paper-plane text-warning mr-2"></i> Resend</button></li>
                             </ul>
                         </div>
                     `;
@@ -296,6 +330,28 @@ $download_url = base_url('admin/download_qris')
             }
         });
 
+        $(document).on('click', '.resend-notif-btn', function(e) {
+            e.preventDefault();
+            var href = $(this).data('href');
+            Swal.fire({
+                title: 'Resend Notification',
+                text: 'Are you sure you want to resend this notification?',
+                icon: 'question',
+                showCancelButton: true,
+                customClass: {
+                    popup: 'swal2-premium-popup',
+                    confirmButton: 'swal2-premium-confirm',
+                    cancelButton: 'swal2-premium-cancel'
+                },
+                buttonsStyling: false,
+                confirmButtonText: 'Yes, resend!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = href;
+                }
+            });
+        });
+
         // Select2 inside panel
         $('.qris-select2').select2({
             width: '100%',
@@ -307,3 +363,18 @@ $download_url = base_url('admin/download_qris')
 </script>
 
 
+
+<script>
+$(document).ready(function() {
+    // Drawer Toggle Logic
+    $('#toggleGuideBtn').on('click', function() {
+        $('#instructionDrawer, #instructionOverlay').addClass('open');
+        $('body').css('overflow', 'hidden');
+    });
+
+    $('#closeDrawerBtn, #instructionOverlay').on('click', function() {
+        $('#instructionDrawer, #instructionOverlay').removeClass('open');
+        $('body').css('overflow', '');
+    });
+});
+</script>

@@ -214,49 +214,119 @@ class Chanel extends CI_Model {
             return $this->db->get()->result();
         }
         public function createCashinChannel($data) {
-            return $this->db->insert('cashin_channel', $data);
+            $db_debug = $this->db->db_debug;
+            $this->db->db_debug = FALSE;
+            $success = $this->db->insert('cashin_channel', $data);
+            $error = $this->db->error();
+            $this->db->db_debug = $db_debug;
+            return $success ? true : $error;
+        }
+        public function updateCashinChannel($id, $data) {
+            $this->db->where('id', $id);
+            $db_debug = $this->db->db_debug;
+            $this->db->db_debug = FALSE;
+            $success = $this->db->update('cashin_channel', $data);
+            $error = $this->db->error();
+            $this->db->db_debug = $db_debug;
+            return $success ? true : $error;
+        }
+        public function deleteCashinChannel($id) {
+            $this->db->where('id', $id);
+            $db_debug = $this->db->db_debug;
+            $this->db->db_debug = FALSE;
+            $success = $this->db->delete('cashin_channel');
+            $error = $this->db->error();
+            $this->db->db_debug = $db_debug;
+            return $success ? true : $error;
         }
         public function createCashoutChannel($data) {
-            return $this->db->insert('cashout_channel', $data);
+            $db_debug = $this->db->db_debug;
+            $this->db->db_debug = FALSE;
+            $success = $this->db->insert('cashout_channel', $data);
+            $error = $this->db->error();
+            $this->db->db_debug = $db_debug;
+            return $success ? true : $error;
+        }
+        public function updateCashoutChannel($id, $data) {
+            $this->db->where('id', $id);
+            $db_debug = $this->db->db_debug;
+            $this->db->db_debug = FALSE;
+            $success = $this->db->update('cashout_channel', $data);
+            $error = $this->db->error();
+            $this->db->db_debug = $db_debug;
+            return $success ? true : $error;
+        }
+        public function deleteCashoutChannel($id) {
+            $this->db->where('id', $id);
+            $db_debug = $this->db->db_debug;
+            $this->db->db_debug = FALSE;
+            $success = $this->db->delete('cashout_channel');
+            $error = $this->db->error();
+            $this->db->db_debug = $db_debug;
+            return $success ? true : $error;
         }
         public function insertPaketData($data) {
             return $this->db->insert('cashout_channel', $data);
         }
         public function createCashinChannelXMerchant($data) {
-            if ($this->db->insert('cashin_channel_x_merchant', $data)) {
+            $db_debug = $this->db->db_debug;
+            $this->db->db_debug = FALSE;
+            $result = $this->db->insert('cashin_channel_x_merchant', $data);
+            $error = $this->db->error();
+            $this->db->db_debug = $db_debug;
+
+            if ($result) {
                 return true;
             } else {
-                return $this->db->error(); // Returns array with 'code' and 'message'
+                return $error;
             }
         }
 
         public function updateCashinChannelXMerchant($id, $data) {
             $this->db->where('id', $id);
-            if ($this->db->update('cashin_channel_x_merchant', $data)) {
+            $db_debug = $this->db->db_debug;
+            $this->db->db_debug = FALSE;
+            $success = $this->db->update('cashin_channel_x_merchant', $data);
+            $error = $this->db->error();
+            $this->db->db_debug = $db_debug;
+            if ($success) {
                 return true;
             } else {
-                return $this->db->error(); // Returns array with 'code' and 'message'
+                return $error;
             }
         }
 
         public function deleteCashinChannelXMerchant($id) {
             $this->db->where('id', $id);
-            if ($this->db->delete('cashin_channel_x_merchant')) {
+            $db_debug = $this->db->db_debug;
+            $this->db->db_debug = FALSE;
+            $success = $this->db->delete('cashin_channel_x_merchant');
+            $error = $this->db->error();
+            $this->db->db_debug = $db_debug;
+            if ($success) {
                 return true;
             } else {
-                return $this->db->error(); // Returns array with 'code' and 'message'
+                return $error;
             }
         }
 
         public function createCashoutChannelXMerchant($data) {
-            if ($this->db->insert('cashout_channel_x_merchant', $data)) {
+            $db_debug = $this->db->db_debug;
+            $this->db->db_debug = FALSE;
+            $result = $this->db->insert('cashout_channel_x_merchant', $data);
+            $error = $this->db->error();
+            $this->db->db_debug = $db_debug;
+
+            if ($result) {
                 return true;
             } else {
-                return $this->db->error(); // Returns array with 'code' and 'message'
+                return $error;
             }
         }
 
         public function bulkCreateCashoutChannelXMerchant($data) {
+            $db_debug = $this->db->db_debug;
+            $this->db->db_debug = FALSE;
             $this->db->trans_begin();
             foreach ($data as $row) {
                 $resp = $this->db->insert('cashout_channel_x_merchant', $row);
@@ -269,6 +339,7 @@ class Chanel extends CI_Model {
                     }
 
                     $this->db->trans_rollback();
+                    $this->db->db_debug = $db_debug;
                     return [
                         'code' => $error['code'],
                         'message' => $error['message'],
@@ -280,28 +351,41 @@ class Chanel extends CI_Model {
             }
 
             $this->db->trans_commit();
+            $this->db->db_debug = $db_debug;
             return true;
         }
 
         public function updateCashoutChannelXMerchant($id, $data) {
             $this->db->where('id', $id);
-            if ($this->db->update('cashout_channel_x_merchant', $data)) {
+            $db_debug = $this->db->db_debug;
+            $this->db->db_debug = FALSE;
+            $success = $this->db->update('cashout_channel_x_merchant', $data);
+            $error = $this->db->error();
+            $this->db->db_debug = $db_debug;
+            if ($success) {
                 return true;
             } else {
-                return $this->db->error(); // Returns array with 'code' and 'message'
+                return $error;
             }
         }
 
         public function deleteCashoutChannelXMerchant($id) {
             $this->db->where('id', $id);
-            if ($this->db->delete('cashout_channel_x_merchant')) {
+            $db_debug = $this->db->db_debug;
+            $this->db->db_debug = FALSE;
+            $success = $this->db->delete('cashout_channel_x_merchant');
+            $error = $this->db->error();
+            $this->db->db_debug = $db_debug;
+            if ($success) {
                 return true;
             } else {
-                return $this->db->error(); // Returns array with 'code' and 'message'
+                return $error;
             }
         }
 
         public function bulkCreateCashinChannelXMerchant($data) {
+            $db_debug = $this->db->db_debug;
+            $this->db->db_debug = FALSE;
             $this->db->trans_begin();
             foreach ($data as $row) {
                 $resp = $this->db->insert('cashin_channel_x_merchant', $row);
@@ -314,6 +398,7 @@ class Chanel extends CI_Model {
                     }
 
                     $this->db->trans_rollback();
+                    $this->db->db_debug = $db_debug;
                     return [
                         'code' => $error['code'],
                         'message' => $error['message'],
@@ -325,6 +410,7 @@ class Chanel extends CI_Model {
             }
 
             $this->db->trans_commit();
+            $this->db->db_debug = $db_debug;
             return true;
         }
 
@@ -389,7 +475,16 @@ class Chanel extends CI_Model {
             $update['ref_cashinChannelId'] = $newChannel;
         }
 
-        return $this->db->update('cashin_channel_x_merchant', $update);
+        $db_debug = $this->db->db_debug;
+        $this->db->db_debug = FALSE;
+        $success = $this->db->update('cashin_channel_x_merchant', $update);
+        $error = $this->db->error();
+        $this->db->db_debug = $db_debug;
+        if ($success) {
+            return true;
+        } else {
+            return $error;
+        }
     }
 
     public function updateCashoutChannelGlobal($data) {
@@ -430,7 +525,16 @@ class Chanel extends CI_Model {
             $update['ref_cashoutChannelId'] = $newChannel;
         }
 
-        return $this->db->update('cashout_channel_x_merchant', $update);
+        $db_debug = $this->db->db_debug;
+        $this->db->db_debug = FALSE;
+        $success = $this->db->update('cashout_channel_x_merchant', $update);
+        $error = $this->db->error();
+        $this->db->db_debug = $db_debug;
+        if ($success) {
+            return true;
+        } else {
+            return $error;
+        }
     }
     public function get_datatables_handler($table, $column_order, $column_search, $order, $where = [])
     {
@@ -465,12 +569,27 @@ class Chanel extends CI_Model {
     public function getCashinExternalDataTable() {
         $this->load->library('datatables');
 
+        $where = [];
+        if ($this->input->post('channel_group')) {
+            $where['cxm.c_cashinChannelGroup'] = $this->input->post('channel_group');
+        }
+        if ($this->input->post('channel_id')) {
+            $where['cxm.ref_cashinChannelId'] = $this->input->post('channel_id');
+        }
+        if ($this->input->post('provider')) {
+            $where['cxm.c_externalIdDefault'] = $this->input->post('provider');
+        }
+        if ($this->input->post('status')) {
+            $where['cxm.c_status'] = $this->input->post('status');
+        }
+
         return $this->datatables->of('cashin_channel_x_merchant cxm')
             ->select('cxm.id, cxm.ref_merchantId, cxm.c_cashinChannelGroup, cxm.ref_cashinChannelId, cxm.c_externalIdDefault, cxm.c_feeType, cxm.c_fee, cxm.c_feePercetange, cxm.c_settlementInterval, cxm.c_amountMin, cxm.c_amountMax, cxm.c_status, m.c_name as merchant_name')
             ->join('merchant m', 'm.id = cxm.ref_merchantId')
             ->set_column_order([null, 'm.c_name', 'cxm.c_cashinChannelGroup', 'cxm.c_fee', 'cxm.c_status', null])
             ->set_column_search(['m.c_name', 'cxm.c_cashinChannelGroup', 'cxm.ref_cashinChannelId', 'cxm.c_externalIdDefault'])
             ->set_default_order(['cxm.id' => 'desc'])
+            ->where($where)
             ->addColumn('no', function ($row) {
                 static $no = null;
                 if ($no === null) $no = intval($this->input->post('start'));
@@ -482,12 +601,27 @@ class Chanel extends CI_Model {
     public function getCashoutExternalDataTable() {
         $this->load->library('datatables');
 
+        $where = [];
+        if ($this->input->post('channel_group')) {
+            $where['cxm.c_cashoutChannelGroup'] = $this->input->post('channel_group');
+        }
+        if ($this->input->post('channel_id')) {
+            $where['cxm.ref_cashoutChannelId'] = $this->input->post('channel_id');
+        }
+        if ($this->input->post('provider')) {
+            $where['cxm.c_externalIdDefault'] = $this->input->post('provider');
+        }
+        if ($this->input->post('status')) {
+            $where['cxm.c_status'] = $this->input->post('status');
+        }
+
         return $this->datatables->of('cashout_channel_x_merchant cxm')
             ->select('cxm.id, cxm.ref_merchantId, cxm.c_cashoutChannelGroup, cxm.ref_cashoutChannelId, cxm.c_externalIdDefault, cxm.c_feeType, cxm.c_fee, cxm.c_feePercetange, cxm.c_amountMin, cxm.c_amountMax, cxm.c_status, m.c_name as merchant_name')
             ->join('merchant m', 'm.id = cxm.ref_merchantId')
             ->set_column_order([null, 'm.c_name', 'cxm.c_cashoutChannelGroup', 'cxm.c_fee', 'cxm.c_status', null])
             ->set_column_search(['m.c_name', 'cxm.c_cashoutChannelGroup', 'cxm.ref_cashoutChannelId', 'cxm.c_externalIdDefault'])
             ->set_default_order(['cxm.id' => 'desc'])
+            ->where($where)
             ->addColumn('no', function ($row) {
                 static $no = null;
                 if ($no === null) $no = intval($this->input->post('start'));

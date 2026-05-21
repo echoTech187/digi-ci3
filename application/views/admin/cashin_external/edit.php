@@ -39,7 +39,8 @@
                         });
                     </script>
 
-                    <form action="<?= base_url('admin/cashin/external/update'); ?>" method="post">
+                    <form action="<?= base_url('external/cashin/update'); ?>" method="post">
+                        <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>">
                         <input type="hidden" name="id" value="<?= $mapping['id'] ?>">
                         
                         <!-- Merchant Selection -->
@@ -149,8 +150,8 @@
                         </div>
 
                         <div class="d-flex justify-content-end mt-5 pt-3 border-top">
-                            <a href="<?= base_url('admin/cashin/external'); ?>" class="btn btn-light px-4 py-2 mr-3 font-weight-bold small text-uppercase">Cancel</a>
-                            <button type="submit" class="btn-dt-action btn-dt-action-primary px-5 py-2">
+                            <a href="<?= base_url('external/cashin'); ?>" class="btn btn-light px-4 py-2 mr-3 font-weight-bold small text-uppercase">Cancel</a>
+                            <button type="submit" class="btn-dt-action btn-dt-action-success px-5 py-2">
                                 <i class="fas fa-save mr-2"></i> Save Changes
                             </button>
                         </div>
@@ -185,6 +186,24 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Instructions Guide -->
+            <div class="card border-0 shadow-sm dt-card mt-4">
+                <div class="card-header bg-white py-3 border-0 d-flex align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-book-open mr-2"></i> Instructions Guide</h6>
+                </div>
+                <div class="card-body p-4 pt-0">
+                    <p class="text-muted small mb-4">Modify the mapping parameters for the selected merchant and channel group.</p>
+                    <div class="p-3 mb-3" style="background:rgba(0,0,0,0.02); border:1px solid rgba(0,0,0,0.05); border-radius:12px;">
+                        <div class="font-weight-bold mb-1 text-dark" style="font-size: 13px;"><i class="fas fa-hand-holding-usd text-primary mr-2"></i> Fee Updates</div>
+                        <p class="text-muted small mb-0">Changes to the fixed fee or percentage fee apply to all future incoming transactions for this merchant on this channel.</p>
+                    </div>
+                    <div class="p-3" style="background:rgba(0,0,0,0.02); border:1px solid rgba(0,0,0,0.05); border-radius:12px;">
+                        <div class="font-weight-bold mb-1 text-dark" style="font-size: 13px;"><i class="fas fa-exclamation-triangle text-primary mr-2"></i> Limits & Status</div>
+                        <p class="text-muted small mb-0">If marked "Not Active", transactions through this mapping will be blocked immediately.</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -198,12 +217,12 @@
 
             if (group && external) {
                 $channelId.prop('disabled', true).html('<option value="">Loading...</option>');
-                $.post('<?= base_url("admin/getCashinChannelGroups") ?>', { 
+                $.post('<?= base_url("merchant/setting-cashin-fee/groups") ?>', { 
                     c_cashinChannelGroup: group, 
                     c_externalIdDefault: external,
-                    '<?= $this->security->get_csrf_token_name(); ?>': '<?= $this->security->get_csrf_hash(); ?>'
+                    '<?= $this->security->get_csrf_token_name(); ?>': $('input[name="<?= $this->security->get_csrf_token_name(); ?>"]').val() || '<?= $this->security->get_csrf_hash(); ?>'
                 }, function(data) {
-                    const options = JSON.parse(data);
+                    const options = typeof data === 'string' ? JSON.parse(data) : data;
                     const currentVal = '<?= $mapping['ref_cashinChannelId'] ?>';
                     $channelId.empty().append('<option disabled>Select channel ID</option>');
                     if (options.length > 0) {

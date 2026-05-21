@@ -155,8 +155,11 @@ function initServerDataTable(tableId, ajaxUrl, columns, additionalOptions = {}) 
 
     // Show loading state on init AND on every subsequent request (search, paginate)
     target.addClass("dt-processing-active");
-    table.on('preXhr.dt', function() {
+    table.on('preXhr.dt', function(e, settings, data) {
         target.addClass("dt-processing-active");
+        if (data && data.search && data.search.value) {
+            data.search.value = data.search.value.trim();
+        }
     });
     table.on('xhr.dt', function (e, settings, json) {
         target.removeClass("dt-processing-active");

@@ -49,335 +49,234 @@ defined('BASEPATH') or exit('No direct script access allowed');
 | Examples:	my-controller/index	-> my_controller/index
 |		my-controller/my-method	-> my_controller/my_method
 */
-$route['default_controller'] = 'auth';
-
-// --- Dashboard Module Extraction Routes ---
-$route['admin'] = 'admin/DashboardController/index';
-$route['admin/analytics'] = 'admin/DashboardController/analytics';
-$route['admin/toggleOpenApiStatus'] = 'admin/DashboardController/toggleOpenApiStatus';
-$route['admin/getMaintenanceStatus'] = 'admin/DashboardController/getMaintenanceStatus';
-$route['admin/globalSearch'] = 'admin/DashboardController/globalSearch';
-$route['admin/syncAvailableBalanceMerchant'] = 'admin/DashboardController/syncAvailableBalanceMerchant';
-$route['admin/recent_mutations_json'] = 'admin/DashboardController/recent_mutations_json';
-$route['admin/ajax_today_stats_json'] = 'admin/DashboardController/ajax_today_stats_json';
-$route['admin/ajax_monthly_stats_json'] = 'admin/DashboardController/ajax_monthly_stats_json';
-$route['admin/ajax_dashboard_metadata_json'] = 'admin/DashboardController/ajax_dashboard_metadata_json';
-$route['admin/ajax_analytics_data_json'] = 'admin/DashboardController/ajax_analytics_data_json';
-$route['welcome'] = 'admin/DashboardController/welcome';
-
-// --- Merchant Module Extraction Routes ---
-$route['admin/merchant'] = 'AdminMerchant/merchant';
-$route['admin/addMerchant'] = 'AdminMerchant/addMerchant';
-$route['admin/merchant_spv'] = 'AdminMerchant/merchant_spv';
-$route['admin/listMerchants/(:any)'] = 'AdminMerchant/listMerchants/$1';
-$route['admin/merchant'] = 'admin/MerchantManagementController/merchant';
-$route['admin/merchant/(:any)'] = 'admin/MerchantManagementController/merchant/$1';
-$route['admin/merchant/(:any)/(:any)'] = 'admin/MerchantManagementController/merchant/$1/$2';
-$route['admin/merchant_spv'] = 'admin/MerchantManagementController/merchant_spv';
-$route['admin/merchant_spv/(:any)'] = 'admin/MerchantManagementController/merchant_spv/$1';
-$route['admin/merchant_spv/(:any)/(:any)'] = 'admin/MerchantManagementController/merchant_spv/$1/$2';
-$route['admin/listMerchants'] = 'admin/MerchantManagementController/listMerchants';
-$route['admin/listMerchants/(:any)'] = 'admin/MerchantManagementController/listMerchants/$1';
-$route['admin/listMerchants/(:any)/(:any)'] = 'admin/MerchantManagementController/listMerchants/$1/$2';
-$route['admin/registerMerchant'] = 'admin/MerchantManagementController/registerMerchant';
-$route['admin/registerMerchant/(:any)'] = 'admin/MerchantManagementController/registerMerchant/$1';
-$route['admin/registerMerchant/(:any)/(:any)'] = 'admin/MerchantManagementController/registerMerchant/$1/$2';
-$route['admin/addMerchant'] = 'admin/MerchantManagementController/addMerchant';
-$route['admin/addMerchant/(:any)'] = 'admin/MerchantManagementController/addMerchant/$1';
-$route['admin/addMerchant/(:any)/(:any)'] = 'admin/MerchantManagementController/addMerchant/$1/$2';
-$route['admin/registerMerchantSpv'] = 'admin/MerchantManagementController/registerMerchantSpv';
-$route['admin/registerMerchantSpv/(:any)'] = 'admin/MerchantManagementController/registerMerchantSpv/$1';
-$route['admin/registerMerchantSpv/(:any)/(:any)'] = 'admin/MerchantManagementController/registerMerchantSpv/$1/$2';
-$route['admin/deleteMerchantSpv'] = 'admin/MerchantManagementController/deleteMerchantSpv';
-$route['admin/deleteMerchantSpv/(:any)'] = 'admin/MerchantManagementController/deleteMerchantSpv/$1';
-$route['admin/deleteMerchantSpv/(:any)/(:any)'] = 'admin/MerchantManagementController/deleteMerchantSpv/$1/$2';
-$route['admin/editMerchant'] = 'admin/MerchantManagementController/editMerchant';
-$route['admin/editMerchant/(:any)'] = 'admin/MerchantManagementController/editMerchant/$1';
-$route['admin/editMerchant/(:any)/(:any)'] = 'admin/MerchantManagementController/editMerchant/$1/$2';
-$route['admin/updateMerchant'] = 'admin/MerchantManagementController/updateMerchant';
-$route['admin/updateMerchant/(:any)'] = 'admin/MerchantManagementController/updateMerchant/$1';
-$route['admin/updateMerchant/(:any)/(:any)'] = 'admin/MerchantManagementController/updateMerchant/$1/$2';
-$route['admin/settingcashinfee'] = 'admin/MerchantManagementController/settingcashinfee';
-$route['admin/settingcashinfee/(:any)'] = 'admin/MerchantManagementController/settingcashinfee/$1';
-$route['admin/settingcashinfee/(:any)/(:any)'] = 'admin/MerchantManagementController/settingcashinfee/$1/$2';
-$route['admin/createSettingCashinFee'] = 'admin/MerchantManagementController/createSettingCashinFee';
-$route['admin/createSettingCashinFee/(:any)'] = 'admin/MerchantManagementController/createSettingCashinFee/$1';
-$route['admin/createSettingCashinFee/(:any)/(:any)'] = 'admin/MerchantManagementController/createSettingCashinFee/$1/$2';
-$route['admin/bulkCreateSettingCashinFee'] = 'admin/MerchantManagementController/bulkCreateSettingCashinFee';
-$route['admin/bulkCreateSettingCashinFee/(:any)'] = 'admin/MerchantManagementController/bulkCreateSettingCashinFee/$1';
-$route['admin/bulkCreateSettingCashinFee/(:any)/(:any)'] = 'admin/MerchantManagementController/bulkCreateSettingCashinFee/$1/$2';
-$route['admin/getCashinChannelGroups'] = 'admin/MerchantManagementController/getCashinChannelGroups';
-$route['admin/editSettingCashinFee'] = 'admin/MerchantManagementController/editSettingCashinFee';
-$route['admin/editSettingCashinFee/(:any)'] = 'admin/MerchantManagementController/editSettingCashinFee/$1';
-$route['admin/editSettingCashinFee/(:any)/(:any)'] = 'admin/MerchantManagementController/editSettingCashinFee/$1/$2';
-$route['admin/deleteSettingCashinFee'] = 'admin/MerchantManagementController/deleteSettingCashinFee';
-$route['admin/deleteSettingCashinFee/(:any)'] = 'admin/MerchantManagementController/deleteSettingCashinFee/$1';
-$route['admin/deleteSettingCashinFee/(:any)/(:any)'] = 'admin/MerchantManagementController/deleteSettingCashinFee/$1/$2';
-$route['admin/settingcashoutfee'] = 'admin/MerchantManagementController/settingcashoutfee';
-$route['admin/settingcashoutfee/(:any)'] = 'admin/MerchantManagementController/settingcashoutfee/$1';
-$route['admin/settingcashoutfee/(:any)/(:any)'] = 'admin/MerchantManagementController/settingcashoutfee/$1/$2';
-$route['admin/createSettingCashoutFee'] = 'admin/MerchantManagementController/createSettingCashoutFee';
-$route['admin/createSettingCashoutFee/(:any)'] = 'admin/MerchantManagementController/createSettingCashoutFee/$1';
-$route['admin/createSettingCashoutFee/(:any)/(:any)'] = 'admin/MerchantManagementController/createSettingCashoutFee/$1/$2';
-$route['admin/bulkCreateSettingCashoutFee'] = 'admin/MerchantManagementController/bulkCreateSettingCashoutFee';
-$route['admin/bulkCreateSettingCashoutFee/(:any)'] = 'admin/MerchantManagementController/bulkCreateSettingCashoutFee/$1';
-$route['admin/bulkCreateSettingCashoutFee/(:any)/(:any)'] = 'admin/MerchantManagementController/bulkCreateSettingCashoutFee/$1/$2';
-$route['admin/getCashoutChannelGroups'] = 'admin/MerchantManagementController/getCashoutChannelGroups';
-$route['admin/editSettingCashoutFee'] = 'admin/MerchantManagementController/editSettingCashoutFee';
-$route['admin/editSettingCashoutFee/(:any)'] = 'admin/MerchantManagementController/editSettingCashoutFee/$1';
-$route['admin/editSettingCashoutFee/(:any)/(:any)'] = 'admin/MerchantManagementController/editSettingCashoutFee/$1/$2';
-$route['admin/deleteSettingCashoutFee'] = 'admin/MerchantManagementController/deleteSettingCashoutFee';
-$route['admin/deleteSettingCashoutFee/(:any)'] = 'admin/MerchantManagementController/deleteSettingCashoutFee/$1';
-$route['admin/deleteSettingCashoutFee/(:any)/(:any)'] = 'admin/MerchantManagementController/deleteSettingCashoutFee/$1/$2';
-$route['admin/resetMerchant'] = 'admin/MerchantManagementController/resetMerchant';
-$route['admin/resetMerchant/(:any)'] = 'admin/MerchantManagementController/resetMerchant/$1';
-$route['admin/resetMerchant/(:any)/(:any)'] = 'admin/MerchantManagementController/resetMerchant/$1/$2';
-$route['admin/searchMerchants'] = 'admin/MerchantManagementController/searchMerchants';
-$route['admin/fetchMerchantPermissions'] = 'admin/MerchantManagementController/fetchMerchantPermissions';
-$route['admin/fetchMerchantPermissions/(:any)'] = 'admin/MerchantManagementController/fetchMerchantPermissions/$1';
-$route['admin/saveDelegation'] = 'admin/MerchantManagementController/saveDelegation';
-$route['admin/saveDelegation/(:any)'] = 'admin/MerchantManagementController/saveDelegation/$1';
-
+$route['default_controller'] = 'DashboardController';
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
 
-// --- Transaction Module Extraction Routes ---
-$route['admin/submerchant'] = 'admin/MerchantSubAccountController/Submerchant';
-$route['admin/submerchant/(:any)'] = 'admin/MerchantSubAccountController/Submerchant/$1';
-$route['admin/submerchant/(:any)/(:any)'] = 'admin/MerchantSubAccountController/Submerchant/$1/$2';
-$route['admin/resetsubmerchant'] = 'admin/MerchantSubAccountController/resetsubmerchant';
-$route['admin/resetsubmerchant/(:any)'] = 'admin/MerchantSubAccountController/resetsubmerchant/$1';
-$route['admin/resetsubmerchant/(:any)/(:any)'] = 'admin/MerchantSubAccountController/resetsubmerchant/$1/$2';
-$route['admin/registersubMerchant'] = 'admin/MerchantSubAccountController/registersubMerchant';
-$route['admin/registersubMerchant/(:any)'] = 'admin/MerchantSubAccountController/registersubMerchant/$1';
-$route['admin/registersubMerchant/(:any)/(:any)'] = 'admin/MerchantSubAccountController/registersubMerchant/$1/$2';
-$route['admin/edit_submerchant'] = 'admin/MerchantSubAccountController/edit_submerchant';
-$route['admin/edit_submerchant/(:any)'] = 'admin/MerchantSubAccountController/edit_submerchant/$1';
-$route['admin/edit_submerchant/(:any)/(:any)'] = 'admin/MerchantSubAccountController/edit_submerchant/$1/$2';
-$route['admin/mutation'] = 'admin/TransactionMutationController/mutation';
-$route['admin/mutation/(:any)'] = 'admin/TransactionMutationController/mutation/$1';
-$route['admin/mutation/(:any)/(:any)'] = 'admin/TransactionMutationController/mutation/$1/$2';
-$route['admin/resetMutation'] = 'admin/TransactionMutationController/resetMutation';
-$route['admin/resetMutation/(:any)'] = 'admin/TransactionMutationController/resetMutation/$1';
-$route['admin/resetMutation/(:any)/(:any)'] = 'admin/TransactionMutationController/resetMutation/$1/$2';
-$route['admin/download_mutation'] = 'admin/TransactionMutationController/download_mutation';
-$route['admin/download_mutation/(:any)'] = 'admin/TransactionMutationController/download_mutation/$1';
-$route['admin/download_mutation/(:any)/(:any)'] = 'admin/TransactionMutationController/download_mutation/$1/$2';
-$route['admin/history'] = 'admin/HistoryController/index';
-$route['admin/history/(:any)'] = 'admin/HistoryController/index/$1';
-$route['admin/history/(:any)/(:any)'] = 'admin/HistoryController/index/$1/$2';
-$route['admin/resetHistory'] = 'admin/HistoryController/resetHistory';
-$route['admin/resetHistory/(:any)'] = 'admin/HistoryController/resetHistory/$1';
-$route['admin/resetHistory/(:any)/(:any)'] = 'admin/HistoryController/resetHistory/$1/$2';
-$route['admin/download_history'] = 'admin/HistoryController/download_history';
-$route['admin/download_history/(:any)'] = 'admin/HistoryController/download_history/$1';
-$route['admin/download_history/(:any)/(:any)'] = 'admin/HistoryController/download_history/$1/$2';
-$route['admin/virtual_account'] = 'admin/VirtualAccountTransactionController/virtual_account';
-$route['admin/virtual_account/(:any)'] = 'admin/VirtualAccountTransactionController/virtual_account/$1';
-$route['admin/virtual_account/(:any)/(:any)'] = 'admin/VirtualAccountTransactionController/virtual_account/$1/$2';
-$route['admin/resetVA'] = 'admin/VirtualAccountTransactionController/resetVA';
-$route['admin/resetVA/(:any)'] = 'admin/VirtualAccountTransactionController/resetVA/$1';
-$route['admin/resetVA/(:any)/(:any)'] = 'admin/VirtualAccountTransactionController/resetVA/$1/$2';
-$route['admin/VA_detail'] = 'admin/VirtualAccountTransactionController/VA_detail';
-$route['admin/VA_detail/(:any)'] = 'admin/VirtualAccountTransactionController/VA_detail/$1';
-$route['admin/VA_detail/(:any)/(:any)'] = 'admin/VirtualAccountTransactionController/VA_detail/$1/$2';
-$route['admin/download_VA'] = 'admin/VirtualAccountTransactionController/download_VA';
-$route['admin/download_VA/(:any)'] = 'admin/VirtualAccountTransactionController/download_VA/$1';
-$route['admin/download_VA/(:any)/(:any)'] = 'admin/VirtualAccountTransactionController/download_VA/$1/$2';
-$route['admin/qris'] = 'admin/QrisTransactionController/qris';
-$route['admin/qris/(:any)'] = 'admin/QrisTransactionController/qris/$1';
-$route['admin/qris/(:any)/(:any)'] = 'admin/QrisTransactionController/qris/$1/$2';
-$route['admin/resetqris'] = 'admin/QrisTransactionController/resetqris';
-$route['admin/resetqris/(:any)'] = 'admin/QrisTransactionController/resetqris/$1';
-$route['admin/resetqris/(:any)/(:any)'] = 'admin/QrisTransactionController/resetqris/$1/$2';
-$route['admin/qris_detail'] = 'admin/QrisTransactionController/qris_detail';
-$route['admin/qris_detail/(:any)'] = 'admin/QrisTransactionController/qris_detail/$1';
-$route['admin/qris_detail/(:any)/(:any)'] = 'admin/QrisTransactionController/qris_detail/$1/$2';
-$route['admin/download_qris'] = 'admin/QrisTransactionController/download_qris';
-$route['admin/download_qris/(:any)'] = 'admin/QrisTransactionController/download_qris/$1';
-$route['admin/download_qris/(:any)/(:any)'] = 'admin/QrisTransactionController/download_qris/$1/$2';
-$route['admin/ewallet'] = 'admin/EwalletTransactionController/ewallet';
-$route['admin/ewallet/(:any)'] = 'admin/EwalletTransactionController/ewallet/$1';
-$route['admin/ewallet/(:any)/(:any)'] = 'admin/EwalletTransactionController/ewallet/$1/$2';
-$route['admin/resetewallet'] = 'admin/EwalletTransactionController/resetewallet';
-$route['admin/resetewallet/(:any)'] = 'admin/EwalletTransactionController/resetewallet/$1';
-$route['admin/resetewallet/(:any)/(:any)'] = 'admin/EwalletTransactionController/resetewallet/$1/$2';
-$route['admin/download_ewallet'] = 'admin/EwalletTransactionController/download_ewallet';
-$route['admin/download_ewallet/(:any)'] = 'admin/EwalletTransactionController/download_ewallet/$1';
-$route['admin/download_ewallet/(:any)/(:any)'] = 'admin/EwalletTransactionController/download_ewallet/$1/$2';
-$route['admin/bi_fast'] = 'admin/BiFastTransactionController/bi_fast';
-$route['admin/bi_fast/(:any)'] = 'admin/BiFastTransactionController/bi_fast/$1';
-$route['admin/bi_fast/(:any)/(:any)'] = 'admin/BiFastTransactionController/bi_fast/$1/$2';
-$route['admin/resetbi_fast'] = 'admin/BiFastTransactionController/resetbi_fast';
-$route['admin/resetbi_fast/(:any)'] = 'admin/BiFastTransactionController/resetbi_fast/$1';
-$route['admin/resetbi_fast/(:any)/(:any)'] = 'admin/BiFastTransactionController/resetbi_fast/$1/$2';
-$route['admin/bi_fast_detail'] = 'admin/BiFastTransactionController/bi_fast_detail';
-$route['admin/bi_fast_detail/(:any)'] = 'admin/BiFastTransactionController/bi_fast_detail/$1';
-$route['admin/bi_fast_detail/(:any)/(:any)'] = 'admin/BiFastTransactionController/bi_fast_detail/$1/$2';
-$route['admin/download_bi_fast'] = 'admin/BiFastTransactionController/download_bi_fast';
-$route['admin/download_bi_fast/(:any)'] = 'admin/BiFastTransactionController/download_bi_fast/$1';
-$route['admin/download_bi_fast/(:any)/(:any)'] = 'admin/BiFastTransactionController/download_bi_fast/$1/$2';
-$route['admin/Va_dynamic'] = 'admin/VirtualAccountTransactionController/Va_dynamic';
-$route['admin/Va_dynamic/(:any)'] = 'admin/VirtualAccountTransactionController/Va_dynamic/$1';
-$route['admin/Va_dynamic/(:any)/(:any)'] = 'admin/VirtualAccountTransactionController/Va_dynamic/$1/$2';
-$route['admin/resetVa_dynamic'] = 'admin/VirtualAccountTransactionController/resetVa_dynamic';
-$route['admin/resetVa_dynamic/(:any)'] = 'admin/VirtualAccountTransactionController/resetVa_dynamic/$1';
-$route['admin/resetVa_dynamic/(:any)/(:any)'] = 'admin/VirtualAccountTransactionController/resetVa_dynamic/$1/$2';
-$route['admin/VA_recurring'] = 'admin/VirtualAccountTransactionController/VA_recurring';
-$route['admin/VA_recurring/(:any)'] = 'admin/VirtualAccountTransactionController/VA_recurring/$1';
-$route['admin/VA_recurring/(:any)/(:any)'] = 'admin/VirtualAccountTransactionController/VA_recurring/$1/$2';
-$route['admin/resetVa_recurring'] = 'admin/VirtualAccountTransactionController/resetVa_recurring';
-$route['admin/resetVa_recurring/(:any)'] = 'admin/VirtualAccountTransactionController/resetVa_recurring/$1';
-$route['admin/resetVa_recurring/(:any)/(:any)'] = 'admin/VirtualAccountTransactionController/resetVa_recurring/$1/$2';
-$route['admin/qris_dynamic_list'] = 'admin/QrisTransactionController/qris_dynamic_list';
-$route['admin/qris_dynamic_list/(:any)'] = 'admin/QrisTransactionController/qris_dynamic_list/$1';
-$route['admin/qris_dynamic_list/(:any)/(:any)'] = 'admin/QrisTransactionController/qris_dynamic_list/$1/$2';
-$route['admin/qris_dynamic'] = 'admin/QrisTransactionController/qris_dynamic';
-$route['admin/qris_dynamic/(:any)'] = 'admin/QrisTransactionController/qris_dynamic/$1';
-$route['admin/qris_dynamic/(:any)/(:any)'] = 'admin/QrisTransactionController/qris_dynamic/$1/$2';
-$route['admin/getDetailQrisDynamicChannelExternal'] = 'admin/QrisTransactionController/getDetailQrisDynamicChannelExternal';
-$route['admin/getDetailEwalletDynamicChannelExternal'] = 'admin/EwalletTransactionController/getDetailEwalletDynamicChannelExternal';
-$route['admin/getDetailEwalletChannelExternal'] = 'admin/EwalletTransactionController/getDetailEwalletChannelExternal';
-$route['admin/getDetailBiFastChannelExternal'] = 'admin/BiFastTransactionController/getDetailBiFastChannelExternal';
+// ── Welcome ─────────────────────────────────────────────
+$route['welcome'] = 'DashboardController/welcome';
 
-$route['admin/getDetailVaDynamicChannelExternal'] = 'admin/VirtualAccountTransactionController/getDetailVaDynamicChannelExternal';
-$route['admin/getDetailVaRecurringChannelExternal'] = 'admin/VirtualAccountTransactionController/getDetailVaRecurringChannelExternal';
+// ── DashboardController ─────────────────────────────────────────────
+$route['dashboard'] = 'DashboardController/index';
+$route['dashboard/analytics'] = 'DashboardController/analytics';
+$route['dashboard/toggle-openapi'] = 'DashboardController/toggleOpenApiStatus';
+$route['dashboard/maintenance-status'] = 'DashboardController/getMaintenanceStatus';
+$route['dashboard/sync-balance'] = 'DashboardController/syncAvailableBalanceMerchant';
+$route['dashboard/recent-mutations/json'] = 'DashboardController/recent_mutations_json';
+$route['dashboard/today-stats/json'] = 'DashboardController/ajax_today_stats_json';
+$route['dashboard/monthly-stats/json'] = 'DashboardController/ajax_monthly_stats_json';
+$route['dashboard/metadata/json'] = 'DashboardController/ajax_dashboard_metadata_json';
+$route['dashboard/analytics-data/json'] = 'DashboardController/ajax_analytics_data_json';
 
-$route['admin/resetqris_dynamic'] = 'admin/QrisTransactionController/resetqris_dynamic';
-$route['admin/resetqris_dynamic/(:any)'] = 'admin/QrisTransactionController/resetqris_dynamic/$1';
-$route['admin/resetqris_dynamic/(:any)/(:any)'] = 'admin/QrisTransactionController/resetqris_dynamic/$1/$2';
-$route['admin/ewallet_dynamic'] = 'admin/EwalletTransactionController/ewallet_dynamic';
-$route['admin/ewallet_dynamic/(:any)'] = 'admin/EwalletTransactionController/ewallet_dynamic/$1';
-$route['admin/ewallet_dynamic/(:any)/(:any)'] = 'admin/EwalletTransactionController/ewallet_dynamic/$1/$2';
-$route['admin/ewallet_detail'] = 'admin/EwalletTransactionController/ewallet_detail';
-$route['admin/ewallet_detail/(:any)'] = 'admin/EwalletTransactionController/ewallet_detail/$1';
-$route['admin/ewallet_detail/(:any)/(:any)'] = 'admin/EwalletTransactionController/ewallet_detail/$1/$2';
-$route['admin/resetewallet_dynamic'] = 'admin/EwalletTransactionController/resetewallet_dynamic';
-$route['admin/resetewallet_dynamic/(:any)'] = 'admin/EwalletTransactionController/resetewallet_dynamic/$1';
-$route['admin/resetewallet_dynamic/(:any)/(:any)'] = 'admin/EwalletTransactionController/resetewallet_dynamic/$1/$2';
-$route['admin/qris_recurring'] = 'admin/QrisTransactionController/qris_recurring';
-$route['admin/qris_recurring/(:any)'] = 'admin/QrisTransactionController/qris_recurring/$1';
-$route['admin/qris_recurring/(:any)/(:any)'] = 'admin/QrisTransactionController/qris_recurring/$1/$2';
-$route['admin/getDetailQrisRecurringChannelExternal'] = 'admin/QrisTransactionController/getDetailQrisRecurringChannelExternal';
-$route['admin/resetqris_recurring'] = 'admin/QrisTransactionController/resetqris_recurring';
-$route['admin/resetqris_recurring/(:any)'] = 'admin/QrisTransactionController/resetqris_recurring/$1';
-$route['admin/resetqris_recurring/(:any)/(:any)'] = 'admin/QrisTransactionController/resetqris_recurring/$1/$2';
-$route['admin/report'] = 'admin/ReportController/report';
-$route['admin/report/(:any)'] = 'admin/ReportController/report/$1';
-$route['admin/report/(:any)/(:any)'] = 'admin/ReportController/report/$1/$2';
-$route['admin/resetdownload'] = 'admin/ReportController/resetdownload';
-$route['admin/resetdownload/(:any)'] = 'admin/ReportController/resetdownload/$1';
-$route['admin/resetdownload/(:any)/(:any)'] = 'admin/ReportController/resetdownload/$1/$2';
-$route['admin/get_submerchants'] = 'admin/MerchantSubAccountController/get_submerchants';
-$route['admin/get_submerchants/(:any)'] = 'admin/MerchantSubAccountController/get_submerchants/$1';
-$route['admin/get_submerchants/(:any)/(:any)'] = 'admin/MerchantSubAccountController/get_submerchants/$1/$2';
-$route['admin/getChannelsByPosition'] = 'admin/TransactionMutationController/getChannelsByPosition';
-$route['admin/createCreditBalance'] = 'admin/MerchantManagementController/createCreditBalance';
-$route['admin/createCreditBalance/(:any)'] = 'admin/MerchantManagementController/createCreditBalance/$1';
-$route['admin/createCreditBalance/(:any)/(:any)'] = 'admin/MerchantManagementController/createCreditBalance/$1/$2';
-$route['admin/createDebitBalance'] = 'admin/MerchantManagementController/createDebitBalance';
-$route['admin/createDebitBalance/(:any)'] = 'admin/MerchantManagementController/createDebitBalance/$1';
-$route['admin/createDebitBalance/(:any)/(:any)'] = 'admin/MerchantManagementController/createDebitBalance/$1/$2';
-$route['admin/download'] = 'admin/ReportController/download';
-$route['admin/download/(:any)'] = 'admin/ReportController/download/$1';
-$route['admin/download/(:any)/(:any)'] = 'admin/ReportController/download/$1/$2';
-$route['admin/SendnotifikasiVA'] = 'admin/VirtualAccountTransactionController/SendnotifikasiVA';
-$route['admin/SendnotifikasiVA/(:any)'] = 'admin/VirtualAccountTransactionController/SendnotifikasiVA/$1';
-$route['admin/SendnotifikasiVA/(:any)/(:any)'] = 'admin/VirtualAccountTransactionController/SendnotifikasiVA/$1/$2';
-$route['admin/SendnotifikasiQRIS'] = 'admin/QrisTransactionController/SendnotifikasiQRIS';
-$route['admin/SendnotifikasiQRIS/(:any)'] = 'admin/QrisTransactionController/SendnotifikasiQRIS/$1';
-$route['admin/SendnotifikasiQRIS/(:any)/(:any)'] = 'admin/QrisTransactionController/SendnotifikasiQRIS/$1/$2';
-$route['admin/Sendnotifikasiewallet'] = 'admin/EwalletTransactionController/Sendnotifikasiewallet';
-$route['admin/Sendnotifikasiewallet/(:any)'] = 'admin/EwalletTransactionController/Sendnotifikasiewallet/$1';
-$route['admin/Sendnotifikasiewallet/(:any)/(:any)'] = 'admin/EwalletTransactionController/Sendnotifikasiewallet/$1/$2';
+// ── GlobalSearchController ─────────────────────────────────────────────
+$route['dashboard/global-search'] = 'GlobalSearchController/globalSearch';
 
-// --- Service/PPOB Module Extraction Routes ---
-$route['admin/pulsa_reguler'] = 'admin/ServiceController/pulsa_reguler';
-$route['admin/pulsa_reguler/(:any)'] = 'admin/ServiceController/pulsa_reguler/$1';
-$route['admin/pulsa_reguler/(:any)/(:any)'] = 'admin/ServiceController/pulsa_reguler/$1/$2';
-$route['admin/paket_data'] = 'admin/ServiceController/paket_data';
-$route['admin/paket_data/(:any)'] = 'admin/ServiceController/paket_data/$1';
-$route['admin/paket_data/(:any)/(:any)'] = 'admin/ServiceController/paket_data/$1/$2';
-$route['admin/token_listrik'] = 'admin/ServiceController/token_listrik';
-$route['admin/token_listrik/(:any)'] = 'admin/ServiceController/token_listrik/$1';
-$route['admin/token_listrik/(:any)/(:any)'] = 'admin/ServiceController/token_listrik/$1/$2';
-$route['admin/topupgopay'] = 'admin/ServiceController/topupgopay';
-$route['admin/topupgopay/(:any)'] = 'admin/ServiceController/topupgopay/$1';
-$route['admin/topupgopay/(:any)/(:any)'] = 'admin/ServiceController/topupgopay/$1/$2';
-$route['admin/topupdana'] = 'admin/ServiceController/topupdana';
-$route['admin/topupdana/(:any)'] = 'admin/ServiceController/topupdana/$1';
-$route['admin/topupdana/(:any)/(:any)'] = 'admin/ServiceController/topupdana/$1/$2';
-$route['admin/topupovo'] = 'admin/ServiceController/topupovo';
-$route['admin/topupovo/(:any)'] = 'admin/ServiceController/topupovo/$1';
-$route['admin/topupovo/(:any)/(:any)'] = 'admin/ServiceController/topupovo/$1/$2';
-$route['admin/googleplay'] = 'admin/ServiceController/googleplay';
-$route['admin/googleplay/(:any)'] = 'admin/ServiceController/googleplay/$1';
-$route['admin/googleplay/(:any)/(:any)'] = 'admin/ServiceController/googleplay/$1/$2';
-$route['admin/freefire'] = 'admin/ServiceController/freefire';
-$route['admin/freefire/(:any)'] = 'admin/ServiceController/freefire/$1';
-$route['admin/freefire/(:any)/(:any)'] = 'admin/ServiceController/freefire/$1/$2';
-$route['admin/hago'] = 'admin/ServiceController/hago';
-$route['admin/hago/(:any)'] = 'admin/ServiceController/hago/$1';
-$route['admin/hago/(:any)/(:any)'] = 'admin/ServiceController/hago/$1/$2';
-$route['admin/mobilelegend'] = 'admin/ServiceController/mobilelegend';
-$route['admin/mobilelegend/(:any)'] = 'admin/ServiceController/mobilelegend/$1';
-$route['admin/mobilelegend/(:any)/(:any)'] = 'admin/ServiceController/mobilelegend/$1/$2';
-$route['admin/pubgmobile'] = 'admin/ServiceController/pubgmobile';
-$route['admin/pubgmobile/(:any)'] = 'admin/ServiceController/pubgmobile/$1';
-$route['admin/pubgmobile/(:any)/(:any)'] = 'admin/ServiceController/pubgmobile/$1/$2';
-$route['admin/createProduk'] = 'admin/ServiceController/createProduk';
-$route['admin/createProduk/(:any)'] = 'admin/ServiceController/createProduk/$1';
-$route['admin/createProduk/(:any)/(:any)'] = 'admin/ServiceController/createProduk/$1/$2';
+// ── Auth ─────────────────────────────────────────────
+$route['auth'] = 'AuthController/index';
+$route['auth/login'] = 'AuthController/index';
+$route['auth/blocked'] = 'AuthController/blocked';
+$route['auth/change-password'] = 'AuthController/changePassword';
+$route['auth/forgot-password'] = 'AuthController/forgotPassword';
+$route['auth/logout'] = 'AuthController/logout';
+$route['auth/register'] = 'AuthController/register';
+$route['auth/reset-password'] = 'AuthController/resetPassword';
+$route['auth/verify'] = 'AuthController/verify';
 
-// --- Cashin External Module Extraction Routes ---
-$route['admin/cashin/external'] = 'admin/CashinExternalController/index';
-$route['admin/cashin/external/ajax_list'] = 'admin/CashinExternalController/ajax_list';
-$route['admin/cashin/external/add_view'] = 'admin/CashinExternalController/add_view';
-$route['admin/cashin/external/edit_view/(:any)'] = 'admin/CashinExternalController/edit_view/$1';
-$route['admin/cashin/external/add'] = 'admin/CashinExternalController/add';
-$route['admin/cashin/external/update'] = 'admin/CashinExternalController/update';
-$route['admin/cashin/external/delete/(:any)'] = 'admin/CashinExternalController/delete/$1';
-$route['admin/cashin/external/bulk_update'] = 'admin/CashinExternalController/bulk_update';
+// ── BiFastTransactionController ─────────────────────────────────────────────
+$route['finance/bi-fast'] = 'BiFastTransactionController/bi_fast';
+$route['finance/bi-fast/reset'] = 'BiFastTransactionController/resetbi_fast';
+$route['finance/bi-fast/detail/(:num)'] = 'BiFastTransactionController/bi_fast_detail/$1';
+$route['finance/bi-fast/download'] = 'BiFastTransactionController/download_bi_fast';
+$route['finance/bi-fast/channel/external'] = 'BiFastTransactionController/getDetailBiFastChannelExternal';
 
-// --- Cashout External Module Extraction Routes ---
-$route['admin/cashout/external'] = 'admin/CashoutExternalController/index';
-$route['admin/cashout/external/ajax_list'] = 'admin/CashoutExternalController/ajax_list';
-$route['admin/cashout/external/add_view'] = 'admin/CashoutExternalController/add_view';
-$route['admin/cashout/external/edit_view/(:any)'] = 'admin/CashoutExternalController/edit_view/$1';
-$route['admin/cashout/external/add'] = 'admin/CashoutExternalController/add';
-$route['admin/cashout/external/update'] = 'admin/CashoutExternalController/update';
-$route['admin/cashout/external/delete/(:any)'] = 'admin/CashoutExternalController/delete/$1';
-$route['admin/cashout/external/bulk_update'] = 'admin/CashoutExternalController/bulk_update';
+// ── VirtualAccountTransactionController ─────────────────────────────────────────────
+$route['finance/virtual-account'] = 'VirtualAccountTransactionController/virtual_account';
+$route['finance/virtual-account/reset'] = 'VirtualAccountTransactionController/resetVA';
+$route['finance/virtual-account/detail/(:num)'] = 'VirtualAccountTransactionController/VA_detail/$1';
+$route['finance/virtual-account/download'] = 'VirtualAccountTransactionController/download_VA';
+$route['virtual-account/dynamic'] = 'VirtualAccountTransactionController/Va_dynamic';
+$route['virtual-account/dynamic/reset'] = 'VirtualAccountTransactionController/resetVa_dynamic';
+$route['virtual-account/recurring'] = 'VirtualAccountTransactionController/VA_recurring';
+$route['virtual-account/recurring/reset'] = 'VirtualAccountTransactionController/resetVa_recurring';
+$route['virtual-account/notification/resend/(:num)'] = 'VirtualAccountTransactionController/SendnotifikasiVA/$1';
+$route['virtual-account/dynamic/channel/external'] = 'VirtualAccountTransactionController/getDetailVaDynamicChannelExternal';
+$route['virtual-account/recurring/channel/external'] = 'VirtualAccountTransactionController/getDetailVaRecurringChannelExternal';
 
-// --- Channel Module Extraction Routes ---
-$route['admin/cashin'] = 'admin/ChannelController/cashin';
-$route['admin/cashin/(:any)'] = 'admin/ChannelController/cashin/$1';
-$route['admin/cashout'] = 'admin/ChannelController/cashout';
-$route['admin/cashout/(:any)'] = 'admin/ChannelController/cashout/$1';
-$route['admin/createCashinChanel'] = 'admin/ChannelController/createCashinChanel';
-$route['admin/createCashinChanel/(:any)'] = 'admin/ChannelController/createCashinChanel/$1';
-$route['admin/createCashOutChanel'] = 'admin/ChannelController/createCashOutChanel';
-$route['admin/createCashOutChanel/(:any)'] = 'admin/ChannelController/createCashOutChanel/$1';
+// ── QrisTransactionController ─────────────────────────────────────────────
+$route['finance/qris'] = 'QrisTransactionController/qris';
+$route['finance/qris/reset'] = 'QrisTransactionController/resetqris';
+$route['finance/qris/detail/(:num)'] = 'QrisTransactionController/qris_detail/$1';
+$route['finance/qris/download'] = 'QrisTransactionController/download_qris';
+$route['qris/dynamic'] = 'QrisTransactionController/qris_dynamic';
+$route['qris/dynamic/reset'] = 'QrisTransactionController/resetqris_dynamic';
+$route['qris/recurring'] = 'QrisTransactionController/qris_recurring';
+$route['qris/recurring/reset'] = 'QrisTransactionController/resetqris_recurring';
+$route['qris/notification/resend/(:num)'] = 'QrisTransactionController/SendnotifikasiQRIS/$1';
+$route['qris/dynamic/channel/external'] = 'QrisTransactionController/getDetailQrisDynamicChannelExternal';
+$route['qris/recurring/channel/external'] = 'QrisTransactionController/getDetailQrisRecurringChannelExternal';
+$route['qris/dynamic/list'] = 'QrisTransactionController/qris_dynamic_list';
 
-// --- User Access Module Extraction Routes ---
-$route['admin/holiday'] = 'admin/UserAccessController/holiday';
-$route['admin/holiday/(:any)'] = 'admin/UserAccessController/holiday/$1';
-$route['admin/listadmin'] = 'admin/UserAccessController/listAdmin';
-$route['admin/listadmin/(:any)'] = 'admin/UserAccessController/listAdmin/$1';
-$route['admin/listAdmin'] = 'admin/UserAccessController/listAdmin';
-$route['admin/listAdmin/(:any)'] = 'admin/UserAccessController/listAdmin/$1';
-// $route['admin/listadmin'] = 'admin/UserAccessController/listAdmin';
-// $route['admin/listadmin/(:any)'] = 'admin/UserAccessController/listAdmin/$1';
+// ── EwalletTransactionController ─────────────────────────────────────────────
+$route['finance/e-wallet'] = 'EwalletTransactionController/ewallet';
+$route['finance/e-wallet/reset'] = 'EwalletTransactionController/resetewallet';
+$route['finance/e-wallet/detail/(:num)'] = 'EwalletTransactionController/ewallet_detail/$1';
+$route['finance/e-wallet/download'] = 'EwalletTransactionController/download_ewallet';
+$route['e-wallet/dynamic'] = 'EwalletTransactionController/ewallet_dynamic';
+$route['e-wallet/dynamic/reset'] = 'EwalletTransactionController/resetewallet_dynamic';
+$route['finance/e-wallet/notification/resend/(:num)'] = 'EwalletTransactionController/Sendnotifikasiewallet/$1';
+$route['finance/e-wallet/channel/external'] = 'EwalletTransactionController/getDetailEwalletChannelExternal';
+$route['e-wallet/dynamic/channel/external'] = 'EwalletTransactionController/getDetailEwalletDynamicChannelExternal';
 
-$route['admin/manageUsers'] = 'admin/UserAccessController/manageUsers';
-$route['admin/manageUsers/(:any)'] = 'admin/UserAccessController/manageUsers/$1';
-$route['admin/manageusers'] = 'admin/UserAccessController/manageUsers';
-$route['admin/manageusers/(:any)'] = 'admin/UserAccessController/manageUsers/$1';
+// ── HistoryController ─────────────────────────────────────────────
+$route['finance/history'] = 'HistoryController/index';
+$route['finance/history/reset'] = 'HistoryController/resetHistory';
+$route['finance/history/download'] = 'HistoryController/download_history';
 
-$route['admin/manageHoliday'] = 'admin/UserAccessController/manageHoliday';
-$route['admin/manageHoliday/(:any)'] = 'admin/UserAccessController/manageHoliday/$1';
-$route['admin/manageholiday'] = 'admin/UserAccessController/manageHoliday';
-$route['admin/manageholiday/(:any)'] = 'admin/UserAccessController/manageHoliday/$1';
+// ── TransactionMutationController ─────────────────────────────────────────────
+$route['finance/mutation'] = 'TransactionMutationController/mutation';
+$route['finance/mutation/reset/(:num)'] = 'TransactionMutationController/resetMutation/$1';
+$route['finance/mutation/download'] = 'TransactionMutationController/download_mutation';
+$route['finance/mutation/channels'] = 'TransactionMutationController/getChannelsByPosition';
+$route['finance/mutation/(:num)'] = 'TransactionMutationController/mutation/$1';
 
-// --- Report Module Extraction Routes ---
-$route['admin/balance_log'] = 'admin/ReportController/balance_log';
+// ── MerchantManagementController ─────────────────────────────────────────────
+$route['merchant/manage'] = 'MerchantManagementController/merchant';
+$route['merchant/manage/reset'] = 'MerchantManagementController/resetMerchant';
+$route['merchant/supervisor'] = 'MerchantManagementController/merchant_spv';
+$route['merchant/supervisor/reset'] = 'MerchantManagementController/resetMerchantSpv';
+$route['merchant/supervisor/delete/(:num)'] = 'MerchantManagementController/deleteMerchantSpv/$1';
+$route['merchant/manage/register'] = 'MerchantManagementController/registerMerchant';
+$route['merchant/supervisor/register'] = 'MerchantManagementController/registerMerchantSpv';
+$route['merchant/supervisor/get/(:num)'] = 'MerchantManagementController/getSupervisorJson/$1';
+$route['merchant/supervisor/update/(:num)'] = 'MerchantManagementController/updateMerchantSpv/$1';
+$route['merchant/supervisor/search'] = 'MerchantManagementController/searchMerchants';
+$route['merchant/manage/list/reset/(:num)'] = 'MerchantManagementController/resetListMerchants/$1';
+$route['merchant/manage/list/(:num)'] = 'MerchantManagementController/listMerchants/$1';
+$route['merchant/manage/edit/(:num)'] = 'MerchantManagementController/editMerchant/$1';
+$route['merchant/manage/update/(:num)'] = 'MerchantManagementController/updateMerchant/$1';
+$route['merchant/manage/search'] = 'MerchantManagementController/searchMerchants';
+$route['merchant/manage/add'] = 'MerchantManagementController/addMerchant';
+$route['merchant/manage/detail/(:num)'] = 'MerchantManagementController/detailMerchant/$1';
+$route['merchant/manage/history-ajax/(:num)'] = 'MerchantManagementController/detailHistoryAjax/$1';
+$route['merchant/manage/mutation-ajax/(:num)'] = 'MerchantManagementController/detailMutationAjax/$1';
+$route['merchant/manage/submerchant-ajax/(:num)'] = 'MerchantManagementController/detailSubmerchantAjax/$1';
+$route['merchant/manage/overview-ajax/(:num)'] = 'MerchantManagementController/detailOverviewAjax/$1';
+
+// Cashin Fee Setting Routes
+$route['merchant/setting-cashin-fee/(:num)'] = 'MerchantManagementController/settingcashinfee/$1';
+$route['merchant/setting-cashin-fee/create'] = 'MerchantManagementController/createSettingCashinFee';
+$route['merchant/setting-cashin-fee/bulk-create/(:num)'] = 'MerchantManagementController/bulkCreateSettingCashinFee/$1';
+$route['merchant/setting-cashin-fee/edit/(:num)/(:num)'] = 'MerchantManagementController/editSettingCashinFee/$1/$2';
+$route['merchant/setting-cashin-fee/delete/(:num)/(:num)'] = 'MerchantManagementController/deleteSettingCashinFee/$1/$2';
+$route['merchant/setting-cashin-fee/groups'] = 'MerchantManagementController/getCashinChannelGroups';
+
+// Cashout Fee Setting Routes
+$route['merchant/setting-cashout-fee/(:num)'] = 'MerchantManagementController/settingcashoutfee/$1';
+$route['merchant/setting-cashout-fee/create'] = 'MerchantManagementController/createSettingCashoutFee';
+$route['merchant/setting-cashout-fee/bulk-create/(:num)'] = 'MerchantManagementController/bulkCreateSettingCashoutFee/$1';
+$route['merchant/setting-cashout-fee/edit/(:num)/(:num)'] = 'MerchantManagementController/editSettingCashoutFee/$1/$2';
+$route['merchant/setting-cashout-fee/delete/(:num)/(:num)'] = 'MerchantManagementController/deleteSettingCashoutFee/$1/$2';
+$route['merchant/setting-cashout-fee/groups'] = 'MerchantManagementController/getCashoutChannelGroups';
+
+$route['merchant/balance/credit'] = 'MerchantManagementController/createCreditBalance';
+$route['merchant/balance/debit'] = 'MerchantManagementController/createDebitBalance';
+$route['merchant/permissions/(:any)'] = 'MerchantManagementController/fetchMerchantPermissions/$1';
+$route['merchant/permissions/(:any)/save'] = 'MerchantManagementController/saveDelegation/$1';
+
+// ── MerchantSubAccountController ─────────────────────────────────────────────
+$route['merchant/sub-account'] = 'MerchantSubAccountController/Submerchant';
+$route['merchant/sub-account/reset'] = 'MerchantSubAccountController/resetsubmerchant';
+$route['merchant/sub-account/register'] = 'MerchantSubAccountController/registersubMerchant';
+$route['merchant/sub-account/edit/(:num)'] = 'MerchantSubAccountController/edit_submerchant/$1';
+$route['merchant/sub-account/list'] = 'MerchantSubAccountController/get_submerchants';
+$route['merchant/sub-account/(:num)'] = 'MerchantSubAccountController/Submerchant/$1';
+
+// ── ReportController ─────────────────────────────────────────────
+$route['report/download'] = 'ReportController/report';
+$route['report/download/reset'] = 'ReportController/resetdownload';
+$route['report/download/export'] = 'ReportController/download';
+$route['report/balance-log'] = 'ReportController/balance_log';
+
+// ── UserAccessController ─────────────────────────────────────────────
+$route['access-control/holiday'] = 'UserAccessController/holiday';
+$route['access-control/holiday/manage'] = 'UserAccessController/manageHoliday';
+$route['access-control/accounts'] = 'UserAccessController/listAdmin';
+$route['access-control/accounts/create'] = 'UserAccessController/createAdmin';
+$route['access-control/accounts/update/(:num)'] = 'UserAccessController/updateAdmin/$1';
+$route['access-control/accounts/delete/(:num)'] = 'UserAccessController/deleteAdmin/$1';
+
+// ── Menu ─────────────────────────────────────────────
+$route['menu'] = 'MenuController/index';
+$route['menu/sub-menu'] = 'MenuController/subMenu';
+$route['menu/change-menu/(:num)'] = 'MenuController/changeMenu/$1';
+$route['menu/update-menu'] = 'MenuController/updateMenu';
+$route['menu/update-menu/ajax'] = 'MenuController/updateMenuAjax';
+$route['menu/sub-menu/edit/(:num)'] = 'MenuController/editSubMenu/$1';
+$route['menu/sub-menu/update'] = 'MenuController/updateSubMenu';
+$route['menu/delete/(:num)'] = 'MenuController/hapus/$1';
+$route['menu/sub-menu/delete/(:num)'] = 'MenuController/hapus_subMenu/$1';
+$route['access-control/roles'] = 'MenuController/role';
+$route['access-control/roles/access/(:num)'] = 'MenuController/roleAccess/$1';
+$route['access-control/roles/change-access'] = 'MenuController/changeAccess';
+$route['menu/save/ajax'] = 'MenuController/saveMenuAjax';
+$route['menu/delete/ajax'] = 'MenuController/deleteMenuAjax';
+$route['menu/get/(:num)'] = 'MenuController/getMenuById/$1';
+
+// ── User ─────────────────────────────────────────────
+$route['user'] = 'UserController/index';
+$route['user/change-password'] = 'UserController/changePassword';
+
+// ── CashinExternalController ─────────────────────────────────────────────
+$route['external/cashin'] = 'CashinExternalController/index';
+$route['external/cashin/list'] = 'CashinExternalController/ajax_list';
+$route['external/cashin/create'] = 'CashinExternalController/add_view';
+$route['external/cashin/edit/(:num)'] = 'CashinExternalController/edit_view/$1';
+$route['external/cashin/add'] = 'CashinExternalController/add';
+$route['external/cashin/update'] = 'CashinExternalController/update';
+$route['external/cashin/delete/(:num)'] = 'CashinExternalController/delete/$1';
+$route['external/cashin/bulk-update'] = 'CashinExternalController/bulk_update';
+$route['external/cashin/get-channels'] = 'CashinExternalController/get_channel_ids';
+
+// ── CashoutExternalController ─────────────────────────────────────────────
+$route['external/cashout'] = 'CashoutExternalController/index';
+$route['external/cashout/list'] = 'CashoutExternalController/ajax_list';
+$route['external/cashout/create'] = 'CashoutExternalController/add_view';
+$route['external/cashout/edit/(:num)'] = 'CashoutExternalController/edit_view/$1';
+$route['external/cashout/add'] = 'CashoutExternalController/add';
+$route['external/cashout/update'] = 'CashoutExternalController/update';
+$route['external/cashout/delete/(:num)'] = 'CashoutExternalController/delete/$1';
+$route['external/cashout/bulk-update'] = 'CashoutExternalController/bulk_update';
+$route['external/cashout/get-channels'] = 'CashoutExternalController/get_channel_ids';
+
+// ── ChannelController ─────────────────────────────────────────────
+$route['channel/cashin'] = 'ChannelController/cashin';
+$route['channel/cashout'] = 'ChannelController/cashout';
+$route['channel/cashin/create'] = 'ChannelController/createCashinChanel';
+$route['channel/cashout/create'] = 'ChannelController/createCashOutChanel';
+$route['channel/cashin/update'] = 'ChannelController/updateCashinChanel';
+$route['channel/cashout/update'] = 'ChannelController/updateCashOutChanel';
+$route['channel/deleteCashInChanel/(:any)'] = 'ChannelController/deleteCashInChanel/$1';
+$route['channel/deleteCashOutChanel/(:any)'] = 'ChannelController/deleteCashOutChanel/$1';
+
+// ── ServiceController ─────────────────────────────────────────────
+$route['product/pulsa-reguler'] = 'ServiceController/pulsa_reguler';
+$route['product/paket-data'] = 'ServiceController/paket_data';
+$route['product/token-listrik'] = 'ServiceController/token_listrik';
+$route['product/ewallet/gopay'] = 'ServiceController/topupgopay';
+$route['product/ewallet/dana'] = 'ServiceController/topupdana';
+$route['product/ewallet/ovo'] = 'ServiceController/topupovo';
+$route['product/games/mobile-legend'] = 'ServiceController/mobilelegend';
+$route['product/games/pubg'] = 'ServiceController/pubgmobile';
+$route['product/games/free-fire'] = 'ServiceController/freefire';
+$route['product/games/hago'] = 'ServiceController/hago';
+$route['product/games/google-play'] = 'ServiceController/googleplay';
+$route['product/create'] = 'ServiceController/createProduk';
+$route['product/update'] = 'ServiceController/updateProduct';
+
+// ── HealthCheck ─────────────────────────────────────────────
+$route['health/db-check'] = 'HealthController/dbCheck';
+
+
+
+
+

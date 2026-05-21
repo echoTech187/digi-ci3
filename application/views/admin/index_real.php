@@ -17,10 +17,13 @@
         <div class="d-flex align-items-center gap-3">
             <!-- Period Selector -->
             <div class="d-flex p-1 gap-1" style="border-radius: 14px;">
-                <a href="<?= base_url('admin/analytics?period=yesterday'); ?>" class="btn btn-sm <?= ($current_period == 'yesterday' ? 'btn-primary' : 'btn-link text-muted'); ?> px-4 py-2 font-weight-bold shadow-none" style="border-radius: 10px; font-size: 11px; text-decoration: none;">Yesterday</a>
-                <a href="<?= base_url('admin/analytics?period=last_7_days'); ?>" class="btn btn-sm <?= ($current_period == 'last_7_days' ? 'btn-primary' : 'btn-link text-muted'); ?> px-4 py-2 font-weight-bold shadow-none" style="border-radius: 10px; font-size: 11px; text-decoration: none;">Last 7 Days</a>
-                <a href="<?= base_url('admin/analytics?period=last_month'); ?>" class="btn btn-sm <?= ($current_period == 'last_month' ? 'btn-primary' : 'btn-link text-muted'); ?> px-4 py-2 font-weight-bold shadow-none" style="border-radius: 10px; font-size: 11px; text-decoration: none;">Last Month</a>
+                <a href="<?= base_url('dashboard/analytics?period=yesterday'); ?>" class="btn btn-sm <?= ($current_period == 'yesterday' ? 'btn-primary' : 'btn-link text-muted'); ?> px-4 py-2 font-weight-bold shadow-none" style="border-radius: 10px; font-size: 11px; text-decoration: none;">Yesterday</a>
+                <a href="<?= base_url('dashboard/analytics?period=last_7_days'); ?>" class="btn btn-sm <?= ($current_period == 'last_7_days' ? 'btn-primary' : 'btn-link text-muted'); ?> px-4 py-2 font-weight-bold shadow-none" style="border-radius: 10px; font-size: 11px; text-decoration: none;">Last 7 Days</a>
+                <a href="<?= base_url('dashboard/analytics?period=last_month'); ?>" class="btn btn-sm <?= ($current_period == 'last_month' ? 'btn-primary' : 'btn-link text-muted'); ?> px-4 py-2 font-weight-bold shadow-none" style="border-radius: 10px; font-size: 11px; text-decoration: none;">Last Month</a>
             </div>
+            <button id="toggleGuideBtn" class="btn btn-sm btn-outline-primary px-4 py-2 font-weight-bold shadow-none" style="border-radius: 10px; font-size: 11px;">
+                <i class="fas fa-info-circle mr-1"></i> Instructions Guide
+            </button>
         </div>
     </div>
 
@@ -221,6 +224,46 @@
         </div>
     </div>
 
+    <!-- Instructions Guide Drawer -->
+    <div class="drawer-overlay" id="instructionOverlay"></div>
+    <div class="drawer-right" id="instructionDrawer">
+        <div class="drawer-header">
+            <h5 class="drawer-title">
+                <i class="fas fa-info-circle mr-2"></i> Strategic Analytics Guide
+            </h5>
+            <button class="drawer-close" id="closeDrawerBtn">&times;</button>
+        </div>
+        <div class="drawer-body">
+            <p class="drawer-desc">
+                This dashboard displays platform-wide revenue, profit growth indicators, channel contributions, and BI insights.
+            </p>
+            <div class="drawer-card">
+                <div class="drawer-card-title">
+                    <i class="fas fa-chart-line text-indigo mr-2"></i> Revenue & Growth
+                </div>
+                <p class="drawer-card-text">
+                    KPI blocks compute current period volume against the corresponding prior period (e.g. yesterday vs same day last week).
+                </p>
+            </div>
+            <div class="drawer-card">
+                <div class="drawer-card-title">
+                    <i class="fas fa-hand-holding-usd text-success mr-2"></i> Platform Yield
+                </div>
+                <p class="drawer-card-text">
+                    Net yield represents total transactions fees gathered minus underlying external provider cost fees.
+                </p>
+            </div>
+            <div class="drawer-card">
+                <div class="drawer-card-title">
+                    <i class="fas fa-brain text-warning mr-2"></i> Growth Directives
+                </div>
+                <p class="drawer-card-text">
+                    BI insights highlight network-load-free windows and volume distribution to maximize merchant settlement rates.
+                </p>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 
@@ -360,7 +403,7 @@
 
     function loadAnalyticsData() {
         $.ajax({
-            url: "<?= base_url('admin/ajax_analytics_data_json?period=' . $current_period); ?>",
+            url: "<?= base_url('dashboard/analytics-data/json?period=' . $current_period); ?>",
             type: "GET",
             dataType: "json",
             success: function(resp) {
@@ -413,6 +456,17 @@
 
     $(document).ready(function() {
         loadAnalyticsData();
+
+        // Instructions Guide Drawer Toggle logic
+        $('#toggleGuideBtn').on('click', function() {
+            $('#instructionDrawer, #instructionOverlay').addClass('open');
+            $('body').addClass('drawer-open');
+        });
+
+        $('#closeDrawerBtn, #instructionOverlay').on('click', function() {
+            $('#instructionDrawer, #instructionOverlay').removeClass('open');
+            $('body').removeClass('drawer-open');
+        });
     });
 </script>
 

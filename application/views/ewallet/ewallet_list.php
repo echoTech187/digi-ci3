@@ -1,5 +1,34 @@
 <!-- Begin Page Content -->
 <div >
+    <!-- ── Toggleable Page Instructional Drawer ── -->
+    <div class="drawer-overlay" id="instructionOverlay"></div>
+    <div class="drawer-right" id="instructionDrawer">
+        <div class="drawer-header">
+            <h6 class="drawer-title"><i class="fas fa-book mr-2"></i> E-Wallet Transactions Guide</h6>
+            <button type="button" class="drawer-close" id="closeDrawerBtn">&times;</button>
+        </div>
+        <div class="drawer-body">
+            <p class="drawer-desc">Monitor inbound payments from popular digital wallets (OVO, DANA, LinkAja, ShopeePay, Gopay).</p>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-wallet text-primary mr-2"></i> Channel Routing</div>
+                <p class="drawer-card-text">Differentiate traffic flowing through various e-wallet providers easily.</p>
+            </div>
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-sync text-primary mr-2"></i> Real-Time Querying</div>
+                <p class="drawer-card-text">Get immediate verification of wallet balance changes directly from the acquirer interface.</p>
+            </div>
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-bell text-primary mr-2"></i> Re-notify Merchants</div>
+                <p class="drawer-card-text">Manually fire failed webhooks to ensure systems remain synchronized.</p>
+            </div>
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-check-double text-primary mr-2"></i> Settlement Validation</div>
+                <p class="drawer-card-text">Confirm status shifts from pending/processing to settled/failed.</p>
+            </div>
+        </div>
+    </div>
+
 
     <!-- Page Header -->
     <div class="dt-page-header">
@@ -8,8 +37,11 @@
             <p class="dt-page-subtitle">Manage and monitor all e-wallet payment activity.</p>
         </div>
         <div class="d-flex align-items-center gap-2">
+            <button type="button" class="btn btn-light border shadow-sm mr-2 d-flex align-items-center" id="toggleGuideBtn">
+                <i class="fas fa-book-open text-primary mr-2"></i> <span class="d-none d-md-block">Instructions Guide</span>
+            </button>
             <?php
-                $download_url = base_url('admin/download_ewallet')
+                $download_url = base_url('finance/e-wallet/download')
                     . "?search_date_ewallet=" . ($this->session->userdata('search_date_ewallet') ?: '')
                     . "&search_date_to_ewallet=" . ($this->session->userdata('search_date_ewallet_to') ?: '')
                     . "&search_date_ewallet_settlement=" . ($this->session->userdata('search_date_ewallet_settlement') ?: '')
@@ -40,7 +72,7 @@
             if ($search_date_ewallet_settlement_value) $extra_active++;
             // search_invoice_no is now in the global search input, excluded from advanced badge
         ?>
-        <form id="ewallet_form" method="post" action="<?= base_url('admin/ewallet'); ?>">
+        <form id="ewallet_form" method="post" action="<?= base_url('finance/e-wallet'); ?>">
             <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>">
 
             <div class="dt-toolbar">
@@ -71,7 +103,7 @@
                         <div class="dt-more-panel" id="moreFiltersPanel">
                             <div class="dt-more-panel-header">
                                 <span class="dt-more-panel-title"><i class="fas fa-filter mr-1 mr-2"></i> Advanced filters</span>
-                                <a href="<?= base_url('admin/resetewallet'); ?>" class="dt-more-clear">Clear All</a>
+                                <a href="<?= base_url('finance/e-wallet/reset'); ?>" class="dt-more-clear">Clear All</a>
                             </div>
 
                             <div class="dt-more-panel-body">
@@ -163,7 +195,7 @@
         });
 
         // Init Server-Side DataTable
-        var table = initServerDataTable("#ewalletTable", "<?= base_url('admin/ewallet') ?>", [
+        var table = initServerDataTable("#ewalletTable", "<?= base_url('finance/e-wallet') ?>", [
             {data: 'no', orderable: false},
             {data: 'c_datetime',className: 'text-nowrap', render: function(data){
                 return moment(data).format('DD-MM-YYYY HH:mm:ss');
@@ -201,8 +233,8 @@
                 searchable: false,
                 render: function(data, type, row) {
                     var baseUrl = "<?= base_url() ?>";
-                    var detailLink = baseUrl + 'admin/ewallet_detail/' + data;
-                    var resendLink = baseUrl + 'admin/Sendnotifikasiewallet/' + data;
+                    var detailLink = baseUrl + 'finance/e-wallet/detail/' + data;
+                    var resendLink = baseUrl + 'finance/e-wallet/notification/resend/' + data;
                     
                     return `
                         <div class="dropdown">
@@ -210,7 +242,7 @@
                             <ul class="dropdown-menu dropdown-menu-right border-0 shadow-lg">
                                 <li><a href="${detailLink}" class="dropdown-item"><i class="fas fa-eye text-primary mr-2"></i> Detail</a></li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a onclick="javascript: return confirm('Are you sure, want to resend notification again ??')" href="${resendLink}" class="dropdown-item"><i class="fas fa-paper-plane text-warning mr-2"></i> Resend</a></li>
+                                <li><button class="dropdown-item resend-notif-btn" data-href="${resendLink}"><i class="fas fa-paper-plane text-warning mr-2"></i> Resend</button></li>
                             </ul>
                         </div>
                     `;
@@ -231,7 +263,7 @@
             
             // Option 2: If we want it to persist across reloads via the 'invoice' parameter,
             // we could update the session, but DataTable's built-in search doesn't do that by default.
-            // For consistency with how the user got here, we'll let it be.
+            // For consistency with how the let it be.
         }, 400));
 
         // ── More Filters dropdown toggle ──
@@ -259,6 +291,28 @@
             }
         });
 
+        $(document).on('click', '.resend-notif-btn', function(e) {
+            e.preventDefault();
+            var href = $(this).data('href');
+            Swal.fire({
+                title: 'Resend Notification',
+                text: 'Are you sure you want to resend this notification?',
+                icon: 'question',
+                showCancelButton: true,
+                customClass: {
+                    popup: 'swal2-premium-popup',
+                    confirmButton: 'swal2-premium-confirm',
+                    cancelButton: 'swal2-premium-cancel'
+                },
+                buttonsStyling: false,
+                confirmButtonText: 'Yes, resend!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = href;
+                }
+            });
+        });
+
         // Select2 init for More panel merchant select
         $('.select2-more').select2({
             width: '100%',
@@ -271,3 +325,18 @@
 
 
 
+
+<script>
+$(document).ready(function() {
+    // Drawer Toggle Logic
+    $('#toggleGuideBtn').on('click', function() {
+        $('#instructionDrawer, #instructionOverlay').addClass('open');
+        $('body').css('overflow', 'hidden');
+    });
+
+    $('#closeDrawerBtn, #instructionOverlay').on('click', function() {
+        $('#instructionDrawer, #instructionOverlay').removeClass('open');
+        $('body').css('overflow', '');
+    });
+});
+</script>

@@ -64,7 +64,7 @@
                             <?= form_error('repeatPassword', '<small class="text-danger pl-2 mt-1 d-block">', '</small>'); ?>
                         </div>
 
-                        <button type="submit" class="btn-dt-action btn-dt-action-primary shadow-sm px-4 mt-2 w-100 py-2">
+                        <button type="submit" class="btn-dt-action btn-dt-action-success shadow-sm px-4 mt-2 w-100 py-2">
                             <i class="fas fa-key mr-2"></i> Update Password
                         </button>
                     </form>

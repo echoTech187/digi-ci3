@@ -35,7 +35,7 @@ class TransactionMutationController extends CI_Controller
       if (!$id) $id = $this->uri->segment(3);
       if (!$id) {
          $this->session->set_flashdata('error', 'Merchant ID not found.');
-         redirect('admin/merchant');
+         redirect('merchant/manage');
       }
 
       $data['title'] = 'Mutation';
@@ -96,14 +96,14 @@ class TransactionMutationController extends CI_Controller
       $this->load->view('mutation/list', $data);
    }
 
-   public function resetMutation()
+   public function resetMutation($id = NULL)
    {
-      $id = $this->uri->segment(3);
+      if (!$id) $id = $this->uri->segment(4);
       $this->session->unset_userdata('search_date_mutation');
       $this->session->unset_userdata('search_date_mutation_to');
       $this->session->unset_userdata('search_position');
       $this->session->unset_userdata('search_channel');
-      redirect("admin/mutation/$id");
+      redirect("finance/mutation/$id");
    }
 
    public function download_mutation()
@@ -114,7 +114,7 @@ class TransactionMutationController extends CI_Controller
 
       if (empty($search_date_mutation) || empty($search_date_mutation_to)) {
          $this->session->set_flashdata('error_message', 'Please select both from and to dates before downloading.');
-         redirect("admin/mutation/$id");
+         redirect("finance/mutation/$id");
       }
       
       $user = $this->Model_user->view_user()->row_array();
@@ -134,7 +134,7 @@ class TransactionMutationController extends CI_Controller
          $this->session->set_flashdata('error', 'Failed request download');
       }
 
-      redirect("admin/mutation/$id");
+      redirect("finance/mutation/$id");
    }
    
    public function getChannelsByPosition()

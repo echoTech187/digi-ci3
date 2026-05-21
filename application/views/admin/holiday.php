@@ -1,7 +1,33 @@
 <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.17/index.global.min.js'></script>
 
+
 <!-- Begin Page Content -->
 <div class=" w-100">
+    <!-- ── Toggleable Page Instructional Drawer ── -->
+    <div class="drawer-overlay" id="instructionOverlay"></div>
+    <div class="drawer-right" id="instructionDrawer">
+        <div class="drawer-header">
+            <h6 class="drawer-title"><i class="fas fa-book mr-2"></i> Holiday Calendar Guide</h6>
+            <button type="button" class="drawer-close" id="closeDrawerBtn">&times;</button>
+        </div>
+        <div class="drawer-body">
+            <p class="drawer-desc">Configure public holidays that affect settlement delays and payout clearing schedules.</p>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-calendar-alt text-primary mr-2"></i> Holiday Setting</div>
+                <p class="drawer-card-text">Add national holidays to postpone settlement payouts automatically.</p>
+            </div>
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-calendar-day text-primary mr-2"></i> Calendar View</div>
+                <p class="drawer-card-text">Interactive FullCalendar representation to visually check upcoming non-working days.</p>
+            </div>
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-sync text-primary mr-2"></i> System Sync</div>
+                <p class="drawer-card-text">Automated calculation adjustments for T+1 / T+2 settlement schedules based on holiday dates.</p>
+            </div>
+        </div>
+    </div>
+
 
     <!-- ── Page Header ── -->
     <div class="dt-page-header d-flex align-items-center justify-content-between">
@@ -9,7 +35,11 @@
             <h4 class="dt-page-title">Holiday Calendar</h4>
             <p class="dt-page-subtitle">Manage and visualize public holidays across the system.</p>
         </div>
-        
+        <div class="d-flex align-items-center gap-2">
+            <button type="button" class="btn btn-light border shadow-sm mr-2 d-flex align-items-center" id="toggleGuideBtn">
+                <i class="fas fa-book-open text-primary mr-2"></i> <span class="d-none d-md-block">Instructions Guide</span>
+            </button>
+        </div>
     </div>
 
     <!-- Alerts Standardized to Swal2 Premium -->
@@ -48,16 +78,16 @@
         <div class="fc-card border-0 shadow-sm dt-card" style="border-radius: 20px; overflow: hidden;">
             <div class="dt-toolbar border-0 d-flex align-items-center justify-content-between flex-wrap gap-3" style="padding: 16px 20px; border-bottom: 1px solid var(--border-color) !important;">
                 <div class="d-flex align-items-center flex-wrap gap-2 gap-md-4">
-                    <div class="d-flex align-items-center gap-2 px-2 py-1" style="background: rgba(0,0,0,0.02); border-radius: 8px;">
-                        <div style="width: 8px; height: 8px; border-radius: 50%; background: var(--primary); box-shadow: 0 0 0 3px var(--primary-soft);"></div>
-                        <span style="font-size: 12px; font-weight: 700; color: #4a5568;">Active <span class="d-none d-sm-inline">Holiday</span></span>
+                    <div class="legend-item-custom">
+                        <div style="width: 8px; height: 8px; border-radius: 50%; background: var(--danger); box-shadow: 0 0 0 3px var(--danger-soft);"></div>
+                        <span>Active <span class="d-none d-sm-inline">Holiday</span></span>
                     </div>
-                    <div class="d-flex align-items-center gap-2 px-2 py-1" style="background: rgba(0,0,0,0.02); border-radius: 8px;">
-                        <div style="width: 8px; height: 8px; border-radius: 50%; background: #e2e8f0; box-shadow: 0 0 0 3px #f1f5f9;"></div>
-                        <span style="font-size: 12px; font-weight: 700; color: #94a3b8;">Inactive <span class="d-none d-sm-inline">/ Disabled</span></span>
+                    <div class="legend-item-custom">
+                        <div style="width: 8px; height: 8px; border-radius: 50%; background: #94a3b8; box-shadow: 0 0 0 3px rgba(148, 163, 184, 0.2);"></div>
+                        <span>Inactive <span class="d-none d-sm-inline">/ Disabled</span></span>
                     </div>
                 </div>
-                <button type="button" class="btn-dt-chip-action btn-dt-action-primary border-0 px-3 px-md-4" style="height: 38px;" onclick="openAddHolidayModal()">
+                <button type="button" class="btn-dt-action btn-dt-action-success border-0 px-3 px-md-4" style="height: 38px;" onclick="openAddHolidayModal()">
                     <i class="fas fa-calendar-plus"></i> <span class="d-none d-md-inline">Add New Holiday</span>
                 </button>
             </div>
@@ -92,7 +122,7 @@
 
 <!-- ── Add / Edit Holiday Modal ── -->
 <div class="modal fade" id="settingHolidayModal" tabindex="-1" role="dialog" aria-labelledby="settingHolidayModalTitle" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 24px; overflow: hidden;">
             <div class="modal-header border-0 py-4" style="background: linear-gradient(135deg, var(--primary) 0%, #4f39ce 100%) !important; color: white;">
                 <h6 class="modal-title font-weight-bold" id="settingHolidayModalTitle" style="font-size: 1.1rem; letter-spacing: 0.5px;">
@@ -102,51 +132,67 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <form method="post" action="<?= base_url('admin/manageHoliday'); ?>">
-                <div class="modal-body p-4 text-dark">
-                    <div class="mb-4">
-                        <label class="mb-2 d-block" style="font-weight: 700; color: #374151; font-size: 13px;">Selected Date</label>
-                        <div class="input-group-custom position-relative">
-                            <i class="fas fa-calendar-day position-absolute" style="left: 16px; top: 50%; transform: translateY(-50%); color: var(--primary); z-index: 5;"></i>
-                            <input class="form-control"
-                                   style="height: 54px; padding-left: 48px; border-radius: 14px; border: 1.5px solid #e5e7eb; background: #f9fafb; font-weight: 600; color: #111827;"
-                                   type="text"
-                                   id="c_date"
-                                   name="c_date"
-                                   readonly
-                                   required>
+            <form method="post" action="<?= base_url('access-control/holiday/manage'); ?>">
+                <div class="modal-body p-0">
+                    <div class="d-flex g-0 w-100 flex-column flex-lg-row">
+                        <div class="col-lg-5 p-4 d-flex flex-column mb-0 modal-guide-sidebar">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mr-3" style="width:40px;height:40px;flex-shrink:0;"><i class="fas fa-calendar-alt fa-lg"></i></div>
+                                <h6 class="fw-bold text-primary mb-0" style="font-size:15px;">Holiday Guide</h6>
+                            </div>
+                            <p class="text-muted small mb-3" style="font-size:12px;line-height:1.5;">Configure public holidays that affect settlement delays and payout clearing schedules.</p>
+                            <div class="modal-guide-card mb-3">
+                                <h6 class="fw-bold mb-1 d-flex align-items-center" style="font-size:12px;"><i class="fas fa-clock text-warning mr-2"></i> Settlement Impact</h6>
+                                <p class="mb-0" style="font-size:11px;line-height:1.4;">Active holidays will delay T+1/T+2 settlement calculations. Payouts are automatically shifted to the next business day.</p>
+                            </div>
+                            <div class="modal-guide-card">
+                                <h6 class="fw-bold mb-1 d-flex align-items-center" style="font-size:12px;"><i class="fas fa-info-circle text-info mr-2"></i> Status Options</h6>
+                                <p class="mb-0" style="font-size:11px;line-height:1.4;"><b>Active</b> = Non-working day (delays payouts). <b>Not Active</b> = Regular business day.</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-7 p-4 modal-input-pane mb-0">
+                            <div class="mb-4">
+                                <label>Selected Date</label>
+                                <div class="input-group-custom position-relative">
+                                    <i class="fas fa-calendar-day position-absolute" style="left: 16px; top: 50%; transform: translateY(-50%); color: var(--primary); z-index: 5;"></i>
+                                    <input class="form-control modal-input-custom has-icon"
+                                           type="text"
+                                           id="c_date"
+                                           name="c_date"
+                                           readonly
+                                           required>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label>Holiday Name / Description <span class="text-danger">*</span></label>
+                                <input type="text" 
+                                       class="form-control modal-input-custom" 
+                                       required 
+                                       id="c_desc" 
+                                       name="c_desc" 
+                                       placeholder="e.g. Lunar New Year">
+                            </div>
+
+                            <div class="mb-4">
+                                <label>Availability Status <span class="text-danger">*</span></label>
+                                <select class="form-control modal-input-custom" 
+                                        id="c_status" 
+                                        required 
+                                        name="c_status">
+                                    <option value="" selected disabled>Select status</option>
+                                    <option value="Active">Active Holiday</option>
+                                    <option value="Not Active">Not Active (Regular Day)</option>
+                                </select>
+                            </div>
+
+                            <input type="hidden" id="c_action" name="c_action" value="create"/>
                         </div>
                     </div>
-
-                    <div class="mb-4">
-                        <label class="mb-2 d-block" style="font-weight: 700; color: #374151; font-size: 13px;">Holiday Name / Description <span class="text-danger">*</span></label>
-                        <input type="text" 
-                               class="form-control" 
-                               required 
-                               id="c_desc" 
-                               name="c_desc" 
-                               placeholder="e.g. Lunar New Year"
-                               style="height: 54px; border-radius: 14px; border: 1.5px solid #e5e7eb; padding: 0 16px; font-size: 14px; width: 100%; transition: all 0.2s;">
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="mb-2 d-block" style="font-weight: 700; color: #374151; font-size: 13px;">Availability Status <span class="text-danger">*</span></label>
-                        <select class="form-control" 
-                                id="c_status" 
-                                required 
-                                name="c_status"
-                                style="height: 54px; border-radius: 14px; border: 1.5px solid #e5e7eb; padding: 0 16px; font-size: 14px; width: 100%;">
-                            <option value="" selected disabled>Select status</option>
-                            <option value="Active">Active Holiday</option>
-                            <option value="Not Active">Not Active (Regular Day)</option>
-                        </select>
-                    </div>
-
-                    <input type="hidden" id="c_action" name="c_action" value="create"/>
                 </div>
                 <div class="modal-footer px-4 pb-4 border-0">
-                    <button type="button" class="btn btn-light" data-dismiss="modal" style="height: 50px; border-radius: 12px; font-weight: 700; color: #6b7280; background: #f3f4f6; border: none; padding: 0 24px;">Cancel</button>
-                    <button type="submit" class="btn" style="height: 50px; border-radius: 12px; font-weight: 700; color: #fff; background: var(--primary); border: none; padding: 0 32px; box-shadow: 0 4px 14px var(--primary-glow);">
+                    <button type="button" class="btn btn-modal-cancel" data-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-modal-submit">
                         Save Holiday
                     </button>
                 </div>
@@ -188,6 +234,7 @@
         const status = event.status || (event.extendedProps && event.extendedProps.status);
         return {
             ...event,
+            display: 'background',
             classNames: [status === 'Active' ? 'holiday-active' : 'holiday-inactive']
         };
     });
@@ -225,7 +272,7 @@
                 <div class="mobile-event-content">
                     <div class="title">${ev.desc || ev.title}</div>
                     <div class="status">
-                        <span class="badge badge-pill ${ev.status === 'Active' ? 'badge-success' : 'badge-light'}">
+                        <span class="badge ${ev.status === 'Active' ? 'badge-soft-danger' : 'badge-soft-secondary'} px-2 py-1" style="font-size: 10px; border-radius: 6px;">
                             ${ev.status}
                         </span>
                     </div>
@@ -259,6 +306,22 @@
           if (isMobile) renderMobileEventList(info.view);
       },
       events: formattedEvents,
+      eventDidMount: function(info) {
+          const title = info.event.extendedProps.desc || info.event.title;
+          const status = info.event.extendedProps.status;
+          const tooltipText = `${title} (${status === 'Active' ? 'Active Holiday' : 'Inactive'})`;
+          
+          $(info.el).attr('data-toggle', 'tooltip');
+          $(info.el).attr('data-placement', 'top');
+          $(info.el).attr('title', tooltipText);
+          $(info.el).tooltip({
+              container: 'body',
+              trigger: 'hover'
+          });
+      },
+      eventWillUnmount: function(info) {
+          $(info.el).tooltip('dispose');
+      },
       dateClick: function(e) {
         const date = e.dateStr;
         const existingEvent = calendar.getEvents().find(ev => {
@@ -285,3 +348,18 @@
 </script>
 
 
+
+<script>
+$(document).ready(function() {
+    // Drawer Toggle Logic
+    $('#toggleGuideBtn').on('click', function() {
+        $('#instructionDrawer, #instructionOverlay').addClass('open');
+        $('body').css('overflow', 'hidden');
+    });
+
+    $('#closeDrawerBtn, #instructionOverlay').on('click', function() {
+        $('#instructionDrawer, #instructionOverlay').removeClass('open');
+        $('body').css('overflow', '');
+    });
+});
+</script>

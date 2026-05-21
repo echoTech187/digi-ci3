@@ -1,6 +1,6 @@
 <?php defined('BASEPATH') or exit('No direct script access allowed');
 
-class Menu extends CI_Controller
+class MenuController extends CI_Controller
 {
    public function __construct()
    {
@@ -28,9 +28,17 @@ class Menu extends CI_Controller
             'menu' => $this->input->post('menu')
          ];
 
-         $this->Model_menu->insert_menu($data, 'user_menu');
-
-         $this->session->set_flashdata('message', '<div class="alert alert-success" role="alert">New Menu Added</div>');
+         $result = $this->Model_menu->insert_menu($data, 'user_menu');
+         if ($result === true) {
+            $this->session->set_flashdata('success', 'New Menu Added Successfully.');
+         } else {
+            $code = isset($result['code']) ? $result['code'] : 0;
+            if ($code == 1142) {
+               $this->session->set_flashdata('error', 'Access Denied. You do not have sufficient database privileges to create menu items.');
+            } else {
+               $this->session->set_flashdata('error', 'Unable to add menu due to a system constraint. Please contact technical support.');
+            }
+         }
          redirect('menu');
       }
    }
@@ -68,8 +76,17 @@ class Menu extends CI_Controller
          'id' => $id
       ];
 
-      $this->Model_menu->changeMenu($where, $data, 'user_menu');
-      $this->session->set_flashdata('message', '<div class="alert alert-success" role="alert">Menu Changed</div>');
+      $result = $this->Model_menu->changeMenu($where, $data, 'user_menu');
+      if ($result === true) {
+         $this->session->set_flashdata('success', 'Menu Updated Successfully.');
+      } else {
+         $code = isset($result['code']) ? $result['code'] : 0;
+         if ($code == 1142) {
+            $this->session->set_flashdata('error', 'Access Denied. You do not have sufficient database privileges to modify menu items.');
+         } else {
+            $this->session->set_flashdata('error', 'Unable to update menu due to a system constraint. Please contact technical support.');
+         }
+      }
       redirect('menu');
    }
 
@@ -98,9 +115,17 @@ class Menu extends CI_Controller
             'is_active' => $this->input->post('is_active')
          ];
 
-         $this->Model_menu->insert_subMenu($data, 'user_sub_menu');
-
-         $this->session->set_flashdata('message', '<div class="alert alert-success" role="alert">New Submenu Added</div>');
+         $result = $this->Model_menu->insert_subMenu($data, 'user_sub_menu');
+         if ($result === true) {
+            $this->session->set_flashdata('success', 'New Submenu Added Successfully.');
+         } else {
+            $code = isset($result['code']) ? $result['code'] : 0;
+            if ($code == 1142) {
+               $this->session->set_flashdata('error', 'Access Denied. You do not have sufficient database privileges to create submenu items.');
+            } else {
+               $this->session->set_flashdata('error', 'Unable to add submenu due to a system constraint. Please contact technical support.');
+            }
+         }
          redirect('menu/subMenu');
       }
    }
@@ -153,7 +178,17 @@ class Menu extends CI_Controller
          'id' => $id,
       ];
 
-      $this->Model_menu->changeSubMenu($where, $data, 'user_sub_menu');
+      $result = $this->Model_menu->changeSubMenu($where, $data, 'user_sub_menu');
+      if ($result === true) {
+         $this->session->set_flashdata('success', 'Submenu Updated Successfully.');
+      } else {
+         $code = isset($result['code']) ? $result['code'] : 0;
+         if ($code == 1142) {
+            $this->session->set_flashdata('error', 'Access Denied. You do not have sufficient database privileges to modify submenu items.');
+         } else {
+            $this->session->set_flashdata('error', 'Unable to update submenu due to a system constraint. Please contact technical support.');
+         }
+      }
       redirect('menu/submenu');
    }
 
@@ -167,7 +202,19 @@ class Menu extends CI_Controller
          'id' => $id
       ];
 
-      $this->Model_menu->hapus_menu($where, 'user_menu');
+      $result = $this->Model_menu->hapus_menu($where, 'user_menu');
+      if ($result === true) {
+         $this->session->set_flashdata('success', 'Menu Deleted Successfully.');
+      } else {
+         $code = isset($result['code']) ? $result['code'] : 0;
+         if ($code == 1142) {
+            $this->session->set_flashdata('error', 'Access Denied. You do not have sufficient database privileges to delete menu items.');
+         } elseif ($code == 1451) {
+            $this->session->set_flashdata('error', 'Cannot delete this menu because it contains active submenus or access permissions.');
+         } else {
+            $this->session->set_flashdata('error', 'Unable to delete menu due to a system constraint. Please contact technical support.');
+         }
+      }
       redirect('menu');
    }
 
@@ -181,7 +228,17 @@ class Menu extends CI_Controller
          'id' => $id
       ];
 
-      $this->Model_menu->hapus_subMenu($where, 'user_sub_menu');
+      $result = $this->Model_menu->hapus_subMenu($where, 'user_sub_menu');
+      if ($result === true) {
+         $this->session->set_flashdata('success', 'Submenu Deleted Successfully.');
+      } else {
+         $code = isset($result['code']) ? $result['code'] : 0;
+         if ($code == 1142) {
+            $this->session->set_flashdata('error', 'Access Denied. You do not have sufficient database privileges to delete submenu items.');
+         } else {
+            $this->session->set_flashdata('error', 'Unable to delete submenu due to a system constraint. Please contact technical support.');
+         }
+      }
       redirect('menu/subMenu');
    }
 
@@ -193,7 +250,7 @@ class Menu extends CI_Controller
       $this->load->model('AdminModel');
       $data['role'] = $this->AdminModel->get_roles();
       $data['breadcrumb_url_replace'] = [
-         'menu' => 'menu/role'
+         'menu' => 'access-control/roles'
       ];
       $this->load->view('menu/role', $data);
    }
@@ -202,7 +259,7 @@ class Menu extends CI_Controller
    {
       if (!$role_id) {
          $this->session->set_flashdata('message', '<div class="alert alert-danger" role="alert">Role ID not found.</div>');
-         redirect('menu/role');
+         redirect('access-control/roles');
       }
       $data['title'] = 'Role Access';
       $data['user'] = $this->Model_user->view_user()->row_array();
@@ -218,8 +275,8 @@ class Menu extends CI_Controller
 
       // Custom breadcrumb redirects
       $data['breadcrumb_url_replace'] = [
-         'menu'       => 'menu/role',
-         'roleAccess' => 'menu/roleAccess/'.$role_id,
+         'menu'       => 'access-control/roles',
+         'roleAccess' => 'access-control/roles/access/'.$role_id,
       ];
 
       // Get all menus hierarchically
@@ -309,17 +366,38 @@ class Menu extends CI_Controller
    {
       $id = $this->input->post('id');
       
+      $db_debug = $this->db->db_debug;
+      $this->db->db_debug = FALSE;
+
       // Also delete submenus
-      $this->db->where('parent_id', $id)->delete('user_menu');
+      $this->db->where('parent_id', $id);
+      $successSub = $this->db->delete('user_menu');
+      $errSub = $this->db->error();
       
       // Delete the menu itself
-      $this->Model_menu->hapus_menu(['id' => $id], 'user_menu');
+      $resultMenu = $this->Model_menu->hapus_menu(['id' => $id], 'user_menu');
       
       // Clean up access mappings
-      $this->db->where('menu_id', $id)->delete('user_access_menu');
+      $this->db->where('menu_id', $id);
+      $successAccess = $this->db->delete('user_access_menu');
+      $errAccess = $this->db->error();
 
-      $this->rbac->clear_menu_cache();
-      $this->session->set_flashdata('message', 'Menu Deleted Successfully!');
-      echo json_encode(['status' => 'success']);
+      $this->db->db_debug = $db_debug;
+
+      if (!$successSub || $resultMenu !== true || !$successAccess) {
+         $err = (!$successSub) ? $errSub : (($resultMenu !== true) ? $resultMenu : $errAccess);
+         $code = isset($err['code']) ? $err['code'] : 0;
+         $msg = 'Unable to delete menu due to a system constraint.';
+         if ($code == 1142) {
+            $msg = 'Access Denied. You do not have sufficient database privileges to delete menu items.';
+         } elseif ($code == 1451) {
+            $msg = 'Cannot delete this menu because it contains active submenus or access permissions.';
+         }
+         echo json_encode(['status' => 'error', 'message' => $msg]);
+      } else {
+         $this->rbac->clear_menu_cache();
+         $this->session->set_flashdata('message', 'Menu Deleted Successfully!');
+         echo json_encode(['status' => 'success']);
+      }
    }
 }

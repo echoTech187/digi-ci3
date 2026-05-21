@@ -6,12 +6,47 @@
             <p class="dt-page-subtitle">Centralized configuration for all merchant cashout channels</p>
         </div>
         <div class="d-flex" style="gap:10px;">
-            <button type="button" class="btn-dt-action btn-dt-action-primary" data-toggle="modal" data-target="#globalUpdateModal">
+            <button type="button" class="btn-dt-action btn-dt-action-primary border-0 d-flex align-items-center shadow-sm" id="toggleGuideBtn" >
+                <i class="fas fa-book-open mr-2"></i> <span class="d-none d-md-block">Instructions Guide</span>
+            </button>
+            <button type="button" class="btn-dt-action btn-dt-action-success" data-toggle="modal" data-target="#globalUpdateModal">
                 <i class="fas fa-globe mr-1 mr-2"></i> Edit Mapping
             </button>
-            <a href="<?= base_url('admin/cashout/external/add_view'); ?>" class="btn-dt-action btn-dt-action-success border-0 text-decoration-none d-flex align-items-center">
+            <a href="<?= base_url('external/cashout/create'); ?>" class="btn-dt-action btn-dt-action-success border-0 text-decoration-none d-flex align-items-center">
                 <i class="fas fa-plus mr-1 mr-2"></i> Add Mapping
             </a>
+        </div>
+    </div>
+
+    <!-- ── Toggleable Page Instructional Drawer ── -->
+    <div class="drawer-overlay" id="instructionOverlay"></div>
+    <div class="drawer-right" id="instructionDrawer">
+        <div class="drawer-header">
+            <h6 class="drawer-title"><i class="fas fa-book mr-2"></i> Cashout Mapping Guide</h6>
+            <button type="button" class="drawer-close" id="closeDrawerBtn">&times;</button>
+        </div>
+        <div class="drawer-body">
+            <p class="drawer-desc">This dashboard allows you to manage external cashout (withdrawal) channel configurations for all merchants.</p>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-globe text-primary mr-2"></i> Edit Mapping (Bulk Update)</div>
+                <p class="drawer-card-text">Update the cashout provider for multiple merchants at once. Choose to update a channel group globally or for a specific merchant.</p>
+            </div>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-sliders-h text-primary mr-2"></i> Filtering & Search</div>
+                <p class="drawer-card-text">Quickly locate configuration rows using global search, or narrow them down by Channel Group, Channel ID, Provider, or Status.</p>
+            </div>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-percent text-primary mr-2"></i> Fee Structures</div>
+                <p class="drawer-card-text">View active fee types (Fixed, Percentage, or Both) as well as the exact fee value applied to transactions.</p>
+            </div>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-wallet text-primary mr-2"></i> Transaction Limits</div>
+                <p class="drawer-card-text">Check the minimum and maximum transactional limits configured for each mapping.</p>
+            </div>
         </div>
     </div>
 
@@ -20,11 +55,84 @@
     <div class="card border-0 shadow-sm dt-card">
         <!-- ── Toolbar ── -->
         <div class="dt-toolbar">
-            <div class="dt-search-wrapper">
+            <div class="dt-search-wrapper flex-grow-1 mb-2 mb-md-0" style="min-width: 280px;">
                 <i class="fas fa-search dt-search-icon"></i>
                 <input type="text" id="dt-search" class="dt-search-input" placeholder="Search merchant or channel...">
             </div>
 
+            <!-- RIGHT: Filters & Actions -->
+            <div class="dt-toolbar-filters d-flex align-items-center gap-2">
+                <!-- More Filters Trigger -->
+                <div class="dt-filter-group dt-more-filters-wrapper">
+                    <button type="button" id="cashoutMoreFiltersBtn" class="dt-more-filters-btn">
+                        <i class="fas fa-sliders-h mr-1 mr-2"></i> Filters
+                        <span class="dt-more-badge" id="cashoutFilterBadge" style="display: none;">0</span>
+                        <i class="fas fa-chevron-down ml-1 dt-more-arrow"></i>
+                    </button>
+
+                    <!-- Dropdown Panel -->
+                    <div class="dt-more-panel" id="cashoutMoreFiltersPanel">
+                        <div class="dt-more-panel-header">
+                            <span class="dt-more-panel-title"><i class="fas fa-filter mr-1 mr-2"></i> Advanced Filters</span>
+                            <a href="javascript:void(0)" id="cashoutMoreClear" class="dt-more-clear">Clear All</a>
+                        </div>
+
+                        <div class="dt-more-panel-body">
+                            <!-- Channel Group -->
+                            <div class="dt-more-field">
+                                <label class="dt-more-label"><i class="fas fa-layer-group mr-1 mr-2"></i> Channel Group</label>
+                                <select id="filter_channel_group" class="dt-more-select filter-select">
+                                    <option value="">All Groups</option>
+                                    <?php foreach ($channel_groups as $cg): ?>
+                                        <option value="<?= $cg->c_channelGroup ?>"><?= $cg->c_channelGroup ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+
+                            <!-- Channel ID -->
+                            <div class="dt-more-field">
+                                <label class="dt-more-label"><i class="fas fa-hashtag mr-1 mr-2"></i> Channel ID</label>
+                                <select id="filter_channel_id" class="dt-more-select filter-select">
+                                    <option value="">All Channel IDs</option>
+                                    <?php foreach ($channel_ids as $cid): ?>
+                                        <option value="<?= $cid->id ?>"><?= $cid->id ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+
+                            <!-- Provider -->
+                            <div class="dt-more-field">
+                                <label class="dt-more-label"><i class="fas fa-server mr-1 mr-2"></i> Provider / External Default</label>
+                                <select id="filter_provider" class="dt-more-select filter-select">
+                                    <option value="">All Providers</option>
+                                    <?php foreach ($channel_external_id_defaults as $prd): ?>
+                                        <option value="<?= $prd->c_externalIdDefault ?>"><?= $prd->c_externalIdDefault ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+
+                            <!-- Status -->
+                            <div class="dt-more-field">
+                                <label class="dt-more-label"><i class="fas fa-info-circle mr-1 mr-2"></i> Status</label>
+                                <select id="filter_status" class="dt-more-select filter-select">
+                                    <option value="">All Statuses</option>
+                                    <option value="Active">Active</option>
+                                    <option value="Not Active">Not Active</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="dt-more-panel-footer">
+                            <button type="button" id="cashoutMoreApply" class="btn-dt-apply btn-dt-action-primary shadow-sm">
+                                <i class="fas fa-check mr-1 mr-2"></i> APPLY FILTER
+                            </button>
+                            <button type="button" id="cashoutMoreFiltersClose" class="btn-dt-cancel btn-dt-secondary">
+                                CANCEL
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- ── Table ── -->
@@ -50,7 +158,7 @@
 
 <!-- Edit Mapping Modal -->
 <div class="modal fade" id="globalUpdateModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg">
             <div class="modal-header modal-header-primary border-0 mh-premium" style="background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);">
                 <div class="d-flex align-items-center">
@@ -66,9 +174,16 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <form id="globalUpdateForm" action="<?= base_url('admin/cashout/external/bulk_update'); ?>" method="post">
+            <form id="globalUpdateForm" action="<?= base_url('external/cashout/bulk-update'); ?>" method="post">
                 <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>">
                 <div class="modal-body p-4 bg-light">
+                    <div class="d-flex align-items-start p-3 mb-4" style="background:rgba(78,115,223,0.08);border:1px solid rgba(78,115,223,0.15);border-radius:12px;">
+                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mr-3 flex-shrink-0" style="width:36px;height:36px;"><i class="fas fa-globe"></i></div>
+                        <div>
+                            <h6 class="fw-bold text-primary mb-1" style="font-size:13px;">Global Cash Out Update Guide</h6>
+                            <p class="text-muted mb-0" style="font-size:11px;line-height:1.5;">This operation switches the active cashout provider for <strong>all merchants at once</strong>. Choose between group-based or individual channel updates. Changes take effect immediately after confirmation.</p>
+                        </div>
+                    </div>
                     <div class="alert alert-info border-0 shadow-sm small mb-4">
                         <i class="fas fa-info-circle mr-2"></i> Configure the criteria for the bulk channel update.
                     </div>
@@ -201,6 +316,17 @@
 <script src="<?= base_url('assets/js/server-datatables.js') ?>"></script>
 <script>
 $(document).ready(function() {
+    // Drawer Logic
+    $('#toggleGuideBtn').on('click', function() {
+        $('#instructionDrawer, #instructionOverlay').addClass('open');
+        $('body').css('overflow', 'hidden');
+    });
+
+    $('#closeDrawerBtn, #instructionOverlay').on('click', function() {
+        $('#instructionDrawer, #instructionOverlay').removeClass('open');
+        $('body').css('overflow', '');
+    });
+
     const csrfName = '<?= $this->security->get_csrf_token_name(); ?>';
     const csrfHash = '<?= $this->security->get_csrf_hash(); ?>';
 
@@ -224,7 +350,7 @@ $(document).ready(function() {
         $(this).find('.select2').val('').trigger('change');
     });
 
-    var table = initServerDataTable("#cashoutTable", "<?= base_url('admin/cashout/external/ajax_list') ?>", [
+    var table = initServerDataTable("#cashoutTable", "<?= base_url('external/cashout/list') ?>", [
         { "data": "no", "className": "ps-4 text-muted small" },
         { 
             "data": "merchant_name",
@@ -283,16 +409,31 @@ $(document).ready(function() {
                     <div class="dropdown">
                         <button class="btn btn-sm rounded-circle p-2 border-0 bg-transparent" type="button" data-toggle="dropdown" data-boundary="viewport"><i class="fas fa-ellipsis-v"></i></button>
                         <ul class="dropdown-menu dropdown-menu-right border-0 shadow-lg">
-                            <li><a class="dropdown-item" href="<?= base_url('admin/cashout/external/edit_view') ?>/${row.id}"><i class="fas fa-edit text-primary mr-2"></i> Edit</a></li>
+                            <li><a class="dropdown-item" href="<?= base_url('external/cashout/edit') ?>/${row.id}"><i class="fas fa-edit text-primary mr-2"></i> Edit</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item text-danger delete-btn" href="javascript:void(0)" data-href="<?= base_url('admin/cashout/external/delete') ?>/${row.id}"><i class="fas fa-trash mr-2"></i> Delete</a></li>
+                            <li><a class="dropdown-item text-danger delete-btn" href="javascript:void(0)" data-href="<?= base_url('external/cashout/delete') ?>/${row.id}"><i class="fas fa-trash mr-2"></i> Delete</a></li>
                         </ul>
                     </div>
                 `;
             }
         }
-    ], { order: [[1, 'asc']] });
-
+    ], {
+        ajax: {
+            url: "<?= base_url('external/cashout/list') ?>",
+            type: "POST",
+            data: function (d) {
+                var csrfName = $('meta[name="csrf-token-name"]').attr('content');
+                var csrfHash = $('meta[name="csrf-token-hash"]').attr('content');
+                if (csrfName && csrfHash) {
+                    d[csrfName] = csrfHash;
+                }
+                d.channel_group = $('#filter_channel_group').val();
+                d.channel_id = $('#filter_channel_id').val();
+                d.provider = $('#filter_provider').val();
+                d.status = $('#filter_status').val();
+            }
+        }
+    });
 
     // Reset modal on close
     $('#globalUpdateModal').on('hidden.bs.modal', function () {
@@ -301,7 +442,83 @@ $(document).ready(function() {
         $form.find('.select2').val(null).trigger('change');
         $('#updateByGroup').prop('checked', true).trigger('change');
         $('#merchantSelectGroup').hide();
-        restoreBtn($form);
+        if (typeof restoreBtn === 'function') restoreBtn($form);
+    });
+
+    // Update Scope Radio Toggle
+    $('input[name="update_type"]').on('change', function() {
+        if (this.value === 'merchant') {
+            $('#merchantSelectGroup').slideDown();
+        } else {
+            $('#merchantSelectGroup').slideUp();
+            $('#global_merchant').val(null).trigger('change');
+        }
+    });
+
+    // Dynamic Channel ID population for Current Configuration
+    $('#global_current_group, #global_current_external').on('change', function() {
+        const group = $('#global_current_group').val();
+        const external_id = $('#global_current_external').val();
+        const $channelSelect = $('#global_current_channel');
+        const tokenVal = $('input[name="' + csrfName + '"]').val() || csrfHash;
+
+        if (!group) return;
+
+        $channelSelect.html('<option value="" selected>Loading channels...</option>');
+
+        $.ajax({
+            url: "<?= base_url('external/cashout/get-channels') ?>",
+            type: "POST",
+            data: { 
+                group: group, 
+                external_id: external_id,
+                [csrfName]: tokenVal 
+            },
+            dataType: "json",
+            success: function(data) {
+                let options = '<option value="" selected>All Channel IDs</option>';
+                data.forEach(function(item) {
+                    options += `<option value="${item.id}">${item.id}</option>`;
+                });
+                $channelSelect.html(options);
+            },
+            error: function() {
+                $channelSelect.html('<option value="" selected>All Channel IDs</option>');
+            }
+        });
+    });
+
+    // Dynamic Channel ID population for New Configuration
+    $('#global_new_group, #global_new_external').on('change', function() {
+        const group = $('#global_new_group').val();
+        const external_id = $('#global_new_external').val();
+        const $channelSelect = $('#global_new_channel');
+        const tokenVal = $('input[name="' + csrfName + '"]').val() || csrfHash;
+
+        if (!group) return;
+
+        $channelSelect.html('<option value="" selected>Loading channels...</option>');
+
+        $.ajax({
+            url: "<?= base_url('external/cashout/get-channels') ?>",
+            type: "POST",
+            data: { 
+                group: group, 
+                external_id: external_id,
+                [csrfName]: tokenVal 
+            },
+            dataType: "json",
+            success: function(data) {
+                let options = '<option value="" selected>Don\'t Update (Keep Original)</option>';
+                data.forEach(function(item) {
+                    options += `<option value="${item.id}">${item.id}</option>`;
+                });
+                $channelSelect.html(options);
+            },
+            error: function() {
+                $channelSelect.html('<option value="" selected>Don\'t Update (Keep Original)</option>');
+            }
+        });
     });
 
     $('#globalUpdateForm').on('submit', function(e) {
@@ -362,8 +579,55 @@ $(document).ready(function() {
             confirmButtonText: 'Yes, update all!'
         }).then((result) => {
             if (result.isConfirmed) {
-                $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i> UPDATING...');
-                form.submit();
+                const $form = $(form);
+                const $btn = $form.find('button[type="submit"]');
+
+                if (typeof loadingBtn === 'function') loadingBtn($btn, 'Updating Channels...');
+
+                $.ajax({
+                    url: $form.attr('action'),
+                    type: $form.attr('method'),
+                    data: $form.serialize(),
+                    dataType: 'json',
+                    success: function(response) {
+                        if (typeof restoreBtn === 'function') restoreBtn($form);
+                        $('#globalUpdateModal').modal('hide');
+                        
+                        if (response.status) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Update Successful!',
+                                text: response.message,
+                                customClass: { popup: 'swal2-premium-popup', confirmButton: 'swal2-premium-confirm' },
+                                buttonsStyling: false
+                            }).then(() => {
+                                table.ajax.reload(null, false);
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Update Failed',
+                                text: response.message,
+                                customClass: { popup: 'swal2-premium-popup', confirmButton: 'swal2-premium-confirm' },
+                                buttonsStyling: false
+                            });
+                        }
+                    },
+                    error: function(xhr) {
+                        if (typeof restoreBtn === 'function') restoreBtn($form);
+                        let msg = 'An unexpected error occurred while updating channels.';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            msg = xhr.responseJSON.message;
+                        }
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'System Error',
+                            text: msg,
+                            customClass: { popup: 'swal2-premium-popup', confirmButton: 'swal2-premium-confirm' },
+                            buttonsStyling: false
+                        });
+                    }
+                });
             }
         });
     });
@@ -413,5 +677,67 @@ $(document).ready(function() {
     });
 
     $('#dt-search').on('keyup', function() { table.search(this.value).draw(); });
+
+    // ── More Filters dropdown ──
+    var $moreBtn   = $('#cashoutMoreFiltersBtn');
+    var $morePanel = $('#cashoutMoreFiltersPanel');
+    var $moreClose = $('#cashoutMoreFiltersClose');
+    var $moreApply = $('#cashoutMoreApply');
+    var $moreClear = $('#cashoutMoreClear');
+
+    $moreBtn.on('click', function(e) {
+        e.stopPropagation();
+        var isOpen = $morePanel.hasClass('dt-panel-open');
+        $morePanel.toggleClass('dt-panel-open', !isOpen);
+        $moreBtn.toggleClass('dt-open', !isOpen);
+    });
+
+    $moreClose.on('click', function() {
+        $morePanel.removeClass('dt-panel-open');
+        $moreBtn.removeClass('dt-open');
+    });
+
+    $(document).on('click', function(e) {
+        if (!$(e.target).closest('.dt-more-filters-wrapper').length) {
+            $morePanel.removeClass('dt-panel-open');
+            $moreBtn.removeClass('dt-open');
+        }
+    });
+
+    // Select2 for ALL selects inside the More Filters panel
+    $('#cashoutMoreFiltersPanel select').not('.select2-hidden-accessible').select2({
+        width: '100%',
+        dropdownAutoWidth: true,
+        dropdownParent: $(document.body),
+        minimumResultsForSearch: 0
+    });
+
+    function updateFilterBadge() {
+        let count = 0;
+        $('.filter-select').each(function() {
+            if ($(this).val()) count++;
+        });
+        const $badge = $('#cashoutFilterBadge');
+        if (count > 0) {
+            $badge.text(count).show();
+            $moreBtn.addClass('dt-more-filters-active');
+        } else {
+            $badge.hide();
+            $moreBtn.removeClass('dt-more-filters-active');
+        }
+    }
+
+    $moreApply.on('click', function() {
+        updateFilterBadge();
+        table.ajax.reload(null, false);
+        $morePanel.removeClass('dt-panel-open');
+        $moreBtn.removeClass('dt-open');
+    });
+
+    $moreClear.on('click', function() {
+        $('.filter-select').val('').trigger('change');
+        updateFilterBadge();
+        table.ajax.reload(null, false);
+    });
 });
 </script>

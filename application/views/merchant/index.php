@@ -1,59 +1,139 @@
 <div>
 
     <!-- Page Header -->
-    <div class="dt-page-header">
+    <div class="dt-page-header d-flex align-items-center justify-content-between">
         <div>
             <h1 class="dt-page-title">Merchant Management</h1>
             <p class="dt-page-subtitle">View and manage all registered merchants and their balances.</p>
         </div>
+        <button type="button" class="btn-dt-action btn-dt-action-primary border-0 d-flex align-items-center shadow-sm" id="toggleGuideBtn" >
+            <i class="fas fa-book-open mr-2"></i> <span class="d-none d-md-block">Instructions Guide</span>
+        </button>
     </div>
 
-    <!-- Alerts Standardized to Swal2 Premium -->
-    <script>
-        $(document).ready(function() {
-            <?php if ($this->session->flashdata('success')) : ?>
-                Swal.fire({
-                    title: 'Success!',
-                    text: '<?= $this->session->flashdata('success'); ?>',
-                    icon: 'success',
-                    customClass: {
-                        popup: 'swal2-premium-popup',
-                        confirmButton: 'swal2-premium-confirm'
-                    },
-                    buttonsStyling: false
-                });
-            <?php endif; ?>
-
-            <?php if ($this->session->flashdata('error')) : ?>
-                Swal.fire({
-                    title: 'Error!',
-                    html: '<?= trim(str_replace(["\r", "\n"], '', $this->session->flashdata('error'))); ?>',
-                    icon: 'error',
-                    customClass: {
-                        popup: 'swal2-premium-popup',
-                        confirmButton: 'swal2-premium-confirm'
-                    },
-                    buttonsStyling: false
-                });
-            <?php endif; ?>
-        });
-    </script>
+    <!-- ── Toggleable Page Instructional Drawer ── -->
+    <div class="drawer-overlay" id="instructionOverlay"></div>
+    <div class="drawer-right" id="instructionDrawer">
+        <div class="drawer-header">
+            <h6 class="drawer-title"><i class="fas fa-book mr-2"></i> Merchant Management Overview</h6>
+            <button type="button" class="drawer-close" id="closeDrawerBtn">&times;</button>
+        </div>
+        <div class="drawer-body">
+            <p class="drawer-desc">Welcome to the core Merchant Management portal. Here you can oversee all registered merchants, track their API statuses, and manage their fund balances with absolute precision.</p>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-search text-primary mr-2"></i> Global Search</div>
+                <p class="drawer-card-text">Find any merchant instantly by their Name, Merchant ID, Business ID, or Email Address using the fast search bar.</p>
+            </div>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-filter text-primary mr-2"></i> Advanced Filters</div>
+                <p class="drawer-card-text">Narrow down the list by Account Status (Active, Blocked, Frozen), OpenAPI Status, and Registration Date range.</p>
+            </div>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-wallet text-primary mr-2"></i> Balance Controls</div>
+                <p class="drawer-card-text">Authorized admins can manually Credit (Add) or Debit (Deduct) a merchant's balance directly from the actions menu.</p>
+            </div>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-key text-primary mr-2"></i> Delegation & Security</div>
+                <p class="drawer-card-text">Configure a merchant's maximum hierarchy permissions, ensuring sub-accounts never exceed their parent's access ceilings.</p>
+            </div>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-sliders-h text-primary mr-2"></i> Deep Configuration</div>
+                <p class="drawer-card-text">Use the Action (⋮) menu to jump to a merchant's specific Mutation Logs, Sub-Accounts, or Cashin/Cashout Fee Settings.</p>
+            </div>
+        </div>
+    </div>
 
     <!-- Data Table Card -->
     <div class="card dt-card border-0 shadow-sm">
         <!-- Toolbar -->
-        <form id="merchant_search_form" method="post" action="<?= base_url('admin/merchant'); ?>">
+        <form id="merchant_search_form" method="post" action="<?= base_url('merchant/manage'); ?>">
             <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>">
             <div class="dt-toolbar">
                 <!-- LEFT: Global Search -->
-                <div class="dt-search-wrapper">
+                <div class="dt-search-wrapper flex-grow-1 mb-2 mb-md-0" style="min-width: 280px;">
                     <i class="fas fa-search dt-search-icon"></i>
                     <input type="text" id="merchantGlobalSearch" class="dt-search-input" placeholder="Search by name, ID, email, or Business ID..." value="<?= $this->session->userdata('search_merchant'); ?>">
                 </div>
 
                 <!-- RIGHT: Filters & Actions -->
-                <div class="dt-toolbar-filters">
-                    <a href="<?= base_url('admin/addMerchant'); ?>" class="btn-dt-action btn-dt-action-success border-0 text-decoration-none d-flex align-items-center">
+                <div class="dt-toolbar-filters d-flex align-items-center gap-2">
+                    <!-- More Filters Trigger -->
+                    <div class="dt-filter-group dt-more-filters-wrapper">
+                        <button type="button" id="merchantMoreFiltersBtn" class="dt-more-filters-btn <?= (!empty($this->session->userdata('search_merchant_status')) || !empty($this->session->userdata('search_merchant_openapi_status')) || !empty($this->session->userdata('search_merchant_date_from')) || !empty($this->session->userdata('search_merchant_date_to'))) ? 'dt-more-filters-active' : ''; ?>">
+                            <i class="fas fa-sliders-h mr-1 mr-2"></i> Filters
+                            <?php 
+                                $extra_active = 0;
+                                if (!empty($this->session->userdata('search_merchant_status'))) $extra_active++;
+                                if (!empty($this->session->userdata('search_merchant_openapi_status'))) $extra_active++;
+                                if (!empty($this->session->userdata('search_merchant_date_from')) || !empty($this->session->userdata('search_merchant_date_to'))) $extra_active++;
+                                if ($extra_active > 0): 
+                            ?>
+                                <span class="dt-more-badge"><?= $extra_active; ?></span>
+                            <?php endif; ?>
+                            <i class="fas fa-chevron-down ml-1 dt-more-arrow"></i>
+                        </button>
+
+                        <!-- Dropdown Panel -->
+                        <div class="dt-more-panel" id="merchantMoreFiltersPanel">
+                            <div class="dt-more-panel-header">
+                                <span class="dt-more-panel-title"><i class="fas fa-filter mr-1 mr-2"></i> Advanced Filters</span>
+                                <a href="<?= base_url('merchant/manage/reset'); ?>" class="dt-more-clear">Clear All</a>
+                            </div>
+
+                            <div class="dt-more-panel-body">
+                                <!-- Registration Date Range -->
+                                <div class="dt-more-field">
+                                    <label class="dt-more-label"><i class="fas fa-calendar-alt mr-1 mr-2"></i> Registration Date</label>
+                                    <div class="dt-filter-chip">
+                                        <input type="date" name="search_merchant_date_from" class="dt-chip-input" value="<?= $this->session->userdata('search_merchant_date_from'); ?>" title="Date From">
+                                        <span class="text-muted mx-1" style="font-size:11px;">→</span>
+                                        <input type="date" name="search_merchant_date_to" class="dt-chip-input" value="<?= $this->session->userdata('search_merchant_date_to'); ?>" title="Date To">
+                                    </div>
+                                </div>
+
+                                <!-- Status -->
+                                <div class="dt-more-field">
+                                    <label class="dt-more-label"><i class="fas fa-info-circle mr-1 mr-2"></i> Account Status</label>
+                                    <select name="search_merchant_status" class="dt-more-select">
+                                        <option value="">All Account Statuses</option>
+                                        <option value="Pending" <?= ($this->session->userdata('search_merchant_status') == 'Pending') ? 'selected' : ''; ?>>Pending Approval</option>
+                                        <option value="Active" <?= ($this->session->userdata('search_merchant_status') == 'Active') ? 'selected' : ''; ?>>Active</option>
+                                        <option value="Blocked" <?= ($this->session->userdata('search_merchant_status') == 'Blocked') ? 'selected' : ''; ?>>Blocked</option>
+                                        <option value="Freeze" <?= ($this->session->userdata('search_merchant_status') == 'Freeze') ? 'selected' : ''; ?>>Frozen</option>
+                                    </select>
+                                </div>
+                                
+                                <!-- OpenAPI Status -->
+                                <div class="dt-more-field">
+                                    <label class="dt-more-label"><i class="fas fa-plug mr-1 mr-2"></i> OpenAPI Status</label>
+                                    <select name="search_merchant_openapi_status" class="dt-more-select">
+                                        <option value="">All OpenAPI Statuses</option>
+                                        <option value="Pending" <?= ($this->session->userdata('search_merchant_openapi_status') == 'Pending') ? 'selected' : ''; ?>>Pending Approval</option>
+                                        <option value="Active" <?= ($this->session->userdata('search_merchant_openapi_status') == 'Active') ? 'selected' : ''; ?>>Active Access</option>
+                                        <option value="Not Active" <?= ($this->session->userdata('search_merchant_openapi_status') == 'Not Active') ? 'selected' : ''; ?>>Deactivated</option>
+                                        <option value="Blocked" <?= ($this->session->userdata('search_merchant_openapi_status') == 'Blocked') ? 'selected' : ''; ?>>Blocked</option>
+                                        <option value="Freeze" <?= ($this->session->userdata('search_merchant_openapi_status') == 'Freeze') ? 'selected' : ''; ?>>Account Frozen</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="dt-more-panel-footer">
+                                <button type="submit" name="submit" class="btn-dt-apply btn-dt-action-primary shadow-sm">
+                                    <i class="fas fa-check mr-1 mr-2"></i> APPLY FILTER
+                                </button>
+                                <button type="button" id="merchantMoreFiltersClose" class="btn-dt-cancel btn-dt-secondary">
+                                    CANCEL
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <a href="<?= base_url('merchant/manage/add'); ?>" class="btn-dt-action btn-dt-action-success border-0 text-decoration-none d-flex align-items-center" >
                         <i class="fas fa-plus mr-2"></i> <span class="d-none d-md-block">Add Merchant</span>
                     </a>
                 </div>
@@ -69,6 +149,7 @@
                             <th>Merchant ID</th>
                             <th>Merchant Info</th>
                             <th>Balance Summary</th>
+                            <th>Registration Date</th>
                             <th>Status Details</th>
                             <th class="text-center pe-4" data-orderable="false">Actions</th>
                         </tr>
@@ -82,7 +163,7 @@
 
         <!-- Modal: Credit Balance -->
         <div class="modal fade" id="creditBalanceModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
                 <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
                     <div class="modal-header modal-header-primary border-0 mh-premium">
                         <div class="d-flex align-items-center">
@@ -98,41 +179,74 @@
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
-                    <div class="modal-body p-4">
-                        <form id="creditBalanceForm">
-                            <div class="mb-4">
-                                <label class="form-label text-muted small fw-bold">Merchant Name</label>
-                                <input type="text" class="form-control border-0 py-2 fw-bold" readonly id="merchantName">
-                                <input type="hidden" id="merchantId" name="merchantId">
-                            </div>
-                            <div class="mb-4">
-                                <label class="form-label text-muted small fw-bold">Channel ID</label>
-                                <select id="creditChannelId" name="channelId" class="form-select border-1 py-1" style="font-size: 13px;" required>
-                                    <option value="">Select Channel</option>
-                                    <?php foreach ($cashin_channels as $cashin_channel): ?>
-                                        <option value="<?php echo $cashin_channel->id; ?>"><?php echo $cashin_channel->id; ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                            <div class="mb-4">
-                                <label class="form-label text-muted small fw-bold">Description</label>
-                                <input type="text" class="form-control border-1 py-2" id="creditDescription" name="description" placeholder="e.g. Manual top-up" required>
-                            </div>
-                            <div class="mb-4">
-                                <label class="form-label text-muted small fw-bold">Amount (IDR)</label>
-                                <div class="input-group">
-                                    <span class="input-group-text border-1">Rp</span>
-                                    <input type="text" class="form-control border-1 py-2 fw-bold text-success" id="amountCredit" name="amount" oninput="formatNumber(this)" placeholder="0">
+                    <div class="modal-body p-0">
+                        <div class="d-flex g-0 w-100 flex-column flex-lg-row">
+                            <!-- Left Column: Instructions Guide -->
+                            <div class="col-lg-5 p-4 d-flex flex-column justify-content-between mb-0" style="background:#202328;color:#fff;border-right:1px solid rgba(255,255,255,0.05);">
+                                <div>
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center mr-3 shadow-sm" style="width: 36px; height: 36px; background-color: rgba(40, 167, 69, 0.2) !important;">
+                                            <i class="fas fa-book-open text-success"></i>
+                                        </div>
+                                        <h6 class="fw-bold text-success mb-0" style="font-size: 14px;">Credit Guide</h6>
+                                    </div>
+                                    <p class="text-muted small mb-4" style="font-size: 12px; line-height: 1.5;">Guide for manual balance adjustments:</p>
+                                    
+                                    <div class="d-flex flex-column gap-3">
+                                        <div class="p-3 rounded-4 shadow-sm border-0 mb-3" style="background-color: rgba(255, 255, 255, 0.03) !important; border: 1px solid rgba(255, 255, 255, 0.08) !important; border-radius: 12px;">
+                                            <h6 class="fw-bold text-white mb-1 d-flex align-items-center" style="font-size: 12px;"><i class="fas fa-user-check text-warning mr-2"></i> 1. Merchant Identity</h6>
+                                            <p class="text-muted mb-0" style="font-size: 11px; line-height: 1.4;">Verify the merchant's business name and ID carefully before executing any balance adjustment.</p>
+                                        </div>
+                                        <div class="p-3 rounded-4 shadow-sm border-0 mb-3" style="background-color: rgba(255, 255, 255, 0.03) !important; border: 1px solid rgba(255, 255, 255, 0.08) !important; border-radius: 12px;">
+                                            <h6 class="fw-bold text-white mb-1 d-flex align-items-center" style="font-size: 12px;"><i class="fas fa-file-invoice text-info mr-2"></i> 2. Precise Auditing</h6>
+                                            <p class="text-muted mb-0" style="font-size: 11px; line-height: 1.4;">Manual transactions require clear descriptions. Explain why you are crediting the merchant's balance.</p>
+                                        </div>
+                                        <div class="p-3 rounded-4 shadow-sm border-0 mb-3" style="background-color: rgba(255, 255, 255, 0.03) !important; border: 1px solid rgba(255, 255, 255, 0.08) !important; border-radius: 12px;">
+                                            <h6 class="fw-bold text-white mb-1 d-flex align-items-center" style="font-size: 12px;"><i class="fas fa-bolt text-success mr-2"></i> 3. Instant Execution</h6>
+                                            <p class="text-muted mb-0" style="font-size: 11px; line-height: 1.4;">Credits are applied to the active wallet instantly. This operation is recorded and cannot be automatically undone.</p>
+                                        </div>
+                                    </div>
                                 </div>
-                                <input type="hidden" id="rawAmountCredit" name="rawAmountCredit">
                             </div>
-                            <div class="modal-footer border-0 px-0 pb-0 mt-4">
-                                <button type="button" class="btn-dt-cancel" data-dismiss="modal">CANCEL</button>
-                                <button type="submit" id="btnConfirmCredit" class="btn-dt-apply px-4">
-                                    <i class="fas fa-check mr-2"></i> CONFIRM CREDIT
-                                </button>
+
+                            <!-- Right Column: The Form -->
+                            <div class="col-lg-7 p-4 bg-light mb-0">
+                                <form id="creditBalanceForm">
+                                    <div class="mb-4">
+                                        <label class="form-label text-muted small fw-bold">Merchant Name</label>
+                                        <input type="text" class="form-control border-0 py-2 bg-dark text-white fw-bold" readonly id="merchantName" style="border-color: rgba(255,255,255,0.1);">
+                                        <input type="hidden" id="merchantId" name="merchantId">
+                                    </div>
+                                    <div class="mb-4">
+                                        <label class="form-label text-muted small fw-bold">Channel ID</label>
+                                        <select id="creditChannelId" name="channelId" class="form-select border-1 py-1" style="font-size: 13px;" required>
+                                            <option value="">Select Channel</option>
+                                            <?php foreach ($cashin_channels as $cashin_channel): ?>
+                                                <option value="<?php echo $cashin_channel->id; ?>"><?php echo $cashin_channel->id; ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
+                                    <div class="mb-4">
+                                        <label class="form-label text-muted small fw-bold">Description</label>
+                                        <input type="text" class="form-control border-1 py-2" id="creditDescription" name="description" placeholder="e.g. Manual top-up" required>
+                                    </div>
+                                    <div class="mb-4">
+                                        <label class="form-label text-muted small fw-bold">Amount (IDR)</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text border-1">Rp</span>
+                                            <input type="text" class="form-control border-1 py-2 fw-bold text-success" id="amountCredit" name="amount" oninput="formatNumber(this)" placeholder="0">
+                                        </div>
+                                        <input type="hidden" id="rawAmountCredit" name="rawAmountCredit">
+                                    </div>
+                                    <div class="modal-footer border-0 px-0 pb-0 mt-4 justify-content-end">
+                                        <button type="button" class="btn-dt-cancel mr-2" data-dismiss="modal">CANCEL</button>
+                                        <button type="submit" id="btnConfirmCredit" class="btn-dt-apply px-4 no-loader">
+                                            <i class="fas fa-check mr-2"></i> CONFIRM CREDIT
+                                        </button>
+                                    </div>
+                                </form>
                             </div>
-                        </form>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -140,7 +254,7 @@
 
         <!-- Modal: Debit Balance -->
         <div class="modal fade" id="debitBalanceModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
                 <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
                     <div class="modal-header modal-header-primary border-0 mh-premium">
                         <div class="d-flex align-items-center">
@@ -156,41 +270,74 @@
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
-                    <div class="modal-body p-4">
-                        <form id="debitBalanceForm">
-                            <div class="mb-4">
-                                <label class="form-label text-muted small fw-bold">Merchant Name</label>
-                                <input type="text" class="form-control border-0 py-2 fw-bold" readonly id="merchantNameDebit">
-                                <input type="hidden" id="merchantIdDebit" name="merchantIdDebit">
-                            </div>
-                            <div class="mb-4">
-                                <label class="form-label text-muted small fw-bold">Channel ID</label>
-                                <select id="debitChannelId" name="channelId" class="form-select border-1 py-1" style="font-size: 13px;" required>
-                                    <option value="">Select Channel</option>
-                                    <?php foreach ($cashout_channels as $cashout_channel): ?>
-                                        <option value="<?php echo $cashout_channel->id; ?>"><?php echo $cashout_channel->id; ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                            <div class="mb-4">
-                                <label class="form-label text-muted small fw-bold">Description</label>
-                                <input type="text" class="form-control border-1 py-2" id="debitDescription" name="description" placeholder="e.g. Administrative deduction" required>
-                            </div>
-                            <div class="mb-4">
-                                <label class="form-label text-muted small fw-bold">Amount (IDR)</label>
-                                <div class="input-group">
-                                    <span class="input-group-text border-1">Rp</span>
-                                    <input type="text" class="form-control border-1 py-2 fw-bold text-danger" id="amountDebit" name="amount" oninput="formatNumber(this)" placeholder="0">
+                    <div class="modal-body p-0">
+                        <div class="d-flex g-0 w-100 flex-column flex-lg-row">
+                            <!-- Left Column: Instructions Guide -->
+                            <div class="col-lg-5 p-4 d-flex flex-column justify-content-between mb-0" style="background:#202328;color:#fff;border-right:1px solid rgba(255,255,255,0.05);">
+                                <div>
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center mr-3 shadow-sm" style="width: 36px; height: 36px; background-color: rgba(220, 53, 69, 0.2) !important;">
+                                            <i class="fas fa-book-open text-danger"></i>
+                                        </div>
+                                        <h6 class="fw-bold text-danger mb-0" style="font-size: 14px;">Debit Guide</h6>
+                                    </div>
+                                    <p class="text-muted small mb-4" style="font-size: 12px; line-height: 1.5;">Guide for manual balance deductions:</p>
+                                    
+                                    <div class="d-flex flex-column gap-3">
+                                        <div class="p-3 rounded-4 shadow-sm border-0 mb-3" style="background-color: rgba(255, 255, 255, 0.03) !important; border: 1px solid rgba(255, 255, 255, 0.08) !important; border-radius: 12px;">
+                                            <h6 class="fw-bold text-white mb-1 d-flex align-items-center" style="font-size: 12px;"><i class="fas fa-info-circle text-warning mr-2"></i> 1. Balance Availability</h6>
+                                            <p class="text-muted mb-0" style="font-size: 11px; line-height: 1.4;">Ensure the merchant's available balance is sufficient to cover the debit adjustment to avoid a negative balance.</p>
+                                        </div>
+                                        <div class="p-3 rounded-4 shadow-sm border-0 mb-3" style="background-color: rgba(255, 255, 255, 0.03) !important; border: 1px solid rgba(255, 255, 255, 0.08) !important; border-radius: 12px;">
+                                            <h6 class="fw-bold text-white mb-1 d-flex align-items-center" style="font-size: 12px;"><i class="fas fa-file-contract text-info mr-2"></i> 2. Audit Trail</h6>
+                                            <p class="text-muted mb-0" style="font-size: 11px; line-height: 1.4;">Enter a detailed explanation for the balance deduction (e.g. system correction, penalty, fee recovery).</p>
+                                        </div>
+                                        <div class="p-3 rounded-4 shadow-sm border-0 mb-3" style="background-color: rgba(255, 255, 255, 0.03) !important; border: 1px solid rgba(255, 255, 255, 0.08) !important; border-radius: 12px;">
+                                            <h6 class="fw-bold text-white mb-1 d-flex align-items-center" style="font-size: 12px;"><i class="fas fa-minus-square text-danger mr-2"></i> 3. Immediate Effect</h6>
+                                            <p class="text-muted mb-0" style="font-size: 11px; line-height: 1.4;">Funds are deducted from the merchant's balance in real-time. This action is permanently logged and audited.</p>
+                                        </div>
+                                    </div>
                                 </div>
-                                <input type="hidden" id="rawAmountDebit" name="rawAmountDebit">
                             </div>
-                            <div class="modal-footer border-0 px-0 pb-0 mt-4">
-                                <button type="button" class="btn-dt-cancel" data-dismiss="modal">CANCEL</button>
-                                <button type="submit" id="btnConfirmDebit" class="btn-dt-apply px-4">
-                                    <i class="fas fa-check mr-2"></i> CONFIRM DEBIT
-                                </button>
+
+                            <!-- Right Column: The Form -->
+                            <div class="col-lg-7 p-4 bg-light mb-0">
+                                <form id="debitBalanceForm">
+                                    <div class="mb-4">
+                                        <label class="form-label text-muted small fw-bold">Merchant Name</label>
+                                        <input type="text" class="form-control border-0 py-2 bg-dark text-white fw-bold" readonly id="merchantNameDebit" style="border-color: rgba(255,255,255,0.1);">
+                                        <input type="hidden" id="merchantIdDebit" name="merchantIdDebit">
+                                    </div>
+                                    <div class="mb-4">
+                                        <label class="form-label text-muted small fw-bold">Channel ID</label>
+                                        <select id="debitChannelId" name="channelId" class="form-select border-1 py-1" style="font-size: 13px;" required>
+                                            <option value="">Select Channel</option>
+                                            <?php foreach ($cashout_channels as $cashout_channel): ?>
+                                                <option value="<?php echo $cashout_channel->id; ?>"><?php echo $cashout_channel->id; ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
+                                    <div class="mb-4">
+                                        <label class="form-label text-muted small fw-bold">Description</label>
+                                        <input type="text" class="form-control border-1 py-2" id="debitDescription" name="description" placeholder="e.g. Administrative deduction" required>
+                                    </div>
+                                    <div class="mb-4">
+                                        <label class="form-label text-muted small fw-bold">Amount (IDR)</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text border-1">Rp</span>
+                                            <input type="text" class="form-control border-1 py-2 fw-bold text-danger" id="amountDebit" name="amount" oninput="formatNumber(this)" placeholder="0">
+                                        </div>
+                                        <input type="hidden" id="rawAmountDebit" name="rawAmountDebit">
+                                    </div>
+                                    <div class="modal-footer border-0 px-0 pb-0 mt-4 justify-content-end">
+                                        <button type="button" class="btn-dt-cancel mr-2" data-dismiss="modal">CANCEL</button>
+                                        <button type="submit" id="btnConfirmDebit" class="btn-dt-apply px-4 no-loader">
+                                            <i class="fas fa-check mr-2"></i> CONFIRM DEBIT
+                                        </button>
+                                    </div>
+                                </form>
                             </div>
-                        </form>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -199,7 +346,7 @@
 
         <!-- Modal: Delegate Access -->
         <div class="modal fade" id="delegateModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-dialog modal-xl modal-dialog-centered">
                 <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
                     <div class="modal-header modal-header-primary border-0 mh-premium">
                         <div class="d-flex align-items-center">
@@ -215,31 +362,64 @@
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
-                    <div class="modal-body p-0">
-                        <div class="p-4 border-bottom bg-light">
-                            <div class="d-flex align-items-center gap-2">
-                                <div class="avatar-sm bg-warning-soft text-warning rounded-circle p-2 me-3" style="background-color: rgba(255, 193, 7, 0.1); width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
-                                    <i class="fas fa-store"></i>
-                                </div>
-                                <div>
-                                    <h6 class="mb-0 fw-bold" id="delegateMerchantName">Merchant Name</h6>
-                                    <small class="text-muted">Setting maximum permissions for this merchant and its hierarchy.</small>
-                                </div>
-                            </div>
-                        </div>
-                        <form id="delegateForm">
+                    <div class="modal-body p-0 bg-light">
+                        <form id="delegateForm" class="mb-0 w-100">
                             <input type="hidden" id="delegateMerchantId" name="merchantId">
-                            <div id="permissionsList" style="max-height: 400px; overflow-y: auto;" class="p-4">
-                                <div class="text-center py-5" id="permissionsLoader">
-                                    <div class="spinner-border text-warning" role="status"><span class="visually-hidden">Loading...</span></div>
-                                    <p class="mt-2 text-muted">Fetching permissions...</p>
+                            <div class="d-flex g-0 w-100 flex-column flex-lg-row">
+                                <!-- Left Column: Instructions Guide -->
+                                <div class="col-lg-5 p-4 d-flex flex-column justify-content-between mb-0" style="background:#202328;color:#fff;border-right:1px solid rgba(255,255,255,0.05);">
+                                    <div>
+                                        <div class="d-flex align-items-center mb-3">
+                                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mr-3 shadow-sm" style="width: 36px; height: 36px;">
+                                                <i class="fas fa-book-open"></i>
+                                            </div>
+                                            <h6 class="fw-bold text-primary mb-0" style="font-size: 14px;">Delegation Guide</h6>
+                                        </div>
+                                        <p class="text-muted small mb-4" style="font-size: 12px; line-height: 1.5;">Guide for managing merchant permission ceilings:</p>
+                                        
+                                        <div class="d-flex flex-column gap-3">
+                                            <div class="p-3 rounded-4 shadow-sm border-0 mb-3" style="background-color: rgba(255, 255, 255, 0.03) !important; border: 1px solid rgba(255, 255, 255, 0.08) !important; border-radius: 12px;">
+                                                <h6 class="fw-bold text-white mb-1 d-flex align-items-center" style="font-size: 12px;"><i class="fas fa-shield-alt text-warning mr-2"></i> 1. Permission Ceiling</h6>
+                                                <p class="text-muted mb-0" style="font-size: 11px; line-height: 1.4;">You can only delegate permissions that you personally possess. You cannot grant access beyond your clearance.</p>
+                                            </div>
+                                            <div class="p-3 rounded-4 shadow-sm border-0 mb-3" style="background-color: rgba(255, 255, 255, 0.03) !important; border: 1px solid rgba(255, 255, 255, 0.08) !important; border-radius: 12px;">
+                                                <h6 class="fw-bold text-white mb-1 d-flex align-items-center" style="font-size: 12px;"><i class="fas fa-sitemap text-info mr-2"></i> 2. Inheritance &amp; Flow</h6>
+                                                <p class="text-muted mb-0" style="font-size: 11px; line-height: 1.4;">Granting a permission allows the merchant to use the feature and further delegate it down their hierarchy.</p>
+                                            </div>
+                                            <div class="p-3 rounded-4 shadow-sm border-0 mb-3" style="background-color: rgba(255, 255, 255, 0.03) !important; border: 1px solid rgba(255, 255, 255, 0.08) !important; border-radius: 12px;">
+                                                <h6 class="fw-bold text-white mb-1 d-flex align-items-center" style="font-size: 12px;"><i class="fas fa-sliders-h text-success mr-2"></i> 3. Granular Controls</h6>
+                                                <p class="text-muted mb-0" style="font-size: 11px; line-height: 1.4;">Toggle between Grant (Allow) and Deny (Block) to override default role permissions instantly.</p>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="modal-footer border-0 px-4 py-3 border-top">
-                                <button type="button" class="btn-dt-cancel" data-dismiss="modal">CANCEL</button>
-                                <button type="submit" class="btn-dt-apply px-4" id="btnSaveDelegation">
-                                    <i class="fas fa-save mr-2"></i> SAVE CHANGES
-                                </button>
+
+                                <!-- Right Column: Permissions List -->
+                                <div class="col-lg-7 p-4 bg-light mb-0">
+                                    <div class="d-flex align-items-center gap-2 mb-4">
+                                        <div class="avatar-sm bg-warning-soft text-warning rounded-circle p-2 me-3" style="background-color: rgba(255, 193, 7, 0.1); width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                                            <i class="fas fa-store text-warning"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0 fw-bold text-dark" id="delegateMerchantName">Merchant Name</h6>
+                                            <small class="text-muted">Setting maximum permissions for this merchant and its hierarchy.</small>
+                                        </div>
+                                    </div>
+
+                                    <div id="permissionsList" style="max-height: 400px; overflow-y: auto;" class="p-2 border rounded bg-white">
+                                        <div class="text-center py-5" id="permissionsLoader">
+                                            <div class="spinner-border text-warning" role="status"><span class="visually-hidden">Loading...</span></div>
+                                            <p class="mt-2 text-muted">Fetching permissions...</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="modal-footer border-0 px-0 pb-0 mt-4 justify-content-end">
+                                        <button type="button" class="btn-dt-cancel mr-2" data-dismiss="modal">CANCEL</button>
+                                        <button type="submit" class="btn-dt-apply px-4 no-loader" id="btnSaveDelegation">
+                                            <i class="fas fa-save mr-2"></i> SAVE CHANGES
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </form>
                     </div>
@@ -248,25 +428,25 @@
         </div>
 
         <!-- DataTables & Scripts -->
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script src="<?= base_url('assets/js/server-datatables.js') ?>"></script>
         <script>
             $(document).ready(function() {
-                var ajaxUrl = "<?= base_url('admin/merchant') ?>";
+                var ajaxUrl = "<?= base_url('merchant/manage') ?>";
                 var columns = [
                     { "data": "no", "orderable": false, "className": "ps-4 text-muted small" },
                     { 
                         "data": "id",
+                        "className": "text-left text-nowrap",
                         "render": function(data, type, row) {
                             return '<span class="fw-bold text-dark">#' + data + '</span>';
                         }
                     },
                     { 
                         "data": "c_name",
-                        "className": "text-left",
+                        "className": "text-left text-nowrap",
                         "render": function(data, type, row) {
                             return '<div class="d-flex flex-column">' +
-                                   '    <span class="fw-bold text-dark">' + data + '</span>' +
+                                   '    <a href="<?= base_url('merchant/manage/detail/') ?>' + row.id + '" class="fw-bold text-primary text-decoration-none">' + data + '</a>' +
                                    '    <span class="text-muted small">' + row.c_email + '</span>' +
                                    '</div>';
                         }
@@ -295,13 +475,53 @@
                         }
                     },
                     { 
+                        "data": "c_dateCreated", 
+                        "orderable": true,
+                        "className": "text-center text-nowrap",
+                        "render": function(data, type, row) {
+                            if (!data) return '-';
+                            var d = new Date(data);
+                            if (isNaN(d)) return data;
+                            var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                            var day = ('0' + d.getDate()).slice(-2);
+                            var month = months[d.getMonth()];
+                            var year = d.getFullYear();
+                            return '<span class="fw-bold text-dark">' + day + ' ' + month + ' ' + year + '</span>';
+                        }
+                    },
+                    { 
                         "data": "c_status",
                         "orderable": false,
                         "render": function(data, type, row) {
-                            var status_class = (data == 'Active') ? 'bg-success' : 'bg-secondary';
-                            var openapi_class = (row.c_openapiStatus == 'Active') ? 'text-success' : 'text-muted';
+                            var status_bg = 'bg-secondary-soft';
+                            var status_text = 'text-secondary';
+                            if (data == 'Active') {
+                                status_bg = 'bg-success-soft';
+                                status_text = 'text-success';
+                            } else if (data == 'Pending') {
+                                status_bg = 'bg-warning-soft';
+                                status_text = 'text-warning';
+                            } else if (data == 'Blocked') {
+                                status_bg = 'bg-danger-soft';
+                                status_text = 'text-danger';
+                            } else if (data == 'Freeze') {
+                                status_bg = 'bg-info-soft';
+                                status_text = 'text-info';
+                            }
+
+                            var openapi_class = 'text-muted';
+                            if (row.c_openapiStatus == 'Active') {
+                                openapi_class = 'text-success';
+                            } else if (row.c_openapiStatus == 'Pending') {
+                                openapi_class = 'text-warning';
+                            } else if (row.c_openapiStatus == 'Blocked') {
+                                openapi_class = 'text-danger';
+                            } else if (row.c_openapiStatus == 'Freeze') {
+                                openapi_class = 'text-info';
+                            }
+
                             return '<div class="d-flex flex-column">' +
-                                   '    <span class="mb-2 badge ' + status_class + '-soft text-' + status_class.replace('-soft', '').replace('bg-', '') + ' rounded-pill px-3 py-1" style="width: fit-content;">' +
+                                   '    <span class="mb-2 badge ' + status_bg + ' ' + status_text + ' rounded-pill px-3 py-1" style="width: fit-content;">' +
                                    '        ' + data +
                                    '    </span>' +
                                    '    <span class="small ' + openapi_class + ' d-flex align-items-center gap-1">' +
@@ -310,6 +530,7 @@
                                    '</div>';
                         }
                     },
+                    
                     { 
                         "data": "action",
                         "orderable": false,
@@ -320,9 +541,10 @@
                                 <div class="dropdown">
                                     <button class="btn btn-sm rounded-circle p-2 border-0 bg-transparent" type="button" data-toggle="dropdown" data-boundary="viewport"><i class="fas fa-ellipsis-v"></i></button>
                                     <ul class="dropdown-menu dropdown-menu-right">
-                                        <li><a class="dropdown-item" href="${baseUrl}admin/editMerchant/${row.id}"><i class="fas fa-edit text-info"></i> Edit Merchant</a></li>
-                                        <li><a class="dropdown-item" href="${baseUrl}admin/mutation/${row.id}"><i class="fas fa-exchange-alt text-primary"></i> Mutation Log</a></li>
-                                        <li><a class="dropdown-item" href="${baseUrl}admin/submerchant/${row.id}"><i class="fas fa-users text-success"></i> Sub Accounts</a></li>
+                                        <li><a class="dropdown-item" href="${baseUrl}merchant/manage/detail/${row.id}"><i class="fas fa-eye text-primary"></i> Detail Merchant</a></li>
+                                        <li><a class="dropdown-item" href="${baseUrl}merchant/manage/edit/${row.id}"><i class="fas fa-edit text-info"></i> Edit Merchant</a></li>
+                                        <li><a class="dropdown-item" href="${baseUrl}finance/mutation/${row.id}"><i class="fas fa-exchange-alt text-primary"></i> Mutation Log</a></li>
+                                        <li><a class="dropdown-item" href="${baseUrl}merchant/sub-account/${row.id}"><i class="fas fa-users text-success"></i> Sub Accounts</a></li>
                                         ${row.c_merchantLevel == 0 ? `<li><button class="dropdown-item" data-toggle="modal" data-target="#delegateModal" onClick="openDelegateModal(${row.id}, '${row.c_name.replace(/'/g, "\\'")}')"><i class="fas fa-key text-warning"></i> Delegate</button></li>` : ''}
                                         ${row.hasBalancePermission ? `
                                             <li><hr class="dropdown-divider"></li>
@@ -330,8 +552,8 @@
                                             <li><button class="dropdown-item" data-toggle="modal" data-target="#debitBalanceModal" onClick="detaildebit(${row.id}, '${row.c_name.replace(/'/g, "\\'")}')"><i class="fas fa-minus-circle text-danger"></i> Debit Balance</button></li>
                                         ` : ''}
                                         <li><hr class="dropdown-divider"></li>
-                                        <li><a class="dropdown-item" href="${baseUrl}admin/settingcashinfee/${row.id}"><i class="fas fa-cog text-secondary"></i> Cashin Fee</a></li>
-                                        <li><a class="dropdown-item" href="${baseUrl}admin/settingcashoutfee/${row.id}"><i class="fas fa-cog text-secondary"></i> Cashout Fee</a></li>
+                                        <li><a class="dropdown-item" href="${baseUrl}merchant/setting-cashin-fee/${row.id}"><i class="fas fa-cog text-secondary"></i> Cashin Fee</a></li>
+                                        <li><a class="dropdown-item" href="${baseUrl}merchant/setting-cashout-fee/${row.id}"><i class="fas fa-cog text-secondary"></i> Cashout Fee</a></li>
                                     </ul>
                                 </div>
                             `;
@@ -345,6 +567,49 @@
                     if (json && json.redirect) {
                         window.location = json.redirect;
                     }
+                });
+
+                // Drawer Logic
+                $('#toggleGuideBtn').on('click', function() {
+                    $('#instructionDrawer, #instructionOverlay').addClass('open');
+                    $('body').css('overflow', 'hidden');
+                });
+
+                $('#closeDrawerBtn, #instructionOverlay').on('click', function() {
+                    $('#instructionDrawer, #instructionOverlay').removeClass('open');
+                    $('body').css('overflow', '');
+                });
+
+                // ── More Filters dropdown ──
+                var $moreBtn   = $('#merchantMoreFiltersBtn');
+                var $morePanel = $('#merchantMoreFiltersPanel');
+                var $moreClose = $('#merchantMoreFiltersClose');
+
+                $moreBtn.on('click', function(e) {
+                    e.stopPropagation();
+                    var isOpen = $morePanel.hasClass('dt-panel-open');
+                    $morePanel.toggleClass('dt-panel-open', !isOpen);
+                    $moreBtn.toggleClass('dt-open', !isOpen);
+                });
+
+                $moreClose.on('click', function() {
+                    $morePanel.removeClass('dt-panel-open');
+                    $moreBtn.removeClass('dt-open');
+                });
+
+                $(document).on('click', function(e) {
+                    if (!$(e.target).closest('.dt-more-filters-wrapper').length) {
+                        $morePanel.removeClass('dt-panel-open');
+                        $moreBtn.removeClass('dt-open');
+                    }
+                });
+
+                // Select2 for ALL selects inside the More Filters panel
+                $('#merchantMoreFiltersPanel select').not('.select2-hidden-accessible').select2({
+                    width: '100%',
+                    dropdownAutoWidth: true,
+                    dropdownParent: $(document.body),
+                    minimumResultsForSearch: 0
                 });
 
                 // Global search with Debounce
@@ -391,7 +656,7 @@
                 $('#permissionsList').html('<div class="text-center py-5"><div class="spinner-border text-info" role="status"></div><p class="mt-2 text-muted">Fetching permissions...</p></div>');
                 
                 $.ajax({
-                    url: '<?= base_url('admin/fetchMerchantPermissions/') ?>' + id,
+                    url: '<?= base_url('merchant/permissions/') ?>' + id,
                     type: 'GET',
                     dataType: 'json',
                     success: function(response) {
@@ -458,8 +723,10 @@
                     $label.removeClass('btn-link text-danger').addClass('btn-danger active');
                 }
 
-                // Data update
-                $input.prop('checked', true);
+                // Data update: Explicitly uncheck all radio buttons in this group first to prevent duplicate serialization
+                $parentGroup.find('input[type="radio"]').prop('checked', false).removeAttr('checked');
+                // Then check the clicked one
+                $input.prop('checked', true).attr('checked', 'checked');
                 $input.trigger('change');
             });
 
@@ -472,13 +739,17 @@
 
                 Swal.fire({
                     icon: 'warning',
-                    title: 'Simpan Perubahan?',
-                    html: 'Permission untuk <strong>' + merchantName + '</strong> akan langsung berlaku setelah disimpan.',
+                    title: 'Save Permission Changes?',
+                    html: 'Maximum hierarchy permissions for <strong class="text-primary">' + merchantName + '</strong> will be updated immediately. Do you want to proceed?',
                     showCancelButton: true,
-                    confirmButtonText: '<i class="fas fa-save mr-1"></i> Ya, Simpan',
-                    cancelButtonText: 'Batal',
-                    confirmButtonColor: '#0d6efd',
-                    cancelButtonColor: '#6c757d'
+                    confirmButtonText: '<i class="fas fa-check mr-2"></i>Yes, Save Changes',
+                    cancelButtonText: '<i class="fas fa-times mr-2"></i>Cancel',
+                    customClass: {
+                        popup: 'swal2-premium-popup',
+                        confirmButton: 'swal2-premium-confirm mr-2',
+                        cancelButton: 'swal2-premium-cancel'
+                    },
+                    buttonsStyling: false
                 }).then(function(result) {
                     if (!result.isConfirmed) return;
 
@@ -489,7 +760,7 @@
                     $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i> SAVING...');
 
                     $.ajax({
-                        url: '<?= base_url('admin/saveDelegation/') ?>' + id,
+                        url: '<?= base_url('merchant/permissions/') ?>'+id+'/save',
                         type: 'POST',
                         data: $form.serialize(),
                         dataType: 'json',
@@ -497,18 +768,31 @@
                             if (response.status === 'success') { 
                                 Swal.fire({ 
                                     icon: 'success', 
-                                    title: 'Tersimpan!', 
+                                    title: 'Saved Successfully!', 
                                     text: response.message,
                                     timer: 2000,
-                                    showConfirmButton: false
+                                    showConfirmButton: false,
+                                    customClass: { popup: 'swal2-premium-popup' }
                                 }); 
                                 $('#delegateModal').modal('hide'); 
                             } else {
-                                Swal.fire({ icon: 'error', title: 'Gagal', text: response.message });
+                                Swal.fire({ 
+                                    icon: 'error', 
+                                    title: 'Failed', 
+                                    text: response.message,
+                                    customClass: { popup: 'swal2-premium-popup', confirmButton: 'swal2-premium-confirm' },
+                                    buttonsStyling: false
+                                });
                             }
                         },
                         error: function() {
-                            Swal.fire({ icon: 'error', title: 'Error', text: 'Tidak dapat terhubung ke server.' });
+                            Swal.fire({ 
+                                icon: 'error', 
+                                title: 'Connection Error', 
+                                text: 'Unable to connect to the server. Please try again.',
+                                customClass: { popup: 'swal2-premium-popup', confirmButton: 'swal2-premium-confirm' },
+                                buttonsStyling: false
+                            });
                         },
                         complete: function() {
                             $btn.prop('disabled', false).html(originalBtnHtml);
@@ -524,12 +808,18 @@
                 var originalHtml = $btn.html();
                 var rawAmount = $('#rawAmountCredit').val();
                 if (!rawAmount || parseInt(rawAmount) <= 0) {
-                    Swal.fire({ icon: 'warning', title: 'Perhatian', text: 'Masukkan jumlah amount yang valid.' });
+                    Swal.fire({ 
+                        icon: 'warning', 
+                        title: 'Invalid Amount', 
+                        text: 'Please enter a valid credit amount greater than zero.',
+                        customClass: { popup: 'swal2-premium-popup', confirmButton: 'swal2-premium-confirm' },
+                        buttonsStyling: false
+                    });
                     return;
                 }
                 $btn.prop('disabled', true).html('<i class="fas fa-circle-notch fa-spin mr-2"></i> Processing...');
                 $.ajax({
-                    url: '<?= base_url('admin/createCreditBalance') ?>',
+                    url: '<?= base_url('merchant/balance/credit') ?>',
                     type: 'POST',
                     data: {
                         merchantId: $('#merchantId').val(),
@@ -541,20 +831,38 @@
                     dataType: 'json',
                     success: function(response) {
                         if (response && response.status === 'success') {
-                            Swal.fire({ icon: 'success', title: 'Berhasil!', text: response.message || 'Credit balance berhasil ditambahkan.', timer: 2500, showConfirmButton: false });
+                            Swal.fire({ 
+                                icon: 'success', 
+                                title: 'Success!', 
+                                text: response.message || 'Credit balance has been successfully added.', 
+                                timer: 2500, 
+                                showConfirmButton: false,
+                                customClass: { popup: 'swal2-premium-popup' }
+                            });
                             $('#creditBalanceModal').modal('hide');
                             $('#creditBalanceForm')[0].reset();
                             if (window.merchantTableInstance) window.merchantTableInstance.draw('page');
                         } else {
-                            Swal.fire({ icon: 'error', title: 'Gagal', text: (response && response.message) ? response.message : 'Terjadi kesalahan.' });
+                            Swal.fire({ 
+                                icon: 'error', 
+                                title: 'Failed', 
+                                text: (response && response.message) ? response.message : 'An error occurred while processing credit balance.',
+                                customClass: { popup: 'swal2-premium-popup', confirmButton: 'swal2-premium-confirm' },
+                                buttonsStyling: false
+                            });
                         }
                     },
                     error: function(xhr) {
-                        // Fallback: jika server tidak mengembalikan JSON, submit form biasa
                         if (xhr.status !== 200) {
-                            Swal.fire({ icon: 'error', title: 'Error', text: 'Tidak dapat terhubung ke server.' });
+                            Swal.fire({ 
+                                icon: 'error', 
+                                title: 'Connection Error', 
+                                text: 'Unable to connect to the server. Please try again.',
+                                customClass: { popup: 'swal2-premium-popup', confirmButton: 'swal2-premium-confirm' },
+                                buttonsStyling: false
+                            });
                         } else {
-                            window.location.href = '<?= base_url('admin/createCreditBalance') ?>';
+                            window.location.href = '<?= base_url('merchant/balance/credit') ?>';
                         }
                     },
                     complete: function() {
@@ -570,12 +878,18 @@
                 var originalHtml = $btn.html();
                 var rawAmount = $('#rawAmountDebit').val();
                 if (!rawAmount || parseInt(rawAmount) <= 0) {
-                    Swal.fire({ icon: 'warning', title: 'Perhatian', text: 'Masukkan jumlah amount yang valid.' });
+                    Swal.fire({ 
+                        icon: 'warning', 
+                        title: 'Invalid Amount', 
+                        text: 'Please enter a valid debit amount greater than zero.',
+                        customClass: { popup: 'swal2-premium-popup', confirmButton: 'swal2-premium-confirm' },
+                        buttonsStyling: false
+                    });
                     return;
                 }
                 $btn.prop('disabled', true).html('<i class="fas fa-circle-notch fa-spin mr-2"></i> Processing...');
                 $.ajax({
-                    url: '<?= base_url('admin/createDebitBalance') ?>',
+                    url: '<?= base_url('merchant/balance/debit') ?>',
                     type: 'POST',
                     data: {
                         merchantIdDebit: $('#merchantIdDebit').val(),
@@ -587,19 +901,38 @@
                     dataType: 'json',
                     success: function(response) {
                         if (response && response.status === 'success') {
-                            Swal.fire({ icon: 'success', title: 'Berhasil!', text: response.message || 'Debit balance berhasil diproses.', timer: 2500, showConfirmButton: false });
+                            Swal.fire({ 
+                                icon: 'success', 
+                                title: 'Success!', 
+                                text: response.message || 'Debit balance deduction has been successfully processed.', 
+                                timer: 2500, 
+                                showConfirmButton: false,
+                                customClass: { popup: 'swal2-premium-popup' }
+                            });
                             $('#debitBalanceModal').modal('hide');
                             $('#debitBalanceForm')[0].reset();
                             if (window.merchantTableInstance) window.merchantTableInstance.draw('page');
                         } else {
-                            Swal.fire({ icon: 'error', title: 'Gagal', text: (response && response.message) ? response.message : 'Terjadi kesalahan.' });
+                            Swal.fire({ 
+                                icon: 'error', 
+                                title: 'Failed', 
+                                text: (response && response.message) ? response.message : 'An error occurred while processing debit balance.',
+                                customClass: { popup: 'swal2-premium-popup', confirmButton: 'swal2-premium-confirm' },
+                                buttonsStyling: false
+                            });
                         }
                     },
                     error: function(xhr) {
                         if (xhr.status !== 200) {
-                            Swal.fire({ icon: 'error', title: 'Error', text: 'Tidak dapat terhubung ke server.' });
+                            Swal.fire({ 
+                                icon: 'error', 
+                                title: 'Connection Error', 
+                                text: 'Unable to connect to the server. Please try again.',
+                                customClass: { popup: 'swal2-premium-popup', confirmButton: 'swal2-premium-confirm' },
+                                buttonsStyling: false
+                            });
                         } else {
-                            window.location.href = '<?= base_url('admin/createDebitBalance') ?>';
+                            window.location.href = '<?= base_url('merchant/balance/debit') ?>';
                         }
                     },
                     complete: function() {

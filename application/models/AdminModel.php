@@ -16,12 +16,55 @@ class AdminModel extends CI_Model {
     return $this->db->query($query)->result();
   }
   
-  public function update_admin($id, $data) {
-    $this->db->where('id', $id);
-    if ($this->db->update('admin', $data)) {
+  public function add_admin($data) {
+    $db_debug = $this->db->db_debug;
+    $this->db->db_debug = FALSE;
+    
+    $success = $this->db->insert('admin', $data);
+    $error = $this->db->error();
+    
+    $this->db->db_debug = $db_debug;
+    
+    if ($success) {
         return true;
     } else {
-        return $this->db->error(); // Returns array with 'code' and 'message'
+        return $error;
+    }
+  }
+
+  public function update_admin($id, $data) {
+    $this->db->where('id', $id);
+    
+    $db_debug = $this->db->db_debug;
+    $this->db->db_debug = FALSE;
+    
+    $success = $this->db->update('admin', $data);
+    $error = $this->db->error();
+    
+    $this->db->db_debug = $db_debug;
+    
+    if ($success) {
+        return true;
+    } else {
+        return $error; // Returns array with 'code' and 'message'
+    }
+  }
+
+  public function delete_admin($id) {
+    $this->db->where('id', $id);
+    
+    $db_debug = $this->db->db_debug;
+    $this->db->db_debug = FALSE;
+    
+    $success = $this->db->delete('admin');
+    $error = $this->db->error();
+    
+    $this->db->db_debug = $db_debug;
+    
+    if ($success) {
+        return true;
+    } else {
+        return $error;
     }
   }
 
@@ -111,6 +154,14 @@ class AdminModel extends CI_Model {
         $dt = $this->datatables->of('admin a')
             ->select('a.*, b.role_name')
             ->join('roles b', 'a.role_id = b.id', 'left');
+
+        if (!empty($filters)) {
+            foreach ($filters as $field => $val) {
+                if ($val !== '') {
+                    $dt->where($field, $val);
+                }
+            }
+        }
 
         return $dt->set_column_order(['a.c_email', 'a.c_name', 'a.c_status', 'a.c_level', 'b.role_name', null])
             ->set_column_search(['a.c_email', 'a.c_name', 'a.c_level', 'b.role_name'])

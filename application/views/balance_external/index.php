@@ -7,6 +7,38 @@
             <h4 class="dt-page-title text-dark fw-700">External Balance Log</h4>
             <p class="dt-page-subtitle text-muted">Daily snapshots and comparisons of balances across external providers.</p>
         </div>
+        <div class="d-flex align-items-center gap-2">
+            <button type="button" class="btn-dt-action btn-dt-action-primary border-0 d-flex align-items-center shadow-sm" id="toggleGuideBtn" >
+                <i class="fas fa-book-open mr-2"></i> <span class="d-none d-md-block">Instructions Guide</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ── Toggleable Page Instructional Drawer ── -->
+    <div class="drawer-overlay" id="instructionOverlay"></div>
+    <div class="drawer-right" id="instructionDrawer">
+        <div class="drawer-header">
+            <h6 class="drawer-title"><i class="fas fa-book mr-2"></i> External Balance Log Guide</h6>
+            <button type="button" class="drawer-close" id="closeDrawerBtn">&times;</button>
+        </div>
+        <div class="drawer-body">
+            <p class="drawer-desc">This page provides daily snapshots comparing total ledger balances across external payment providers.</p>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-history text-primary mr-2"></i> Daily Snapshots</div>
+                <p class="drawer-card-text">Compare actual recorded totals between Gidi, Paylabs, GV, and Paydgn for date-based verification.</p>
+            </div>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-search-dollar text-primary mr-2"></i> Discrepancy Audits</div>
+                <p class="drawer-card-text">Quickly inspect any balance gaps to perform manual matching or trigger re-syncing actions if necessary.</p>
+            </div>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-sort-amount-down text-primary mr-2"></i> Default Ordering</div>
+                <p class="drawer-card-text">By default, log records are listed in descending order starting from the most recent snapshot date.</p>
+            </div>
+        </div>
     </div>
 
     <!-- ── Main Data Card ── -->
@@ -55,7 +87,7 @@
                                 <td class="text-center text-muted small"><?= $index + 1 ?></td>
                                 <td class="font-weight-bold text-dark"><?= $log->c_datetimeCreated; ?></td>
                                 <td class="text-right font-weight-bold text-primary">
-                                    <?= $log->gidi !== null ? 'Rp ' . number_format((float)$log->gidi, 2, ',', '.') : '-'; ?>
+                                     <?= $log->gidi !== null ? 'Rp ' . number_format((float)$log->gidi, 2, ',', '.') : '-'; ?>
                                 </td>
                                 <td class="text-right">
                                     <?= $log->paylabs !== null ? 'Rp ' . number_format((float)$log->paylabs, 2, ',', '.') : '-'; ?>
@@ -77,6 +109,19 @@
 
 <script>
 $(document).ready(function() {
+    // Instructions Guide drawer handlers
+    $('#toggleGuideBtn').on('click', function() {
+        $('#instructionDrawer').addClass('open');
+        $('#instructionOverlay').addClass('open');
+        $('body').css('overflow', 'hidden'); // Lock background scroll
+    });
+
+    $('#closeDrawerBtn, #instructionOverlay').on('click', function() {
+        $('#instructionDrawer').removeClass('open');
+        $('#instructionOverlay').removeClass('open');
+        $('body').css('overflow', ''); // Unlock scroll
+    });
+
     const table = $('#balanceTable').DataTable({
         dom: 'rt<"dt-footer"<"dt-footer-info"i><"dt-footer-pager">>',
         pageLength: 25,

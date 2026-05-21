@@ -12,6 +12,33 @@
             </h4>
             <p class="dt-page-subtitle">Manage menu structures and toggle access rights for this role.</p>
         </div>
+        <div class="d-flex align-items-center gap-2">
+            <button type="button" class="btn-dt-action btn-dt-action-primary border-0 d-flex align-items-center shadow-sm" id="toggleGuideBtn" >
+                <i class="fas fa-book-open mr-2"></i> <span class="d-none d-md-block">Instructions Guide</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ── Toggleable Page Instructional Drawer ── -->
+    <div class="drawer-overlay" id="instructionOverlay"></div>
+    <div class="drawer-right" id="instructionDrawer">
+        <div class="drawer-header">
+            <h6 class="drawer-title"><i class="fas fa-book mr-2"></i> Menu Permissions Guide</h6>
+            <button type="button" class="drawer-close" id="closeDrawerBtn">&times;</button>
+        </div>
+        <div class="drawer-body">
+            <p class="drawer-desc">This matrix page allows administrators to manage deep hierarchical menu configurations and toggle granular access rights for the selected role.</p>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-sitemap text-primary mr-2"></i> Parent & Submenus</div>
+                <p class="drawer-card-text">Distinguish main parent module tabs from nested sub-menus (indicated by 'ㄴ'). Modifying parent nodes shifts child navigation paths.</p>
+            </div>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-toggle-on text-primary mr-2"></i> Access Granted</div>
+                <p class="drawer-card-text">Toggle switches in the table column to instantly register or revoke access to paths for users holding this role.</p>
+            </div>
+        </div>
     </div>
 
     <!-- Alerts Standardized to Swal2 Premium -->
@@ -59,7 +86,7 @@
                 </div>
             </div>
             <div class="dt-toolbar-right">
-                <button type="button" class="btn-dt-chip-action btn-dt-action-primary" data-toggle="modal" data-target="#addMenuModal" style="border-radius:10px; font-weight:600; font-size:14px;">
+                <button type="button" class="btn-dt-action btn-dt-action-success" data-toggle="modal" data-target="#addMenuModal" style="border-radius:10px; font-weight:600; font-size:14px;">
                     <i class="fas fa-plus"></i> <span class="d-none d-md-block">Add Menu</span>
                 </button>
                 
@@ -157,84 +184,117 @@
 
 <!-- Add Menu Modal -->
 <div class="modal fade" id="addMenuModal" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content border-0 shadow-lg">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
             <!-- Header Legacy Migrated -->
-<div class="modal-header modal-header-primary border-0 mh-premium">
-    <div class="d-flex align-items-center">
-        <div class="mh-icon-badge">
-            <i class="fas fa-star"></i>
-        </div>
-        <div class="mh-title-wrap">
-            <h6 class="mh-title" id="addMenuModalLabel">New Menu</h6>
-            <small class="mh-subtitle" >Manage and process information details</small>
-        </div>
-    </div>
-    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" style="opacity:0.8;">
-        <span aria-hidden="true">&times;</span>
-    </button>
-</div>
+            <div class="modal-header modal-header-primary border-0 mh-premium">
+                <div class="d-flex align-items-center">
+                    <div class="mh-icon-badge">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <div class="mh-title-wrap">
+                        <h6 class="mh-title" id="addMenuModalLabel">New Menu</h6>
+                        <small class="mh-subtitle">Manage and process information details</small>
+                    </div>
+                </div>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" style="opacity:0.8;">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
             <form id="addMenuForm">
-                <div class="modal-body p-4">
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="form-group mb-3">
-                                <label class="dt-more-label mb-2">Menu Title</label>
-                                <input type="text" class="dt-more-input" name="title" placeholder="e.g. Dashboard" required>
+                <div class="modal-body p-0 bg-light">
+                    <div class="d-flex g-0 w-100 flex-column flex-lg-row">
+                        <!-- Left Information Sidebar -->
+                        <div class="col-lg-4 p-4 d-flex flex-column justify-content-between mb-0" style="background: #202328; border-right: 1px solid rgba(255,255,255,0.05); color: #fff;">
+                            <div>
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mr-3 shadow-sm" style="width: 40px; height: 40px;">
+                                        <i class="fas fa-info-circle fa-lg"></i>
+                                    </div>
+                                    <h6 class="fw-bold text-primary mb-0" style="font-size: 15px;">Configuration Guide</h6>
+                                </div>
+                                <p class="text-muted small mb-4" style="font-size: 12px; line-height: 1.5;">Define core menu parameters to build system navigation structures safely.</p>
+                                
+                                <div class="d-flex flex-column gap-3">
+                                    <div class="p-3 rounded-4 shadow-sm border-0 mb-3" style="background-color: rgba(255, 255, 255, 0.03) !important; border: 1px solid rgba(255, 255, 255, 0.08) !important; border-radius: 12px;">
+                                        <h6 class="fw-bold text-white mb-1 d-flex align-items-center" style="font-size: 12px;"><i class="fas fa-heading text-warning mr-2"></i> 1. Menu Title</h6>
+                                        <p class="text-muted mb-0" style="font-size: 11px; line-height: 1.4;">Enter a descriptive name for the navigation item as seen in the sidebar.</p>
+                                    </div>
+                                    <div class="p-3 rounded-4 shadow-sm border-0 mb-3" style="background-color: rgba(255, 255, 255, 0.03) !important; border: 1px solid rgba(255, 255, 255, 0.08) !important; border-radius: 12px;">
+                                        <h6 class="fw-bold text-white mb-1 d-flex align-items-center" style="font-size: 12px;"><i class="fas fa-link text-info mr-2"></i> 2. Target Routing</h6>
+                                        <p class="text-muted mb-0" style="font-size: 11px; line-height: 1.4;">Provide the relative URL path mapping the menu to its respective controller action.</p>
+                                    </div>
+                                    <div class="p-3 rounded-4 shadow-sm border-0 mb-3" style="background-color: rgba(255, 255, 255, 0.03) !important; border: 1px solid rgba(255, 255, 255, 0.08) !important; border-radius: 12px;">
+                                        <h6 class="fw-bold text-white mb-1 d-flex align-items-center" style="font-size: 12px;"><i class="fas fa-sitemap text-success mr-2"></i> 3. Hierarchy Nesting</h6>
+                                        <p class="text-muted mb-0" style="font-size: 11px; line-height: 1.4;">Select a parent menu if this behaves as a sub-menu navigation tier.</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <div class="col-md-12">
-                            <div class="form-group mb-3">
-                                <label class="dt-more-label mb-2">Group Module</label>
-                                <div class="d-flex align-items-stretch w-100 dt-input-group">
-                                    <select class="dt-more-select group-module-select flex-grow-1 m-0 rounded-right-none" name="group_modules" style="border-top-right-radius: 0 !important; border-bottom-right-radius: 0 !important; border-right: 0 !important;">
-                                        <option value="">-- Choose Group Module --</option>
-                                        <?php foreach($group_modules as $gm): ?>
-                                            <option value="<?= $gm['group_modules'] ?>"><?= $gm['group_modules'] ?></option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                    <button class="btn btn-primary add-group-btn m-0" type="button" style="border-top-left-radius: 0 !important; border-bottom-left-radius: 0 !important; font-size: 13px; font-weight: 600; padding: 0 15px; white-space: nowrap;"><i class="fas fa-plus mr-2"></i> Add</button>
+
+                        <!-- Right Form Area -->
+                        <div class="col-lg-8 p-4 bg-light mb-0">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group mb-3">
+                                        <label class="dt-more-label mb-2">Menu Title</label>
+                                        <input type="text" class="dt-more-input" name="title" placeholder="e.g. Dashboard" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="form-group mb-3">
+                                        <label class="dt-more-label mb-2">Group Module</label>
+                                        <div class="d-flex align-items-stretch w-100 dt-input-group">
+                                            <select class="dt-more-select group-module-select flex-grow-1 m-0 rounded-right-none" name="group_modules" style="border-top-right-radius: 0 !important; border-bottom-right-radius: 0 !important; border-right: 0 !important;">
+                                                <option value="">-- Choose Group Module --</option>
+                                                <?php foreach($group_modules as $gm): ?>
+                                                    <option value="<?= $gm['group_modules'] ?>"><?= $gm['group_modules'] ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                            <button class="btn btn-primary add-group-btn m-0" type="button" style="border-top-left-radius: 0 !important; border-bottom-left-radius: 0 !important; font-size: 13px; font-weight: 600; padding: 0 15px; white-space: nowrap;"><i class="fas fa-plus mr-2"></i> Add</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label class="dt-more-label mb-2">URL</label>
+                                        <input type="text" class="dt-more-input" name="url" placeholder="e.g. dashboard" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label class="dt-more-label mb-2">Icon</label>
+                                        <input type="text" class="dt-more-input" name="icon" placeholder="e.g. fas fa-tachometer-alt" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <div class="form-group mb-3">
+                                        <label class="dt-more-label mb-2">Parent Menu</label>
+                                        <select class="dt-more-select" name="parent_id">
+                                            <option value="0">None (Main Menu)</option>
+                                            <?php foreach($main_menus as $mm): ?>
+                                                <option value="<?= $mm['id'] ?>"><?= $mm['title'] ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group mb-3">
+                                        <label class="dt-more-label mb-2">Order</label>
+                                        <input type="number" class="dt-more-input" name="menu_order" value="0" required>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group mb-3">
-                                <label class="dt-more-label mb-2">URL</label>
-                                <input type="text" class="dt-more-input" name="url" placeholder="e.g. admin/dashboard" required>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group mb-3">
-                                <label class="dt-more-label mb-2">Icon</label>
-                                <input type="text" class="dt-more-input" name="icon" placeholder="e.g. fas fa-tachometer-alt" required>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-8">
-                            <div class="form-group mb-3">
-                                <label class="dt-more-label mb-2">Parent Menu</label>
-                                <select class="dt-more-select" name="parent_id">
-                                    <option value="0">None (Main Menu)</option>
-                                    <?php foreach($main_menus as $mm): ?>
-                                        <option value="<?= $mm['id'] ?>"><?= $mm['title'] ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="form-group mb-3">
-                                <label class="dt-more-label mb-2">Order</label>
-                                <input type="number" class="dt-more-input" name="menu_order" value="0" required>
-                            </div>
-                        </div>
-                    </div>
                 </div>
-                <div class="modal-footer px-0 pb-0 border-0 pt-3 mx-4 mb-4">
-                    <button type="button" class="btn-dt-cancel" data-dismiss="modal" data-dismiss="modal">Close</button>
-                    <button type="submit" class="btn-dt-apply px-4 ">Create</button>
+                <div class="modal-footer px-4 py-3 border-0 bg-white justify-content-end">
+                    <button type="button" class="btn-dt-cancel mr-2" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn-dt-apply px-4">Create</button>
                 </div>
             </form>
         </div>
@@ -243,85 +303,114 @@
 
 <!-- Edit Menu Modal -->
 <div class="modal fade" id="editMenuModal" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content border-0 shadow-lg">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
             <!-- Header Legacy Migrated -->
-<div class="modal-header modal-header-primary border-0 mh-premium">
-    <div class="d-flex align-items-center">
-        <div class="mh-icon-badge">
-            <i class="fas fa-edit"></i>
-        </div>
-        <div class="mh-title-wrap">
-            <h6 class="mh-title"  id="editMenuModalLabel">Edit Menu</h6>
-            <small class="mh-subtitle" >Modify and update existing information</small>
-        </div>
-    </div>
-    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" style="opacity:0.8;">
-        <span aria-hidden="true">&times;</span>
-    </button>
-</div>
+            <div class="modal-header modal-header-primary border-0 mh-premium">
+                <div class="d-flex align-items-center">
+                    <div class="mh-icon-badge">
+                        <i class="fas fa-edit"></i>
+                    </div>
+                    <div class="mh-title-wrap">
+                        <h6 class="mh-title" id="editMenuModalLabel">Edit Menu</h6>
+                        <small class="mh-subtitle">Modify and update existing information</small>
+                    </div>
+                </div>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" style="opacity:0.8;">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
             <form id="editMenuForm">
                 <input type="hidden" name="id" id="edit_id">
-                <div class="modal-body p-4">
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="form-group mb-3">
-                                <label class="dt-more-label mb-2">Menu Title</label>
-                                <input type="text" class="dt-more-input" name="title" id="edit_title" required>
+                <div class="modal-body p-0 bg-light">
+                    <div class="d-flex g-0 w-100 flex-column flex-lg-row">
+                        <!-- Left Information Sidebar -->
+                        <div class="col-lg-4 p-4 d-flex flex-column justify-content-between mb-0" style="background: #202328; border-right: 1px solid rgba(255,255,255,0.05); color: #fff;">
+                            <div>
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mr-3 shadow-sm" style="width: 40px; height: 40px;">
+                                        <i class="fas fa-info-circle fa-lg"></i>
+                                    </div>
+                                    <h6 class="fw-bold text-primary mb-0" style="font-size: 15px;">Modification Guide</h6>
+                                </div>
+                                <p class="text-muted small mb-4" style="font-size: 12px; line-height: 1.5;">Update existing structural elements. Changes persist across all roles using this menu.</p>
+                                
+                                <div class="d-flex flex-column gap-3">
+                                    <div class="p-3 rounded-4 shadow-sm border-0 mb-3" style="background-color: rgba(255, 255, 255, 0.03) !important; border: 1px solid rgba(255, 255, 255, 0.08) !important; border-radius: 12px;">
+                                        <h6 class="fw-bold text-white mb-1 d-flex align-items-center" style="font-size: 12px;"><i class="fas fa-sync text-warning mr-2"></i> 1. Live Sync</h6>
+                                        <p class="text-muted mb-0" style="font-size: 11px; line-height: 1.4;">Renaming menu titles changes the labels rendered in the user interfaces dynamically.</p>
+                                    </div>
+                                    <div class="p-3 rounded-4 shadow-sm border-0 mb-3" style="background-color: rgba(255, 255, 255, 0.03) !important; border: 1px solid rgba(255, 255, 255, 0.08) !important; border-radius: 12px;">
+                                        <h6 class="fw-bold text-white mb-1 d-flex align-items-center" style="font-size: 12px;"><i class="fas fa-folder-open text-info mr-2"></i> 2. Hierarchy Shifts</h6>
+                                        <p class="text-muted mb-0" style="font-size: 11px; line-height: 1.4;">Altering parent menus re-nests sub-navigation paths instantly.</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <div class="col-md-12">
-                            <div class="form-group mb-3">
-                                <label class="dt-more-label mb-2">Group Module</label>
-                                <div class="d-flex align-items-stretch w-100 dt-input-group">
-                                    <select class="dt-more-select group-module-select flex-grow-1 m-0" name="group_modules" id="edit_group_modules" style="border-top-right-radius: 0 !important; border-bottom-right-radius: 0 !important; border-right: 0 !important;">
-                                        <option value="">-- Choose Group Module --</option>
-                                        <?php foreach($group_modules as $gm): ?>
-                                            <option value="<?= $gm['group_modules'] ?>"><?= $gm['group_modules'] ?></option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                    <button class="btn btn-primary add-group-btn m-0" type="button" style="border-top-left-radius: 0 !important; border-bottom-left-radius: 0 !important; font-size: 13px; font-weight: 600; padding: 0 15px; white-space: nowrap;"><i class="fas fa-plus mr-2"></i> Add</button>
+
+                        <!-- Right Form Area -->
+                        <div class="col-lg-8 p-4 bg-light mb-0">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group mb-3">
+                                        <label class="dt-more-label mb-2">Menu Title</label>
+                                        <input type="text" class="dt-more-input" name="title" id="edit_title" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="form-group mb-3">
+                                        <label class="dt-more-label mb-2">Group Module</label>
+                                        <div class="d-flex align-items-stretch w-100 dt-input-group">
+                                            <select class="dt-more-select group-module-select flex-grow-1 m-0" name="group_modules" id="edit_group_modules" style="border-top-right-radius: 0 !important; border-bottom-right-radius: 0 !important; border-right: 0 !important;">
+                                                <option value="">-- Choose Group Module --</option>
+                                                <?php foreach($group_modules as $gm): ?>
+                                                    <option value="<?= $gm['group_modules'] ?>"><?= $gm['group_modules'] ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                            <button class="btn btn-primary add-group-btn m-0" type="button" style="border-top-left-radius: 0 !important; border-bottom-left-radius: 0 !important; font-size: 13px; font-weight: 600; padding: 0 15px; white-space: nowrap;"><i class="fas fa-plus mr-2"></i> Add</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label class="dt-more-label mb-2">URL</label>
+                                        <input type="text" class="dt-more-input" name="url" id="edit_url" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label class="dt-more-label mb-2">Icon</label>
+                                        <input type="text" class="dt-more-input" name="icon" id="edit_icon" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <div class="form-group mb-3">
+                                        <label class="dt-more-label mb-2">Parent Menu</label>
+                                        <select class="dt-more-select" name="parent_id" id="edit_parent_id">
+                                            <option value="0">None (Main Menu)</option>
+                                            <?php foreach($main_menus as $mm): ?>
+                                                <option value="<?= $mm['id'] ?>"><?= $mm['title'] ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group mb-3">
+                                        <label class="dt-more-label mb-2">Order</label>
+                                        <input type="number" class="dt-more-input" name="menu_order" id="edit_menu_order" required>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group mb-3">
-                                <label class="dt-more-label mb-2">URL</label>
-                                <input type="text" class="dt-more-input" name="url" id="edit_url" required>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group mb-3">
-                                <label class="dt-more-label mb-2">Icon</label>
-                                <input type="text" class="dt-more-input" name="icon" id="edit_icon" required>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-8">
-                            <div class="form-group mb-3">
-                                <label class="dt-more-label mb-2">Parent Menu</label>
-                                <select class="dt-more-select" name="parent_id" id="edit_parent_id">
-                                    <option value="0">None (Main Menu)</option>
-                                    <?php foreach($main_menus as $mm): ?>
-                                        <option value="<?= $mm['id'] ?>"><?= $mm['title'] ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="form-group mb-3">
-                                <label class="dt-more-label mb-2">Order</label>
-                                <input type="number" class="dt-more-input" name="menu_order" id="edit_menu_order" required>
-                            </div>
-                        </div>
-                    </div>
                 </div>
-                <div class="modal-footer px-0 pb-0 border-0 pt-3 mx-4 mb-4">
-                    <button type="button" class="btn-dt-cancel" data-dismiss="modal" data-dismiss="modal">Close</button>
-                    <button type="submit" class="btn-dt-apply px-4 ">Save Changes</button>
+                <div class="modal-footer px-4 py-3 border-0 bg-white justify-content-end">
+                    <button type="button" class="btn-dt-cancel mr-2" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn-dt-apply px-4">Save Changes</button>
                 </div>
             </form>
         </div>
@@ -365,6 +454,19 @@
 <!-- ── AJAX Logic ── -->
 <script>
 $(document).ready(function() {
+    // Instructions Guide drawer handlers
+    $('#toggleGuideBtn').on('click', function() {
+        $('#instructionDrawer').addClass('open');
+        $('#instructionOverlay').addClass('open');
+        $('body').css('overflow', 'hidden'); // Lock background scroll
+    });
+
+    $('#closeDrawerBtn, #instructionOverlay').on('click', function() {
+        $('#instructionDrawer').removeClass('open');
+        $('#instructionOverlay').removeClass('open');
+        $('body').css('overflow', ''); // Unlock scroll
+    });
+
     const CSRF_NAME = "<?php echo $this->security->get_csrf_token_name(); ?>";
     const CSRF_HASH = "<?php echo $this->security->get_csrf_hash(); ?>";
 
@@ -387,7 +489,7 @@ $(document).ready(function() {
         $row.addClass('saving');
 
         $.ajax({
-            url: "<?= base_url('menu/changeAccess'); ?>",
+            url: "<?= base_url('access-control/roles/change-access'); ?>",
             type: 'POST',
             data: {
                 menuId: menuId,
@@ -401,7 +503,16 @@ $(document).ready(function() {
             error: function() {
                 $input.prop('checked', !$input.prop('checked'));
                 $row.removeClass('saving');
-                alert('Failed to update access.');
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Failed to update access.',
+                    icon: 'error',
+                    customClass: {
+                        popup: 'swal2-premium-popup',
+                        confirmButton: 'swal2-premium-confirm'
+                    },
+                    buttonsStyling: false
+                });
             }
         });
     });
@@ -410,7 +521,7 @@ $(document).ready(function() {
     $('#addMenuForm').on('submit', function(e) {
         e.preventDefault();
         $.ajax({
-            url: "<?= base_url('menu/saveMenuAjax'); ?>",
+            url: "<?= base_url('menu/save/ajax'); ?>",
             type: 'POST',
             data: $(this).serialize() + "&" + CSRF_NAME + "=" + CSRF_HASH,
             dataType: 'json',
@@ -424,7 +535,7 @@ $(document).ready(function() {
     $('.edit-menu-btn').on('click', function() {
         var id = $(this).data('id');
         $.ajax({
-            url: "<?= base_url('menu/getMenuById/'); ?>" + id,
+            url: "<?= base_url('menu/get/'); ?>" + id,
             type: 'GET',
             dataType: 'json',
             success: function(data) {
@@ -450,7 +561,7 @@ $(document).ready(function() {
     $('#editMenuForm').on('submit', function(e) {
         e.preventDefault();
         $.ajax({
-            url: "<?= base_url('menu/updateMenuAjax'); ?>",
+            url: "<?= base_url('menu/update-menu/ajax'); ?>",
             type: 'POST',
             data: $(this).serialize() + "&" + CSRF_NAME + "=" + CSRF_HASH,
             dataType: 'json',
@@ -464,17 +575,56 @@ $(document).ready(function() {
     $('.delete-menu-btn').on('click', function() {
         var id = $(this).data('id');
         var title = $(this).data('title');
-        if(confirm('Are you sure you want to delete "' + title + '"? This will also delete any sub-menus and revoke access from all roles.')) {
-            $.ajax({
-                url: "<?= base_url('menu/deleteMenuAjax'); ?>",
-                type: 'POST',
-                data: { id: id, [CSRF_NAME]: CSRF_HASH },
-                dataType: 'json',
-                success: function(res) {
-                    if(res.status == 'success') location.reload();
-                }
-            });
-        }
+        Swal.fire({
+            title: 'Delete Menu',
+            text: 'Are you sure you want to delete "' + title + '"? This will also delete any sub-menus and revoke access from all roles.',
+            icon: 'warning',
+            showCancelButton: true,
+            customClass: {
+                popup: 'swal2-premium-popup',
+                confirmButton: 'swal2-premium-confirm',
+                cancelButton: 'swal2-premium-cancel'
+            },
+            buttonsStyling: false,
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: "<?= base_url('menu/delete/ajax'); ?>",
+                    type: 'POST',
+                    data: { id: id, [CSRF_NAME]: CSRF_HASH },
+                    dataType: 'json',
+                    success: function(res) {
+                        if(res.status == 'success') {
+                            location.reload();
+                        } else {
+                            Swal.fire({
+                                title: 'Error!',
+                                text: res.message,
+                                icon: 'error',
+                                customClass: {
+                                    popup: 'swal2-premium-popup',
+                                    confirmButton: 'swal2-premium-confirm'
+                                },
+                                buttonsStyling: false
+                            });
+                        }
+                    },
+                    error: function() {
+                        Swal.fire({
+                            title: 'Error!',
+                            text: 'Failed to delete menu due to a server error.',
+                            icon: 'error',
+                            customClass: {
+                                popup: 'swal2-premium-popup',
+                                confirmButton: 'swal2-premium-confirm'
+                            },
+                            buttonsStyling: false
+                        });
+                    }
+                });
+            }
+        });
     });
 
     // Add New Group Module dynamically via Modal
@@ -505,7 +655,16 @@ $(document).ready(function() {
             }
 
             if (exists) {
-                alert('Group Module "' + existingValue + '" sudah ada!');
+                Swal.fire({
+                    title: 'Warning!',
+                    text: 'Group Module "' + existingValue + '" sudah ada!',
+                    icon: 'warning',
+                    customClass: {
+                        popup: 'swal2-premium-popup',
+                        confirmButton: 'swal2-premium-confirm'
+                    },
+                    buttonsStyling: false
+                });
                 if(activeGroupSelect) {
                     activeGroupSelect.val(existingValue); // select the existing one
                 }

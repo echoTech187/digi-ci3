@@ -26,7 +26,7 @@
         <div class="row justify-content-center g-3 mt-4 px-lg-5">
             <?php 
             $count = 0;
-            $excluded_urls = ['admin', 'admin/analytics'];
+            $excluded_urls = ['admin', 'dashboard', 'dashboard/analytics'];
             
             foreach ($menus as $m) : 
                 // Collect all clickable links for this menu branch

@@ -7,6 +7,38 @@
             <h4 class="dt-page-title"><?= $title; ?></h4>
             <p class="dt-page-subtitle">Manage payout channels, external provider links, and transaction fee logic.</p>
         </div>
+        <div class="d-flex align-items-center gap-2">
+            <button type="button" class="btn-dt-action btn-dt-action-primary border-0 d-flex align-items-center shadow-sm" id="toggleGuideBtn" >
+                <i class="fas fa-book-open mr-2"></i> <span class="d-none d-md-block">Instructions Guide</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ── Toggleable Page Instructional Drawer ── -->
+    <div class="drawer-overlay" id="instructionOverlay"></div>
+    <div class="drawer-right" id="instructionDrawer">
+        <div class="drawer-header">
+            <h6 class="drawer-title"><i class="fas fa-book mr-2"></i> Cash Out Channels Guide</h6>
+            <button type="button" class="drawer-close" id="closeDrawerBtn">&times;</button>
+        </div>
+        <div class="drawer-body">
+            <p class="drawer-desc">This page allows administrators to manage and configure outbound payout channels for external bank transfer or provider endpoints.</p>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-arrow-alt-circle-up text-primary mr-2"></i> Disbursement Setup</div>
+                <p class="drawer-card-text">Configure outbound routes such as BI-FAST, online bank transfer, and e-wallet transfers, along with transaction limits.</p>
+            </div>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-server text-primary mr-2"></i> Provider Routing</div>
+                <p class="drawer-card-text">Define default external provider codes and identifiers responsible for executing payouts upstream.</p>
+            </div>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-coins text-primary mr-2"></i> Limits & Fees</div>
+                <p class="drawer-card-text">Audit fixed/percentage processing fees and the ceiling/floor transaction amounts permitted per cash-out request.</p>
+            </div>
+        </div>
     </div>
 
     <!-- ── KPI Summary Cards ── -->
@@ -17,14 +49,65 @@
 
         <!-- ── Toolbar ── -->
         <div class="dt-toolbar">
-            <div class="dt-search-wrapper">
+            <div class="dt-search-wrapper flex-grow-1 mb-2 mb-md-0" style="min-width: 280px;">
                 <i class="fas fa-search dt-search-icon"></i>
                 <input type="text" id="cashoutGlobalSearch" class="dt-search-input" placeholder="Search by Channel, Provider, or Fee...">
             </div>
-            <div class="dt-toolbar-filters">
-                <!-- Filter & Reset Actions -->
-                <button type="button" class="btn-dt-chip-action btn-dt-action-success border-0" data-toggle="modal" data-target=".bd-example-modal-lg">
-                    <i class="fas fa-plus"></i> <span class="d-none d-md-block">New Cash Out Channel</span>
+
+            <!-- RIGHT: Filters & Actions -->
+            <div class="dt-toolbar-filters d-flex align-items-center gap-2">
+                <!-- More Filters Trigger -->
+                <div class="dt-filter-group dt-more-filters-wrapper">
+                    <button type="button" id="cashoutMoreFiltersBtn" class="dt-more-filters-btn">
+                        <i class="fas fa-sliders-h mr-1 mr-2"></i> Filters
+                        <span class="dt-more-badge" id="cashoutFilterBadge" style="display: none;">0</span>
+                        <i class="fas fa-chevron-down ml-1 dt-more-arrow"></i>
+                    </button>
+
+                    <!-- Dropdown Panel -->
+                    <div class="dt-more-panel" id="cashoutMoreFiltersPanel">
+                        <div class="dt-more-panel-header">
+                            <span class="dt-more-panel-title"><i class="fas fa-filter mr-1 mr-2"></i> Advanced Filters</span>
+                            <a href="javascript:void(0)" id="cashoutMoreClear" class="dt-more-clear">Clear All</a>
+                        </div>
+
+                        <div class="dt-more-panel-body">
+                            <!-- Channel Group -->
+                            <div class="dt-more-field mb-3">
+                                <label class="dt-more-label"><i class="fas fa-layer-group mr-1 mr-2"></i> Channel Group</label>
+                                <select id="filter_channel_group" class="dt-more-select filter-select">
+                                    <option value="">All Groups</option>
+                                    <?php foreach ($channel_groups as $cg): ?>
+                                        <option value="<?= $cg->c_channelGroup ?>"><?= $cg->c_channelGroup ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+
+                            <!-- External ID Default -->
+                            <div class="dt-more-field mb-3">
+                                <label class="dt-more-label"><i class="fas fa-server mr-1 mr-2"></i> External ID Default</label>
+                                <select id="filter_external_id" class="dt-more-select filter-select">
+                                    <option value="">All External IDs</option>
+                                    <?php foreach ($channel_external_id_defaults as $prd): ?>
+                                        <option value="<?= $prd->c_externalIdDefault ?>"><?= $prd->c_externalIdDefault ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="dt-more-panel-footer">
+                            <button type="button" id="cashoutMoreApply" class="btn-dt-apply btn-dt-action-primary shadow-sm">
+                                <i class="fas fa-check mr-1 mr-2"></i> APPLY FILTER
+                            </button>
+                            <button type="button" id="cashoutMoreFiltersClose" class="btn-dt-cancel btn-dt-secondary">
+                                CANCEL
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="button" class="btn-dt-action btn-dt-action-success border-0 text-decoration-none d-flex align-items-center" data-toggle="modal" data-target=".bd-example-modal-lg" >
+                    <i class="fas fa-plus mr-2"></i> <span class="d-none d-md-block">New Cash Out Channel</span>
                 </button>
             </div>
         </div>
@@ -92,158 +175,139 @@
 <!-- ── Modal Tambah Chanel ── -->
 <div class="modal fade bd-example-modal-lg" id="addCashoutModal" tabindex="-1" role="dialog" aria-labelledby="addCashoutLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg">
-            <!-- Header Legacy Migrated -->
-<div class="modal-header modal-header-primary border-0 mh-premium">
-    <div class="d-flex align-items-center">
-        <div class="mh-icon-badge">
-            <i class="fas fa-star"></i>
-        </div>
-        <div class="mh-title-wrap">
-            <h6 class="mh-title" id="addCashoutLabel">New Cash Out Channel</h6>
-            <small class="mh-subtitle" >Manage and process information details</small>
-        </div>
-    </div>
-    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" style="opacity:0.8;">
-        <span aria-hidden="true">&times;</span>
-    </button>
-</div>
-            <div class="modal-body p-4 text-dark">
-                <?php if(validation_errors()): ?>
-                    <div class="alert alert-danger mb-4 shadow-sm border-0 small">
-                        <i class="fas fa-exclamation-triangle "></i> <?= validation_errors(); ?>
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
+            <div class="modal-header modal-header-primary border-0 mh-premium">
+                <div class="d-flex align-items-center">
+                    <div class="mh-icon-badge"><i class="fas fa-star"></i></div>
+                    <div class="mh-title-wrap">
+                        <h6 class="mh-title" id="addCashoutLabel">New Cash Out Channel</h6>
+                        <small class="mh-subtitle">Manage and process information details</small>
                     </div>
-                <?php endif; ?>
-                
-                <form method="post" action="<?= base_url('admin/createCashOutChanel'); ?>">
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="dt-more-label mb-2">Channel ID</label>
-                            <input type="text" class="dt-more-input" required name="id" placeholder="e.g. BANK_TRANSFER_MANDIRI">
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="dt-more-label mb-2">Channel Group</label>
-                            <input type="text" class="dt-more-input" required name="chanelgroup" placeholder="e.g. BANK_TRANSFER">
-                        </div>
-                    </div>
-                    
-                    <div class="mb-4">
-                        <label class="dt-more-label mb-2">Description</label>
-                        <textarea class="dt-more-input" name="description" rows="2" placeholder="Detail channel configuration..."></textarea>
-                    </div>
-
-                    <div class="row mb-4">
-                        <div class="col-md-6 mb-3 mb-md-0">
-                            <label class="dt-more-label mb-2">External Default</label>
-                            <input type="text" class="dt-more-input" required name="externaldefault" placeholder="External provider key">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="dt-more-label mb-2">Fee Type</label>
-                            <select class="dt-more-select" required name="feetype">
-                                <option value="" selected disabled>Select fee type</option>
-                                <option value="fixed">Fixed</option>
-                                <option value="Percentage">Percentage</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="row mb-4">
-                        <div class="col-md-4 mb-3 mb-md-0">
-                            <label class="dt-more-label mb-2">Fee Value</label>
-                            <div class="input-group">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text border-right-0" style="border-radius:8px 0 0 8px; font-size:12px;">Rp</span>
-                                </div>
-                                <input type="number" class="dt-more-input h-auto" required name="fee" style="border-radius:0 8px 8px 0;">
+                </div>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" style="opacity:0.8;"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <form method="post" action="<?= base_url('channel/cashout/create'); ?>">
+                <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>">
+                <div class="modal-body p-0 bg-light">
+                    <div class="d-flex g-0 w-100 flex-column flex-lg-row">
+                        <div class="col-lg-4 p-4 d-flex flex-column mb-0" style="background: #202328; border-right: 1px solid rgba(255,255,255,0.05); color: #fff;">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center mr-3" style="width:40px;height:40px;flex-shrink:0;"><i class="fas fa-arrow-alt-circle-up fa-lg"></i></div>
+                                <h6 class="fw-bold text-danger mb-0" style="font-size:15px;">Cash Out Guide</h6>
+                            </div>
+                            <p class="text-muted small mb-3" style="font-size:12px;line-height:1.5;">Configure outbound payout channels for external bank or provider endpoints.</p>
+                            <div class="p-3 mb-3" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;">
+                                <h6 class="fw-bold text-white mb-1 d-flex align-items-center" style="font-size:12px;"><i class="fas fa-money-check-alt text-warning mr-2"></i> 1. Fee Type</h6>
+                                <p class="text-muted mb-0" style="font-size:11px;line-height:1.4;">Fixed: flat deduction per transaction. Percentage: dynamic slice of payout amount.</p>
+                            </div>
+                            <div class="p-3" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;">
+                                <h6 class="fw-bold text-white mb-1 d-flex align-items-center" style="font-size:12px;"><i class="fas fa-shield-alt text-info mr-2"></i> 2. Amount Limits</h6>
+                                <p class="text-muted mb-0" style="font-size:11px;line-height:1.4;">Set min/max boundaries to protect against fraudulent payout requests.</p>
                             </div>
                         </div>
-                        <div class="col-md-4 mb-3 mb-md-0">
-                            <label class="dt-more-label mb-2">Amount Min</label>
-                            <input type="number" class="dt-more-input" required name="amountmin" value="10000">
+                        <div class="col-lg-8 p-4 bg-light mb-0 text-dark">
+                            <?php if(validation_errors()): ?>
+                                <div class="alert alert-danger mb-4 shadow-sm border-0 small"><i class="fas fa-exclamation-triangle"></i> <?= validation_errors(); ?></div>
+                            <?php endif; ?>
+                            <div class="row">
+                                <div class="col-md-6 mb-3"><label class="dt-more-label mb-2">Channel ID</label><input type="text" class="dt-more-input" required name="id" placeholder="e.g. BANK_TRANSFER_MANDIRI"></div>
+                                <div class="col-md-6 mb-3"><label class="dt-more-label mb-2">Channel Group</label><input type="text" class="dt-more-input" required name="chanelgroup" placeholder="e.g. BANK_TRANSFER"></div>
+                            </div>
+                            <div class="mb-3"><label class="dt-more-label mb-2">Description</label><textarea class="dt-more-input" name="description" rows="2" placeholder="Detail channel configuration..."></textarea></div>
+                            <div class="row mb-3">
+                                <div class="col-md-6 mb-3 mb-md-0"><label class="dt-more-label mb-2">External Default</label><input type="text" class="dt-more-input" required name="externaldefault" placeholder="External provider key"></div>
+                                <div class="col-md-6"><label class="dt-more-label mb-2">Fee Type</label><select class="dt-more-select" required name="feetype"><option value="" selected disabled>Select fee type</option><option value="fixed">Fixed</option><option value="Percentage">Percentage</option></select></div>
+                            </div>
+                            <div class="row mb-0">
+                                <div class="col-md-4 mb-3 mb-md-0"><label class="dt-more-label mb-2">Fee Value</label><div class="input-group"><div class="input-group-prepend"><span class="input-group-text border-right-0" style="border-radius:8px 0 0 8px;font-size:12px;">Rp</span></div><input type="number" class="dt-more-input h-auto" required name="fee" style="border-radius:0 8px 8px 0;"></div></div>
+                                <div class="col-md-4 mb-3 mb-md-0"><label class="dt-more-label mb-2">Amount Min</label><input type="number" class="dt-more-input" required name="amountmin" value="10000"></div>
+                                <div class="col-md-4"><label class="dt-more-label mb-2">Amount Max</label><input type="number" class="dt-more-input" required name="amountmax" value="50000000"></div>
+                            </div>
                         </div>
-                        <div class="col-md-4">
-                            <label class="dt-more-label mb-2">Amount Max</label>
-                            <input type="number" class="dt-more-input" required name="amountmax" value="50000000">
-                        </div>
                     </div>
-
-                    <div class="mb-4">
-                        <label class="dt-more-label mb-2">Settlement Interval (Days)</label>
-                        <input type="number" class="dt-more-input" required name="settlementinterval" value="1">
-                    </div>
-
-                    <div class="modal-footer px-0 pb-0 border-0 pt-3">
-                        <button type="button" class="btn-dt-cancel" data-dismiss="modal">Close</button>
-                        <button type="submit" class="btn-dt-apply px-4 ">
-                            <i class="fas fa-save  mr-2"></i> Save New Cash Out
-                        </button>
-                    </div>
-                </form>
-            </div>
+                </div>
+                <div class="modal-footer px-4 py-3 border-0 bg-white justify-content-end">
+                    <button type="button" class="btn-dt-cancel mr-2" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn-dt-apply px-4"><i class="fas fa-save mr-2"></i> Save New Cash Out</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
 
-<!-- ── Modal Debit Balance (Action) ── -->
-<div class="modal fade" id="debitBalanceModal" tabindex="-1" aria-labelledby="debitBalanceModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg">
-            <!-- Header Legacy Migrated -->
-<div class="modal-header modal-header-primary border-0 mh-premium">
-    <div class="d-flex align-items-center">
-        <div class="mh-icon-badge">
-            <i class="fas fa-arrow-circle-up"></i>
-        </div>
-        <div class="mh-title-wrap">
-            <h6 class="mh-title" id="debitBalanceModalLabel">EDIT CASHOUT CONFIG</h6>
-            <small class="mh-subtitle" >Modify and update existing information</small>
-        </div>
-    </div>
-    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" style="opacity:0.8;">
-        <span aria-hidden="true">&times;</span>
-    </button>
-</div>
-            <div class="modal-body p-4 text-dark">
-                <form method="post" action="<?= base_url('admin/createDebitBalance'); ?>">
-                    <div class="mb-3">
-                        <label class="dt-more-label mb-2">ID / Merchant</label>
-                        <input type="text" class="dt-more-input font-weight-bold text-primary" readonly id="merchantNameDebit">
-                        <input type="hidden" id="merchantIdDebit" name="merchantIdDebit">
+<!-- ── Modal Edit Chanel ── -->
+<div class="modal fade bd-example-modal-lg" id="editChanelModal" tabindex="-1" role="dialog" aria-labelledby="editChanelModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
+            <div class="modal-header modal-header-primary border-0 mh-premium">
+                <div class="d-flex align-items-center">
+                    <div class="mh-icon-badge"><i class="fas fa-edit"></i></div>
+                    <div class="mh-title-wrap">
+                        <h6 class="mh-title" id="editChanelModalLabel">Edit Cash Out Channel</h6>
+                        <small class="mh-subtitle">Modify and update existing information</small>
                     </div>
-                    <div class="mb-3">
-                        <label class="dt-more-label mb-2">Channel ID Selector</label>
-                        <select name="channelId" class="dt-more-select">
-                            <option value="">Select Channel</option>
-                            <?php foreach ($cashout_channels as $cashout_channel): ?>
-                                <option value="<?= $cashout_channel->id; ?>"><?= $cashout_channel->id; ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="dt-more-label mb-2">Description / Adjustment Note</label>
-                        <input type="text" class="dt-more-input" name="description" placeholder="Reason for change...">
-                    </div>
-                    <div class="mb-4">
-                        <label class="dt-more-label mb-2">Adjustment Amount</label>
-                        <input type="number" class="dt-more-input" name="amount" placeholder="0">
-                    </div>
-                    
-                    <div class="modal-footer px-0 pb-0 border-0 pt-2">
-                        <button type="button" class="btn-dt-cancel" data-dismiss="modal">Close</button>
-                        <button type="submit" class="btn-dt-apply px-4 " onclick="return confirm('Is the data correct?')">
-                            <i class="fas fa-check  mr-2"></i> Process Action
-                        </button>
-                    </div>
-                </form>
+                </div>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" style="opacity:0.8;"><span aria-hidden="true">&times;</span></button>
             </div>
+            <form method="post" action="<?= base_url('channel/cashout/update'); ?>">
+                <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>">
+                <div class="modal-body p-0 bg-light">
+                    <div class="d-flex g-0 w-100 flex-column flex-lg-row">
+                        <div class="col-lg-4 p-4 d-flex flex-column mb-0" style="background: #202328; border-right: 1px solid rgba(255,255,255,0.05); color: #fff;">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mr-3" style="width:40px;height:40px;flex-shrink:0;"><i class="fas fa-info-circle fa-lg"></i></div>
+                                <h6 class="fw-bold text-primary mb-0" style="font-size:15px;">Modification Guide</h6>
+                            </div>
+                            <p class="text-muted small mb-3" style="font-size:12px;line-height:1.5;">Update payout channel configs. Verify all values carefully before saving.</p>
+                            <div class="p-3" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;">
+                                <h6 class="fw-bold text-white mb-1 d-flex align-items-center" style="font-size:12px;"><i class="fas fa-lock text-warning mr-2"></i> Channel ID (Read-only)</h6>
+                                <p class="text-muted mb-0" style="font-size:11px;line-height:1.4;">Channel IDs cannot be changed to maintain ledger data integrity.</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-8 p-4 bg-light mb-0 text-dark">
+                            <div class="row">
+                                <div class="col-md-6 mb-3"><label class="dt-more-label mb-2">Channel ID</label><input type="text" class="dt-more-input bg-light" readonly required name="id" id="edit_id"></div>
+                                <div class="col-md-6 mb-3"><label class="dt-more-label mb-2">Channel Group</label><input type="text" class="dt-more-input" required name="chanelgroup" id="edit_chanelgroup"></div>
+                            </div>
+                            <div class="mb-3"><label class="dt-more-label mb-2">Description</label><textarea class="dt-more-input" name="description" rows="2" id="edit_description"></textarea></div>
+                            <div class="row mb-3">
+                                <div class="col-md-6 mb-3 mb-md-0"><label class="dt-more-label mb-2">External Default</label><input type="text" class="dt-more-input" required name="externaldefault" id="edit_externaldefault"></div>
+                                <div class="col-md-6"><label class="dt-more-label mb-2">Fee Type</label><select class="dt-more-select" required name="feetype" id="edit_feetype"><option value="" disabled>Select fee type</option><option value="fixed">Fixed</option><option value="Percentage">Percentage</option></select></div>
+                            </div>
+                            <div class="row mb-0">
+                                <div class="col-md-4 mb-3 mb-md-0"><label class="dt-more-label mb-2">Fee Value</label><div class="input-group"><div class="input-group-prepend"><span class="input-group-text border-right-0" style="border-radius:8px 0 0 8px;font-size:12px;">Rp</span></div><input type="number" class="dt-more-input h-auto" required name="fee" id="edit_fee" style="border-radius:0 8px 8px 0;"></div></div>
+                                <div class="col-md-4 mb-3 mb-md-0"><label class="dt-more-label mb-2">Amount Min</label><input type="number" class="dt-more-input" required name="amountmin" id="edit_amountmin"></div>
+                                <div class="col-md-4"><label class="dt-more-label mb-2">Amount Max</label><input type="number" class="dt-more-input" required name="amountmax" id="edit_amountmax"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer px-4 py-3 border-0 bg-white justify-content-end">
+                    <button type="button" class="btn-dt-cancel mr-2" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn-dt-apply px-4"><i class="fas fa-save mr-2"></i> Update Cash Out</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
 
 <script>
     $(document).ready(function() {
+        // Instructions Guide drawer handlers
+        $('#toggleGuideBtn').on('click', function() {
+            $('#instructionDrawer').addClass('open');
+            $('#instructionOverlay').addClass('open');
+            $('body').css('overflow', 'hidden'); // Lock background scroll
+        });
+
+        $('#closeDrawerBtn, #instructionOverlay').on('click', function() {
+            $('#instructionDrawer').removeClass('open');
+            $('#instructionOverlay').removeClass('open');
+            $('body').css('overflow', ''); // Unlock scroll
+        });
+
         // Standardize DataTables for premium look
-        var table = initServerDataTable('#cashoutTable', "<?= base_url('admin/cashout') ?>", [
+        var table = initServerDataTable('#cashoutTable', "<?= base_url('channel/cashout') ?>", [
                 {data: 'no', orderable: false, className: 'text-center'},
                 {data: 'id', className: 'font-weight-bold text-primary dt-id-column'},
                 {data: 'c_channelGroup', render: function(data){
@@ -271,10 +335,21 @@
                                 <ul class="dropdown-menu dropdown-menu-right shadow border-0 py-2">
                                     <li>
                                         <button type="button" class="dropdown-item edit-cashout" 
-                                            data-toggle="modal" data-target="#debitBalanceModal" 
+                                            data-toggle="modal" data-target="#editChanelModal" 
                                             data-id="${row.id}" 
-                                            data-group="${row.c_channelGroup}">
+                                            data-group="${row.c_channelGroup}"
+                                            data-desc="${row.c_description || ''}"
+                                            data-ext="${row.c_externalIdDefault || ''}"
+                                            data-feetype="${row.c_feeType || ''}"
+                                            data-fee="${row.c_fee || 0}"
+                                            data-min="${row.c_amountMin || 10000}"
+                                            data-max="${row.c_amountMax || 50000000}">
                                             <i class="fas fa-edit text-primary mr-2"></i> Edit Channel
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button type="button" class="dropdown-item delete-cashout text-danger" data-id="${row.id}">
+                                            <i class="fas fa-trash-alt mr-2"></i> Delete Channel
                                         </button>
                                     </li>
                                 </ul>
@@ -282,7 +357,21 @@
                         `;
                     }
                 }
-            ]);
+            ], {
+                ajax: {
+                    url: "<?= base_url('channel/cashout') ?>",
+                    type: "POST",
+                    data: function (d) {
+                        var csrfName = $('meta[name="csrf-token-name"]').attr('content');
+                        var csrfHash = $('meta[name="csrf-token-hash"]').attr('content');
+                        if (csrfName && csrfHash) {
+                            d[csrfName] = csrfHash;
+                        }
+                        d.channel_group = $('#filter_channel_group').val();
+                        d.external_id = $('#filter_external_id').val();
+                    }
+                }
+            });
 
         // Global Search mapping
         $('#cashoutGlobalSearch').on('keyup', function() {
@@ -291,10 +380,106 @@
 
         // Edit button mapping
         $(document).on('click', '.edit-cashout', function() {
+            $('#edit_id').val($(this).data('id'));
+            $('#edit_chanelgroup').val($(this).data('group'));
+            $('#edit_description').val($(this).data('desc'));
+            $('#edit_externaldefault').val($(this).data('ext'));
+            
+            var ft = ($(this).data('feetype') || '').toLowerCase();
+            if (ft === 'fixed') {
+                $('#edit_feetype').val('fixed');
+            } else if (ft === 'percentage') {
+                $('#edit_feetype').val('Percentage');
+            } else {
+                $('#edit_feetype').val('');
+            }
+
+            $('#edit_fee').val($(this).data('fee'));
+            $('#edit_amountmin').val($(this).data('min'));
+            $('#edit_amountmax').val($(this).data('max'));
+        });
+
+        // Delete button mapping
+        $(document).on('click', '.delete-cashout', function() {
             var id = $(this).data('id');
-            var group = $(this).data('group');
-            $('#merchantNameDebit').val(id);
-            $('#merchantIdDebit').val(id);
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You are about to delete cash-out channel " + id + ". This action cannot be undone!",
+                icon: 'warning',
+                showCancelButton: true,
+                customClass: {
+                    popup: 'swal2-premium-popup',
+                    confirmButton: 'swal2-premium-confirm bg-danger border-danger',
+                    cancelButton: 'swal2-premium-cancel'
+                },
+                buttonsStyling: false,
+                confirmButtonText: '<i class="fas fa-trash-alt mr-2"></i> Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = "<?= base_url('channel/deleteCashOutChanel/') ?>" + id;
+                }
+            });
+        });
+
+        // ── More Filters dropdown ──
+        var $moreBtn   = $('#cashoutMoreFiltersBtn');
+        var $morePanel = $('#cashoutMoreFiltersPanel');
+        var $moreClose = $('#cashoutMoreFiltersClose');
+        var $moreApply = $('#cashoutMoreApply');
+        var $moreClear = $('#cashoutMoreClear');
+
+        $moreBtn.on('click', function(e) {
+            e.stopPropagation();
+            var isOpen = $morePanel.hasClass('dt-panel-open');
+            $morePanel.toggleClass('dt-panel-open', !isOpen);
+            $moreBtn.toggleClass('dt-open', !isOpen);
+        });
+
+        $moreClose.on('click', function() {
+            $morePanel.removeClass('dt-panel-open');
+            $moreBtn.removeClass('dt-open');
+        });
+
+        $(document).on('click', function(e) {
+            if (!$(e.target).closest('.dt-more-filters-wrapper').length) {
+                $morePanel.removeClass('dt-panel-open');
+                $moreBtn.removeClass('dt-open');
+            }
+        });
+
+        $('#cashoutMoreFiltersPanel select').not('.select2-hidden-accessible').select2({
+            width: '100%',
+            dropdownAutoWidth: true,
+            dropdownParent: $(document.body),
+            minimumResultsForSearch: 0
+        });
+
+        function updateFilterBadge() {
+            let count = 0;
+            $('.filter-select').each(function() {
+                if ($(this).val()) count++;
+            });
+            const $badge = $('#cashoutFilterBadge');
+            if (count > 0) {
+                $badge.text(count).show();
+                $moreBtn.addClass('dt-more-filters-active');
+            } else {
+                $badge.hide();
+                $moreBtn.removeClass('dt-more-filters-active');
+            }
+        }
+
+        $moreApply.on('click', function() {
+            updateFilterBadge();
+            table.ajax.reload(null, false);
+            $morePanel.removeClass('dt-panel-open');
+            $moreBtn.removeClass('dt-open');
+        });
+
+        $moreClear.on('click', function() {
+            $('.filter-select').val('').trigger('change');
+            updateFilterBadge();
+            table.ajax.reload(null, false);
         });
     });
 </script>

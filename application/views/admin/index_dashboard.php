@@ -16,12 +16,37 @@
                 <small class="text-muted d-block font-weight-bold" style="font-size: 10px; text-transform: uppercase; letter-spacing: 1px;">Cloud Sync Active</small>
                 <small class="text-primary font-weight-bold" style="font-size: 11px;">Last updated: <span id="stat_last_synced">Loading...</span></small>
             </div>
-            <div class="d-flex align-items-center gap-2 px-3 py-2 btn-dt-chip-action" style="border-radius: 12px; backdrop-filter: blur(10px); border: 1px solid var(--border-color);">
+            <div class="d-flex align-items-center gap-2 px-3 py-2 btn-dt-chip-action" style="border-radius: 12px; backdrop-filter: blur(10px); border: 1px solid var(--border-color); cursor: default;">
                 <span class="position-relative d-flex">
                     <span id="maintenance_ping" class="position-absolute h-full w-full rounded-full bg-secondary opacity-75" style="width: 8px; height: 8px;"></span>
                     <span id="maintenance_dot" class="relative rounded-full bg-secondary" style="width: 8px; height: 8px;"></span>
                 </span>
                 <span class="font-weight-bold" style="color: var(--gray-700); letter-spacing: 0.5px; font-size: 12px;">System: <span id="maintenance_label"><span class="skeleton-box" style="width: 60px;"></span></span></span>
+            </div>
+            <button type="button" class="btn-dt-action btn-dt-action-primary border-0 d-flex align-items-center shadow-sm" id="toggleGuideBtn" >
+                <i class="fas fa-book-open mr-2"></i> <span class="d-none d-md-block">Instructions Guide</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ── Toggleable Page Instructional Drawer ── -->
+    <div class="drawer-overlay" id="instructionOverlay"></div>
+    <div class="drawer-right" id="instructionDrawer">
+        <div class="drawer-header">
+            <h6 class="drawer-title"><i class="fas fa-book mr-2"></i> Dashboard Guide</h6>
+            <button type="button" class="drawer-close" id="closeDrawerBtn">&times;</button>
+        </div>
+        <div class="drawer-body">
+            <p class="drawer-desc">This analytics dashboard aggregates real-time performance indicators and financial health metrics across all integrated checkout systems.</p>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-wallet text-primary mr-2"></i> KPI Performance</div>
+                <p class="drawer-card-text">Track volume metrics (Net Volume, QRIS amounts, and BI-FAST disbursement statistics) synchronized live from payment providers.</p>
+            </div>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-sync-alt text-primary mr-2"></i> Live Activity Feed</div>
+                <p class="drawer-card-text">Displays transaction activities as they process. Status changes (Paid, Pending, Failed) are updated automatically every 30 seconds.</p>
             </div>
         </div>
     </div>
@@ -201,7 +226,7 @@
                             <span style="font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">LIVE FEED</span>
                         </div>
                     </div>
-                    <a href="<?= base_url('admin/report'); ?>" class="btn btn-primary btn-sm font-weight-bold px-4 py-2" style="border-radius: 12px; font-size: 11px;">
+                    <a href="<?= base_url('report/download'); ?>" class="btn btn-primary btn-sm font-weight-bold px-4 py-2" style="border-radius: 12px; font-size: 11px;">
                         EXPLORE RECORDS <i class="fas fa-external-link-alt ml-2" style="font-size: 10px;"></i>
                     </a>
                 </div>
@@ -235,8 +260,21 @@
 <script src="<?= base_url('assets/'); ?>vendor/chart.js/Chart.min.js"></script>
 <script type="text/javascript">
     $(document).ready(function() {
+        // Instructions Guide drawer handlers
+        $('#toggleGuideBtn').on('click', function() {
+            $('#instructionDrawer').addClass('open');
+            $('#instructionOverlay').addClass('open');
+            $('body').css('overflow', 'hidden'); // Lock background scroll
+        });
+
+        $('#closeDrawerBtn, #instructionOverlay').on('click', function() {
+            $('#instructionDrawer').removeClass('open');
+            $('#instructionOverlay').removeClass('open');
+            $('body').css('overflow', ''); // Unlock scroll
+        });
+
         // Enhanced DataTable Init
-        initServerDataTable("#recentActivityTable", "<?= base_url('admin/recent_mutations_json') ?>", [
+        initServerDataTable("#recentActivityTable", "<?= base_url('dashboard/recent-mutations/json') ?>", [
             {data: 'date', className: "font-weight-bold text-gray-600"},
             {data: 'merchant', className: "font-weight-bold"},
             {
@@ -405,7 +443,7 @@
     // --- Asynchronous Dashboard Stats Loading (SPLIT) ---
     function loadMetadata() {
         $.ajax({
-            url: "<?= base_url('admin/ajax_dashboard_metadata_json'); ?>",
+            url: "<?= base_url('dashboard/metadata/json'); ?>",
             type: "GET",
             dataType: "json",
             success: function(resp) {
@@ -428,7 +466,7 @@
 
     function loadTodayStats() {
         $.ajax({
-            url: "<?= base_url('admin/ajax_today_stats_json'); ?>",
+            url: "<?= base_url('dashboard/today-stats/json'); ?>",
             type: "GET",
             dataType: "json",
             success: function(resp) {
@@ -458,7 +496,7 @@
 
     function loadMonthlyStats() {
         $.ajax({
-            url: "<?= base_url('admin/ajax_monthly_stats_json'); ?>",
+            url: "<?= base_url('dashboard/monthly-stats/json'); ?>",
             type: "GET",
             dataType: "json",
             success: function(resp) {

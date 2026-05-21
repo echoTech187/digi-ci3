@@ -127,16 +127,13 @@ class QrisTransactionController extends CI_Controller
       $this->session->unset_userdata('search_rrn');
       $this->session->unset_userdata('search_transactionid_ht');
       $this->session->unset_userdata('last_search_qris');
-      redirect('admin/qris');
+      redirect('finance/qris');
    }
 
    public function qris_detail($id = NULL)
    {
-      if (!$id) $id = $this->uri->segment(3);
-
       if (!$id) {
-         $this->session->set_flashdata('error', 'Transaction ID not found.');
-         redirect('admin/qris');
+         redirect('finance/qris');
       }
 
       $data['user'] = $this->Model_user->view_user()->row_array();
@@ -161,7 +158,7 @@ class QrisTransactionController extends CI_Controller
 
       if (empty($search_name_qris) && (empty($search_date_qris) && empty($search_date_qris_settlement))) {
          $this->session->set_flashdata('error_message', 'Please fill all fields and search before continuing with download.');
-         redirect('admin/qris');
+         redirect('finance/qris');
       }
       
       $user = $this->Model_user->view_user()->row_array();
@@ -183,7 +180,7 @@ class QrisTransactionController extends CI_Controller
          $this->session->set_flashdata('error', 'Failed request download');
       }
 
-      redirect('admin/qris');
+      redirect('finance/qris');
    }
 
    public function qris_dynamic_list()
@@ -293,7 +290,7 @@ class QrisTransactionController extends CI_Controller
       $this->session->unset_userdata('search_status_transaction_qd');
       $this->session->unset_userdata('search_reff_label');
       $this->session->unset_userdata('last_search_qd');
-      redirect('admin/qris_dynamic');
+      redirect('qris/dynamic');
    }
 
    public function qris_recurring()
@@ -383,7 +380,7 @@ class QrisTransactionController extends CI_Controller
       $this->session->unset_userdata('search_name_qr');
       $this->session->unset_userdata('search_submerchant_qr');
       $this->session->unset_userdata('search_transid_qr');
-      redirect('admin/qris_recurring');
+      redirect('qris/recurring');
    }
 
    public function SendnotifikasiQRIS()
@@ -393,7 +390,7 @@ class QrisTransactionController extends CI_Controller
 
       if (!$ref_cashinPaymentQrisMpmId) {
          $this->session->set_flashdata('error', 'Transaction ID not found.');
-         redirect('admin/qris');
+         redirect('finance/qris');
       }
 
       $internalRequestBody = array(
@@ -426,7 +423,7 @@ class QrisTransactionController extends CI_Controller
       curl_close($internalCurl);
 
       $this->session->set_flashdata('success', 'Notification has resend');
-      redirect('admin/qris');
+      redirect('finance/qris');
    }
 
    public function getDetailQrisDynamicChannelExternal()

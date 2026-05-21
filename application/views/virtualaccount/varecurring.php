@@ -4,7 +4,7 @@ $search_date_var_value        = $this->session->userdata('search_date_var') ?: '
 $search_date_var_to_value     = $this->session->userdata('search_date_var_to') ?: '';
 $search_name_var_value        = $this->session->userdata('search_name_var') ?: '';
 $search_submerchant_var_value = $this->session->userdata('search_submerchant_var') ?: '';
-$download_url = base_url('admin/download_VA_recurring') // Assuming this exists or follows pattern
+$download_url = base_url('finance/virtual-account/download_recurring') // Assuming this exists or follows pattern
     . '?search_date_var='            . $search_date_var_value
     . '&search_date_var_to='         . $search_date_var_to_value
     . '&search_name_var='            . $search_name_var_value;
@@ -15,6 +15,38 @@ $download_url = base_url('admin/download_VA_recurring') // Assuming this exists 
         <div>
             <h4 class="dt-page-title">Recurring VA Transactions</h4>
             <p class="dt-page-subtitle">Manage and track automated recurring Virtual Account payments.</p>
+        </div>
+        <div class="d-flex" style="gap:10px;">
+            <button type="button" class="btn-dt-action btn-dt-action-primary border-0 d-flex align-items-center shadow-sm" id="toggleGuideBtn" >
+                <i class="fas fa-book-open mr-2"></i> <span class="d-none d-md-block">Instructions Guide</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ── Toggleable Page Instructional Drawer ── -->
+    <div class="drawer-overlay" id="instructionOverlay"></div>
+    <div class="drawer-right" id="instructionDrawer">
+        <div class="drawer-header">
+            <h6 class="drawer-title"><i class="fas fa-book mr-2"></i> VA Recurring Guide</h6>
+            <button type="button" class="drawer-close" id="closeDrawerBtn">&times;</button>
+        </div>
+        <div class="drawer-body">
+            <p class="drawer-desc">This register allows tracking of automated subscription billing paid via Virtual Accounts.</p>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-sync text-primary mr-2"></i> Recurring Payments</div>
+                <p class="drawer-card-text">Track multi-cycle subscription payments, statuses, and routing across sub-merchants.</p>
+            </div>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-search text-primary mr-2"></i> Filtering & Search</div>
+                <p class="drawer-card-text">Search by VA Number, Merchant name/ID, or specific reference parameters. Use the advanced filter to filter by request dates.</p>
+            </div>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-info-circle text-primary mr-2"></i> Channel Logs</div>
+                <p class="drawer-card-text">Click the External ID links in the transaction table to open the API request/response logs modal from the provider.</p>
+            </div>
         </div>
     </div>
     <!-- ── KPI Summary Cards ── -->
@@ -30,7 +62,7 @@ $download_url = base_url('admin/download_VA_recurring') // Assuming this exists 
             if ($this->session->userdata('search_name_var'))      $extra_active++;
             if ($this->session->userdata('search_submerchant_var')) $extra_active++;
         ?>
-        <form id="varecurring_form" method="post" action="<?= base_url('admin/VA_recurring'); ?>">
+        <form id="varecurring_form" method="post" action="<?= base_url('virtual-account/recurring'); ?>">
             <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>">
             <div class="dt-toolbar">
                 <!-- LEFT: Global Search -->
@@ -55,7 +87,7 @@ $download_url = base_url('admin/download_VA_recurring') // Assuming this exists 
                         <div class="dt-more-panel" id="vadynamicMoreFiltersPanel">
                             <div class="dt-more-panel-header">
                                 <span class="dt-more-panel-title"><i class="fas fa-filter mr-1 mr-2"></i> Advanced Filters</span>
-                                <a href="<?= base_url('admin/resetVa_recurring'); ?>" class="dt-more-clear">Clear All</a>
+                                <a href="<?= base_url('virtual-account/recurring/reset'); ?>" class="dt-more-clear">Clear All</a>
                             </div>
                             
                             <div class="dt-more-panel-body">
@@ -136,6 +168,17 @@ $download_url = base_url('admin/download_VA_recurring') // Assuming this exists 
     </button>
 </div>
             <div class="modal-body p-4 bg-light">
+                <!-- Guide Banner -->
+                <div class="d-flex align-items-start pb-4" id="detail-guide-banner">
+                    <div class="d-flex align-items-start p-3 w-100" style="background:rgba(78,115,223,0.06);border:1px solid rgba(78,115,223,0.12);border-radius:12px;">
+                        <div class="bg-info text-white rounded-circle d-flex align-items-center justify-content-center mr-3 flex-shrink-0" style="width:32px;height:32px;"><i class="fas fa-sync-alt" style="font-size:13px;"></i></div>
+                        <div>
+                            <h6 class="fw-bold mb-1" style="font-size:12px;color:var(--text-dark);">VA Recurring Detail</h6>
+                            <p class="text-muted mb-0" style="font-size:11px;line-height:1.5;">Inspect recurring virtual account payment details including subscription cycle, VA assignment, and channel external responses.</p>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="row mb-4">
                     <div class="col-md-4">
                         <div class="small text-uppercase font-weight-bold text-muted mb-1">Provider</div>
@@ -201,17 +244,26 @@ $download_url = base_url('admin/download_VA_recurring') // Assuming this exists 
         </div>
     </div>
 </div>
-<!-- SweetAlert2 -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script type="text/javascript">
     $(document).ready(function() {
+        // Drawer Logic
+        $('#toggleGuideBtn').on('click', function() {
+            $('#instructionDrawer, #instructionOverlay').addClass('open');
+            $('body').css('overflow', 'hidden');
+        });
+
+        $('#closeDrawerBtn, #instructionOverlay').on('click', function() {
+            $('#instructionDrawer, #instructionOverlay').removeClass('open');
+            $('body').css('overflow', '');
+        });
+
         // Init Select2
         $('.select2').select2({
             width: '100%',
             dropdownAutoWidth: true
         });
         // Init Server-Side DataTable
-        var table = initServerDataTable("#varecurringTable", "<?= base_url('admin/VA_recurring') ?>", [
+        var table = initServerDataTable("#varecurringTable", "<?= base_url('virtual-account/recurring') ?>", [
             {data: 'no', orderable: false},
             {data: 'c_datetimeRequest',className: 'text-nowrap', render: function(data){
                 return moment(data).format('DD-MM-YYYY HH:mm:ss');
@@ -306,7 +358,7 @@ $download_url = base_url('admin/download_VA_recurring') // Assuming this exists 
             $('#cashinExternalId, #TransactionIdExternal1, #TransactionIdExternal2, #RequestDatetime, #ResponseDatetime').text('...');
             $('#RequestHeader, #RequestBody, #ResponseHeader, #ResponseBody').text('Loading...');
             $.ajax({
-                url: "<?php echo base_url('admin/getDetailVaRecurringChannelExternal'); ?>",
+                url: "<?php echo base_url('virtual-account/recurring/channel/external'); ?>",
                 method: "POST",
                 data: {
                     '<?php echo $this->security->get_csrf_token_name(); ?>': '<?php echo $this->security->get_csrf_hash(); ?>',

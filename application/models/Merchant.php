@@ -10,7 +10,7 @@ class Merchant extends CI_Model
             $hasBalancePermission = $this->load->library('rbac') ? $this->rbac->has_permission($role_id, 'balance_merchant_module') : true;
         }
 
-        $cols = 'id, c_name, c_email, c_phoneNumber, c_status, c_merchantLevel, c_openapiStatus, c_openapiUrlCallbackQrisMpm, c_openapiUrlCallbackVa, c_openapiUrlCallbackEwallet, c_openapiIPAllow, c_openapiSecurityType, c_refSupervisor, ref_entity';
+        $cols = 'id, c_name, c_email, c_phoneNumber, c_status, c_merchantLevel, c_openapiStatus, c_dateCreated, c_openapiUrlCallbackQrisMpm, c_openapiUrlCallbackVa, c_openapiUrlCallbackEwallet, c_openapiIPAllow, c_openapiSecurityType, c_refSupervisor, ref_entity, c_openapiChannelVaDynamicCreate, c_openapiChannelVaDynamicQuery, c_openapiChannelVaDynamicCancel, c_openapiChannelVaRecurringCreate, c_openapiChannelVaRecurringCancel, c_openapiChannelQrisMpmDynamicCreate, c_openapiChannelQrisMpmDynamicQuery, c_openapiChannelQrisMpmDynamicCancel, c_openapiChannelEwalletDynamicCreate, c_openapiChannelEwalletDynamicQuery, c_openapiChannelEwalletDynamicCancel, c_openapiChannelTransferToBifast, c_openapiChannelTransferToRealtimeOnline, c_allowTransferFromDashboard';
         
         if ($hasBalancePermission) {
             $cols .= ', c_balanceTotal, c_balanceHold';
@@ -33,23 +33,21 @@ class Merchant extends CI_Model
             $ref_entity = $this->session->userdata('ref_entity');
 
             // Only apply filter if ref_entity is NOT null or empty
-            if (!empty($ref_entity)) {
+            if ($ref_entity !== null && $ref_entity !== '') {
                 $this->db->where('ref_entity', $ref_entity);
             }
         }
     
         if ($count_only) {
-            $this->db->select('count(id) as total');
-            $query = $this->db->get();
-            return $query->row()->total;
+            return $this->db->count_all_results();
         }
     
-        $this->db->order_by('id', 'DESC');
-        if ($limit !== null && $start !== null) {
+        if ($limit !== null) {
             $this->db->limit($limit, $start);
         }
     
-        return $this->db->get()->result();
+        $this->db->order_by('id', 'DESC');
+        return $this->db->get();
     }
     
     public function getMerchantById($id) {
@@ -97,6 +95,8 @@ class Merchant extends CI_Model
     }
 
     public function create_merchant($data, $gvconnectBusinessId, $gvconnectBusinessName) {
+        $db_debug = $this->db->db_debug;
+        $this->db->db_debug = FALSE;
         $this->db->trans_begin();
         if ($this->db->insert('merchant', $data)) {
             $submerchant_data = [
@@ -108,20 +108,26 @@ class Merchant extends CI_Model
                 'c_gvconnectBusinessName'   => $gvconnectBusinessName,
             ];
             if (!$this->db->insert('submerchant', $submerchant_data)) {
+                $err = $this->db->error();
                 $this->db->trans_rollback();
-                return $this->db->error();
+                $this->db->db_debug = $db_debug;
+                return $err;
             }
 
             if ($this->db->trans_status() === false) {
                 $this->db->trans_rollback();
+                $this->db->db_debug = $db_debug;
                 return ['code' => '500', 'message' => 'Transaction failed'];
             } else {
                 $this->db->trans_commit();
+                $this->db->db_debug = $db_debug;
                 return true;
             }
         } else {
+            $err = $this->db->error();
             $this->db->trans_rollback();
-            return $this->db->error(); // Returns array with 'code' and 'message'
+            $this->db->db_debug = $db_debug;
+            return $err; // Returns array with 'code' and 'message'
         }
     }
 
@@ -168,8 +174,13 @@ public function setMaintenanceStatus($newStatus) {
     }
 
     public function update_merchant($merchant_id, $data) {
+        $db_debug = $this->db->db_debug;
+        $this->db->db_debug = FALSE;
         $this->db->where('id', $merchant_id);
-        return $this->db->update('merchant', $data);
+        $success = $this->db->update('merchant', $data);
+        $error = $this->db->error();
+        $this->db->db_debug = $db_debug;
+        return $success ? true : $error;
     }
 
     /* Server-Side DataTables Helpers */
@@ -280,34 +291,39 @@ public function setMaintenanceStatus($newStatus) {
     {
         $this->db->from('rbac_merchant_access_grants');
         $this->db->where('ref_granteeMerchantId', $merchantId);
-        // Using NULL for System/Admin level permissions
-        $this->db->where('ref_granterMerchantId IS NULL', null, false);
+        // Using NULL or 0 for System/Admin level permissions to handle MySQL constraints flexibly
+        $this->db->where('(ref_granterMerchantId IS NULL OR ref_granterMerchantId = 0)', null, false);
         return $this->db->get()->result();
     }
 
     public function save_merchant_delegation($granteeId, $permissionId, $action)
     {
+        $db_debug = $this->db->db_debug;
+        $this->db->db_debug = FALSE;
         // Action can be: 'Grant', 'Deny', 'Inherit'
         if ($action === 'Inherit') {
-            // Delete any explicit grant by Admin (NULL granter)
+            // Delete any explicit grant by Admin (NULL or 0 granter)
             $this->db->where('ref_granteeMerchantId', $granteeId);
             $this->db->where('ref_permissionId', $permissionId);
-            $this->db->where('ref_granterMerchantId', NULL);
-            return $this->db->delete('rbac_merchant_access_grants');
+            $this->db->where('(ref_granterMerchantId IS NULL OR ref_granterMerchantId = 0)', null, false);
+            $success = $this->db->delete('rbac_merchant_access_grants');
+            $err = $this->db->error();
+            $this->db->db_debug = $db_debug;
+            return $success ? true : $err;
         } else {
             $isAllowed = ($action === 'Grant') ? 1 : 0;
             
-            // Check if exists using NULL for system granter
+            // Check if exists using NULL or 0 for system granter
             $this->db->from('rbac_merchant_access_grants');
             $this->db->where('ref_granteeMerchantId', $granteeId);
             $this->db->where('ref_permissionId', $permissionId);
-            $this->db->where('ref_granterMerchantId IS NULL', null, false);
+            $this->db->where('(ref_granterMerchantId IS NULL OR ref_granterMerchantId = 0)', null, false);
             $exists = $this->db->get()->row();
 
             $data = [
                 'ref_granteeMerchantId' => $granteeId,
                 'ref_permissionId'      => $permissionId,
-                'ref_granterMerchantId' => NULL,
+                'ref_granterMerchantId' => NULL, // Must be NULL to satisfy fk_rbac_access_granter foreign key referencing merchant(id)
                 'c_isAllowed'           => $isAllowed,
                 'c_grantedByUserId'     => $this->session->userdata('id'), // Admin's user ID is 'id', not 'user_id'
                 'c_updatedAt'           => date('Y-m-d H:i:s')
@@ -315,11 +331,14 @@ public function setMaintenanceStatus($newStatus) {
 
             if ($exists) {
                 $this->db->where('id', $exists->id);
-                return $this->db->update('rbac_merchant_access_grants', $data);
+                $success = $this->db->update('rbac_merchant_access_grants', $data);
             } else {
                 $data['c_grantedAt'] = date('Y-m-d H:i:s');
-                return $this->db->insert('rbac_merchant_access_grants', $data);
+                $success = $this->db->insert('rbac_merchant_access_grants', $data);
             }
+            $err = $this->db->error();
+            $this->db->db_debug = $db_debug;
+            return $success ? true : $err;
         }
     }
 
@@ -345,9 +364,9 @@ public function setMaintenanceStatus($newStatus) {
 
         return $this->datatables->of('merchant m')
             ->select($prefixedCols)
-            ->set_column_order([null, 'm.id', 'm.c_name', 'm.c_balanceTotal', 'm.c_status', null])
+            ->set_column_order([null, 'm.id', 'm.c_name', 'm.c_balanceTotal', 'm.c_status', 'm.c_dateCreated', null])
             ->set_column_search(['m.id', 'm.c_name', 'm.c_email'])
-            ->set_default_order(['m.id' => 'desc'])
+            ->set_default_order(['m.c_dateCreated' => 'desc'])
             ->where($where)
             ->addColumn('no', function ($row) {
                 static $no = null;
@@ -373,26 +392,41 @@ public function setMaintenanceStatus($newStatus) {
         $channel_group_col = "c_{$prefix}ChannelGroup";
         $channel_id_col = "ref_{$prefix}ChannelId";
         
-        return $this->datatables->of($table)
+        $dt = $this->datatables->of($table)
             ->set_column_order([null, $channel_group_col, 'c_fee', null, null, 'c_status', null])
             ->set_column_search([$channel_group_col, $channel_id_col, 'c_externalIdDefault', 'c_status'])
             ->set_default_order(['id' => 'desc'])
-            ->where('ref_merchantId', $merchant_id)
-            ->addColumn('no', function($row) {
+            ->where('ref_merchantId', $merchant_id);
+
+        if ($this->input->post('channel_group')) {
+            $dt->where($channel_group_col, $this->input->post('channel_group'));
+        }
+        if ($this->input->post('channel_id')) {
+            $dt->where($channel_id_col, $this->input->post('channel_id'));
+        }
+        if ($this->input->post('provider')) {
+            $dt->where('c_externalIdDefault', $this->input->post('provider'));
+        }
+        if ($this->input->post('status')) {
+            $dt->where('c_status', $this->input->post('status'));
+        }
+
+        return $dt->addColumn('no', function($row) {
                 static $no = null;
                 if ($no === null) $no = intval($this->input->post('start'));
                 return ++$no;
             })
             ->make(true);
     }
-    public function get_merchant_spv_handler()
+    public function get_merchant_spv_handler($where = [])
     {
         $this->load->library('datatables');
         
         return $this->datatables->of('merchant_supervisor')
-            ->set_column_order(['id', 'c_name', 'c_username', 'c_email', 'c_status'])
+            ->set_column_order(['id', 'c_name', 'c_username', 'c_email', 'c_status', 'c_created_date'])
             ->set_column_search(['c_name', 'c_username', 'c_email', 'c_status'])
-            ->set_default_order(['id' => 'desc'])
+            ->set_default_order(['c_created_date' => 'desc'])
+            ->where($where)
             ->addColumn('no', function($row) {
                 static $no = null;
                 if ($no === null) $no = intval($this->input->post('start'));
@@ -401,7 +435,7 @@ public function setMaintenanceStatus($newStatus) {
             ->make(true);
     }
 
-    public function get_merchants_by_supervisor_handler($supervisor_id, $hasBalancePermission = false)
+    public function get_merchants_by_supervisor_handler($supervisor_id, $hasBalancePermission = false, $where = [])
     {
         $this->load->library('datatables');
 
@@ -415,10 +449,11 @@ public function setMaintenanceStatus($newStatus) {
 
         return $this->datatables->of('merchant')
             ->select($prefixedCols)
-            ->set_column_order(['merchant.id', 'merchant.c_name', 'merchant.c_balanceTotal', 'merchant.c_balanceHold', 'merchant.c_openapiStatus', 'merchant.c_status'])
-            ->set_column_search(['merchant.c_name', 'merchant.id'])
-            ->set_default_order(['merchant.id' => 'desc'])
+            ->set_column_order(['merchant.id', 'merchant.c_name', 'merchant.c_balanceTotal', 'merchant.c_balanceHold', 'merchant.c_openapiStatus', 'merchant.c_status', 'merchant.c_dateCreated'])
+            ->set_column_search(['merchant.c_name', 'merchant.id', 'merchant.c_email'])
+            ->set_default_order(['merchant.c_dateCreated' => 'desc'])
             ->where('merchant.c_refSupervisor', $supervisor_id)
+            ->where($where)
             ->addColumn('no', function($row) {
                 static $no = null;
                 if ($no === null) $no = intval($this->input->post('start'));

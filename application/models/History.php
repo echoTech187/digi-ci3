@@ -266,5 +266,167 @@ class History extends CI_Model {
             })
             ->make(true);
     }
+
+    /**
+     * Get all transaction history (PPOB, VA, QRIS, E-Wallet, BI-FAST) for a specific merchant.
+     */
+    public function get_merchant_all_history_datatables_handler($merchant_id)
+    {
+        $this->load->library('datatables');
+        $merchant_id = intval($merchant_id);
+
+        $union_sql = "
+            SELECT 
+                m.c_name AS name_merchant,
+                cpp.c_datetime,
+                cpp.ref_cashoutChannelId AS ref_cashoutChannelId,
+                c.c_invoiceNo,
+                cpp.c_phone AS c_phone,
+                cpp.c_amount,
+                cpp.c_status
+            FROM cashout_payment_ppob cpp
+            LEFT JOIN cashout c ON cpp.ref_cashoutId = c.id
+            LEFT JOIN merchant m ON cpp.ref_merchantId = m.id
+            WHERE cpp.ref_merchantId = {$merchant_id}
+            
+            UNION ALL
+            
+            SELECT 
+                m.c_name AS name_merchant,
+                cpv.c_datetime,
+                cpv.ref_cashinChannelId AS ref_cashoutChannelId,
+                c.c_invoiceNo,
+                cpv.c_vaNumber AS c_phone,
+                cpv.c_amount,
+                'SUCCESS' AS c_status
+            FROM cashin_payment_va cpv
+            LEFT JOIN cashin c ON cpv.ref_cashinId = c.id
+            LEFT JOIN merchant m ON cpv.ref_merchantId = m.id
+            WHERE cpv.ref_merchantId = {$merchant_id}
+
+            UNION ALL
+
+            SELECT 
+                m.c_name AS name_merchant,
+                cpq.c_datetime,
+                'QRIS' AS ref_cashoutChannelId,
+                c.c_invoiceNo,
+                '-' AS c_phone,
+                cpq.c_amount,
+                'SUCCESS' AS c_status
+            FROM cashin_payment_qris_mpm cpq
+            LEFT JOIN cashin c ON cpq.ref_cashinId = c.id
+            LEFT JOIN merchant m ON cpq.ref_merchantId = m.id
+            WHERE cpq.ref_merchantId = {$merchant_id}
+
+            UNION ALL
+
+            SELECT 
+                m.c_name AS name_merchant,
+                cpe.c_datetime,
+                cpe.ref_cashinChannelId AS ref_cashoutChannelId,
+                c.c_invoiceNo,
+                '-' AS c_phone,
+                cpe.c_amount,
+                'SUCCESS' AS c_status
+            FROM cashin_payment_ewallet cpe
+            LEFT JOIN cashin c ON cpe.ref_cashinId = c.id
+            LEFT JOIN merchant m ON cpe.ref_merchantId = m.id
+            WHERE cpe.ref_merchantId = {$merchant_id}
+
+            UNION ALL
+
+            SELECT 
+                m.c_name AS name_merchant,
+                cpb.c_datetime,
+                'BI-FAST' AS ref_cashoutChannelId,
+                c.c_invoiceNo,
+                cpb.c_accountNo AS c_phone,
+                cpb.c_amount,
+                cpb.c_status
+            FROM cashout_payment_bifast cpb
+            LEFT JOIN cashout c ON cpb.ref_cashoutId = c.id
+            LEFT JOIN merchant m ON cpb.ref_merchantId = m.id
+            WHERE cpb.ref_merchantId = {$merchant_id}
+        ";
+
+        // Calculate counts
+        $total_query = $this->db->query("SELECT COUNT(*) AS total FROM ({$union_sql}) AS t");
+        $recordsTotal = $total_query->row() ? intval($total_query->row()->total) : 0;
+
+        $searchValue = isset($_POST['search']['value']) ? trim($_POST['search']['value']) : '';
+        $where_clause = '';
+        if ($searchValue !== '') {
+            $safeSearch = $this->db->escape_str($searchValue);
+            $where_clause = " WHERE (
+                t.c_invoiceNo LIKE '%{$safeSearch}%' OR 
+                t.c_phone LIKE '%{$safeSearch}%' OR 
+                t.ref_cashoutChannelId LIKE '%{$safeSearch}%' OR 
+                t.name_merchant LIKE '%{$safeSearch}%'
+            )";
+        }
+
+        if ($searchValue !== '') {
+            $filtered_query = $this->db->query("SELECT COUNT(*) AS total FROM ({$union_sql}) AS t {$where_clause}");
+            $recordsFiltered = $filtered_query->row() ? intval($filtered_query->row()->total) : 0;
+        } else {
+            $recordsFiltered = $recordsTotal;
+        }
+
+        // Determine ordering
+        $columns = [
+            0 => null,
+            1 => 't.name_merchant',
+            2 => 't.c_datetime',
+            3 => 't.ref_cashoutChannelId',
+            4 => 't.c_invoiceNo',
+            5 => 't.c_phone',
+            6 => 't.c_amount',
+            7 => 't.c_status'
+        ];
+
+        $order_clause = ' ORDER BY t.c_datetime DESC ';
+        if (isset($_POST['order'])) {
+            $col_idx = intval($_POST['order']['0']['column']);
+            $col_dir = $_POST['order']['0']['dir'] === 'asc' ? 'ASC' : 'DESC';
+            if (isset($columns[$col_idx]) && $columns[$col_idx] !== null) {
+                $order_clause = " ORDER BY {$columns[$col_idx]} {$col_dir} ";
+            }
+        }
+
+        // Determine pagination limits
+        $limit_clause = '';
+        if (isset($_POST['length']) && $_POST['length'] != -1) {
+            $start = intval($_POST['start']);
+            $length = intval($_POST['length']);
+            $limit_clause = " LIMIT {$start}, {$length}";
+        }
+
+        $data_sql = "SELECT * FROM ({$union_sql}) AS t {$where_clause} {$order_clause} {$limit_clause}";
+        $list = $this->db->query($data_sql)->result();
+
+        // Pass manual results to datatables
+        $original_start = isset($_POST['start']) ? $_POST['start'] : 0;
+        $_POST['start'] = 0;
+
+        $output = $this->datatables->of('merchant') // Dummy table to satisfy the library structure
+            ->set_recordsTotal($recordsTotal)
+            ->set_recordsFiltered($recordsFiltered)
+            ->set_data($list)
+            ->addColumn('no', function($row) use ($original_start) {
+                static $no = null;
+                if ($no === null) $no = intval($original_start);
+                return ++$no;
+            })
+            ->make(false);
+
+        // Restore original start and output JSON
+        $_POST['start'] = $original_start;
+        $output['draw'] = intval($this->input->post('draw'));
+
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode($output));
+    }
 }
 ?>

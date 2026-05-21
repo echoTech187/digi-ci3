@@ -115,6 +115,23 @@ class ServiceController extends CI_Controller {
         $this->_render_product_datatable($where, 'pubgmobile', 'PUBG Mobile');
     }
 
+    private function _get_route_by_view($view_name) {
+        $mapping = [
+            'pulsa_reguler' => 'product/pulsa-reguler',
+            'paket_data' => 'product/paket-data',
+            'token_listrik' => 'product/token-listrik',
+            'topup_gopay' => 'product/ewallet/gopay',
+            'topup_dana' => 'product/ewallet/dana',
+            'topup_ovo' => 'product/ewallet/ovo',
+            'mobilelegend' => 'product/games/mobile-legend',
+            'pubgmobile' => 'product/games/pubg',
+            'freefire' => 'product/games/free-fire',
+            'hago' => 'product/games/hago',
+            'googleplay' => 'product/games/google-play',
+        ];
+        return isset($mapping[$view_name]) ? $mapping[$view_name] : 'dashboard';
+    }
+
    public function createProduk()
    {
       $this->form_validation->set_rules('caption', 'Caption', 'required');
@@ -131,7 +148,7 @@ class ServiceController extends CI_Controller {
 
       if ($this->form_validation->run() == FALSE) {
 
-         $this->load->view('admin/' . $name);
+         $this->load->view('product/' . $name);
       } else {
          $data = array(
             'id' => $id,
@@ -148,11 +165,11 @@ class ServiceController extends CI_Controller {
 
          if ($this->Chanel->insert_cashout_chanel($data)) {
             $this->session->set_flashdata('message', 'Product created successfully');
-            redirect('admin/' . $name);
+            redirect($this->_get_route_by_view($name));
          } else {
 
             $this->session->set_flashdata('error', 'An error occurred while creating the product');
-            redirect('admin/' . $name);
+            redirect($this->_get_route_by_view($name));
          }
       }
    }
@@ -173,7 +190,7 @@ class ServiceController extends CI_Controller {
 
       if ($this->form_validation->run() == FALSE) {
          $this->session->set_flashdata('error', validation_errors());
-         redirect('admin/' . $view_name);
+         redirect($this->_get_route_by_view($view_name));
       } else {
          $data = array(
             'c_caption' => $caption,
@@ -187,10 +204,10 @@ class ServiceController extends CI_Controller {
 
          if ($this->Chanel->update_cashout_chanel($id, $data)) {
             $this->session->set_flashdata('message', 'Product updated successfully');
-            redirect('admin/' . $view_name);
+            redirect($this->_get_route_by_view($view_name));
          } else {
             $this->session->set_flashdata('error', 'An error occurred while updating the product');
-            redirect('admin/' . $view_name);
+            redirect($this->_get_route_by_view($view_name));
          }
       }
    }

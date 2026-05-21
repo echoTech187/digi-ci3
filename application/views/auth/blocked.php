@@ -42,7 +42,7 @@
 			<p class="lead text-gray-800 mb-5">Akses Ditolak</p>
 			<p class="text-gray-500 mb-0">Maaf, Anda tidak memiliki izin untuk mengakses halaman ini.</p>
 			<br>
-			<a href="<?= base_url('admin'); ?>" class="btn btn-primary mt-3">&larr; Kembali ke Dasbor</a>
+			<a href="<?= base_url('auth/logout'); ?>" class="btn btn-primary mt-3">&larr; Kembali ke Dasbor</a>
 		</div>
 
 	</div>

@@ -37,24 +37,44 @@ class Model_menu extends CI_Model
 
    public function insert_menu($data, $table)
    {
-      $this->db->insert($table, $data);
+      $db_debug = $this->db->db_debug;
+      $this->db->db_debug = FALSE;
+      $success = $this->db->insert($table, $data);
+      $error = $this->db->error();
+      $this->db->db_debug = $db_debug;
+      return $success ? true : $error;
    }
 
    public function insert_subMenu($data, $table)
    {
-      $this->db->insert($table, $data);
+      $db_debug = $this->db->db_debug;
+      $this->db->db_debug = FALSE;
+      $success = $this->db->insert($table, $data);
+      $error = $this->db->error();
+      $this->db->db_debug = $db_debug;
+      return $success ? true : $error;
    }
 
    public function hapus_menu($where, $table)
    {
       $this->db->where($where);
-      $this->db->delete($table);
+      $db_debug = $this->db->db_debug;
+      $this->db->db_debug = FALSE;
+      $success = $this->db->delete($table);
+      $error = $this->db->error();
+      $this->db->db_debug = $db_debug;
+      return $success ? true : $error;
    }
 
    public function hapus_subMenu($where, $table)
    {
       $this->db->where($where);
-      $this->db->delete($table);
+      $db_debug = $this->db->db_debug;
+      $this->db->db_debug = FALSE;
+      $success = $this->db->delete($table);
+      $error = $this->db->error();
+      $this->db->db_debug = $db_debug;
+      return $success ? true : $error;
    }
 
    public function editSubMenu($where, $table)
@@ -65,7 +85,12 @@ class Model_menu extends CI_Model
    public function changeSubMenu($where, $data, $table)
    {
       $this->db->where($where);
-      $this->db->update($table, $data);
+      $db_debug = $this->db->db_debug;
+      $this->db->db_debug = FALSE;
+      $success = $this->db->update($table, $data);
+      $error = $this->db->error();
+      $this->db->db_debug = $db_debug;
+      return $success ? true : $error;
    }
 
    public function editMenu($where, $table)
@@ -76,7 +101,12 @@ class Model_menu extends CI_Model
    public function changeMenu($where, $data, $table)
    {
       $this->db->where($where);
-      $this->db->update($table, $data);
+      $db_debug = $this->db->db_debug;
+      $this->db->db_debug = FALSE;
+      $success = $this->db->update($table, $data);
+      $error = $this->db->error();
+      $this->db->db_debug = $db_debug;
+      return $success ? true : $error;
    }
 
    public function get_all_menus_hierarchical()

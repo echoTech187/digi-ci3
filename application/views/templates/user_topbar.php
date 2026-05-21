@@ -46,7 +46,7 @@
             ?>
             <nav aria-label="breadcrumb" class="d-none d-lg-block">
                 <ol class="dt-breadcrumb ">
-                    <li class="dt-breadcrumb-item"><a href="<?= base_url('admin') ?>" title="Home"><i class="fas fa-home" style="font-size:12px;"></i></a></li>
+                    <li class="dt-breadcrumb-item"><a href="<?= base_url('dashboard') ?>" title="Home"><i class="fas fa-home" style="font-size:12px;"></i></a></li>
                     <?php foreach ($breadcrumb as $index => $item): ?>
                         <li class="dt-breadcrumb-separator"><i class="fas fa-chevron-right"></i></li>
                         <li class="dt-breadcrumb-item">
@@ -158,7 +158,7 @@
                         <div class="p-2">
                             <?php if ($user['role_id'] != 4): ?>
                                 <div class="dropdown-item px-3 rounded-lg border-bottom mb-1">
-                                    <div class="d-flex align-items-center justify-content-between" style="gap:10px">
+                                    <div class="d-flex align-items-center justify-content-between w-100" style="gap:10px">
                                         <div class="d-flex align-items-center">
                                             <div class="dropdown-icon-wrap mr-3 bg-info-soft text-info">
                                                 <i class="fas fa-network-wired fa-sm"></i>
@@ -263,7 +263,7 @@
                         }
 
                         try {
-                            const response = await fetch(`<?= base_url('admin/globalSearch'); ?>?q=${encodeURIComponent(query)}`);
+                            const response = await fetch(`<?= base_url('dashboard/global-search'); ?>?q=${encodeURIComponent(query)}`);
                             const results = await response.json();
 
                             // Display Results
@@ -307,7 +307,7 @@
                 // Maintenance toggle logic
                 const toggle = document.getElementById('toggleMaintenanceButton');
                 if (toggle) {
-                    fetch("<?= base_url('admin/getMaintenanceStatus') ?>")
+                    fetch("<?= base_url('dashboard/maintenance-status') ?>")
                     .then(response => response.json())
                     .then(data => {
                         toggle.checked = (data.status === 'Active'); 
@@ -360,7 +360,7 @@
                                     formData.append(csrfName, csrfHash);
                                 }
 
-                                fetch("<?= base_url('admin/toggleOpenApiStatus') ?>", {
+                                fetch("<?= base_url('dashboard/toggle-openapi') ?>", {
                                     method: 'POST',
                                     headers: {
                                         'X-Requested-With': 'XMLHttpRequest'

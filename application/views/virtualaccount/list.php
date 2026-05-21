@@ -14,7 +14,7 @@ if ($search_name_va_value)            $extra_active++;
 if ($search_date_va_settlement_value) $extra_active++;
 // VA number, trans ID, invoice are in global search
 
-$download_url = base_url('admin/download_VA')
+$download_url = base_url('finance/virtual-account/download')
     . '?search_date_va='            . $search_date_va_value
     . '&search_date_va_to='         . $search_date_va_to_value
     . '&search_date_va_settlement=' . $search_date_va_settlement_value
@@ -23,11 +23,45 @@ $download_url = base_url('admin/download_VA')
 
 <!-- ── Page Header ── -->
 <div>
+    <!-- ── Toggleable Page Instructional Drawer ── -->
+    <div class="drawer-overlay" id="instructionOverlay"></div>
+    <div class="drawer-right" id="instructionDrawer">
+        <div class="drawer-header">
+            <h6 class="drawer-title"><i class="fas fa-book mr-2"></i> Virtual Account Transactions Guide</h6>
+            <button type="button" class="drawer-close" id="closeDrawerBtn">&times;</button>
+        </div>
+        <div class="drawer-body">
+            <p class="drawer-desc">Overview of all Virtual Account (VA) transactions generated across all integrated banks.</p>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-search text-primary mr-2"></i> Global Search</div>
+                <p class="drawer-card-text">Look up by VA number, invoice number, or merchant transaction ID using the toolbar search.</p>
+            </div>
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-filter text-primary mr-2"></i> Date Filters</div>
+                <p class="drawer-card-text">Restrict queries by creation date range or settlement date range to isolate specific payment windows.</p>
+            </div>
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-bell text-primary mr-2"></i> Resend Notification</div>
+                <p class="drawer-card-text">Trigger webhook payload callbacks manually if the merchant server missed the original paid notification.</p>
+            </div>
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-calendar-check text-primary mr-2"></i> Settlement Info</div>
+                <p class="drawer-card-text">Check the date and time when the funds were settled into the merchant's available balance.</p>
+            </div>
+        </div>
+    </div>
 
-    <div class="dt-page-header">
+
+    <div class="dt-page-header d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h4 class="dt-page-title">Virtual Account Transactions</h4>
-            <p class="dt-page-subtitle">Track and manage all Virtual Account (VA) payment movements.</p>
+            <h4 class="dt-page-title mb-1">Virtual Account Transactions</h4>
+            <p class="dt-page-subtitle mb-0">Track and manage all Virtual Account (VA) payment movements.</p>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <button type="button" class="btn btn-light border shadow-sm mr-2 d-flex align-items-center" id="toggleGuideBtn">
+                <i class="fas fa-book-open text-primary mr-2"></i> <span class="d-none d-md-block">Instructions Guide</span>
+            </button>
         </div>
     </div>
 
@@ -43,7 +77,7 @@ $download_url = base_url('admin/download_VA')
     <div class="card border-0 shadow-sm dt-card">
 
         <!-- ── Toolbar ── -->
-        <form id="va_form" method="post" action="<?= base_url('admin/virtual_account'); ?>">
+        <form id="va_form" method="post" action="<?= base_url('finance/virtual-account'); ?>">
             <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>">
 
             <div class="dt-toolbar">
@@ -74,7 +108,7 @@ $download_url = base_url('admin/download_VA')
                         <div class="dt-more-panel" id="vaMoreFiltersPanel">
                             <div class="dt-more-panel-header">
                                 <span class="dt-more-panel-title"><i class="fas fa-filter mr-1 mr-2"></i> Advanced filters</span>
-                                <a href="<?= base_url('admin/resetVA'); ?>" class="dt-more-clear">Clear All</a>
+                                <a href="<?= base_url('finance/virtual-account/reset'); ?>" class="dt-more-clear">Clear All</a>
                             </div>
 
                             <div class="dt-more-panel-body">
@@ -159,7 +193,7 @@ $download_url = base_url('admin/download_VA')
 <script type="text/javascript">
     $(document).ready(function() {
         // Init Server-Side DataTable
-        var table = initServerDataTable("#vaTable", "<?= base_url('admin/virtual_account') ?>", [
+        var table = initServerDataTable("#vaTable", "<?= base_url('finance/virtual-account') ?>", [
             {data: 'no', orderable: false},
             {data: 'c_datetime',className: 'text-nowrap', render: function(data){
                 return moment(data).format('DD-MM-YYYY HH:mm:ss');
@@ -197,8 +231,8 @@ $download_url = base_url('admin/download_VA')
                 searchable: false,
                 render: function(data, type, row) {
                     var baseUrl = "<?= base_url() ?>";
-                    var detailLink = baseUrl + 'admin/VA_detail/' + data;
-                    var resendLink = baseUrl + 'admin/SendnotifikasiVA/' + data + '/' + row.ref_merchantId;
+                    var detailLink = baseUrl + 'finance/virtual-account/detail/' + data;
+                    var resendLink = baseUrl + 'virtual-account/notification/resend/' + data + '/' + row.ref_merchantId;
                     
                     return `
                         <div class="dropdown">
@@ -206,7 +240,7 @@ $download_url = base_url('admin/download_VA')
                             <ul class="dropdown-menu dropdown-menu-right border-0 shadow-lg">
                                 <li><a href="${detailLink}" class="dropdown-item"><i class="fas fa-eye text-primary mr-2"></i> Detail</a></li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a onclick="javascript: return confirm('Are you sure, want to resend notification again ??')" href="${resendLink}" class="dropdown-item"><i class="fas fa-paper-plane text-warning mr-2"></i> Resend</a></li>
+                                <li><button class="dropdown-item resend-notif-btn" data-href="${resendLink}"><i class="fas fa-paper-plane text-warning mr-2"></i> Resend</button></li>
                             </ul>
                         </div>
                     `;
@@ -248,6 +282,28 @@ $download_url = base_url('admin/download_VA')
             }
         });
 
+        $(document).on('click', '.resend-notif-btn', function(e) {
+            e.preventDefault();
+            var href = $(this).data('href');
+            Swal.fire({
+                title: 'Resend Notification',
+                text: 'Are you sure you want to resend this notification?',
+                icon: 'question',
+                showCancelButton: true,
+                customClass: {
+                    popup: 'swal2-premium-popup',
+                    confirmButton: 'swal2-premium-confirm',
+                    cancelButton: 'swal2-premium-cancel'
+                },
+                buttonsStyling: false,
+                confirmButtonText: 'Yes, resend!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = href;
+                }
+            });
+        });
+
         // Select2 inside panel
         $('.va-select2').select2({
             width: '100%',
@@ -260,3 +316,18 @@ $download_url = base_url('admin/download_VA')
 
 
 
+
+<script>
+$(document).ready(function() {
+    // Drawer Toggle Logic
+    $('#toggleGuideBtn').on('click', function() {
+        $('#instructionDrawer, #instructionOverlay').addClass('open');
+        $('body').css('overflow', 'hidden');
+    });
+
+    $('#closeDrawerBtn, #instructionOverlay').on('click', function() {
+        $('#instructionDrawer, #instructionOverlay').removeClass('open');
+        $('body').css('overflow', '');
+    });
+});
+</script>

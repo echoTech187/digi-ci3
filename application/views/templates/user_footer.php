@@ -70,17 +70,101 @@
         const roleId = $(this).data('role');
 
         $.ajax({
-            url: "<?= base_url('admin/changeaccess'); ?>",
+            url: "<?= base_url('access-control/roles/change-access'); ?>",
             type: 'post',
             data: {
                 menuId: menuId,
                 roleId: roleId
             },
             success: function() {
-                document.location.href = "<?= base_url('admin/roleaccess/'); ?>" + roleId;
+                document.location.href = "<?= base_url('access-control/roles/access/'); ?>" + roleId;
             }
         });
 
+    });
+</script>
+
+<!-- Centralized Flashdata SweetAlert2 Premium Notifications -->
+ <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    $(document).ready(function() {
+        <?php if ($this->session->flashdata('success')) : ?>
+            Swal.fire({
+                title: 'Success!',
+                text: '<?= addslashes(trim(str_replace(["\r", "\n"], '', $this->session->flashdata('success')))); ?>',
+                icon: 'success',
+                customClass: {
+                    popup: 'swal2-premium-popup',
+                    confirmButton: 'swal2-premium-confirm'
+                },
+                buttonsStyling: false
+            });
+        <?php endif; ?>
+
+        <?php if ($this->session->flashdata('error')) : ?>
+            Swal.fire({
+                title: 'Error!',
+                html: '<?= addslashes(trim(str_replace(["\r", "\n"], '', $this->session->flashdata('error')))); ?>',
+                icon: 'error',
+                customClass: {
+                    popup: 'swal2-premium-popup',
+                    confirmButton: 'swal2-premium-confirm'
+                },
+                buttonsStyling: false
+            });
+        <?php endif; ?>
+
+        <?php if ($this->session->flashdata('message')) : ?>
+            Swal.fire({
+                title: 'Information',
+                html: '<?= addslashes(trim(str_replace(["\r", "\n"], '', $this->session->flashdata('message')))); ?>',
+                icon: 'info',
+                customClass: {
+                    popup: 'swal2-premium-popup',
+                    confirmButton: 'swal2-premium-confirm'
+                },
+                buttonsStyling: false
+            });
+        <?php endif; ?>
+
+        <?php if ($this->session->flashdata('info')) : ?>
+            Swal.fire({
+                title: 'Information',
+                html: '<?= addslashes(trim(str_replace(["\r", "\n"], '', $this->session->flashdata('info')))); ?>',
+                icon: 'info',
+                customClass: {
+                    popup: 'swal2-premium-popup',
+                    confirmButton: 'swal2-premium-confirm'
+                },
+                buttonsStyling: false
+            });
+        <?php endif; ?>
+
+        <?php if ($this->session->flashdata('warning')) : ?>
+            Swal.fire({
+                title: 'Warning!',
+                html: '<?= addslashes(trim(str_replace(["\r", "\n"], '', $this->session->flashdata('warning')))); ?>',
+                icon: 'warning',
+                customClass: {
+                    popup: 'swal2-premium-popup',
+                    confirmButton: 'swal2-premium-confirm'
+                },
+                buttonsStyling: false
+            });
+        <?php endif; ?>
+
+        <?php if ($this->session->flashdata('question')) : ?>
+            Swal.fire({
+                title: 'Confirmation',
+                html: '<?= addslashes(trim(str_replace(["\r", "\n"], '', $this->session->flashdata('question')))); ?>',
+                icon: 'question',
+                customClass: {
+                    popup: 'swal2-premium-popup',
+                    confirmButton: 'swal2-premium-confirm'
+                },
+                buttonsStyling: false
+            });
+        <?php endif; ?>
     });
 </script>
 
@@ -254,7 +338,7 @@
                     $(this).select2({
                         width: '100%',
                         dropdownAutoWidth: true,
-                        dropdownParent: $panel,
+                        dropdownParent: $(document.body),
                         minimumResultsForSearch: 0
                     });
                 });
@@ -576,7 +660,7 @@
         $(document).ready(function() {
             // 1. Auto-hide Success Alerts (smooth slide up)
             setTimeout(function() {
-                $('.alert').slideUp('slow');
+                $('.alert:not(.alert-permanent)').slideUp('slow');
             }, 5000);
 
             // 2. Fix Select2 Auto-Focus in Bootstrap Modals
@@ -596,6 +680,96 @@
                     $btn.prop('disabled', true).html('<i class="fas fa-circle-notch fa-spin mr-2"></i> Processing...');
                 }
             });
+        });
+    </script>
+
+    <!-- Global Background Database Connection Monitoring -->
+    <script>
+        $(document).ready(function() {
+            let isDbOffline = false;
+            let offlineAlertOpen = false;
+
+            function checkDatabaseStatus() {
+                $.ajax({
+                    url: '<?= base_url("health/db-check"); ?>',
+                    type: 'GET',
+                    dataType: 'json',
+                    timeout: 3000,
+                    success: function(response) {
+                        if (response.status === 'offline') {
+                            handleDbOffline(response.message || 'Database connection lost');
+                        } else if (response.status === 'online' && isDbOffline) {
+                            handleDbOnline();
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        // If server returns 500 or timeout, treat as offline
+                        handleDbOffline('Unable to reach data service');
+                    }
+                });
+            }
+
+            function handleDbOffline(msg) {
+                if (!isDbOffline) {
+                    isDbOffline = true;
+                    // Disable submit buttons to prevent data loss while offline
+                    $('button[type="submit"]').prop('disabled', true);
+                    
+                    // Sync with Dashboard System Status Badge if present
+                    if ($("#maintenance_label").length) {
+                        $("#maintenance_label").text('Offline');
+                        $("#maintenance_dot").removeClass('bg-success bg-secondary bg-warning').addClass('bg-danger');
+                        $("#maintenance_ping").removeClass('bg-success bg-secondary bg-warning animate-ping').addClass('bg-danger');
+                    }
+                    
+                    if (!offlineAlertOpen) {
+                        offlineAlertOpen = true;
+                        Swal.fire({
+                            title: 'System Alert: Database Offline',
+                            html: '<div class="text-left"><p class="mb-2">We have detected a temporary loss of database connectivity. To prevent data corruption, form submissions have been paused.</p><p class="text-xs text-muted mb-0">Diagnostic: ' + msg + '</p></div>',
+                            icon: 'warning',
+                            backdrop: 'rgba(15, 23, 42, 0.85)',
+                            allowOutsideClick: false,
+                            allowEscapeKey: false,
+                            showConfirmButton: false,
+                            showLoading: true,
+                            customClass: {
+                                popup: 'swal2-premium-popup border-danger'
+                            }
+                        });
+                    }
+                }
+            }
+
+            function handleDbOnline() {
+                isDbOffline = false;
+                offlineAlertOpen = false;
+                $('button[type="submit"]').prop('disabled', false);
+
+                // Restore Dashboard System Status Badge
+                if (typeof loadMetadata === 'function') {
+                    loadMetadata();
+                } else if ($("#maintenance_label").length) {
+                    $("#maintenance_label").text('Online');
+                    $("#maintenance_dot").removeClass('bg-danger bg-secondary bg-warning').addClass('bg-success');
+                    $("#maintenance_ping").removeClass('bg-danger bg-secondary bg-warning').addClass('bg-success animate-ping');
+                }
+
+                Swal.fire({
+                    title: 'Connection Restored!',
+                    text: 'Database connectivity has been re-established. You may now continue your work.',
+                    icon: 'success',
+                    timer: 3000,
+                    timerProgressBar: true,
+                    showConfirmButton: false,
+                    customClass: {
+                        popup: 'swal2-premium-popup border-success'
+                    }
+                });
+            }
+
+            // Start background polling every 100 seconds
+            setInterval(checkDatabaseStatus, 100000);
         });
     </script>
 </body>

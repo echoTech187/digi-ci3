@@ -89,7 +89,7 @@ class BiFastTransactionController extends CI_Controller
       // Hal ini mencegah ambiguitas data karena Reff ID eksternal bergantung pada provider channel tertentu.
       if (!empty($search_external_reff_id) && (empty($search_channel_bifast) || $search_channel_bifast === '' || $search_channel_bifast === null)) {
          $this->session->set_flashdata('error', 'Silakan pilih "External Channel" terlebih dahulu sebelum memasukan "External Reff ID"');
-         redirect('admin/bi_fast');
+         redirect('finance/bi-fast');
       }
 
       // Simpan filter aktif ke session untuk persistensi antar request.
@@ -177,7 +177,7 @@ class BiFastTransactionController extends CI_Controller
       $this->session->unset_userdata('search_external_reff_id');
       $this->session->unset_userdata('search_channel_bifast');
       $this->session->unset_userdata('last_search_bifast');
-      redirect('admin/bi_fast');
+      redirect('finance/bi-fast');
    }
 
    /**
@@ -187,12 +187,8 @@ class BiFastTransactionController extends CI_Controller
     */
    public function bi_fast_detail($id = NULL)
    {
-      // Fallback ke segment URI jika parameter tidak diberikan secara eksplisit.
-      if (!$id) $id = $this->uri->segment(3);
-
       if (!$id) {
-         $this->session->set_flashdata('error', 'ID Transaksi tidak ditemukan.');
-         redirect('admin/bi_fast');
+         redirect('finance/bi-fast');
       }
 
       $data['user'] = $this->Model_user->view_user()->row_array();
@@ -222,7 +218,7 @@ class BiFastTransactionController extends CI_Controller
       // Validasi: Memastikan setidaknya ada satu filter utama untuk membatasi cakupan data laporan.
       if (empty($search_date_bifast) && empty($search_name_bifast)) {
          $this->session->set_flashdata('error_message', 'Harap isi filter tanggal atau merchant sebelum mengunduh laporan.');
-         redirect('admin/bi_fast');
+         redirect('finance/bi-fast');
       }
 
       $user = $this->Model_user->view_user()->row_array();
@@ -244,7 +240,7 @@ class BiFastTransactionController extends CI_Controller
          $this->session->set_flashdata('error', 'Gagal mendaftarkan permintaan unduhan.');
       }
 
-      redirect('admin/bi_fast');
+      redirect('finance/bi-fast');
    }
 
    /**

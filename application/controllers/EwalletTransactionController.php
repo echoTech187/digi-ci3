@@ -181,7 +181,7 @@ class EwalletTransactionController extends CI_Controller
       $this->session->unset_userdata('search_invoice_no');
       $this->session->unset_userdata('search_transid_ewallet');
       $this->session->unset_userdata('last_search_ewallet');
-      redirect('admin/ewallet');
+      redirect('finance/e-wallet');
    }
 
    public function download_ewallet()
@@ -197,7 +197,7 @@ class EwalletTransactionController extends CI_Controller
          empty($search_date_to_ewallet) &&
          empty($search_date_ewallet_settlement)
       ) {
-         redirect('admin/ewallet');
+         redirect('finance/e-wallet');
       }
 
       $additionalFilter = $search_name_ewallet . '|' . $search_date_ewallet . '|' . $search_date_to_ewallet . '|' . $search_date_ewallet_settlement;
@@ -213,7 +213,7 @@ class EwalletTransactionController extends CI_Controller
          $this->session->set_flashdata('error', 'Failed request download');
       }
 
-      redirect('admin/ewallet');
+      redirect('finance/e-wallet');
    }
 
    public function ewallet_dynamic()
@@ -298,11 +298,8 @@ class EwalletTransactionController extends CI_Controller
 
    public function ewallet_detail($id = NULL)
    {
-      if (!$id) $id = $this->uri->segment(3);
-
       if (!$id) {
-         $this->session->set_flashdata('error', 'Transaction ID not found.');
-         redirect('admin/ewallet');
+         redirect('finance/e-wallet');
       }
 
       $data['user'] = $this->Model_user->view_user()->row_array();
@@ -327,7 +324,7 @@ class EwalletTransactionController extends CI_Controller
       $this->session->unset_userdata('search_transid_qd');
       $this->session->unset_userdata('search_status_transaction_qd');
       $this->session->unset_userdata('last_search_ewd');
-      redirect('admin/ewallet_dynamic');
+      redirect('e-wallet/dynamic');
    }
 
    public function Sendnotifikasiewallet()
@@ -337,7 +334,7 @@ class EwalletTransactionController extends CI_Controller
 
       if (!$ref_cashinPaymentEwalletId) {
          $this->session->set_flashdata('error', 'Transaction ID not found.');
-         redirect('admin/ewallet');
+         redirect('finance/e-wallet');
       }
 
       $internalRequestBody = array(
@@ -370,7 +367,7 @@ class EwalletTransactionController extends CI_Controller
       curl_close($internalCurl);
 
       $this->session->set_flashdata('success', 'Notification has resend');
-      redirect('admin/ewallet');
+      redirect('finance/e-wallet');
    }
 
    public function getDetailEwalletDynamicChannelExternal()

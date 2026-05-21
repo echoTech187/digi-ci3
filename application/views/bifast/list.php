@@ -1,5 +1,34 @@
 <!-- Begin Page Content -->
 <div>
+    <!-- ── Toggleable Page Instructional Drawer ── -->
+    <div class="drawer-overlay" id="instructionOverlay"></div>
+    <div class="drawer-right" id="instructionDrawer">
+        <div class="drawer-header">
+            <h6 class="drawer-title"><i class="fas fa-book mr-2"></i> BI-FAST Transactions Guide</h6>
+            <button type="button" class="drawer-close" id="closeDrawerBtn">&times;</button>
+        </div>
+        <div class="drawer-body">
+            <p class="drawer-desc">Track outbound real-time bank transfers and disbursements through the BI-FAST network.</p>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-university text-primary mr-2"></i> Destination Details</div>
+                <p class="drawer-card-text">Shows recipient bank, account number, account holder name, and transfer amount.</p>
+            </div>
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-exchange-alt text-primary mr-2"></i> Status Flow</div>
+                <p class="drawer-card-text">Track state transitions from Pending/In Process to Success, Failed, or Reversed.</p>
+            </div>
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-search-plus text-primary mr-2"></i> Re-inquiry</div>
+                <p class="drawer-card-text">Perform status checks directly against the bank gateway to resolve hanging transactions.</p>
+            </div>
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-ban text-primary mr-2"></i> Daily Limits</div>
+                <p class="drawer-card-text">Ensure disbursement volumes fit within per-transaction and cumulative daily limits.</p>
+            </div>
+        </div>
+    </div>
+
 
     <!-- Alerts Standardized to Swal2 Premium -->
     <script>
@@ -42,8 +71,11 @@
             <p class="dt-page-subtitle">Monitor and manage all disbursement activities through BI-FAST.</p>
         </div>
         <div class="d-flex align-items-center gap-2">
+            <button type="button" class="btn btn-light border shadow-sm mr-2 d-flex align-items-center" id="toggleGuideBtn">
+                <i class="fas fa-book-open text-primary mr-2"></i> <span class="d-none d-md-block">Instructions Guide</span>
+            </button>
             <?php
-                $download_url = base_url('admin/download_bi_fast') 
+                $download_url = base_url('finance/bi-fast/download') 
                     . "?search_date_bifast=" . ($this->session->userdata('search_date_bifast') ?: '')
                     . "&search_date_bifast_to=" . ($this->session->userdata('search_date_bifast_to') ?: '')
                     . "&search_name_bifast=" . ($this->session->userdata('search_name_bifast') ?: '')
@@ -75,7 +107,7 @@
         ?>
 
         <!-- ── Toolbar ── -->
-        <form id="bifast_form" method="post" action="<?= base_url('admin/bi_fast'); ?>">
+        <form id="bifast_form" method="post" action="<?= base_url('finance/bi-fast'); ?>">
             <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>">
 
             <div class="dt-toolbar">
@@ -103,7 +135,7 @@
                         <div class="dt-more-panel" id="bifastMoreFiltersPanel">
                             <div class="dt-more-panel-header">
                                 <span class="dt-more-panel-title"><i class="fas fa-filter mr-1 mr-2"></i> Advanced filters</span>
-                                <a href="<?= base_url('admin/resetbi_fast'); ?>" class="dt-more-clear">Clear All</a>
+                                <a href="<?= base_url('finance/bi-fast/reset'); ?>" class="dt-more-clear">Clear All</a>
                             </div>
 
                             <div class="dt-more-panel-body">
@@ -225,6 +257,17 @@
             </div>
 
             <div class="modal-body p-0">
+                <!-- Guide Banner -->
+                <div class="d-flex align-items-start pb-4" id="detail-guide-banner">
+                    <div class="d-flex align-items-start p-3 w-100" style="background:rgba(78,115,223,0.06);border:1px solid rgba(78,115,223,0.12);border-radius:12px;">
+                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mr-3 flex-shrink-0" style="width:32px;height:32px;"><i class="fas fa-paper-plane" style="font-size:13px;"></i></div>
+                        <div>
+                            <h6 class="fw-bold mb-1" style="font-size:12px;color:var(--text-dark);">BI-FAST Detail Guide</h6>
+                            <p class="text-muted mb-0" style="font-size:11px;line-height:1.5;">Review disbursement transaction details including amount, channel routing, beneficiary information, and real-time status from the BI-FAST network.</p>
+                        </div>
+                    </div>
+                </div>
+
 
                 <!-- ── Section 1: Transaction Info ── -->
                 <div class="px-4 pt-4 pb-3">
@@ -391,7 +434,7 @@
 <script type="text/javascript">
     $(document).ready(function() {
         // Init Server-Side DataTable
-        var table = initServerDataTable("#bifastTable", "<?= base_url('admin/bi_fast') ?>", [
+        var table = initServerDataTable("#bifastTable", "<?= base_url('finance/bi-fast') ?>", [
             {data: 'no', orderable: false},
             {
                 data: 'name_merchant',
@@ -427,7 +470,7 @@
                 render: function(data) {
                     if (!data) return '-';
                     try {
-                        var decoded = JSON.parse(data);
+                        var decoded = typeof data === 'string' ? JSON.parse(data) : data;
                         return decoded.responseMessage || decoded.message || '-';
                     } catch(e) {
                         return '-';
@@ -440,7 +483,7 @@
                 searchable: false,
                 render: function(data, type, row) {
                     var baseUrl = "<?= base_url() ?>";
-                    var detailLink = baseUrl + 'admin/bi_fast_detail/' + data;
+                    var detailLink = baseUrl + 'finance/bi-fast/detail/' + data;
                     
                     return `
                         <div class="dropdown">
@@ -513,7 +556,7 @@
             $('#detailBiFastSubtitle').text(merchantTransactionId);
             
             $.ajax({
-                url: "<?php echo base_url('admin/getDetailBiFastChannelExternal'); ?>",
+                url: "<?php echo base_url('finance/bi-fast/channel/external'); ?>",
                 method: "POST",
                 data: {
                     ref_cashoutExternalId: ref_cashoutExternalId,
@@ -540,7 +583,16 @@
                     $('#detailBiFastChannelExternalModal').modal('show');
                 },
                 error: function() {
-                    alert('Failed to load transaction details.');
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'Failed to load transaction details.',
+                        icon: 'error',
+                        customClass: {
+                            popup: 'swal2-premium-popup',
+                            confirmButton: 'swal2-premium-confirm'
+                        },
+                        buttonsStyling: false
+                    });
                 }
             });
         });
@@ -563,3 +615,18 @@
     });
 </script>
 <!-- /.container-fluid -->
+
+<script>
+$(document).ready(function() {
+    // Drawer Toggle Logic
+    $('#toggleGuideBtn').on('click', function() {
+        $('#instructionDrawer, #instructionOverlay').addClass('open');
+        $('body').css('overflow', 'hidden');
+    });
+
+    $('#closeDrawerBtn, #instructionOverlay').on('click', function() {
+        $('#instructionDrawer, #instructionOverlay').removeClass('open');
+        $('body').css('overflow', '');
+    });
+});
+</script>

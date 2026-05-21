@@ -6,12 +6,44 @@
             <h4 class="dt-page-title">Merchant Mutations</h4>
             <p class="dt-page-subtitle">Historical ledger of all credit and debit activities for <strong><?php echo $merchant[0]->c_name; ?></strong>.</p>
         </div>
+        <div class="d-flex" style="gap:10px;">
+            <button type="button" class="btn-dt-action btn-dt-action-primary border-0 d-flex align-items-center shadow-sm" id="toggleGuideBtn" >
+                <i class="fas fa-book-open mr-2"></i> <span class="d-none d-md-block">Instructions Guide</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ── Toggleable Page Instructional Drawer ── -->
+    <div class="drawer-overlay" id="instructionOverlay"></div>
+    <div class="drawer-right" id="instructionDrawer">
+        <div class="drawer-header">
+            <h6 class="drawer-title"><i class="fas fa-book mr-2"></i> Mutation Ledger Guide</h6>
+            <button type="button" class="drawer-close" id="closeDrawerBtn">&times;</button>
+        </div>
+        <div class="drawer-body">
+            <p class="drawer-desc">This ledger displays the historical record of all credit and debit activities for this merchant.</p>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-history text-primary mr-2"></i> Audit Ledger</div>
+                <p class="drawer-card-text">Track timestamps, Credit/Debit positions, routing channels, unique reference numbers, and settlement amounts.</p>
+            </div>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-filter text-primary mr-2"></i> Position Filter</div>
+                <p class="drawer-card-text">Filter by Credit or Debit. Selecting a position will dynamically load the associated channel sources.</p>
+            </div>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-download text-primary mr-2"></i> Export Options</div>
+                <p class="drawer-card-text">Use the Export button to download the filtered mutation list as an Excel/CSV spreadsheet report.</p>
+            </div>
+        </div>
     </div>
 
     <div class="card border-0 shadow-sm dt-card mb-4">
         <div class="card-body p-0">
             <!-- ── Toolbar / Filters ── -->
-            <form id="mutation_form" method="post" action="<?php echo base_url('admin/mutation/' . $id); ?>">
+            <form id="mutation_form" method="post" action="<?php echo base_url('finance/mutation/' . $id); ?>">
                 <div class="dt-toolbar">
                     <div class="dt-toolbar-filters flex-wrap">
                         <!-- Date Filter -->
@@ -47,7 +79,7 @@
                         <div class="dt-filter-group ml-md-auto pt-2 pt-md-0">
                             <label class="dt-filter-label d-none d-md-block">&nbsp;</label>
                             <div class="d-flex" style="gap:6px;">
-                                <button type="submit" name="submit" class="btn-dt-chip-action btn-dt-primary">
+                                <button type="submit" name="submit" class="btn-dt-action btn-dt-action-success">
                                     <i class="fas fa-filter mr-1 mr-2"></i> Apply
                                 </button>
                                 <a href="<?php echo $download_url; ?>" class="btn-dt-chip-action btn-dt-action-success border-0">
@@ -126,6 +158,16 @@
 
 <script>
 $(document).ready(function () {
+    // Drawer Logic
+    $('#toggleGuideBtn').on('click', function() {
+        $('#instructionDrawer, #instructionOverlay').addClass('open');
+        $('body').css('overflow', 'hidden');
+    });
+
+    $('#closeDrawerBtn, #instructionOverlay').on('click', function() {
+        $('#instructionDrawer, #instructionOverlay').removeClass('open');
+        $('body').css('overflow', '');
+    });
 
     const channelSelect = $('#search_channel');
 
@@ -161,7 +203,7 @@ $(document).ready(function () {
             return;
         }
 
-        fetch("<?= base_url('admin/getChannelsByPosition') ?>", {
+        fetch("<?= base_url('finance/mutation/channels') ?>", {
             method: "POST",
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
             body: "position=" + encodeURIComponent(position) + "&merchant_id=<?= $id ?>"

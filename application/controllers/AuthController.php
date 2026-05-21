@@ -1,6 +1,6 @@
 <?php defined('BASEPATH') or exit('No direct script access allowed');
 
-class Auth extends CI_Controller
+class AuthController extends CI_Controller
 {
     public function __construct()
     {
@@ -11,7 +11,7 @@ class Auth extends CI_Controller
     public function index()
     {
         if ($this->session->userdata('c_email')) {
-            redirect('admin');
+            redirect('dashboard');
         } elseif ($this->session->userdata('email')) {
             redirect('user');
         }
@@ -96,7 +96,7 @@ class Auth extends CI_Controller
                     $this->load->library('rbac');
                     $this->rbac->clear_menu_cache();
 
-                    redirect('admin');
+                    redirect('dashboard');
                 } else {
                    
                     $this->session->set_flashdata('message', '<div class="alert alert-danger" role="alert">Wrong password!</div>');
@@ -117,7 +117,7 @@ class Auth extends CI_Controller
     public function register()
     {
         if ($this->session->userdata('c_email')) {
-            redirect('admin');
+            redirect('dashboard');
         } elseif ($this->session->userdata('email')) {
             redirect('user');
         }

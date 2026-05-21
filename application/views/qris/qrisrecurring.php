@@ -6,6 +6,38 @@
             <h4 class="dt-page-title">QRIS Recurring Transactions</h4>
             <p class="dt-page-subtitle">Monitor and manage all recurring QRIS activities in real-time.</p>
         </div>
+        <div class="d-flex" style="gap:10px;">
+            <button type="button" class="btn-dt-action btn-dt-action-primary border-0 d-flex align-items-center shadow-sm" id="toggleGuideBtn" >
+                <i class="fas fa-book-open mr-2"></i> <span class="d-none d-md-block">Instructions Guide</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ── Toggleable Page Instructional Drawer ── -->
+    <div class="drawer-overlay" id="instructionOverlay"></div>
+    <div class="drawer-right" id="instructionDrawer">
+        <div class="drawer-header">
+            <h6 class="drawer-title"><i class="fas fa-book mr-2"></i> QRIS Recurring Guide</h6>
+            <button type="button" class="drawer-close" id="closeDrawerBtn">&times;</button>
+        </div>
+        <div class="drawer-body">
+            <p class="drawer-desc">This ledger monitors recurring subscription payments made via QRIS dynamic billing cycles.</p>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-redo text-primary mr-2"></i> Subscription Payments</div>
+                <p class="drawer-card-text">Track scheduled transaction payments dynamically triggered for subscriber merchant accounts.</p>
+            </div>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-info-circle text-primary mr-2"></i> Status Indicators</div>
+                <p class="drawer-card-text">Check the status of each billing attempt, such as PENDING/CREATED, PAID/SUCCESS, or FAILED/EXPIRED.</p>
+            </div>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-code text-primary mr-2"></i> JSON Log Viewer</div>
+                <p class="drawer-card-text">Click the External ID link in the transaction table to open a popup panel with complete API requests and responses.</p>
+            </div>
+        </div>
     </div>
     <!-- ── KPI Summary Cards ── -->
     
@@ -19,7 +51,7 @@
             if ($this->session->userdata('search_date_qr_to'))   $extra_active++;
             if ($this->session->userdata('search_name_qr'))      $extra_active++;
         ?>
-        <form id="qris_recurring_form" method="post" action="<?= base_url('admin/qris_recurring'); ?>">
+        <form id="qris_recurring_form" method="post" action="<?= base_url('qris/recurring'); ?>">
             <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>">
             <div class="dt-toolbar">
                 <!-- LEFT: Global Search -->
@@ -45,7 +77,7 @@
                         <div class="dt-more-panel" id="vadynamicMoreFiltersPanel">
                             <div class="dt-more-panel-header">
                                 <span class="dt-more-panel-title"><i class="fas fa-filter mr-1 mr-2"></i> Advanced Filters</span>
-                                <a href="<?= base_url('admin/qris_recurring'); ?>" class="dt-more-clear">Clear All</a>
+                                <a href="<?= base_url('qris/recurring/reset'); ?>" class="dt-more-clear">Clear All</a>
                             </div>
                             
                             <div class="dt-more-panel-body">
@@ -129,6 +161,17 @@
     </button>
 </div>
             <div class="modal-body p-4 bg-light">
+                <!-- Guide Banner -->
+                <div class="d-flex align-items-start pb-4" id="detail-guide-banner">
+                    <div class="d-flex align-items-start p-3 w-100" style="background:rgba(78,115,223,0.06);border:1px solid rgba(78,115,223,0.12);border-radius:12px;">
+                        <div class="bg-warning text-white rounded-circle d-flex align-items-center justify-content-center mr-3 flex-shrink-0" style="width:32px;height:32px;"><i class="fas fa-redo" style="font-size:13px;"></i></div>
+                        <div>
+                            <h6 class="fw-bold mb-1" style="font-size:12px;color:var(--text-dark);">QRIS Recurring Detail</h6>
+                            <p class="text-muted mb-0" style="font-size:11px;line-height:1.5;">Review recurring QRIS subscription payment details including cycle information, merchant routing, and channel response data.</p>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="row mb-4">
                     <div class="col-md-4">
                         <div class="small text-uppercase font-weight-bold text-muted mb-1">Provider</div>
@@ -194,13 +237,22 @@
         </div>
     </div>
 </div>
-<!-- SweetAlert2 -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script type="text/javascript">
     $(document).ready(function() {
+        // Drawer Logic
+        $('#toggleGuideBtn').on('click', function() {
+            $('#instructionDrawer, #instructionOverlay').addClass('open');
+            $('body').css('overflow', 'hidden');
+        });
+
+        $('#closeDrawerBtn, #instructionOverlay').on('click', function() {
+            $('#instructionDrawer, #instructionOverlay').removeClass('open');
+            $('body').css('overflow', '');
+        });
+
         // Init Server-Side DataTable
-        var table = initServerDataTable("#qrisRecurringTable", "<?= base_url('admin/qris_recurring') ?>", [
+        var table = initServerDataTable("#qrisRecurringTable", "<?= base_url('qris/recurring') ?>", [
             {data: 'no', orderable: false},
             {data: 'c_datetimeRequest',className: 'text-nowrap', render: function(data){
                 return moment(data).format('DD-MM-YYYY HH:mm:ss');
@@ -295,7 +347,7 @@
             $('#cashinExternalId, #TransactionIdExternal1, #TransactionIdExternal2, #RequestDatetime, #ResponseDatetime').text('...');
             $('#RequestHeader, #RequestBody, #ResponseHeader, #ResponseBody').text('Loading...');
             $.ajax({
-                url: "<?php echo base_url('admin/getDetailQrisRecurringChannelExternal'); ?>",
+                url: "<?php echo base_url('qris/recurring/channel/external'); ?>",
                 method: "POST",
                 data: {
                     '<?php echo $this->security->get_csrf_token_name(); ?>': '<?php echo $this->security->get_csrf_hash(); ?>',

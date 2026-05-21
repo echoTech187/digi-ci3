@@ -104,7 +104,7 @@ class HistoryController extends CI_Controller
       $this->session->unset_userdata('search_merchant_purchase');
       $this->session->unset_userdata('search_invoice_ppob');
       $this->session->unset_userdata('last_search_ppob');
-      redirect('admin/history');
+      redirect('finance/history');
    }
 
    public function download_history()
@@ -114,7 +114,7 @@ class HistoryController extends CI_Controller
 
       if (empty($search_date_purchase) && empty($search_merchant_purchase)) {
          $this->session->set_flashdata('error_message', 'Please select date and merchant before downloading.');
-         redirect('admin/history');
+         redirect('finance/history');
       }
 
       $user = $this->Model_user->view_user()->row_array();
@@ -129,11 +129,11 @@ class HistoryController extends CI_Controller
       );
 
       if ($this->db->insert('admin_download', $data)) {
-         $this->session->set_flashdata('success', 'Your request is being processed. Please go to <a href="' . base_url('admin/report') . '">Download Report</a> menu to retrieve the file.');
+         $this->session->set_flashdata('success', 'Your request is being processed. Please go to <a href="' . base_url('report/download') . '">Download Report</a> menu to retrieve the file.');
       } else {
          $this->session->set_flashdata('error', 'Failed to request download.');
       }
 
-      redirect('admin/history');
+      redirect('finance/history');
    }
 }

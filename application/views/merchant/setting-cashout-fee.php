@@ -6,16 +6,15 @@
             <p class="dt-page-subtitle">Configure disbursement channel fees for <strong><?= $merchant_name ?></strong></p>
         </div>
         <div class="d-flex" style="gap:10px;">
+            <button type="button" class="btn-dt-action btn-dt-action-primary toggle-guide-btn" id="toggleGuideBtn">
+                <i class="fas fa-book-open mr-2"></i> Instructions Guide
+            </button>
             <button type="button" class="btn-dt-action btn-dt-action-success add-btn" data-toggle="modal" data-target="#feeModal">
                 <i class="fas fa-plus mr-1 mr-2"></i> Add Channel
             </button>
         </div>
     </div>
 
-    <!-- ── KPI Summary Cards ── -->
-    
-
-    <!-- Alerts -->
     <!-- Alerts Standardized to Swal2 Premium -->
     <script>
         $(document).ready(function() {
@@ -47,6 +46,43 @@
         });
     </script>
 
+    <!-- ── Toggleable Page Instructional Drawer ── -->
+    <div class="drawer-overlay" id="instructionOverlay"></div>
+    <div class="drawer-right" id="instructionDrawer">
+        <div class="drawer-header">
+            <h6 class="drawer-title"><i class="fas fa-book mr-2"></i> Cashout Management Overview</h6>
+            <button type="button" class="drawer-close" id="closeDrawerBtn">&times;</button>
+        </div>
+        <div class="drawer-body">
+            <p class="drawer-desc">This dashboard allows you to oversee and configure fund disbursement fees for <strong><?= $merchant_name ?></strong>. You can establish specific rules per disbursement channel or apply bulk configurations across entire channel groups.</p>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-search text-primary mr-2"></i> Live Search</div>
+                <p class="drawer-card-text">Instantly filter table records by channel name, external ID, or fee type using the search bar.</p>
+            </div>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-filter text-primary mr-2"></i> Advanced Filters</div>
+                <p class="drawer-card-text">Use the Filters dropdown to sort records by Channel Group, Channel ID, Provider, or Status.</p>
+            </div>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-plus-circle text-primary mr-2"></i> Add Channel</div>
+                <p class="drawer-card-text">Configure a single specific disbursement channel with dedicated fee structures and boundaries.</p>
+            </div>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-layer-group text-primary mr-2"></i> Bulk Add</div>
+                <p class="drawer-card-text">Apply uniform fee rates and limits across all disbursement channels within a selected group instantly.</p>
+            </div>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-sliders-h text-primary mr-2"></i> Quick Actions</div>
+                <p class="drawer-card-text">Use the action menu (⋮) on any table row to modify or delete existing configurations on the fly.</p>
+            </div>
+        </div>
+    </div>
+
     <!-- ── Main Data Card ── -->
     <div class="card border-0 shadow-sm dt-card">
         <!-- ── Toolbar ── -->
@@ -58,14 +94,82 @@
             </div>
 
             <!-- RIGHT: Actions -->
-            <div class="dt-toolbar-filters">
-                <div class="dt-filter-group">
-                    <label class="dt-filter-label">&nbsp;</label>
-                    <div class="d-flex" style="gap:6px;">
-                        <button type="button" class="btn-dt-chip-action btn-dt-primary" data-toggle="modal" data-target="#bulkModal">
-                            <i class="fas fa-layer-group mr-1 mr-2"></i> Bulk Add
-                        </button>
+            <div class="dt-toolbar-filters d-flex align-items-center" style="gap: 10px;">
+                <!-- More Filters Trigger -->
+                <div class="dt-filter-group dt-more-filters-wrapper mb-0">
+                    <button type="button" id="feeMoreFiltersBtn" class="dt-more-filters-btn">
+                        <i class="fas fa-sliders-h mr-1 mr-2"></i> Filters
+                        <span class="dt-more-badge" id="feeFilterBadge" style="display: none;">0</span>
+                        <i class="fas fa-chevron-down ml-1 dt-more-arrow"></i>
+                    </button>
+
+                    <!-- Dropdown Panel -->
+                    <div class="dt-more-panel" id="feeMoreFiltersPanel">
+                        <div class="dt-more-panel-header">
+                            <span class="dt-more-panel-title"><i class="fas fa-filter mr-1 mr-2"></i> Advanced Filters</span>
+                            <a href="javascript:void(0)" id="feeMoreClear" class="dt-more-clear">Clear All</a>
+                        </div>
+
+                        <div class="dt-more-panel-body">
+                            <!-- Channel Group -->
+                            <div class="dt-more-field">
+                                <label class="dt-more-label"><i class="fas fa-layer-group mr-1 mr-2"></i> Channel Group</label>
+                                <select id="filter_channel_group" class="dt-more-select filter-select">
+                                    <option value="">All Groups</option>
+                                    <?php foreach ($channel_groups as $cg): ?>
+                                        <option value="<?= $cg->c_channelGroup ?>"><?= $cg->c_channelGroup ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+
+                            <!-- Channel ID -->
+                            <div class="dt-more-field">
+                                <label class="dt-more-label"><i class="fas fa-hashtag mr-1 mr-2"></i> Channel ID</label>
+                                <select id="filter_channel_id" class="dt-more-select filter-select">
+                                    <option value="">All Channel IDs</option>
+                                    <?php foreach ($channel_ids as $cid): ?>
+                                        <option value="<?= $cid->id ?>"><?= $cid->id ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+
+                            <!-- Provider -->
+                            <div class="dt-more-field">
+                                <label class="dt-more-label"><i class="fas fa-server mr-1 mr-2"></i> Provider / External Default</label>
+                                <select id="filter_provider" class="dt-more-select filter-select">
+                                    <option value="">All Providers</option>
+                                    <?php foreach ($channel_external_id_defaults as $prd): ?>
+                                        <option value="<?= $prd->c_externalIdDefault ?>"><?= $prd->c_externalIdDefault ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+
+                            <!-- Status -->
+                            <div class="dt-more-field">
+                                <label class="dt-more-label"><i class="fas fa-info-circle mr-1 mr-2"></i> Status</label>
+                                <select id="filter_status" class="dt-more-select filter-select">
+                                    <option value="">All Statuses</option>
+                                    <option value="Active">Active</option>
+                                    <option value="Not Active">Not Active</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="dt-more-panel-footer">
+                            <button type="button" id="feeMoreApply" class="btn-dt-apply btn-dt-action-primary shadow-sm">
+                                <i class="fas fa-check mr-1 mr-2"></i> APPLY FILTER
+                            </button>
+                            <button type="button" id="feeMoreFiltersClose" class="btn-dt-cancel btn-dt-secondary">
+                                CANCEL
+                            </button>
+                        </div>
                     </div>
+                </div>
+
+                <div class="dt-filter-group mb-0">
+                    <button type="button" class="btn-dt-action btn-dt-action-success" data-toggle="modal" data-target="#bulkModal">
+                        <i class="fas fa-layer-group mr-1 mr-2"></i> Bulk Add
+                    </button>
                 </div>
             </div>
         </div>
@@ -90,12 +194,25 @@
         </div>
         <div id="dt-footer-container"></div>
     </div>
+    <script>
+        $(document).ready(function() {
+            $('#toggleGuideBtn').on('click', function() {
+                $('#instructionDrawer, #instructionOverlay').addClass('open');
+                $('body').css('overflow', 'hidden');
+            });
+
+            $('#closeDrawerBtn, #instructionOverlay').on('click', function() {
+                $('#instructionDrawer, #instructionOverlay').removeClass('open');
+                $('body').css('overflow', '');
+            });
+        });
+    </script>
 </div>
 
 <!-- Add/Edit Modal -->
 <div class="modal fade" id="feeModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
             <!-- Header Legacy Migrated -->
             <div class="modal-header modal-header-primary border-0 mh-premium">
                 <div class="d-flex align-items-center">
@@ -111,105 +228,143 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <form id="feeForm" method="post" action="<?= base_url('admin/createSettingCashoutFee/' . $merchant_id); ?>">
-                <div class="modal-body p-4 bg-light">
-                    <div class="row g-4">
-                        <div class="col-md-6">
-                            <div class="card h-100 border-0 shadow-none bg-white p-3 rounded-4">
-                                <h6 class="text-primary fw-bold mb-3 d-flex align-items-center">
-                                    <i class="fas fa-network-wired  mr-2"></i> CHANNEL CONFIG
-                                </h6>
-                                <div class="mb-3">
-                                    <label class="form-label small fw-bold text-muted">Channel Group</label>
-                                    <select class="form-control border-1 select2" id="c_cashoutChannelGroup" required name="c_cashoutChannelGroup">
-                                        <option value="" selected disabled>Select group</option>
-                                        <?php foreach ($channel_groups as $chg): ?>
-                                            <option value="<?= $chg->c_channelGroup ?>"><?= $chg->c_channelGroup ?></option>
-                                        <?php endforeach; ?>
-                                    </select>
+            <form id="feeForm" method="post" action="<?= base_url('merchant/setting-cashout-fee/create'); ?>">
+                <input type="hidden" name="ref_merchantId" id="ref_merchantId" value="<?= $merchant_id ?>">
+                <div class="modal-body p-0 bg-light">
+                    <div class="d-flex g-0 w-100">
+                        <!-- Left Information Sidebar -->
+                        <div class="col-lg-4 p-4 d-flex flex-column justify-content-between mb-0 bg-dark-subtle" >
+                            <div>
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mr-3 shadow-sm" style="width: 40px; height: 40px;">
+                                        <i class="fas fa-info-circle fa-lg"></i>
+                                    </div>
+                                    <h6 class="fw-bold text-primary mb-0" style="font-size: 15px;">Configuration Guide</h6>
                                 </div>
-                                <div class="mb-3">
-                                    <label class="form-label small fw-bold text-muted">External ID Default</label>
-                                    <select class="form-control border-1 select2" id="c_externalIdDefault" required name="c_externalIdDefault">
-                                        <option value="" selected disabled>Select external ID</option>
-                                        <?php foreach ($channel_external_id_defaults as $ecd): ?>
-                                            <option value="<?= $ecd->c_externalIdDefault ?>"><?= $ecd->c_externalIdDefault ?></option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                </div>
-                                <div class="mb-0">
-                                    <label class="form-label small fw-bold text-muted">Specific Channel ID</label>
-                                    <select class="form-control border-1 select2" id="ref_cashoutChannelId" required name="ref_cashoutChannelId" disabled>
-                                        <option value="" disabled selected>Select channel ID</option>
-                                    </select>
+                                <p class="text-muted small mb-4" style="font-size: 12px; line-height: 1.5;">Follow the instructions below to configure disbursement channels, fee structures, and transaction limits accurately.</p>
+                                
+                                <div class="d-flex flex-column gap-3">
+                                    <div class="bg-white p-3 rounded-4 shadow-sm border-0 mb-3">
+                                        <h6 class="fw-bold text-dark mb-1 d-flex align-items-center" style="font-size: 12.5px;"><i class="fas fa-network-wired text-primary mr-2"></i> 1. Channel Selection</h6>
+                                        <p class="text-muted mb-0" style="font-size: 11px; line-height: 1.5;">Select a Channel Group and External ID Default to populate and enable Specific Channel ID options.</p>
+                                    </div>
+                                    <div class="bg-white p-3 rounded-4 shadow-sm border-0 mb-3">
+                                        <h6 class="fw-bold text-dark mb-1 d-flex align-items-center" style="font-size: 12.5px;"><i class="fas fa-calculator text-primary mr-2"></i> 2. Fee Structure</h6>
+                                        <p class="text-muted mb-0" style="font-size: 11px; line-height: 1.5;">Choose Fixed for a flat rate, Percentage for a percentage deduction, or Both to apply both charges.</p>
+                                    </div>
+                                    <div class="bg-white p-3 rounded-4 shadow-sm border-0 mb-3">
+                                        <h6 class="fw-bold text-dark mb-1 d-flex align-items-center" style="font-size: 12.5px;"><i class="fas fa-shield-alt text-primary mr-2"></i> 3. Limits & Status</h6>
+                                        <p class="text-muted mb-0" style="font-size: 11px; line-height: 1.5;">Set the minimum and maximum allowable transaction boundaries and set operational status.</p>
+                                    </div>
                                 </div>
                             </div>
+                            <div class="bg-white p-3 rounded-4 shadow-sm border-0 mt-3 d-flex align-items-center">
+                                <i class="fas fa-lightbulb text-warning fa-2x mr-3"></i>
+                                <span class="text-muted" style="font-size: 11px; line-height: 1.4;">Need help? Contact system administrator for advanced routing configurations.</span>
+                            </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="card h-100 border-0 shadow-none bg-white p-3 rounded-4">
+                        
+                        <!-- Right Form Area -->
+                        <div class="col-lg-8 p-4 bg-light mb-0">
+                            <div class="row g-4 mb-4">
+                                <div class="col-md-6">
+                                    <div class="card h-100 border-0 shadow-none bg-white p-0 rounded-4">
+                                        <h6 class="text-primary fw-bold mb-3 d-flex align-items-center">
+                                            <i class="fas fa-network-wired mr-2"></i> CHANNEL CONFIG
+                                        </h6>
+                                        <div class="mb-3">
+                                            <label class="form-label small fw-bold text-muted">Channel Group</label>
+                                            <select class="form-control border-1 select2" id="c_cashoutChannelGroup" required name="c_cashoutChannelGroup">
+                                                <option value="" selected disabled>Select group</option>
+                                                <?php foreach ($channel_groups as $chg): ?>
+                                                    <option value="<?= $chg->c_channelGroup ?>"><?= $chg->c_channelGroup ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label small fw-bold text-muted">External ID Default</label>
+                                            <select class="form-control border-1 select2" id="c_externalIdDefault" required name="c_externalIdDefault">
+                                                <option value="" selected disabled>Select external ID</option>
+                                                <?php foreach ($channel_external_id_defaults as $ecd): ?>
+                                                    <option value="<?= $ecd->c_externalIdDefault ?>"><?= $ecd->c_externalIdDefault ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </div>
+                                        <div class="mb-0">
+                                            <label class="form-label small fw-bold text-muted">Specific Channel ID</label>
+                                            <select class="form-control border-1 select2" id="ref_cashoutChannelId" required name="ref_cashoutChannelId" disabled>
+                                                <option value="" disabled selected>Select channel ID</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card h-100 border-0 shadow-none bg-white p-0 rounded-4">
+                                        <h6 class="text-primary fw-bold mb-3 d-flex align-items-center">
+                                            <i class="fas fa-calculator mr-2"></i> FEE STRUCTURE
+                                        </h6>
+                                        <div class="row g-3">
+                                            <div class="col-md-12">
+                                                <label class="form-label small fw-bold text-muted">Fee Type</label>
+                                                <select class="form-control border-1 select2" id="c_feeType" required name="c_feeType">
+                                                    <option value="Fixed">Fixed</option>
+                                                    <option value="Percetange">Percentage</option>
+                                                    <option value="Both">Both</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-12">
+                                                <label class="form-label small fw-bold text-muted">Fixed Fee (IDR)</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text border-1 small">Rp</span>
+                                                    <input type="number" step="any" class="form-control border-1 rounded-left-0 fw-bold text-primary" required id="c_fee" name="c_fee">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12">
+                                                <label class="form-label small fw-bold text-muted">Percentage Fee (%)</label>
+                                                <div class="input-group">
+                                                    <input type="number" step="any" class="form-control border-1 rounded-right-0 fw-bold text-success" required id="c_feePercetange" name="c_feePercetange">
+                                                    <span class="input-group-text border-1 rounded-left-0 small">%</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="card border-0 shadow-none bg-white p-0 rounded-4 mt-4">
                                 <h6 class="text-primary fw-bold mb-3 d-flex align-items-center">
-                                    <i class="fas fa-calculator  mr-2"></i> FEE STRUCTURE
+                                    <i class="fas fa-shield-alt mr-2"></i> LIMITS & STATUS
                                 </h6>
                                 <div class="row g-3">
-                                    <div class="col-md-12">
-                                        <label class="form-label small fw-bold text-muted">Fee Type</label>
-                                        <select class="form-control border-1 select2" id="c_feeType" required name="c_feeType">
-                                            <option value="Fixed">Fixed</option>
-                                            <option value="Percetange">Percentage</option>
-                                            <option value="Both">Both</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-12">
-                                        <label class="form-label small fw-bold text-muted">Fixed Fee (IDR)</label>
+                                    <div class="col-md-4">
+                                        <label class="form-label small fw-bold text-muted">Amount Min</label>
                                         <div class="input-group">
                                             <span class="input-group-text border-1 small">Rp</span>
-                                            <input type="number" class="form-control border-1 fw-bold text-primary" required id="c_fee" name="c_fee">
+                                            <input type="number" step="any" class="form-control border-1 rounded-left-0" id="c_amountMin" required name="c_amountMin">
                                         </div>
                                     </div>
-                                    <div class="col-md-12">
-                                        <label class="form-label small fw-bold text-muted">Percentage Fee (%)</label>
+                                    <div class="col-md-4">
+                                        <label class="form-label small fw-bold text-muted">Amount Max</label>
                                         <div class="input-group">
-                                            <input type="number" step="any" class="form-control border-1 fw-bold text-success" required id="c_feePercetange" name="c_feePercetange">
-                                            <span class="input-group-text border-1 small">%</span>
+                                            <span class="input-group-text border-1 small">Rp</span>
+                                            <input type="number" step="any" class="form-control border-1 rounded-left-0" id="c_amountMax" required name="c_amountMax">
                                         </div>
                                     </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label small fw-bold text-muted">Status</label>
+                                        <select class="form-control border-1 select2" id="c_status" required name="c_status">
+                                            <option value="Active">Active</option>
+                                            <option value="Not Active">Not Active</option>
+                                        </select>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="card border-0 shadow-none bg-white p-3 rounded-4 mt-4">
-                        <h6 class="text-primary fw-bold mb-3 d-flex align-items-center">
-                            <i class="fas fa-shield-alt  mr-2"></i> LIMITS & STATUS
-                        </h6>
-                        <div class="row g-3">
-                            <div class="col-md-4">
-                                <label class="form-label small fw-bold text-muted">Amount Min</label>
-                                <div class="input-group">
-                                    <span class="input-group-text border-1 small">Rp</span>
-                                    <input type="number" class="form-control border-1" id="c_amountMin" required name="c_amountMin">
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label small fw-bold text-muted">Amount Max</label>
-                                <div class="input-group">
-                                    <span class="input-group-text border-1 small">Rp</span>
-                                    <input type="number" class="form-control border-1" id="c_amountMax" required name="c_amountMax">
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label small fw-bold text-muted">Status</label>
-                                <select class="form-control border-1 select2" id="c_status" required name="c_status">
-                                    <option value="Active">Active</option>
-                                    <option value="Not Active">Not Active</option>
-                                </select>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer border-0 p-3 justify-content-end rounded-bottom-4 px-4">
+                <div class="modal-footer border-0 p-3 justify-content-end bg-white px-4">
                     <button type="button" class="btn-dt-cancel" data-dismiss="modal">CANCEL</button>
-                    <button type="submit" class="btn-dt-apply px-4 ">SAVE CONFIGURATION</button>
+                    <button type="submit" class="btn-dt-apply px-4">SAVE CONFIGURATION</button>
                 </div>
             </form>
         </div>
@@ -218,8 +373,8 @@
 
 <!-- Bulk Modal -->
 <div class="modal fade" id="bulkModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
             <!-- Header Legacy Migrated -->
             <div class="modal-header modal-header-primary border-0 mh-premium">
                 <div class="d-flex align-items-center">
@@ -235,74 +390,132 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <form method="post" action="<?= base_url('admin/bulkCreateSettingCashoutFee/' . $merchant_id); ?>">
-                <div class="modal-body p-4 bg-light">
-                    <div class="alert bg-success-soft text-dark border-0 small mb-4 py-3 d-flex align-items-center">
-                        <i class="fas fa-info-circle me-3 text-success fa-lg"></i>
-                        <span>Apply these settings to <strong>ALL channels</strong> within the selected Group and External ID Default. Existing configurations for duplicates will be skipped.</span>
-                    </div>
-                    
-                    <div class="row g-4">
-                        <div class="col-md-6">
-                            <div class="card h-100 border-0 shadow-none bg-white p-3 rounded-4">
-                                <h6 class="text-success fw-bold mb-3"><i class="fas fa-bullseye  mr-2"></i> TARGET GROUPS</h6>
-                                <div class="mb-3">
-                                    <label class="form-label small fw-bold text-muted">Cashout Channel Group</label>
-                                    <select class="form-control border-1 select2" required name="c_cashoutChannelGroup">
-                                        <option value="" selected disabled>Select group</option>
-                                        <?php foreach ($channel_groups as $chg): ?>
-                                            <option value="<?= $chg->c_channelGroup ?>"><?= $chg->c_channelGroup ?></option>
-                                        <?php endforeach; ?>
-                                    </select>
+            <form method="post" action="<?= base_url('merchant/setting-cashout-fee/bulk-create/' . $merchant_id); ?>">
+                <div class="modal-body p-0 bg-light">
+                    <div class="d-flex g-0 w-100">
+                        <!-- Left Information Sidebar -->
+                        <div class="col-lg-4 p-4 d-flex flex-column justify-content-between mb-0 bg-dark-subtle" >
+                            <div>
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center mr-3 shadow-sm" style="width: 40px; height: 40px;">
+                                        <i class="fas fa-bullhorn fa-lg"></i>
+                                    </div>
+                                    <h6 class="fw-bold text-success mb-0" style="font-size: 15px;">Bulk Settings Guide</h6>
                                 </div>
-                                <div class="mb-0">
-                                    <label class="form-label small fw-bold text-muted">External ID Default</label>
-                                    <select class="form-control border-1 select2" required name="c_externalIdDefault">
-                                        <option value="" selected disabled>Select external ID</option>
-                                        <?php foreach ($channel_external_id_defaults as $ecd): ?>
-                                            <option value="<?= $ecd->c_externalIdDefault ?>"><?= $ecd->c_externalIdDefault ?></option>
-                                        <?php endforeach; ?>
-                                    </select>
+                                <p class="text-muted small mb-4" style="font-size: 12px; line-height: 1.5;">Apply uniform fee configurations across multiple channels simultaneously with duplicate protection.</p>
+                                
+                                <div class="d-flex flex-column gap-3">
+                                    <div class="bg-white p-3 rounded-4 shadow-sm border-0 mb-3">
+                                        <h6 class="fw-bold text-dark mb-1 d-flex align-items-center" style="font-size: 12.5px;"><i class="fas fa-bullseye text-success mr-2"></i> 1. Target Scope</h6>
+                                        <p class="text-muted mb-0" style="font-size: 11px; line-height: 1.5;">Configurations apply uniformly to ALL channels in the selected Group and External ID Default.</p>
+                                    </div>
+                                    <div class="bg-white p-3 rounded-4 shadow-sm border-0 mb-3">
+                                        <h6 class="fw-bold text-dark mb-1 d-flex align-items-center" style="font-size: 12.5px;"><i class="fas fa-shield-alt text-success mr-2"></i> 2. Duplicate Protection</h6>
+                                        <p class="text-muted mb-0" style="font-size: 11px; line-height: 1.5;">Channels with existing fee configurations will be automatically skipped to prevent overwriting.</p>
+                                    </div>
+                                    <div class="bg-white p-3 rounded-4 shadow-sm border-0 mb-3">
+                                        <h6 class="fw-bold text-dark mb-1 d-flex align-items-center" style="font-size: 12.5px;"><i class="fas fa-coins text-success mr-2"></i> 3. Fee & Limits</h6>
+                                        <p class="text-muted mb-0" style="font-size: 11px; line-height: 1.5;">Configure uniform fee types, flat rates, percentage deductions, and transaction limits.</p>
+                                    </div>
                                 </div>
                             </div>
+                            <div class="bg-white p-3 rounded-4 shadow-sm border-0 mt-3 d-flex align-items-center">
+                                <i class="fas fa-check-circle text-success fa-2x mr-3"></i>
+                                <span class="text-muted" style="font-size: 11px; line-height: 1.4;">Batch operations are processed securely within a single database transaction.</span>
+                            </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="card h-100 border-0 shadow-none bg-white p-3 rounded-4">
-                                <h6 class="text-success fw-bold mb-3"><i class="fas fa-coins  mr-2"></i> FEE SETTINGS</h6>
-                                <div class="row g-3">
-                                    <div class="col-6">
-                                        <label class="form-label small fw-bold text-muted">Fee Type</label>
-                                        <select class="form-control border-1 select2" required name="c_feeType">
-                                            <option value="Fixed">Fixed</option>
-                                            <option value="Percetange">Percentage</option>
-                                            <option value="Both">Both</option>
-                                        </select>
+                        
+                        <!-- Right Form Area -->
+                        <div class="col-lg-8 p-4 bg-light mb-0">
+                            <div class="row g-4 mb-4">
+                                <div class="col-md-6">
+                                    <div class="card h-100 border-0 shadow-none bg-white p-0 rounded-4">
+                                        <h6 class="text-success fw-bold mb-3"><i class="fas fa-bullseye mr-2"></i> TARGET GROUPS</h6>
+                                        <div class="mb-3">
+                                            <label class="form-label small fw-bold text-muted">Cashout Channel Group</label>
+                                            <select class="form-control border-1 select2" required name="c_cashoutChannelGroup">
+                                                <option value="" selected disabled>Select group</option>
+                                                <?php foreach ($channel_groups as $chg): ?>
+                                                    <option value="<?= $chg->c_channelGroup ?>"><?= $chg->c_channelGroup ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </div>
+                                        <div class="mb-0">
+                                            <label class="form-label small fw-bold text-muted">External ID Default</label>
+                                            <select class="form-control border-1 select2" required name="c_externalIdDefault">
+                                                <option value="" selected disabled>Select external ID</option>
+                                                <?php foreach ($channel_external_id_defaults as $ecd): ?>
+                                                    <option value="<?= $ecd->c_externalIdDefault ?>"><?= $ecd->c_externalIdDefault ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </div>
                                     </div>
-                                    <div class="col-6">
-                                        <label class="form-label small fw-bold text-muted">Fixed Fee</label>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card h-100 border-0 shadow-none bg-white p-0 rounded-4">
+                                        <h6 class="text-success fw-bold mb-3"><i class="fas fa-coins mr-2"></i> FEE SETTINGS</h6>
+                                        <div class="row g-3">
+                                            <div class="col-6">
+                                                <label class="form-label small fw-bold text-muted">Fee Type</label>
+                                                <select class="form-control border-1 select2" required name="c_feeType">
+                                                    <option value="Fixed">Fixed</option>
+                                                    <option value="Percetange">Percentage</option>
+                                                    <option value="Both">Both</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-6">
+                                                <label class="form-label small fw-bold text-muted">Fixed Fee</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text border-1 small">Rp</span>
+                                                    <input type="number" step="any" class="form-control border-1" required name="c_fee">
+                                                </div>
+                                            </div>
+                                            <div class="col-12">
+                                                <label class="form-label small fw-bold text-muted">Fee Percentage (%)</label>
+                                                <div class="input-group">
+                                                    <input type="number" step="any" class="form-control border-1" required name="c_feePercetange">
+                                                    <span class="input-group-text border-1 small">%</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="card border-0 shadow-none bg-white p-0 rounded-4 mt-4">
+                                <h6 class="text-success fw-bold mb-3 d-flex align-items-center">
+                                    <i class="fas fa-shield-alt mr-2"></i> LIMITS & STATUS
+                                </h6>
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label small fw-bold text-muted">Amount Min</label>
                                         <div class="input-group">
                                             <span class="input-group-text border-1 small">Rp</span>
-                                            <input type="number" class="form-control border-1" required name="c_fee">
+                                            <input type="number" step="any" class="form-control border-1" required name="c_amountMin">
                                         </div>
                                     </div>
-                                    <div class="col-12">
-                                        <label class="form-label small fw-bold text-muted">Fee Percentage (%)</label>
+                                    <div class="col-md-4">
+                                        <label class="form-label small fw-bold text-muted">Amount Max</label>
                                         <div class="input-group">
-                                            <input type="number" step="any" class="form-control border-1" required name="c_feePercetange">
-                                            <span class="input-group-text border-1 small">%</span>
+                                            <span class="input-group-text border-1 small">Rp</span>
+                                            <input type="number" step="any" class="form-control border-1" required name="c_amountMax">
                                         </div>
                                     </div>
-                                    <div class="col-12 text-muted smaller">
-                                        *Limits and settlement will use default values for bulk operations.
+                                    <div class="col-md-4">
+                                        <label class="form-label small fw-bold text-muted">Status</label>
+                                        <select class="form-control border-1 select2" required name="c_status">
+                                            <option value="Active">Active</option>
+                                            <option value="Not Active">Not Active</option>
+                                        </select>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer border-0 p-3 justify-content-end rounded-bottom-4 px-4">
+                <div class="modal-footer border-0 p-3 justify-content-end bg-white px-4">
                     <button type="button" class="btn-dt-cancel" data-dismiss="modal">CANCEL</button>
-                    <button type="submit" class="btn-dt-apply px-4 ">APPLY BULK SETTINGS</button>
+                    <button type="submit" class="btn-dt-apply px-4">APPLY BULK SETTINGS</button>
                 </div>
             </form>
         </div>
@@ -414,9 +627,9 @@ $(document).ready(function() {
                                     </li>
                                     <li><hr class="dropdown-divider"></li>
                                     <li>
-                                        <a class="dropdown-item rounded-2 py-2 text-danger" href="<?= base_url('admin/deleteSettingCashoutFee/'. $merchant_id) ?>/${row.id}" onclick="return confirm('Are you sure?')">
+                                        <button class="dropdown-item rounded-2 py-2 text-danger delete-fee-btn" data-href="<?= base_url('merchant/setting-cashout-fee/delete/'. $merchant_id) ?>/${row.id}">
                                             <i class="fas fa-trash mr-2"></i> Delete
-                                        </a>
+                                        </button>
                                     </li>
                                 </ul>
                             </div>
@@ -424,6 +637,21 @@ $(document).ready(function() {
                     }
                 }
             ], {
+            ajax: {
+                url: window.location.href,
+                type: "POST",
+                data: function (d) {
+                    var csrfName = $('meta[name="csrf-token-name"]').attr('content');
+                    var csrfHash = $('meta[name="csrf-token-hash"]').attr('content');
+                    if (csrfName && csrfHash) {
+                        d[csrfName] = csrfHash;
+                    }
+                    d.channel_group = $('#filter_channel_group').val();
+                    d.channel_id = $('#filter_channel_id').val();
+                    d.provider = $('#filter_provider').val();
+                    d.status = $('#filter_status').val();
+                }
+            },
             order: [[1, 'asc']],
             language: {
                 "info": "Showing _START_ – _END_ of _TOTAL_ results",
@@ -447,8 +675,8 @@ $(document).ready(function() {
             };
             if (csrfName) postData[csrfName] = csrfHash;
 
-            $.post('<?= base_url("admin/getCashoutChannelGroups") ?>', postData, function(data) {
-                const options = JSON.parse(data);
+            $.post('<?= base_url("merchant/setting-cashout-fee/groups") ?>', postData, function(data) {
+                const options = typeof data === 'string' ? JSON.parse(data) : data;
                 const $channelId = $('#ref_cashoutChannelId');
                 
                 let currentVal = $channelId.val();
@@ -474,7 +702,7 @@ $(document).ready(function() {
         const d = $(this).data();
         $('#feeModalTitle').html('Edit Cashout Fee Configuration');
         $('#feeModalSubtitle').text('Update and modify existing channel fee configuration');
-        $('#feeForm').attr('action', `<?= base_url('admin/editSettingCashoutFee/' . $merchant_id) ?>/${d.id}`);
+        $('#feeForm').attr('action', `<?= base_url('merchant/setting-cashout-fee/edit/' . $merchant_id) ?>/${d.id}`);
         
         // Prevent trigger during population
         $('#c_cashoutChannelGroup, #c_externalIdDefault').off('change', updateChannelIds);
@@ -500,7 +728,7 @@ $(document).ready(function() {
     $('.add-btn').click(function() {
         $('#feeModalTitle').html('Add New Cashout Fee');
         $('#feeModalSubtitle').text('Create and register new data record');
-        $('#feeForm').attr('action', `<?= base_url('admin/createSettingCashoutFee/' . $merchant_id) ?>`);
+        $('#feeForm').attr('action', `<?= base_url('merchant/setting-cashout-fee/create'); ?>`);
         $('#feeForm')[0].reset();
         
         // Reset dropdowns manually
@@ -508,9 +736,93 @@ $(document).ready(function() {
         $('#ref_cashoutChannelId').prop('disabled', true).empty().append('<option disabled selected>Select channel ID</option>');
     });
 
+    $(document).on('click', '.delete-fee-btn', function(e) {
+        e.preventDefault();
+        var href = $(this).data('href');
+        Swal.fire({
+            title: 'Delete Fee Setting',
+            text: 'Are you sure you want to delete this cashout fee configuration? This action cannot be undone.',
+            icon: 'warning',
+            showCancelButton: true,
+            customClass: {
+                popup: 'swal2-premium-popup',
+                confirmButton: 'swal2-premium-confirm',
+                cancelButton: 'swal2-premium-cancel'
+            },
+            buttonsStyling: false,
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = href;
+            }
+        });
+    });
+
     // Global search
     $('#dt-search').on('keyup', function() {
         table.search(this.value).draw();
+    });
+
+    // ── More Filters dropdown ──
+    var $moreBtn   = $('#feeMoreFiltersBtn');
+    var $morePanel = $('#feeMoreFiltersPanel');
+    var $moreClose = $('#feeMoreFiltersClose');
+    var $moreApply = $('#feeMoreApply');
+    var $moreClear = $('#feeMoreClear');
+
+    $moreBtn.on('click', function(e) {
+        e.stopPropagation();
+        var isOpen = $morePanel.hasClass('dt-panel-open');
+        $morePanel.toggleClass('dt-panel-open', !isOpen);
+        $moreBtn.toggleClass('dt-open', !isOpen);
+    });
+
+    $moreClose.on('click', function() {
+        $morePanel.removeClass('dt-panel-open');
+        $moreBtn.removeClass('dt-open');
+    });
+
+    $(document).on('click', function(e) {
+        if (!$(e.target).closest('.dt-more-filters-wrapper').length) {
+            $morePanel.removeClass('dt-panel-open');
+            $moreBtn.removeClass('dt-open');
+        }
+    });
+
+    // Select2 for ALL selects inside the More Filters panel
+    $('#feeMoreFiltersPanel select').not('.select2-hidden-accessible').select2({
+        width: '100%',
+        dropdownAutoWidth: true,
+        dropdownParent: $(document.body),
+        minimumResultsForSearch: 0
+    });
+
+    function updateFilterBadge() {
+        let count = 0;
+        $('.filter-select').each(function() {
+            if ($(this).val()) count++;
+        });
+        const $badge = $('#feeFilterBadge');
+        if (count > 0) {
+            $badge.text(count).show();
+            $moreBtn.addClass('dt-more-filters-active');
+        } else {
+            $badge.hide();
+            $moreBtn.removeClass('dt-more-filters-active');
+        }
+    }
+
+    $moreApply.on('click', function() {
+        updateFilterBadge();
+        table.ajax.reload(null, false);
+        $morePanel.removeClass('dt-panel-open');
+        $moreBtn.removeClass('dt-open');
+    });
+
+    $moreClear.on('click', function() {
+        $('.filter-select').val('').trigger('change');
+        updateFilterBadge();
+        table.ajax.reload(null, false);
     });
 });
 </script>

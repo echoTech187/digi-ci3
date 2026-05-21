@@ -12,19 +12,50 @@ if ($search_date_mutation_to_value) $extra_active++;
 if ($search_position_value)         $extra_active++;
 if ($search_channel_value)          $extra_active++;
 
-$download_url = base_url('admin/download_mutation') 
+$download_url = base_url('finance/mutation/download') 
     . "?id=" . $id 
     . "&search_date_mutation=" . $search_date_mutation_value 
     . "&search_date_mutation_to=" . $search_date_mutation_to_value;
 ?>
 
 <div>
+    <!-- ── Toggleable Page Instructional Drawer ── -->
+    <div class="drawer-overlay" id="instructionOverlay"></div>
+    <div class="drawer-right" id="instructionDrawer">
+        <div class="drawer-header">
+            <h6 class="drawer-title"><i class="fas fa-book mr-2"></i> Mutation Log Guide</h6>
+            <button type="button" class="drawer-close" id="closeDrawerBtn">&times;</button>
+        </div>
+        <div class="drawer-body">
+            <p class="drawer-desc">Audit trail tracking every single balance change (credits, debits, holds, releases) for the merchant.</p>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-exchange-alt text-primary mr-2"></i> Transaction Types</div>
+                <p class="drawer-card-text">Track debits (disbursements, fees) and credits (incoming VA, QRIS, e-wallet settlements).</p>
+            </div>
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-wallet text-primary mr-2"></i> Running Balance</div>
+                <p class="drawer-card-text">View the precise available balance snapshot at the exact moment of mutation.</p>
+            </div>
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-receipt text-primary mr-2"></i> Double-Entry Auditing</div>
+                <p class="drawer-card-text">Reconcile mutation records against transaction invoices to maintain ledger integrity.</p>
+            </div>
+        </div>
+    </div>
+
     <!-- ── Page Header ── -->
     <div class="dt-page-header">
         <div>
             <h4 class="dt-page-title">Mutation Log</h4>
             <p class="dt-page-subtitle">Tracking financial movements for <strong><?= $merchant[0]->c_name ?></strong></p>
+        
+        <div class="d-flex align-items-center gap-2">
+            <button type="button" class="btn btn-light border shadow-sm mr-2 d-flex align-items-center" id="toggleGuideBtn">
+                <i class="fas fa-book-open text-primary mr-2"></i> <span class="d-none d-md-block">Instructions Guide</span>
+            </button>
         </div>
+    </div>
     </div>
 
     <!-- ── KPI Summary Cards ── -->
@@ -33,7 +64,7 @@ $download_url = base_url('admin/download_mutation')
     <!-- ── Main Data Card ── -->
     <div class="card border-0 shadow-sm dt-card">
         <!-- ── Toolbar ── -->
-        <form id="filter-form" method="post" action="<?= base_url('admin/mutation/' . $id) ?>">
+        <form id="filter-form" method="post" action="<?= base_url('finance/mutation/' . $id) ?>">
             <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>">
             
             <div class="dt-toolbar">
@@ -61,7 +92,7 @@ $download_url = base_url('admin/download_mutation')
                         <div class="dt-more-panel" id="moreFiltersPanel">
                             <div class="dt-more-panel-header">
                                 <span class="dt-more-panel-title"><i class="fas fa-filter mr-1 mr-2"></i> Advanced Filters</span>
-                                <a href="<?= base_url('admin/resetMutation/' . $id); ?>" class="dt-more-clear">Clear All</a>
+                                <a href="<?= base_url('finance/mutation/reset/' . $id); ?>" class="dt-more-clear">Clear All</a>
                             </div>
 
                             <div class="dt-more-panel-body">
@@ -168,7 +199,7 @@ $(document).ready(function() {
             return;
         }
 
-        $.post("<?= base_url('admin/getChannelsByPosition') ?>", { 
+        $.post("<?= base_url('finance/mutation/channels') ?>", { 
             position: position, 
             merchant_id: "<?= $id ?>" 
         }, function(data) {
@@ -186,7 +217,7 @@ $(document).ready(function() {
     }
 
     // Initialize Server-side DataTable
-    var table = initServerDataTable("#mutationTable", "<?= base_url('admin/mutation/'.$id) ?>", [
+    var table = initServerDataTable("#mutationTable", "<?= base_url('finance/mutation/'.$id) ?>", [
         { 
             data: 'no', 
             orderable: false, 
@@ -269,3 +300,18 @@ $(document).ready(function() {
 
 
 
+
+<script>
+$(document).ready(function() {
+    // Drawer Toggle Logic
+    $('#toggleGuideBtn').on('click', function() {
+        $('#instructionDrawer, #instructionOverlay').addClass('open');
+        $('body').css('overflow', 'hidden');
+    });
+
+    $('#closeDrawerBtn, #instructionOverlay').on('click', function() {
+        $('#instructionDrawer, #instructionOverlay').removeClass('open');
+        $('body').css('overflow', '');
+    });
+});
+</script>

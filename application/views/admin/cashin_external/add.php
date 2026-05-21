@@ -39,7 +39,8 @@
                         });
                     </script>
 
-                    <form action="<?= base_url('admin/cashin/external/add'); ?>" method="post">
+                    <form action="<?= base_url('external/cashin/add'); ?>" method="post">
+                        <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>">
                         
                         <!-- Merchant Selection -->
                         <div class="section-title mb-4 mt-0 text-primary font-weight-bold small text-uppercase letter-spacing-1">
@@ -82,7 +83,7 @@
                             </div>
                             <div class="col-md-12 mb-4">
                                 <label class="font-weight-bold text-gray-700 small">Specific Channel ID</label>
-                                <select name="ref_cashinChannelId" id="ref_cashinChannelId" class="form-control select2" required disabled>
+                                <select name="ref_cashinChannelId" id="ref_cashinChannelId" class="form-control select2" required>
                                     <option value="">Select channel ID</option>
                                 </select>
                                 <small class="text-muted">Available IDs depend on Group and External ID selection</small>
@@ -142,8 +143,8 @@
                         </div>
 
                         <div class="d-flex justify-content-end mt-5 pt-3 border-top">
-                            <a href="<?= base_url('admin/cashin/external'); ?>" class="btn btn-light px-4 py-2 mr-3 font-weight-bold small text-uppercase">Cancel</a>
-                            <button type="submit" class="btn-dt-action btn-dt-action-primary px-5 py-2">
+                            <a href="<?= base_url('external/cashin'); ?>" class="btn btn-light px-4 py-2 mr-3 font-weight-bold small text-uppercase">Cancel</a>
+                            <button type="submit" class="btn-dt-action btn-dt-action-success px-5 py-2">
                                 <i class="fas fa-save mr-2"></i> Save Configuration
                             </button>
                         </div>
@@ -199,12 +200,12 @@
 
             if (group && external) {
                 $channelId.prop('disabled', true).html('<option value="">Loading...</option>');
-                $.post('<?= base_url("admin/getCashinChannelGroups") ?>', { 
+                $.post('<?= base_url("merchant/setting-cashin-fee/groups") ?>', { 
                     c_cashinChannelGroup: group, 
                     c_externalIdDefault: external,
-                    '<?= $this->security->get_csrf_token_name(); ?>': '<?= $this->security->get_csrf_hash(); ?>'
+                    '<?= $this->security->get_csrf_token_name(); ?>': $('input[name="<?= $this->security->get_csrf_token_name(); ?>"]').val() || '<?= $this->security->get_csrf_hash(); ?>'
                 }, function(data) {
-                    const options = JSON.parse(data);
+                    const options = typeof data === 'string' ? JSON.parse(data) : data;
                     $channelId.empty().append('<option disabled selected>Select channel ID</option>');
                     if (options.length > 0) {
                         options.forEach(item => $channelId.append(`<option value="${item.id}">${item.id}</option>`));

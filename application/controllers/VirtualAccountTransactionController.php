@@ -122,16 +122,13 @@ class VirtualAccountTransactionController extends CI_Controller
       $this->session->unset_userdata('search_va_number');
       $this->session->unset_userdata('search_va_transid');
       $this->session->unset_userdata('last_search_va');
-      redirect('admin/virtual_account');
+      redirect('finance/virtual-account');
    }
 
    public function VA_detail($id = NULL)
    {
-      if (!$id) $id = $this->uri->segment(3);
-
       if (!$id) {
-         $this->session->set_flashdata('error', 'Transaction ID not found.');
-         redirect('admin/virtual_account');
+         redirect('finance/virtual-account');
       }
 
       $data['user'] = $this->Model_user->view_user()->row_array();
@@ -156,7 +153,7 @@ class VirtualAccountTransactionController extends CI_Controller
 
       if (empty($search_name_va) && (empty($search_date_va) || empty($search_date_va_settlement))) {
          $this->session->set_flashdata('error_message', 'Please fill all fields and search before continuing with download.');
-         redirect('admin/virtual_account');
+         redirect('finance/virtual-account');
       }
 
       $user = $this->Model_user->view_user()->row_array();
@@ -176,7 +173,7 @@ class VirtualAccountTransactionController extends CI_Controller
          $this->session->set_flashdata('error', 'Failed request download');
       }
 
-      redirect('admin/virtual_account');
+      redirect('finance/virtual-account');
    }
 
    public function Va_dynamic()
@@ -261,7 +258,7 @@ class VirtualAccountTransactionController extends CI_Controller
       $this->session->unset_userdata('search_va_number');
       $this->session->unset_userdata('search_merchant_trxid');
       $this->session->unset_userdata('last_search_vad');
-      redirect('admin/Va_dynamic');
+      redirect('virtual-account/dynamic');
    }
 
    public function VA_recurring()
@@ -356,7 +353,7 @@ class VirtualAccountTransactionController extends CI_Controller
       $this->session->unset_userdata('search_transid_var');
       $this->session->unset_userdata('search_va_number_var');
       $this->session->unset_userdata('last_search_var');
-      redirect('admin/VA_recurring');
+      redirect('virtual-account/recurring');
    }
 
    public function SendnotifikasiVA()
@@ -366,7 +363,7 @@ class VirtualAccountTransactionController extends CI_Controller
 
       if (!$ref_cashinPaymentVaId) {
          $this->session->set_flashdata('error', 'Transaction ID not found.');
-         redirect('admin/virtual_account');
+         redirect('finance/virtual-account');
       }
 
       $internalRequestBody = array(
@@ -399,7 +396,7 @@ class VirtualAccountTransactionController extends CI_Controller
       curl_close($internalCurl);
 
       $this->session->set_flashdata('success', 'Notification has resend');
-      redirect('admin/virtual_account');
+      redirect('finance/virtual-account');
    }
 
    public function getDetailVaDynamicChannelExternal()

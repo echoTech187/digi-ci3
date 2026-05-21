@@ -1,10 +1,40 @@
 <!-- Begin Page Content -->
 <div >
+    <!-- ── Toggleable Page Instructional Drawer ── -->
+    <div class="drawer-overlay" id="instructionOverlay"></div>
+    <div class="drawer-right" id="instructionDrawer">
+        <div class="drawer-header">
+            <h6 class="drawer-title"><i class="fas fa-book mr-2"></i> E-Wallet Transaction Details Guide</h6>
+            <button type="button" class="drawer-close" id="closeDrawerBtn">&times;</button>
+        </div>
+        <div class="drawer-body">
+            <p class="drawer-desc">Granular logs and metadata for an E-Wallet payment.</p>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-mobile-alt text-primary mr-2"></i> Wallet Metadata</div>
+                <p class="drawer-card-text">Mobile phone number used, provider reference ID, and product type.</p>
+            </div>
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-envelope-open-text text-primary mr-2"></i> Callback Responses</div>
+                <p class="drawer-card-text">Success response payloads captured during transaction processing.</p>
+            </div>
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-history text-primary mr-2"></i> Audit Timeline</div>
+                <p class="drawer-card-text">Retrace webhook triggers and transaction success milestones.</p>
+            </div>
+        </div>
+    </div>
+
     <!-- ── Page Header ── -->
-    <div class="dt-page-header">
+    <div class="dt-page-header d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h4 class="dt-page-title">Transaction Details</h4>
-            <p class="dt-page-subtitle">Complete data breakdown for the E-Wallet transaction, including merchant and settlement info.</p>
+            <h4 class="dt-page-title mb-1">Transaction Details</h4>
+            <p class="dt-page-subtitle mb-0">Complete data breakdown for the E-Wallet transaction, including merchant and settlement info.</p>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <button type="button" class="btn btn-light border shadow-sm mr-2 d-flex align-items-center" id="toggleGuideBtn">
+                <i class="fas fa-book-open text-primary mr-2"></i> <span class="d-none d-md-block">Instructions Guide</span>
+            </button>
         </div>
     </div>
 
@@ -126,3 +156,18 @@
 <!-- /.container-fluid -->
 
 
+
+<script>
+$(document).ready(function() {
+    // Drawer Toggle Logic
+    $('#toggleGuideBtn').on('click', function() {
+        $('#instructionDrawer, #instructionOverlay').addClass('open');
+        $('body').css('overflow', 'hidden');
+    });
+
+    $('#closeDrawerBtn, #instructionOverlay').on('click', function() {
+        $('#instructionDrawer, #instructionOverlay').removeClass('open');
+        $('body').css('overflow', '');
+    });
+});
+</script>
