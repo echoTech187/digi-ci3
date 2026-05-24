@@ -24,7 +24,7 @@
                 <?= $this->session->flashdata('message'); ?>
             </div>
 
-            <form class="user" method="post" action="<?= base_url('auth/forgotpassword'); ?>">
+            <form class="user" method="post" action="<?= base_url('auth/forgot-password'); ?>">
                 <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>">
                 
                 <div class="form-group-custom">

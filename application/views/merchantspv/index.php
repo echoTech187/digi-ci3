@@ -206,7 +206,7 @@
                 <div class="modal-body p-0 bg-light text-dark">
                     <div class="d-flex g-0 w-100 flex-wrap flex-lg-nowrap">
                         <!-- Left Information Sidebar -->
-                        <div class="col-lg-4 p-4 d-flex flex-column justify-content-between mb-0" style="background: #202328; border-right: 1px solid rgba(255,255,255,0.05); color: #fff;">
+                        <div class="col-lg-4 p-4 d-flex flex-column justify-content-between mb-0" style="background: var(--bg-body); border-right: 1px solid rgba(255,255,255,0.05);">
                             <div>
                                 <div class="d-flex align-items-center mb-3">
                                     <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mr-3 shadow-sm" style="width: 40px; height: 40px; min-width: 40px;">
@@ -218,15 +218,15 @@
                                 
                                 <div class="d-flex flex-column gap-3">
                                     <div class="bg-white-soft p-3 rounded-4 shadow-sm border-0 mb-3" style="background: rgba(255,255,255,0.04); border-radius: 8px;">
-                                        <h6 class="fw-bold text-white mb-1 d-flex align-items-center" style="font-size: 12.5px;"><i class="fas fa-user text-primary mr-2"></i> 1. Account Profile</h6>
+                                        <h6 class="fw-bold mb-1 d-flex align-items-center" style="font-size: 12.5px;"><i class="fas fa-user text-primary mr-2"></i> 1. Account Profile</h6>
                                         <p class="text-muted mb-0" style="font-size: 11px; line-height: 1.5; color: #a0a5b0 !important;">Enter the full name, unique username, and email address for this supervisor.</p>
                                     </div>
                                     <div class="bg-white-soft p-3 rounded-4 shadow-sm border-0 mb-3" style="background: rgba(255,255,255,0.04); border-radius: 8px;">
-                                        <h6 class="fw-bold text-white mb-1 d-flex align-items-center" style="font-size: 12.5px;"><i class="fas fa-key text-primary mr-2"></i> 2. Password Policy</h6>
+                                        <h6 class="fw-bold mb-1 d-flex align-items-center" style="font-size: 12.5px;"><i class="fas fa-key text-primary mr-2"></i> 2. Password Policy</h6>
                                         <p class="text-muted mb-0" style="font-size: 11px; line-height: 1.5; color: #a0a5b0 !important;">Provide a secure password. Ensure both password fields match to verify correctness.</p>
                                     </div>
                                     <div class="bg-white-soft p-3 rounded-4 shadow-sm border-0 mb-3" style="background: rgba(255,255,255,0.04); border-radius: 8px;">
-                                        <h6 class="fw-bold text-white mb-1 d-flex align-items-center" style="font-size: 12.5px;"><i class="fas fa-link text-primary mr-2"></i> 3. Merchant Linkage</h6>
+                                        <h6 class="fw-bold mb-1 d-flex align-items-center" style="font-size: 12.5px;"><i class="fas fa-link text-primary mr-2"></i> 3. Merchant Linkage</h6>
                                         <p class="text-muted mb-0" style="font-size: 11px; line-height: 1.5; color: #a0a5b0 !important;">Select one or more merchants from the searchable list to link to this supervisor.</p>
                                     </div>
                                 </div>
@@ -328,7 +328,7 @@
                 <div class="modal-body p-0 bg-light text-dark">
                     <div class="d-flex g-0 w-100 flex-wrap flex-lg-nowrap">
                         <!-- Left Information Sidebar -->
-                        <div class="col-lg-4 p-4 d-flex flex-column justify-content-between mb-0" style="background: #202328; border-right: 1px solid rgba(255,255,255,0.05); color: #fff;">
+                        <div class="col-lg-4 p-4 d-flex flex-column justify-content-between mb-0" style="background: var(--bg-body); border-right: 1px solid rgba(255,255,255,0.05);">
                             <div>
                                 <div class="d-flex align-items-center mb-3">
                                     <div class="bg-warning text-white rounded-circle d-flex align-items-center justify-content-center mr-3 shadow-sm" style="width: 40px; height: 40px; min-width: 40px; background-color: #d35400 !important;">
@@ -340,19 +340,19 @@
                                 
                                 <div class="d-flex flex-column gap-3">
                                     <div class="bg-white-soft p-3 rounded-4 shadow-sm border-0 mb-3" style="background: rgba(255,255,255,0.04); border-radius: 8px;">
-                                        <h6 class="fw-bold text-white mb-1 d-flex align-items-center" style="font-size: 12.5px;"><i class="fas fa-user-edit text-warning mr-2" style="color: #f39c12 !important;"></i> 1. Modify Profile</h6>
+                                        <h6 class="fw-bold mb-1 d-flex align-items-center" style="font-size: 12.5px;"><i class="fas fa-user-edit text-warning mr-2" style="color: #f39c12 !important;"></i> 1. Modify Profile</h6>
                                         <p class="text-muted mb-0" style="font-size: 11px; line-height: 1.5; color: #a0a5b0 !important;">Edit name, username, and email credentials. Username and email must remain unique.</p>
                                     </div>
                                     <div class="bg-white-soft p-3 rounded-4 shadow-sm border-0 mb-3" style="background: rgba(255,255,255,0.04); border-radius: 8px;">
-                                        <h6 class="fw-bold text-white mb-1 d-flex align-items-center" style="font-size: 12.5px;"><i class="fas fa-key text-warning mr-2" style="color: #f39c12 !important;"></i> 2. Update Password</h6>
+                                        <h6 class="fw-bold mb-1 d-flex align-items-center" style="font-size: 12.5px;"><i class="fas fa-key text-warning mr-2" style="color: #f39c12 !important;"></i> 2. Update Password</h6>
                                         <p class="text-muted mb-0" style="font-size: 11px; line-height: 1.5; color: #a0a5b0 !important;">Leave the password fields empty if you want to keep the current password.</p>
                                     </div>
                                     <div class="bg-white-soft p-3 rounded-4 shadow-sm border-0 mb-3" style="background: rgba(255,255,255,0.04); border-radius: 8px;">
-                                        <h6 class="fw-bold text-white mb-1 d-flex align-items-center" style="font-size: 12.5px;"><i class="fas fa-adjust text-warning mr-2" style="color: #f39c12 !important;"></i> 3. Adjust Merchants</h6>
+                                        <h6 class="fw-bold mb-1 d-flex align-items-center" style="font-size: 12.5px;"><i class="fas fa-adjust text-warning mr-2" style="color: #f39c12 !important;"></i> 3. Adjust Merchants</h6>
                                         <p class="text-muted mb-0" style="font-size: 11px; line-height: 1.5; color: #a0a5b0 !important;">Add or remove merchants. Deselected merchants will be instantly unassigned.</p>
                                     </div>
                                     <div class="bg-white-soft p-3 rounded-4 shadow-sm border-0 mb-3" style="background: rgba(255,255,255,0.04); border-radius: 8px;">
-                                        <h6 class="fw-bold text-white mb-1 d-flex align-items-center" style="font-size: 12.5px;"><i class="fas fa-info-circle text-warning mr-2" style="color: #f39c12 !important;"></i> 4. Account Status</h6>
+                                        <h6 class="fw-bold mb-1 d-flex align-items-center" style="font-size: 12.5px;"><i class="fas fa-info-circle text-warning mr-2" style="color: #f39c12 !important;"></i> 4. Account Status</h6>
                                         <p class="text-muted mb-0" style="font-size: 11px; line-height: 1.5; color: #a0a5b0 !important;">Set status to Active, Pending, Blocked, or Freeze to control platform access.</p>
                                     </div>
                                 </div>
@@ -430,7 +430,6 @@
     </div>
 </div>
 
-<script src="<?= base_url('assets/js/server-datatables.js') ?>"></script>
 <script>
 $(document).ready(function() {
     const table = initServerDataTable("#merchantSpvTable", "<?= base_url('merchant/supervisor') ?>", [

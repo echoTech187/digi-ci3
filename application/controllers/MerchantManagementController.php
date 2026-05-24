@@ -350,6 +350,10 @@ class MerchantManagementController extends CI_Controller
       $this->form_validation->set_rules($formValidationRules);
 
       if ($this->form_validation->run() == FALSE) {
+         if ($this->input->is_ajax_request()) {
+             echo json_encode(['status' => 'error', 'message' => validation_errors()]);
+             return;
+         }
          $errors = validation_errors('<li>', '</li>');
          $this->session->set_flashdata('error', '<ul>' . $errors . '</ul>');
          redirect('merchant/manage/add');
@@ -358,18 +362,30 @@ class MerchantManagementController extends CI_Controller
          try {
             $result = $this->MerchantRegistrationService->registerMerchant($this->input->post(), $formValidationRules, $optionalFields);
             if ($result === true) {
+               if ($this->input->is_ajax_request()) {
+                   echo json_encode(['status' => 'success', 'message' => 'Data successfully inserted']);
+                   return;
+               }
                $this->session->set_flashdata('success', 'Data successfully inserted');
             } else {
                $code = isset($result['code']) ? $result['code'] : 0;
+               $msg = 'Unable to create merchant account due to a system constraint. Please verify your input or contact technical support.';
                if ($code == 1142) {
-                  $this->session->set_flashdata('error', 'Access Denied. You do not have sufficient database privileges to create merchant accounts.');
+                  $msg = 'Access Denied. You do not have sufficient database privileges to create merchant accounts.';
                } elseif ($code == 1062) {
-                  $this->session->set_flashdata('error', 'A merchant account with this email or configuration already exists.');
-               } else {
-                  $this->session->set_flashdata('error', 'Unable to create merchant account due to a system constraint. Please verify your input or contact technical support.');
+                  $msg = 'A merchant account with this email or configuration already exists.';
                }
+               if ($this->input->is_ajax_request()) {
+                   echo json_encode(['status' => 'error', 'message' => $msg]);
+                   return;
+               }
+               $this->session->set_flashdata('error', $msg);
             }
          } catch (Exception $e) {
+            if ($this->input->is_ajax_request()) {
+                echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+                return;
+            }
             $this->session->set_flashdata('error', $e->getMessage());
          }
          redirect('merchant/manage');
@@ -918,6 +934,10 @@ class MerchantManagementController extends CI_Controller
       $this->form_validation->set_rules($rules);
 
       if ($this->form_validation->run() == FALSE) {
+         if ($this->input->is_ajax_request()) {
+             echo json_encode(['status' => 'error', 'message' => validation_errors()]);
+             return;
+         }
          $errors = validation_errors('<li>', '</li>');
          $this->session->set_flashdata('error', '<ul>' . $errors . '</ul>');
          redirect('merchant/manage/edit/' . $merchant_id);
@@ -951,6 +971,10 @@ class MerchantManagementController extends CI_Controller
             if($this->input->post('c_password') == $this->input->post('c_confirmPassword')) {
                $data['c_password'] = password_hash($this->input->post('c_password'), PASSWORD_DEFAULT);
             } else {
+               if ($this->input->is_ajax_request()) {
+                   echo json_encode(['status' => 'error', 'message' => 'Password not match']);
+                   return;
+               }
                $this->session->set_flashdata('message', 'Password not match');
                redirect('merchant/manage/edit/' . $merchant_id);
             }
@@ -998,15 +1022,23 @@ class MerchantManagementController extends CI_Controller
             $err = $errMerchant ?: ($errSub ?: ['code' => 0]);
             $this->db->trans_rollback();
             $code = isset($err['code']) ? $err['code'] : 0;
+            $msg = 'Unable to update merchant details due to a system constraint. Please verify your input or contact technical support.';
             if ($code == 1142) {
-               $this->session->set_flashdata('error', 'Access Denied. You do not have sufficient database privileges to modify merchant accounts.');
+               $msg = 'Access Denied. You do not have sufficient database privileges to modify merchant accounts.';
             } elseif ($code == 1062) {
-               $this->session->set_flashdata('error', 'A merchant account with this email already exists.');
-            } else {
-               $this->session->set_flashdata('error', 'Unable to update merchant details due to a system constraint. Please verify your input or contact technical support.');
+               $msg = 'A merchant account with this email already exists.';
             }
+            if ($this->input->is_ajax_request()) {
+                echo json_encode(['status' => 'error', 'message' => $msg]);
+                return;
+            }
+            $this->session->set_flashdata('error', $msg);
          } else {
             $this->db->trans_commit();
+            if ($this->input->is_ajax_request()) {
+                echo json_encode(['status' => 'success', 'message' => 'Merchant successfully updated.']);
+                return;
+            }
             $this->session->set_flashdata('success', 'Merchant successfully updated.');
          }
          $this->db->db_debug = $db_debug;
@@ -1020,19 +1052,31 @@ class MerchantManagementController extends CI_Controller
       try {
          $result = $this->MerchantRegistrationService->registerSupervisor($this->input->post());
          if ($result === true) {
+            if ($this->input->is_ajax_request()) {
+                echo json_encode(['status' => 'success', 'message' => 'Merchant Supervisor Added Successfully.']);
+                return;
+            }
             $this->session->set_flashdata('success', 'Merchant Supervisor Added Successfully.');
          } else {
             $code = isset($result['code']) ? $result['code'] : 0;
+            $msg = 'Unable to create supervisor account due to a system constraint. Please verify your input or contact technical support.';
             if ($code == 1142) {
-               $this->session->set_flashdata('error', 'Access Denied. You do not have sufficient database privileges to create supervisor accounts.');
+               $msg = 'Access Denied. You do not have sufficient database privileges to create supervisor accounts.';
             } elseif ($code == 1062) {
-               $this->session->set_flashdata('error', 'A supervisor account with this username or email already exists.');
-            } else {
-               $this->session->set_flashdata('error', 'Unable to create supervisor account due to a system constraint. Please verify your input or contact technical support.');
+               $msg = 'A supervisor account with this username or email already exists.';
             }
+            if ($this->input->is_ajax_request()) {
+                echo json_encode(['status' => 'error', 'message' => $msg]);
+                return;
+            }
+            $this->session->set_flashdata('error', $msg);
          }
          redirect('merchant/supervisor');
       } catch (Exception $e) {
+         if ($this->input->is_ajax_request()) {
+             echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+             return;
+         }
          $this->session->set_flashdata('error', $e->getMessage());
          if ($e->getMessage() === 'Password not match') {
             redirect('merchant/supervisor/register');
@@ -1143,6 +1187,10 @@ class MerchantManagementController extends CI_Controller
       }
 
       if ($this->form_validation->run() == FALSE) {
+         if ($this->input->is_ajax_request()) {
+             echo json_encode(['status' => 'error', 'message' => validation_errors()]);
+             return;
+         }
          $errors = validation_errors('<li>', '</li>');
          $this->session->set_flashdata('error', '<ul>' . $errors . '</ul>');
          redirect('merchant/setting-cashin-fee/' . $merchant_id);
@@ -1162,16 +1210,24 @@ class MerchantManagementController extends CI_Controller
          );
          $result = $this->Chanel->createCashinChannelXMerchant($data);
          if ($result === true) {
+            if ($this->input->is_ajax_request()) {
+                echo json_encode(['status' => 'success', 'message' => 'Data successfully inserted']);
+                return;
+            }
             $this->session->set_flashdata('success', 'Data successfully inserted');
          } else {
             $code = isset($result['code']) ? $result['code'] : 0;
+            $msg = 'Unable to insert data due to a system constraint. Please verify your input or contact technical support.';
             if ($code == 1142) {
-               $this->session->set_flashdata('error', 'Access Denied. You do not have sufficient database privileges to add cashin fee settings.');
+               $msg = 'Access Denied. You do not have sufficient database privileges to add cashin fee settings.';
             } elseif ($code == 1062) {
-               $this->session->set_flashdata('error', 'Failed to insert data: A fee configuration for this channel already exists.');
-            } else {
-               $this->session->set_flashdata('error', 'Unable to insert data due to a system constraint. Please verify your input or contact technical support.');
+               $msg = 'Failed to insert data: A fee configuration for this channel already exists.';
             }
+            if ($this->input->is_ajax_request()) {
+                echo json_encode(['status' => 'error', 'message' => $msg]);
+                return;
+            }
+            $this->session->set_flashdata('error', $msg);
          }
          redirect('merchant/setting-cashin-fee/' . $merchant_id);
       }
@@ -1274,6 +1330,10 @@ class MerchantManagementController extends CI_Controller
    public function updateMerchantSpv($id = null)
    {
       if (!$id) {
+         if ($this->input->is_ajax_request()) {
+             echo json_encode(['status' => 'error', 'message' => 'Supervisor ID missing.']);
+             return;
+         }
          $this->session->set_flashdata('error', 'Supervisor ID missing.');
          redirect('merchant/supervisor');
       }
@@ -1282,18 +1342,30 @@ class MerchantManagementController extends CI_Controller
       try {
          $result = $this->MerchantRegistrationService->updateSupervisor($id, $this->input->post());
          if ($result === true) {
+            if ($this->input->is_ajax_request()) {
+                echo json_encode(['status' => 'success', 'message' => 'Merchant Supervisor Updated Successfully.']);
+                return;
+            }
             $this->session->set_flashdata('success', 'Merchant Supervisor Updated Successfully.');
          } else {
             $code = isset($result['code']) ? $result['code'] : 0;
+            $msg = 'Unable to update supervisor account due to a system constraint.';
             if ($code == 1142) {
-               $this->session->set_flashdata('error', 'Access Denied. You do not have sufficient privileges to edit supervisor accounts.');
+               $msg = 'Access Denied. You do not have sufficient privileges to edit supervisor accounts.';
             } elseif ($code == 1062) {
-               $this->session->set_flashdata('error', 'A supervisor account with this username or email already exists.');
-            } else {
-               $this->session->set_flashdata('error', 'Unable to update supervisor account due to a system constraint.');
+               $msg = 'A supervisor account with this username or email already exists.';
             }
+            if ($this->input->is_ajax_request()) {
+                echo json_encode(['status' => 'error', 'message' => $msg]);
+                return;
+            }
+            $this->session->set_flashdata('error', $msg);
          }
       } catch (Exception $e) {
+         if ($this->input->is_ajax_request()) {
+             echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+             return;
+         }
          $this->session->set_flashdata('error', $e->getMessage());
       }
       redirect('merchant/supervisor');
@@ -1641,6 +1713,10 @@ class MerchantManagementController extends CI_Controller
       $this->form_validation->set_rules($rules);
 
       if ($this->form_validation->run() == FALSE) {
+         if ($this->input->is_ajax_request()) {
+             echo json_encode(['status' => 'error', 'message' => validation_errors()]);
+             return;
+         }
          $errors = validation_errors('<li>', '</li>');
          $this->session->set_flashdata('error', '<ul>' . $errors . '</ul>');
          redirect('merchant/setting-cashout-fee/' . $merchant_id);
@@ -1660,16 +1736,24 @@ class MerchantManagementController extends CI_Controller
 
          $result = $this->Chanel->createCashoutChannelXMerchant($data);
          if ($result === true) {
+            if ($this->input->is_ajax_request()) {
+                echo json_encode(['status' => 'success', 'message' => 'Data successfully inserted']);
+                return;
+            }
             $this->session->set_flashdata('success', 'Data successfully inserted');
          } else {
             $code = isset($result['code']) ? $result['code'] : 0;
+            $msg = 'Unable to insert data due to a system constraint. Please verify your input or contact technical support.';
             if ($code == 1142) {
-               $this->session->set_flashdata('error', 'Access Denied. You do not have sufficient database privileges to add cashout fee settings.');
+               $msg = 'Access Denied. You do not have sufficient database privileges to add cashout fee settings.';
             } elseif ($code == 1062) {
-               $this->session->set_flashdata('error', 'Failed to insert data: A fee configuration for this channel already exists.');
-            } else {
-               $this->session->set_flashdata('error', 'Unable to insert data due to a system constraint. Please verify your input or contact technical support.');
+               $msg = 'Failed to insert data: A fee configuration for this channel already exists.';
             }
+            if ($this->input->is_ajax_request()) {
+                echo json_encode(['status' => 'error', 'message' => $msg]);
+                return;
+            }
+            $this->session->set_flashdata('error', $msg);
          }
 
          redirect('merchant/setting-cashout-fee/' . $merchant_id);
@@ -1698,6 +1782,10 @@ class MerchantManagementController extends CI_Controller
       $this->form_validation->set_rules($rules);
 
       if ($this->form_validation->run() == FALSE) {
+         if ($this->input->is_ajax_request()) {
+             echo json_encode(['status' => 'error', 'message' => validation_errors()]);
+             return;
+         }
          $errors = validation_errors('<li>', '</li>');
          $this->session->set_flashdata('error', '<ul>' . $errors . '</ul>');
          redirect('merchant/setting-cashout-fee/' . $merchant_id);
@@ -1722,14 +1810,22 @@ class MerchantManagementController extends CI_Controller
 
          $result = $this->Chanel->bulkCreateCashoutChannelXMerchant($data);
          if ($result === true) {
+            if ($this->input->is_ajax_request()) {
+                echo json_encode(['status' => 'success', 'message' => 'Data successfully inserted']);
+                return;
+            }
             $this->session->set_flashdata('success', 'Data successfully inserted');
          } else {
             $code = isset($result['code']) ? $result['code'] : 0;
+            $msg = 'Unable to complete bulk insertion due to a system constraint. Please contact technical support.';
             if ($code == 1142) {
-               $this->session->set_flashdata('error', 'Access Denied. You do not have sufficient database privileges to perform bulk cashout fee settings.');
-            } else {
-               $this->session->set_flashdata('error', 'Unable to complete bulk insertion due to a system constraint. Please contact technical support.');
+               $msg = 'Access Denied. You do not have sufficient database privileges to perform bulk cashout fee settings.';
             }
+            if ($this->input->is_ajax_request()) {
+                echo json_encode(['status' => 'error', 'message' => $msg]);
+                return;
+            }
+            $this->session->set_flashdata('error', $msg);
          }
 
          redirect('merchant/setting-cashout-fee/' . $merchant_id);

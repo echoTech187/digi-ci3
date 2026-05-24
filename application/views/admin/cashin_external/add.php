@@ -110,11 +110,11 @@
                             </div>
                             <div class="col-md-6 mb-4">
                                 <label class="font-weight-bold text-gray-700 small">Fixed Fee (IDR)</label>
-                                <input type="number" name="c_fee" class="form-control" placeholder="0" required>
+                                <input type="text" name="c_fee" class="input-rupiah form-control" placeholder="0" required>
                             </div>
                             <div class="col-md-6 mb-4">
                                 <label class="font-weight-bold text-gray-700 small">Percentage Fee (%)</label>
-                                <input type="number" step="0.01" name="c_feePercetange" class="form-control" placeholder="0.00" required>
+                                <input type="text" name="c_feePercetange" class="input-percentage form-control" placeholder="0.00" required>
                             </div>
                         </div>
 
@@ -127,11 +127,11 @@
                         <div class="row">
                             <div class="col-md-4 mb-4">
                                 <label class="font-weight-bold text-gray-700 small">Amount Min</label>
-                                <input type="number" name="c_amountMin" class="form-control" placeholder="1000" required>
+                                <input type="text" name="c_amountMin" class="input-rupiah form-control" placeholder="1000" required>
                             </div>
                             <div class="col-md-4 mb-4">
                                 <label class="font-weight-bold text-gray-700 small">Amount Max</label>
-                                <input type="number" name="c_amountMax" class="form-control" placeholder="20000000" required>
+                                <input type="text" name="c_amountMax" class="input-rupiah form-control" placeholder="20000000" required>
                             </div>
                             <div class="col-md-4 mb-4">
                                 <label class="font-weight-bold text-gray-700 small">Status</label>

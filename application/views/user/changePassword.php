@@ -45,7 +45,7 @@
 
             <div class="card border-0 shadow-sm dt-card">
                 <div class="card-body p-4">
-                    <form action="<?= base_url('user/changePassword'); ?>" method="post">
+                    <form action="<?= base_url('auth/change-password'); ?>" method="post">
                         <div class="form-group mb-4">
                             <label class="dt-more-label mb-2" for="currentPassword">Current Password</label>
                             <input type="password" name="currentPassword" id="currentPassword" class="form-control dt-card border-0 shadow-none px-3" style="background: var(--dt-bg-subtle); height: 45px;" placeholder="Enter current password">

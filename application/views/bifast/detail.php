@@ -62,7 +62,7 @@
                 <?php foreach ($bifast_data as $data): ?>
                     <div class="col-md-6">
                         <div class="mb-4">
-                            <label class="dt-more-label text-primary mb-1">REFERENCE INFO</label>
+                            <label class="dt-more-label text-primary mb-3">REFERENCE INFO</label>
                             <div class="p-3 rounded-lg border-left-primary">
                                 <div class="mb-2">
                                     <small class="text-muted d-block">Invoice Number</small>
@@ -80,7 +80,7 @@
                         </div>
 
                         <div class="mb-4">
-                            <label class="dt-more-label text-info mb-1">MERCHANT DETAILS</label>
+                            <label class="dt-more-label text-info mb-3">MERCHANT DETAILS</label>
                             <div class="p-3 rounded-lg border-left-info">
                                 <div class="mb-2">
                                     <small class="text-muted d-block">Merchant Name</small>
@@ -96,7 +96,7 @@
 
                     <div class="col-md-6">
                         <div class="mb-4">
-                            <label class="dt-more-label text-success mb-1">FINANCIAL SUMMARY</label>
+                            <label class="dt-more-label text-success mb-3">FINANCIAL SUMMARY</label>
                             <div class="p-3 rounded-lg border-left-success">
                                 <div class="row">
                                     <div class="col-6 mb-2">
@@ -124,7 +124,7 @@
                         </div>
 
                         <div class="mb-4">
-                            <label class="dt-more-label text-warning mb-1">BENEFICIARY & CHANNEL</label>
+                            <label class="dt-more-label text-warning mb-3">BENEFICIARY & CHANNEL</label>
                             <div class="p-3 rounded-lg border-left-warning">
                                 <div class="mb-2">
                                     <small class="text-muted d-block">Account Holder</small>

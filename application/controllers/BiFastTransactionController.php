@@ -83,6 +83,7 @@ class BiFastTransactionController extends CI_Controller
       $search_date_bifast_to = $this->input->post('search_date_bifast_to') != NULL ? $this->input->post('search_date_bifast_to') : $this->session->userdata('search_date_bifast_to');
       $search_external_reff_id = $this->input->post('search_external_reff_id') != NULL ? $this->input->post('search_external_reff_id') : $this->session->userdata('search_external_reff_id');
       $search_channel_bifast = $this->input->post('search_channel_bifast') != NULL ? $this->input->post('search_channel_bifast') : $this->session->userdata('search_channel_bifast');
+      $search_internal_channel_bifast = $this->input->post('search_internal_channel_bifast') != NULL ? $this->input->post('search_internal_channel_bifast') : $this->session->userdata('search_internal_channel_bifast');
       $search_status_transaction_bifast = $this->input->post('search_status_transaction_bifast') != NULL ? $this->input->post('search_status_transaction_bifast') : $this->session->userdata('search_status_transaction_bifast');
 
       // Validasi Relasional: External Reff ID hanya valid jika channel eksternal telah dipilih.
@@ -100,6 +101,7 @@ class BiFastTransactionController extends CI_Controller
          'search_transid_bifast' => $search_transid_bifast,
          'search_external_reff_id' => $search_external_reff_id,
          'search_channel_bifast' => $search_channel_bifast,
+         'search_internal_channel_bifast' => $search_internal_channel_bifast,
          'search_status_transaction_bifast' => $search_status_transaction_bifast,
       ]);
 
@@ -123,6 +125,7 @@ class BiFastTransactionController extends CI_Controller
                $this->session->unset_userdata('search_status_transaction_bifast');
                $this->session->unset_userdata('search_transid_bifast');
                $this->session->unset_userdata('search_channel_bifast');
+               $this->session->unset_userdata('search_internal_channel_bifast');
                $this->session->unset_userdata('search_external_reff_id');
             }
 
@@ -138,6 +141,7 @@ class BiFastTransactionController extends CI_Controller
                'transid' => $this->session->userdata('search_transid_bifast'),
                'external_reff' => $this->session->userdata('search_external_reff_id'),
                'channel' => $this->session->userdata('search_channel_bifast'),
+               'internal_channel' => $this->session->userdata('search_internal_channel_bifast'),
                'status' => $this->session->userdata('search_status_transaction_bifast')
             ];
             
@@ -158,6 +162,7 @@ class BiFastTransactionController extends CI_Controller
       // Persiapan data untuk tampilan view (initial load)
       $data['merchants'] = $this->BiFast->get_merchant();
       $data['channels'] = $this->BiFast->get_channels();
+      $data['internal_channels'] = $this->BiFast->get_internal_channels();
       $data['search_status_transaction_bifast'] = $search_status_transaction_bifast ?: '';
 
       $this->load->view('bifast/list', $data);
@@ -176,6 +181,7 @@ class BiFastTransactionController extends CI_Controller
       $this->session->unset_userdata('search_status_transaction_bifast');
       $this->session->unset_userdata('search_external_reff_id');
       $this->session->unset_userdata('search_channel_bifast');
+      $this->session->unset_userdata('search_internal_channel_bifast');
       $this->session->unset_userdata('last_search_bifast');
       redirect('finance/bi-fast');
    }

@@ -316,13 +316,13 @@
                                                 <label class="form-label small fw-bold text-muted">Fixed Fee (IDR)</label>
                                                 <div class="input-group">
                                                     <span class="input-group-text border-1 small">Rp</span>
-                                                    <input type="number" step="any" class="form-control border-1 rounded-left-0 fw-bold text-primary" required id="c_fee" name="c_fee">
+                                                    <input type="text" class="input-rupiah form-control border-1 rounded-left-0 fw-bold text-primary" required id="c_fee" name="c_fee">
                                                 </div>
                                             </div>
                                             <div class="col-md-12">
                                                 <label class="form-label small fw-bold text-muted">Percentage Fee (%)</label>
                                                 <div class="input-group">
-                                                    <input type="number" step="any" class="form-control border-1 rounded-right-0 fw-bold text-success" required id="c_feePercetange" name="c_feePercetange">
+                                                    <input type="text" class="input-percentage form-control border-1 rounded-right-0 fw-bold text-success" required id="c_feePercetange" name="c_feePercetange">
                                                     <span class="input-group-text border-1 rounded-left-0 small">%</span>
                                                 </div>
                                             </div>
@@ -340,14 +340,14 @@
                                         <label class="form-label small fw-bold text-muted">Amount Min</label>
                                         <div class="input-group">
                                             <span class="input-group-text border-1 small">Rp</span>
-                                            <input type="number" step="any" class="form-control border-1 rounded-left-0" id="c_amountMin" required name="c_amountMin">
+                                            <input type="text" class="input-rupiah form-control border-1 rounded-left-0" id="c_amountMin" required name="c_amountMin">
                                         </div>
                                     </div>
                                     <div class="col-md-4">
                                         <label class="form-label small fw-bold text-muted">Amount Max</label>
                                         <div class="input-group">
                                             <span class="input-group-text border-1 small">Rp</span>
-                                            <input type="number" step="any" class="form-control border-1 rounded-left-0" id="c_amountMax" required name="c_amountMax">
+                                            <input type="text" class="input-rupiah form-control border-1 rounded-left-0" id="c_amountMax" required name="c_amountMax">
                                         </div>
                                     </div>
                                     <div class="col-md-4">
@@ -467,13 +467,13 @@
                                                 <label class="form-label small fw-bold text-muted">Fixed Fee</label>
                                                 <div class="input-group">
                                                     <span class="input-group-text border-1 small">Rp</span>
-                                                    <input type="number" step="any" class="form-control border-1" required name="c_fee">
+                                                    <input type="text" class="input-rupiah form-control border-1" required name="c_fee">
                                                 </div>
                                             </div>
                                             <div class="col-12">
                                                 <label class="form-label small fw-bold text-muted">Fee Percentage (%)</label>
                                                 <div class="input-group">
-                                                    <input type="number" step="any" class="form-control border-1" required name="c_feePercetange">
+                                                    <input type="text" class="input-percentage form-control border-1" required name="c_feePercetange">
                                                     <span class="input-group-text border-1 small">%</span>
                                                 </div>
                                             </div>
@@ -491,14 +491,14 @@
                                         <label class="form-label small fw-bold text-muted">Amount Min</label>
                                         <div class="input-group">
                                             <span class="input-group-text border-1 small">Rp</span>
-                                            <input type="number" step="any" class="form-control border-1" required name="c_amountMin">
+                                            <input type="text" class="input-rupiah form-control border-1" required name="c_amountMin">
                                         </div>
                                     </div>
                                     <div class="col-md-4">
                                         <label class="form-label small fw-bold text-muted">Amount Max</label>
                                         <div class="input-group">
                                             <span class="input-group-text border-1 small">Rp</span>
-                                            <input type="number" step="any" class="form-control border-1" required name="c_amountMax">
+                                            <input type="text" class="input-rupiah form-control border-1" required name="c_amountMax">
                                         </div>
                                     </div>
                                     <div class="col-md-4">
@@ -522,7 +522,6 @@
     </div>
 </div>
 
-<script src="<?= base_url('assets/js/server-datatables.js') ?>"></script>
 <script>
 $(document).ready(function() {
     // Initialize Select2 for modal with dropdownParent to fix focus/render issues
@@ -718,10 +717,10 @@ $(document).ready(function() {
         $('#c_cashoutChannelGroup, #c_externalIdDefault').on('change', updateChannelIds);
 
         $('#c_feeType').val(d.feetype).trigger('change');
-        $('#c_fee').val(d.fee);
+        $('#c_fee').val(Math.floor(parseFloat(d.fee)));
         $('#c_feePercetange').val(d.feepercentage);
-        $('#c_amountMin').val(d.min);
-        $('#c_amountMax').val(d.max);
+        $('#c_amountMin').val(Math.floor(parseFloat(d.min)));
+        $('#c_amountMax').val(Math.floor(parseFloat(d.max)));
         $('#c_status').val(d.status).trigger('change');
     });
 

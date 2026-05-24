@@ -26,7 +26,7 @@
             
             <div class="drawer-card">
                 <div class="drawer-card-title"><i class="fas fa-qrcode text-primary mr-2"></i> Real-Time Monitor</div>
-                <p class="drawer-card-text">Monitor generated QR codes and check transaction status, including PENDING, PAID, EXPIRED, or FAILED states.</p>
+                <p class="drawer-card-text">Monitor generated QR codes and check transaction status, including Pending, Paid, Expired, or Failed states.</p>
             </div>
             
             <div class="drawer-card">
@@ -56,8 +56,7 @@
         <?php
             // Badge count for More Filters
             $extra_active = 0;
-            if ($this->session->userdata('search_date_qd'))             $extra_active++;
-            if ($this->session->userdata('search_date_qd_to'))          $extra_active++;
+            if ($this->session->userdata('search_date_qd') || $this->session->userdata('search_date_qd_to'))             $extra_active++;
             if ($this->session->userdata('search_name_qd'))             $extra_active++;
             if ($this->session->userdata('search_status_transaction_qd')) $extra_active++;
             if ($this->session->userdata('search_reff_label'))           $extra_active++;
@@ -128,10 +127,12 @@
                                     <label class="dt-more-label"><i class="fas fa-info-circle mr-1 mr-2"></i> Status</label>
                                     <select name="search_status_transaction_qd" class="dt-more-select">
                                         <option value="">All Statuses</option>
-                                        <option value="PENDING" <?= ($this->session->userdata('search_status_transaction_qd') == 'PENDING') ? 'selected' : ''; ?>>PENDING</option>
-                                        <option value="PAID" <?= ($this->session->userdata('search_status_transaction_qd') == 'PAID') ? 'selected' : ''; ?>>PAID</option>
-                                        <option value="EXPIRED" <?= ($this->session->userdata('search_status_transaction_qd') == 'EXPIRED') ? 'selected' : ''; ?>>EXPIRED</option>
-                                        <option value="FAILED" <?= ($this->session->userdata('search_status_transaction_qd') == 'FAILED') ? 'selected' : ''; ?>>FAILED</option>
+                                        <option value="Pending"  <?= ($this->session->userdata('search_status_transaction_qd') == 'Pending')  ? 'selected' : ''; ?>>Pending</option>
+                                        <option value="Created"  <?= ($this->session->userdata('search_status_transaction_qd') == 'Created')  ? 'selected' : ''; ?>>Created</option>
+                                        <option value="Paid"     <?= ($this->session->userdata('search_status_transaction_qd') == 'Paid')     ? 'selected' : ''; ?>>Paid</option>
+                                        <option value="Failed"   <?= ($this->session->userdata('search_status_transaction_qd') == 'Failed')   ? 'selected' : ''; ?>>Failed</option>
+                                        <option value="Expired"  <?= ($this->session->userdata('search_status_transaction_qd') == 'Expired')  ? 'selected' : ''; ?>>Expired</option>
+                                        <option value="Cancel"   <?= ($this->session->userdata('search_status_transaction_qd') == 'Cancel')   ? 'selected' : ''; ?>>Cancel</option>
                                     </select>
                                 </div>
                                 
@@ -165,8 +166,8 @@
                     <tr>
                         <th>NO</th>
                         <th>DATE REQUEST</th>
-                        <th>MERCHANT</th>
-                        <th>SUB MERCHANT</th>
+                        <th>MERCHANT INFO</th>
+                        <th>SUB-MERCHANT INFO</th>
                         <th>MERCHANT TRANS ID</th>
                         <th>EXTERNAL ID</th>
                         <th>AMOUNT</th>
@@ -187,20 +188,20 @@
     <div class="modal-dialog modal-lg border-0">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
             <!-- Header Legacy Migrated -->
-<div class="modal-header modal-header-primary border-0 mh-premium">
-    <div class="d-flex align-items-center">
-        <div class="mh-icon-badge">
-            <i class="fas fa-info-circle"></i>
-        </div>
-        <div class="mh-title-wrap">
-            <h6 class="mh-title"  id="detailQrisDynamicChannelExternalModalLabel">External Log Details</h6>
-            <small class="mh-subtitle" >View comprehensive information details</small>
-        </div>
-    </div>
-    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" style="opacity:0.8;">
-        <span aria-hidden="true">&times;</span>
-    </button>
-</div>
+            <div class="modal-header modal-header-primary border-0 mh-premium">
+                <div class="d-flex align-items-center">
+                    <div class="mh-icon-badge">
+                        <i class="fas fa-info-circle"></i>
+                    </div>
+                    <div class="mh-title-wrap">
+                        <h6 class="mh-title"  id="detailQrisDynamicChannelExternalModalLabel">External Log Details</h6>
+                        <small class="mh-subtitle" >View comprehensive information details</small>
+                    </div>
+                </div>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" style="opacity:0.8;">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
             <div class="modal-body p-4 bg-light">
                 <!-- Guide Banner -->
                 <div class="d-flex align-items-start pb-4" id="detail-guide-banner">
@@ -213,18 +214,30 @@
                     </div>
                 </div>
 
-                <div class="row mb-4">
-                    <div class="col-md-4">
+                <div class="mb-4">
+                    <div class="mb-3">
                         <div class="small text-uppercase font-weight-bold text-muted mb-1">Provider</div>
                         <div class="h6 font-weight-bold text-dark mb-0" id="cashinExternalId"></div>
                     </div>
-                    <div class="col-md-4">
-                        <div class="small text-uppercase font-weight-bold text-muted mb-1">Ext Ref ID 1</div>
-                        <div class="h6 font-weight-bold text-dark mb-0" id="TransactionIdExternal1"></div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="small text-uppercase font-weight-bold text-muted mb-1">Ext Ref ID 2</div>
-                        <div class="h6 font-weight-bold text-dark mb-0" id="TransactionIdExternal2"></div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3 mb-md-0">
+                            <div class="small text-uppercase font-weight-bold text-muted mb-1">Ext Ref ID 1</div>
+                            <div class="d-flex align-items-start">
+                                <div class="h6 font-weight-bold text-dark mb-0 text-break mr-2" style="word-break: break-all;" id="TransactionIdExternal1"></div>
+                                <button type="button" class="btn btn-sm btn-link text-primary p-0 flex-shrink-0 copy-ref-btn" data-target="#TransactionIdExternal1" title="Copy ID" style="line-height: 1;">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="small text-uppercase font-weight-bold text-muted mb-1">Ext Ref ID 2</div>
+                            <div class="d-flex align-items-start">
+                                <div class="h6 font-weight-bold text-dark mb-0 text-break mr-2" style="word-break: break-all;" id="TransactionIdExternal2"></div>
+                                <button type="button" class="btn btn-sm btn-link text-primary p-0 flex-shrink-0 copy-ref-btn" data-target="#TransactionIdExternal2" title="Copy ID" style="line-height: 1;">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
@@ -298,17 +311,23 @@
             {data: 'c_datetimeRequest',className: 'text-nowrap', render: function(data){
                 return moment(data).format('DD-MM-YYYY HH:mm:ss');
             }},
-            {data: 'name_merchant',className: 'text-nowrap'},
-            {data: 'name_submerchant',className: 'text-nowrap'},
+           {
+                data: 'name_merchant',
+                className: 'text-nowrap',
+                render: function(data, type, row) {
+                    return ' [' + row.ref_merchantId + '] - ' + data;
+                }
+            },
+            {
+                data: 'name_submerchant',
+                className: 'text-nowrap',
+                render: function(data, type, row) {
+                    return ' [' + row.ref_subMerchantId + '] - ' + data;
+                }
+            },
             {data: 'c_merchantTransactionId', className: 'text-dark font-weight-bold text-nowrap'},
             {data: 'ref_cashinExternalId', className: 'text-nowrap', render: function(data, type, row) {
-                if (!data) return '-';
-                return '<a href="javascript:void(0)" class="detailQrisDynamicChannelExternalAjax font-weight-bold text-primary" ' +
-                       'data-merchanttransactionid="' + row.c_merchantTransactionId + '" ' +
-                       'data-ref_cashinexternalid="' + data + '" ' +
-                       'data-id="' + row.id + '" ' +
-                       'data-ref_cashinexternallogqrismpmidcreate="' + row.ref_cashinExternalLogQrisMpmIdCreate + '">' +
-                       data + '</a>';
+                return data ? data : '-';
             }},
             {data: 'c_amount',className: 'text-nowrap', render: function(data){
                 var val = typeof data === 'string' ? data.replace(/[^0-9.-]+/g,"") : data;
@@ -317,7 +336,30 @@
             {data: 'c_datetimeExpired',className: 'text-nowrap', render: function(data){
                 return data ? moment(data).format('DD-MM-YYYY HH:mm:ss') : '-';
             }},
-            {data: 'c_status'}
+            {
+                data: 'c_status',
+                className: 'text-center',
+                render: function(data, type, row) {
+                    var status_class = 'secondary';
+                    var s = (data || '').toUpperCase();
+                    if (s == 'PAID' || s == 'SUCCESS')        status_class = 'success';
+                    else if (s == 'EXPIRED' || s == 'FAILED') status_class = 'danger';
+                    else if (s == 'PENDING' || s == 'CREATED') status_class = 'warning';
+                    else if (s == 'CANCEL')                    status_class = 'secondary';
+                    
+                    var badge = '<span class="badge badge-' + status_class + ' px-2 py-1">' + data.toUpperCase() + '</span>';
+                    
+                    if ((s == 'PAID' || s == 'SUCCESS') && row.ref_cashinExternalId) {
+                        return '<a href="javascript:void(0)" class="detailQrisDynamicChannelExternalAjax text-decoration-none" ' +
+                               'data-merchanttransactionid="' + row.c_merchantTransactionId + '" ' +
+                               'data-ref_cashinexternalid="' + row.ref_cashinExternalId + '" ' +
+                               'data-id="' + row.id + '" ' +
+                               'data-ref_cashinexternallogqrismpmidcreate="' + row.ref_cashinExternalLogQrisMpmIdCreate + '">' +
+                               badge + '</a>';
+                    }
+                    return badge;
+                }
+            }
         ]);
 
         // Global search with Debounce

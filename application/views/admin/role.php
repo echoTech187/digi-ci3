@@ -117,7 +117,7 @@
                 <div class="modal-body p-0 bg-light">
                     <div class="d-flex g-0 w-100 flex-column flex-lg-row">
                         <!-- Left Information Sidebar -->
-                        <div class="col-lg-4 p-4 d-flex flex-column justify-content-between mb-0" style="background: #202328; border-right: 1px solid rgba(255,255,255,0.05); color: #fff;">
+                        <div class="col-lg-4 p-4 d-flex flex-column justify-content-between mb-0" style="background: var(--bg-body); border-right: 1px solid rgba(255,255,255,0.05);">
                             <div>
                                 <div class="d-flex align-items-center mb-3">
                                     <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center mr-3 shadow-sm" style="width: 40px; height: 40px;">
@@ -129,11 +129,11 @@
                                 
                                 <div class="d-flex flex-column gap-3">
                                     <div class="p-3 rounded-4 shadow-sm border-0 mb-3" style="background-color: rgba(255, 255, 255, 0.03) !important; border: 1px solid rgba(255, 255, 255, 0.08) !important; border-radius: 12px;">
-                                        <h6 class="fw-bold text-white mb-1 d-flex align-items-center" style="font-size: 12px;"><i class="fas fa-tag text-warning mr-2"></i> 1. Role Name</h6>
+                                        <h6 class="fw-bold mb-1 d-flex align-items-center" style="font-size: 12px;"><i class="fas fa-tag text-warning mr-2"></i> 1. Role Name</h6>
                                         <p class="text-muted mb-0" style="font-size: 11px; line-height: 1.4;">Enter a logical title mapping to organizational tasks (e.g., Finance Admin).</p>
                                     </div>
                                     <div class="p-3 rounded-4 shadow-sm border-0 mb-3" style="background-color: rgba(255, 255, 255, 0.03) !important; border: 1px solid rgba(255, 255, 255, 0.08) !important; border-radius: 12px;">
-                                        <h6 class="fw-bold text-white mb-1 d-flex align-items-center" style="font-size: 12px;"><i class="fas fa-key text-info mr-2"></i> 2. Authorization</h6>
+                                        <h6 class="fw-bold mb-1 d-flex align-items-center" style="font-size: 12px;"><i class="fas fa-key text-info mr-2"></i> 2. Authorization</h6>
                                         <p class="text-muted mb-0" style="font-size: 11px; line-height: 1.4;">After creating the role, assign specific system endpoints inside the role Access Rights matrix.</p>
                                     </div>
                                 </div>

@@ -114,11 +114,11 @@
                             </div>
                             <div class="col-md-6 mb-4">
                                 <label class="font-weight-bold text-gray-700 small">Fixed Fee (IDR)</label>
-                                <input type="number" name="c_fee" class="form-control" value="<?= $mapping['c_fee'] ?>" required>
+                                <input type="text" name="c_fee" class="input-rupiah form-control" value="<?= floor(floatval($mapping['c_fee'])) ?>" required>
                             </div>
                             <div class="col-md-12 mb-4">
                                 <label class="font-weight-bold text-gray-700 small">Percentage Fee (%)</label>
-                                <input type="number" step="0.01" name="c_feePercetange" class="form-control" value="<?= $mapping['c_feePercetange'] ?>" required>
+                                <input type="text" name="c_feePercetange" class="input-percentage form-control" value="<?= $mapping['c_feePercetange'] ?>" required>
                             </div>
                         </div>
 
@@ -131,11 +131,11 @@
                         <div class="row">
                             <div class="col-md-4 mb-4">
                                 <label class="font-weight-bold text-gray-700 small">Amount Min</label>
-                                <input type="number" name="c_amountMin" class="form-control" value="<?= $mapping['c_amountMin'] ?>" required>
+                                <input type="text" name="c_amountMin" class="input-rupiah form-control" value="<?= floor(floatval($mapping['c_amountMin'])) ?>" required>
                             </div>
                             <div class="col-md-4 mb-4">
                                 <label class="font-weight-bold text-gray-700 small">Amount Max</label>
-                                <input type="number" name="c_amountMax" class="form-control" value="<?= $mapping['c_amountMax'] ?>" required>
+                                <input type="text" name="c_amountMax" class="input-rupiah form-control" value="<?= floor(floatval($mapping['c_amountMax'])) ?>" required>
                             </div>
                             <div class="col-md-4 mb-4">
                                 <label class="font-weight-bold text-gray-700 small">Status</label>

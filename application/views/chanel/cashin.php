@@ -194,7 +194,7 @@
                 <div class="modal-body p-0 bg-light">
                     <div class="d-flex g-0 w-100 flex-column flex-lg-row">
                         <!-- Left Information Sidebar -->
-                        <div class="col-lg-4 p-4 d-flex flex-column justify-content-between mb-0" style="background: #202328; border-right: 1px solid rgba(255,255,255,0.05); color: #fff;">
+                        <div class="col-lg-4 p-4 d-flex flex-column justify-content-between mb-0" style="background: var(--bg-body); border-right: 1px solid rgba(255,255,255,0.05);">
                             <div>
                                 <div class="d-flex align-items-center mb-3">
                                     <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center mr-3 shadow-sm" style="width: 40px; height: 40px;">
@@ -206,11 +206,11 @@
                                 
                                 <div class="d-flex flex-column gap-3">
                                     <div class="p-3 rounded-4 shadow-sm border-0 mb-3" style="background-color: rgba(255, 255, 255, 0.03) !important; border: 1px solid rgba(255, 255, 255, 0.08) !important; border-radius: 12px;">
-                                        <h6 class="fw-bold text-white mb-1 d-flex align-items-center" style="font-size: 12px;"><i class="fas fa-money-bill-wave text-warning mr-2"></i> 1. Fees Setup</h6>
+                                        <h6 class="fw-bold mb-1 d-flex align-items-center" style="font-size: 12px;"><i class="fas fa-money-bill-wave text-warning mr-2"></i> 1. Fees Setup</h6>
                                         <p class="text-muted mb-0" style="font-size: 11px; line-height: 1.4;">Percentage fee represents dynamic slice, while Fixed represents flat fee rate.</p>
                                     </div>
                                     <div class="p-3 rounded-4 shadow-sm border-0 mb-3" style="background-color: rgba(255, 255, 255, 0.03) !important; border: 1px solid rgba(255, 255, 255, 0.08) !important; border-radius: 12px;">
-                                        <h6 class="fw-bold text-white mb-1 d-flex align-items-center" style="font-size: 12px;"><i class="fas fa-calendar-alt text-info mr-2"></i> 2. Settlement</h6>
+                                        <h6 class="fw-bold mb-1 d-flex align-items-center" style="font-size: 12px;"><i class="fas fa-calendar-alt text-info mr-2"></i> 2. Settlement</h6>
                                         <p class="text-muted mb-0" style="font-size: 11px; line-height: 1.4;">Number of days wait time before balance converts to merchant clearable funds (e.g. 1 day).</p>
                                     </div>
                                 </div>
@@ -263,16 +263,16 @@
                                         <div class="input-group-prepend">
                                             <span class="input-group-text border-right-0" style="border-radius:8px 0 0 8px; font-size:12px;">Rp</span>
                                         </div>
-                                        <input type="number" class="dt-more-input h-auto" required name="fee" style="border-radius:0 8px 8px 0;">
+                                        <input type="text" class="input-rupiah dt-more-input h-auto" required name="fee" style="border-radius:0 8px 8px 0;">
                                     </div>
                                 </div>
                                 <div class="col-md-4 mb-3 mb-md-0">
                                     <label class="dt-more-label mb-2">Amount Min</label>
-                                    <input type="number" class="dt-more-input" required name="amountmin" value="10000">
+                                    <input type="text" class="input-rupiah dt-more-input" required name="amountmin" value="10000">
                                 </div>
                                 <div class="col-md-4">
                                     <label class="dt-more-label mb-2">Amount Max</label>
-                                    <input type="number" class="dt-more-input" required name="amountmax" value="10000000">
+                                    <input type="text" class="input-rupiah dt-more-input" required name="amountmax" value="10000000">
                                 </div>
                             </div>
 
@@ -317,7 +317,7 @@
                 <div class="modal-body p-0 bg-light">
                     <div class="d-flex g-0 w-100 flex-column flex-lg-row">
                         <!-- Left Information Sidebar -->
-                        <div class="col-lg-4 p-4 d-flex flex-column justify-content-between mb-0" style="background: #202328; border-right: 1px solid rgba(255,255,255,0.05); color: #fff;">
+                        <div class="col-lg-4 p-4 d-flex flex-column justify-content-between mb-0" style="background: var(--bg-body); border-right: 1px solid rgba(255,255,255,0.05);">
                             <div>
                                 <div class="d-flex align-items-center mb-3">
                                     <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mr-3 shadow-sm" style="width: 40px; height: 40px;">
@@ -329,7 +329,7 @@
                                 
                                 <div class="d-flex flex-column gap-3">
                                     <div class="p-3 rounded-4 shadow-sm border-0 mb-3" style="background-color: rgba(255, 255, 255, 0.03) !important; border: 1px solid rgba(255, 255, 255, 0.08) !important; border-radius: 12px;">
-                                        <h6 class="fw-bold text-white mb-1 d-flex align-items-center" style="font-size: 12px;"><i class="fas fa-exclamation-circle text-warning mr-2"></i> Channel ID</h6>
+                                        <h6 class="fw-bold mb-1 d-flex align-items-center" style="font-size: 12px;"><i class="fas fa-exclamation-circle text-warning mr-2"></i> Channel ID</h6>
                                         <p class="text-muted mb-0" style="font-size: 11px; line-height: 1.4;">Channel IDs are read-only to maintain relational integrity in operational ledgers.</p>
                                     </div>
                                 </div>
@@ -376,16 +376,16 @@
                                         <div class="input-group-prepend">
                                             <span class="input-group-text border-right-0" style="border-radius:8px 0 0 8px; font-size:12px;">Rp</span>
                                         </div>
-                                        <input type="number" class="dt-more-input h-auto" required name="fee" id="edit_fee" style="border-radius:0 8px 8px 0;">
+                                        <input type="text" class="input-rupiah dt-more-input h-auto" required name="fee" id="edit_fee" style="border-radius:0 8px 8px 0;">
                                     </div>
                                 </div>
                                 <div class="col-md-4 mb-3 mb-md-0">
                                     <label class="dt-more-label mb-2">Amount Min</label>
-                                    <input type="number" class="dt-more-input" required name="amountmin" id="edit_amountmin">
+                                    <input type="text" class="input-rupiah dt-more-input" required name="amountmin" id="edit_amountmin">
                                 </div>
                                 <div class="col-md-4">
                                     <label class="dt-more-label mb-2">Amount Max</label>
-                                    <input type="number" class="dt-more-input" required name="amountmax" id="edit_amountmax">
+                                    <input type="text" class="input-rupiah dt-more-input" required name="amountmax" id="edit_amountmax">
                                 </div>
                             </div>
 
@@ -511,10 +511,10 @@
                 $('#edit_feetype').val('');
             }
 
-            $('#edit_fee').val($(this).data('fee'));
-            $('#edit_amountmin').val($(this).data('min'));
-            $('#edit_amountmax').val($(this).data('max'));
-            $('#edit_settlementinterval').val($(this).data('interval'));
+            $('#edit_fee').val(Math.floor(parseFloat($(this).data('fee'))));
+            $('#edit_amountmin').val(Math.floor(parseFloat($(this).data('min'))));
+            $('#edit_amountmax').val(Math.floor(parseFloat($(this).data('max'))));
+            $('#edit_settlementinterval').val(Math.floor(parseFloat($(this).data('interval'))));
         });
 
         // Delete button mapping
@@ -534,7 +534,7 @@
                 confirmButtonText: '<i class="fas fa-trash-alt mr-2"></i> Yes, delete it!'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    window.location.href = "<?= base_url('channel/deleteCashInChanel/') ?>" + id;
+                    window.location.href = "<?= base_url('channel/cashin/delete/') ?>" + id;
                 }
             });
         });

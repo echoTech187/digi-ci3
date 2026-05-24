@@ -10,6 +10,7 @@ $search_invoice_no_value          = $this->session->userdata('search_invoice_no'
 
 // Badge count for More Filters (excludes transaction ID and RRN which are now in global search)
 $extra_active = 0;
+if ($search_date_qris_value || $search_date_qris_to_value)  $extra_active++;
 if ($search_name_qris_value)            $extra_active++;
 if ($search_date_qris_settlement_value) $extra_active++;
 // search_invoice_no, search_transactionid_ht, search_rrn are in global search
@@ -64,42 +65,6 @@ $download_url = base_url('finance/qris/download')
             </button>
         </div>
     </div>
-
-    <!-- Alerts Standardized to Swal2 Premium -->
-    <script>
-        $(document).ready(function() {
-            <?php if ($this->session->flashdata('success')) : ?>
-                Swal.fire({
-                    title: 'Success!',
-                    text: '<?= $this->session->flashdata('success'); ?>',
-                    icon: 'success',
-                    customClass: {
-                        popup: 'swal2-premium-popup',
-                        confirmButton: 'swal2-premium-confirm'
-                    },
-                    buttonsStyling: false
-                });
-            <?php endif; ?>
-
-            <?php if ($this->session->flashdata('error')) : ?>
-                Swal.fire({
-                    title: 'Error!',
-                    html: '<?= trim(str_replace(["\r", "\n"], '', $this->session->flashdata('error'))); ?>',
-                    icon: 'error',
-                    customClass: {
-                        popup: 'swal2-premium-popup',
-                        confirmButton: 'swal2-premium-confirm'
-                    },
-                    buttonsStyling: false
-                });
-            <?php endif; ?>
-        });
-    </script>
-
-    <!-- ── KPI Summary Cards ── -->
-    
-
-
     <!-- ── Main Data Card ── -->
     <div class="card border-0 shadow-sm dt-card">
 
@@ -139,15 +104,6 @@ $download_url = base_url('finance/qris/download')
                             </div>
 
                             <div class="dt-more-panel-body">
-                                <!-- Primary: Date Range -->
-                                <div class="dt-more-field">
-                                    <label class="dt-more-label"><i class="fas fa-calendar-alt mr-1 mr-2"></i> Payment Date</label>
-                                    <div class="dt-filter-chip">
-                                        <input type="date" name="search_date_qris" class="dt-chip-input" value="<?= $search_date_qris_value; ?>" title="Date From">
-                                        <span class="text-muted mx-1" style="font-size:11px;">→</span>
-                                        <input type="date" name="search_date_qris_to" class="dt-chip-input" value="<?= $search_date_qris_to_value; ?>" title="Date To">
-                                    </div>
-                                </div>
                                 <!-- Merchant -->
                                 <div class="dt-more-field">
                                     <label class="dt-more-label"><i class="fas fa-user-tie mr-1 mr-2"></i> Merchant</label>
@@ -160,7 +116,15 @@ $download_url = base_url('finance/qris/download')
                                         <?php endforeach; ?>
                                     </select>
                                 </div>
-
+                                <!-- Primary: Date Range -->
+                                <div class="dt-more-field">
+                                    <label class="dt-more-label"><i class="fas fa-calendar-alt mr-1 mr-2"></i> Payment Date</label>
+                                    <div class="dt-filter-chip">
+                                        <input type="date" name="search_date_qris" class="dt-chip-input" value="<?= $search_date_qris_value; ?>" title="Date From">
+                                        <span class="text-muted mx-1" style="font-size:11px;">→</span>
+                                        <input type="date" name="search_date_qris_to" class="dt-chip-input" value="<?= $search_date_qris_to_value; ?>" title="Date To">
+                                    </div>
+                                </div>
                                 <!-- Settlement Date -->
                                 <div class="dt-more-field">
                                     <label class="dt-more-label"><i class="fas fa-check-circle mr-1 mr-2"></i> Settlement Date</label>
@@ -356,7 +320,7 @@ $download_url = base_url('finance/qris/download')
         $('.qris-select2').select2({
             width: '100%',
             dropdownAutoWidth: true,
-            dropdownParent: $morePanel,
+            
             minimumResultsForSearch: 5
         });
     });
@@ -377,4 +341,5 @@ $(document).ready(function() {
         $('body').css('overflow', '');
     });
 });
+
 </script>

@@ -45,7 +45,7 @@
                         });
                     </script>
 
-                    <form action="<?= base_url('merchant/manage/register'); ?>" method="post">
+                    <form class="ajax-form" action="<?= base_url('merchant/manage/register'); ?>" data-redirect="<?= base_url('merchant/manage'); ?>" method="post">
                         
                         <!-- Account Information -->
                         <div class="section-title mb-4 mt-0 text-primary font-weight-bold small text-uppercase letter-spacing-1">
@@ -62,7 +62,7 @@
                             </div>
                             <div class="col-md-6 mb-4">
                                 <label class="font-weight-bold text-gray-700 small">Merchant Phone</label>
-                                <input type="text" name="c_phoneNumber" class="form-control" placeholder="08123xxx">
+                                <input type="text" name="c_phoneNumber" class="input-phone form-control" placeholder="08123xxx">
                             </div>
                             <div class="col-md-6 mb-4">
                                 <label class="font-weight-bold text-gray-700 small">GVConnect Business ID</label>

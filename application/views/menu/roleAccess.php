@@ -205,7 +205,7 @@
                 <div class="modal-body p-0 bg-light">
                     <div class="d-flex g-0 w-100 flex-column flex-lg-row">
                         <!-- Left Information Sidebar -->
-                        <div class="col-lg-4 p-4 d-flex flex-column justify-content-between mb-0" style="background: #202328; border-right: 1px solid rgba(255,255,255,0.05); color: #fff;">
+                        <div class="col-lg-4 p-4 d-flex flex-column justify-content-between mb-0" style="background: var(--bg-body); border-right: 1px solid rgba(255,255,255,0.05);">
                             <div>
                                 <div class="d-flex align-items-center mb-3">
                                     <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mr-3 shadow-sm" style="width: 40px; height: 40px;">
@@ -217,15 +217,15 @@
                                 
                                 <div class="d-flex flex-column gap-3">
                                     <div class="p-3 rounded-4 shadow-sm border-0 mb-3" style="background-color: rgba(255, 255, 255, 0.03) !important; border: 1px solid rgba(255, 255, 255, 0.08) !important; border-radius: 12px;">
-                                        <h6 class="fw-bold text-white mb-1 d-flex align-items-center" style="font-size: 12px;"><i class="fas fa-heading text-warning mr-2"></i> 1. Menu Title</h6>
+                                        <h6 class="fw-bold mb-1 d-flex align-items-center" style="font-size: 12px;"><i class="fas fa-heading text-warning mr-2"></i> 1. Menu Title</h6>
                                         <p class="text-muted mb-0" style="font-size: 11px; line-height: 1.4;">Enter a descriptive name for the navigation item as seen in the sidebar.</p>
                                     </div>
                                     <div class="p-3 rounded-4 shadow-sm border-0 mb-3" style="background-color: rgba(255, 255, 255, 0.03) !important; border: 1px solid rgba(255, 255, 255, 0.08) !important; border-radius: 12px;">
-                                        <h6 class="fw-bold text-white mb-1 d-flex align-items-center" style="font-size: 12px;"><i class="fas fa-link text-info mr-2"></i> 2. Target Routing</h6>
+                                        <h6 class="fw-bold mb-1 d-flex align-items-center" style="font-size: 12px;"><i class="fas fa-link text-info mr-2"></i> 2. Target Routing</h6>
                                         <p class="text-muted mb-0" style="font-size: 11px; line-height: 1.4;">Provide the relative URL path mapping the menu to its respective controller action.</p>
                                     </div>
                                     <div class="p-3 rounded-4 shadow-sm border-0 mb-3" style="background-color: rgba(255, 255, 255, 0.03) !important; border: 1px solid rgba(255, 255, 255, 0.08) !important; border-radius: 12px;">
-                                        <h6 class="fw-bold text-white mb-1 d-flex align-items-center" style="font-size: 12px;"><i class="fas fa-sitemap text-success mr-2"></i> 3. Hierarchy Nesting</h6>
+                                        <h6 class="fw-bold mb-1 d-flex align-items-center" style="font-size: 12px;"><i class="fas fa-sitemap text-success mr-2"></i> 3. Hierarchy Nesting</h6>
                                         <p class="text-muted mb-0" style="font-size: 11px; line-height: 1.4;">Select a parent menu if this behaves as a sub-menu navigation tier.</p>
                                     </div>
                                 </div>
@@ -325,7 +325,7 @@
                 <div class="modal-body p-0 bg-light">
                     <div class="d-flex g-0 w-100 flex-column flex-lg-row">
                         <!-- Left Information Sidebar -->
-                        <div class="col-lg-4 p-4 d-flex flex-column justify-content-between mb-0" style="background: #202328; border-right: 1px solid rgba(255,255,255,0.05); color: #fff;">
+                        <div class="col-lg-4 p-4 d-flex flex-column justify-content-between mb-0" style="background: var(--bg-body); border-right: 1px solid rgba(255,255,255,0.05);">
                             <div>
                                 <div class="d-flex align-items-center mb-3">
                                     <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mr-3 shadow-sm" style="width: 40px; height: 40px;">
@@ -337,11 +337,11 @@
                                 
                                 <div class="d-flex flex-column gap-3">
                                     <div class="p-3 rounded-4 shadow-sm border-0 mb-3" style="background-color: rgba(255, 255, 255, 0.03) !important; border: 1px solid rgba(255, 255, 255, 0.08) !important; border-radius: 12px;">
-                                        <h6 class="fw-bold text-white mb-1 d-flex align-items-center" style="font-size: 12px;"><i class="fas fa-sync text-warning mr-2"></i> 1. Live Sync</h6>
+                                        <h6 class="fw-bold mb-1 d-flex align-items-center" style="font-size: 12px;"><i class="fas fa-sync text-warning mr-2"></i> 1. Live Sync</h6>
                                         <p class="text-muted mb-0" style="font-size: 11px; line-height: 1.4;">Renaming menu titles changes the labels rendered in the user interfaces dynamically.</p>
                                     </div>
                                     <div class="p-3 rounded-4 shadow-sm border-0 mb-3" style="background-color: rgba(255, 255, 255, 0.03) !important; border: 1px solid rgba(255, 255, 255, 0.08) !important; border-radius: 12px;">
-                                        <h6 class="fw-bold text-white mb-1 d-flex align-items-center" style="font-size: 12px;"><i class="fas fa-folder-open text-info mr-2"></i> 2. Hierarchy Shifts</h6>
+                                        <h6 class="fw-bold mb-1 d-flex align-items-center" style="font-size: 12px;"><i class="fas fa-folder-open text-info mr-2"></i> 2. Hierarchy Shifts</h6>
                                         <p class="text-muted mb-0" style="font-size: 11px; line-height: 1.4;">Altering parent menus re-nests sub-navigation paths instantly.</p>
                                     </div>
                                 </div>

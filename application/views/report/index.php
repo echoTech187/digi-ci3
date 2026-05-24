@@ -44,22 +44,88 @@
     <div class="card border-0 shadow-sm dt-card">
 
         <!-- ── Toolbar ── -->
-        <div class="dt-toolbar py-3 px-4">
-            <!-- LEFT: Global Search -->
-            <div class="dt-search-wrapper">
-                <i class="fas fa-search dt-search-icon"></i>
-                <input type="text" id="reportGlobalSearch" class="dt-search-input" placeholder="Search by type, filename, status...">
-            </div>
+        <form id="reportDownloadForm" method="post" action="<?= base_url('report/download'); ?>">
+            <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>">
+            <div class="dt-toolbar py-3 px-4">
+                <!-- LEFT: Global Search -->
+                <div class="dt-search-wrapper">
+                    <i class="fas fa-search dt-search-icon"></i>
+                    <input type="text" id="reportGlobalSearch" class="dt-search-input" placeholder="Search by filename, remark...">
+                </div>
 
-            <!-- RIGHT: Date Filter -->
-            <div class="dt-toolbar-filters">
-                <div class="dt-filter-group">
-                    <label class="dt-filter-label">Filter Date</label>
-                    <input type="date" id="search_date" class="dt-more-input" value="<?= $search_date; ?>" style="min-width:160px;">
+                <!-- RIGHT: Filter -->
+                <div class="dt-toolbar-filters">
+                    <!-- More Filters Trigger -->
+                    <div class="dt-filter-group dt-more-filters-wrapper">
+                        <?php 
+                        $extra_active = 0;
+                        if ($search_type) $extra_active++;
+                        if ($search_date || $search_date_to) $extra_active++;
+                        if ($search_status) $extra_active++;
+                        ?>
+                        <label class="dt-filter-label">&nbsp;</label>
+                        <button type="button" class="btn-dt-chip-action dt-more-filters-btn <?= $extra_active > 0 ? 'dt-more-filters-active' : ''; ?>" id="dt-more-filters-btn">
+                            <i class="fas fa-sliders-h"></i> <span class="d-none d-md-block">Filter</span>
+                            <?php if ($extra_active > 0): ?>
+                                <span class="dt-more-badge"><?= $extra_active; ?></span>
+                            <?php endif; ?>
+                            <i class="fas fa-chevron-down ml-1 dt-more-arrow"></i>
+                        </button>
+                        
+                        <!-- The Slide-Down Panel -->
+                        <div class="dt-more-panel" id="dt-more-filters-panel">
+                            <div class="dt-more-panel-header">
+                                <span class="dt-more-panel-title"><i class="fas fa-filter mr-1 mr-2"></i> Advance Filter</span>
+                                <a href="<?= base_url('report/download/reset'); ?>" class="dt-more-clear">Clear All</a>
+                            </div>
+
+                            <div class="dt-more-panel-body">
+                                <!-- Type -->
+                                <div class="dt-more-field">
+                                    <label class="dt-more-label"><i class="fas fa-tags mr-1 mr-2"></i> Type</label>
+                                    <select name="search_type" class="dt-more-select select2-report text-primary-custom fw-bold">
+                                        <option value="">All Types</option>
+                                        <option value="BI FAST" <?= ($search_type === 'BI FAST') ? 'selected' : ''; ?>>BI FAST</option>
+                                        <option value="QRIS" <?= ($search_type === 'QRIS') ? 'selected' : ''; ?>>QRIS</option>
+                                        <option value="PPOB" <?= ($search_type === 'PPOB') ? 'selected' : ''; ?>>PPOB</option>
+                                        <option value="EWALLET" <?= ($search_type === 'EWALLET') ? 'selected' : ''; ?>>EWALLET</option>
+                                        <option value="Virtual Account" <?= ($search_type === 'Virtual Account') ? 'selected' : ''; ?>>VIRTUAL ACCOUNT</option>
+                                        <option value="Mutation" <?= ($search_type === 'Mutation') ? 'selected' : ''; ?>>MUTATION</option>
+                                    </select>
+                                </div>
+                                <!-- Primary: Date Range -->
+                                <div class="dt-more-field">
+                                    <label class="dt-more-label"><i class="fas fa-calendar-alt mr-1 mr-2"></i> Period</label>
+                                    <div class="dt-filter-chip">
+                                        <input type="date" name="search_date" class="dt-chip-input" value="<?= $search_date; ?>" title="Date From">
+                                        <span class="text-muted mx-1" style="font-size:11px;">→</span>
+                                        <input type="date" name="search_date_to" class="dt-chip-input" value="<?= $search_date_to; ?>" title="Date To">
+                                    </div>
+                                </div>
+                                <!-- Status -->
+                                <div class="dt-more-field">
+                                    <label class="dt-more-label"><i class="fas fa-info-circle mr-1 mr-2"></i> Status</label>
+                                    <select name="search_status" class="dt-more-select select2-report text-primary-custom fw-bold">
+                                        <option value="">All Status</option>
+                                        <option value="Success" <?= ($search_status === 'Success') ? 'selected' : ''; ?>>Success</option>
+                                        <option value="Pending" <?= ($search_status === 'Pending') ? 'selected' : ''; ?>>Pending</option>
+                                        <option value="Failed" <?= ($search_status === 'Failed') ? 'selected' : ''; ?>>Failed</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="dt-more-panel-footer">
+                                <button type="submit" class="btn-dt-apply btn-dt-action-primary shadow-sm">
+                                    <i class="fas fa-check mr-1 mr-2"></i> APPLY FILTER
+                                </button>
+                                <button type="button" class="btn-dt-cancel btn-dt-secondary" id="dt-panel-close">
+                                    CANCEL
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            
-        </div>
+        </form>
 
         <!-- ── Alert Messages ── -->
         <?php if ($this->session->flashdata('success')) : ?>
@@ -115,28 +181,43 @@
                 }},
                 {data: 'c_remark', className: 'small text-muted'}
             ], {
-            "ajax": {
-                "url": "<?= base_url('report/download') ?>",
-                "type": "POST",
-                "data": function(d) {
-                    d.search_date = $('#search_date').val();
-                    var csrfName = $('meta[name="csrf-token-name"]').attr('content');
-                    var csrfHash = $('meta[name="csrf-token-hash"]').attr('content');
-                    if (csrfName && csrfHash) d[csrfName] = csrfHash;
-                }
-            },
             "order": [[1, 'desc']]
         });
 
-        // Global search
         // Global search with Debounce
         $('#reportGlobalSearch').on('input', debounce(function() {
             table.search(this.value).draw();
         }, 400));
 
-        // Date filter
-        $('#search_date').on('change', function() {
-            table.ajax.reload();
+        // ── More Filters dropdown ──
+        var $moreBtn   = $('#dt-more-filters-btn');
+        var $morePanel = $('#dt-more-filters-panel');
+        var $moreClose = $('#dt-panel-close');
+
+        $moreBtn.on('click', function(e) {
+            e.stopPropagation();
+            var isOpen = $morePanel.hasClass('dt-panel-open');
+            $morePanel.toggleClass('dt-panel-open', !isOpen);
+            $moreBtn.toggleClass('dt-open', !isOpen);
+        });
+
+        $moreClose.on('click', function() {
+            $morePanel.removeClass('dt-panel-open');
+            $moreBtn.removeClass('dt-open');
+        });
+
+        $(document).on('click', function(e) {
+            if (!$(e.target).closest('.dt-more-filters-wrapper').length) {
+                $morePanel.removeClass('dt-panel-open');
+                $moreBtn.removeClass('dt-open');
+            }
+        });
+
+        // Select2 inside panel
+        $('.select2-report').select2({
+            width: '100%',
+            dropdownAutoWidth: true,
+            minimumResultsForSearch: -1
         });
     });
 </script>

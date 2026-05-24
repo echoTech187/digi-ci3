@@ -20,6 +20,7 @@ user_guide_src/cilexer/pycilexer.egg-info/*
 /system
 /vendor
 /scratch
+/assets/css/components/*
 
 # IDE Files
 #-------------------------

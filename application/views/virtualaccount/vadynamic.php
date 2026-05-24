@@ -48,8 +48,9 @@
             // Badge count for More Filters
             $extra_active = 0;
             if ($this->session->userdata('search_name_vad'))      $extra_active++;
-            if ($this->session->userdata('search_date_vad'))      $extra_active++;
-            if ($this->session->userdata('search_date_vad_to'))   $extra_active++;
+            if ($this->session->userdata('search_status_transaction_vad')) $extra_active++;
+            if ($this->session->userdata('search_date_vad') || $this->session->userdata('search_date_vad_to'))      $extra_active++;
+            
         ?>
         <form id="vadynamic_form" method="post" action="<?= base_url('virtual-account/dynamic'); ?>">
             <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>">
@@ -105,8 +106,19 @@
                                         <?php endforeach; ?>
                                     </select>
                                 </div>
-                                
-                                
+                                <!-- Status -->
+                                <div class="dt-more-field">
+                                    <label class="dt-more-label"><i class="fas fa-info-circle mr-1 mr-2"></i> Status</label>
+                                    <select name="search_status_transaction_vad" class="dt-more-select vadynamic-select2">
+                                        <option value="">All Statuses</option>
+                                        <option value="Pending" <?= ($this->session->userdata('search_status_transaction_vad') == 'Pending') ? 'selected' : ''; ?>>Pending</option>
+                                        <option value="Created" <?= ($this->session->userdata('search_status_transaction_vad') == 'Created') ? 'selected' : ''; ?>>Created</option>
+                                        <option value="Paid" <?= ($this->session->userdata('search_status_transaction_vad') == 'Paid') ? 'selected' : ''; ?>>Paid</option>
+                                        <option value="Failed" <?= ($this->session->userdata('search_status_transaction_vad') == 'Failed') ? 'selected' : ''; ?>>Failed</option>
+                                        <option value="Expired" <?= ($this->session->userdata('search_status_transaction_vad') == 'Expired') ? 'selected' : ''; ?>>Expired</option>
+                                        <option value="Cancel" <?= ($this->session->userdata('search_status_transaction_vad') == 'Cancel') ? 'selected' : ''; ?>>Cancel</option>
+                                    </select>
+                                </div>
                             </div>
                             <div class="dt-more-panel-footer">
                                 <button type="submit" name="submit" class="btn-dt-apply btn-dt-action-primary shadow-sm">
@@ -129,8 +141,8 @@
                     <tr>
                         <th>NO</th>
                         <th>DATE TIME REQUEST</th>
-                        <th>MERCHANT</th>
-                        <th>SUB MERCHANT</th>
+                        <th>MERCHANT INFO</th>
+                        <th>SUB-MERCHANT INFO</th>
                         <th>TRANS ID</th>
                         <th>VA NUMBER</th>
                         <th>CHANNEL</th>
@@ -177,18 +189,30 @@
                     </div>
                 </div>
 
-                <div class="row mb-4">
-                    <div class="col-md-4">
+                <div class="mb-4">
+                    <div class="mb-3">
                         <div class="small text-uppercase font-weight-bold text-muted mb-1">Provider</div>
                         <div class="h6 font-weight-bold text-dark mb-0" id="cashinExternalId"></div>
                     </div>
-                    <div class="col-md-4">
-                        <div class="small text-uppercase font-weight-bold text-muted mb-1">Ext Ref ID 1</div>
-                        <div class="h6 font-weight-bold text-dark mb-0" id="TransactionIdExternal1"></div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="small text-uppercase font-weight-bold text-muted mb-1">Ext Ref ID 2</div>
-                        <div class="h6 font-weight-bold text-dark mb-0" id="TransactionIdExternal2"></div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3 mb-md-0">
+                            <div class="small text-uppercase font-weight-bold text-muted mb-1">Ext Ref ID 1</div>
+                            <div class="d-flex align-items-start">
+                                <div class="h6 font-weight-bold text-dark mb-0 text-break mr-2" style="word-break: break-all;" id="TransactionIdExternal1"></div>
+                                <button type="button" class="btn btn-sm btn-link text-primary p-0 flex-shrink-0 copy-ref-btn" data-target="#TransactionIdExternal1" title="Copy ID" style="line-height: 1;">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="small text-uppercase font-weight-bold text-muted mb-1">Ext Ref ID 2</div>
+                            <div class="d-flex align-items-start">
+                                <div class="h6 font-weight-bold text-dark mb-0 text-break mr-2" style="word-break: break-all;" id="TransactionIdExternal2"></div>
+                                <button type="button" class="btn btn-sm btn-link text-primary p-0 flex-shrink-0 copy-ref-btn" data-target="#TransactionIdExternal2" title="Copy ID" style="line-height: 1;">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
@@ -265,10 +289,16 @@
                 data: 'name_merchant',
                 className: 'text-nowrap',
                 render: function(data, type, row) {
-                    return row.ref_merchantId ? ' [' + row.ref_merchantId + '] - ' + data : '-';
+                    return ' [' + row.ref_merchantId + '] - ' + data;
                 }
             },
-            {data: 'name_submerchant',className: 'text-nowrap'},
+            {
+                data: 'name_submerchant',
+                className: 'text-nowrap',
+                render: function(data, type, row) {
+                    return ' [' + row.ref_subMerchantId + '] - ' + data;
+                }
+            },
             {data: 'c_merchantTransactionId',className: 'text-nowrap'},
             {data: 'c_vaNumber',className: 'text-nowrap', render: function(data){
                 return '<code>' + data + '</code>';
@@ -278,13 +308,7 @@
                 data: 'ref_cashinExternalId',
                 className: 'text-nowrap',
                 render: function(data, type, row) {
-                    if (!data) return '-';
-                    return '<a href="javascript:void(0)" class="detailVaDynamicChannelExternalAjax font-weight-bold text-primary" ' +
-                           'data-merchanttransactionid="' + row.c_merchantTransactionId + '" ' +
-                           'data-ref_cashinexternalid="' + data + '" ' +
-                           'data-id="' + row.id + '" ' +
-                           'data-ref_cashinexternallogvaidcreate="' + row.ref_cashinExternalLogVaIdCreate + '">' +
-                           data + '</a>';
+                    return data ? data : '-';
                 }
             },
             {data: 'c_amount',className: 'text-nowrap', render: function(data){
@@ -296,12 +320,25 @@
             {
                 data: 'c_status',
                 className: 'text-nowrap',
-                render: function(data) {
+                render: function(data, type, row) {
                     var status_class = 'secondary';
-                    if (data == 'PAID' || data == 'SUCCESS') status_class = 'success';
-                    if (data == 'EXPIRED' || data == 'FAILED') status_class = 'danger';
-                    if (data == 'PENDING') status_class = 'warning';
-                    return '<span class="badge badge-' + status_class + '">' + data + '</span>';
+                    var s = (data || '').toUpperCase();
+                    if (s == 'PAID' || s == 'SUCCESS')        status_class = 'success';
+                    else if (s == 'EXPIRED' || s == 'FAILED') status_class = 'danger';
+                    else if (s == 'PENDING' || s == 'CREATED') status_class = 'warning';
+                    else if (s == 'CANCEL')                    status_class = 'secondary';
+                    
+                    var badge = '<span class="badge badge-' + status_class + '">' + data + '</span>';
+                    
+                    if ((s == 'PAID' || s == 'SUCCESS') && row.ref_cashinExternalId) {
+                        return '<a href="javascript:void(0)" class="detailVaDynamicChannelExternalAjax text-decoration-none" ' +
+                               'data-merchanttransactionid="' + row.c_merchantTransactionId + '" ' +
+                               'data-ref_cashinexternalid="' + row.ref_cashinExternalId + '" ' +
+                               'data-id="' + row.id + '" ' +
+                               'data-ref_cashinexternallogvaidcreate="' + row.ref_cashinExternalLogVaIdCreate + '">' +
+                               badge + '</a>';
+                    }
+                    return badge;
                 }
             }
         ], {
@@ -341,7 +378,7 @@
         $('.vadynamic-select2').select2({
             width: '100%',
             dropdownAutoWidth: true,
-            dropdownParent: $morePanel,
+            
             minimumResultsForSearch: 5
         });
         // Detail AJAX

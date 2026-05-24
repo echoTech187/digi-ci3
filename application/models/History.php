@@ -238,6 +238,7 @@ class History extends CI_Model {
         
         $search_date = $filters['date'] ?? null;
         $search_merchant = $filters['merchant'] ?? null;
+        $search_status = $filters['status'] ?? null;
 
         $dt = $this->datatables->of('cashout_payment_ppob cpp')
             ->select('cpp.*, m.c_name as name_merchant, c.c_invoiceNo')
@@ -250,6 +251,9 @@ class History extends CI_Model {
         }
         if ($search_merchant) {
             $dt->where('cpp.ref_merchantId', $search_merchant);
+        }
+        if ($search_status) {
+            $dt->where('cpp.c_status', $search_status);
         }
         if (isset($filters['invoice']) && $filters['invoice']) {
             $searchVal = $this->db->escape_str($filters['invoice']);

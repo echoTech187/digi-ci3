@@ -50,10 +50,6 @@
             
         </div>
     </div>
-
-    <!-- KPI Summary Cards -->
-    
-
     <!-- Main Data Card -->
     <div class="card border-0 shadow-sm dt-card">
 
@@ -68,6 +64,7 @@
 
             // Count active extra filters for badge (excludes invoice_no which is now in global search)
             $extra_active = 0;
+            if ($search_date_ewallet_value || $search_date_ewallet_to_value)  $extra_active++;
             if ($search_name_ewallet_value)            $extra_active++;
             if ($search_date_ewallet_settlement_value) $extra_active++;
             // search_invoice_no is now in the global search input, excluded from advanced badge
@@ -153,8 +150,6 @@
                     <a href="<?= $download_url; ?>" class="btn-dt-chip-action btn-dt-action-success ">
                         <i class="fas fa-download"></i> <span class="d-none d-md-block">Download</span>
                     </a>
-                    
-
                 </div><!-- /.dt-toolbar-filters -->
             </div><!-- /.dt-toolbar -->
         </form>
@@ -166,7 +161,8 @@
                     <tr>
                         <th>No</th>
                         <th>Date Time</th>
-                        <th>Sub Merchant Info</th>
+                        <th>Merchant Info</th>
+                        <th>Sub-Merchant Info</th>
                         <th>Merchant Trans ID</th>
                         <th>Invoice No</th>
                         <th>Type</th>
@@ -201,6 +197,13 @@
                 return moment(data).format('DD-MM-YYYY HH:mm:ss');
             }},
             {
+                data: 'name_merchant',
+                className: 'text-nowrap',
+                render: function(data, type, row) {
+                    return ' [' + row.ref_merchantId + '] - ' + data;
+                }
+            },
+            {
                 data: 'name_submerchant',
                 className: 'text-nowrap',
                 render: function(data, type, row) {
@@ -234,7 +237,7 @@
                 render: function(data, type, row) {
                     var baseUrl = "<?= base_url() ?>";
                     var detailLink = baseUrl + 'finance/e-wallet/detail/' + data;
-                    var resendLink = baseUrl + 'finance/e-wallet/notification/resend/' + data;
+                    var resendLink = baseUrl + 'finance/e-wallet/notification/resend/' + data + '/' + row.ref_merchantId;
                     
                     return `
                         <div class="dropdown">
@@ -317,7 +320,7 @@
         $('.select2-more').select2({
             width: '100%',
             dropdownAutoWidth: true,
-            dropdownParent: $morePanel,
+            
             minimumResultsForSearch: 5
         });
     });

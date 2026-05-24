@@ -28,42 +28,6 @@
             </div>
         </div>
     </div>
-
-
-    <!-- Alerts Standardized to Swal2 Premium -->
-    <script>
-        $(document).ready(function() {
-            <?php if ($this->session->flashdata('success')) : ?>
-                Swal.fire({
-                    title: 'Success!',
-                    text: '<?= $this->session->flashdata('success'); ?>',
-                    icon: 'success',
-                    customClass: {
-                        popup: 'swal2-premium-popup',
-                        confirmButton: 'swal2-premium-confirm'
-                    },
-                    buttonsStyling: false
-                });
-            <?php endif; ?>
-
-            <?php 
-            $errorMsg = $this->session->flashdata('error') ?: $this->session->flashdata('error_message');
-            if ($errorMsg) : 
-            ?>
-                Swal.fire({
-                    title: 'Error!',
-                    html: '<?= trim(str_replace(["\r", "\n"], '', $errorMsg)); ?>',
-                    icon: 'error',
-                    customClass: {
-                        popup: 'swal2-premium-popup',
-                        confirmButton: 'swal2-premium-confirm'
-                    },
-                    buttonsStyling: false
-                });
-            <?php endif; ?>
-        });
-    </script>
-
     <!-- ── Page Header ── -->
     <div class="dt-page-header">
         <div>
@@ -97,13 +61,16 @@
             $status_val    = $this->session->userdata('search_status_transaction_bifast') ?: '';
             $transid_val   = $this->session->userdata('search_transid_bifast') ?: '';
             $channel_val   = $this->session->userdata('search_channel_bifast') ?: '';
+            $internal_channel_val = $this->session->userdata('search_internal_channel_bifast') ?: '';
             $external_val  = $this->session->userdata('search_external_reff_id') ?: '';
 
             // Badge count for More Filters (Exclude those moved to global search)
             $extra_active = 0;
+            if($date_from_val || $date_to_val )  $extra_active++;
             if ($merchant_val)  $extra_active++;
             if ($status_val)    $extra_active++;
             if ($channel_val)   $extra_active++;
+            if ($internal_channel_val) $extra_active++;
         ?>
 
         <!-- ── Toolbar ── -->
@@ -114,7 +81,7 @@
                 <!-- LEFT: Global Search -->
                 <div class="dt-search-wrapper">
                     <i class="fas fa-search dt-search-icon"></i>
-                    <input type="text" id="bifastGlobalSearch" class="dt-search-input" placeholder="<?= $transid_val ?: 'Search by Trans ID, Invoice, or Account No...'; ?>" value="<?= $transid_val; ?>">
+                    <input type="text" id="bifastGlobalSearch" class="dt-search-input" placeholder="<?= $transid_val ?: 'Search by Trans ID, Invoice, Account No, or Beneficiary Name...'; ?>" value="<?= $transid_val; ?>">
                 </div>
 
                 <!-- RIGHT: Primary chips + More Filters trigger -->
@@ -139,15 +106,6 @@
                             </div>
 
                             <div class="dt-more-panel-body">
-                                <!-- Primary: Date Range -->
-                                <div class="dt-more-field">
-                                    <label class="dt-more-label"><i class="fas fa-calendar-alt mr-1 mr-2"></i> Period</label>
-                                    <div class="dt-filter-chip">
-                                        <input type="date" name="search_date_bifast" class="dt-chip-input" value="<?= $date_from_val; ?>" title="Date From">
-                                        <span class="text-muted mx-1" style="font-size:11px;">→</span>
-                                        <input type="date" name="search_date_bifast_to" class="dt-chip-input" value="<?= $date_to_val; ?>" title="Date To">
-                                    </div>
-                                </div>
                                 <!-- Merchant -->
                                 <div class="dt-more-field">
                                     <label class="dt-more-label"><i class="fas fa-store mr-1 mr-2"></i> Merchant</label>
@@ -160,7 +118,27 @@
                                         <?php endforeach; ?>
                                     </select>
                                 </div>
-
+                                <!-- Channel -->
+                                <div class="dt-more-field">
+                                    <label class="dt-more-label"><i class="fas fa-network-wired mr-1 mr-2"></i> Channel ID</label>
+                                    <select name="search_internal_channel_bifast" class="dt-more-select bifast-select2">
+                                        <option value="">All Channels</option>
+                                        <?php foreach ($internal_channels as $ic): ?>
+                                            <option value="<?= $ic->id; ?>" <?= ($ic->id == $internal_channel_val) ? 'selected' : ''; ?>>
+                                                <?= $ic->c_description; ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                                <!-- Primary: Date Range -->
+                                <div class="dt-more-field">
+                                    <label class="dt-more-label"><i class="fas fa-calendar-alt mr-1 mr-2"></i> Period</label>
+                                    <div class="dt-filter-chip">
+                                        <input type="date" name="search_date_bifast" class="dt-chip-input" value="<?= $date_from_val; ?>" title="Date From">
+                                        <span class="text-muted mx-1" style="font-size:11px;">→</span>
+                                        <input type="date" name="search_date_bifast_to" class="dt-chip-input" value="<?= $date_to_val; ?>" title="Date To">
+                                    </div>
+                                </div>
                                 <!-- Status -->
                                 <div class="dt-more-field">
                                     <label class="dt-more-label"><i class="fas fa-info-circle mr-1 mr-2"></i> Transaction Status</label>
@@ -173,8 +151,10 @@
                                 </div>
 
 
-                                <!-- Channel -->
-                                <div class="dt-more-field">
+                                
+
+                                <!-- External Channel -->
+                                <div class="dt-more-field d-none">
                                     <label class="dt-more-label"><i class="fas fa-network-wired mr-1 mr-2"></i> External Channel</label>
                                     <select name="search_channel_bifast" class="dt-more-select">
                                         <option value="">All Channels</option>
@@ -214,8 +194,8 @@
                     <thead>
                         <tr>
                             <th style="width: 50px;">No</th>
-                            <th>Merchant</th>
                             <th>Date Request</th>
+                            <th>Merchant Info</th>
                             <th>Merchant Trans ID</th>
                             <th>Invoice No</th>
                             <th>Channel</th>
@@ -436,6 +416,9 @@
         // Init Server-Side DataTable
         var table = initServerDataTable("#bifastTable", "<?= base_url('finance/bi-fast') ?>", [
             {data: 'no', orderable: false},
+            {data: 'c_datetime',className: 'text-nowrap', render: function(data){
+                return moment(data).format('DD-MM-YYYY HH:mm:ss');
+            }},
             {
                 data: 'name_merchant',
                 className: 'text-nowrap',
@@ -443,9 +426,6 @@
                     return ' [' + row.ref_merchantId + '] - ' + data;
                 }
             },
-            {data: 'c_datetime',className: 'text-nowrap', render: function(data){
-                return moment(data).format('DD-MM-YYYY HH:mm:ss');
-            }},
             {data: 'c_merchantTransactionId',className: 'text-nowrap'},
             {data: 'c_invoiceNo',className: 'text-nowrap'},
             {data: 'ref_cashoutChannelId',className: 'text-nowrap'},
@@ -541,7 +521,7 @@
         $('.bifast-select2').select2({
             width: '100%',
             dropdownAutoWidth: true,
-            dropdownParent: $morePanel,
+            
             minimumResultsForSearch: 5
         });
 

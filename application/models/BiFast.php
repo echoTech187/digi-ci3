@@ -9,7 +9,7 @@ class BiFast extends CI_Model {
     private static $cached_total = null;
     var $order = array('cpb.id' => 'desc');
 
-    private function _get_datatables_query($search_name = null, $date_from = null, $date_to = null, $search_transid = null, $search_external_reff = null, $search_channel = null, $search_status = null, $only_ids = false, $count_only = false)
+    private function _get_datatables_query($search_name = null, $date_from = null, $date_to = null, $search_transid = null, $search_external_reff = null, $search_channel = null, $search_status = null, $search_internal_channel = null, $only_ids = false, $count_only = false)
     {
         // Emergency safeguard
         $this->db->query("SET SESSION max_execution_time = 30000");
@@ -65,6 +65,9 @@ class BiFast extends CI_Model {
         }
         if ($search_status) {
             $this->db->where('cpb.c_status', $search_status);
+        }
+        if ($search_internal_channel) {
+            $this->db->where('cpb.ref_cashoutChannelId', $search_internal_channel);
         }
         
         // Handle External Channel and External Reff ID filters
@@ -140,32 +143,20 @@ class BiFast extends CI_Model {
                 $matching_ids = [-1];
                 $matching_inv_ids = [-1];
 
-                $extracted_date = null;
-                // Improved regex to handle various formats
-                if (preg_match('/(?:GD|TRX|VA|EW|BF|_)([0-9]{6})/i', $searchValue, $matches)) {
-                    $yymmdd = $matches[1];
-                    $year = "20" . substr($yymmdd, 0, 2);
-                    $month = substr($yymmdd, 2, 2);
-                    $day = substr($yymmdd, 4, 2);
-                    if (checkdate($month, $day, $year)) {
-                        $extracted_date = "$year-$month-$day";
-                    }
-                }
-
                 $op = (strlen($searchValue) >= 15) ? '=' : 'LIKE';
                 $val = (strlen($searchValue) >= 15) ? "'$safeSearchValue'" : "'$safeSearchValue%'";
 
-                // 1. Priority: Check technical ID columns (Merchant Trans ID & Account No)
+                // 1. Priority: Check technical ID columns (Merchant Trans ID & Account No) & Beneficiary Name
                 $cpb_res = $this->db->query("SELECT id FROM cashout_payment_bifast WHERE c_merchantTransactionId $op $val OR c_accountNo $op $val LIMIT 100")->result();
                 if (!empty($cpb_res)) $matching_ids = array_merge($matching_ids, array_column($cpb_res, 'id'));
+
+                $mab_res = $this->db->query("SELECT cpb.id FROM cashout_payment_bifast cpb JOIN merchant_account_bank mab ON mab.c_beneficiaryAccountNo = cpb.c_accountNo AND mab.ref_cashoutChannelId = cpb.ref_cashoutChannelId AND mab.ref_merchantId = cpb.ref_merchantId WHERE mab.c_beneficiaryAccountName LIKE '$safeSearchValue%' LIMIT 100")->result();
+                if (!empty($mab_res)) $matching_ids = array_merge($matching_ids, array_column($mab_res, 'id'));
 
                 // 2. Check Invoice Number (Only if specific ID not found)
                 if (count($matching_ids) <= 1 || strlen($searchValue) < 15) {
                     if (strlen($searchValue) >= 4) {
                         $inv_q = "SELECT id FROM cashout WHERE c_invoiceNo $op $val ";
-                        if ($extracted_date) {
-                            $inv_q .= " AND (c_datetime >= '$extracted_date 00:00:00' AND c_datetime <= '$extracted_date 23:59:59') ";
-                        }
                         $inv_res = $this->db->query($inv_q . " LIMIT 50")->result();
                         if (!empty($inv_res)) $matching_inv_ids = array_merge($matching_inv_ids, array_column($inv_res, 'id'));
                     }
@@ -225,10 +216,10 @@ class BiFast extends CI_Model {
         }
     }
 
-    public function get_datatables($search_name = null, $date_from = null, $date_to = null, $search_transid = null, $search_external_reff = null, $search_channel = null, $search_status = null)
+    public function get_datatables($search_name = null, $date_from = null, $date_to = null, $search_transid = null, $search_external_reff = null, $search_channel = null, $search_status = null, $search_internal_channel = null)
     {
         // STEP 1: Get only IDs for the current page (Fast query)
-        $this->_get_datatables_query($search_name, $date_from, $date_to, $search_transid, $search_external_reff, $search_channel, $search_status, true);
+        $this->_get_datatables_query($search_name, $date_from, $date_to, $search_transid, $search_external_reff, $search_channel, $search_status, $search_internal_channel, true);
         if ($_POST['length'] != -1)
             $this->db->limit($_POST['length'], $_POST['start']);
         $query = $this->db->get();
@@ -239,8 +230,8 @@ class BiFast extends CI_Model {
         $ids = array_column($id_results, 'id');
         
         // STEP 2: Fetch full data for only these specific IDs
-        $this->db->select("cpb.*, m.c_name AS name_merchant, c.c_invoiceNo, mab.c_beneficiaryAccountName,
-                           COALESCE(epb.c_responseBody, egb.c_responseBody, eif.c_responseBody, epd.c_responseBody) AS c_responseBody");
+        $this->db->select("cpb.*, m.c_name AS name_merchant, m.c_merchantLevel, c.c_invoiceNo, mab.c_beneficiaryAccountName,
+                           COALESCE(epb.c_responseBody, egb.c_responseBody, eif.c_responseBody, epd.c_responseBody) AS c_responseBody", FALSE);
         $this->db->from($this->table);
         $this->db->join('cashout c', 'c.id = cpb.ref_cashoutId', 'left');
         $this->db->join('merchant m', 'm.id = cpb.ref_merchantId', 'left');
@@ -259,16 +250,16 @@ class BiFast extends CI_Model {
         return $query->result();
     }
 
-    public function count_filtered($search_name = null, $date_from = null, $date_to = null, $search_transid = null, $search_external_reff = null, $search_channel = null, $search_status = null)
+    public function count_filtered($search_name = null, $date_from = null, $date_to = null, $search_transid = null, $search_external_reff = null, $search_channel = null, $search_status = null, $search_internal_channel = null)
     {
-        $searchValue = $this->input->post('search')['value'];
-        $is_filtered = $search_name || $date_from || $date_to || $search_transid || $search_external_reff || $search_channel || $search_status || (!empty($searchValue));
+        $searchValue = isset($_POST['search']['value']) ? $_POST['search']['value'] : '';
+        $is_filtered = $search_name || $date_from || $date_to || $search_transid || $search_external_reff || $search_channel || $search_status || $search_internal_channel || (!empty($searchValue));
 
         if (!$is_filtered) {
-            return $this->count_all_dt();
+            return $this->count_all_dt($search_name, $date_from, $date_to);
         }
 
-        $this->_get_datatables_query($search_name, $date_from, $date_to, $search_transid, $search_external_reff, $search_channel, $search_status, false, true);
+        $this->_get_datatables_query($search_name, $date_from, $date_to, $search_transid, $search_external_reff, $search_channel, $search_status, $search_internal_channel, false, true);
         $query = $this->db->get();
         if (!is_object($query) || $query->num_rows() == 0) return 0;
         return $query->row()->total;
@@ -409,6 +400,13 @@ class BiFast extends CI_Model {
         $query = "SELECT c_cashoutExternalId FROM cashout_external_x_channel  
                 WHERE c_cashoutChannelGroup = 'bifast' 
                 GROUP BY c_cashoutExternalId  ";
+        return $this->db->query($query)->result();
+    }
+
+    public function get_internal_channels(){
+        $query = "SELECT id, c_description FROM cashout_channel 
+                WHERE c_channelGroup = 'bifast' 
+                ORDER BY c_description ASC";
         return $this->db->query($query)->result();
     }
 
@@ -581,6 +579,7 @@ class BiFast extends CI_Model {
         $search_transid = $filters['transid'] ?? null;
         $search_external_reff = $filters['external_reff'] ?? null;
         $search_channel = $filters['channel'] ?? null;
+        $search_internal_channel = $filters['internal_channel'] ?? null;
         $search_status = $filters['status'] ?? null;
 
         // Format dates for query
@@ -588,13 +587,13 @@ class BiFast extends CI_Model {
         $date_to_query = !empty($date_to) ? date('Ymd', strtotime($date_to)) . "235959" : null;
 
         // Optimized Fetch (Two-Step Lookup)
-        $list = $this->get_datatables($search_name, $date_from_query, $date_to_query, $search_transid, $search_external_reff, $search_channel, $search_status);
+        $list = $this->get_datatables($search_name, $date_from_query, $date_to_query, $search_transid, $search_external_reff, $search_channel, $search_status, $search_internal_channel);
         
         $searchValue = $this->input->post('search')['value'];
-        $is_filtered = $search_name || $date_from || $date_to || $search_transid || $search_external_reff || $search_channel || $search_status || (!empty($searchValue));
+        $is_filtered = $search_name || $date_from || $date_to || $search_transid || $search_external_reff || $search_channel || $search_status || $search_internal_channel || (!empty($searchValue));
 
         $recordsTotal = $this->count_all_dt($search_name, $date_from_query, $date_to_query);
-        $recordsFiltered = $is_filtered ? $this->count_filtered($search_name, $date_from_query, $date_to_query, $search_transid, $search_external_reff, $search_channel, $search_status) : $recordsTotal;
+        $recordsFiltered = $is_filtered ? $this->count_filtered($search_name, $date_from_query, $date_to_query, $search_transid, $search_external_reff, $search_channel, $search_status, $search_internal_channel) : $recordsTotal;
 
         // Trick the library to NOT re-slice our already-paginated $list
         $original_start = $_POST['start'];

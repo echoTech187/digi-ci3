@@ -1,7 +1,7 @@
-﻿<!-- Begin Page Content -->
+<!-- Begin Page Content -->
 <div>
     <!-- ── Page Header ── -->
-        <div class="dt-page-header">
+    <div class="dt-page-header">
         <div>
             <h4 class="dt-page-title"><?= $title; ?></h4>
             <p class="dt-page-subtitle">Manage PUBG Mobile Unknown Cash (UC) and denominations.</p>
@@ -52,74 +52,6 @@
         </form>
 
         <div class="card-body p-0">
-            <!-- Add Product Modal -->
-            <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                <div class="modal-dialog modal-lg modal-dialog-centered">
-                    <div class="modal-content border-0 shadow-sm" style="border-radius:16px;overflow:hidden;">
-                        <div class="modal-header modal-header-primary border-0 mh-premium">
-                            <div class="d-flex align-items-center">
-                                <div class="mh-icon-badge">
-                                    <i class="fas fa-plus-circle"></i>
-                                </div>
-                                <div class="mh-title-wrap">
-                                    <h6 class="mh-title" id="exampleModalLabel">ADD PRODUCT</h6>
-                                    <small class="mh-subtitle">Create and register new data record</small>
-                                </div>
-                            </div>
-                            <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" style="opacity:0.8;">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <form method="post" action="<?php echo base_url('product/create'); ?>">
-                        <div class="modal-body p-0 bg-light">
-                            <div class="d-flex g-0 w-100 flex-column flex-lg-row">
-                                <div class="col-lg-4 p-4 d-flex flex-column mb-0" style="background:#202328;border-right:1px solid rgba(255,255,255,0.05);color:#fff;">
-                                    <div class="d-flex align-items-center mb-3">
-                                        <div class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center mr-3" style="width:40px;height:40px;flex-shrink:0;"><i class="fas fa-crosshairs fa-lg"></i></div>
-                                        <h6 class="fw-bold text-danger mb-0" style="font-size:15px;">PUBG Mobile Guide</h6>
-                                    </div>
-                                    <p class="text-muted small mb-3" style="font-size:12px;line-height:1.5;">Register PUBG Mobile UC denominations for in-game currency topups.</p>
-                                    <div class="p-3 mb-3" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;">
-                                        <h6 class="fw-bold text-white mb-1 d-flex align-items-center" style="font-size:12px;"><i class="fas fa-coins text-warning mr-2"></i> 1. UC Amount</h6>
-                                        <p class="text-muted mb-0" style="font-size:11px;line-height:1.4;">Label clearly e.g. 'PUBG 60 UC' so players identify the denomination.</p>
-                                    </div>
-                                    <div class="p-3 mb-3" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;">
-                                        <h6 class="fw-bold text-white mb-1 d-flex align-items-center" style="font-size:12px;"><i class="fas fa-tag text-info mr-2"></i> 2. Price</h6>
-                                        <p class="text-muted mb-0" style="font-size:11px;line-height:1.4;">UC prices vary by supplier. Verify cost before setting sell price.</p>
-                                    </div>
-                                </div>
-                                <div class="col-lg-8 p-4 bg-light">
-                                    <div class="mb-3">
-                                        <label class="form-label small fw-bold text-muted">Caption</label>
-                                        <input type="text" class="form-control border-1" name="caption" required>
-                                        <input type="hidden" name="channelgroup" value="ppob">
-                                        <input type="hidden" name="channelgroup2" value="pubg_mobile">
-                                        <input type="hidden" name="name" value="pubgmobile">
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label small fw-bold text-muted">Description</label>
-                                        <textarea class="form-control border-1" name="description" rows="2" required></textarea>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label small fw-bold text-muted">Price</label>
-                                        <input type="number" class="form-control border-1" name="price" required>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="modal-footer px-4 py-3 border-0 bg-white justify-content-end">
-                            <button type="button" class="btn-dt-cancel mr-2" data-dismiss="modal">Close</button>
-                            <button type="submit" class="btn-dt-apply px-4">
-                                <i class="fas fa-save mr-2"></i> Save Product
-                            </button>
-                        </div>
-                        </form>
-
-                </div>
-            </div>
-        </div>
-
-        <div class="p-0">       
             <div class="table-responsive">       
                 <table id="productTable" class="table dt-table mb-0" style="width: 100%;">
                     <thead>
@@ -134,72 +66,135 @@
                     <tbody></tbody>
                 </table>
             </div>
-
-            <!-- Edit Product Modal -->
-            <div class="modal fade" id="editProductModal" tabindex="-1" aria-labelledby="editProductModalLabel" aria-hidden="true">
-                <div class="modal-dialog modal-lg modal-dialog-centered">
-                    <div class="modal-content border-0 shadow-lg" style="border-radius:16px;overflow:hidden;">
-                        <div class="modal-header modal-header-primary border-0 mh-premium">
-                            <div class="d-flex align-items-center">
-                                <div class="mh-icon-badge">
-                                    <i class="fas fa-edit"></i>
-                                </div>
-                                <div class="mh-title-wrap">
-                                    <h6 class="mh-title" id="editProductModalLabel">Edit Product</h6>
-                                    <small class="mh-subtitle">Modify and update existing product information</small>
-                                </div>
-                            </div>
-                            <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" style="opacity:0.8;">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <form method="post" action="<?php echo base_url('product/update'); ?>">
-                        <div class="modal-body p-0 bg-light">
-                            <div class="d-flex g-0 w-100 flex-column flex-lg-row">
-                                <div class="col-lg-4 p-4 d-flex flex-column mb-0" style="background:#202328;border-right:1px solid rgba(255,255,255,0.05);color:#fff;">
-                                    <div class="d-flex align-items-center mb-3">
-                                        <div class="bg-warning text-white rounded-circle d-flex align-items-center justify-content-center mr-3" style="width:40px;height:40px;flex-shrink:0;"><i class="fas fa-edit fa-lg"></i></div>
-                                        <h6 class="fw-bold text-warning mb-0" style="font-size:15px;">Edit Guide</h6>
-                                    </div>
-                                    <p class="text-muted small mb-3" style="font-size:12px;line-height:1.5;">Update product details. Price changes apply immediately.</p>
-                                    <div class="p-3 mb-3" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;">
-                                        <h6 class="fw-bold text-white mb-1 d-flex align-items-center" style="font-size:12px;"><i class="fas fa-exclamation-circle text-warning mr-2"></i> Price Impact</h6>
-                                        <p class="text-muted mb-0" style="font-size:11px;line-height:1.4;">Price updates affect merchant fee calculations. Review after changes.</p>
-                                    </div>
-                                </div>
-                                <div class="col-lg-8 p-4 bg-light">
-                                    <input type="hidden" name="view_name" value="pubgmobile">
-                                    <input type="hidden" id="edit_product_id" name="id">
-                                    <div class="mb-3">
-                                        <label class="form-label small fw-bold text-muted">Product Caption</label>
-                                        <input type="text" class="form-control border-1" id="edit_caption" name="caption" required>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label small fw-bold text-muted">Description</label>
-                                        <textarea class="form-control border-1" id="edit_description" name="description" rows="3" required></textarea>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label small fw-bold text-muted">Price / Fee (IDR)</label>
-                                        <input type="number" class="form-control border-1" id="edit_price" name="price" required>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="modal-footer px-4 py-3 border-0 bg-white justify-content-end">
-                            <button type="button" class="btn-dt-cancel mr-2" data-dismiss="modal">Cancel</button>
-                            <button type="submit" class="btn-dt-apply px-4">
-                                <i class="fas fa-save mr-2"></i> Save Changes
-                            </button>
-                        </div>
-                        </form>
-
-                </div>
-            </div>
         </div>
     </div>
 </div>
 
-<script src="<?= base_url('assets/js/server-datatables.js') ?>"></script>
+<!-- Add Product Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-sm" style="border-radius:16px;overflow:hidden;">
+            <div class="modal-header modal-header-primary border-0 mh-premium">
+                <div class="d-flex align-items-center">
+                    <div class="mh-icon-badge">
+                        <i class="fas fa-plus-circle"></i>
+                    </div>
+                    <div class="mh-title-wrap">
+                        <h6 class="mh-title" id="exampleModalLabel">ADD PRODUCT</h6>
+                        <small class="mh-subtitle">Create and register new data record</small>
+                    </div>
+                </div>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" style="opacity:0.8;">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="addProductForm">
+                <div class="modal-body p-0 bg-light">
+                    <div class="d-flex g-0 w-100 flex-column flex-lg-row">
+                        <div class="col-lg-4 p-4 d-flex flex-column mb-0" style="background:#202328;border-right:1px solid rgba(255,255,255,0.05);color:#fff;">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center mr-3" style="width:40px;height:40px;flex-shrink:0;"><i class="fas fa-crosshairs fa-lg"></i></div>
+                                <h6 class="fw-bold text-danger mb-0" style="font-size:15px;">PUBG Mobile Guide</h6>
+                            </div>
+                            <p class="text-muted small mb-3" style="font-size:12px;line-height:1.5;">Register PUBG Mobile UC denominations for in-game currency topups.</p>
+                            <div class="p-3 mb-3" style="border-radius:12px;">
+                                <h6 class="fw-bold text-white mb-1 d-flex align-items-center" style="font-size:12px;"><i class="fas fa-coins text-warning mr-2"></i> 1. UC Amount</h6>
+                                <p class="text-muted mb-0" style="font-size:11px;line-height:1.4;">Label clearly e.g. 'PUBG 60 UC' so players identify the denomination.</p>
+                            </div>
+                            <div class="p-3 mb-3" style="border-radius:12px;">
+                                <h6 class="fw-bold text-white mb-1 d-flex align-items-center" style="font-size:12px;"><i class="fas fa-tag text-info mr-2"></i> 2. Price</h6>
+                                <p class="text-muted mb-0" style="font-size:11px;line-height:1.4;">UC prices vary by supplier. Verify cost before setting sell price.</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-8 p-4 bg-light">
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-muted">Caption</label>
+                                <input type="text" class="form-control border-1" name="caption" required>
+                                <input type="hidden" name="channelgroup" value="ppob">
+                                <input type="hidden" name="channelgroup2" value="pubg_mobile">
+                                <input type="hidden" name="name" value="pubgmobile">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-muted">Description</label>
+                                <textarea class="form-control border-1" name="description" rows="2"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-muted">Price</label>
+                                <input type="text" class="input-rupiah form-control border-1" name="price" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer px-4 py-3 border-0 bg-white justify-content-end">
+                    <button type="button" class="btn-dt-cancel mr-2" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn-dt-apply px-4">
+                        <i class="fas fa-save mr-2"></i> Save Product
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!-- Edit Product Modal -->
+<div class="modal fade" id="editProductModal" tabindex="-1" aria-labelledby="editProductModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius:16px;overflow:hidden;">
+            <div class="modal-header modal-header-primary border-0 mh-premium">
+                    <div class="d-flex align-items-center">
+                    <div class="mh-icon-badge">
+                        <i class="fas fa-edit"></i>
+                    </div>
+                    <div class="mh-title-wrap">
+                        <h6 class="mh-title" id="editProductModalLabel">Edit Product</h6>
+                        <small class="mh-subtitle">Modify and update existing product information</small>
+                    </div>
+                </div>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" style="opacity:0.8;">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="editProductForm">
+                    <div class="modal-body p-0 bg-light">
+                        <div class="d-flex g-0 w-100 flex-column flex-lg-row">
+                        <div class="col-lg-4 p-4 d-flex flex-column mb-0">
+                                <div class="d-flex align-items-center mb-3">
+                                <div class="bg-warning text-white rounded-circle d-flex align-items-center justify-content-center mr-3" style="width:40px;height:40px;flex-shrink:0;"><i class="fas fa-edit fa-lg"></i></div>
+                                <h6 class="fw-bold text-warning mb-0" style="font-size:15px;">Edit Guide</h6>
+                            </div>
+                            <p class="text-muted small mb-3" style="font-size:12px;line-height:1.5;">Update product details. Price changes apply immediately.</p>
+                            <div class="p-3 mb-3" style="border-radius:12px;">
+                                <h6 class="fw-bold mb-1 d-flex align-items-center" style="font-size:12px;"><i class="fas fa-exclamation-circle text-warning mr-2"></i> Price Impact</h6>
+                                <p class="text-muted mb-0" style="font-size:11px;line-height:1.4;">Price updates affect merchant fee calculations. Review after changes.</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-8 p-4 bg-light">
+                            <input type="hidden" name="view_name" value="pubgmobile">
+                            <input type="hidden" id="edit_product_id" name="id">
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-muted">Product Caption</label>
+                                <input type="text" class="form-control border-1" id="edit_caption" name="caption" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-muted">Description</label>
+                                <textarea class="form-control border-1" id="edit_description" name="description" rows="3" ></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-muted">Price / Fee (IDR)</label>
+                                <input type="text" class="input-rupiah form-control border-1" id="edit_price" name="price" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer px-4 py-3 border-0 bg-white justify-content-end">
+                    <button type="button" class="btn-dt-cancel mr-2" data-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn-dt-apply px-4">
+                        <i class="fas fa-save mr-2"></i> Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 <script>
 $(document).ready(function() {
     // Instructions Guide drawer handlers
@@ -243,6 +238,14 @@ $(document).ready(function() {
                                     <i class="fas fa-edit text-primary mr-2"></i> Edit Product
                                 </button>
                             </li>
+                            <li>
+                                <div class="dropdown-divider my-1"></div>
+                            </li>
+                            <li>
+                                <button type="button" class="dropdown-item text-danger" onclick="deleteProduct('${(row.id || '').replace(/'/g, "\\'")}')">
+                                    <i class="fas fa-trash-alt mr-2"></i> Delete Product
+                                </button>
+                            </li>
                         </ul>
                     </div>
                 `;
@@ -272,10 +275,128 @@ function editProduct(id, caption, description, fee, provider) {
     $('#edit_caption').val(caption);
     $('#edit_description').val(description);
     
-    // Clean fee from formatting
-    var cleanFee = fee.toString().replace(/[^0-9]/g, '');
+    // Parse the fee as float to remove trailing decimal zeroes, then convert to int
+    var cleanFee = Math.floor(parseFloat(fee));
     $('#edit_price').val(cleanFee);
     
     $('#editProductModal').modal('show');
 }
+
+function deleteProduct(id) {
+    Swal.fire({
+        title: 'Delete Product?',
+        text: "This action cannot be undone!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            var csrfName = $('meta[name="csrf-token-name"]').attr('content');
+            var csrfHash = $('meta[name="csrf-token-hash"]').attr('content');
+            var data = {};
+            if (csrfName && csrfHash) {
+                data[csrfName] = csrfHash;
+            }
+            
+            $.ajax({
+                url: "<?= base_url('product/delete/') ?>" + id,
+                type: 'POST',
+                dataType: 'json',
+                data: data,
+                success: function(res) {
+                    if (res.status === 'success') {
+                        Swal.fire('Deleted!', res.message, 'success');
+                        window.productTable.ajax.reload(null, false);
+                    } else {
+                        Swal.fire('Error!', res.message, 'error');
+                    }
+                },
+                error: function() {
+                    Swal.fire('Error!', 'An unexpected error occurred.', 'error');
+                }
+            });
+        }
+    });
+}
+
+// Manual AJAX for Add Form
+$('#addProductForm').on('submit', function(e) {
+    e.preventDefault();
+    var form = $(this);
+    var btn = form.find('button[type="submit"]');
+    var originalBtnText = btn.html();
+    
+    btn.html('<i class="fas fa-spinner fa-spin mr-2"></i> Processing...').prop('disabled', true);
+    
+    $.ajax({
+        url: "<?= base_url('product/create') ?>",
+        type: 'POST',
+        data: form.serialize(),
+        dataType: 'json',
+        success: function(res) {
+            if (res.status === 'success') {
+                $('#exampleModal').modal('hide');
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: res.message
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.trigger('reset');
+                        window.productTable.ajax.reload(null, false);
+                    }
+                });
+            } else {
+                Swal.fire('Error!', res.message, 'error');
+            }
+        },
+        error: function() {
+            Swal.fire('Error!', 'An unexpected error occurred.', 'error');
+        },
+        complete: function() {
+            btn.html(originalBtnText).prop('disabled', false);
+        }
+    });
+});
+
+// Manual AJAX for Edit Form
+$('#editProductForm').on('submit', function(e) {
+    e.preventDefault();
+    var form = $(this);
+    var btn = form.find('button[type="submit"]');
+    var originalBtnText = btn.html();
+    
+    btn.html('<i class="fas fa-spinner fa-spin mr-2"></i> Processing...').prop('disabled', true);
+    
+    $.ajax({
+        url: "<?= base_url('product/update') ?>",
+        type: 'POST',
+        data: form.serialize(),
+        dataType: 'json',
+        success: function(res) {
+            if (res.status === 'success') {
+                $('#editProductModal').modal('hide');
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: res.message
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.productTable.ajax.reload(null, false);
+                    }
+                });
+            } else {
+                Swal.fire('Error!', res.message, 'error');
+            }
+        },
+        error: function() {
+            Swal.fire('Error!', 'An unexpected error occurred.', 'error');
+        },
+        complete: function() {
+            btn.html(originalBtnText).prop('disabled', false);
+        }
+    });
+});
 </script>

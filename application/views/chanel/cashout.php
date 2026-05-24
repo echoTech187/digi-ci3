@@ -190,18 +190,18 @@
                 <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>">
                 <div class="modal-body p-0 bg-light">
                     <div class="d-flex g-0 w-100 flex-column flex-lg-row">
-                        <div class="col-lg-4 p-4 d-flex flex-column mb-0" style="background: #202328; border-right: 1px solid rgba(255,255,255,0.05); color: #fff;">
+                        <div class="col-lg-4 p-4 d-flex flex-column mb-0" style="background: var(--bg-body); border-right: 1px solid rgba(255,255,255,0.05);">
                             <div class="d-flex align-items-center mb-3">
                                 <div class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center mr-3" style="width:40px;height:40px;flex-shrink:0;"><i class="fas fa-arrow-alt-circle-up fa-lg"></i></div>
                                 <h6 class="fw-bold text-danger mb-0" style="font-size:15px;">Cash Out Guide</h6>
                             </div>
                             <p class="text-muted small mb-3" style="font-size:12px;line-height:1.5;">Configure outbound payout channels for external bank or provider endpoints.</p>
-                            <div class="p-3 mb-3" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;">
-                                <h6 class="fw-bold text-white mb-1 d-flex align-items-center" style="font-size:12px;"><i class="fas fa-money-check-alt text-warning mr-2"></i> 1. Fee Type</h6>
+                            <div class="p-3 mb-3" style="border-radius:12px;">
+                                <h6 class="fw-bold mb-1 d-flex align-items-center" style="font-size:12px;"><i class="fas fa-money-check-alt text-warning mr-2"></i> 1. Fee Type</h6>
                                 <p class="text-muted mb-0" style="font-size:11px;line-height:1.4;">Fixed: flat deduction per transaction. Percentage: dynamic slice of payout amount.</p>
                             </div>
-                            <div class="p-3" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;">
-                                <h6 class="fw-bold text-white mb-1 d-flex align-items-center" style="font-size:12px;"><i class="fas fa-shield-alt text-info mr-2"></i> 2. Amount Limits</h6>
+                            <div class="p-3" style="border-radius:12px;">
+                                <h6 class="fw-bold mb-1 d-flex align-items-center" style="font-size:12px;"><i class="fas fa-shield-alt text-info mr-2"></i> 2. Amount Limits</h6>
                                 <p class="text-muted mb-0" style="font-size:11px;line-height:1.4;">Set min/max boundaries to protect against fraudulent payout requests.</p>
                             </div>
                         </div>
@@ -219,9 +219,9 @@
                                 <div class="col-md-6"><label class="dt-more-label mb-2">Fee Type</label><select class="dt-more-select" required name="feetype"><option value="" selected disabled>Select fee type</option><option value="fixed">Fixed</option><option value="Percentage">Percentage</option></select></div>
                             </div>
                             <div class="row mb-0">
-                                <div class="col-md-4 mb-3 mb-md-0"><label class="dt-more-label mb-2">Fee Value</label><div class="input-group"><div class="input-group-prepend"><span class="input-group-text border-right-0" style="border-radius:8px 0 0 8px;font-size:12px;">Rp</span></div><input type="number" class="dt-more-input h-auto" required name="fee" style="border-radius:0 8px 8px 0;"></div></div>
-                                <div class="col-md-4 mb-3 mb-md-0"><label class="dt-more-label mb-2">Amount Min</label><input type="number" class="dt-more-input" required name="amountmin" value="10000"></div>
-                                <div class="col-md-4"><label class="dt-more-label mb-2">Amount Max</label><input type="number" class="dt-more-input" required name="amountmax" value="50000000"></div>
+                                <div class="col-md-4 mb-3 mb-md-0"><label class="dt-more-label mb-2">Fee Value</label><div class="input-group"><div class="input-group-prepend"><span class="input-group-text border-right-0" style="border-radius:8px 0 0 8px;font-size:12px;">Rp</span></div><input type="text" class="input-rupiah" class="dt-more-input h-auto" required name="fee" style="border-radius:0 8px 8px 0;"></div></div>
+                                <div class="col-md-4 mb-3 mb-md-0"><label class="dt-more-label mb-2">Amount Min</label><input type="text" class="input-rupiah" class="dt-more-input" required name="amountmin" value="10000"></div>
+                                <div class="col-md-4"><label class="dt-more-label mb-2">Amount Max</label><input type="text" class="input-rupiah" class="dt-more-input" required name="amountmax" value="50000000"></div>
                             </div>
                         </div>
                     </div>
@@ -253,14 +253,14 @@
                 <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>">
                 <div class="modal-body p-0 bg-light">
                     <div class="d-flex g-0 w-100 flex-column flex-lg-row">
-                        <div class="col-lg-4 p-4 d-flex flex-column mb-0" style="background: #202328; border-right: 1px solid rgba(255,255,255,0.05); color: #fff;">
+                        <div class="col-lg-4 p-4 d-flex flex-column mb-0" style="background: var(--bg-body); border-right: 1px solid rgba(255,255,255,0.05);">
                             <div class="d-flex align-items-center mb-3">
                                 <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mr-3" style="width:40px;height:40px;flex-shrink:0;"><i class="fas fa-info-circle fa-lg"></i></div>
                                 <h6 class="fw-bold text-primary mb-0" style="font-size:15px;">Modification Guide</h6>
                             </div>
                             <p class="text-muted small mb-3" style="font-size:12px;line-height:1.5;">Update payout channel configs. Verify all values carefully before saving.</p>
-                            <div class="p-3" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;">
-                                <h6 class="fw-bold text-white mb-1 d-flex align-items-center" style="font-size:12px;"><i class="fas fa-lock text-warning mr-2"></i> Channel ID (Read-only)</h6>
+                            <div class="p-3" style="border-radius:12px;">
+                                <h6 class="fw-bold mb-1 d-flex align-items-center" style="font-size:12px;"><i class="fas fa-lock text-warning mr-2"></i> Channel ID (Read-only)</h6>
                                 <p class="text-muted mb-0" style="font-size:11px;line-height:1.4;">Channel IDs cannot be changed to maintain ledger data integrity.</p>
                             </div>
                         </div>
@@ -275,9 +275,9 @@
                                 <div class="col-md-6"><label class="dt-more-label mb-2">Fee Type</label><select class="dt-more-select" required name="feetype" id="edit_feetype"><option value="" disabled>Select fee type</option><option value="fixed">Fixed</option><option value="Percentage">Percentage</option></select></div>
                             </div>
                             <div class="row mb-0">
-                                <div class="col-md-4 mb-3 mb-md-0"><label class="dt-more-label mb-2">Fee Value</label><div class="input-group"><div class="input-group-prepend"><span class="input-group-text border-right-0" style="border-radius:8px 0 0 8px;font-size:12px;">Rp</span></div><input type="number" class="dt-more-input h-auto" required name="fee" id="edit_fee" style="border-radius:0 8px 8px 0;"></div></div>
-                                <div class="col-md-4 mb-3 mb-md-0"><label class="dt-more-label mb-2">Amount Min</label><input type="number" class="dt-more-input" required name="amountmin" id="edit_amountmin"></div>
-                                <div class="col-md-4"><label class="dt-more-label mb-2">Amount Max</label><input type="number" class="dt-more-input" required name="amountmax" id="edit_amountmax"></div>
+                                <div class="col-md-4 mb-3 mb-md-0"><label class="dt-more-label mb-2">Fee Value</label><div class="input-group"><div class="input-group-prepend"><span class="input-group-text border-right-0" style="border-radius:8px 0 0 8px;font-size:12px;">Rp</span></div><input type="text" class="input-rupiah" class="dt-more-input h-auto" required name="fee" id="edit_fee" style="border-radius:0 8px 8px 0;"></div></div>
+                                <div class="col-md-4 mb-3 mb-md-0"><label class="dt-more-label mb-2">Amount Min</label><input type="text" class="input-rupiah" class="dt-more-input" required name="amountmin" id="edit_amountmin"></div>
+                                <div class="col-md-4"><label class="dt-more-label mb-2">Amount Max</label><input type="text" class="input-rupiah" class="dt-more-input" required name="amountmax" id="edit_amountmax"></div>
                             </div>
                         </div>
                     </div>
@@ -394,9 +394,9 @@
                 $('#edit_feetype').val('');
             }
 
-            $('#edit_fee').val($(this).data('fee'));
-            $('#edit_amountmin').val($(this).data('min'));
-            $('#edit_amountmax').val($(this).data('max'));
+            $('#edit_fee').val(Math.floor(parseFloat($(this).data('fee'))));
+            $('#edit_amountmin').val(Math.floor(parseFloat($(this).data('min'))));
+            $('#edit_amountmax').val(Math.floor(parseFloat($(this).data('max'))));
         });
 
         // Delete button mapping
@@ -416,7 +416,7 @@
                 confirmButtonText: '<i class="fas fa-trash-alt mr-2"></i> Yes, delete it!'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    window.location.href = "<?= base_url('channel/deleteCashOutChanel/') ?>" + id;
+                    window.location.href = "<?= base_url('channel/cashout/delete/') ?>" + id;
                 }
             });
         });

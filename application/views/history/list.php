@@ -2,14 +2,18 @@
 // Session filter values
 $search_date_purchase_value = $this->session->userdata('search_date_purchase') ?: '';
 $search_merchant_purchase_value = $this->session->userdata('search_merchant_purchase') ?: '';
+$search_status_purchase_value = $this->session->userdata('search_status_purchase') ?: '';
 
-// Badge count for More Filters (Merchant only for now)
+// Badge count for More Filters
 $extra_active = 0;
+if ($search_date_purchase_value)  $extra_active++;
 if ($search_merchant_purchase_value) $extra_active++;
+if ($search_status_purchase_value) $extra_active++;
 
-$download_url = base_url('admin/download_history') 
+$download_url = base_url('finance/history/download') 
     . "?search_date_purchase=" . $search_date_purchase_value 
-    . "&search_merchant_purchase=" . $search_merchant_purchase_value;
+    . "&search_merchant_purchase=" . $search_merchant_purchase_value
+    . "&search_status_purchase=" . $search_status_purchase_value;
 ?>
 
 <!-- ── Page Header ── -->
@@ -20,36 +24,22 @@ $download_url = base_url('admin/download_history')
             <h4 class="dt-page-title">Purchase Transactions</h4>
             <p class="dt-page-subtitle">Complete history transactions and other purchase activities.</p>
         </div>
-        
     </div>
-
-    <?php if ($this->session->flashdata('success')): ?>
-        <div class="alert alert-success"><?= $this->session->flashdata('success'); ?></div>
-    <?php endif; ?>
-
-    <!-- ── KPI Summary Cards ── -->
-    
 
     <!-- ── Main Data Card ── -->
     <div class="card border-0 shadow-sm dt-card">
-
         <!-- ── Toolbar ── -->
-         
-        <form id="historyForm" method="post" action="<?= base_url('admin/history'); ?>">
+        <form id="historyForm" method="post" action="<?= base_url('finance/history'); ?>">
             <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>">
-
             <div class="dt-toolbar">
                 <!-- LEFT: Global Search -->
                 <div class="dt-search-wrapper">
                     <i class="fas fa-search dt-search-icon"></i>
                     <?php $active_ppob_search = $this->session->userdata('search_invoice_ppob'); ?>
-                    <input type="text" id="historyGlobalSearch" class="dt-search-input" placeholder="<?= $active_ppob_search ?: 'Search by Invoice, or Phone...'; ?>" value="<?= $active_ppob_search; ?>">
+                    <input type="text" id="historyGlobalSearch" class="dt-search-input" placeholder="<?= $active_ppob_search ?: 'Search by Invoice, ID Product, or Phone...'; ?>" value="<?= $active_ppob_search; ?>">
                 </div>
                 <!-- RIGHT: Filters -->
                 <div class="dt-toolbar-filters">
-                    
-                    
-
                     <!-- More Filters Trigger -->
                     <div class="dt-filter-group dt-more-filters-wrapper">
                         <label class="dt-filter-label">&nbsp;</label>
@@ -65,20 +55,12 @@ $download_url = base_url('admin/download_history')
                         <div class="dt-more-panel" id="moreFiltersPanel">
                             <div class="dt-more-panel-header">
                                 <span class="dt-more-panel-title"><i class="fas fa-filter mr-1 mr-2"></i> Advanced Filters</span>
-                                <a href="<?= base_url('admin/resetHistory'); ?>" class="dt-more-clear">Clear All</a>
+                                <a href="<?= base_url('finance/history/reset'); ?>" class="dt-more-clear">Clear All</a>
                             </div>
 
                             <div class="dt-more-panel-body">
-                                <!-- Primary: Single Date -->
-                                <div class="dt-more-field">
-                                    <label class="dt-more-label"><i class="fas fa-calendar-alt mr-1 mr-2"></i> Transaction Date</label>
-                                    <div class="dt-filter-chip">
-                                        <input type="date" name="search_date_purchase" class="dt-chip-input" value="<?= $search_date_purchase_value; ?>">
-                                    </div>
-                                </div>
-
-                                <!-- Merchant -->
-                                <div class="dt-more-field">
+                                <!-- Merchant Filter -->
+                                <div class="mb-3">
                                     <label class="dt-more-label"><i class="fas fa-store mr-1 mr-2"></i> Merchant</label>
                                     <div class="dt-filter-chip" style="min-width: 180px;">
                                         <select name="search_merchant_purchase" class="dt-chip-input history-select2">
@@ -88,6 +70,26 @@ $download_url = base_url('admin/download_history')
                                                     <?= $merchant->c_name; ?>
                                                 </option>
                                             <?php endforeach; ?>
+                                        </select>
+                                    </div>
+                                </div>
+                                <!-- Primary: Single Date -->
+                                <div class="dt-more-field">
+                                    <label class="dt-more-label"><i class="fas fa-calendar-alt mr-1 mr-2"></i> Transaction Date</label>
+                                    <div class="dt-filter-chip">
+                                        <input type="date" name="search_date_purchase" class="dt-chip-input" value="<?= $search_date_purchase_value; ?>">
+                                    </div>
+                                </div>
+                                <!-- Status Filter -->
+                                <div class="mb-3">
+                                    <label class="dt-more-label"><i class="fas fa-info-circle mr-1 mr-2"></i> Status</label>
+                                    <div class="dt-filter-chip" style="min-width: 180px;">
+                                        <select name="search_status_purchase" class="dt-chip-input history-select2">
+                                            <option value="">All Statuses</option>
+                                            <option value="Success" <?= ('Success' == $search_status_purchase_value) ? 'selected' : ''; ?>>Success</option>
+                                            <option value="Failed" <?= ('Failed' == $search_status_purchase_value) ? 'selected' : ''; ?>>Failed</option>
+                                            <option value="Pending" <?= ('Pending' == $search_status_purchase_value) ? 'selected' : ''; ?>>Pending</option>
+                                            <option value="Timeout" <?= ('Timeout' == $search_status_purchase_value) ? 'selected' : ''; ?>>Timeout</option>
                                         </select>
                                     </div>
                                 </div>
@@ -106,7 +108,6 @@ $download_url = base_url('admin/download_history')
                     <a href="<?= $download_url; ?>" class="btn-dt-chip-action btn-dt-action-success">
                         <i class="fas fa-download"></i> <span class="d-none d-md-block">Download</span>
                     </a>
-                   
                 </div><!-- /.dt-toolbar-filters -->
             </div><!-- /.dt-toolbar -->
         </form>
@@ -119,7 +120,7 @@ $download_url = base_url('admin/download_history')
                         <th>No</th>
                         <th>Merchant</th>
                         <th>Date Time</th>
-                        <th>ID Produk</th>
+                        <th>ID Product</th>
                         <th>Invoice No</th>
                         <th>No Pelanggan</th>
                         <th>Nominal</th>
@@ -135,7 +136,7 @@ $download_url = base_url('admin/download_history')
 <script type="text/javascript">
     $(document).ready(function() {
         // Init Server-Side DataTable
-        var table = initServerDataTable("#historyTable", "<?= base_url('admin/history') ?>", [
+        var table = initServerDataTable("#historyTable", "<?= base_url('finance/history') ?>", [
             {data: 'no'},
             {data: 'name_merchant'},
             {data: 'c_datetime', render: function(data){
@@ -149,9 +150,10 @@ $download_url = base_url('admin/download_history')
             }},
             {data: 'c_status', render: function(data){
                 var badgeClass = 'badge-secondary';
-                if(data == 'SUCCESS') badgeClass = 'badge-success';
-                if(data == 'FAILED') badgeClass = 'badge-danger';
-                if(data == 'PENDING') badgeClass = 'badge-warning';
+                if(data === 'Success') badgeClass = 'badge-success';
+                else if(data === 'Failed') badgeClass = 'badge-danger';
+                else if(data === 'Pending') badgeClass = 'badge-warning';
+                else if(data === 'Timeout') badgeClass = 'badge-secondary';
                 return '<span class="badge badge-pill ' + badgeClass + '">' + data + '</span>';
             }}
         ]);

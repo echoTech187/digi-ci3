@@ -42,6 +42,7 @@ class VirtualAccountTransactionController extends CI_Controller
       $search_date_va = $this->input->get('date') ?: $this->input->post('search_date_va');
       $search_date_va_to = $this->input->get('date_to') ?: $this->input->post('search_date_va_to');
       $search_date_va_settlement = $this->input->get('settlement') ?: $this->input->post('search_date_va_settlement');
+      $search_channel_va = $this->input->get('channel') ?: $this->input->post('search_channel_va');
 
       if (!$this->input->is_ajax_request()) {
          $search_va_number = $this->input->get('va_number') ?: ($this->input->post('search_va_number') ?: '');
@@ -63,6 +64,7 @@ class VirtualAccountTransactionController extends CI_Controller
       if ($search_date_va !== null) $this->session->set_userdata('search_date_va', $search_date_va);
       if ($search_date_va_to !== null) $this->session->set_userdata('search_date_va_to', $search_date_va_to);
       if ($search_date_va_settlement !== null) $this->session->set_userdata('search_date_va_settlement', $search_date_va_settlement);
+      if ($search_channel_va !== null) $this->session->set_userdata('search_channel_va', $search_channel_va);
       
       $this->session->set_userdata('search_va_number', $search_va_number);
       $this->session->set_userdata('search_va_transid', $search_va_transid);
@@ -78,6 +80,7 @@ class VirtualAccountTransactionController extends CI_Controller
                $this->session->unset_userdata('search_date_va_to');
                $this->session->unset_userdata('search_name_va');
                $this->session->unset_userdata('search_date_va_settlement');
+               $this->session->unset_userdata('search_channel_va');
                $this->session->unset_userdata('search_va_number');
                $this->session->unset_userdata('search_va_transid');
                $this->session->unset_userdata('search_invoice_no');
@@ -93,8 +96,10 @@ class VirtualAccountTransactionController extends CI_Controller
                'date_to' => $this->session->userdata('search_date_va_to'),
                'merchant' => $this->session->userdata('search_name_va'),
                'settlement' => $this->session->userdata('search_date_va_settlement'),
+               'channel' => $this->session->userdata('search_channel_va'),
                'va_number' => $this->session->userdata('search_va_number'),
-               'transid' => $this->session->userdata('search_va_transid')
+               'transid' => $this->session->userdata('search_va_transid'),
+               'invoice_no' => $this->session->userdata('search_invoice_no')
             ];
             return $this->VirtualAccount->get_datatables_handler($filters);
          } catch (Throwable $e) {
@@ -110,6 +115,7 @@ class VirtualAccountTransactionController extends CI_Controller
       }
 
       $data['merchants'] = $this->VirtualAccount->get_merchant();
+      $data['internal_channels'] = $this->VirtualAccount->get_internal_channels();
       $this->load->view('virtualaccount/list', $data);
    }
 
@@ -119,6 +125,7 @@ class VirtualAccountTransactionController extends CI_Controller
       $this->session->unset_userdata('search_date_va_to');
       $this->session->unset_userdata('search_name_va');
       $this->session->unset_userdata('search_date_va_settlement');
+      $this->session->unset_userdata('search_channel_va');
       $this->session->unset_userdata('search_va_number');
       $this->session->unset_userdata('search_va_transid');
       $this->session->unset_userdata('last_search_va');
@@ -189,6 +196,7 @@ class VirtualAccountTransactionController extends CI_Controller
             $this->session->unset_userdata('search_date_vad_to');
             $this->session->unset_userdata('search_va_number');
             $this->session->unset_userdata('search_merchant_trxid');
+            $this->session->unset_userdata('search_status_transaction_vad');
             $this->session->unset_userdata('last_search_vad');
          }
       } else {
@@ -199,13 +207,15 @@ class VirtualAccountTransactionController extends CI_Controller
       $search_date_vad = $this->input->post('search_date_vad') != NULL ? $this->input->post('search_date_vad') : $this->session->userdata('search_date_vad');
       $search_date_vad_to = $this->input->post('search_date_vad_to') != NULL ? $this->input->post('search_date_vad_to') : $this->session->userdata('search_date_vad_to');
       $search_va_number = $this->input->get('va_number') ? $this->input->get('va_number') : ($this->input->post('search_va_number') != NULL ? $this->input->post('search_va_number') : $this->session->userdata('search_va_number'));
+      $search_status_transaction_vad = $this->input->post('search_status_transaction_vad') != NULL ? $this->input->post('search_status_transaction_vad') : $this->session->userdata('search_status_transaction_vad');
 
       $this->session->set_userdata([
          'search_name_vad' => $search_name_vad,
          'search_date_vad' => $search_date_vad,
          'search_date_vad_to' => $search_date_vad_to,
          'search_va_number' => $search_va_number,
-         'search_merchant_trxid' => $search_merchant_trxid
+         'search_merchant_trxid' => $search_merchant_trxid,
+         'search_status_transaction_vad' => $search_status_transaction_vad
       ]);
 
       if ($this->input->is_ajax_request()) {
@@ -219,6 +229,7 @@ class VirtualAccountTransactionController extends CI_Controller
                $this->session->unset_userdata('search_name_vad');
                $this->session->unset_userdata('search_va_number');
                $this->session->unset_userdata('search_merchant_trxid');
+               $this->session->unset_userdata('search_status_transaction_vad');
             }
 
             if ($dtSearch !== '') {
@@ -231,7 +242,8 @@ class VirtualAccountTransactionController extends CI_Controller
                'date' => $this->session->userdata('search_date_vad'),
                'date_to' => $this->session->userdata('search_date_vad_to'),
                'va_number' => $this->session->userdata('search_va_number'),
-               'merchant_trxid' => $this->session->userdata('search_merchant_trxid')
+               'merchant_trxid' => $this->session->userdata('search_merchant_trxid'),
+               'status' => $this->session->userdata('search_status_transaction_vad')
             ];
             return $this->VADynamic->get_datatables_handler($filters);
          } catch (Throwable $e) {
@@ -257,6 +269,7 @@ class VirtualAccountTransactionController extends CI_Controller
       $this->session->unset_userdata('search_date_vad_to');
       $this->session->unset_userdata('search_va_number');
       $this->session->unset_userdata('search_merchant_trxid');
+      $this->session->unset_userdata('search_status_transaction_vad');
       $this->session->unset_userdata('last_search_vad');
       redirect('virtual-account/dynamic');
    }
@@ -277,6 +290,7 @@ class VirtualAccountTransactionController extends CI_Controller
             $this->session->unset_userdata('search_submerchant_var');
             $this->session->unset_userdata('search_transid_var');
             $this->session->unset_userdata('search_va_number_var');
+            $this->session->unset_userdata('search_status_transaction_var');
             $this->session->unset_userdata('last_search_var');
          }
       } else {
@@ -298,8 +312,12 @@ class VirtualAccountTransactionController extends CI_Controller
       if ($search_name_var) $this->session->set_userdata('search_name_var', $search_name_var);
       else $search_name_var = $this->session->userdata('search_name_var');
 
-      if ($search_submerchant_var) $this->session->set_userdata('search_submerchant_var', $search_submerchant_var);
+      if ($search_submerchant_var !== null) $this->session->set_userdata('search_submerchant_var', $search_submerchant_var);
       else $search_submerchant_var = $this->session->userdata('search_submerchant_var');
+
+      $search_status_transaction_var = $this->input->post('search_status_transaction_var');
+      if ($search_status_transaction_var !== null) $this->session->set_userdata('search_status_transaction_var', $search_status_transaction_var);
+      else $search_status_transaction_var = $this->session->userdata('search_status_transaction_var');
 
       $this->session->set_userdata('search_transid_var', $search_transid_var);
       $this->session->set_userdata('search_va_number_var', $search_va_number);
@@ -315,6 +333,7 @@ class VirtualAccountTransactionController extends CI_Controller
                $this->session->unset_userdata('search_name_var');
                $this->session->unset_userdata('search_submerchant_var');
                $this->session->unset_userdata('search_transid_var');
+               $this->session->unset_userdata('search_status_transaction_var');
             }
 
             if ($dtSearch !== '') {
@@ -327,6 +346,7 @@ class VirtualAccountTransactionController extends CI_Controller
                'date' => $this->session->userdata('search_date_var'),
                'submerchant' => $this->session->userdata('search_submerchant_var'),
                'transid' => $this->session->userdata('search_transid_var'),
+               'status' => $this->session->userdata('search_status_transaction_var'),
             ];
             return $this->VARecurring->get_datatables_handler($filters);
          } catch (Throwable $e) {
@@ -348,10 +368,12 @@ class VirtualAccountTransactionController extends CI_Controller
    public function resetVa_recurring()
    {
       $this->session->unset_userdata('search_date_var');
+      $this->session->unset_userdata('search_date_var_to');
       $this->session->unset_userdata('search_name_var');
       $this->session->unset_userdata('search_submerchant_var');
       $this->session->unset_userdata('search_transid_var');
       $this->session->unset_userdata('search_va_number_var');
+      $this->session->unset_userdata('search_status_transaction_var');
       $this->session->unset_userdata('last_search_var');
       redirect('virtual-account/recurring');
    }

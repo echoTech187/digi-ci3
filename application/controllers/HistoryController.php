@@ -40,6 +40,7 @@ class HistoryController extends CI_Controller
       }
 
       $search_merchant_purchase = $this->input->post('search_merchant_purchase');
+      $search_status_purchase = $this->input->post('search_status_purchase');
       $search_date_purchase = $this->input->post('search_date_purchase');
 
       if ($search_date_purchase) {
@@ -54,6 +55,12 @@ class HistoryController extends CI_Controller
          $search_merchant_purchase = $this->session->userdata('search_merchant_purchase');
       }
 
+      if ($search_status_purchase) {
+         $this->session->set_userdata('search_status_purchase', $search_status_purchase);
+      } else {
+         $search_status_purchase = $this->session->userdata('search_status_purchase');
+      }
+
       $this->session->set_userdata('search_invoice_ppob', $search_invoice_ppob);
 
       // Handle DataTables AJAX Request
@@ -65,6 +72,7 @@ class HistoryController extends CI_Controller
             if ($dtSearch === '' && $oldSearch !== '' && $oldSearch !== null) {
                 $this->session->unset_userdata('search_date_purchase');
                 $this->session->unset_userdata('search_merchant_purchase');
+                $this->session->unset_userdata('search_status_purchase');
                 $this->session->unset_userdata('search_invoice_ppob');
             }
 
@@ -76,6 +84,7 @@ class HistoryController extends CI_Controller
             $filters = [
                'date' => $this->session->userdata('search_date_purchase'),
                'merchant' => $this->session->userdata('search_merchant_purchase'),
+               'status' => $this->session->userdata('search_status_purchase'),
                'invoice' => $this->session->userdata('search_invoice_ppob')
             ];
             return $this->History->get_datatables_handler($filters);
@@ -102,6 +111,7 @@ class HistoryController extends CI_Controller
    {
       $this->session->unset_userdata('search_date_purchase');
       $this->session->unset_userdata('search_merchant_purchase');
+      $this->session->unset_userdata('search_status_purchase');
       $this->session->unset_userdata('search_invoice_ppob');
       $this->session->unset_userdata('last_search_ppob');
       redirect('finance/history');
@@ -111,15 +121,16 @@ class HistoryController extends CI_Controller
    {
       $search_date_purchase = $this->input->get('search_date_purchase') ?: '';
       $search_merchant_purchase = $this->input->get('search_merchant_purchase') ?: '';
+      $search_status_purchase = $this->input->get('search_status_purchase') ?: '';
 
-      if (empty($search_date_purchase) && empty($search_merchant_purchase)) {
-         $this->session->set_flashdata('error_message', 'Please select date and merchant before downloading.');
+      if (empty($search_date_purchase) && empty($search_merchant_purchase) && empty($search_status_purchase)) {
+         $this->session->set_flashdata('error_message', 'Please select at least one filter before downloading.');
          redirect('finance/history');
       }
 
       $user = $this->Model_user->view_user()->row_array();
       $adminID = $user['id'];
-      $additionalFilter = $search_date_purchase . '|' . $search_merchant_purchase;
+      $additionalFilter = $search_date_purchase . '|' . $search_merchant_purchase . '|' . $search_status_purchase;
 
       $data = array(
          'ref_adminId' => $adminID,

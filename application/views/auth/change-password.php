@@ -18,7 +18,7 @@
 
                         <?= $this->session->flashdata('message'); ?>
 
-                        <form class="user" method="post" action="<?= base_url('auth/changepassword'); ?>">
+                        <form class="user" method="post" action="<?= base_url('auth/change-password'); ?>">
                             <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>">
                            <div class="form-group">
                               <input type="password" class="form-control form-control-user" id="password1" name="password1" placeholder="Enter new password...">

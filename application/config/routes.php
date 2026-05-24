@@ -98,7 +98,7 @@ $route['virtual-account/dynamic'] = 'VirtualAccountTransactionController/Va_dyna
 $route['virtual-account/dynamic/reset'] = 'VirtualAccountTransactionController/resetVa_dynamic';
 $route['virtual-account/recurring'] = 'VirtualAccountTransactionController/VA_recurring';
 $route['virtual-account/recurring/reset'] = 'VirtualAccountTransactionController/resetVa_recurring';
-$route['virtual-account/notification/resend/(:num)'] = 'VirtualAccountTransactionController/SendnotifikasiVA/$1';
+$route['virtual-account/notification/resend/(:any)/(:any)'] = 'VirtualAccountTransactionController/SendnotifikasiVA/$1/$2';
 $route['virtual-account/dynamic/channel/external'] = 'VirtualAccountTransactionController/getDetailVaDynamicChannelExternal';
 $route['virtual-account/recurring/channel/external'] = 'VirtualAccountTransactionController/getDetailVaRecurringChannelExternal';
 
@@ -111,7 +111,7 @@ $route['qris/dynamic'] = 'QrisTransactionController/qris_dynamic';
 $route['qris/dynamic/reset'] = 'QrisTransactionController/resetqris_dynamic';
 $route['qris/recurring'] = 'QrisTransactionController/qris_recurring';
 $route['qris/recurring/reset'] = 'QrisTransactionController/resetqris_recurring';
-$route['qris/notification/resend/(:num)'] = 'QrisTransactionController/SendnotifikasiQRIS/$1';
+$route['qris/notification/resend/(:any)/(:any)'] = 'QrisTransactionController/SendnotifikasiQRIS/$1/$2';
 $route['qris/dynamic/channel/external'] = 'QrisTransactionController/getDetailQrisDynamicChannelExternal';
 $route['qris/recurring/channel/external'] = 'QrisTransactionController/getDetailQrisRecurringChannelExternal';
 $route['qris/dynamic/list'] = 'QrisTransactionController/qris_dynamic_list';
@@ -123,7 +123,7 @@ $route['finance/e-wallet/detail/(:num)'] = 'EwalletTransactionController/ewallet
 $route['finance/e-wallet/download'] = 'EwalletTransactionController/download_ewallet';
 $route['e-wallet/dynamic'] = 'EwalletTransactionController/ewallet_dynamic';
 $route['e-wallet/dynamic/reset'] = 'EwalletTransactionController/resetewallet_dynamic';
-$route['finance/e-wallet/notification/resend/(:num)'] = 'EwalletTransactionController/Sendnotifikasiewallet/$1';
+$route['finance/e-wallet/notification/resend/(:any)/(:any)'] = 'EwalletTransactionController/Sendnotifikasiewallet/$1/$2';
 $route['finance/e-wallet/channel/external'] = 'EwalletTransactionController/getDetailEwalletChannelExternal';
 $route['e-wallet/dynamic/channel/external'] = 'EwalletTransactionController/getDetailEwalletDynamicChannelExternal';
 
@@ -193,9 +193,10 @@ $route['merchant/sub-account/(:num)'] = 'MerchantSubAccountController/Submerchan
 
 // ── ReportController ─────────────────────────────────────────────
 $route['report/download'] = 'ReportController/report';
-$route['report/download/reset'] = 'ReportController/resetdownload';
+$route['report/download/reset'] = 'ReportController/reset_download';
 $route['report/download/export'] = 'ReportController/download';
 $route['report/balance-log'] = 'ReportController/balance_log';
+$route['report/balance-log/reset'] = 'ReportController/reset_balance_log';
 
 // ── UserAccessController ─────────────────────────────────────────────
 $route['access-control/holiday'] = 'UserAccessController/holiday';
@@ -255,8 +256,8 @@ $route['channel/cashin/create'] = 'ChannelController/createCashinChanel';
 $route['channel/cashout/create'] = 'ChannelController/createCashOutChanel';
 $route['channel/cashin/update'] = 'ChannelController/updateCashinChanel';
 $route['channel/cashout/update'] = 'ChannelController/updateCashOutChanel';
-$route['channel/deleteCashInChanel/(:any)'] = 'ChannelController/deleteCashInChanel/$1';
-$route['channel/deleteCashOutChanel/(:any)'] = 'ChannelController/deleteCashOutChanel/$1';
+$route['channel/cashin/delete/(:any)'] = 'ChannelController/deleteCashInChanel/$1';
+$route['channel/cashout/delete/(:any)'] = 'ChannelController/deleteCashOutChanel/$1';
 
 // ── ServiceController ─────────────────────────────────────────────
 $route['product/pulsa-reguler'] = 'ServiceController/pulsa_reguler';
@@ -272,11 +273,7 @@ $route['product/games/hago'] = 'ServiceController/hago';
 $route['product/games/google-play'] = 'ServiceController/googleplay';
 $route['product/create'] = 'ServiceController/createProduk';
 $route['product/update'] = 'ServiceController/updateProduct';
+$route['product/delete/(:any)'] = 'ServiceController/deleteProduct/$1';
 
 // ── HealthCheck ─────────────────────────────────────────────
 $route['health/db-check'] = 'HealthController/dbCheck';
-
-
-
-
-

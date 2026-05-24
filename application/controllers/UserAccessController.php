@@ -48,6 +48,10 @@ class UserAccessController extends CI_Controller {
 
       // Basic validation
       if (empty($c_date) || empty($c_desc) || empty($c_status)) {
+         if ($this->input->is_ajax_request()) {
+             echo json_encode(['status' => 'error', 'message' => 'All fields are required.']);
+             return;
+         }
          $this->session->set_flashdata('error', 'All fields are required.');
          redirect('access-control/holiday');
          return;
@@ -62,10 +66,18 @@ class UserAccessController extends CI_Controller {
       if ($c_action === 'update') {
          // Update existing holiday by date
          $this->HolidayModel->update_holiday($c_date, $data);
+         if ($this->input->is_ajax_request()) {
+             echo json_encode(['status' => 'success', 'message' => 'Holiday updated successfully.']);
+             return;
+         }
          $this->session->set_flashdata('success', 'Holiday updated successfully.');
       } else {
          // Insert new holiday
          $this->HolidayModel->add_holiday($data);
+         if ($this->input->is_ajax_request()) {
+             echo json_encode(['status' => 'success', 'message' => 'Holiday added successfully.']);
+             return;
+         }
          $this->session->set_flashdata('success', 'Holiday added successfully.');
       }
 
@@ -122,22 +134,38 @@ class UserAccessController extends CI_Controller {
       $c_password_confirm = $this->input->post('c_password_confirm');
 
       if (empty($c_email) || empty($c_password) || empty($c_password_confirm)) {
+         if ($this->input->is_ajax_request()) {
+             echo json_encode(['status' => 'error', 'message' => 'Email, Password, and Password Confirmation are required for new admin.']);
+             return;
+         }
          $this->session->set_flashdata('error', 'Email, Password, and Password Confirmation are required for new admin.');
          redirect('access-control/accounts');
          return;
       }
       if ($c_password !== $c_password_confirm) {
+         if ($this->input->is_ajax_request()) {
+             echo json_encode(['status' => 'error', 'message' => 'Password and Password Confirmation do not match.']);
+             return;
+         }
          $this->session->set_flashdata('error', 'Password and Password Confirmation do not match.');
          redirect('access-control/accounts');
          return;
       }
       $existing = $this->db->get_where('admin', ['c_email' => $c_email])->row();
       if ($existing) {
+         if ($this->input->is_ajax_request()) {
+             echo json_encode(['status' => 'error', 'message' => 'Email already exists.']);
+             return;
+         }
          $this->session->set_flashdata('error', 'Email already exists.');
          redirect('access-control/accounts');
          return;
       }
       if (!in_array($c_level, ['1', '2'])) {
+         if ($this->input->is_ajax_request()) {
+             echo json_encode(['status' => 'error', 'message' => 'Invalid Level. Allowed values are 1 or 2.']);
+             return;
+         }
          $this->session->set_flashdata('error', 'Invalid Level. Allowed values are 1 or 2.');
          redirect('access-control/accounts');
          return;
@@ -154,16 +182,24 @@ class UserAccessController extends CI_Controller {
 
       $result = $this->AdminModel->add_admin($data);
       if ($result === true) {
+         if ($this->input->is_ajax_request()) {
+             echo json_encode(['status' => 'success', 'message' => 'Admin added successfully.']);
+             return;
+         }
          $this->session->set_flashdata('success', 'Admin added successfully.');
       } else {
          $code = isset($result['code']) ? $result['code'] : 0;
+         $msg = 'Unable to create admin account due to a system constraint. Please verify your input or contact technical support.';
          if ($code == 1142) {
-            $this->session->set_flashdata('error', 'Access Denied. You do not have sufficient database privileges to create administrator accounts.');
+            $msg = 'Access Denied. You do not have sufficient database privileges to create administrator accounts.';
          } elseif ($code == 1062) {
-            $this->session->set_flashdata('error', 'An account with these credentials already exists in the system.');
-         } else {
-            $this->session->set_flashdata('error', 'Unable to create admin account due to a system constraint. Please verify your input or contact technical support.');
+            $msg = 'An account with these credentials already exists in the system.';
          }
+         if ($this->input->is_ajax_request()) {
+             echo json_encode(['status' => 'error', 'message' => $msg]);
+             return;
+         }
+         $this->session->set_flashdata('error', $msg);
       }
       redirect('access-control/accounts');
    }
@@ -177,6 +213,10 @@ class UserAccessController extends CI_Controller {
       }
 
       if (empty($id)) {
+         if ($this->input->is_ajax_request()) {
+             echo json_encode(['status' => 'error', 'message' => 'Invalid admin ID.']);
+             return;
+         }
          $this->session->set_flashdata('error', 'Invalid admin ID.');
          redirect('access-control/accounts');
          return;
@@ -191,6 +231,10 @@ class UserAccessController extends CI_Controller {
       $c_password_confirm = $this->input->post('c_password_confirm');
 
       if (!in_array($c_level, ['1', '2'])) {
+         if ($this->input->is_ajax_request()) {
+             echo json_encode(['status' => 'error', 'message' => 'Invalid Level. Allowed values are 1 or 2.']);
+             return;
+         }
          $this->session->set_flashdata('error', 'Invalid Level. Allowed values are 1 or 2.');
          redirect('access-control/accounts');
          return;
@@ -207,6 +251,10 @@ class UserAccessController extends CI_Controller {
          // Check if email already exists for a DIFFERENT admin
          $existing = $this->db->get_where('admin', ['c_email' => $c_email, 'id !=' => $id])->row();
          if ($existing) {
+            if ($this->input->is_ajax_request()) {
+                echo json_encode(['status' => 'error', 'message' => 'Email already exists for another account.']);
+                return;
+            }
             $this->session->set_flashdata('error', 'Email already exists for another account.');
             redirect('access-control/accounts');
             return;
@@ -216,6 +264,10 @@ class UserAccessController extends CI_Controller {
 
       if (!empty($c_password)) {
          if ($c_password !== $c_password_confirm) {
+            if ($this->input->is_ajax_request()) {
+                echo json_encode(['status' => 'error', 'message' => 'Password and Password Confirmation do not match.']);
+                return;
+            }
             $this->session->set_flashdata('error', 'Password and Password Confirmation do not match.');
             redirect('access-control/accounts');
             return;
@@ -225,16 +277,24 @@ class UserAccessController extends CI_Controller {
 
       $result = $this->AdminModel->update_admin($id, $data);
       if ($result === true) {
+         if ($this->input->is_ajax_request()) {
+             echo json_encode(['status' => 'success', 'message' => 'Admin updated successfully.']);
+             return;
+         }
          $this->session->set_flashdata('success', 'Admin updated successfully.');
       } else {
          $code = isset($result['code']) ? $result['code'] : 0;
+         $msg = 'Unable to update account details due to a system constraint. Please verify your input or contact technical support.';
          if ($code == 1142) {
-            $this->session->set_flashdata('error', 'Access Denied. You do not have sufficient database privileges to modify administrator accounts.');
+            $msg = 'Access Denied. You do not have sufficient database privileges to modify administrator accounts.';
          } elseif ($code == 1062) {
-            $this->session->set_flashdata('error', 'The email address provided is already registered to another account.');
-         } else {
-            $this->session->set_flashdata('error', 'Unable to update account details due to a system constraint. Please verify your input or contact technical support.');
+            $msg = 'The email address provided is already registered to another account.';
          }
+         if ($this->input->is_ajax_request()) {
+             echo json_encode(['status' => 'error', 'message' => $msg]);
+             return;
+         }
+         $this->session->set_flashdata('error', $msg);
       }
       redirect('access-control/accounts');
    }

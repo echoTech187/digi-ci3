@@ -306,6 +306,7 @@ class QrisTransactionController extends CI_Controller
             $this->session->unset_userdata('search_name_qr');
             $this->session->unset_userdata('search_submerchant_qr');
             $this->session->unset_userdata('search_transid_qr');
+            $this->session->unset_userdata('search_status_transaction_qr');
             $this->session->unset_userdata('last_search_qr');
          }
       } else {
@@ -329,6 +330,10 @@ class QrisTransactionController extends CI_Controller
       if ($search_submerchant_qr !== null) $this->session->set_userdata('search_submerchant_qr', $search_submerchant_qr);
       else $search_submerchant_qr = $this->session->userdata('search_submerchant_qr');
 
+      $search_status_transaction_qr = $this->input->post('search_status_transaction_qr');
+      if ($search_status_transaction_qr !== null) $this->session->set_userdata('search_status_transaction_qr', $search_status_transaction_qr);
+      else $search_status_transaction_qr = $this->session->userdata('search_status_transaction_qr');
+
       $this->session->set_userdata('search_transid_qr', $search_transid_qr);
 
       if ($this->input->is_ajax_request()) {
@@ -342,6 +347,7 @@ class QrisTransactionController extends CI_Controller
                $this->session->unset_userdata('search_name_qr');
                $this->session->unset_userdata('search_submerchant_qr');
                $this->session->unset_userdata('search_transid_qr');
+               $this->session->unset_userdata('search_status_transaction_qr');
             }
 
             if ($dtSearch !== '') {
@@ -354,7 +360,8 @@ class QrisTransactionController extends CI_Controller
                'date' => $this->session->userdata('search_date_qr'),
                'date_to' => $this->session->userdata('search_date_qr_to'),
                'transid' => $this->session->userdata('search_transid_qr'),
-               'submerchant' => $this->session->userdata('search_submerchant_qr')
+               'submerchant' => $this->session->userdata('search_submerchant_qr'),
+               'status' => $this->session->userdata('search_status_transaction_qr')
             ];
             return $this->QRISRecurring->get_datatables_handler($filters);
          } catch (Throwable $e) {
@@ -380,6 +387,8 @@ class QrisTransactionController extends CI_Controller
       $this->session->unset_userdata('search_name_qr');
       $this->session->unset_userdata('search_submerchant_qr');
       $this->session->unset_userdata('search_transid_qr');
+      $this->session->unset_userdata('search_status_transaction_qr');
+      $this->session->unset_userdata('last_search_qr');
       redirect('qris/recurring');
    }
 

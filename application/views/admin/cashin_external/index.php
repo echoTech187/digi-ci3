@@ -314,7 +314,6 @@
 </div>
 
 
-<script src="<?= base_url('assets/js/server-datatables.js') ?>"></script>
 <script>
 $(document).ready(function() {
     // Drawer Logic

@@ -16,9 +16,24 @@ class ReportController extends CI_Controller {
    {
       is_logged_in();
 
+      if (!$this->input->is_ajax_request()) {
+         $search_merchant = $this->input->post('search_merchant_balance_log') !== null ? $this->input->post('search_merchant_balance_log') : $this->session->userdata('search_merchant_balance_log');
+         $search_date_from = $this->input->post('search_date_balance_log') !== null ? $this->input->post('search_date_balance_log') : $this->session->userdata('search_date_balance_log');
+         $search_date_to = $this->input->post('search_date_balance_log_to') !== null ? $this->input->post('search_date_balance_log_to') : $this->session->userdata('search_date_balance_log_to');
+
+         $this->session->set_userdata('search_merchant_balance_log', $search_merchant);
+         $this->session->set_userdata('search_date_balance_log', $search_date_from);
+         $this->session->set_userdata('search_date_balance_log_to', $search_date_to);
+      }
+
       if ($this->input->is_ajax_request()) {
          try {
-            return $this->BalanceLogModel->get_datatables_handler();
+            $filters = [
+               'merchant' => $this->session->userdata('search_merchant_balance_log'),
+               'date_from' => $this->session->userdata('search_date_balance_log'),
+               'date_to' => $this->session->userdata('search_date_balance_log_to')
+            ];
+            return $this->BalanceLogModel->get_datatables_handler($filters);
          } catch (Throwable $e) {
             log_message('error', 'Balance Log AJAX error: ' . $e->getMessage());
             echo json_encode(array(
@@ -33,6 +48,10 @@ class ReportController extends CI_Controller {
 
       $data['title'] = 'Balance Log';
       $data['user'] = $this->Model_user->view_user()->row_array();
+      $data['merchants'] = $this->BalanceLogModel->get_merchant();
+      $data['search_merchant'] = $this->session->userdata('search_merchant_balance_log');
+      $data['search_date_from'] = $this->session->userdata('search_date_balance_log');
+      $data['search_date_to'] = $this->session->userdata('search_date_balance_log_to');
       $data['balance_logs'] = [];
 
       // Summary data for KPI cards
@@ -50,15 +69,25 @@ class ReportController extends CI_Controller {
       $this->load->model('AdminDownload');
       is_logged_in();
 
-      $search_date = $this->input->post('search_date');
-      if (!$search_date && !$this->input->is_ajax_request()) {
-         $search_date = $this->session->userdata('search_date');
+      if (!$this->input->is_ajax_request()) {
+         $search_date = $this->input->post('search_date') !== null ? $this->input->post('search_date') : $this->session->userdata('search_date');
+         $search_date_to = $this->input->post('search_date_to') !== null ? $this->input->post('search_date_to') : $this->session->userdata('search_date_to');
+         $search_type = $this->input->post('search_type') !== null ? $this->input->post('search_type') : $this->session->userdata('search_type');
+         $search_status = $this->input->post('search_status') !== null ? $this->input->post('search_status') : $this->session->userdata('search_status');
+
+         $this->session->set_userdata('search_date', $search_date);
+         $this->session->set_userdata('search_date_to', $search_date_to);
+         $this->session->set_userdata('search_type', $search_type);
+         $this->session->set_userdata('search_status', $search_status);
       }
 
       if ($this->input->is_ajax_request()) {
          try {
             $filters = [
-               'date' => $this->session->userdata('search_date') ?: $this->input->post('search_date')
+               'date' => $this->session->userdata('search_date'),
+               'date_to' => $this->session->userdata('search_date_to'),
+               'type' => $this->session->userdata('search_type'),
+               'status' => $this->session->userdata('search_status')
             ];
             return $this->AdminDownload->get_datatables_handler($filters);
          } catch (Throwable $e) {
@@ -73,13 +102,12 @@ class ReportController extends CI_Controller {
          }
       }
 
-      if ($search_date) {
-         $this->session->set_userdata('search_date', $search_date);
-      }
-
       $data['title'] = 'Report';
       $data['user'] = $this->Model_user->view_user()->row_array();
-      $data['search_date'] = $search_date;
+      $data['search_date'] = $this->session->userdata('search_date');
+      $data['search_date_to'] = $this->session->userdata('search_date_to');
+      $data['search_type'] = $this->session->userdata('search_type');
+      $data['search_status'] = $this->session->userdata('search_status');
       $data['downloads'] = [];
       $data['pagination'] = '';
       $data['start'] = 0;
@@ -87,9 +115,12 @@ class ReportController extends CI_Controller {
       $this->load->view('report/index', $data);
    }
 
-   public function resetdownload()
+   public function reset_download()
    {
       $this->session->unset_userdata('search_date');
+      $this->session->unset_userdata('search_date_to');
+      $this->session->unset_userdata('search_type');
+      $this->session->unset_userdata('search_status');
       redirect('report/download');
    }
 
@@ -117,5 +148,13 @@ class ReportController extends CI_Controller {
       } else {
          echo 'Filename parameter is missing.';
       }
+   }
+
+   public function reset_balance_log()
+   {
+      $this->session->unset_userdata('search_merchant_balance_log');
+      $this->session->unset_userdata('search_date_balance_log');
+      $this->session->unset_userdata('search_date_balance_log_to');
+      redirect('report/balance-log');
    }
 }

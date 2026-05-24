@@ -135,7 +135,7 @@ class ServiceController extends CI_Controller {
    public function createProduk()
    {
       $this->form_validation->set_rules('caption', 'Caption', 'required');
-      $this->form_validation->set_rules('description', 'Description', 'required');
+    //   $this->form_validation->set_rules('description', 'Description', 'required');
       $this->form_validation->set_rules('price', 'Price', 'required|numeric');
 
       $caption = $this->input->post('caption');
@@ -147,27 +147,39 @@ class ServiceController extends CI_Controller {
       $name = $this->input->post('name');
 
       if ($this->form_validation->run() == FALSE) {
+         if ($this->input->is_ajax_request()) {
+            echo json_encode(['status' => 'error', 'message' => validation_errors()]);
+         } else {
+            $this->session->set_flashdata('error', validation_errors());
+            redirect($this->_get_route_by_view($name));
+         }
+         return;
+      }
 
-         $this->load->view('product/' . $name);
-      } else {
-         $data = array(
-            'id' => $id,
-            'c_caption' => $caption,
-            'c_description' => $description,
-            'c_fee' => $price,
-            'c_channelGroup' => $channelgroup,
-            'c_channelGroup2' => $channelgroup2,
-            'c_externalIdDefault' => 'portalpulsa',
-            'c_feeType' => 'Fixed',
-            'c_amountMin' => 0,
-            'c_amountMax' => 0
-         );
+      $data = array(
+         'id' => $id,
+         'c_caption' => $caption,
+         'c_description' => $description,
+         'c_fee' => $price,
+         'c_channelGroup' => $channelgroup,
+         'c_channelGroup2' => $channelgroup2,
+         'c_externalIdDefault' => 'portalpulsa',
+         'c_feeType' => 'Fixed',
+         'c_amountMin' => 0,
+         'c_amountMax' => 0
+      );
 
-         if ($this->Chanel->insert_cashout_chanel($data)) {
+      if ($this->Chanel->insert_cashout_chanel($data)) {
+         if ($this->input->is_ajax_request()) {
+            echo json_encode(['status' => 'success', 'message' => 'Product created successfully']);
+         } else {
             $this->session->set_flashdata('message', 'Product created successfully');
             redirect($this->_get_route_by_view($name));
+         }
+      } else {
+         if ($this->input->is_ajax_request()) {
+            echo json_encode(['status' => 'error', 'message' => 'An error occurred while creating the product']);
          } else {
-
             $this->session->set_flashdata('error', 'An error occurred while creating the product');
             redirect($this->_get_route_by_view($name));
          }
@@ -178,7 +190,7 @@ class ServiceController extends CI_Controller {
    {
       $this->form_validation->set_rules('id', 'Product ID', 'required');
       $this->form_validation->set_rules('caption', 'Caption', 'required');
-      $this->form_validation->set_rules('description', 'Description', 'required');
+    //   $this->form_validation->set_rules('description', 'Description', 'required');
       $this->form_validation->set_rules('price', 'Price', 'required|numeric');
 
       $id = $this->input->post('id');
@@ -189,26 +201,61 @@ class ServiceController extends CI_Controller {
       $channelgroup2 = $this->input->post('channelgroup2');
 
       if ($this->form_validation->run() == FALSE) {
-         $this->session->set_flashdata('error', validation_errors());
-         redirect($this->_get_route_by_view($view_name));
-      } else {
-         $data = array(
-            'c_caption' => $caption,
-            'c_description' => $description,
-            'c_fee' => $price
-         );
-
-         if (!empty($channelgroup2)) {
-            $data['c_channelGroup2'] = $channelgroup2;
+         if ($this->input->is_ajax_request()) {
+            echo json_encode(['status' => 'error', 'message' => validation_errors()]);
+         } else {
+            $this->session->set_flashdata('error', validation_errors());
+            redirect($this->_get_route_by_view($view_name));
          }
+         return;
+      }
 
-         if ($this->Chanel->update_cashout_chanel($id, $data)) {
+      $data = array(
+         'c_caption' => $caption,
+         'c_description' => $description,
+         'c_fee' => $price
+      );
+
+      if (!empty($channelgroup2)) {
+         $data['c_channelGroup2'] = $channelgroup2;
+      }
+
+      if ($this->Chanel->update_cashout_chanel($id, $data)) {
+         if ($this->input->is_ajax_request()) {
+            echo json_encode(['status' => 'success', 'message' => 'Product updated successfully']);
+         } else {
             $this->session->set_flashdata('message', 'Product updated successfully');
             redirect($this->_get_route_by_view($view_name));
+         }
+      } else {
+         if ($this->input->is_ajax_request()) {
+            echo json_encode(['status' => 'error', 'message' => 'An error occurred while updating the product']);
          } else {
             $this->session->set_flashdata('error', 'An error occurred while updating the product');
             redirect($this->_get_route_by_view($view_name));
          }
+      }
+   }
+
+   public function deleteProduct($id)
+   {
+      if (!$this->input->is_ajax_request()) {
+         show_404();
+      }
+
+      $result = $this->Chanel->deleteCashoutChannel($id);
+      
+      if ($result === true) {
+         echo json_encode(['status' => 'success', 'message' => 'Product deleted successfully']);
+      } else {
+         // Determine a user-friendly error message based on the error code if needed,
+         // but generally, hide raw SQL errors from the UI.
+         $friendlyMessage = 'Failed to delete product. Access denied or the data is currently in use.';
+         
+         // You can log the actual $result['message'] here if you have logging set up.
+         // log_message('error', 'Delete Product Error: ' . (is_array($result) && isset($result['message']) ? $result['message'] : 'Unknown error'));
+         
+         echo json_encode(['status' => 'error', 'message' => $friendlyMessage]);
       }
    }
 

@@ -85,40 +85,53 @@ class MerchantSubAccountController extends CI_Controller
       $this->form_validation->set_rules($formValidationRules);
 
       if ($this->form_validation->run() == FALSE) {
-         $errors = validation_errors('<li>', '</li>');
-         $this->session->set_flashdata('error', '<ul>' . $errors . '</ul>');
-         redirect('merchant/sub-account/' . $this->input->post('ref_merchantId'));
-      } else {
-         $data = [];
-         $subData = [];
-         
-         foreach ($formValidationRules as $rule) {
-            $field = $rule['field'];
-            $val = $this->input->post($field);
-            
-            if (strpos($field, 'c_gvconnect') === 0) {
-                $subData[$field] = $val;
-            } elseif ($field !== 'ref_merchantId') {
-                $data[$field] = $val;
-            }
-         }
-
-         $parent_id = $this->input->post('ref_merchantId');
-         
-         // Set default values for the new merchant account
-         $data['c_password'] = password_hash($this->input->post('c_email'), PASSWORD_DEFAULT);
-         $data['c_status'] = $this->input->post('c_status') ?: 'Active';
-         $data['c_type'] = "Sub Account";
-
-         $newId = $this->SubMerchant->create_submerchant_standard($parent_id, $data, $subData);
-
-         if ($newId) {
-            $this->session->set_flashdata('success', 'Submerchant successfully registered');
+         if ($this->input->is_ajax_request()) {
+             echo json_encode(['status' => 'error', 'message' => validation_errors()]);
          } else {
-            $this->session->set_flashdata('error', 'Failed to register Submerchant.');
+             $errors = validation_errors('<li>', '</li>');
+             $this->session->set_flashdata('error', '<ul>' . $errors . '</ul>');
+             redirect('merchant/sub-account/' . $this->input->post('ref_merchantId'));
          }
+         return;
+      }
 
-         redirect('merchant/sub-account/' . $parent_id);
+      $data = [];
+      $subData = [];
+      
+      foreach ($formValidationRules as $rule) {
+         $field = $rule['field'];
+         $val = $this->input->post($field);
+         
+         if (strpos($field, 'c_gvconnect') === 0) {
+             $subData[$field] = $val;
+         } elseif ($field !== 'ref_merchantId') {
+             $data[$field] = $val;
+         }
+      }
+
+      $parent_id = $this->input->post('ref_merchantId');
+      
+      // Set default values for the new merchant account
+      $data['c_password'] = password_hash($this->input->post('c_email'), PASSWORD_DEFAULT);
+      $data['c_status'] = $this->input->post('c_status') ?: 'Active';
+      $data['c_type'] = "Sub Account";
+
+      $newId = $this->SubMerchant->create_submerchant_standard($parent_id, $data, $subData);
+
+      if ($newId) {
+         if ($this->input->is_ajax_request()) {
+             echo json_encode(['status' => 'success', 'message' => 'Submerchant successfully registered']);
+         } else {
+             $this->session->set_flashdata('success', 'Submerchant successfully registered');
+             redirect('merchant/sub-account/' . $parent_id);
+         }
+      } else {
+         if ($this->input->is_ajax_request()) {
+             echo json_encode(['status' => 'error', 'message' => 'Failed to register Submerchant.']);
+         } else {
+             $this->session->set_flashdata('error', 'Failed to register Submerchant.');
+             redirect('merchant/sub-account/' . $parent_id);
+         }
       }
    }
 
@@ -128,8 +141,13 @@ class MerchantSubAccountController extends CI_Controller
       $this->form_validation->set_rules('c_email', 'Email', 'required|valid_email');
 
       if ($this->form_validation->run() == FALSE) {
-         $this->session->set_flashdata('error', validation_errors());
-         redirect($_SERVER['HTTP_REFERER']);
+         if ($this->input->is_ajax_request()) {
+             echo json_encode(['status' => 'error', 'message' => validation_errors()]);
+         } else {
+             $this->session->set_flashdata('error', validation_errors());
+             redirect($_SERVER['HTTP_REFERER']);
+         }
+         return;
       }
 
       $data = [
@@ -148,14 +166,23 @@ class MerchantSubAccountController extends CI_Controller
 
       $updated = $this->SubMerchant->update_submerchant($id, $data);
 
-      if ($updated) {
-         $this->session->set_flashdata('success', 'SubMerchant was successfully updated.');
-      } else {
-         $this->session->set_flashdata('error', 'Failed to update SubMerchant.');
-      }
-
       $refMerchantId = $this->input->post('ref_merchantId');
-      redirect('merchant/sub-account/' . $refMerchantId);
+
+      if ($updated) {
+         if ($this->input->is_ajax_request()) {
+             echo json_encode(['status' => 'success', 'message' => 'SubMerchant was successfully updated.']);
+         } else {
+             $this->session->set_flashdata('success', 'SubMerchant was successfully updated.');
+             redirect('merchant/sub-account/' . $refMerchantId);
+         }
+      } else {
+         if ($this->input->is_ajax_request()) {
+             echo json_encode(['status' => 'error', 'message' => 'Failed to update SubMerchant.']);
+         } else {
+             $this->session->set_flashdata('error', 'Failed to update SubMerchant.');
+             redirect('merchant/sub-account/' . $refMerchantId);
+         }
+      }
    }
 
    public function get_submerchants()

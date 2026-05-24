@@ -9,7 +9,7 @@ class VirtualAccount extends CI_Model {
     var $column_search = array('cpv.id', 'm.c_name', 'c.c_invoiceNo', 'cpv.c_vaNumber', 'cdv.c_merchantTransactionId', 'crv.c_merchantTransactionId', 'egv.c_custom');
     var $order = array('cpv.id' => 'desc');
 
-    private function _get_datatables_query($search_date = null, $search_date_to = null, $search_merchant = null, $search_settlement = null, $search_va = null, $search_transid = null, $only_ids = false, $count_only = false)
+    private function _get_datatables_query($search_date = null, $search_date_to = null, $search_merchant = null, $search_settlement = null, $search_va = null, $search_transid = null, $search_invoice = null, $search_channel = null, $only_ids = false, $count_only = false)
     {
         // Emergency safeguard
         $this->db->query("SET SESSION max_execution_time = 30000");
@@ -65,6 +65,9 @@ class VirtualAccount extends CI_Model {
         }
         if ($search_merchant) {
             $this->db->where('cpv.ref_merchantId', $search_merchant);
+        }
+        if ($search_channel) {
+            $this->db->where('cpv.ref_cashinChannelId', $search_channel);
         }
         if ($search_va !== null && $search_va !== '' && !$searchValue) {
             $search_va = trim($search_va);
@@ -129,6 +132,22 @@ class VirtualAccount extends CI_Model {
                 $this->db->where_in('cpv.id', array_unique($matching_ids));
             }
         }
+        if ($search_invoice !== null && $search_invoice !== '' && !$searchValue) {
+            $search_invoice = trim($search_invoice);
+            if ($search_invoice !== '') {
+                $safeInvoice = $this->db->escape_str($search_invoice);
+                $matching_ids = [-1];
+
+                $inv_res = $this->db->query("SELECT id FROM cashin WHERE c_invoiceNo LIKE '$safeInvoice%' LIMIT 50")->result();
+                if (!empty($inv_res)) {
+                    $inv_ids = array_column($inv_res, 'id');
+                    $cpv_inv_res = $this->db->query("SELECT id FROM cashin_payment_va WHERE ref_cashinId IN (".implode(',', $inv_ids).") LIMIT 50")->result();
+                    if (!empty($cpv_inv_res)) $matching_ids = array_merge($matching_ids, array_column($cpv_inv_res, 'id'));
+                }
+                
+                $this->db->where_in('cpv.id', array_unique($matching_ids));
+            }
+        }
 
         if ($searchValue) {
             $safeSearchValue = $this->db->escape_str($searchValue);
@@ -142,18 +161,6 @@ class VirtualAccount extends CI_Model {
                 $last_query = $searchValue;
                 $matching_ids = [-1];
                 $matching_inv_ids = [-1];
-
-                $extracted_date = null;
-                // Improved regex to handle various formats
-                if (preg_match('/(?:GD|TRX|VA|EW|BF|_)([0-9]{6})/i', $searchValue, $matches)) {
-                    $yymmdd = $matches[1];
-                    $year = "20" . substr($yymmdd, 0, 2);
-                    $month = substr($yymmdd, 2, 2);
-                    $day = substr($yymmdd, 4, 2);
-                    if (checkdate($month, $day, $year)) {
-                        $extracted_date = "$year-$month-$day";
-                    }
-                }
 
                 $op = (strlen($searchValue) >= 15) ? '=' : 'LIKE';
                 $val = (strlen($searchValue) >= 15) ? "'$safeSearchValue'" : "'$safeSearchValue%'";
@@ -186,9 +193,6 @@ class VirtualAccount extends CI_Model {
                 if (count($matching_ids) <= 1 || strlen($searchValue) < 15) {
                     if (strlen($searchValue) >= 4) {
                         $inv_q = "SELECT id FROM cashin WHERE c_invoiceNo $op $val ";
-                        if ($extracted_date) {
-                            $inv_q .= " AND (c_datetime >= '$extracted_date 00:00:00' AND c_datetime <= '$extracted_date 23:59:59') ";
-                        }
                         $inv_res = $this->db->query($inv_q . " LIMIT 50")->result();
                         if (!empty($inv_res)) $matching_inv_ids = array_merge($matching_inv_ids, array_column($inv_res, 'id'));
                     }
@@ -256,10 +260,9 @@ class VirtualAccount extends CI_Model {
 
     }
 
-    public function get_datatables($search_date = null, $search_date_to = null, $search_merchant = null, $search_settlement = null, $search_va = null, $search_transid = null)
+    public function get_datatables($search_date = null, $search_date_to = null, $search_merchant = null, $search_settlement = null, $search_va = null, $search_transid = null, $search_invoice = null, $search_channel = null)
     {
-        // STEP 1: Get only IDs for the current page (Fast query)
-        $this->_get_datatables_query($search_date, $search_date_to, $search_merchant, $search_settlement, $search_va, $search_transid, true);
+        $this->_get_datatables_query($search_date, $search_date_to, $search_merchant, $search_settlement, $search_va, $search_transid, $search_invoice, $search_channel, true);
         if ($_POST['length'] != -1)
             $this->db->limit($_POST['length'], $_POST['start']);
         $query = $this->db->get();
@@ -270,9 +273,9 @@ class VirtualAccount extends CI_Model {
         $ids = array_column($id_results, 'id');
         
         // STEP 2: Fetch full data for only these specific IDs
-        $this->db->select("cpv.*, c.c_invoiceNo, m.c_name AS merchant_name, s.c_name AS submerchant_name, 
+        $this->db->select("cpv.*, c.c_invoiceNo, m.c_name AS merchant_name, m.c_merchantLevel, s.c_name AS submerchant_name, 
                            IF(cpv.c_type = 'Dynamic', cdv.c_merchantTransactionId, crv.c_merchantTransactionId) AS Merchant_Transaction_Id,
-                           egv.c_custom");
+                           egv.c_custom", FALSE);
         $this->db->from($this->table);
         $this->db->join('cashin c', 'cpv.ref_cashinId = c.id', 'left');
         $this->db->join('submerchant s', 'cpv.ref_subMerchantId = s.id', 'left');
@@ -295,16 +298,16 @@ class VirtualAccount extends CI_Model {
         return $query->result();
     }
 
-    public function count_filtered($search_date = null, $search_date_to = null, $search_merchant = null, $search_settlement = null, $search_va = null, $search_transid = null)
+    public function count_filtered($search_date = null, $search_date_to = null, $search_merchant = null, $search_settlement = null, $search_va = null, $search_transid = null, $search_invoice = null, $search_channel = null)
     {
-        $searchValue = $this->input->post('search')['value'];
-        $is_filtered = $search_date || $search_date_to || $search_merchant || $search_settlement || $search_va || $search_transid || (!empty($searchValue));
+        $searchValue = isset($_POST['search']['value']) ? $_POST['search']['value'] : '';
+        $is_filtered = $search_date || $search_date_to || $search_merchant || $search_settlement || $search_va || $search_transid || $search_invoice || $search_channel || (!empty($searchValue));
 
         if (!$is_filtered) {
-            return $this->count_all_dt();
+            return $this->count_all_dt($search_date, $search_date_to, $search_merchant);
         }
 
-        $this->_get_datatables_query($search_date, $search_date_to, $search_merchant, $search_settlement, $search_va, $search_transid, false, true);
+        $this->_get_datatables_query($search_date, $search_date_to, $search_merchant, $search_settlement, $search_va, $search_transid, $search_invoice, $search_channel, false, true);
         $query = $this->db->get();
         if (!is_object($query) || $query->num_rows() == 0) return 0;
         return $query->row()->total;
@@ -435,6 +438,12 @@ class VirtualAccount extends CI_Model {
     }
 
 
+    public function get_internal_channels(){
+        $query = "SELECT id, c_description FROM cashin_channel 
+                WHERE c_channelGroup IN ('va', 'VIRTUAL_ACCOUNT')
+                ORDER BY c_description ASC";
+        return $this->db->query($query)->result();
+    }
 
     public function get_summary($date_from, $date_to, $refMerchantId = null) {
         // $this->db->select('COUNT(id) as qty, SUM(c_amount) as amount, SUM(c_fee) as fee, SUM(c_feeExternal) as fee_external');
@@ -489,15 +498,17 @@ class VirtualAccount extends CI_Model {
         $search_settlement = $filters['settlement'] ?? null;
         $search_va = $filters['va_number'] ?? null;
         $search_transid = $filters['transid'] ?? null;
+        $search_invoice = $filters['invoice_no'] ?? null;
+        $search_channel = $filters['channel'] ?? null;
 
         // Optimized Fetch (Two-Step Lookup)
-        $list = $this->get_datatables($search_date, $search_date_to, $search_merchant, $search_settlement, $search_va, $search_transid);
+        $list = $this->get_datatables($search_date, $search_date_to, $search_merchant, $search_settlement, $search_va, $search_transid, $search_invoice, $search_channel);
 
         $searchValue = $this->input->post('search')['value'];
-        $is_filtered = $search_date || $search_date_to || $search_merchant || $search_settlement || $search_va || $search_transid || (!empty($searchValue));
+        $is_filtered = $search_date || $search_date_to || $search_merchant || $search_settlement || $search_va || $search_transid || $search_invoice || $search_channel || (!empty($searchValue));
         
         $recordsTotal = $this->count_all_dt($search_date, $search_date_to, $search_merchant);
-        $recordsFiltered = $is_filtered ? $this->count_filtered($search_date, $search_date_to, $search_merchant, $search_settlement, $search_va, $search_transid) : $recordsTotal;
+        $recordsFiltered = $is_filtered ? $this->count_filtered($search_date, $search_date_to, $search_merchant, $search_settlement, $search_va, $search_transid, $search_invoice, $search_channel) : $recordsTotal;
 
         // Trick the library to NOT re-slice our already-paginated $list
         $original_start = $_POST['start'];

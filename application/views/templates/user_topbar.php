@@ -245,6 +245,7 @@
                 const searchInput = document.getElementById('globalSearchInput');
                 const resultsDropdown = document.getElementById('searchResultsDropdown');
                 let searchTimeout;
+                let activeSearchRequests = 0;
 
                 async function performSearch(query) {
                     if (query.length < 2) {
@@ -257,6 +258,7 @@
                         const loader = document.getElementById('globalSearchLoader');
                         const icon = document.getElementById('globalSearchIcon');
                         
+                        activeSearchRequests++;
                         if (loader && icon) {
                             loader.style.display = 'block';
                             icon.style.display = 'none';
@@ -285,7 +287,8 @@
                         } catch (error) {
                             console.error('Search error:', error);
                         } finally {
-                            if (loader && icon) {
+                            activeSearchRequests--;
+                            if (activeSearchRequests === 0 && loader && icon) {
                                 loader.style.display = 'none';
                                 icon.style.display = 'block';
                             }
@@ -294,6 +297,11 @@
                 }
 
                 if (searchInput) {
+                    searchInput.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                        }
+                    });
                     searchInput.addEventListener('input', (e) => performSearch(e.target.value));
                     searchInput.addEventListener('focus', (e) => { if(e.target.value.length > 1) resultsDropdown.style.display = 'block'; });
                 }
@@ -310,14 +318,17 @@
                     fetch("<?= base_url('dashboard/maintenance-status') ?>")
                     .then(response => response.json())
                     .then(data => {
-                        toggle.checked = (data.status === 'Active'); 
+                        // If data.status is 'Active' it means APIs are active, so Maintenance Mode is OFF (unchecked)
+                        toggle.checked = (data.status === 'Not Active'); 
                     })
                     .catch(error => {
                         console.error('Error fetching maintenance status:', error);
                     });
 
                     toggle.addEventListener('change', function () {
-                        const status = toggle.checked ? 'Active' : 'Not Active';
+                        // If toggle is checked (Maintenance Mode ON), we set API status to 'Not Active'
+                        const status = toggle.checked ? 'Not Active' : 'Active';
+                        const displayStatus = toggle.checked ? 'ON' : 'OFF';
                         const originalState = !toggle.checked;
                         const isEnabling = toggle.checked;
 
@@ -332,13 +343,13 @@
                                     </div>
                                     <h5 style="font-weight:700; margin:0; font-size:1.1rem;">Change Maintenance Mode?</h5>
                                     <p style="color:var(--gray-500, #94a3b8); font-size:0.92rem; margin:0; line-height:1.6;">
-                                        Are you sure you want to set Maintenance Mode to <strong>"${status}"</strong>?<br>
+                                        Are you sure you want to turn Maintenance Mode <strong>${displayStatus}</strong>?<br>
                                         <span style="font-size:0.82rem; opacity:0.7;">${isEnabling ? 'This will disable all merchant API access.' : 'This will re-enable all merchant API access.'}</span>
                                     </p>
                                 </div>
                             `,
                             showCancelButton: true,
-                            confirmButtonText: `<i class="fas fa-check mr-1"></i> Yes, set to ${status}`,
+                            confirmButtonText: `<i class="fas fa-check mr-1"></i> Yes, turn ${displayStatus}`,
                             cancelButtonText: 'Cancel',
                             customClass: {
                                 popup:             'swal2-premium-popup',

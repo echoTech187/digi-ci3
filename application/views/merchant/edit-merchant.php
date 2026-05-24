@@ -45,7 +45,7 @@
                         });
                     </script>
 
-                    <form action="<?= base_url('merchant/manage/update/' . $merchant['id']); ?>" method="post">
+                    <form class="ajax-form" action="<?= base_url('merchant/manage/update/' . $merchant['id']); ?>" data-redirect="<?= base_url('merchant/manage'); ?>" method="post">
                         
                         <!-- Account Information -->
                         <div class="section-title mb-4 mt-0 text-primary font-weight-bold small text-uppercase letter-spacing-1">
@@ -64,7 +64,7 @@
                             </div>
                             <div class="col-md-6 mb-4">
                                 <label class="font-weight-bold text-gray-700 small">Merchant Phone</label>
-                                <input type="text" name="c_phoneNumber" class="form-control" 
+                                <input type="text" name="c_phoneNumber" class="input-phone form-control" 
                                        value="<?= set_value('c_phoneNumber', isset($merchant['c_phoneNumber']) ? $merchant['c_phoneNumber'] : ''); ?>">
                             </div>
                             <div class="col-md-6 mb-4">
@@ -74,11 +74,11 @@
                             </div>
                             <div class="col-md-6 mb-4">
                                 <label class="font-weight-bold text-gray-700 small">Password (Leave blank to keep current)</label>
-                                <input type="password" name="c_password" class="form-control" required>
+                                <input type="password" name="c_password" class="form-control">
                             </div>
                             <div class="col-md-6 mb-4">
                                 <label class="font-weight-bold text-gray-700 small">Confirm Password</label>
-                                <input type="password" name="c_confirmPassword" class="form-control" required>
+                                <input type="password" name="c_confirmPassword" class="form-control">
                             </div>
                         </div>
 

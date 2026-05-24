@@ -11,7 +11,7 @@ class VADynamic extends CI_Model {
     private static $cached_total = null;
     private static $cached_inv_ids = null;
 
-    private function _get_datatables_query($search_name = null, $search_date = null, $search_va = null, $search_trxid = null, $search_date_to = null, $only_ids = false, $count_only = false)
+    private function _get_datatables_query($search_name = null, $search_date = null, $search_va = null, $search_trxid = null, $search_date_to = null, $only_ids = false, $count_only = false, $search_status = null)
     {
         // Emergency 30-second safeguard
         $this->db->query("SET SESSION max_execution_time = 30000");
@@ -58,6 +58,9 @@ class VADynamic extends CI_Model {
             $this->db->where('cdv.c_merchantTransactionId', $search_trxid);
             $this->db->or_where('cdv.c_vaNumber', $search_trxid);
             $this->db->group_end();
+        }
+        if ($search_status) {
+            $this->db->where('cdv.c_status', $search_status);
         }
 
         if ($searchValue) {
@@ -112,10 +115,10 @@ class VADynamic extends CI_Model {
         }
     }
 
-    public function get_datatables($search_name = null, $search_date = null, $search_va = null, $search_trxid = null, $search_date_to = null)
+    public function get_datatables($search_name = null, $search_date = null, $search_va = null, $search_trxid = null, $search_date_to = null, $search_status = null)
     {
         // STEP 1: Get matching IDs only
-        $this->_get_datatables_query($search_name, $search_date, $search_va, $search_trxid, $search_date_to, true);
+        $this->_get_datatables_query($search_name, $search_date, $search_va, $search_trxid, $search_date_to, true, false, $search_status);
         if (isset($_POST['length']) && $_POST['length'] != -1)
             $this->db->limit($_POST['length'], $_POST['start']);
         $query = $this->db->get();
@@ -126,7 +129,7 @@ class VADynamic extends CI_Model {
         $ids = array_column($id_results, 'id');
         
         // STEP 2: Fetch full records for only these specific IDs
-        $this->db->select("cdv.*, s.c_name as name_submerchant, m.c_name as name_merchant");
+        $this->db->select("cdv.*, s.c_name as name_submerchant, m.c_name as name_merchant, m.c_merchantLevel", FALSE);
         $this->db->from($this->table);
         $this->db->join('submerchant s', 's.id = cdv.ref_subMerchantId', 'left');
         $this->db->join('merchant m', 'm.id = cdv.ref_merchantId', 'left');
@@ -145,15 +148,15 @@ class VADynamic extends CI_Model {
         return $query->result();
     }
 
-    public function count_filtered($search_name = null, $search_date = null, $search_va = null, $search_trxid = null, $search_date_to = null)
+    public function count_filtered($search_name = null, $search_date = null, $search_va = null, $search_trxid = null, $search_date_to = null, $search_status = null)
     {
         $searchValue = isset($_POST['search']['value']) ? $_POST['search']['value'] : null;
-        $is_filtered = ($search_name || $search_date || $search_va || $search_trxid || (isset($searchValue) && !empty($searchValue)));
+        $is_filtered = ($search_name || $search_date || $search_date_to || $search_va || $search_trxid || $search_status || (isset($searchValue) && !empty($searchValue)));
         if (!$is_filtered) {
             return $this->count_all_dt();
         }
 
-        $this->_get_datatables_query($search_name, $search_date, $search_va, $search_trxid, $search_date_to, false, true);
+        $this->_get_datatables_query($search_name, $search_date, $search_va, $search_trxid, $search_date_to, false, true, $search_status);
         $query = $this->db->get();
         return $query->row()->total;
     }
@@ -367,15 +370,16 @@ class VADynamic extends CI_Model {
         $search_va = $filters['va_number'] ?? null;
         $search_trxid = $filters['merchant_trxid'] ?? null;
         $search_date_to = $filters['date_to'] ?? null;
+        $search_status = $filters['status'] ?? null;
 
         // Optimized Fetch (Two-Step Lookup)
-        $list = $this->get_datatables($search_name, $search_date, $search_va, $search_trxid, $search_date_to);
+        $list = $this->get_datatables($search_name, $search_date, $search_va, $search_trxid, $search_date_to, $search_status);
         
         $searchValue = $this->input->post('search')['value'];
-        $is_filtered = $search_name || $search_date || $search_va || $search_trxid || (!empty($searchValue));
+        $is_filtered = $search_name || $search_date || $search_va || $search_trxid || $search_status || (!empty($searchValue));
         
         $recordsTotal = $this->count_all_dt($search_name, $search_date);
-        $recordsFiltered = $is_filtered ? $this->count_filtered($search_name, $search_date, $search_va, $search_trxid, $search_date_to) : $recordsTotal;
+        $recordsFiltered = $is_filtered ? $this->count_filtered($search_name, $search_date, $search_va, $search_trxid, $search_date_to, $search_status) : $recordsTotal;
 
         // Use Datatables Library for final processing and JSON output
         return $this->datatables->of($this->table)

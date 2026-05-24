@@ -4,13 +4,16 @@ $search_date_va_value            = $this->session->userdata('search_date_va') ?:
 $search_date_va_to_value         = $this->session->userdata('search_date_va_to') ?: '';
 $search_date_va_settlement_value = $this->session->userdata('search_date_va_settlement') ?: '';
 $search_name_va_value            = $this->session->userdata('search_name_va') ?: '';
+$search_channel_va_value         = $this->session->userdata('search_channel_va') ?: '';
 $search_va_number_value          = $this->session->userdata('search_va_number') ?: '';
 $search_va_transid_value         = $this->session->userdata('search_va_transid') ?: '';
 $search_invoice_no_value         = $this->session->userdata('search_invoice_no') ?: '';
 
 // Badge count for More Filters (excludes VA number and trans ID which are now in global search)
 $extra_active = 0;
+if ($search_date_va_value != '' || $search_date_va_to_value != '')  $extra_active++;
 if ($search_name_va_value)            $extra_active++;
+if ($search_channel_va_value)         $extra_active++;
 if ($search_date_va_settlement_value) $extra_active++;
 // VA number, trans ID, invoice are in global search
 
@@ -85,7 +88,7 @@ $download_url = base_url('finance/virtual-account/download')
                 <div class="dt-search-wrapper">
                     <i class="fas fa-search dt-search-icon"></i>
                     <?php $active_va_search = $search_va_number_value ?: ($search_va_transid_value ?: $search_invoice_no_value); ?>
-                    <input type="text" id="vaGlobalSearch" class="dt-search-input" placeholder="<?= $active_va_search ?: 'Search by VA Number, Invoice, or Trans ID...'; ?>" value="<?= $active_va_search; ?>">
+                    <input type="text" id="vaGlobalSearch" class="dt-search-input" placeholder="<?= $active_va_search ?: 'Search by VA Number, Custom ID, Invoice, or Trans ID...'; ?>" value="<?= $active_va_search; ?>">
                 </div>
 
                 <!-- RIGHT: Primary chips + More Filters trigger -->
@@ -112,15 +115,6 @@ $download_url = base_url('finance/virtual-account/download')
                             </div>
 
                             <div class="dt-more-panel-body">
-                                <!-- Primary: Date Range -->
-                                <div class="dt-more-field">
-                                    <label class="dt-more-label"><i class="fas fa-calendar-alt mr-1 mr-2"></i> Payment Date</label>
-                                    <div class="dt-filter-chip">
-                                        <input type="date" name="search_date_va" class="dt-chip-input" value="<?= $search_date_va_value; ?>" title="Date From">
-                                        <span class="text-muted mx-1" style="font-size:11px;">→</span>
-                                        <input type="date" name="search_date_va_to" class="dt-chip-input" value="<?= $search_date_va_to_value; ?>" title="Date To">
-                                    </div>
-                                </div>
                                 <!-- Merchant -->
                                 <div class="dt-more-field">
                                     <label class="dt-more-label"><i class="fas fa-store mr-1 mr-2"></i> Merchant</label>
@@ -133,6 +127,30 @@ $download_url = base_url('finance/virtual-account/download')
                                         <?php endforeach; ?>
                                     </select>
                                 </div>
+                                <!-- Channel Filter -->
+                                <div class="mb-3">
+                                    <label class="dt-more-label"><i class="fas fa-network-wired mr-1 mr-2"></i> Channel ID</label>
+                                    <div class="dt-filter-chip" style="min-width: 180px;">
+                                        <select name="search_channel_va" class="dt-chip-input va-select2">
+                                            <option value="">All Channels</option>
+                                            <?php foreach ($internal_channels as $ic): ?>
+                                                <option value="<?= $ic->id; ?>" <?= ($ic->id == $search_channel_va_value) ? 'selected' : ''; ?>>
+                                                    <?= $ic->c_description; ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
+                                </div>
+                                <!-- Primary: Date Range -->
+                                <div class="dt-more-field">
+                                    <label class="dt-more-label"><i class="fas fa-calendar-alt mr-1 mr-2"></i> Payment Date</label>
+                                    <div class="dt-filter-chip">
+                                        <input type="date" name="search_date_va" class="dt-chip-input" value="<?= $search_date_va_value; ?>" title="Date From">
+                                        <span class="text-muted mx-1" style="font-size:11px;">→</span>
+                                        <input type="date" name="search_date_va_to" class="dt-chip-input" value="<?= $search_date_va_to_value; ?>" title="Date To">
+                                    </div>
+                                </div>
+                                
 
                                 <!-- Settlement Date -->
                                 <div class="dt-more-field">
@@ -170,7 +188,8 @@ $download_url = base_url('finance/virtual-account/download')
                     <tr>
                         <th>No</th>
                         <th>Date Payment</th>
-                        <th>Merchant</th>
+                        <th>Merchant Info</th>
+                        <th>Sub-Merchant Info</th>
                         <th>Trans ID</th>
                         <th>VA Number</th>
                         <th>VA Custom ID</th>
@@ -198,7 +217,20 @@ $download_url = base_url('finance/virtual-account/download')
             {data: 'c_datetime',className: 'text-nowrap', render: function(data){
                 return moment(data).format('DD-MM-YYYY HH:mm:ss');
             }},
-            {data: 'merchant_name',className: 'text-nowrap'},
+            {
+                data: 'merchant_name',
+                className: 'text-nowrap',
+                render: function(data, type, row) {
+                    return ' [' + row.ref_merchantId + '] - ' + data;
+                }
+            },
+            {
+                data: 'submerchant_name',
+                className: 'text-nowrap',
+                render: function(data, type, row) {
+                    return ' [' + row.ref_subMerchantId + '] - ' + data;
+                }
+            },
             {data: 'Merchant_Transaction_Id',className: 'text-nowrap'},
             {data: 'c_vaNumber',className: 'text-nowrap'},
             {data: 'c_custom',className: 'text-nowrap'},
@@ -308,7 +340,7 @@ $download_url = base_url('finance/virtual-account/download')
         $('.va-select2').select2({
             width: '100%',
             dropdownAutoWidth: true,
-            dropdownParent: $morePanel,
+            
             minimumResultsForSearch: 5
         });
     });

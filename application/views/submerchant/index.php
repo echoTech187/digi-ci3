@@ -154,15 +154,15 @@ $id = $this->uri->segment(3);
                                 
                                 <div class="d-flex flex-column gap-3">
                                     <div class="bg-white p-3 rounded-4 shadow-sm border-0 mb-3" style="background-color: rgba(255, 255, 255, 0.03) !important; border: 1px solid rgba(255, 255, 255, 0.08) !important;">
-                                        <h6 class="fw-bold text-white mb-1 d-flex align-items-center" style="font-size: 12.5px;"><i class="fas fa-sitemap text-warning mr-2"></i> 1. Hierarchy Integrity</h6>
+                                        <h6 class="fw-bold mb-1 d-flex align-items-center" style="font-size: 12.5px;"><i class="fas fa-sitemap text-warning mr-2"></i> 1. Hierarchy Integrity</h6>
                                         <p class="text-muted mb-0" style="font-size: 11px; line-height: 1.5;">Sub-accounts operate as branch entities under the parent merchant's clearance and financial settlement umbrella.</p>
                                     </div>
                                     <div class="bg-white p-3 rounded-4 shadow-sm border-0 mb-3" style="background-color: rgba(255, 255, 255, 0.03) !important; border: 1px solid rgba(255, 255, 255, 0.08) !important;">
-                                        <h6 class="fw-bold text-white mb-1 d-flex align-items-center" style="font-size: 12.5px;"><i class="fas fa-plug text-info mr-2"></i> 2. GVConnect Gateway</h6>
+                                        <h6 class="fw-bold mb-1 d-flex align-items-center" style="font-size: 12.5px;"><i class="fas fa-plug text-info mr-2"></i> 2. GVConnect Gateway</h6>
                                         <p class="text-muted mb-0" style="font-size: 11px; line-height: 1.5;">Ensure Business ID and Keys match the gateway configuration for seamless static VA and QRIS generation.</p>
                                     </div>
                                     <div class="bg-white p-3 rounded-4 shadow-sm border-0 mb-3" style="background-color: rgba(255, 255, 255, 0.03) !important; border: 1px solid rgba(255, 255, 255, 0.08) !important;">
-                                        <h6 class="fw-bold text-white mb-1 d-flex align-items-center" style="font-size: 12.5px;"><i class="fas fa-user-shield text-success mr-2"></i> 3. Status Control</h6>
+                                        <h6 class="fw-bold mb-1 d-flex align-items-center" style="font-size: 12.5px;"><i class="fas fa-user-shield text-success mr-2"></i> 3. Status Control</h6>
                                         <p class="text-muted mb-0" style="font-size: 11px; line-height: 1.5;">Toggling account status instantly enables or revokes access to the merchant portal and API endpoints.</p>
                                     </div>
                                 </div>
@@ -177,7 +177,7 @@ $id = $this->uri->segment(3);
                         <div class="col-lg-8 p-4 bg-light mb-0">
                             <div class="row g-4 mb-4">
                                 <div class="col-md-12 mb-4">
-                                    <div class="card h-100 border-0 shadow-none p-4 rounded-4" style="">
+                                    <div class="card h-100 border-0 shadow-none p-4 rounded-4">
                                         <h6 class="text-primary fw-bold mb-3 d-flex align-items-center">
                                             <i class="fas fa-info-circle mr-2"></i> BASIC INFORMATION
                                         </h6>
@@ -194,8 +194,9 @@ $id = $this->uri->segment(3);
                                                 <label class="form-label small fw-bold text-muted">Account Status <span class="text-danger">*</span></label>
                                                 <select class="form-control border-1 bg-dark text-white" name="c_status" id="modal_c_status" required style="border-color: rgba(255,255,255,0.1);">
                                                     <option value="Active">Active</option>
-                                                    <option value="Inactive">Inactive</option>
+                                                    <option value="Pending">Pending</option>
                                                     <option value="Blocked">Blocked</option>
+                                                    <option value="Freeze">Freeze</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -203,7 +204,7 @@ $id = $this->uri->segment(3);
                                 </div>
 
                                 <div class="col-md-12">
-                                    <div class="card h-100 border-0 shadow-none p-4 rounded-4" style="">
+                                    <div class="card h-100 border-0 shadow-none p-4 rounded-4">
                                         <h6 class="text-primary fw-bold mb-3 d-flex align-items-center">
                                             <i class="fas fa-plug mr-2"></i> GVCONNECT &amp; STATIC VA
                                         </h6>

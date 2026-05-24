@@ -80,18 +80,6 @@ class Ewallet extends CI_Model {
                 $matching_ids = [-1];
                 $matching_inv_ids = [-1];
 
-                $extracted_date = null;
-                // Improved regex to handle various formats
-                if (preg_match('/(?:GD|TRX|VA|EW|BF|_)([0-9]{6})/i', $searchValue, $matches)) {
-                    $yymmdd = $matches[1];
-                    $year = "20" . substr($yymmdd, 0, 2);
-                    $month = substr($yymmdd, 2, 2);
-                    $day = substr($yymmdd, 4, 2);
-                    if (checkdate($month, $day, $year)) {
-                        $extracted_date = "$year-$month-$day";
-                    }
-                }
-
                 $op = (strlen($searchValue) >= 15) ? '=' : 'LIKE';
                 $val = (strlen($searchValue) >= 15) ? "'$safeSearchValue'" : "'$safeSearchValue%'";
 
@@ -107,9 +95,6 @@ class Ewallet extends CI_Model {
                 if (count($matching_ids) <= 1 || strlen($searchValue) < 15) {
                     if (strlen($searchValue) >= 4) {
                         $inv_q = "SELECT id FROM cashin WHERE c_invoiceNo $op $val ";
-                        if ($extracted_date) {
-                            $inv_q .= " AND (c_datetime >= '$extracted_date 00:00:00' AND c_datetime <= '$extracted_date 23:59:59') ";
-                        }
                         $inv_res = $this->db->query($inv_q . " LIMIT 50")->result();
                         if (!empty($inv_res)) $matching_inv_ids = array_merge($matching_inv_ids, array_column($inv_res, 'id'));
                     }
@@ -186,8 +171,8 @@ class Ewallet extends CI_Model {
         $ids = array_column($id_results, 'id');
         
         // STEP 2: Fetch full details for those IDs
-        $this->db->select("cpe.*, m.c_name as name_merchant, s.c_name as name_submerchant, c.c_invoiceNo, 
-                           cde.c_merchantTransactionId AS Merchant_Transaction_Id");
+        $this->db->select("cpe.*, m.c_name as name_merchant, m.c_merchantLevel, s.c_name as name_submerchant, c.c_invoiceNo, 
+                           cde.c_merchantTransactionId AS Merchant_Transaction_Id", FALSE);
         $this->db->from($this->table);
         $this->db->join('cashin c', 'c.id = cpe.ref_cashinId', 'left');
         $this->db->join('submerchant s', 'cpe.ref_subMerchantId = s.id', 'left');

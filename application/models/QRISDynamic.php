@@ -145,12 +145,11 @@ class QRISDynamic extends CI_Model
         
         $ids = array_column($id_results, 'id');
         
-        // STEP 2: Fetch full details for those specific IDs
-        $this->db->select("cdq.*, s.c_name as name_submerchant, m.c_name as name_merchant");
+        // STEP 2: Fetch full details for those IDs
+        $this->db->select("cdq.*, m.c_name as name_merchant, m.c_merchantLevel, s.c_name as name_submerchant", FALSE);
         $this->db->from($this->table);
+        $this->db->join('merchant m', 'cdq.ref_merchantId = m.id','left');
         $this->db->join('submerchant s', 's.id = cdq.ref_subMerchantId', 'left');
-        $this->db->join('merchant m', 'm.id = cdq.ref_merchantId', 'left');
-        
         $this->db->where_in('cdq.id', $ids);
         
         if (isset($_POST['order'])) {
@@ -208,12 +207,6 @@ class QRISDynamic extends CI_Model
                 static $no = null;
                 if ($no === null) $no = intval($this->input->post('start'));
                 return ++$no;
-            })
-            ->editColumn('name_merchant', function($row) {
-                return ' [' . ($row->ref_merchantId ?? '-') . '] - ' . ($row->name_merchant ?? '-');
-            })
-            ->editColumn('name_submerchant', function($row) {
-                return ' [' . ($row->ref_subMerchantId ?? '-') . '] - ' . ($row->name_submerchant ?? '-');
             })
             ->make(true);
     }
@@ -377,6 +370,103 @@ class QRISDynamic extends CI_Model
                 $ResponseHeader             = $result1_1->c_responseHeader;
                 $ResponseBody               = $result1_1->c_responseBody;
 
+            }
+
+        } elseif ($ref_cashinExternalId == 'yukk') {
+
+            // Fallback for Yukk: Search by parentId if log ID is missing
+            $isLogEmpty = empty($ref_cashinExternalLogQrisMpmIdCreate) || $ref_cashinExternalLogQrisMpmIdCreate === 'null' || $ref_cashinExternalLogQrisMpmIdCreate === 'undefined';
+            
+            if ($isLogEmpty && !empty($parentId) && $parentId !== 'null' && $parentId !== 'undefined') {
+                $qtxt1_1    = "SELECT c_partnerReferenceNo, c_referenceNo, c_datetimeRequest, c_requestHeader, c_requestBody, c_datetimeResponse, c_responseHeader, c_responseBody FROM external_yukk_qris_mpm_create WHERE ref_cashinDynamicQrisMpmId='$parentId'";
+            } else {
+                $qtxt1_1    = "SELECT c_partnerReferenceNo, c_referenceNo, c_datetimeRequest, c_requestHeader, c_requestBody, c_datetimeResponse, c_responseHeader, c_responseBody FROM external_yukk_qris_mpm_create WHERE id='$ref_cashinExternalLogQrisMpmIdCreate'";
+            }
+
+            $query1_1   = $this->db->query($qtxt1_1);
+            $result1_1  = $query1_1->num_rows() ? $query1_1->row() : false;
+            if ($result1_1) {
+
+                $TransactionIdExternal1     = $result1_1->c_referenceNo;
+                $TransactionIdExternal2     = $result1_1->c_partnerReferenceNo;
+                
+                $DatetimeRequest            = $result1_1->c_datetimeRequest;
+                $RequestHeader              = $result1_1->c_requestHeader;
+                $RequestBody                = $result1_1->c_requestBody;
+
+                $DatetimeResponse           = $result1_1->c_datetimeResponse;
+                $ResponseHeader             = $result1_1->c_responseHeader;
+                $ResponseBody               = $result1_1->c_responseBody;
+
+            }
+
+        } elseif ($ref_cashinExternalId == 'ezeelink') {
+
+            $isLogEmpty = empty($ref_cashinExternalLogQrisMpmIdCreate) || $ref_cashinExternalLogQrisMpmIdCreate === 'null' || $ref_cashinExternalLogQrisMpmIdCreate === 'undefined';
+            
+            if ($isLogEmpty && !empty($parentId) && $parentId !== 'null' && $parentId !== 'undefined') {
+                $qtxt1_1    = "SELECT c_transactionId, c_transactionCode, c_datetimeRequest, c_requestHeader, c_requestBody, c_datetimeResponse, c_responseHeader, c_responseBody FROM external_ezeelink_qris_mpm_create WHERE ref_cashinDynamicQrisMpmId='$parentId'";
+            } else {
+                $qtxt1_1    = "SELECT c_transactionId, c_transactionCode, c_datetimeRequest, c_requestHeader, c_requestBody, c_datetimeResponse, c_responseHeader, c_responseBody FROM external_ezeelink_qris_mpm_create WHERE id='$ref_cashinExternalLogQrisMpmIdCreate'";
+            }
+
+            $query1_1   = $this->db->query($qtxt1_1);
+            $result1_1  = $query1_1->num_rows() ? $query1_1->row() : false;
+            if ($result1_1) {
+                $TransactionIdExternal1     = $result1_1->c_transactionId;
+                $TransactionIdExternal2     = $result1_1->c_transactionCode;
+                $DatetimeRequest            = $result1_1->c_datetimeRequest;
+                $RequestHeader              = $result1_1->c_requestHeader;
+                $RequestBody                = $result1_1->c_requestBody;
+                $DatetimeResponse           = $result1_1->c_datetimeResponse;
+                $ResponseHeader             = $result1_1->c_responseHeader;
+                $ResponseBody               = $result1_1->c_responseBody;
+            }
+
+        } elseif ($ref_cashinExternalId == 'stm') {
+
+            $isLogEmpty = empty($ref_cashinExternalLogQrisMpmIdCreate) || $ref_cashinExternalLogQrisMpmIdCreate === 'null' || $ref_cashinExternalLogQrisMpmIdCreate === 'undefined';
+            
+            if ($isLogEmpty && !empty($parentId) && $parentId !== 'null' && $parentId !== 'undefined') {
+                $qtxt1_1    = "SELECT qris_reff_code, client_reference, c_datetimeRequest, c_requestHeader, c_requestBody, c_datetimeResponse, c_responseHeader, c_responseBody FROM external_stm_qris_mpm_create WHERE ref_cashinDynamicQrisMpmId='$parentId'";
+            } else {
+                $qtxt1_1    = "SELECT qris_reff_code, client_reference, c_datetimeRequest, c_requestHeader, c_requestBody, c_datetimeResponse, c_responseHeader, c_responseBody FROM external_stm_qris_mpm_create WHERE id='$ref_cashinExternalLogQrisMpmIdCreate'";
+            }
+
+            $query1_1   = $this->db->query($qtxt1_1);
+            $result1_1  = $query1_1->num_rows() ? $query1_1->row() : false;
+            if ($result1_1) {
+                $TransactionIdExternal1     = $result1_1->qris_reff_code;
+                $TransactionIdExternal2     = $result1_1->client_reference;
+                $DatetimeRequest            = $result1_1->c_datetimeRequest;
+                $RequestHeader              = $result1_1->c_requestHeader;
+                $RequestBody                = $result1_1->c_requestBody;
+                $DatetimeResponse           = $result1_1->c_datetimeResponse;
+                $ResponseHeader             = $result1_1->c_responseHeader;
+                $ResponseBody               = $result1_1->c_responseBody;
+            }
+
+        } elseif ($ref_cashinExternalId == 'paylabs2') {
+
+            $isLogEmpty = empty($ref_cashinExternalLogQrisMpmIdCreate) || $ref_cashinExternalLogQrisMpmIdCreate === 'null' || $ref_cashinExternalLogQrisMpmIdCreate === 'undefined';
+            
+            if ($isLogEmpty && !empty($parentId) && $parentId !== 'null' && $parentId !== 'undefined') {
+                $qtxt1_1    = "SELECT c_platformTradeNo, c_merchantTradeNo, c_datetimeRequest, c_requestHeader, c_requestBody, c_datetimeResponse, c_responseHeader, c_responseBody FROM external_paylabs2_qris_mpm_create WHERE ref_cashinDynamicQrisMpmId='$parentId'";
+            } else {
+                $qtxt1_1    = "SELECT c_platformTradeNo, c_merchantTradeNo, c_datetimeRequest, c_requestHeader, c_requestBody, c_datetimeResponse, c_responseHeader, c_responseBody FROM external_paylabs2_qris_mpm_create WHERE id='$ref_cashinExternalLogQrisMpmIdCreate'";
+            }
+
+            $query1_1   = $this->db->query($qtxt1_1);
+            $result1_1  = $query1_1->num_rows() ? $query1_1->row() : false;
+            if ($result1_1) {
+                $TransactionIdExternal1     = $result1_1->c_platformTradeNo;
+                $TransactionIdExternal2     = $result1_1->c_merchantTradeNo;
+                $DatetimeRequest            = $result1_1->c_datetimeRequest;
+                $RequestHeader              = $result1_1->c_requestHeader;
+                $RequestBody                = $result1_1->c_requestBody;
+                $DatetimeResponse           = $result1_1->c_datetimeResponse;
+                $ResponseHeader             = $result1_1->c_responseHeader;
+                $ResponseBody               = $result1_1->c_responseBody;
             }
 
         }

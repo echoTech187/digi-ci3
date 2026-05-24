@@ -57,10 +57,10 @@ $download_url = base_url('finance/virtual-account/download_recurring') // Assumi
         <?php
             // Badge count for More Filters
             $extra_active = 0;
-            if ($this->session->userdata('search_date_var'))      $extra_active++;
-            if ($this->session->userdata('search_date_var_to'))   $extra_active++;
+            if ($this->session->userdata('search_date_var') || $this->session->userdata('search_date_var_to'))      $extra_active++;
             if ($this->session->userdata('search_name_var'))      $extra_active++;
             if ($this->session->userdata('search_submerchant_var')) $extra_active++;
+            if ($this->session->userdata('search_status_transaction_var')) $extra_active++;
         ?>
         <form id="varecurring_form" method="post" action="<?= base_url('virtual-account/recurring'); ?>">
             <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>">
@@ -112,6 +112,17 @@ $download_url = base_url('finance/virtual-account/download_recurring') // Assumi
                                         <?php endforeach; ?>
                                     </select>
                                 </div>
+                                <!-- Status -->
+                                <div class="dt-more-field">
+                                    <label class="dt-more-label"><i class="fas fa-info-circle mr-1 mr-2"></i> Status</label>
+                                    <select name="search_status_transaction_var" class="dt-more-select select2">
+                                        <option value="">All Statuses</option>
+                                        <option value="Pending" <?= ($this->session->userdata('search_status_transaction_var') == 'Pending') ? 'selected' : ''; ?>>Pending</option>
+                                        <option value="Paid" <?= ($this->session->userdata('search_status_transaction_var') == 'Paid') ? 'selected' : ''; ?>>Paid</option>
+                                        <option value="Failed" <?= ($this->session->userdata('search_status_transaction_var') == 'Failed') ? 'selected' : ''; ?>>Failed</option>
+                                        <option value="Expired" <?= ($this->session->userdata('search_status_transaction_var') == 'Expired') ? 'selected' : ''; ?>>Expired</option>
+                                    </select>
+                                </div>
                             </div>
                             <div class="dt-more-panel-footer">
                                 <button type="submit" name="submit" class="btn-dt-apply btn-dt-action-primary shadow-sm">
@@ -133,8 +144,8 @@ $download_url = base_url('finance/virtual-account/download_recurring') // Assumi
                     <tr>
                         <th>No</th>
                         <th>Date Time Request</th>
-                        <th>Merchant</th>
-                        <th>Sub Merchant</th>
+                        <th>Merchant Info</th>
+                        <th>Sub-Merchant Info</th>
                         <th>Merchant Trans ID</th>
                         <th>VA Number</th>
                         <th>Channel ID</th>
@@ -153,20 +164,20 @@ $download_url = base_url('finance/virtual-account/download_recurring') // Assumi
     <div class="modal-dialog modal-lg border-0">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
             <!-- Header Legacy Migrated -->
-<div class="modal-header modal-header-primary border-0 mh-premium">
-    <div class="d-flex align-items-center">
-        <div class="mh-icon-badge">
-            <i class="fas fa-info-circle"></i>
-        </div>
-        <div class="mh-title-wrap">
-            <h6 class="mh-title"  id="detailVaDynamicChannelExternalModalLabel">External Log Details</h6>
-            <small class="mh-subtitle" >View comprehensive information details</small>
-        </div>
-    </div>
-    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" style="opacity:0.8;">
-        <span aria-hidden="true">&times;</span>
-    </button>
-</div>
+            <div class="modal-header modal-header-primary border-0 mh-premium">
+                <div class="d-flex align-items-center">
+                    <div class="mh-icon-badge">
+                        <i class="fas fa-info-circle"></i>
+                    </div>
+                    <div class="mh-title-wrap">
+                        <h6 class="mh-title"  id="detailVaDynamicChannelExternalModalLabel">External Log Details</h6>
+                        <small class="mh-subtitle" >View comprehensive information details</small>
+                    </div>
+                </div>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" style="opacity:0.8;">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
             <div class="modal-body p-4 bg-light">
                 <!-- Guide Banner -->
                 <div class="d-flex align-items-start pb-4" id="detail-guide-banner">
@@ -179,18 +190,30 @@ $download_url = base_url('finance/virtual-account/download_recurring') // Assumi
                     </div>
                 </div>
 
-                <div class="row mb-4">
-                    <div class="col-md-4">
+                <div class="mb-4">
+                    <div class="mb-3">
                         <div class="small text-uppercase font-weight-bold text-muted mb-1">Provider</div>
                         <div class="h6 font-weight-bold text-dark mb-0" id="cashinExternalId"></div>
                     </div>
-                    <div class="col-md-4">
-                        <div class="small text-uppercase font-weight-bold text-muted mb-1">Ext Ref ID 1</div>
-                        <div class="h6 font-weight-bold text-dark mb-0" id="TransactionIdExternal1"></div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="small text-uppercase font-weight-bold text-muted mb-1">Ext Ref ID 2</div>
-                        <div class="h6 font-weight-bold text-dark mb-0" id="TransactionIdExternal2"></div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3 mb-md-0">
+                            <div class="small text-uppercase font-weight-bold text-muted mb-1">Ext Ref ID 1</div>
+                            <div class="d-flex align-items-start">
+                                <div class="h6 font-weight-bold text-dark mb-0 text-break mr-2" style="word-break: break-all;" id="TransactionIdExternal1"></div>
+                                <button type="button" class="btn btn-sm btn-link text-primary p-0 flex-shrink-0 copy-ref-btn" data-target="#TransactionIdExternal1" title="Copy ID" style="line-height: 1;">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="small text-uppercase font-weight-bold text-muted mb-1">Ext Ref ID 2</div>
+                            <div class="d-flex align-items-start">
+                                <div class="h6 font-weight-bold text-dark mb-0 text-break mr-2" style="word-break: break-all;" id="TransactionIdExternal2"></div>
+                                <button type="button" class="btn btn-sm btn-link text-primary p-0 flex-shrink-0 copy-ref-btn" data-target="#TransactionIdExternal2" title="Copy ID" style="line-height: 1;">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
@@ -272,10 +295,16 @@ $download_url = base_url('finance/virtual-account/download_recurring') // Assumi
                 data: 'name_merchant',
                 className: 'text-nowrap',
                 render: function(data, type, row) {
-                    return row.ref_merchantId ? ' [' + row.ref_merchantId + '] ' + data : data;
+                    return ' [' + row.ref_merchantId + '] - ' + data;
                 }
             },
-            {data: 'name_submerchant',className: 'text-nowrap'},
+            {
+                data: 'name_submerchant',
+                className: 'text-nowrap',
+                render: function(data, type, row) {
+                    return ' [' + row.ref_subMerchantId + '] - ' + data;
+                }
+            },
             {data: 'c_merchantTransactionId',className: 'text-nowrap'},
             {data: 'c_vaNumber',className: 'text-nowrap', render: function(data){
                 return '<code>' + data + '</code>';
@@ -285,13 +314,7 @@ $download_url = base_url('finance/virtual-account/download_recurring') // Assumi
                 data: 'ref_cashinExternalId',
                 className: 'text-nowrap',
                 render: function(data, type, row) {
-                    if (!data) return '-';
-                    return '<a href="javascript:void(0)" class="detailVaDynamicChannelExternalAjax font-weight-bold text-primary" ' +
-                           'data-merchanttransactionid="' + row.c_merchantTransactionId + '" ' +
-                           'data-ref_cashinexternalid="' + data + '" ' +
-                           'data-id="' + row.id + '" ' +
-                           'data-ref_cashinexternallogvaidcreate="' + row.ref_cashinExternalLogVaIdCreate + '">' +
-                           data + '</a>';
+                    return data ? data : '-';
                 }
             },
             
@@ -301,13 +324,24 @@ $download_url = base_url('finance/virtual-account/download_recurring') // Assumi
             {
                 data: 'c_status',
                 className: 'text-nowrap',
-                render: function(data) {
+                render: function(data, type, row) {
                     var status_class = 'secondary';
                     var s = (data || '').toUpperCase();
                     if (s == 'PAID' || s == 'SUCCESS') status_class = 'success';
                     else if (s == 'EXPIRED' || s == 'FAILED') status_class = 'danger';
                     else if (s == 'PENDING') status_class = 'warning';
-                    return '<span class="badge badge-' + status_class + '">' + data + '</span>';
+                    
+                    var badge = '<span class="badge badge-' + status_class + '">' + data + '</span>';
+                    
+                    if ((s == 'PAID' || s == 'SUCCESS') && row.ref_cashinExternalId) {
+                        return '<a href="javascript:void(0)" class="detailVaDynamicChannelExternalAjax text-decoration-none" ' +
+                               'data-merchanttransactionid="' + row.c_merchantTransactionId + '" ' +
+                               'data-ref_cashinexternalid="' + row.ref_cashinExternalId + '" ' +
+                               'data-id="' + row.id + '" ' +
+                               'data-ref_cashinexternallogvaidcreate="' + row.ref_cashinExternalLogVaIdCreate + '">' +
+                               badge + '</a>';
+                    }
+                    return badge;
                 }
             }
         ]);

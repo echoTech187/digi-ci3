@@ -30,14 +30,22 @@ class MenuController extends CI_Controller
 
          $result = $this->Model_menu->insert_menu($data, 'user_menu');
          if ($result === true) {
+            if ($this->input->is_ajax_request()) {
+                echo json_encode(['status' => 'success', 'message' => 'New Menu Added Successfully.']);
+                return;
+            }
             $this->session->set_flashdata('success', 'New Menu Added Successfully.');
          } else {
             $code = isset($result['code']) ? $result['code'] : 0;
+            $msg = 'Unable to add menu due to a system constraint. Please contact technical support.';
             if ($code == 1142) {
-               $this->session->set_flashdata('error', 'Access Denied. You do not have sufficient database privileges to create menu items.');
-            } else {
-               $this->session->set_flashdata('error', 'Unable to add menu due to a system constraint. Please contact technical support.');
+               $msg = 'Access Denied. You do not have sufficient database privileges to create menu items.';
             }
+            if ($this->input->is_ajax_request()) {
+                echo json_encode(['status' => 'error', 'message' => $msg]);
+                return;
+            }
+            $this->session->set_flashdata('error', $msg);
          }
          redirect('menu');
       }
@@ -78,14 +86,22 @@ class MenuController extends CI_Controller
 
       $result = $this->Model_menu->changeMenu($where, $data, 'user_menu');
       if ($result === true) {
+         if ($this->input->is_ajax_request()) {
+             echo json_encode(['status' => 'success', 'message' => 'Menu Updated Successfully.']);
+             return;
+         }
          $this->session->set_flashdata('success', 'Menu Updated Successfully.');
       } else {
          $code = isset($result['code']) ? $result['code'] : 0;
+         $msg = 'Unable to update menu due to a system constraint. Please contact technical support.';
          if ($code == 1142) {
-            $this->session->set_flashdata('error', 'Access Denied. You do not have sufficient database privileges to modify menu items.');
-         } else {
-            $this->session->set_flashdata('error', 'Unable to update menu due to a system constraint. Please contact technical support.');
+            $msg = 'Access Denied. You do not have sufficient database privileges to modify menu items.';
          }
+         if ($this->input->is_ajax_request()) {
+             echo json_encode(['status' => 'error', 'message' => $msg]);
+             return;
+         }
+         $this->session->set_flashdata('error', $msg);
       }
       redirect('menu');
    }
@@ -117,14 +133,22 @@ class MenuController extends CI_Controller
 
          $result = $this->Model_menu->insert_subMenu($data, 'user_sub_menu');
          if ($result === true) {
+            if ($this->input->is_ajax_request()) {
+                echo json_encode(['status' => 'success', 'message' => 'New Submenu Added Successfully.']);
+                return;
+            }
             $this->session->set_flashdata('success', 'New Submenu Added Successfully.');
          } else {
             $code = isset($result['code']) ? $result['code'] : 0;
+            $msg = 'Unable to add submenu due to a system constraint. Please contact technical support.';
             if ($code == 1142) {
-               $this->session->set_flashdata('error', 'Access Denied. You do not have sufficient database privileges to create submenu items.');
-            } else {
-               $this->session->set_flashdata('error', 'Unable to add submenu due to a system constraint. Please contact technical support.');
+               $msg = 'Access Denied. You do not have sufficient database privileges to create submenu items.';
             }
+            if ($this->input->is_ajax_request()) {
+                echo json_encode(['status' => 'error', 'message' => $msg]);
+                return;
+            }
+            $this->session->set_flashdata('error', $msg);
          }
          redirect('menu/subMenu');
       }
@@ -180,14 +204,22 @@ class MenuController extends CI_Controller
 
       $result = $this->Model_menu->changeSubMenu($where, $data, 'user_sub_menu');
       if ($result === true) {
+         if ($this->input->is_ajax_request()) {
+             echo json_encode(['status' => 'success', 'message' => 'Submenu Updated Successfully.']);
+             return;
+         }
          $this->session->set_flashdata('success', 'Submenu Updated Successfully.');
       } else {
          $code = isset($result['code']) ? $result['code'] : 0;
+         $msg = 'Unable to update submenu due to a system constraint. Please contact technical support.';
          if ($code == 1142) {
-            $this->session->set_flashdata('error', 'Access Denied. You do not have sufficient database privileges to modify submenu items.');
-         } else {
-            $this->session->set_flashdata('error', 'Unable to update submenu due to a system constraint. Please contact technical support.');
+            $msg = 'Access Denied. You do not have sufficient database privileges to modify submenu items.';
          }
+         if ($this->input->is_ajax_request()) {
+             echo json_encode(['status' => 'error', 'message' => $msg]);
+             return;
+         }
+         $this->session->set_flashdata('error', $msg);
       }
       redirect('menu/submenu');
    }
