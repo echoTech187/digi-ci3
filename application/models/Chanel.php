@@ -550,12 +550,20 @@ class Chanel extends CI_Model {
             $cols = "{$prefix}id, {$prefix}c_caption, {$prefix}c_description, {$prefix}c_fee, {$prefix}c_channelGroup, {$prefix}c_channelGroup2, {$prefix}c_externalIdDefault, {$prefix}c_feeType, {$prefix}c_amountMin, {$prefix}c_amountMax";
         }
 
-        return $this->datatables->of($table)
+        $dt = $this->datatables->of($table)
             ->select($cols)
             ->set_column_order($column_order)
             ->set_column_search($column_search)
-            ->set_default_order($order)
-            ->where($where)
+            ->set_default_order($order);
+
+        if (isset($where['custom_search'])) {
+            $search = $this->db->escape_like_str($where['custom_search']);
+            $prefix = $alias ? $alias . '.' : '';
+            $dt->where("({$prefix}id LIKE '%$search%' ESCAPE '!' OR {$prefix}c_channelGroup LIKE '%$search%' ESCAPE '!' OR {$prefix}c_description LIKE '%$search%' ESCAPE '!' OR {$prefix}c_externalIdDefault LIKE '%$search%' ESCAPE '!')", null, false);
+            unset($where['custom_search']);
+        }
+
+        return $dt->where($where)
             ->addColumn('no', function($row) {
                 static $no = null;
                 if ($no === null) $no = intval($this->input->post('start'));
@@ -566,7 +574,7 @@ class Chanel extends CI_Model {
 
     /* --- Refactored External Merchant DataTables --- */
 
-    public function getCashinExternalDataTable() {
+    public function getCashinExternalDataTable($custom_search = null) {
         $this->load->library('datatables');
 
         $where = [];
@@ -583,14 +591,20 @@ class Chanel extends CI_Model {
             $where['cxm.c_status'] = $this->input->post('status');
         }
 
-        return $this->datatables->of('cashin_channel_x_merchant cxm')
+        $dt = $this->datatables->of('cashin_channel_x_merchant cxm')
             ->select('cxm.id, cxm.ref_merchantId, cxm.c_cashinChannelGroup, cxm.ref_cashinChannelId, cxm.c_externalIdDefault, cxm.c_feeType, cxm.c_fee, cxm.c_feePercetange, cxm.c_settlementInterval, cxm.c_amountMin, cxm.c_amountMax, cxm.c_status, m.c_name as merchant_name')
             ->join('merchant m', 'm.id = cxm.ref_merchantId')
             ->set_column_order([null, 'm.c_name', 'cxm.c_cashinChannelGroup', 'cxm.c_fee', 'cxm.c_status', null])
             ->set_column_search(['m.c_name', 'cxm.c_cashinChannelGroup', 'cxm.ref_cashinChannelId', 'cxm.c_externalIdDefault'])
             ->set_default_order(['cxm.id' => 'desc'])
-            ->where($where)
-            ->addColumn('no', function ($row) {
+            ->where($where);
+
+        if ($custom_search) {
+            $search = $this->db->escape_like_str($custom_search);
+            $dt->where("(m.c_name LIKE '%$search%' ESCAPE '!' OR cxm.c_cashinChannelGroup LIKE '%$search%' ESCAPE '!' OR cxm.ref_cashinChannelId LIKE '%$search%' ESCAPE '!' OR cxm.c_externalIdDefault LIKE '%$search%' ESCAPE '!')", null, false);
+        }
+
+        return $dt->addColumn('no', function ($row) {
                 static $no = null;
                 if ($no === null) $no = intval($this->input->post('start'));
                 return ++$no;
@@ -598,7 +612,7 @@ class Chanel extends CI_Model {
             ->make(true);
     }
 
-    public function getCashoutExternalDataTable() {
+    public function getCashoutExternalDataTable($custom_search = null) {
         $this->load->library('datatables');
 
         $where = [];
@@ -615,14 +629,20 @@ class Chanel extends CI_Model {
             $where['cxm.c_status'] = $this->input->post('status');
         }
 
-        return $this->datatables->of('cashout_channel_x_merchant cxm')
+        $dt = $this->datatables->of('cashout_channel_x_merchant cxm')
             ->select('cxm.id, cxm.ref_merchantId, cxm.c_cashoutChannelGroup, cxm.ref_cashoutChannelId, cxm.c_externalIdDefault, cxm.c_feeType, cxm.c_fee, cxm.c_feePercetange, cxm.c_amountMin, cxm.c_amountMax, cxm.c_status, m.c_name as merchant_name')
             ->join('merchant m', 'm.id = cxm.ref_merchantId')
             ->set_column_order([null, 'm.c_name', 'cxm.c_cashoutChannelGroup', 'cxm.c_fee', 'cxm.c_status', null])
             ->set_column_search(['m.c_name', 'cxm.c_cashoutChannelGroup', 'cxm.ref_cashoutChannelId', 'cxm.c_externalIdDefault'])
             ->set_default_order(['cxm.id' => 'desc'])
-            ->where($where)
-            ->addColumn('no', function ($row) {
+            ->where($where);
+
+        if ($custom_search) {
+            $search = $this->db->escape_like_str($custom_search);
+            $dt->where("(m.c_name LIKE '%$search%' ESCAPE '!' OR cxm.c_cashoutChannelGroup LIKE '%$search%' ESCAPE '!' OR cxm.ref_cashoutChannelId LIKE '%$search%' ESCAPE '!' OR cxm.c_externalIdDefault LIKE '%$search%' ESCAPE '!')", null, false);
+        }
+
+        return $dt->addColumn('no', function ($row) {
                 static $no = null;
                 if ($no === null) $no = intval($this->input->post('start'));
                 return ++$no;

@@ -51,6 +51,7 @@
             // Badge count for More Filters
             $extra_active = 0;
             if ($this->session->userdata('search_date_qd') || $this->session->userdata('search_date_qd_to')) $extra_active++;
+            if ($this->session->userdata('search_name_qd')) $extra_active++;
             if ($this->session->userdata('search_status_transaction_qd')) $extra_active++;
         ?>
 

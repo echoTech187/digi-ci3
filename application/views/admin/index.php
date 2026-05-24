@@ -89,7 +89,7 @@
         <div class="dt-toolbar py-3 px-4">
             <div class="dt-search-wrapper flex-grow-1 mb-2 mb-md-0" style="min-width: 280px;">
                 <i class="fas fa-search dt-search-icon"></i>
-                <input type="text" id="adminGlobalSearch" class="dt-search-input" placeholder="Search by email, name, or role...">
+                <input type="text" id="adminGlobalSearch" class="dt-search-input" placeholder="Search by email, name, or role..." value="<?= $this->session->userdata('search_admin'); ?>">
             </div>
 
             <!-- RIGHT: Filters & Actions -->

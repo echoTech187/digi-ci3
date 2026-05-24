@@ -39,7 +39,7 @@ class HistoryController extends CI_Controller
           $search_invoice_ppob = $this->session->userdata('search_invoice_ppob');
       }
 
-      $search_merchant_purchase = $this->input->post('search_merchant_purchase');
+      $search_merchant_purchase = $this->input->get('merchant') ?: $this->input->post('search_merchant_purchase');
       $search_status_purchase = $this->input->post('search_status_purchase');
       $search_date_purchase = $this->input->post('search_date_purchase');
 

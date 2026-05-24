@@ -52,7 +52,7 @@
         <div class="dt-toolbar">
             <div class="dt-search-wrapper flex-grow-1 mb-2 mb-md-0" style="min-width: 280px;">
                 <i class="fas fa-search dt-search-icon"></i>
-                <input type="text" id="cashinGlobalSearch" class="dt-search-input" placeholder="Search by Channel, ID, or Category...">
+                <input type="text" id="cashinGlobalSearch" class="dt-search-input" placeholder="Search by Channel, ID, or Category..." value="<?= $this->session->userdata('search_channel'); ?>">
             </div>
 
             <!-- RIGHT: Filters & Actions -->
@@ -486,6 +486,7 @@
                         }
                         d.channel_group = $('#filter_channel_group').val();
                         d.external_id = $('#filter_external_id').val();
+                        d.search_channel = $('#cashinGlobalSearch').val() || '';
                     }
                 }
             });

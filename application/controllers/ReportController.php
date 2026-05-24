@@ -17,7 +17,20 @@ class ReportController extends CI_Controller {
       is_logged_in();
 
       if (!$this->input->is_ajax_request()) {
-         $search_merchant = $this->input->post('search_merchant_balance_log') !== null ? $this->input->post('search_merchant_balance_log') : $this->session->userdata('search_merchant_balance_log');
+         if ($this->input->post('search_merchant_balance_log') === null && 
+             $this->input->get('search_merchant_balance_log') === null &&
+             $this->input->post('search_date_balance_log') === null && 
+             $this->input->post('search_date_balance_log_to') === null) {
+            $this->session->unset_userdata('search_merchant_balance_log');
+            $this->session->unset_userdata('search_date_balance_log');
+            $this->session->unset_userdata('search_date_balance_log_to');
+            $this->session->unset_userdata('search_ref_id_balance');
+         }
+
+         $post_search_merchant = $this->input->post('search_merchant_balance_log');
+         $get_search_merchant = $this->input->get('search_merchant_balance_log');
+         $search_merchant = $post_search_merchant !== null ? $post_search_merchant : ($get_search_merchant !== null ? $get_search_merchant : $this->session->userdata('search_merchant_balance_log'));
+         
          $search_date_from = $this->input->post('search_date_balance_log') !== null ? $this->input->post('search_date_balance_log') : $this->session->userdata('search_date_balance_log');
          $search_date_to = $this->input->post('search_date_balance_log_to') !== null ? $this->input->post('search_date_balance_log_to') : $this->session->userdata('search_date_balance_log_to');
 

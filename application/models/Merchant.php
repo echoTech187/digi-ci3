@@ -350,7 +350,7 @@ public function setMaintenanceStatus($newStatus) {
      * @param bool $hasBalancePermission Permission flag for balance column
      * @return void Outputs JSON response
      */
-    public function getMerchantDataTable($where, $hasBalancePermission)
+    public function getMerchantDataTable($where, $hasBalancePermission, $search_merchant = null)
     {
         $this->load->library('datatables');
         
@@ -362,13 +362,19 @@ public function setMaintenanceStatus($newStatus) {
             return 'm.' . $col;
         }, explode(',', $cols)));
 
-        return $this->datatables->of('merchant m')
+        $dt = $this->datatables->of('merchant m')
             ->select($prefixedCols)
             ->set_column_order([null, 'm.id', 'm.c_name', 'm.c_balanceTotal', 'm.c_status', 'm.c_dateCreated', null])
             ->set_column_search(['m.id', 'm.c_name', 'm.c_email'])
             ->set_default_order(['m.c_dateCreated' => 'desc'])
-            ->where($where)
-            ->addColumn('no', function ($row) {
+            ->where($where);
+
+        if (!empty($search_merchant)) {
+            $escaped_search = $this->db->escape_like_str($search_merchant);
+            $dt->where("(m.c_name LIKE '%{$escaped_search}%' OR m.id LIKE '%{$escaped_search}%' OR m.c_email LIKE '%{$escaped_search}%')", null, false);
+        }
+
+        return $dt->addColumn('no', function ($row) {
                 static $no = null;
                 if ($no === null) $no = intval($this->input->post('start'));
                 return ++$no;
@@ -418,16 +424,22 @@ public function setMaintenanceStatus($newStatus) {
             })
             ->make(true);
     }
-    public function get_merchant_spv_handler($where = [])
+    public function get_merchant_spv_handler($where = [], $search_spv = null)
     {
         $this->load->library('datatables');
         
-        return $this->datatables->of('merchant_supervisor')
+        $dt = $this->datatables->of('merchant_supervisor')
             ->set_column_order(['id', 'c_name', 'c_username', 'c_email', 'c_status', 'c_created_date'])
             ->set_column_search(['c_name', 'c_username', 'c_email', 'c_status'])
             ->set_default_order(['c_created_date' => 'desc'])
-            ->where($where)
-            ->addColumn('no', function($row) {
+            ->where($where);
+
+        if (!empty($search_spv)) {
+            $escaped_search = $this->db->escape_like_str($search_spv);
+            $dt->where("(c_name LIKE '%{$escaped_search}%' OR c_username LIKE '%{$escaped_search}%' OR c_email LIKE '%{$escaped_search}%')", null, false);
+        }
+
+        return $dt->addColumn('no', function($row) {
                 static $no = null;
                 if ($no === null) $no = intval($this->input->post('start'));
                 return ++$no;

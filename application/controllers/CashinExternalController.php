@@ -22,13 +22,34 @@ class CashinExternalController extends CI_Controller {
         $data['channel_groups'] = $this->Chanel->get_cashin_chanel_group();
         $data['channel_ids'] = $this->Chanel->get_cashin_chanel_id();
         $data['channel_external_id_defaults'] = $this->Chanel->get_cashin_chanel_external_id_default();
+        // Clear session if direct access (not ajax) without parameters
+        if (!$this->input->is_ajax_request() && $this->input->get('search_channel') === null && $this->input->post('search_channel') === null) {
+            $this->session->unset_userdata('search_external_cashin');
+        }
+
+        // Session-based search persistence
+        $search_channel = $this->input->get('search_channel') ?: $this->input->post('search_channel');
+        if ($search_channel !== null) {
+            $this->session->set_userdata('search_external_cashin', $search_channel);
+        } else {
+            $search_channel = $this->session->userdata('search_external_cashin');
+        }
+
         // Note: MY_Loader automatically wraps this in templates/layout
         $this->load->view('admin/cashin_external/index', $data);
     }
 
     public function ajax_list() {
         if (!$this->input->is_ajax_request()) return;
-        return $this->Chanel->getCashinExternalDataTable();
+        
+        $search_channel = $this->input->get('search_channel') ?: $this->input->post('search_channel');
+        if ($search_channel !== null) {
+            $this->session->set_userdata('search_external_cashin', $search_channel);
+        } else {
+            $search_channel = $this->session->userdata('search_external_cashin');
+        }
+
+        return $this->Chanel->getCashinExternalDataTable($search_channel);
     }
 
     public function add_view() {

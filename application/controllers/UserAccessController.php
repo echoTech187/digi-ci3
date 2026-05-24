@@ -88,6 +88,18 @@ class UserAccessController extends CI_Controller {
    {
       $this->load->model('AdminModel');
 
+      // Clear session if direct access (not ajax) without parameters
+      if (!$this->input->is_ajax_request() && $this->input->get('search_admin') === null && $this->input->post('search_admin') === null) {
+         $this->session->unset_userdata('search_admin');
+      }
+
+      $search_admin = $this->input->get('search_admin') ?: $this->input->post('search_admin');
+      if ($search_admin !== null) {
+         $this->session->set_userdata('search_admin', $search_admin);
+      } else {
+         $search_admin = $this->session->userdata('search_admin');
+      }
+
       // Intercept AJAX request for DataTables
       if ($this->input->is_ajax_request()) {
          try {
@@ -98,6 +110,12 @@ class UserAccessController extends CI_Controller {
             if ($this->input->post('status')) {
                 $filters['a.c_status'] = $this->input->post('status');
             }
+            
+            $search_admin_sess = $this->session->userdata('search_admin');
+            if ($search_admin_sess) {
+                $filters['custom_search'] = $search_admin_sess;
+            }
+
             return $this->AdminModel->get_datatables_handler($filters);
          } catch (Throwable $e) {
             log_message('error', 'Admin List AJAX error: ' . $e->getMessage());

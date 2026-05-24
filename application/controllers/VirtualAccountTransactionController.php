@@ -52,6 +52,14 @@ class VirtualAccountTransactionController extends CI_Controller
          if (!$this->input->get('va_number') && !$this->input->post('search_va_number') && 
              !$this->input->get('transid') && !$this->input->post('search_va_transid') &&
              !$this->input->get('invoice') && !$this->input->post('search_invoice_no')) {
+            $this->session->unset_userdata('search_date_va');
+            $this->session->unset_userdata('search_date_va_to');
+            $this->session->unset_userdata('search_name_va');
+            $this->session->unset_userdata('search_date_va_settlement');
+            $this->session->unset_userdata('search_channel_va');
+            $this->session->unset_userdata('search_va_number');
+            $this->session->unset_userdata('search_va_transid');
+            $this->session->unset_userdata('search_invoice_no');
             $this->session->unset_userdata('last_search_va');
          }
       } else {
@@ -203,7 +211,7 @@ class VirtualAccountTransactionController extends CI_Controller
          $search_merchant_trxid = $this->session->userdata('search_merchant_trxid');
       }
 
-      $search_name_vad = $this->input->post('search_name_vad') != NULL ? $this->input->post('search_name_vad') : $this->session->userdata('search_name_vad');
+      $search_name_vad = $this->input->get('merchant') ?: ($this->input->post('search_name_vad') != NULL ? $this->input->post('search_name_vad') : $this->session->userdata('search_name_vad'));
       $search_date_vad = $this->input->post('search_date_vad') != NULL ? $this->input->post('search_date_vad') : $this->session->userdata('search_date_vad');
       $search_date_vad_to = $this->input->post('search_date_vad_to') != NULL ? $this->input->post('search_date_vad_to') : $this->session->userdata('search_date_vad_to');
       $search_va_number = $this->input->get('va_number') ? $this->input->get('va_number') : ($this->input->post('search_va_number') != NULL ? $this->input->post('search_va_number') : $this->session->userdata('search_va_number'));
@@ -298,7 +306,7 @@ class VirtualAccountTransactionController extends CI_Controller
          $search_va_number = $this->session->userdata('search_va_number_var');
       }
 
-      $search_name_var = $this->input->post('search_name_var');
+      $search_name_var = $this->input->get('merchant') ?: $this->input->post('search_name_var');
       $search_date_var = $this->input->post('search_date_var');
       $search_date_var_to = $this->input->post('search_date_var_to');
       $search_submerchant_var = $this->input->post('search_submerchant_var');

@@ -87,9 +87,23 @@
                             $active_term = $this->session->userdata('search_merchant_trxid');
                         } elseif ($segment2 == 'VA_recurring') {
                             $active_term = $this->session->userdata('search_transid_var');
+                        } elseif ($segment2 == 'manage' && $this->uri->segment(1) == 'merchant') {
+                            $active_term = $this->session->userdata('search_merchant');
+                        } elseif ($segment2 == 'accounts' && $this->uri->segment(1) == 'access-control') {
+                            $active_term = $this->session->userdata('search_admin');
+                        } elseif ($segment2 == 'supervisor' && $this->uri->segment(1) == 'merchant') {
+                            $active_term = $this->session->userdata('search_spv');
+                        } elseif ($segment2 == 'cashin' && $this->uri->segment(1) == 'channel') {
+                            $active_term = $this->session->userdata('search_channel');
+                        } elseif ($segment2 == 'cashout' && $this->uri->segment(1) == 'channel') {
+                            $active_term = $this->session->userdata('search_channel_out');
+                        } elseif ($segment2 == 'cashin' && $this->uri->segment(1) == 'external') {
+                            $active_term = $this->session->userdata('search_external_cashin');
+                        } elseif ($segment2 == 'cashout' && $this->uri->segment(1) == 'external') {
+                            $active_term = $this->session->userdata('search_external_cashout');
                         }
                         
-                        $topbar_placeholder = $active_term ?: "Search transactions (ID, VA, RRN, Inv)...";
+                        $topbar_placeholder = $active_term ?: "Search anything (Merchant, Channel, Admin, or Transaction...)";
                     ?>
                     <input type="text" class="form-control premium-search-input" placeholder="<?= htmlspecialchars($topbar_placeholder); ?>" id="globalSearchInput" autocomplete="off">
                     <i class="fas fa-search search-icon" id="globalSearchIcon"></i>
@@ -265,20 +279,179 @@
                         }
 
                         try {
-                            const response = await fetch(`<?= base_url('dashboard/global-search'); ?>?q=${encodeURIComponent(query)}`);
+                            const trimmedQuery = query.trim();
+                            const response = await fetch(`<?= base_url('dashboard/global-search'); ?>?q=${encodeURIComponent(trimmedQuery)}`);
                             const results = await response.json();
 
                             // Display Results
                             if (results.length > 0) {
-                                resultsDropdown.innerHTML = results.map(res => `
-                                    <div class="search-result-item" onclick="window.location.href='${res.url}'">
-                                        <div class="result-icon"><i class="${res.icon}"></i></div>
-                                        <div class="result-info">
-                                            <div class="result-title">${res.title}</div>
-                                            <div class="result-category">${res.category}</div>
-                                        </div>
-                                    </div>
-                                `).join('');
+                                // Group results by category
+                                const grouped = {};
+                                results.forEach(res => {
+                                    if (!grouped[res.category]) grouped[res.category] = [];
+                                    grouped[res.category].push(res);
+                                });
+                                
+                                const categories = Object.keys(grouped);
+                                // Check if we have a merchant/sub-account to show Recent Transactions
+                                let searchMerchantId = null;
+                                let searchMerchantUrl = null;
+                                const merchantResult = results.find(res => res.merchant_id);
+                                if (merchantResult) {
+                                    searchMerchantId = merchantResult.merchant_id;
+                                    searchMerchantUrl = merchantResult.url;
+                                    categories.unshift('Recent Transactions');
+                                }
+
+                                // Default active tab is the first category
+                                let activeCategory = categories[0];
+                                
+                                let recentTransactionsData = null;
+                                let isFetchingRecent = false;
+                                
+                                const renderResults = () => {
+                                    let html = '<div class="search-tabs-container">';
+                                    categories.forEach(cat => {
+                                        const count = grouped[cat] ? grouped[cat].length : (recentTransactionsData ? recentTransactionsData.length : '?');
+                                        const isActive = cat === activeCategory ? 'active' : '';
+                                        const countDisplay = cat === 'Recent Transactions' && count === '?' ? '' : ` (${count})`;
+                                        html += `<div class="search-tab ${isActive}" data-category="${cat}">${cat}${countDisplay}</div>`;
+                                    });
+                                    html += '</div>';
+                                    
+                                    html += '<div class="search-results-list" id="searchResultsListWrapper">';
+                                    
+                                    if (activeCategory === 'Recent Transactions') {
+                                        if (recentTransactionsData) {
+                                            if (recentTransactionsData.length > 0) {
+                                                recentTransactionsData.forEach(rt => {
+                                                    let statusBadge = 'badge-rt-pending';
+                                                    if (rt.status === 'Success' || rt.status === 'Settled') statusBadge = 'badge-rt-success';
+                                                    if (rt.status === 'Failed' || rt.status === 'Error') statusBadge = 'badge-rt-failed';
+                                                    
+                                                    let iconClass = rt.type === 'Cash-In' ? 'fas fa-arrow-down' : 'fas fa-arrow-up';
+                                                    if (rt.channel.includes('QRIS')) iconClass = 'fas fa-qrcode';
+                                                    else if (rt.channel.includes('VA')) iconClass = 'fas fa-university';
+                                                    else if (rt.channel.includes('EWALLET')) iconClass = 'fas fa-wallet';
+                                                    else if (rt.channel.includes('BIFAST')) iconClass = 'fas fa-paper-plane';
+
+                                                    html += `
+                                                        <div class="rt-item">
+                                                            <div class="rt-icon"><i class="${iconClass}"></i></div>
+                                                            <div class="rt-details">
+                                                                <span class="rt-title">${rt.channel} <span style="opacity:0.5; font-weight:normal; font-size:0.65rem;">• ${rt.date_formatted}</span></span>
+                                                                <span class="rt-subtitle">${rt.transid}</span>
+                                                            </div>
+                                                            <div class="rt-status">
+                                                                <span class="rt-amount">${rt.amount_formatted}</span>
+                                                                <span class="badge ${statusBadge} px-2 py-0" style="font-size:0.6rem; border-radius:4px;">${rt.status}</span>
+                                                            </div>
+                                                        </div>
+                                                    `;
+                                                });
+                                                const baseUrl = "<?= base_url(); ?>";
+                                                html += `
+                                                    <div class="p-2 mt-1">
+                                                        <a href="${baseUrl}merchant/manage/detail/${searchMerchantId}#nav-history" class="btn btn-sm btn-block text-primary font-weight-bold">
+                                                            View All Transactions <i class="fas fa-arrow-right ml-1"></i>
+                                                        </a>
+                                                    </div>
+                                                `;
+                                            } else {
+                                                html += '<div class="p-3 text-center text-muted small"><i class="fas fa-inbox mb-2 d-block"></i>No recent transactions</div>';
+                                            }
+                                        } else {
+                                            html += '<div class="p-4 text-center text-muted small"><i class="fas fa-spinner fa-spin mb-2 d-block text-primary" style="font-size:20px;"></i>Loading transactions...</div>';
+                                            
+                                            // Fetch the data if not fetching
+                                            if (!isFetchingRecent && searchMerchantId) {
+                                                isFetchingRecent = true;
+                                                fetch(`<?= base_url('dashboard/recent-search'); ?>?merchant_id=${searchMerchantId}`, {
+                                                    headers: {
+                                                        'X-Requested-With': 'XMLHttpRequest'
+                                                    }
+                                                })
+                                                    .then(res => res.json())
+                                                    .then(data => {
+                                                        if (data.status === 'success') {
+                                                            recentTransactionsData = data.data;
+                                                            if (activeCategory === 'Recent Transactions') renderResults();
+                                                        }
+                                                    })
+                                                    .catch(err => {
+                                                        recentTransactionsData = [];
+                                                        if (activeCategory === 'Recent Transactions') renderResults();
+                                                    });
+                                            }
+                                        }
+                                    } else {
+                                        if (grouped[activeCategory]) {
+                                            grouped[activeCategory].forEach(res => {
+                                                html += `
+                                                    <div class="search-result-item" onclick="window.location.href='${res.url}'">
+                                                        <div class="result-icon"><i class="${res.icon}"></i></div>
+                                                        <div class="result-info">
+                                                            <div class="result-title">${res.title}</div>
+                                                            <div class="result-category">${res.category}</div>
+                                                        </div>
+                                                    </div>
+                                                `;
+                                            });
+                                        }
+                                    }
+                                    html += '</div>';
+                                    
+                                    resultsDropdown.innerHTML = html;
+                                    
+                                    // Add event listeners to tabs
+                                    const tabs = resultsDropdown.querySelectorAll('.search-tab');
+                                    let isDragging = false;
+                                    
+                                    tabs.forEach(tab => {
+                                        tab.addEventListener('click', (e) => {
+                                            if (isDragging) return;
+                                            e.stopPropagation(); // Prevent closing dropdown
+                                            activeCategory = tab.getAttribute('data-category');
+                                            renderResults();
+                                            document.getElementById('globalSearchInput').focus(); // Keep focus
+                                        });
+                                    });
+                                    
+                                    // Add mouse drag scrolling for tabs
+                                    const slider = resultsDropdown.querySelector('.search-tabs-container');
+                                    let isDown = false;
+                                    let startX;
+                                    let scrollLeft;
+
+                                    if (slider) {
+                                        slider.addEventListener('mousedown', (e) => {
+                                            isDown = true;
+                                            isDragging = false;
+                                            slider.style.cursor = 'grabbing';
+                                            startX = e.pageX - slider.offsetLeft;
+                                            scrollLeft = slider.scrollLeft;
+                                        });
+                                        slider.addEventListener('mouseleave', () => {
+                                            isDown = false;
+                                            slider.style.cursor = 'auto';
+                                        });
+                                        slider.addEventListener('mouseup', () => {
+                                            isDown = false;
+                                            slider.style.cursor = 'auto';
+                                            setTimeout(() => { isDragging = false; }, 50);
+                                        });
+                                        slider.addEventListener('mousemove', (e) => {
+                                            if (!isDown) return;
+                                            e.preventDefault();
+                                            isDragging = true;
+                                            const x = e.pageX - slider.offsetLeft;
+                                            const walk = (x - startX) * 2;
+                                            slider.scrollLeft = scrollLeft - walk;
+                                        });
+                                    }
+                                };
+                                
+                                renderResults();
                                 resultsDropdown.style.display = 'block';
                             } else {
                                 resultsDropdown.innerHTML = '<div class="p-3 text-center text-muted small"><i class="fas fa-search mb-2 d-block"></i>No matching results found</div>';

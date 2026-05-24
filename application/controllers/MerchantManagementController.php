@@ -63,8 +63,10 @@ class MerchantManagementController extends CI_Controller
 
             $role_id = $this->session->userdata('role');
             $hasBalancePermission = $this->rbac->has_permission($role_id, 'balance_merchant_module');
+            
+            $search_merchant = $this->session->userdata('search_merchant');
 
-            return $this->Merchant->getMerchantDataTable($where, $hasBalancePermission);
+            return $this->Merchant->getMerchantDataTable($where, $hasBalancePermission, $search_merchant);
          } catch (Throwable $e) {
             log_message('error', 'Merchant AJAX error: ' . $e->getMessage());
             echo json_encode([
@@ -80,6 +82,11 @@ class MerchantManagementController extends CI_Controller
 
       $data['title'] = 'Merchant';
       $data['user'] = $this->Model_user->view_user()->row_array();
+
+      // Clear session if direct access (not ajax) without parameters
+      if (!$this->input->is_ajax_request() && $this->input->get('search_merchant') === null && $this->input->post('search_merchant') === null) {
+         $this->session->unset_userdata('search_merchant');
+      }
 
       $search_merchant = $this->input->get('search_merchant') ?: $this->input->post('search_merchant');
       if ($search_merchant !== null) {
@@ -156,9 +163,23 @@ class MerchantManagementController extends CI_Controller
 
    public function merchant_spv()
    {
+      // Clear session if direct access (not ajax) without parameters
+      if (!$this->input->is_ajax_request() && $this->input->get('search_spv') === null && $this->input->post('search_spv') === null) {
+         $this->session->unset_userdata('search_spv');
+      }
+
+      $search_spv = $this->input->get('search_spv') ?: $this->input->post('search_spv');
+      if ($search_spv !== null) {
+         $this->session->set_userdata('search_spv', $search_spv);
+      } else {
+         $search_spv = $this->session->userdata('search_spv');
+      }
+
       if ($this->input->is_ajax_request()) {
          try {
             $where = [];
+            
+            $search_spv_sess = $this->session->userdata('search_spv');
             $filter_status = $this->session->userdata('search_spv_status');
             if (!empty($filter_status)) {
                $where['c_status'] = $filter_status;
@@ -173,7 +194,7 @@ class MerchantManagementController extends CI_Controller
                $where['c_created_date <='] = $filter_date_to . ' 23:59:59';
             }
 
-            return $this->Merchant->get_merchant_spv_handler($where);
+            return $this->Merchant->get_merchant_spv_handler($where, $search_spv_sess);
          } catch (Exception $e) {
             log_message('error', 'Supervisor AJAX error: ' . $e->getMessage());
             echo json_encode([

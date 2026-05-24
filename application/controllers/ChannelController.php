@@ -30,6 +30,22 @@ class ChannelController extends CI_Controller {
           $where['cc.c_externalIdDefault'] = $this->input->post('external_id');
       }
 
+      // Clear session if direct access (not ajax) without parameters
+      if (!$this->input->is_ajax_request() && $this->input->get('search_channel') === null && $this->input->post('search_channel') === null) {
+         $this->session->unset_userdata('search_channel');
+      }
+
+      $search_channel = $this->input->get('search_channel') ?: $this->input->post('search_channel');
+      if ($search_channel !== null) {
+         $this->session->set_userdata('search_channel', $search_channel);
+      } else {
+         $search_channel = $this->session->userdata('search_channel');
+      }
+
+      if ($search_channel) {
+         $where['custom_search'] = $search_channel;
+      }
+
       if ($this->input->is_ajax_request()) {
          try {
             return $this->Chanel->get_datatables_handler($table, $column_order, $column_search, $order, $where);
@@ -78,6 +94,22 @@ class ChannelController extends CI_Controller {
       }
       if ($this->input->post('external_id')) {
           $where['cc.c_externalIdDefault'] = $this->input->post('external_id');
+      }
+
+      // Clear session if direct access (not ajax) without parameters
+      if (!$this->input->is_ajax_request() && $this->input->get('search_channel') === null && $this->input->post('search_channel') === null) {
+         $this->session->unset_userdata('search_channel_out');
+      }
+
+      $search_channel = $this->input->get('search_channel') ?: $this->input->post('search_channel');
+      if ($search_channel !== null) {
+         $this->session->set_userdata('search_channel_out', $search_channel);
+      } else {
+         $search_channel = $this->session->userdata('search_channel_out');
+      }
+
+      if ($search_channel) {
+         $where['custom_search'] = $search_channel;
       }
 
       if ($this->input->is_ajax_request()) {

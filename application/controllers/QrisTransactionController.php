@@ -51,6 +51,13 @@ class QrisTransactionController extends CI_Controller
          if (!$this->input->get('rrn') && !$this->input->post('search_rrn') && 
              !$this->input->get('invoice') && !$this->input->post('search_invoice_no') &&
              !$this->input->get('transid') && !$this->input->post('search_transactionid_ht')) {
+            $this->session->unset_userdata('search_date_qris');
+            $this->session->unset_userdata('search_date_qris_to');
+            $this->session->unset_userdata('search_name_qris');
+            $this->session->unset_userdata('search_date_qris_settlement');
+            $this->session->unset_userdata('search_invoice_no');
+            $this->session->unset_userdata('search_rrn');
+            $this->session->unset_userdata('search_transactionid_ht');
             $this->session->unset_userdata('last_search_qris');
          }
       } else {
@@ -221,7 +228,7 @@ class QrisTransactionController extends CI_Controller
          $search_transid_qd = $this->session->userdata('search_transid_qd');
       }
 
-      $search_name_qd = $this->input->post('search_name_qd') != NULL ? $this->input->post('search_name_qd') : $this->session->userdata('search_name_qd');
+      $search_name_qd = $this->input->get('merchant') ?: ($this->input->post('search_name_qd') != NULL ? $this->input->post('search_name_qd') : $this->session->userdata('search_name_qd'));
       $search_date_qd = $this->input->post('search_date_qd') != NULL ? $this->input->post('search_date_qd') : $this->session->userdata('search_date_qd');
       $search_date_qd_to = $this->input->post('search_date_qd_to') != NULL ? $this->input->post('search_date_qd_to') : $this->session->userdata('search_date_qd_to');
       $search_status_transaction_qd = $this->input->post('search_status_transaction_qd') != NULL ? $this->input->post('search_status_transaction_qd') : $this->session->userdata('search_status_transaction_qd');
@@ -315,7 +322,7 @@ class QrisTransactionController extends CI_Controller
 
       $search_date_qr = $this->input->post('search_date_qr');
       $search_date_qr_to = $this->input->post('search_date_qr_to');
-      $search_name_qr = $this->input->post('search_name_qr');
+      $search_name_qr = $this->input->get('merchant') ?: $this->input->post('search_name_qr');
       $search_submerchant_qr = $this->input->post('search_submerchant_qr');
 
       if ($search_date_qr !== null) $this->session->set_userdata('search_date_qr', $search_date_qr);

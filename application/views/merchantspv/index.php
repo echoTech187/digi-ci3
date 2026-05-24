@@ -56,7 +56,7 @@
                 <div class="dt-toolbar-left flex-grow-1" style="min-width: 280px;">
                     <div class="dt-search-wrapper">
                         <i class="fas fa-search dt-search-icon"></i>
-                        <input type="text" id="dt-global-search" class="dt-search-input" placeholder="Search by name, username, and email...">
+                        <input type="text" id="dt-global-search" class="dt-search-input" placeholder="Search by name, username, and email..." value="<?= $this->session->userdata('search_spv'); ?>">
                     </div>
                 </div>
                 <div class="dt-toolbar-right d-flex align-items-center gap-2">

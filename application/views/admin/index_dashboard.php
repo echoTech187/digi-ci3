@@ -55,7 +55,7 @@
     <div class="row mb-4 gr-3">
         <!-- Today's Volume -->
         <div class="col-xl-3 col-md-6">
-            <div class="card border-0 shadow-sm dash-kpi-card" style="background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%); color: white; border-radius: 20px; overflow: hidden; position: relative;">
+            <div class="card border-0 shadow-sm dash-kpi-card" style="background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%); color: white; border-radius: 20px; overflow: hidden; position: relative; z-index: 1; transform: translateZ(0);">
                 <div class="card-body p-4">
                     <div class="d-flex justify-content-between align-items-start mb-3">
                         <div class="dash-kpi-icon-wrap" style="background: rgba(255,255,255,0.2); border-radius: 12px; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center;">
@@ -81,7 +81,7 @@
 
         <!-- QRIS Today -->
         <div class="col-xl-3 col-md-6">
-            <div class="card border-0 shadow-sm dash-kpi-card" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border-radius: 20px; overflow: hidden; position: relative;">
+            <div class="card border-0 shadow-sm dash-kpi-card" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border-radius: 20px; overflow: hidden; position: relative; z-index: 1; transform: translateZ(0);">
                 <div class="card-body p-4">
                     <div class="d-flex justify-content-between align-items-start mb-3">
                         <div class="dash-kpi-icon-wrap" style="background: rgba(255,255,255,0.2); border-radius: 12px; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center;">
@@ -104,7 +104,7 @@
 
         <!-- Disbursement Today -->
         <div class="col-xl-3 col-md-6">
-            <div class="card border-0 shadow-sm dash-kpi-card" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; border-radius: 20px; overflow: hidden; position: relative;">
+            <div class="card border-0 shadow-sm dash-kpi-card" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; border-radius: 20px; overflow: hidden; position: relative; z-index: 1; transform: translateZ(0);">
                 <div class="card-body p-4">
                     <div class="d-flex justify-content-between align-items-start mb-3">
                         <div class="dash-kpi-icon-wrap" style="background: rgba(255,255,255,0.2); border-radius: 12px; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center;">
@@ -127,7 +127,7 @@
 
         <!-- Active Merchants -->
         <div class="col-xl-3 col-md-6">
-            <div class="card border-0 shadow-sm dash-kpi-card" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; border-radius: 20px; overflow: hidden; position: relative;">
+            <div class="card border-0 shadow-sm dash-kpi-card" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; border-radius: 20px; overflow: hidden; position: relative; z-index: 1; transform: translateZ(0);">
                 <div class="card-body p-4">
                     <div class="d-flex justify-content-between align-items-start mb-3">
                         <div class="dash-kpi-icon-wrap" style="background: rgba(255,255,255,0.2); border-radius: 12px; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center;">

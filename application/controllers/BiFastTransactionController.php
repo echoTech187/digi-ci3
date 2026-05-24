@@ -62,6 +62,14 @@ class BiFastTransactionController extends CI_Controller
          $search_transid_bifast = $this->input->get('transid') ?: ($this->input->get('invoice') ?: ($this->input->post('search_transid_bifast') ?: ''));
          
          if (!$this->input->get('transid') && !$this->input->get('invoice') && !$this->input->post('search_transid_bifast')) {
+            $this->session->unset_userdata('search_date_bifast');
+            $this->session->unset_userdata('search_date_bifast_to');
+            $this->session->unset_userdata('search_name_bifast');
+            $this->session->unset_userdata('search_status_transaction_bifast');
+            $this->session->unset_userdata('search_transid_bifast');
+            $this->session->unset_userdata('search_channel_bifast');
+            $this->session->unset_userdata('search_internal_channel_bifast');
+            $this->session->unset_userdata('search_external_reff_id');
             $this->session->unset_userdata('last_search_bifast');
          }
       } else {
@@ -78,9 +86,9 @@ class BiFastTransactionController extends CI_Controller
       // 1. Jika ada input POST baru (pengguna menekan tombol 'Search' di modal), gunakan nilai tersebut dan simpan ke session.
       // 2. Jika tidak ada POST (misal: navigasi halaman), ambil nilai terakhir dari session (Fallback).
       // Hal ini memungkinkan pengguna untuk berpindah modul dan kembali lagi dengan filter yang tetap aktif (Sticky Filter).
-      $search_name_bifast = $this->input->post('search_name_bifast') != NULL ? $this->input->post('search_name_bifast') : $this->session->userdata('search_name_bifast');
-      $search_date_bifast = $this->input->post('search_date_bifast') != NULL ? $this->input->post('search_date_bifast') : $this->session->userdata('search_date_bifast');
-      $search_date_bifast_to = $this->input->post('search_date_bifast_to') != NULL ? $this->input->post('search_date_bifast_to') : $this->session->userdata('search_date_bifast_to');
+      $search_name_bifast = $this->input->get('merchant') ?: ($this->input->post('search_name_bifast') ?: $this->session->userdata('search_name_bifast'));
+      $search_date_bifast = $this->input->get('date_from') ?: ($this->input->post('search_date_bifast') ?: $this->session->userdata('search_date_bifast'));
+      $search_date_bifast_to = $this->input->get('date_to') ?: ($this->input->post('search_date_bifast_to') ?: $this->session->userdata('search_date_bifast_to'));
       $search_external_reff_id = $this->input->post('search_external_reff_id') != NULL ? $this->input->post('search_external_reff_id') : $this->session->userdata('search_external_reff_id');
       $search_channel_bifast = $this->input->post('search_channel_bifast') != NULL ? $this->input->post('search_channel_bifast') : $this->session->userdata('search_channel_bifast');
       $search_internal_channel_bifast = $this->input->post('search_internal_channel_bifast') != NULL ? $this->input->post('search_internal_channel_bifast') : $this->session->userdata('search_internal_channel_bifast');

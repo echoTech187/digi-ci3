@@ -194,7 +194,9 @@ class BiFast extends CI_Model {
 
         // Deduplication
         // Deduplication: Always group by invoice ID
-        $this->db->group_by('cpb.ref_cashoutId');
+        if (!$count_only) {
+            $this->db->group_by('cpb.ref_cashoutId');
+        }
 
         if (!$count_only) {
             if (isset($_POST['order'])) {

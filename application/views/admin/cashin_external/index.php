@@ -57,7 +57,7 @@
         <div class="dt-toolbar">
             <div class="dt-search-wrapper flex-grow-1 mb-2 mb-md-0" style="min-width: 280px;">
                 <i class="fas fa-search dt-search-icon"></i>
-                <input type="text" id="dt-search" class="dt-search-input" placeholder="Search merchant or channel...">
+                <input type="text" id="dt-search" class="dt-search-input" placeholder="Search merchant or channel..." value="<?= htmlspecialchars($this->session->userdata('search_external_cashin')); ?>">
             </div>
 
             <!-- RIGHT: Filters & Actions -->
@@ -435,6 +435,7 @@ $(document).ready(function() {
                 d.channel_id = $('#filter_channel_id').val();
                 d.provider = $('#filter_provider').val();
                 d.status = $('#filter_status').val();
+                d.search_channel = $('#dt-search').val() || '';
             }
         }
     });

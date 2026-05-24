@@ -157,7 +157,10 @@ class AdminModel extends CI_Model {
 
         if (!empty($filters)) {
             foreach ($filters as $field => $val) {
-                if ($val !== '') {
+                if ($field === 'custom_search') {
+                    $escaped_search = $this->db->escape_like_str($val);
+                    $dt->where("(a.c_name LIKE '%{$escaped_search}%' ESCAPE '!' OR a.c_email LIKE '%{$escaped_search}%' ESCAPE '!')", null, false);
+                } elseif ($val !== '') {
                     $dt->where($field, $val);
                 }
             }

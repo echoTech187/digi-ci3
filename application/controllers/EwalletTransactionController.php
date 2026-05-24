@@ -61,6 +61,12 @@ class EwalletTransactionController extends CI_Controller
          // Jika semua filter utama (invoice & transid) kosong, bersihkan session pencarian lama
          if (!$this->input->get('invoice') && !$this->input->post('search_invoice_no') &&
              !$this->input->get('transid') && !$this->input->post('search_transid_ewallet')) {
+            $this->session->unset_userdata('search_date_ewallet');
+            $this->session->unset_userdata('search_date_ewallet_to');
+            $this->session->unset_userdata('search_name_ewallet');
+            $this->session->unset_userdata('search_date_ewallet_settlement');
+            $this->session->unset_userdata('search_invoice_no');
+            $this->session->unset_userdata('search_transid_ewallet');
             $this->session->unset_userdata('last_search_ewallet');
          }
       } else {
@@ -237,7 +243,7 @@ class EwalletTransactionController extends CI_Controller
 
       $search_date_qd = $this->input->post('search_date_qd');
       $search_date_qd_to = $this->input->post('search_date_qd_to');
-      $search_name_qd = $this->input->post('search_name_qd');
+      $search_name_qd = $this->input->get('merchant') ?: $this->input->post('search_name_qd');
       $search_status_transaction_qd = $this->input->post('search_status_transaction_qd');
 
       if ($search_date_qd !== null) $this->session->set_userdata('search_date_qd', $search_date_qd);

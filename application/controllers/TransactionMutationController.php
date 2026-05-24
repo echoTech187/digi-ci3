@@ -46,6 +46,18 @@ class TransactionMutationController extends CI_Controller
       $merchant_name = isset($data['merchant'][0]) ? $data['merchant'][0]->c_name : 'Merchant';
       $data['breadcrumb_replace'] = [$id => $merchant_name];
 
+      // Clear session if direct access (not ajax) without parameters
+      if (!$this->input->is_ajax_request()) {
+         if ($this->input->post('search_date_mutation') === null && $this->input->post('search_date_mutation_to') === null &&
+             $this->input->post('search_position') === null && $this->input->post('search_channel') === null) {
+            $this->session->unset_userdata('search_date_mutation');
+            $this->session->unset_userdata('search_date_mutation_to');
+            $this->session->unset_userdata('search_position');
+            $this->session->unset_userdata('search_channel');
+            $this->session->unset_userdata('search_transactionid_mutation');
+         }
+      }
+
       $search_date_mutation = $this->input->post('search_date_mutation')
          != NULL ? $this->input->post('search_date_mutation') : $this->session->userdata('search_date_mutation');
 
