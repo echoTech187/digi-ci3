@@ -141,20 +141,20 @@ class Merchant extends CI_Model
     }
 
     public function getMaintenanceStatus() {
-    $this->db->select('status');
-    $this->db->from('maintenance_status');
-    $this->db->limit(1);
-    $query = $this->db->get();
-    if ($query->num_rows() > 0) {
-        return $query->row()->status;
+        $this->db->select('status');
+        $this->db->from('maintenance_status');
+        $this->db->limit(1);
+        $query = $this->db->get();
+        if ($query->num_rows() > 0) {
+            return $query->row()->status;
+        }
+        return 'Active'; // default kalau kosong
     }
-    return 'Active'; // default kalau kosong
-}
 
-public function setMaintenanceStatus($newStatus) {
-    // Asumsikan hanya 1 row di tabel
-    $this->db->update('maintenance_status', ['status' => $newStatus], ['id' => 1]);
-}
+    public function setMaintenanceStatus($newStatus) {
+        // Asumsikan hanya 1 row di tabel
+        $this->db->update('maintenance_status', ['status' => $newStatus], ['id' => 1]);
+    }
 
     public function get_merchant_by_id($merchant_id) {
         $cols = $this->get_allowed_columns();
@@ -264,11 +264,12 @@ public function setMaintenanceStatus($newStatus) {
         $table_name = explode(' ', $table)[0];
         $q = $this->db->query("SHOW TABLE STATUS LIKE '{$table_name}'");
         $res = $q->row();
+        // TODO: need to sync cached total data
         if ($res && isset($res->Rows)) {
             self::$cached_total = (int)$res->Rows;
             return self::$cached_total;
         }
-
+        // backup if the table is empty
         $this->db->select("count(id) as total");
         $this->db->from($table_name);
         $query = $this->db->get();
