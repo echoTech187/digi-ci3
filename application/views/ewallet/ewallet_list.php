@@ -42,10 +42,10 @@
             </button>
             <?php
                 $download_url = base_url('finance/e-wallet/download')
-                    . "?search_date_ewallet=" . ($this->session->userdata('search_date_ewallet') ?: '')
-                    . "&search_date_to_ewallet=" . ($this->session->userdata('search_date_ewallet_to') ?: '')
-                    . "&search_date_ewallet_settlement=" . ($this->session->userdata('search_date_ewallet_settlement') ?: '')
-                    . "&search_name_ewallet=" . ($this->session->userdata('search_name_ewallet') ?: '');
+                    . "?search_ewallet_date1=" . ($this->session->userdata('search_ewallet_date1') ?: '')
+                    . "&search_ewallet_date2=" . ($this->session->userdata('search_ewallet_date2') ?: '')
+                    . "&search_ewallet_date_settlement=" . ($this->session->userdata('search_ewallet_date_settlement') ?: '')
+                    . "&search_ewallet_name=" . ($this->session->userdata('search_ewallet_name') ?: '');
             ?>
             
         </div>
@@ -55,12 +55,12 @@
 
         <!-- ── Toolbar ── -->
         <?php
-            $search_date_ewallet_value            = $this->session->userdata('search_date_ewallet') ?: '';
-            $search_date_ewallet_to_value         = $this->session->userdata('search_date_ewallet_to') ?: '';
-            $search_date_ewallet_settlement_value = $this->session->userdata('search_date_ewallet_settlement') ?: '';
-            $search_name_ewallet_value            = $this->session->userdata('search_name_ewallet') ?: '';
-            $search_invoice_no_value              = $this->session->userdata('search_invoice_no') ?: '';
-            $search_transid_ewallet_value         = $this->session->userdata('search_transid_ewallet') ?: '';
+            $search_date_ewallet_value            = $this->session->userdata('search_ewallet_date1') ?: '';
+            $search_date_ewallet_to_value         = $this->session->userdata('search_ewallet_date2') ?: '';
+            $search_date_ewallet_settlement_value = $this->session->userdata('search_ewallet_date_settlement') ?: '';
+            $search_name_ewallet_value            = $this->session->userdata('search_ewallet_name') ?: '';
+            $search_invoice_no_value              = $this->session->userdata('search_ewallet_invoice_no') ?: '';
+            $search_transid_ewallet_value         = $this->session->userdata('search_ewallet_transid') ?: '';
 
             // Count active extra filters for badge (excludes invoice_no which is now in global search)
             $extra_active = 0;
@@ -76,7 +76,7 @@
                 <!-- LEFT: Global Search -->
                 <div class="dt-search-wrapper">
                     <i class="fas fa-search dt-search-icon"></i>
-                    <?php $active_ewallet_search = $search_invoice_no_value ?: $search_transid_ewallet_value; ?>
+                    <?php $active_ewallet_search = $this->session->userdata('last_dt_search_ewallet') ?: ''; ?>
                     <input type="text" id="ewalletGlobalSearch" class="dt-search-input" placeholder="<?= $active_ewallet_search ?: 'Search by Invoice or Trans ID...'; ?>" value="<?= $active_ewallet_search; ?>">
                 </div>
 
@@ -187,6 +187,7 @@
         $('.dt-chip-select').select2({
             width: 'auto',
             dropdownAutoWidth: true,
+            dropdownParent: $(this).parent(),
             minimumResultsForSearch: 5
         });
 
@@ -254,7 +255,7 @@
         ], {
             "order": [[1, 'desc']],
             "search": {
-                "search": "<?= $search_invoice_no_value ?: $search_transid_ewallet_value ?>"
+                "search": "<?= $this->session->userdata('last_dt_search_ewallet') ?: '' ?>"
             }
         });
 

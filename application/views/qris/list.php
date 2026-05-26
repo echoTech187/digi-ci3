@@ -1,25 +1,25 @@
 <?php
 // Session filter values
-$search_date_qris_value            = $this->session->userdata('search_date_qris') ?: '';
-$search_date_qris_to_value         = $this->session->userdata('search_date_qris_to') ?: '';
-$search_date_qris_settlement_value = $this->session->userdata('search_date_qris_settlement') ?: '';
-$search_name_qris_value            = $this->session->userdata('search_name_qris') ?: '';
-$search_transactionid_ht_value     = $this->session->userdata('search_transactionid_ht') ?: '';
-$search_rrn_value                  = $this->session->userdata('search_rrn') ?: '';
-$search_invoice_no_value          = $this->session->userdata('search_invoice_no') ?: '';
+$search_date_qris_value            = $this->session->userdata('search_qris_date1') ?: '';
+$search_date_qris_to_value         = $this->session->userdata('search_qris_date2') ?: '';
+$search_date_qris_settlement_value = $this->session->userdata('search_qris_date_settlement') ?: '';
+$search_name_qris_value            = $this->session->userdata('search_qris_name') ?: '';
+$search_transactionid_ht_value     = $this->session->userdata('search_qris_transid') ?: '';
+$search_rrn_value                  = $this->session->userdata('search_qris_rrn') ?: '';
+$search_invoice_no_value          = $this->session->userdata('search_qris_invoice_no') ?: '';
+$last_dt_search_qris_value         = $this->session->userdata('last_dt_search_qris') ?: '';
 
 // Badge count for More Filters (excludes transaction ID and RRN which are now in global search)
 $extra_active = 0;
 if ($search_date_qris_value || $search_date_qris_to_value)  $extra_active++;
 if ($search_name_qris_value)            $extra_active++;
 if ($search_date_qris_settlement_value) $extra_active++;
-// search_invoice_no, search_transactionid_ht, search_rrn are in global search
 
 $download_url = base_url('finance/qris/download')
-    . '?search_date_qris='            . $search_date_qris_value
-    . '&search_date_qris_to='         . $search_date_qris_to_value
-    . '&search_date_qris_settlement=' . $search_date_qris_settlement_value
-    . '&search_name_qris='            . $search_name_qris_value;
+    . '?search_qris_date1='            . $search_date_qris_value
+    . '&search_qris_date2='         . $search_date_qris_to_value
+    . '&search_qris_date_settlement=' . $search_date_qris_settlement_value
+    . '&search_qris_name='            . $search_name_qris_value;
 ?>
 
 <!-- ── Page Header ── -->
@@ -76,8 +76,8 @@ $download_url = base_url('finance/qris/download')
                 <!-- LEFT: Global Search -->
                 <div class="dt-search-wrapper">
                     <i class="fas fa-search dt-search-icon"></i>
-                    <?php $active_qris_search = $search_transactionid_ht_value ?: ($search_rrn_value ?: $search_invoice_no_value); ?>
-                    <input type="text" id="qrisGlobalSearch" class="dt-search-input" placeholder="<?= $active_qris_search ?: 'Search by Invoice, Trans ID, or RRN...'; ?>" value="<?= $active_qris_search; ?>">
+                    <?php $active_qris_search = $last_dt_search_qris_value; ?>
+                    <input type="text" id="qrisGlobalSearch" class="dt-search-input" placeholder="<?= htmlspecialchars($active_qris_search ?: 'Search by Invoice, Trans ID, or RRN...'); ?>" value="<?= htmlspecialchars($active_qris_search); ?>">
                 </div>
 
                 <!-- RIGHT: Primary chips + More Filters trigger -->
@@ -255,7 +255,7 @@ $download_url = base_url('finance/qris/download')
         ], {
             "order": [[1, 'desc']],
             "search": {
-                "search": "<?= $search_transactionid_ht_value ?: ($search_rrn_value ?: $search_invoice_no_value) ?>"
+                "search": "<?= htmlspecialchars($last_dt_search_qris_value, ENT_QUOTES, 'UTF-8') ?>"
             }
         });
 

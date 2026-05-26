@@ -38,6 +38,11 @@ class TransactionMutationController extends CI_Controller
          redirect('merchant/manage');
       }
 
+      // Auto-reset if accessed directly without any parameters (GET or POST)
+      if (!$this->input->is_ajax_request() && empty($this->input->get()) && !$this->input->post()) {
+         $this->resetMutation($id, false);
+      }
+
       $data['title'] = 'Mutation';
       $data['user'] = $this->Model_user->view_user()->row_array();
       $data['merchant'] = $this->Mutation_model->get_merchant($id);
@@ -46,45 +51,58 @@ class TransactionMutationController extends CI_Controller
       $merchant_name = isset($data['merchant'][0]) ? $data['merchant'][0]->c_name : 'Merchant';
       $data['breadcrumb_replace'] = [$id => $merchant_name];
 
-      // Clear session if direct access (not ajax) without parameters
-      if (!$this->input->is_ajax_request()) {
-         if ($this->input->post('search_date_mutation') === null && $this->input->post('search_date_mutation_to') === null &&
-             $this->input->post('search_position') === null && $this->input->post('search_channel') === null) {
-            $this->session->unset_userdata('search_date_mutation');
-            $this->session->unset_userdata('search_date_mutation_to');
-            $this->session->unset_userdata('search_position');
-            $this->session->unset_userdata('search_channel');
-            $this->session->unset_userdata('search_transactionid_mutation');
+      // Sync from GET/POST to Session
+      $field_map = [
+         'search_mutation_date1'    => 'search_date_mutation',
+         'search_mutation_date2'    => 'search_date_mutation_to',
+         'search_mutation_position' => 'search_position',
+         'search_mutation_channel'  => 'search_channel',
+         'search_mutation_transid'  => 'search_transactionid_mutation',
+      ];
+
+      $get_fallback = [
+         'search_mutation_date1'    => 'date_from',
+         'search_mutation_date2'    => 'date_to',
+         'search_mutation_position' => 'position',
+         'search_mutation_channel'  => 'channel',
+         'search_mutation_transid'  => 'transid',
+      ];
+
+      foreach ($field_map as $session_key => $post_key) {
+         $val = $this->input->post($post_key);
+         if ($val === NULL && isset($get_fallback[$session_key])) {
+            $val = $this->input->get($get_fallback[$session_key]);
          }
+         if ($val !== NULL) $this->session->set_userdata($session_key, $val);
       }
 
-      $search_date_mutation = $this->input->post('search_date_mutation')
-         != NULL ? $this->input->post('search_date_mutation') : $this->session->userdata('search_date_mutation');
-
-      $search_date_mutation_to = $this->input->post('search_date_mutation_to')
-         != NULL ? $this->input->post('search_date_mutation_to') : $this->session->userdata('search_date_mutation_to');
-
-      $search_position = $this->input->post('search_position')
-         != NULL ? $this->input->post('search_position') : $this->session->userdata('search_position');
-
-      $search_channel = $this->input->post('search_channel')
-         != NULL ? $this->input->post('search_channel') : $this->session->userdata('search_channel');
-
-      // Sync Session
-      $this->session->set_userdata([
-         'search_date_mutation' => $search_date_mutation,
-         'search_date_mutation_to' => $search_date_mutation_to,
-         'search_position' => $search_position,
-         'search_channel' => $search_channel
-      ]);
+      // Deep Linking & Main Search Sync
+      $active_search = $this->input->get('q') ?: $this->input->get('invoice') ?: $this->input->get('transid');
+      if ($active_search) {
+         $this->session->set_userdata('last_dt_search_mutation', $active_search);
+         $this->session->set_userdata('search_mutation_transid', $active_search);
+      }
 
       if ($this->input->is_ajax_request()) {
          try {
+            $dtSearch = $this->input->post('search')['value'] ?? '';
+            $oldSearch = $this->session->userdata('last_dt_search_mutation');
+
+            if ($dtSearch === '' && $oldSearch !== '' && $oldSearch !== null) {
+               $this->resetMutation($id, false); // Silent reset
+            }
+
+            if ($dtSearch !== '') {
+               $this->session->set_userdata('search_mutation_transid', $dtSearch);
+               $this->session->set_userdata('last_dt_search_mutation', $dtSearch);
+            }
+
             $filters = [
-               'date' => $search_date_mutation,
-               'date_to' => $search_date_mutation_to,
-               'position' => $search_position,
-               'channel' => $search_channel
+               'date' => $this->session->userdata('search_mutation_date1'),
+               'date_to' => $this->session->userdata('search_mutation_date2'),
+               'position' => $this->session->userdata('search_mutation_position'),
+               'channel' => $this->session->userdata('search_mutation_channel'),
+               'transid' => $this->session->userdata('search_mutation_transid')
             ];
             return $this->Mutation_model->get_datatables_handler($id, $filters);
          } catch (Throwable $e) {
@@ -100,6 +118,7 @@ class TransactionMutationController extends CI_Controller
       }
 
       $data['channels'] = [];
+      $search_position = $this->session->userdata('search_mutation_position');
       if ($search_position == 'Credit')
          $data['channels'] = $this->Mutation_model->get_cashin_channels($id);
       elseif ($search_position == 'Debit')
@@ -108,20 +127,24 @@ class TransactionMutationController extends CI_Controller
       $this->load->view('mutation/list', $data);
    }
 
-   public function resetMutation($id = NULL)
+   public function resetMutation($id = NULL, $redirect = true)
    {
       if (!$id) $id = $this->uri->segment(4);
-      $this->session->unset_userdata('search_date_mutation');
-      $this->session->unset_userdata('search_date_mutation_to');
-      $this->session->unset_userdata('search_position');
-      $this->session->unset_userdata('search_channel');
-      redirect("finance/mutation/$id");
+      $this->session->unset_userdata([
+         'search_mutation_date1',
+         'search_mutation_date2',
+         'search_mutation_position',
+         'search_mutation_channel',
+         'search_mutation_transid',
+         'last_dt_search_mutation'
+      ]);
+      if ($redirect) redirect("finance/mutation/$id");
    }
 
    public function download_mutation()
    {
-      $search_date_mutation = isset($_GET['search_date_mutation']) ? $_GET['search_date_mutation'] : '';
-      $search_date_mutation_to = isset($_GET['search_date_mutation_to']) ? $_GET['search_date_mutation_to'] : '';
+      $search_date_mutation = isset($_GET['search_mutation_date1']) ? $_GET['search_mutation_date1'] : '';
+      $search_date_mutation_to = isset($_GET['search_mutation_date2']) ? $_GET['search_mutation_date2'] : '';
       $id = isset($_GET['id']) ? $_GET['id'] : '';
 
       if (empty($search_date_mutation) || empty($search_date_mutation_to)) {

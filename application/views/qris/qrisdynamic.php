@@ -56,10 +56,10 @@
         <?php
             // Badge count for More Filters
             $extra_active = 0;
-            if ($this->session->userdata('search_date_qd') || $this->session->userdata('search_date_qd_to'))             $extra_active++;
-            if ($this->session->userdata('search_name_qd'))             $extra_active++;
-            if ($this->session->userdata('search_status_transaction_qd')) $extra_active++;
-            if ($this->session->userdata('search_reff_label'))           $extra_active++;
+            if ($this->session->userdata('search_qrisdynamic_date1') || $this->session->userdata('search_qrisdynamic_date2'))             $extra_active++;
+            if ($this->session->userdata('search_qrisdynamic_name'))             $extra_active++;
+            if ($this->session->userdata('search_qrisdynamic_status')) $extra_active++;
+            if ($this->session->userdata('search_qrisdynamic_reff'))           $extra_active++;
         ?>
 
         <form id="qris_dynamic_form" method="post" action="<?= base_url('qris/dynamic'); ?>">
@@ -69,8 +69,8 @@
                 <!-- LEFT: Global Search -->
                 <div class="dt-search-wrapper">
                     <i class="fas fa-search dt-search-icon"></i>
-                    <?php $active_qd_search = $this->session->userdata('search_transid_qd'); ?>
-                    <input type="text" id="qrisDynamicGlobalSearch" class="dt-search-input" placeholder="<?= $active_qd_search ?: 'Search by Merchant, ID, or Reference...'; ?>" value="<?= $active_qd_search; ?>">
+                    <?php $active_qd_search = $this->session->userdata('last_dt_search_qrisdynamic'); ?>
+                    <input type="text" id="qrisDynamicGlobalSearch" class="dt-search-input" placeholder="<?= htmlspecialchars($active_qd_search ?: 'Search by Merchant, ID, or Reference...'); ?>" value="<?= htmlspecialchars($active_qd_search); ?>">
                 </div>
 
                 <!-- RIGHT: Filters -->
@@ -101,9 +101,9 @@
                                 <div class="dt-more-field">
                                     <label class="dt-more-label"><i class="fas fa-calendar-alt mr-1 mr-2"></i> Period</label>
                                     <div class="dt-filter-chip">
-                                        <input type="date" name="search_date_qd" class="dt-chip-input" value="<?= $this->session->userdata('search_date_qd'); ?>" title="Date From">
+                                        <input type="date" name="search_date_qd" class="dt-chip-input" value="<?= $this->session->userdata('search_qrisdynamic_date1'); ?>" title="Date From">
                                         <span class="text-muted mx-1" style="font-size:11px;">→</span>
-                                        <input type="date" name="search_date_qd_to" class="dt-chip-input" value="<?= $this->session->userdata('search_date_qd_to'); ?>" title="Date To">
+                                        <input type="date" name="search_date_qd_to" class="dt-chip-input" value="<?= $this->session->userdata('search_qrisdynamic_date2'); ?>" title="Date To">
                                     </div>
                                 </div>
 
@@ -114,7 +114,7 @@
                                         <select name="search_name_qd" class="dt-chip-select qris-dynamic-select2">
                                             <option value="">All Merchants</option>
                                             <?php foreach ($merchants as $m): ?>
-                                                <option value="<?= $m->id; ?>" <?= ($this->session->userdata('search_name_qd') == $m->id) ? 'selected' : ''; ?>>
+                                                <option value="<?= $m->id; ?>" <?= ($this->session->userdata('search_qrisdynamic_name') == $m->id) ? 'selected' : ''; ?>>
                                                     [<?= $m->id; ?>] <?= $m->c_name; ?>
                                                 </option>
                                             <?php endforeach; ?>
@@ -127,19 +127,19 @@
                                     <label class="dt-more-label"><i class="fas fa-info-circle mr-1 mr-2"></i> Status</label>
                                     <select name="search_status_transaction_qd" class="dt-more-select">
                                         <option value="">All Statuses</option>
-                                        <option value="Pending"  <?= ($this->session->userdata('search_status_transaction_qd') == 'Pending')  ? 'selected' : ''; ?>>Pending</option>
-                                        <option value="Created"  <?= ($this->session->userdata('search_status_transaction_qd') == 'Created')  ? 'selected' : ''; ?>>Created</option>
-                                        <option value="Paid"     <?= ($this->session->userdata('search_status_transaction_qd') == 'Paid')     ? 'selected' : ''; ?>>Paid</option>
-                                        <option value="Failed"   <?= ($this->session->userdata('search_status_transaction_qd') == 'Failed')   ? 'selected' : ''; ?>>Failed</option>
-                                        <option value="Expired"  <?= ($this->session->userdata('search_status_transaction_qd') == 'Expired')  ? 'selected' : ''; ?>>Expired</option>
-                                        <option value="Cancel"   <?= ($this->session->userdata('search_status_transaction_qd') == 'Cancel')   ? 'selected' : ''; ?>>Cancel</option>
+                                        <option value="Pending"  <?= ($this->session->userdata('search_qrisdynamic_status') == 'Pending')  ? 'selected' : ''; ?>>Pending</option>
+                                        <option value="Created"  <?= ($this->session->userdata('search_qrisdynamic_status') == 'Created')  ? 'selected' : ''; ?>>Created</option>
+                                        <option value="Paid"     <?= ($this->session->userdata('search_qrisdynamic_status') == 'Paid')     ? 'selected' : ''; ?>>Paid</option>
+                                        <option value="Failed"   <?= ($this->session->userdata('search_qrisdynamic_status') == 'Failed')   ? 'selected' : ''; ?>>Failed</option>
+                                        <option value="Expired"  <?= ($this->session->userdata('search_qrisdynamic_status') == 'Expired')  ? 'selected' : ''; ?>>Expired</option>
+                                        <option value="Cancel"   <?= ($this->session->userdata('search_qrisdynamic_status') == 'Cancel')   ? 'selected' : ''; ?>>Cancel</option>
                                     </select>
                                 </div>
                                 
                                 <!-- Reference Label -->
                                 <div class="dt-more-field">
                                     <label class="dt-more-label"><i class="fas fa-tag mr-1 mr-2"></i> Reference Label</label>
-                                    <input type="text" name="search_reff_label" class="dt-more-input" placeholder="e.g. PROVIDER..." value="<?= $this->session->userdata('search_reff_label'); ?>">
+                                    <input type="text" name="search_reff_label" class="dt-more-input" placeholder="e.g. PROVIDER..." value="<?= $this->session->userdata('search_qrisdynamic_reff'); ?>">
                                 </div>
                             </div>
 
@@ -401,7 +401,6 @@
         $('.qris-dynamic-select2').select2({
             width: '100%',
             dropdownAutoWidth: true,
-            dropdownParent: $('.dt-toolbar'),
             minimumResultsForSearch: 5
         });
 
@@ -409,7 +408,6 @@
         $('#qrisMoreFiltersPanel select').not('.select2-hidden-accessible').select2({
             width: '100%',
             dropdownAutoWidth: true,
-            dropdownParent: $('#qrisMoreFiltersPanel'),
             minimumResultsForSearch: 0
         });
 

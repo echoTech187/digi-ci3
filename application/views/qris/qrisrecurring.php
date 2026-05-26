@@ -47,10 +47,10 @@
         <?php
             // Badge count for More Filters
             $extra_active = 0;
-            if ($this->session->userdata('search_date_qr') || $this->session->userdata('search_date_qr_to'))      $extra_active++;
-            if ($this->session->userdata('search_name_qr'))      $extra_active++;
-            if ($this->session->userdata('search_submerchant_qr')) $extra_active++;
-            if ($this->session->userdata('search_status_transaction_qr')) $extra_active++;
+            if ($this->session->userdata('search_qrisrecurring_date1') || $this->session->userdata('search_qrisrecurring_date2'))      $extra_active++;
+            if ($this->session->userdata('search_qrisrecurring_name'))      $extra_active++;
+            if ($this->session->userdata('search_qrisrecurring_submerchant')) $extra_active++;
+            if ($this->session->userdata('search_qrisrecurring_status')) $extra_active++;
         ?>
         <form id="qris_recurring_form" method="post" action="<?= base_url('qris/recurring'); ?>">
             <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>">
@@ -58,8 +58,8 @@
                 <!-- LEFT: Global Search -->
                 <div class="dt-search-wrapper">
                     <i class="fas fa-search dt-search-icon"></i>
-                    <?php $active_qr_search = $this->session->userdata('search_transid_qr'); ?>
-                    <input type="text" id="qrisRecurringGlobalSearch" class="dt-search-input" placeholder="<?= $active_qr_search ?: 'Search by Merchant, ID, or Reference...'; ?>" value="<?= $active_qr_search; ?>">
+                    <?php $active_qr_search = $this->session->userdata('last_dt_search_qrisrecurring'); ?>
+                    <input type="text" id="qrisRecurringGlobalSearch" class="dt-search-input" placeholder="<?= htmlspecialchars($active_qr_search ?: 'Search by Merchant, ID, or Reference...'); ?>" value="<?= htmlspecialchars($active_qr_search); ?>">
                 </div>
                 
                 <!-- RIGHT: Filters -->
@@ -86,9 +86,9 @@
                                 <div class="dt-more-field">
                                     <label class="dt-more-label"><i class="fas fa-calendar-alt mr-1 mr-2"></i> Period</label>
                                     <div class="dt-filter-chip">
-                                        <input type="date" name="search_date_qr" class="dt-chip-input" value="<?= $this->session->userdata('search_date_qr'); ?>" title="Date From">
+                                        <input type="date" name="search_date_qr" class="dt-chip-input" value="<?= $this->session->userdata('search_qrisrecurring_date1'); ?>" title="Date From">
                                         <span class="text-muted mx-1" style="font-size:11px;">→</span>
-                                        <input type="date" name="search_date_qr_to" class="dt-chip-input" value="<?= $this->session->userdata('search_date_qr_to'); ?>" title="Date To">
+                                        <input type="date" name="search_date_qr_to" class="dt-chip-input" value="<?= $this->session->userdata('search_qrisrecurring_date2'); ?>" title="Date To">
                                     </div>
                                 </div>
                                 <!-- Primary: Merchant -->
@@ -98,7 +98,7 @@
                                         <select name="search_name_qr" class="dt-chip-select qris-recurring-select2">
                                             <option value="">All Merchants</option>
                                             <?php foreach ($merchants as $m): ?>
-                                                <option value="<?= $m->id; ?>" <?= ($this->session->userdata('search_name_qr') == $m->id) ? 'selected' : ''; ?>>
+                                                <option value="<?= $m->id; ?>" <?= ($this->session->userdata('search_qrisrecurring_name') == $m->id) ? 'selected' : ''; ?>>
                                                     [<?= $m->id; ?>] <?= $m->c_name; ?>
                                                 </option>
                                             <?php endforeach; ?>
@@ -110,12 +110,12 @@
                                     <label class="dt-more-label"><i class="fas fa-info-circle mr-1 mr-2"></i> Status</label>
                                     <select name="search_status_transaction_qr" class="dt-more-select qris-recurring-select2">
                                         <option value="">All Statuses</option>
-                                        <option value="Pending" <?= ($this->session->userdata('search_status_transaction_qr') == 'Pending') ? 'selected' : ''; ?>>Pending</option>
-                                        <option value="Created" <?= ($this->session->userdata('search_status_transaction_qr') == 'Created') ? 'selected' : ''; ?>>Created</option>
-                                        <option value="Paid" <?= ($this->session->userdata('search_status_transaction_qr') == 'Paid') ? 'selected' : ''; ?>>Paid</option>
-                                        <option value="Failed" <?= ($this->session->userdata('search_status_transaction_qr') == 'Failed') ? 'selected' : ''; ?>>Failed</option>
-                                        <option value="Expired" <?= ($this->session->userdata('search_status_transaction_qr') == 'Expired') ? 'selected' : ''; ?>>Expired</option>
-                                        <option value="Cancel" <?= ($this->session->userdata('search_status_transaction_qr') == 'Cancel') ? 'selected' : ''; ?>>Cancel</option>
+                                        <option value="Pending" <?= ($this->session->userdata('search_qrisrecurring_status') == 'Pending') ? 'selected' : ''; ?>>Pending</option>
+                                        <option value="Created" <?= ($this->session->userdata('search_qrisrecurring_status') == 'Created') ? 'selected' : ''; ?>>Created</option>
+                                        <option value="Paid" <?= ($this->session->userdata('search_qrisrecurring_status') == 'Paid') ? 'selected' : ''; ?>>Paid</option>
+                                        <option value="Failed" <?= ($this->session->userdata('search_qrisrecurring_status') == 'Failed') ? 'selected' : ''; ?>>Failed</option>
+                                        <option value="Expired" <?= ($this->session->userdata('search_qrisrecurring_status') == 'Expired') ? 'selected' : ''; ?>>Expired</option>
+                                        <option value="Cancel" <?= ($this->session->userdata('search_qrisrecurring_status') == 'Cancel') ? 'selected' : ''; ?>>Cancel</option>
                                     </select>
                                 </div>
                             </div>
@@ -365,7 +365,6 @@
         $('.qris-recurring-select2').select2({
             width: '100%',
             dropdownAutoWidth: true,
-            dropdownParent: $('.dt-toolbar'),
             minimumResultsForSearch: 5
         });
         // Detail AJAX

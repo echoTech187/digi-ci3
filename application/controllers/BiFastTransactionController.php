@@ -43,117 +43,81 @@ class BiFastTransactionController extends CI_Controller
     */
    public function bi_fast()
    {
+      // Auto-reset if accessed directly without any parameters (GET or POST)
+      if (!$this->input->is_ajax_request() && empty($this->input->get()) && !$this->input->post()) {
+         $this->resetbi_fast(false);
+      }
+
       $data['title'] = 'Disbursement';
       $data['user'] = $this->Model_user->view_user()->row_array();
 
-      // Logika Persistensi Pencarian:
-      // Kami menggunakan Session untuk menyimpan parameter pencarian agar pengguna tidak kehilangan
-      // konteks saat melakukan navigasi halaman atau melakukan refresh.
-      // [1] GLOBAL SEARCH / SEARCH UTAMA (Invoice & Transaction ID):
-      // Filter ini adalah entry point utama untuk mencari transaksi spesifik secara cepat. 
-      // Sumber data bisa berasal dari:
-      // a. Top Bar Search: Input teks di navigasi atas yang mengirimkan POST 'search_transid_bifast'.
-      // b. Deep Link / URL: Parameter GET 'transid' atau 'invoice' (misalnya dari klik notifikasi atau tautan email).
-      //
-      // Strategi: Jika diakses bukan via AJAX (halaman baru/refresh), kita cek parameter input.
-      // Jika input kosong sama sekali, sistem mengasumsikan pengguna ingin "membersihkan" konteks pencarian ID spesifik.
-      if (!$this->input->is_ajax_request()) {
-         // Prioritas resolusi: GET 'transid' -> GET 'invoice' -> POST 'search_transid_bifast'.
-         $search_transid_bifast = $this->input->get('transid') ?: ($this->input->get('invoice') ?: ($this->input->post('search_transid_bifast') ?: ''));
-         
-         if (!$this->input->get('transid') && !$this->input->get('invoice') && !$this->input->post('search_transid_bifast')) {
-            $this->session->unset_userdata('search_date_bifast');
-            $this->session->unset_userdata('search_date_bifast_to');
-            $this->session->unset_userdata('search_name_bifast');
-            $this->session->unset_userdata('search_status_transaction_bifast');
-            $this->session->unset_userdata('search_transid_bifast');
-            $this->session->unset_userdata('search_channel_bifast');
-            $this->session->unset_userdata('search_internal_channel_bifast');
-            $this->session->unset_userdata('search_external_reff_id');
-            $this->session->unset_userdata('last_search_bifast');
+      // Sync from GET/POST to Session
+      $field_map = [
+         'search_bifast_name'               => 'search_name_bifast',
+         'search_bifast_date1'              => 'search_date_bifast',
+         'search_bifast_date2'              => 'search_date_bifast_to',
+         'search_bifast_status'             => 'search_status_transaction_bifast',
+         'search_bifast_transid'            => 'search_transid_bifast',
+         'search_bifast_external_reff'      => 'search_external_reff_id',
+         'search_bifast_channel'            => 'search_channel_bifast',
+         'search_bifast_internal_channel'   => 'search_internal_channel_bifast',
+      ];
+
+      $get_fallback = [
+         'search_bifast_name'               => 'merchant',
+         'search_bifast_date1'              => 'date_from',
+         'search_bifast_date2'              => 'date_to',
+         'search_bifast_status'             => 'status',
+         'search_bifast_transid'            => 'transid',
+      ];
+
+      foreach ($field_map as $session_key => $post_key) {
+         $val = $this->input->post($post_key);
+         if ($val === NULL && isset($get_fallback[$session_key])) {
+            $val = $this->input->get($get_fallback[$session_key]);
          }
-      } else {
-         // Pada request AJAX (DataTables redraw), kita menarik nilai dari session.
-         // Hal ini krusial agar saat tabel melakukan paging atau sorting, filter pencarian awal tidak hilang.
-         $search_transid_bifast = $this->session->userdata('search_transid_bifast');
+         if ($val !== NULL) $this->session->set_userdata($session_key, $val);
       }
 
-      // [2] ADVANCE FILTERS / FILTER LANJUTAN (Metadata & Analysis):
-      // Filter ini digunakan untuk analisis data yang lebih kompleks menggunakan kombinasi kriteria (Multi-Criteria Search).
-      // Biasanya diinputkan melalui Modal Form "Advance Filter".
-      //
-      // Pola Implementasi: "POST-over-SESSION"
-      // 1. Jika ada input POST baru (pengguna menekan tombol 'Search' di modal), gunakan nilai tersebut dan simpan ke session.
-      // 2. Jika tidak ada POST (misal: navigasi halaman), ambil nilai terakhir dari session (Fallback).
-      // Hal ini memungkinkan pengguna untuk berpindah modul dan kembali lagi dengan filter yang tetap aktif (Sticky Filter).
-      $search_name_bifast = $this->input->get('merchant') ?: ($this->input->post('search_name_bifast') ?: $this->session->userdata('search_name_bifast'));
-      $search_date_bifast = $this->input->get('date_from') ?: ($this->input->post('search_date_bifast') ?: $this->session->userdata('search_date_bifast'));
-      $search_date_bifast_to = $this->input->get('date_to') ?: ($this->input->post('search_date_bifast_to') ?: $this->session->userdata('search_date_bifast_to'));
-      $search_external_reff_id = $this->input->post('search_external_reff_id') != NULL ? $this->input->post('search_external_reff_id') : $this->session->userdata('search_external_reff_id');
-      $search_channel_bifast = $this->input->post('search_channel_bifast') != NULL ? $this->input->post('search_channel_bifast') : $this->session->userdata('search_channel_bifast');
-      $search_internal_channel_bifast = $this->input->post('search_internal_channel_bifast') != NULL ? $this->input->post('search_internal_channel_bifast') : $this->session->userdata('search_internal_channel_bifast');
-      $search_status_transaction_bifast = $this->input->post('search_status_transaction_bifast') != NULL ? $this->input->post('search_status_transaction_bifast') : $this->session->userdata('search_status_transaction_bifast');
-
-      // Validasi Relasional: External Reff ID hanya valid jika channel eksternal telah dipilih.
-      // Hal ini mencegah ambiguitas data karena Reff ID eksternal bergantung pada provider channel tertentu.
+      // Check external reff validation
+      $search_external_reff_id = $this->session->userdata('search_bifast_external_reff');
+      $search_channel_bifast = $this->session->userdata('search_bifast_channel');
       if (!empty($search_external_reff_id) && (empty($search_channel_bifast) || $search_channel_bifast === '' || $search_channel_bifast === null)) {
          $this->session->set_flashdata('error', 'Silakan pilih "External Channel" terlebih dahulu sebelum memasukan "External Reff ID"');
          redirect('finance/bi-fast');
       }
 
-      // Simpan filter aktif ke session untuk persistensi antar request.
-      $this->session->set_userdata([
-         'search_name_bifast' => $search_name_bifast,
-         'search_date_bifast' => $search_date_bifast,
-         'search_date_bifast_to' => $search_date_bifast_to,
-         'search_transid_bifast' => $search_transid_bifast,
-         'search_external_reff_id' => $search_external_reff_id,
-         'search_channel_bifast' => $search_channel_bifast,
-         'search_internal_channel_bifast' => $search_internal_channel_bifast,
-         'search_status_transaction_bifast' => $search_status_transaction_bifast,
-      ]);
+      // Deep Linking & Main Search Sync
+      $active_search = $this->input->get('q') ?: $this->input->get('invoice') ?: $this->input->get('transid');
+      if ($active_search) {
+         $this->session->set_userdata('last_dt_search_bifast', $active_search);
+         $this->session->set_userdata('search_bifast_transid', $active_search);
+      }
 
-      // Penanganan DataTables AJAX
       if ($this->input->is_ajax_request()) {
          try {
-            // [3] LOCAL DATATABLES SEARCH (Interactive Table UI):
-            // Diambil dari input 'search[value]' yang dikirim otomatis oleh library DataTables saat pengguna mengetik 
-            // di kotak pencarian yang ada tepat di atas tabel.
             $dtSearch = $this->input->post('search')['value'] ?? '';
-            $oldSearch = $this->session->userdata('last_search_bifast');
+            $oldSearch = $this->session->userdata('last_dt_search_bifast');
 
-            // Logika "Reset Shortcut":
-            // Kami mengimplementasikan fitur di mana jika pengguna menghapus isi kotak pencarian DataTables (menjadi kosong),
-            // sistem akan otomatis membersihkan SEMUA kriteria filter lain di session (Advance & Global Filter).
-            // Ini memberikan cara cepat bagi pengguna untuk kembali ke tampilan default tanpa harus membuka modal filter.
             if ($dtSearch === '' && $oldSearch !== '' && $oldSearch !== null) {
-               $this->session->unset_userdata('search_date_bifast');
-               $this->session->unset_userdata('search_date_bifast_to');
-               $this->session->unset_userdata('search_name_bifast');
-               $this->session->unset_userdata('search_status_transaction_bifast');
-               $this->session->unset_userdata('search_transid_bifast');
-               $this->session->unset_userdata('search_channel_bifast');
-               $this->session->unset_userdata('search_internal_channel_bifast');
-               $this->session->unset_userdata('search_external_reff_id');
+               $this->resetbi_fast(false); // Silent reset
             }
 
             if ($dtSearch !== '') {
-               $this->session->set_userdata('search_transid_bifast', $dtSearch);
-               $this->session->set_userdata('last_search_bifast', $dtSearch);
+               $this->session->set_userdata('search_bifast_transid', $dtSearch);
+               $this->session->set_userdata('last_dt_search_bifast', $dtSearch);
             }
 
             $filters = [
-               'merchant' => $this->session->userdata('search_name_bifast'),
-               'date_from' => $this->session->userdata('search_date_bifast'),
-               'date_to' => $this->session->userdata('search_date_bifast_to'),
-               'transid' => $this->session->userdata('search_transid_bifast'),
-               'external_reff' => $this->session->userdata('search_external_reff_id'),
-               'channel' => $this->session->userdata('search_channel_bifast'),
-               'internal_channel' => $this->session->userdata('search_internal_channel_bifast'),
-               'status' => $this->session->userdata('search_status_transaction_bifast')
+               'merchant' => $this->session->userdata('search_bifast_name'),
+               'date_from' => $this->session->userdata('search_bifast_date1'),
+               'date_to' => $this->session->userdata('search_bifast_date2'),
+               'transid' => $this->session->userdata('search_bifast_transid'),
+               'external_reff' => $this->session->userdata('search_bifast_external_reff'),
+               'channel' => $this->session->userdata('search_bifast_channel'),
+               'internal_channel' => $this->session->userdata('search_bifast_internal_channel'),
+               'status' => $this->session->userdata('search_bifast_status')
             ];
-            
-            // Mendelegasikan pengambilan data ke model untuk memisahkan logika bisnis dari kontroler.
             return $this->BiFast->get_datatables_handler($filters);
          } catch (Throwable $e) {
             log_message('error', 'BI-FAST AJAX error: ' . $e->getMessage());
@@ -167,11 +131,10 @@ class BiFastTransactionController extends CI_Controller
          }
       }
 
-      // Persiapan data untuk tampilan view (initial load)
       $data['merchants'] = $this->BiFast->get_merchant();
       $data['channels'] = $this->BiFast->get_channels();
       $data['internal_channels'] = $this->BiFast->get_internal_channels();
-      $data['search_status_transaction_bifast'] = $search_status_transaction_bifast ?: '';
+      $data['search_status_transaction_bifast'] = $this->session->userdata('search_bifast_status') ?: '';
 
       $this->load->view('bifast/list', $data);
    }
@@ -180,18 +143,20 @@ class BiFastTransactionController extends CI_Controller
     * Menghapus semua parameter pencarian dari session dan mengarahkan kembali ke halaman utama.
     * Digunakan untuk fitur "Reset Filter" agar pengguna dapat memulai pencarian baru dengan bersih.
     */
-   public function resetbi_fast()
+   public function resetbi_fast($redirect = true)
    {
-      $this->session->unset_userdata('search_date_bifast');
-      $this->session->unset_userdata('search_date_bifast_to');
-      $this->session->unset_userdata('search_name_bifast');
-      $this->session->unset_userdata('search_transid_bifast');
-      $this->session->unset_userdata('search_status_transaction_bifast');
-      $this->session->unset_userdata('search_external_reff_id');
-      $this->session->unset_userdata('search_channel_bifast');
-      $this->session->unset_userdata('search_internal_channel_bifast');
-      $this->session->unset_userdata('last_search_bifast');
-      redirect('finance/bi-fast');
+      $this->session->unset_userdata([
+         'search_bifast_date1',
+         'search_bifast_date2',
+         'search_bifast_name',
+         'search_bifast_transid',
+         'search_bifast_status',
+         'search_bifast_external_reff',
+         'search_bifast_channel',
+         'search_bifast_internal_channel',
+         'last_dt_search_bifast'
+      ]);
+      if ($redirect) redirect('finance/bi-fast');
    }
 
    /**
@@ -226,8 +191,8 @@ class BiFastTransactionController extends CI_Controller
     */
    public function download_bi_fast()
    {
-      $search_date_bifast = isset($_GET['search_date_bifast']) ? $_GET['search_date_bifast'] : '';
-      $search_name_bifast = isset($_GET['search_name_bifast']) ? $_GET['search_name_bifast'] : '';
+      $search_date_bifast = isset($_GET['search_bifast_date1']) ? $_GET['search_bifast_date1'] : '';
+      $search_name_bifast = isset($_GET['search_bifast_name']) ? $_GET['search_bifast_name'] : '';
 
       // Validasi: Memastikan setidaknya ada satu filter utama untuk membatasi cakupan data laporan.
       if (empty($search_date_bifast) && empty($search_name_bifast)) {

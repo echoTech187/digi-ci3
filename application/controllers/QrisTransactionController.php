@@ -35,73 +35,70 @@ class QrisTransactionController extends CI_Controller
 
    public function qris()
    {
+      // Auto-reset if accessed directly without any parameters (GET or POST)
+      if (!$this->input->is_ajax_request() && empty($this->input->get()) && !$this->input->post()) {
+         $this->resetqris(false);
+      }
+
       $data['title'] = 'QRIS';
       $data['user'] = $this->Model_user->view_user()->row_array();
 
-      $search_name_qris = $this->input->get('merchant') ?: $this->input->post('search_name_qris');
-      $search_date_qris = $this->input->get('date_from') ?: $this->input->post('search_date_qris');
-      $search_date_qris_to = $this->input->get('date_to') ?: $this->input->post('search_date_qris_to');
-      $search_date_qris_settlement = $this->input->get('settlement') ?: $this->input->post('search_date_qris_settlement');
+      // 1. Sync from GET/POST to Session (Prioritize GET for deep-links)
+      $field_map = [
+         'search_qris_name'            => 'search_name_qris',
+         'search_qris_date1'           => 'search_date_qris',
+         'search_qris_date2'           => 'search_date_qris_to',
+         'search_qris_date_settlement' => 'search_date_qris_settlement',
+         'search_qris_invoice_no'      => 'search_invoice_no',
+         'search_qris_rrn'             => 'search_rrn',
+         'search_qris_transid'         => 'search_transactionid_ht',
+      ];
 
-      if (!$this->input->is_ajax_request()) {
-         $search_rrn = $this->input->get('rrn') ?: ($this->input->post('search_rrn') ?: '');
-         $search_invoice_no = $this->input->get('invoice') ?: ($this->input->post('search_invoice_no') ?: '');
-         $search_transid_qriss = $this->input->get('transid') ?: ($this->input->post('search_transactionid_ht') ?: '');
-         
-         if (!$this->input->get('rrn') && !$this->input->post('search_rrn') && 
-             !$this->input->get('invoice') && !$this->input->post('search_invoice_no') &&
-             !$this->input->get('transid') && !$this->input->post('search_transactionid_ht')) {
-            $this->session->unset_userdata('search_date_qris');
-            $this->session->unset_userdata('search_date_qris_to');
-            $this->session->unset_userdata('search_name_qris');
-            $this->session->unset_userdata('search_date_qris_settlement');
-            $this->session->unset_userdata('search_invoice_no');
-            $this->session->unset_userdata('search_rrn');
-            $this->session->unset_userdata('search_transactionid_ht');
-            $this->session->unset_userdata('last_search_qris');
+      // Standard Fallback Map for GET aliases
+      $get_fallback = [
+         'search_qris_name'            => 'merchant',
+         'search_qris_date1'           => 'date_from',
+         'search_qris_date2'           => 'date_to',
+         'search_qris_date_settlement' => 'settlement',
+         'search_qris_invoice_no'      => 'invoice',
+         'search_qris_rrn'             => 'rrn',
+         'search_qris_transid'         => 'transid',
+      ];
+
+      foreach ($field_map as $session_key => $post_key) {
+         $val = $this->input->post($post_key);
+         if ($val === NULL && isset($get_fallback[$session_key])) {
+            $val = $this->input->get($get_fallback[$session_key]);
          }
-      } else {
-         $search_rrn = $this->session->userdata('search_rrn');
-         $search_invoice_no = $this->session->userdata('search_invoice_no');
-         $search_transid_qriss = $this->session->userdata('search_transactionid_ht');
+         if ($val !== NULL) $this->session->set_userdata($session_key, $val);
       }
 
-      if ($search_name_qris !== null) $this->session->set_userdata('search_name_qris', $search_name_qris);
-      if ($search_date_qris !== null) $this->session->set_userdata('search_date_qris', $search_date_qris);
-      if ($search_date_qris_to !== null) $this->session->set_userdata('search_date_qris_to', $search_date_qris_to);
-      if ($search_date_qris_settlement !== null) $this->session->set_userdata('search_date_qris_settlement', $search_date_qris_settlement);
-      if ($search_invoice_no !== null) $this->session->set_userdata('search_invoice_no', $search_invoice_no);
-      if ($search_rrn !== null) $this->session->set_userdata('search_rrn', $search_rrn);
-      if ($search_transid_qriss !== null) $this->session->set_userdata('search_transactionid_ht', $search_transid_qriss);
+      // SYNC: Update main search persistence if coming from deep-link/GET
+      $active_search = $this->input->get('q') ?: $this->input->get('invoice') ?: $this->input->get('transid') ?: $this->input->get('rrn');
+      if ($active_search) $this->session->set_userdata('last_dt_search_qris', $active_search);
 
       if ($this->input->is_ajax_request()) {
          try {
             $dtSearch = $this->input->post('search')['value'] ?? '';
-            $oldSearch = $this->session->userdata('last_search_qris');
+            $oldSearch = $this->session->userdata('last_dt_search_qris');
 
             if ($dtSearch === '' && $oldSearch !== '' && $oldSearch !== null) {
-               $this->session->unset_userdata('search_date_qris');
-               $this->session->unset_userdata('search_date_qris_to');
-               $this->session->unset_userdata('search_name_qris');
-               $this->session->unset_userdata('search_date_qris_settlement');
-               $this->session->unset_userdata('search_transactionid_ht');
-               $this->session->unset_userdata('search_rrn');
-               $this->session->unset_userdata('search_invoice_no');
+               $this->resetqris(false); // Silent reset
             }
 
             if ($dtSearch !== '') {
-               $this->session->set_userdata('search_invoice_no', $dtSearch);
-               $this->session->set_userdata('last_search_qris', $dtSearch);
+               $this->session->set_userdata('search_qris_invoice_no', $dtSearch);
+               $this->session->set_userdata('last_dt_search_qris', $dtSearch);
             }
 
             $filters = [
-               'merchant' => $this->session->userdata('search_name_qris'),
-               'date_from' => $this->session->userdata('search_date_qris'),
-               'date_to' => $this->session->userdata('search_date_qris_to'),
-               'settlement' => $this->session->userdata('search_date_qris_settlement'),
-               'rrn' => $this->session->userdata('search_rrn'),
-               'invoice' => $this->session->userdata('search_invoice_no'),
-               'transid' => $this->session->userdata('search_transactionid_ht')
+               'merchant' => $this->session->userdata('search_qris_name'),
+               'date_from' => $this->session->userdata('search_qris_date1'),
+               'date_to' => $this->session->userdata('search_qris_date2'),
+               'settlement' => $this->session->userdata('search_qris_date_settlement'),
+               'rrn' => $this->session->userdata('search_qris_rrn'),
+               'invoice' => $this->session->userdata('search_qris_invoice_no'),
+               'transid' => $this->session->userdata('search_qris_transid')
             ];
             return $this->Qris->get_datatables_handler($filters);
          } catch (Throwable $e) {
@@ -124,17 +121,19 @@ class QrisTransactionController extends CI_Controller
       $this->load->view('qris/list', $data);
    }
 
-   public function resetqris()
+   public function resetqris($redirect = true)
    {
-      $this->session->unset_userdata('search_date_qris');
-      $this->session->unset_userdata('search_date_qris_to');
-      $this->session->unset_userdata('search_name_qris');
-      $this->session->unset_userdata('search_date_qris_settlement');
-      $this->session->unset_userdata('search_invoice_no');
-      $this->session->unset_userdata('search_rrn');
-      $this->session->unset_userdata('search_transactionid_ht');
-      $this->session->unset_userdata('last_search_qris');
-      redirect('finance/qris');
+      $this->session->unset_userdata([
+         'search_qris_name',
+         'search_qris_date1',
+         'search_qris_date2',
+         'search_qris_date_settlement',
+         'search_qris_invoice_no',
+         'search_qris_rrn',
+         'search_qris_transid',
+         'last_dt_search_qris'
+      ]);
+      if ($redirect) redirect('finance/qris');
    }
 
    public function qris_detail($id = NULL)
@@ -158,10 +157,10 @@ class QrisTransactionController extends CI_Controller
 
    public function download_qris()
    {
-      $search_date_qris = isset($_GET['search_date_qris']) ? $_GET['search_date_qris'] : '';
-      $search_name_qris = isset($_GET['search_name_qris']) ? $_GET['search_name_qris'] : '';
-      $search_date_qris_to = isset($_GET['search_date_qris_to']) ? $_GET['search_date_qris_to'] : '';
-      $search_date_qris_settlement = isset($_GET['search_date_qris_settlement']) ? $_GET['search_date_qris_settlement'] : '';
+      $search_date_qris = isset($_GET['search_qris_date1']) ? $_GET['search_qris_date1'] : '';
+      $search_name_qris = isset($_GET['search_qris_name']) ? $_GET['search_qris_name'] : '';
+      $search_date_qris_to = isset($_GET['search_qris_date2']) ? $_GET['search_qris_date2'] : '';
+      $search_date_qris_settlement = isset($_GET['search_qris_date_settlement']) ? $_GET['search_qris_date_settlement'] : '';
 
       if (empty($search_name_qris) && (empty($search_date_qris) && empty($search_date_qris_settlement))) {
          $this->session->set_flashdata('error_message', 'Please fill all fields and search before continuing with download.');
@@ -210,65 +209,61 @@ class QrisTransactionController extends CI_Controller
 
    public function qris_dynamic()
    {
+      // Auto-reset if accessed directly without any parameters (GET or POST)
+      if (!$this->input->is_ajax_request() && empty($this->input->get()) && !$this->input->post()) {
+         $this->resetqris_dynamic(false);
+      }
+
       $data['title'] = 'QRIS Dynamic';
       $data['user'] = $this->Model_user->view_user()->row_array();
 
-      if (!$this->input->is_ajax_request()) {
-         $search_transid_qd = $this->input->get('transid') ?: ($this->input->post('search_transid_qd') ?: '');
-         if (!$this->input->get('transid') && !$this->input->post('search_transid_qd')) {
-            $this->session->unset_userdata('search_date_qd');
-            $this->session->unset_userdata('search_date_qd_to');
-            $this->session->unset_userdata('search_name_qd');
-            $this->session->unset_userdata('search_transid_qd');
-            $this->session->unset_userdata('search_status_transaction_qd');
-            $this->session->unset_userdata('search_reff_label');
-            $this->session->unset_userdata('last_search_qd');
+      // Sync from GET/POST to Session
+      $field_map = [
+         'search_qrisdynamic_name'   => 'search_name_qd',
+         'search_qrisdynamic_date1'  => 'search_date_qd',
+         'search_qrisdynamic_date2'  => 'search_date_qd_to',
+         'search_qrisdynamic_status' => 'search_status_transaction_qd',
+         'search_qrisdynamic_reff'   => 'search_reff_label',
+         'search_qrisdynamic_transid'=> 'search_transid_qd',
+      ];
+
+      $get_fallback = [
+         'search_qrisdynamic_name'   => 'merchant',
+         'search_qrisdynamic_transid'=> 'transid',
+      ];
+
+      foreach ($field_map as $session_key => $post_key) {
+         $val = $this->input->post($post_key);
+         if ($val === NULL && isset($get_fallback[$session_key])) {
+            $val = $this->input->get($get_fallback[$session_key]);
          }
-      } else {
-         $search_transid_qd = $this->session->userdata('search_transid_qd');
+         if ($val !== NULL) $this->session->set_userdata($session_key, $val);
       }
 
-      $search_name_qd = $this->input->get('merchant') ?: ($this->input->post('search_name_qd') != NULL ? $this->input->post('search_name_qd') : $this->session->userdata('search_name_qd'));
-      $search_date_qd = $this->input->post('search_date_qd') != NULL ? $this->input->post('search_date_qd') : $this->session->userdata('search_date_qd');
-      $search_date_qd_to = $this->input->post('search_date_qd_to') != NULL ? $this->input->post('search_date_qd_to') : $this->session->userdata('search_date_qd_to');
-      $search_status_transaction_qd = $this->input->post('search_status_transaction_qd') != NULL ? $this->input->post('search_status_transaction_qd') : $this->session->userdata('search_status_transaction_qd');
-      $search_reff_label = $this->input->post('search_reff_label') != NULL ? $this->input->post('search_reff_label') : $this->session->userdata('search_reff_label');
-
-      $this->session->set_userdata([
-         'search_name_qd' => $search_name_qd,
-         'search_date_qd' => $search_date_qd,
-         'search_date_qd_to' => $search_date_qd_to,
-         'search_transid_qd' => $search_transid_qd,
-         'search_status_transaction_qd' => $search_status_transaction_qd,
-         'search_reff_label' => $search_reff_label
-      ]);
+      $active_search = $this->input->get('q') ?: $this->input->get('transid');
+      if ($active_search) $this->session->set_userdata('last_dt_search_qrisdynamic', $active_search);
 
       if ($this->input->is_ajax_request()) {
          try {
             $dtSearch = $this->input->post('search')['value'] ?? '';
-            $oldSearch = $this->session->userdata('last_search_qd');
+            $oldSearch = $this->session->userdata('last_dt_search_qrisdynamic');
 
             if ($dtSearch === '' && $oldSearch !== '' && $oldSearch !== null) {
-               $this->session->unset_userdata('search_date_qd');
-               $this->session->unset_userdata('search_date_qd_to');
-               $this->session->unset_userdata('search_name_qd');
-               $this->session->unset_userdata('search_status_transaction_qd');
-               $this->session->unset_userdata('search_transid_qd');
-               $this->session->unset_userdata('search_reff_label');
+               $this->resetqris_dynamic(false); // Silent reset
             }
 
             if ($dtSearch !== '') {
-               $this->session->set_userdata('search_transid_qd', $dtSearch);
-               $this->session->set_userdata('last_search_qd', $dtSearch);
+               $this->session->set_userdata('search_qrisdynamic_transid', $dtSearch);
+               $this->session->set_userdata('last_dt_search_qrisdynamic', $dtSearch);
             }
 
             $filters = [
-               'merchant' => $this->session->userdata('search_name_qd'),
-               'date' => $this->session->userdata('search_date_qd'),
-               'date_to' => $this->session->userdata('search_date_qd_to'),
-               'transid' => $this->session->userdata('search_transid_qd'),
-               'status' => $this->session->userdata('search_status_transaction_qd'),
-               'reff' => $this->session->userdata('search_reff_label')
+               'merchant' => $this->session->userdata('search_qrisdynamic_name'),
+               'date' => $this->session->userdata('search_qrisdynamic_date1'),
+               'date_to' => $this->session->userdata('search_qrisdynamic_date2'),
+               'transid' => $this->session->userdata('search_qrisdynamic_transid'),
+               'status' => $this->session->userdata('search_qrisdynamic_status'),
+               'reff' => $this->session->userdata('search_qrisdynamic_reff')
             ];
             return $this->QRISDynamic->get_datatables_handler($filters);
          } catch (Throwable $e) {
@@ -284,91 +279,81 @@ class QrisTransactionController extends CI_Controller
       }
 
       $data['merchants'] = $this->QRISDynamic->get_merchant();
-      $data['search_reff_label'] = $search_reff_label;
+      $data['search_reff_label'] = $this->session->userdata('search_qrisdynamic_reff');
       $this->load->view('qris/qrisdynamic', $data);
    }
 
-   public function resetqris_dynamic()
+   public function resetqris_dynamic($redirect = true)
    {
-      $this->session->unset_userdata('search_date_qd');
-      $this->session->unset_userdata('search_date_qd_to');
-      $this->session->unset_userdata('search_name_qd');
-      $this->session->unset_userdata('search_transid_qd');
-      $this->session->unset_userdata('search_status_transaction_qd');
-      $this->session->unset_userdata('search_reff_label');
-      $this->session->unset_userdata('last_search_qd');
-      redirect('qris/dynamic');
+      $this->session->unset_userdata([
+         'search_qrisdynamic_name',
+         'search_qrisdynamic_date1',
+         'search_qrisdynamic_date2',
+         'search_qrisdynamic_status',
+         'search_qrisdynamic_reff',
+         'search_qrisdynamic_transid',
+         'last_dt_search_qrisdynamic'
+      ]);
+      if ($redirect) redirect('qris/dynamic');
    }
 
    public function qris_recurring()
    {
+      // Auto-reset if accessed directly without any parameters (GET or POST)
+      if (!$this->input->is_ajax_request() && empty($this->input->get()) && !$this->input->post()) {
+         $this->resetqris_recurring(false);
+      }
+
       $data['title'] = 'QRIS Recurring';
       $data['user'] = $this->Model_user->view_user()->row_array();
 
-      if (!$this->input->is_ajax_request()) {
-         $search_transid_qr = $this->input->get('transid') ?: ($this->input->post('search_transid_qr') ?: '');
-         if (!$this->input->get('transid') && !$this->input->post('search_name_qr')) {
-            $this->session->unset_userdata('search_date_qr');
-            $this->session->unset_userdata('search_date_qr_to');
-            $this->session->unset_userdata('search_name_qr');
-            $this->session->unset_userdata('search_submerchant_qr');
-            $this->session->unset_userdata('search_transid_qr');
-            $this->session->unset_userdata('search_status_transaction_qr');
-            $this->session->unset_userdata('last_search_qr');
+      // Sync from GET/POST to Session
+      $field_map = [
+         'search_qrisrecurring_name'        => 'search_name_qr',
+         'search_qrisrecurring_date1'       => 'search_date_qr',
+         'search_qrisrecurring_date2'       => 'search_date_qr_to',
+         'search_qrisrecurring_submerchant' => 'search_submerchant_qr',
+         'search_qrisrecurring_status'      => 'search_status_transaction_qr',
+         'search_qrisrecurring_transid'     => 'search_transid_qr',
+      ];
+
+      $get_fallback = [
+         'search_qrisrecurring_name'        => 'merchant',
+         'search_qrisrecurring_transid'     => 'transid',
+      ];
+
+      foreach ($field_map as $session_key => $post_key) {
+         $val = $this->input->post($post_key);
+         if ($val === NULL && isset($get_fallback[$session_key])) {
+            $val = $this->input->get($get_fallback[$session_key]);
          }
-      } else {
-         $search_transid_qr = $this->session->userdata('search_transid_qr');
+         if ($val !== NULL) $this->session->set_userdata($session_key, $val);
       }
 
-      $search_date_qr = $this->input->post('search_date_qr');
-      $search_date_qr_to = $this->input->post('search_date_qr_to');
-      $search_name_qr = $this->input->get('merchant') ?: $this->input->post('search_name_qr');
-      $search_submerchant_qr = $this->input->post('search_submerchant_qr');
-
-      if ($search_date_qr !== null) $this->session->set_userdata('search_date_qr', $search_date_qr);
-      else $search_date_qr = $this->session->userdata('search_date_qr');
-
-      if ($search_date_qr_to !== null) $this->session->set_userdata('search_date_qr_to', $search_date_qr_to);
-      else $search_date_qr_to = $this->session->userdata('search_date_qr_to');
-
-      if ($search_name_qr !== null) $this->session->set_userdata('search_name_qr', $search_name_qr);
-      else $search_name_qr = $this->session->userdata('search_name_qr');
-
-      if ($search_submerchant_qr !== null) $this->session->set_userdata('search_submerchant_qr', $search_submerchant_qr);
-      else $search_submerchant_qr = $this->session->userdata('search_submerchant_qr');
-
-      $search_status_transaction_qr = $this->input->post('search_status_transaction_qr');
-      if ($search_status_transaction_qr !== null) $this->session->set_userdata('search_status_transaction_qr', $search_status_transaction_qr);
-      else $search_status_transaction_qr = $this->session->userdata('search_status_transaction_qr');
-
-      $this->session->set_userdata('search_transid_qr', $search_transid_qr);
+      $active_search = $this->input->get('q') ?: $this->input->get('transid');
+      if ($active_search) $this->session->set_userdata('last_dt_search_qrisrecurring', $active_search);
 
       if ($this->input->is_ajax_request()) {
          try {
             $dtSearch = $this->input->post('search')['value'] ?? '';
-            $oldSearch = $this->session->userdata('last_search_qr');
+            $oldSearch = $this->session->userdata('last_dt_search_qrisrecurring');
 
             if ($dtSearch === '' && $oldSearch !== '' && $oldSearch !== null) {
-               $this->session->unset_userdata('search_date_qr');
-               $this->session->unset_userdata('search_date_qr_to');
-               $this->session->unset_userdata('search_name_qr');
-               $this->session->unset_userdata('search_submerchant_qr');
-               $this->session->unset_userdata('search_transid_qr');
-               $this->session->unset_userdata('search_status_transaction_qr');
+               $this->resetqris_recurring(false); // Silent reset
             }
 
             if ($dtSearch !== '') {
-               $this->session->set_userdata('search_transid_qr', $dtSearch);
-               $this->session->set_userdata('last_search_qr', $dtSearch);
+               $this->session->set_userdata('search_qrisrecurring_transid', $dtSearch);
+               $this->session->set_userdata('last_dt_search_qrisrecurring', $dtSearch);
             }
 
             $filters = [
-               'merchant' => $this->session->userdata('search_name_qr'),
-               'date' => $this->session->userdata('search_date_qr'),
-               'date_to' => $this->session->userdata('search_date_qr_to'),
-               'transid' => $this->session->userdata('search_transid_qr'),
-               'submerchant' => $this->session->userdata('search_submerchant_qr'),
-               'status' => $this->session->userdata('search_status_transaction_qr')
+               'merchant' => $this->session->userdata('search_qrisrecurring_name'),
+               'date' => $this->session->userdata('search_qrisrecurring_date1'),
+               'date_to' => $this->session->userdata('search_qrisrecurring_date2'),
+               'transid' => $this->session->userdata('search_qrisrecurring_transid'),
+               'submerchant' => $this->session->userdata('search_qrisrecurring_submerchant'),
+               'status' => $this->session->userdata('search_qrisrecurring_status')
             ];
             return $this->QRISRecurring->get_datatables_handler($filters);
          } catch (Throwable $e) {
@@ -387,16 +372,18 @@ class QrisTransactionController extends CI_Controller
       $this->load->view('qris/qrisrecurring', $data);
    }
 
-   public function resetqris_recurring()
+   public function resetqris_recurring($redirect = true)
    {
-      $this->session->unset_userdata('search_date_qr');
-      $this->session->unset_userdata('search_date_qr_to');
-      $this->session->unset_userdata('search_name_qr');
-      $this->session->unset_userdata('search_submerchant_qr');
-      $this->session->unset_userdata('search_transid_qr');
-      $this->session->unset_userdata('search_status_transaction_qr');
-      $this->session->unset_userdata('last_search_qr');
-      redirect('qris/recurring');
+      $this->session->unset_userdata([
+         'search_qrisrecurring_name',
+         'search_qrisrecurring_date1',
+         'search_qrisrecurring_date2',
+         'search_qrisrecurring_submerchant',
+         'search_qrisrecurring_status',
+         'search_qrisrecurring_transid',
+         'last_dt_search_qrisrecurring'
+      ]);
+      if ($redirect) redirect('qris/recurring');
    }
 
    public function SendnotifikasiQRIS()

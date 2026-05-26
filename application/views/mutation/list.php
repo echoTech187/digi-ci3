@@ -1,8 +1,8 @@
 <?php
-$search_date_mutation_value    = $this->session->userdata('search_date_mutation') ?: '';
-$search_date_mutation_to_value = $this->session->userdata('search_date_mutation_to') ?: '';
-$search_position_value         = $this->session->userdata('search_position') ?: '';
-$search_channel_value          = $this->session->userdata('search_channel') ?: '';
+$search_date_mutation_value    = $this->session->userdata('search_mutation_date1') ?: '';
+$search_date_mutation_to_value = $this->session->userdata('search_mutation_date2') ?: '';
+$search_position_value         = $this->session->userdata('search_mutation_position') ?: '';
+$search_channel_value          = $this->session->userdata('search_mutation_channel') ?: '';
 $id = $this->uri->segment(3);
 
 // Badge count for More Filters
@@ -14,8 +14,8 @@ if ($search_channel_value)          $extra_active++;
 
 $download_url = base_url('finance/mutation/download') 
     . "?id=" . $id 
-    . "&search_date_mutation=" . $search_date_mutation_value 
-    . "&search_date_mutation_to=" . $search_date_mutation_to_value;
+    . "&search_mutation_date1=" . $search_date_mutation_value 
+    . "&search_mutation_date2=" . $search_date_mutation_to_value;
 ?>
 
 <div>
@@ -71,7 +71,8 @@ $download_url = base_url('finance/mutation/download')
                 <!-- LEFT: Global Search -->
                 <div class="dt-search-wrapper">
                     <i class="fas fa-search dt-search-icon"></i>
-                    <input type="text" id="dt-search" class="dt-search-input" placeholder="Search by Channel, Description, ID...">
+                    <?php $active_mutation_search = $this->session->userdata('last_dt_search_mutation') ?: ''; ?>
+                    <input type="text" id="dt-search" class="dt-search-input" placeholder="<?= $active_mutation_search ?: 'Search by Channel, Description, ID...'; ?>" value="<?= $active_mutation_search; ?>">
                 </div>
 
                 <!-- RIGHT: Filters & Download -->
@@ -183,7 +184,7 @@ $(document).ready(function() {
     const channelSelect = $('.select2-channel').select2({
         width: '100%',
         dropdownAutoWidth: true,
-        dropdownParent: $('#moreFiltersPanel'),
+        dropdownParent: $(this).parent(),
         minimumResultsForSearch: 5,
         placeholder: "All Channels",
         allowClear: true
@@ -264,7 +265,11 @@ $(document).ready(function() {
                 return 'Rp ' + number_format(data, 0, ',', '.');
             }
         }
-    ]);
+    ], {
+        "search": {
+            "search": "<?= $this->session->userdata('last_dt_search_mutation') ?: '' ?>"
+        }
+    });
 
     // Global search
     // Global search with Debounce

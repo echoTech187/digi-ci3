@@ -176,7 +176,7 @@ $(document).ready(function () {
 				$(this).select2({
 					width: "100%",
 					dropdownAutoWidth: true,
-					dropdownParent: $(document.body),
+					dropdownParent: $(this).parent(),
 					minimumResultsForSearch: 0,
 				});
 			});
@@ -467,7 +467,7 @@ $(document).ready(function () {
 							$select.select2({
 								width: "100%",
 								dropdownAutoWidth: true,
-								dropdownParent: $target.closest(".dt-more-panel"),
+								dropdownParent: $(this).parent(),
 								minimumResultsForSearch: 0,
 							});
 						}

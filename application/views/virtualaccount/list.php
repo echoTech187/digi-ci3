@@ -1,13 +1,13 @@
 <?php
 // Session filter values
-$search_date_va_value            = $this->session->userdata('search_date_va') ?: '';
-$search_date_va_to_value         = $this->session->userdata('search_date_va_to') ?: '';
-$search_date_va_settlement_value = $this->session->userdata('search_date_va_settlement') ?: '';
-$search_name_va_value            = $this->session->userdata('search_name_va') ?: '';
-$search_channel_va_value         = $this->session->userdata('search_channel_va') ?: '';
+$search_date_va_value            = $this->session->userdata('search_va_date1') ?: '';
+$search_date_va_to_value         = $this->session->userdata('search_va_date2') ?: '';
+$search_date_va_settlement_value = $this->session->userdata('search_va_date_settlement') ?: '';
+$search_name_va_value            = $this->session->userdata('search_va_name') ?: '';
+$search_channel_va_value         = $this->session->userdata('search_va_channel') ?: '';
 $search_va_number_value          = $this->session->userdata('search_va_number') ?: '';
 $search_va_transid_value         = $this->session->userdata('search_va_transid') ?: '';
-$search_invoice_no_value         = $this->session->userdata('search_invoice_no') ?: '';
+$search_invoice_no_value         = $this->session->userdata('search_va_invoice_no') ?: '';
 
 // Badge count for More Filters (excludes VA number and trans ID which are now in global search)
 $extra_active = 0;
@@ -18,10 +18,10 @@ if ($search_date_va_settlement_value) $extra_active++;
 // VA number, trans ID, invoice are in global search
 
 $download_url = base_url('finance/virtual-account/download')
-    . '?search_date_va='            . $search_date_va_value
-    . '&search_date_va_to='         . $search_date_va_to_value
-    . '&search_date_va_settlement=' . $search_date_va_settlement_value
-    . '&search_name_va='            . $search_name_va_value;
+    . '?search_va_date1='            . $search_date_va_value
+    . '&search_va_date2='         . $search_date_va_to_value
+    . '&search_va_date_settlement=' . $search_date_va_settlement_value
+    . '&search_va_name='            . $search_name_va_value;
 ?>
 
 <!-- ── Page Header ── -->
@@ -87,7 +87,7 @@ $download_url = base_url('finance/virtual-account/download')
                 <!-- LEFT: Global Search -->
                 <div class="dt-search-wrapper">
                     <i class="fas fa-search dt-search-icon"></i>
-                    <?php $active_va_search = $search_va_number_value ?: ($search_va_transid_value ?: $search_invoice_no_value); ?>
+                    <?php $active_va_search = $this->session->userdata('last_dt_search_va') ?: ''; ?>
                     <input type="text" id="vaGlobalSearch" class="dt-search-input" placeholder="<?= $active_va_search ?: 'Search by VA Number, Custom ID, Invoice, or Trans ID...'; ?>" value="<?= $active_va_search; ?>">
                 </div>
 
@@ -281,7 +281,7 @@ $download_url = base_url('finance/virtual-account/download')
         ], {
             "order": [[1, 'desc']],
             "search": {
-                "search": "<?= $search_va_number_value ?: ($search_va_transid_value ?: $search_invoice_no_value) ?>"
+                "search": "<?= $this->session->userdata('last_dt_search_va') ?: '' ?>"
             }
         });
 

@@ -42,9 +42,11 @@ class Qris extends CI_Model {
         
         // Join merchant and submerchant only if needed for global search or sorting or full data
         $isTextSearch = $searchValue && !preg_match('/^[0-9]{5,25}$/', $searchValue) && !$isInvoiceSearch;
+        $joined_merchant_submerchant = false;
         if ($needFullJoins || $search_name || $isTextSearch) {
             $this->db->join('merchant m', 'cpq.ref_merchantId = m.id');
             $this->db->join('submerchant s', 'cpq.ref_subMerchantId = s.id');
+            $joined_merchant_submerchant = true;
         }
 
         // Transactions ID joins (Only if full data, NEVER during ID fetch to prevent timeouts)
@@ -205,8 +207,11 @@ class Qris extends CI_Model {
                 // FALLBACK: Name search if no specific ID matched (min 3 chars)
                 if (strlen($searchValue) >= 3) {
                     // Ensure joins for name search
-                    $this->db->join('merchant m', 'cpq.ref_merchantId = m.id', 'left');
-                    $this->db->join('submerchant s', 'cpq.ref_subMerchantId = s.id', 'left');
+                    if (!$joined_merchant_submerchant) {
+                        $this->db->join('merchant m', 'cpq.ref_merchantId = m.id', 'left');
+                        $this->db->join('submerchant s', 'cpq.ref_subMerchantId = s.id', 'left');
+                        $joined_merchant_submerchant = true;
+                    }
 
                     $this->db->group_start();
                     $this->db->like('s.c_name', $searchValue, 'both');

@@ -56,9 +56,11 @@ class QRISRecurring extends CI_Model {
 
         // Join only if needed
         $isTextSearch = $searchValue && !preg_match('/^([0-9]{8,}|(GD|INV|QRIS|VA|EWALLET|BIF)[0-9a-zA-Z_-]+)/i', $searchValue);
+        $joined_merchant_submerchant = false;
         if (!$only_ids && !$count_only || $search_name || $isTextSearch || strpos($sort_col, 's.') !== false || strpos($sort_col, 'm.') !== false) {
             $this->db->join('submerchant s', 'crqm.ref_subMerchantId = s.id', 'left');
             $this->db->join('merchant m', 'crqm.ref_merchantId = m.id', 'left');
+            $joined_merchant_submerchant = true;
         }
 
         $this->_apply_filters($search_name, $search_date, $search_date_to, $search_submerchant, $search_transid, $search_status);
@@ -89,8 +91,11 @@ class QRISRecurring extends CI_Model {
                 // FALLBACK: Name search if no specific ID matched
                 if (strlen($searchValue) >= 3) {
                     // Ensure joins are present for name search fallback
-                    $this->db->join('submerchant s', 'crqm.ref_subMerchantId = s.id', 'left');
-                    $this->db->join('merchant m', 'crqm.ref_merchantId = m.id', 'left');
+                    if (!$joined_merchant_submerchant) {
+                        $this->db->join('submerchant s', 'crqm.ref_subMerchantId = s.id', 'left');
+                        $this->db->join('merchant m', 'crqm.ref_merchantId = m.id', 'left');
+                        $joined_merchant_submerchant = true;
+                    }
                     
                     $this->db->group_start();
                     $this->db->like('s.c_name', $searchValue, 'both');

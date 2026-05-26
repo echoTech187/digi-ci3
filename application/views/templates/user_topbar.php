@@ -68,25 +68,27 @@
                         $active_term = '';
                         
                         if ($segment2 == 'qris') {
-                            $active_term = $this->session->userdata('last_search_qris') ?: ($this->session->userdata('search_transactionid_ht') ?: ($this->session->userdata('search_rrn') ?: $this->session->userdata('search_invoice_no')));
+                            $active_term = $this->session->userdata('last_dt_search_qris');
                         } elseif ($segment2 == 'virtual_account') {
-                            $active_term = $this->session->userdata('search_va_transid') ?: ($this->session->userdata('search_va_number') ?: $this->session->userdata('search_invoice_no'));
+                            $active_term = $this->session->userdata('last_dt_search_va');
                         } elseif ($segment2 == 'ewallet') {
-                            $active_term = $this->session->userdata('search_transid_ewallet') ?: $this->session->userdata('search_invoice_no');
+                            $active_term = $this->session->userdata('last_dt_search_ewallet');
                         } elseif ($segment2 == 'bi_fast') {
-                            $active_term = $this->session->userdata('search_transid_bifast') ?: $this->session->userdata('search_invoice_no');
+                            $active_term = $this->session->userdata('last_dt_search_bifast');
                         } elseif ($segment2 == 'history') {
-                            $active_term = $this->session->userdata('search_invoice_ppob');
+                            $active_term = $this->session->userdata('last_dt_search_history');
+                        } elseif ($segment2 == 'mutation') {
+                            $active_term = $this->session->userdata('last_dt_search_mutation');
                         } elseif ($segment2 == 'qris_dynamic') {
-                            $active_term = $this->session->userdata('search_transid_qd');
+                            $active_term = $this->session->userdata('last_dt_search_qrisdynamic');
                         } elseif ($segment2 == 'ewallet_dynamic') {
-                            $active_term = $this->session->userdata('search_transid_qd');
+                            $active_term = $this->session->userdata('last_dt_search_ewalletdynamic');
                         } elseif ($segment2 == 'qris_recurring') {
-                            $active_term = $this->session->userdata('search_transid_qr');
+                            $active_term = $this->session->userdata('last_dt_search_qrisrecurring');
                         } elseif ($segment2 == 'Va_dynamic') {
-                            $active_term = $this->session->userdata('search_merchant_trxid');
+                            $active_term = $this->session->userdata('last_dt_search_vadynamic');
                         } elseif ($segment2 == 'VA_recurring') {
-                            $active_term = $this->session->userdata('search_transid_var');
+                            $active_term = $this->session->userdata('last_dt_search_varecurring');
                         } elseif ($segment2 == 'manage' && $this->uri->segment(1) == 'merchant') {
                             $active_term = $this->session->userdata('search_merchant');
                         } elseif ($segment2 == 'accounts' && $this->uri->segment(1) == 'access-control') {
@@ -107,7 +109,7 @@
                     ?>
                     <input type="text" class="form-control premium-search-input" placeholder="<?= htmlspecialchars($topbar_placeholder); ?>" id="globalSearchInput" autocomplete="off">
                     <i class="fas fa-search search-icon" id="globalSearchIcon"></i>
-                    <i class="fas fa-spinner fa-spin search-loader" id="globalSearchLoader"></i>
+                    <i class="fas fa-spinner fa-spin search-loader d-none" id="globalSearchLoader"></i>
                     <div class="search-badge">⌘ K</div>
                     <div id="searchResultsDropdown" class="search-results-dropdown"></div>
                 </div>
@@ -258,30 +260,40 @@
                 // Global Search Real-time Logic
                 const searchInput = document.getElementById('globalSearchInput');
                 const resultsDropdown = document.getElementById('searchResultsDropdown');
+                const searchIcon = document.getElementById('globalSearchIcon');
+                const searchLoader = document.getElementById('globalSearchLoader');
                 let searchTimeout;
-                let activeSearchRequests = 0;
+                let currentAbortController = null;
 
                 async function performSearch(query) {
                     if (query.length < 2) {
+                        if (currentAbortController) currentAbortController.abort();
+                        clearTimeout(searchTimeout);
                         resultsDropdown.style.display = 'none';
+                        if (searchLoader) searchLoader.classList.add('d-none');
+                        if (searchIcon) searchIcon.classList.remove('d-none');
                         return;
                     }
 
+                    // Show loader immediately
+                    if (searchIcon) searchIcon.classList.add('d-none');
+                    if (searchLoader) searchLoader.classList.remove('d-none');
+
                     clearTimeout(searchTimeout);
                     searchTimeout = setTimeout(async () => {
-                        const loader = document.getElementById('globalSearchLoader');
-                        const icon = document.getElementById('globalSearchIcon');
-                        
-                        activeSearchRequests++;
-                        if (loader && icon) {
-                            loader.style.display = 'block';
-                            icon.style.display = 'none';
-                        }
+                        // Abort any existing request before starting a new one
+                        if (currentAbortController) currentAbortController.abort();
+                        currentAbortController = new AbortController();
+                        const currentSignal = currentAbortController.signal;
 
                         try {
                             const trimmedQuery = query.trim();
-                            const response = await fetch(`<?= base_url('dashboard/global-search'); ?>?q=${encodeURIComponent(trimmedQuery)}`);
+                            const response = await fetch(`<?= base_url('dashboard/global-search'); ?>?q=${encodeURIComponent(trimmedQuery)}`, {
+                                signal: currentSignal
+                            });
                             const results = await response.json();
+
+                            if (currentSignal.aborted) return;
 
                             // Display Results
                             if (results.length > 0) {
@@ -458,12 +470,13 @@
                                 resultsDropdown.style.display = 'block';
                             }
                         } catch (error) {
-                            console.error('Search error:', error);
+                            if (error.name !== 'AbortError') {
+                                console.error('Search error:', error);
+                            }
                         } finally {
-                            activeSearchRequests--;
-                            if (activeSearchRequests === 0 && loader && icon) {
-                                loader.style.display = 'none';
-                                icon.style.display = 'block';
+                            if (!currentSignal.aborted) {
+                                if (searchLoader) searchLoader.classList.add('d-none');
+                                if (searchIcon) searchIcon.classList.remove('d-none');
                             }
                         }
                     }, 300);

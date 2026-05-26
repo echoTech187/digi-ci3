@@ -25,67 +25,63 @@ class HistoryController extends CI_Controller
 
    public function index()
    {
-      if (!$this->input->is_ajax_request()) {
-          $search_invoice_ppob = $this->input->get('invoice') ?: ($this->input->get('transid') ?: ($this->input->get('phone') ?: ($this->input->post('search_invoice_ppob') ?: '')));
-          
-          if ($this->input->get('invoice') || $this->input->get('transid') || $this->input->get('phone')) {
-              $this->session->set_userdata('last_search_ppob', $search_invoice_ppob);
-          }
-
-          if (!$this->input->get('invoice') && !$this->input->get('transid') && !$this->input->get('phone') && !$this->input->post('search_invoice_ppob')) {
-              $this->session->unset_userdata('last_search_ppob');
-          }
-      } else {
-          $search_invoice_ppob = $this->session->userdata('search_invoice_ppob');
+      // Auto-reset if accessed directly without any parameters (GET or POST)
+      if (!$this->input->is_ajax_request() && empty($this->input->get()) && !$this->input->post()) {
+         $this->resetHistory(false);
       }
 
-      $search_merchant_purchase = $this->input->get('merchant') ?: $this->input->post('search_merchant_purchase');
-      $search_status_purchase = $this->input->post('search_status_purchase');
-      $search_date_purchase = $this->input->post('search_date_purchase');
+      $data['title'] = 'Purchase History';
+      $data['user'] = $this->Model_user->view_user()->row_array();
 
-      if ($search_date_purchase) {
-         $this->session->set_userdata('search_date_purchase', $search_date_purchase);
-      } else {
-         $search_date_purchase = $this->session->userdata('search_date_purchase');
+      // Sync from GET/POST to Session
+      $field_map = [
+         'search_history_name'      => 'search_merchant_purchase',
+         'search_history_date1'     => 'search_date_purchase',
+         'search_history_status'    => 'search_status_purchase',
+         'search_history_invoice'   => 'search_invoice_ppob',
+      ];
+
+      $get_fallback = [
+         'search_history_name'      => 'merchant',
+         'search_history_date1'     => 'date',
+         'search_history_status'    => 'status',
+         'search_history_invoice'   => 'invoice',
+      ];
+
+      foreach ($field_map as $session_key => $post_key) {
+         $val = $this->input->post($post_key);
+         if ($val === NULL && isset($get_fallback[$session_key])) {
+            $val = $this->input->get($get_fallback[$session_key]);
+         }
+         if ($val !== NULL) $this->session->set_userdata($session_key, $val);
       }
 
-      if ($search_merchant_purchase) {
-         $this->session->set_userdata('search_merchant_purchase', $search_merchant_purchase);
-      } else {
-         $search_merchant_purchase = $this->session->userdata('search_merchant_purchase');
+      // Deep Linking & Main Search Sync
+      $active_search = $this->input->get('q') ?: $this->input->get('invoice') ?: $this->input->get('transid') ?: $this->input->get('phone');
+      if ($active_search) {
+         $this->session->set_userdata('last_dt_search_history', $active_search);
+         $this->session->set_userdata('search_history_invoice', $active_search);
       }
 
-      if ($search_status_purchase) {
-         $this->session->set_userdata('search_status_purchase', $search_status_purchase);
-      } else {
-         $search_status_purchase = $this->session->userdata('search_status_purchase');
-      }
-
-      $this->session->set_userdata('search_invoice_ppob', $search_invoice_ppob);
-
-      // Handle DataTables AJAX Request
       if ($this->input->is_ajax_request()) {
          try {
             $dtSearch = $this->input->post('search')['value'] ?? '';
-            $oldSearch = $this->session->userdata('last_search_ppob');
+            $oldSearch = $this->session->userdata('last_dt_search_history');
 
             if ($dtSearch === '' && $oldSearch !== '' && $oldSearch !== null) {
-                $this->session->unset_userdata('search_date_purchase');
-                $this->session->unset_userdata('search_merchant_purchase');
-                $this->session->unset_userdata('search_status_purchase');
-                $this->session->unset_userdata('search_invoice_ppob');
+               $this->resetHistory(false); // Silent reset
             }
 
             if ($dtSearch !== '') {
-                $this->session->set_userdata('search_invoice_ppob', $dtSearch);
-                $this->session->set_userdata('last_search_ppob', $dtSearch);
+               $this->session->set_userdata('search_history_invoice', $dtSearch);
+               $this->session->set_userdata('last_dt_search_history', $dtSearch);
             }
 
             $filters = [
-               'date' => $this->session->userdata('search_date_purchase'),
-               'merchant' => $this->session->userdata('search_merchant_purchase'),
-               'status' => $this->session->userdata('search_status_purchase'),
-               'invoice' => $this->session->userdata('search_invoice_ppob')
+               'date' => $this->session->userdata('search_history_date1'),
+               'merchant' => $this->session->userdata('search_history_name'),
+               'status' => $this->session->userdata('search_history_status'),
+               'invoice' => $this->session->userdata('search_history_invoice')
             ];
             return $this->History->get_datatables_handler($filters);
          } catch (Throwable $e) {
@@ -101,27 +97,27 @@ class HistoryController extends CI_Controller
          return;
       }
 
-      $data['title'] = 'Purchase History';
-      $data['user'] = $this->Model_user->view_user()->row_array();
       $data['merchants'] = $this->History->get_merchant();
       $this->load->view('history/list', $data);
    }
 
-   public function resetHistory()
+   public function resetHistory($redirect = true)
    {
-      $this->session->unset_userdata('search_date_purchase');
-      $this->session->unset_userdata('search_merchant_purchase');
-      $this->session->unset_userdata('search_status_purchase');
-      $this->session->unset_userdata('search_invoice_ppob');
-      $this->session->unset_userdata('last_search_ppob');
-      redirect('finance/history');
+      $this->session->unset_userdata([
+         'search_history_date1',
+         'search_history_name',
+         'search_history_status',
+         'search_history_invoice',
+         'last_dt_search_history'
+      ]);
+      if ($redirect) redirect('finance/history');
    }
 
    public function download_history()
    {
-      $search_date_purchase = $this->input->get('search_date_purchase') ?: '';
-      $search_merchant_purchase = $this->input->get('search_merchant_purchase') ?: '';
-      $search_status_purchase = $this->input->get('search_status_purchase') ?: '';
+      $search_date_purchase = $this->input->get('search_history_date1') ?: '';
+      $search_merchant_purchase = $this->input->get('search_history_name') ?: '';
+      $search_status_purchase = $this->input->get('search_history_status') ?: '';
 
       if (empty($search_date_purchase) && empty($search_merchant_purchase) && empty($search_status_purchase)) {
          $this->session->set_flashdata('error_message', 'Please select at least one filter before downloading.');

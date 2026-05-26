@@ -50,9 +50,9 @@
         <?php
             // Badge count for More Filters
             $extra_active = 0;
-            if ($this->session->userdata('search_date_qd') || $this->session->userdata('search_date_qd_to')) $extra_active++;
-            if ($this->session->userdata('search_name_qd')) $extra_active++;
-            if ($this->session->userdata('search_status_transaction_qd')) $extra_active++;
+            if ($this->session->userdata('search_ewalletdynamic_date1') || $this->session->userdata('search_ewalletdynamic_date2')) $extra_active++;
+            if ($this->session->userdata('search_ewalletdynamic_name')) $extra_active++;
+            if ($this->session->userdata('search_ewalletdynamic_status')) $extra_active++;
         ?>
 
         <!-- ── Toolbar ── -->
@@ -63,7 +63,7 @@
                 <!-- LEFT: Global Search -->
                 <div class="dt-search-wrapper">
                     <i class="fas fa-search dt-search-icon"></i>
-                    <?php $active_ed_search = $this->session->userdata('search_transid_qd'); ?>
+                    <?php $active_ed_search = $this->session->userdata('last_dt_search_ewalletdynamic') ?: ''; ?>
                     <input type="text" id="ewalletDynamicGlobalSearch" class="dt-search-input" placeholder="<?= $active_ed_search ?: 'Search Transaction, Merchant, or ID...'; ?>" value="<?= $active_ed_search; ?>">
                 </div>
 
@@ -92,9 +92,9 @@
                                 <div class="dt-more-field">
                                     <label class="dt-more-label"><i class="fas fa-calendar-alt mr-1 mr-2"></i> Period</label>
                                     <div class="dt-filter-chip">
-                                        <input type="date" name="search_date_qd" class="dt-chip-input" value="<?= $this->session->userdata('search_date_qd'); ?>" title="Date From">
+                                        <input type="date" name="search_date_qd" class="dt-chip-input" value="<?= $this->session->userdata('search_ewalletdynamic_date1'); ?>" title="Date From">
                                         <span class="text-muted mx-1" style="font-size:11px;">→</span>
-                                        <input type="date" name="search_date_qd_to" class="dt-chip-input" value="<?= $this->session->userdata('search_date_qd_to'); ?>" title="Date To">
+                                        <input type="date" name="search_date_qd_to" class="dt-chip-input" value="<?= $this->session->userdata('search_ewalletdynamic_date2'); ?>" title="Date To">
                                     </div>
                                 </div>
 
@@ -105,7 +105,7 @@
                                         <select name="search_name_qd" class="dt-chip-select ewallet-dynamic-select2">
                                             <option value="">All Merchants</option>
                                             <?php foreach ($merchants as $m): ?>
-                                                <option value="<?= $m->id; ?>" <?= ($this->session->userdata('search_name_qd') == $m->id) ? 'selected' : ''; ?>>
+                                                <option value="<?= $m->id; ?>" <?= ($this->session->userdata('search_ewalletdynamic_name') == $m->id) ? 'selected' : ''; ?>>
                                                     [<?= $m->id; ?>] <?= $m->c_name; ?>
                                                 </option>
                                             <?php endforeach; ?>
@@ -117,12 +117,12 @@
                                     <label class="dt-more-label"><i class="fas fa-info-circle mr-1 mr-2"></i> Status Transaction</label>
                                     <select name="search_status_transaction_qd" class="dt-more-select ewallet-dynamic-select2 no-search">
                                         <option value="">All Statuses</option>
-                                        <option value="Pending"  <?= ($this->session->userdata('search_status_transaction_qd') == 'Pending')  ? 'selected' : ''; ?>>Pending</option>
-                                        <option value="Created"  <?= ($this->session->userdata('search_status_transaction_qd') == 'Created')  ? 'selected' : ''; ?>>Created</option>
-                                        <option value="Paid"     <?= ($this->session->userdata('search_status_transaction_qd') == 'Paid')     ? 'selected' : ''; ?>>Paid</option>
-                                        <option value="Failed"   <?= ($this->session->userdata('search_status_transaction_qd') == 'Failed')   ? 'selected' : ''; ?>>Failed</option>
-                                        <option value="Expired"  <?= ($this->session->userdata('search_status_transaction_qd') == 'Expired')  ? 'selected' : ''; ?>>Expired</option>
-                                        <option value="Cancel"   <?= ($this->session->userdata('search_status_transaction_qd') == 'Cancel')   ? 'selected' : ''; ?>>Cancel</option>
+                                        <option value="Pending"  <?= ($this->session->userdata('search_ewalletdynamic_status') == 'Pending')  ? 'selected' : ''; ?>>Pending</option>
+                                        <option value="Created"  <?= ($this->session->userdata('search_ewalletdynamic_status') == 'Created')  ? 'selected' : ''; ?>>Created</option>
+                                        <option value="Paid"     <?= ($this->session->userdata('search_ewalletdynamic_status') == 'Paid')     ? 'selected' : ''; ?>>Paid</option>
+                                        <option value="Failed"   <?= ($this->session->userdata('search_ewalletdynamic_status') == 'Failed')   ? 'selected' : ''; ?>>Failed</option>
+                                        <option value="Expired"  <?= ($this->session->userdata('search_ewalletdynamic_status') == 'Expired')  ? 'selected' : ''; ?>>Expired</option>
+                                        <option value="Cancel"   <?= ($this->session->userdata('search_ewalletdynamic_status') == 'Cancel')   ? 'selected' : ''; ?>>Cancel</option>
                                     </select>
                                 </div>
                                 
@@ -334,7 +334,11 @@
                     return badge;
                 }
             }
-        ]);
+        ], {
+            "search": {
+                "search": "<?= $this->session->userdata('last_dt_search_ewalletdynamic') ?: '' ?>"
+            }
+        });
 
         // Global search with Debounce
         $('#ewalletDynamicGlobalSearch').on('input', debounce(function() {
@@ -351,7 +355,7 @@
         $('.ewallet-dynamic-select2').select2({
             width: '100%',
             dropdownAutoWidth: true,
-            dropdownParent: $('.dt-toolbar'),
+            dropdownParent: $(this).parent(),
             minimumResultsForSearch: 5
         });
 

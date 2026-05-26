@@ -6328,7 +6328,6 @@ button:disabled:hover {
     left: 1.1rem;
     color: var(--primary);
     font-size: 0.9rem;
-    display: none;
     pointer-events: none;
 }
 

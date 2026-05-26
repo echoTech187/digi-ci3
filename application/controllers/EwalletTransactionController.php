@@ -37,126 +37,66 @@ class EwalletTransactionController extends CI_Controller
     */
    public function ewallet()
    {
-      // Mengatur judul halaman yang akan ditampilkan di tab browser/header
+      // Auto-reset if accessed directly without any parameters (GET or POST)
+      if (!$this->input->is_ajax_request() && empty($this->input->get()) && !$this->input->post()) {
+         $this->resetewallet(false);
+      }
+
       $data['title'] = 'Ewallet';
-      // Mengambil data profile user yang sedang login untuk ditampilkan di topbar
       $data['user'] = $this->Model_user->view_user()->row_array();
 
-      // Mengambil parameter pencarian merchant dari GET (URL) atau POST (Filter Form)
-      $search_name_ewallet = $this->input->get('merchant') ?: $this->input->post('search_name_ewallet');
-      // Mengambil parameter filter tanggal mulai (Date From)
-      $search_date_ewallet = $this->input->get('date_from') ?: $this->input->post('search_date_ewallet');
-      // Mengambil parameter filter tanggal akhir (Date To)
-      $search_date_ewallet_to = $this->input->get('date_to') ?: $this->input->post('search_date_ewallet_to');
-      // Mengambil parameter filter tanggal settlement (penyelesaian transaksi)
-      $search_date_ewallet_settlement = $this->input->get('settlement') ?: $this->input->post('search_date_ewallet_settlement');
-      
-      // Cek apakah request datang dari browser biasa (bukan AJAX)
-      if (!$this->input->is_ajax_request()) {
-         // Ambil data invoice dari URL atau Form POST, default ke string kosong jika tidak ada
-         $search_invoice_no = $this->input->get('invoice') ?: ($this->input->post('search_invoice_no') ?: '');
-         // Ambil data Transaction ID Merchant dari URL atau Form POST
-         $search_transid_ewallet = $this->input->get('transid') ?: ($this->input->post('search_transid_ewallet') ?: '');
+      // Sync from GET/POST to Session
+      $field_map = [
+         'search_ewallet_name'            => 'search_name_ewallet',
+         'search_ewallet_date1'           => 'search_date_ewallet',
+         'search_ewallet_date2'           => 'search_date_ewallet_to',
+         'search_ewallet_date_settlement' => 'search_date_ewallet_settlement',
+         'search_ewallet_invoice_no'      => 'search_invoice_no',
+         'search_ewallet_transid'         => 'search_transid_ewallet',
+      ];
 
-         // Jika semua filter utama (invoice & transid) kosong, bersihkan session pencarian lama
-         if (!$this->input->get('invoice') && !$this->input->post('search_invoice_no') &&
-             !$this->input->get('transid') && !$this->input->post('search_transid_ewallet')) {
-            $this->session->unset_userdata('search_date_ewallet');
-            $this->session->unset_userdata('search_date_ewallet_to');
-            $this->session->unset_userdata('search_name_ewallet');
-            $this->session->unset_userdata('search_date_ewallet_settlement');
-            $this->session->unset_userdata('search_invoice_no');
-            $this->session->unset_userdata('search_transid_ewallet');
-            $this->session->unset_userdata('last_search_ewallet');
+      $get_fallback = [
+         'search_ewallet_name'            => 'merchant',
+         'search_ewallet_date1'           => 'date_from',
+         'search_ewallet_date2'           => 'date_to',
+         'search_ewallet_date_settlement' => 'settlement',
+         'search_ewallet_invoice_no'      => 'invoice',
+         'search_ewallet_transid'         => 'transid',
+      ];
+
+      foreach ($field_map as $session_key => $post_key) {
+         $val = $this->input->post($post_key);
+         if ($val === NULL && isset($get_fallback[$session_key])) {
+            $val = $this->input->get($get_fallback[$session_key]);
          }
-      } else {
-         // Jika melalui AJAX (DataTables), ambil filter invoice & transid dari session (Persistence)
-         $search_invoice_no = $this->session->userdata('search_invoice_no');
-         $search_transid_ewallet = $this->session->userdata('search_transid_ewallet');
+         if ($val !== NULL) $this->session->set_userdata($session_key, $val);
       }
 
-      // Logika persistensi filter Merchant
-      if ($search_name_ewallet) {
-         $this->session->set_userdata('search_name_ewallet', $search_name_ewallet);
-      } else {
-         $search_name_ewallet = $this->session->userdata('search_name_ewallet');
-      }
+      // Deep Linking & Main Search Sync
+      $active_search = $this->input->get('q') ?: $this->input->get('invoice') ?: $this->input->get('transid');
+      if ($active_search) $this->session->set_userdata('last_dt_search_ewallet', $active_search);
 
-      // Logika persistensi filter Tanggal Mulai
-      if ($search_date_ewallet) {
-         $this->session->set_userdata('search_date_ewallet', $search_date_ewallet);
-      } else {
-         $search_date_ewallet = $this->session->userdata('search_date_ewallet');
-      }
-
-      // Logika persistensi filter Tanggal Akhir
-      if ($search_date_ewallet_to) {
-         $this->session->set_userdata('search_date_ewallet_to', $search_date_ewallet_to);
-      } else {
-         $search_date_ewallet_to = $this->session->userdata('search_date_ewallet_to');
-      }
-
-      // Logika persistensi filter Tanggal Settlement
-      if ($search_date_ewallet_settlement) {
-         $this->session->set_userdata('search_date_ewallet_settlement', $search_date_ewallet_settlement);
-      } else {
-         $search_date_ewallet_settlement = $this->session->userdata('search_date_ewallet_settlement');
-      }
-
-      // Logika persistensi filter Nomor Invoice
-      if ($search_invoice_no !== null) {
-         $this->session->set_userdata('search_invoice_no', $search_invoice_no);
-      } else {
-         $search_invoice_no = $this->session->userdata('search_invoice_no');
-      }
-
-      // Logika persistensi filter Merchant Transaction ID
-      if ($search_transid_ewallet !== null) {
-         $this->session->set_userdata('search_transid_ewallet', $search_transid_ewallet);
-      } else {
-         $search_transid_ewallet = $this->session->userdata('search_transid_ewallet');
-      }
-
-      // Sinkronisasi parameter URL opsional (dari Redirect Global Search atau Deep Link)
-      $getInvoice = $this->input->get('invoice');
-      if ($getInvoice) {
-         $this->session->set_userdata('search_invoice_no', $getInvoice);
-         $this->session->set_userdata('last_search_ewallet', $getInvoice);
-      }
-      
-      $getTransId = $this->input->get('transid');
-      if ($getTransId) {
-         $this->session->set_userdata('search_transid_ewallet', $getTransId);
-         $this->session->set_userdata('last_search_ewallet', $getTransId);
-      }
-
-      // Menangani request AJAX dari library DataTables
       if ($this->input->is_ajax_request()) {
          try {
             $dtSearch = $this->input->post('search')['value'] ?? '';
-            $oldSearch = $this->session->userdata('last_search_ewallet');
+            $oldSearch = $this->session->userdata('last_dt_search_ewallet');
 
             if ($dtSearch === '' && $oldSearch !== '' && $oldSearch !== null) {
-               $this->session->unset_userdata('search_date_ewallet');
-               $this->session->unset_userdata('search_date_ewallet_to');
-               $this->session->unset_userdata('search_name_ewallet');
-               $this->session->unset_userdata('search_date_ewallet_settlement');
-               $this->session->unset_userdata('search_invoice_no');
-               $this->session->unset_userdata('search_transid_ewallet');
+               $this->resetewallet(false); // Silent reset
             }
 
             if ($dtSearch !== '') {
-               $this->session->set_userdata('search_invoice_no', $dtSearch);
-               $this->session->set_userdata('last_search_ewallet', $dtSearch);
+               $this->session->set_userdata('search_ewallet_invoice_no', $dtSearch);
+               $this->session->set_userdata('last_dt_search_ewallet', $dtSearch);
             }
 
             $filters = [
-               'merchant' => $this->session->userdata('search_name_ewallet'),
-               'date_from' => $this->session->userdata('search_date_ewallet'),
-               'date_to' => $this->session->userdata('search_date_ewallet_to'),
-               'settlement' => $this->session->userdata('search_date_ewallet_settlement'),
-               'invoice' => $this->session->userdata('search_invoice_no'),
-               'transid' => $this->session->userdata('search_transid_ewallet')
+               'merchant' => $this->session->userdata('search_ewallet_name'),
+               'date_from' => $this->session->userdata('search_ewallet_date1'),
+               'date_to' => $this->session->userdata('search_ewallet_date2'),
+               'settlement' => $this->session->userdata('search_ewallet_date_settlement'),
+               'invoice' => $this->session->userdata('search_ewallet_invoice_no'),
+               'transid' => $this->session->userdata('search_ewallet_transid')
             ];
             return $this->Ewallet->get_datatables_handler($filters);
          } catch (Throwable $e) {
@@ -178,24 +118,26 @@ class EwalletTransactionController extends CI_Controller
       $this->load->view('ewallet/ewallet_list', $data);
    }
 
-   public function resetewallet()
+   public function resetewallet($redirect = true)
    {
-      $this->session->unset_userdata('search_date_ewallet');
-      $this->session->unset_userdata('search_date_ewallet_to');
-      $this->session->unset_userdata('search_name_ewallet');
-      $this->session->unset_userdata('search_date_ewallet_settlement');
-      $this->session->unset_userdata('search_invoice_no');
-      $this->session->unset_userdata('search_transid_ewallet');
-      $this->session->unset_userdata('last_search_ewallet');
-      redirect('finance/e-wallet');
+      $this->session->unset_userdata([
+         'search_ewallet_name',
+         'search_ewallet_date1',
+         'search_ewallet_date2',
+         'search_ewallet_date_settlement',
+         'search_ewallet_invoice_no',
+         'search_ewallet_transid',
+         'last_dt_search_ewallet'
+      ]);
+      if ($redirect) redirect('finance/e-wallet');
    }
 
    public function download_ewallet()
    {
-      $search_date_ewallet = isset($_GET['search_date_ewallet']) ? $_GET['search_date_ewallet'] : '';
-      $search_date_to_ewallet = isset($_GET['search_date_to_ewallet']) ? $_GET['search_date_to_ewallet'] : '';
-      $search_name_ewallet = isset($_GET['search_name_ewallet']) ? $_GET['search_name_ewallet'] : '';
-      $search_date_ewallet_settlement = isset($_GET['search_date_ewallet_settlement']) ? $_GET['search_date_ewallet_settlement'] : '';
+      $search_date_ewallet = isset($_GET['search_ewallet_date1']) ? $_GET['search_ewallet_date1'] : '';
+      $search_date_to_ewallet = isset($_GET['search_ewallet_date2']) ? $_GET['search_ewallet_date2'] : '';
+      $search_name_ewallet = isset($_GET['search_ewallet_name']) ? $_GET['search_ewallet_name'] : '';
+      $search_date_ewallet_settlement = isset($_GET['search_ewallet_date_settlement']) ? $_GET['search_ewallet_date_settlement'] : '';
 
       if (
          empty($search_name_ewallet) &&
@@ -224,66 +166,59 @@ class EwalletTransactionController extends CI_Controller
 
    public function ewallet_dynamic()
    {
+      // Auto-reset if accessed directly without any parameters (GET or POST)
+      if (!$this->input->is_ajax_request() && empty($this->input->get()) && !$this->input->post()) {
+         $this->resetewallet_dynamic(false);
+      }
+
       $data['title'] = 'E-Wallet Dynamic';
       $data['user'] = $this->Model_user->view_user()->row_array();
 
-      if (!$this->input->is_ajax_request()) {
-         $search_transid_qd = $this->input->get('transid') ?: ($this->input->post('search_transid_qd') ?: '');
-         if (!$this->input->get('transid') && !$this->input->post('search_transid_qd')) {
-            $this->session->unset_userdata('search_date_qd');
-            $this->session->unset_userdata('search_date_qd_to');
-            $this->session->unset_userdata('search_name_qd');
-            $this->session->unset_userdata('search_transid_qd');
-            $this->session->unset_userdata('search_status_transaction_qd');
-            $this->session->unset_userdata('last_search_ewd');
+      // Sync from GET/POST to Session
+      $field_map = [
+         'search_ewalletdynamic_name'   => 'search_name_qd',
+         'search_ewalletdynamic_date1'  => 'search_date_qd',
+         'search_ewalletdynamic_date2'  => 'search_date_qd_to',
+         'search_ewalletdynamic_status' => 'search_status_transaction_qd',
+         'search_ewalletdynamic_transid'=> 'search_transid_qd',
+      ];
+
+      $get_fallback = [
+         'search_ewalletdynamic_name'   => 'merchant',
+         'search_ewalletdynamic_transid'=> 'transid',
+      ];
+
+      foreach ($field_map as $session_key => $post_key) {
+         $val = $this->input->post($post_key);
+         if ($val === NULL && isset($get_fallback[$session_key])) {
+            $val = $this->input->get($get_fallback[$session_key]);
          }
-      } else {
-         $search_transid_qd = $this->session->userdata('search_transid_qd');
+         if ($val !== NULL) $this->session->set_userdata($session_key, $val);
       }
 
-      $search_date_qd = $this->input->post('search_date_qd');
-      $search_date_qd_to = $this->input->post('search_date_qd_to');
-      $search_name_qd = $this->input->get('merchant') ?: $this->input->post('search_name_qd');
-      $search_status_transaction_qd = $this->input->post('search_status_transaction_qd');
-
-      if ($search_date_qd !== null) $this->session->set_userdata('search_date_qd', $search_date_qd);
-      else $search_date_qd = $this->session->userdata('search_date_qd');
-
-      if ($search_date_qd_to !== null) $this->session->set_userdata('search_date_qd_to', $search_date_qd_to);
-      else $search_date_qd_to = $this->session->userdata('search_date_qd_to');
-
-      if ($search_name_qd !== null) $this->session->set_userdata('search_name_qd', $search_name_qd);
-      else $search_name_qd = $this->session->userdata('search_name_qd');
-
-      $this->session->set_userdata('search_transid_qd', $search_transid_qd);
-
-      if ($search_status_transaction_qd !== null) $this->session->set_userdata('search_status_transaction_qd', $search_status_transaction_qd);
-      else $search_status_transaction_qd = $this->session->userdata('search_status_transaction_qd');
+      $active_search = $this->input->get('q') ?: $this->input->get('transid');
+      if ($active_search) $this->session->set_userdata('last_dt_search_ewalletdynamic', $active_search);
 
       if ($this->input->is_ajax_request()) {
          try {
             $dtSearch = $this->input->post('search')['value'] ?? '';
-            $oldSearch = $this->session->userdata('last_search_ewd');
+            $oldSearch = $this->session->userdata('last_dt_search_ewalletdynamic');
 
             if ($dtSearch === '' && $oldSearch !== '' && $oldSearch !== null) {
-               $this->session->unset_userdata('search_date_qd');
-               $this->session->unset_userdata('search_date_qd_to');
-               $this->session->unset_userdata('search_name_qd');
-               $this->session->unset_userdata('search_status_transaction_qd');
-               $this->session->unset_userdata('search_transid_qd');
+               $this->resetewallet_dynamic(false); // Silent reset
             }
 
             if ($dtSearch !== '') {
-               $this->session->set_userdata('search_transid_qd', $dtSearch);
-               $this->session->set_userdata('last_search_ewd', $dtSearch);
+               $this->session->set_userdata('search_ewalletdynamic_transid', $dtSearch);
+               $this->session->set_userdata('last_dt_search_ewalletdynamic', $dtSearch);
             }
 
             $filters = [
-               'merchant' => $this->session->userdata('search_name_qd'),
-               'date' => $this->session->userdata('search_date_qd'),
-               'date_to' => $this->session->userdata('search_date_qd_to'),
-               'transid' => $this->session->userdata('search_transid_qd'),
-               'status' => $this->session->userdata('search_status_transaction_qd')
+               'merchant' => $this->session->userdata('search_ewalletdynamic_name'),
+               'date' => $this->session->userdata('search_ewalletdynamic_date1'),
+               'date_to' => $this->session->userdata('search_ewalletdynamic_date2'),
+               'transid' => $this->session->userdata('search_ewalletdynamic_transid'),
+               'status' => $this->session->userdata('search_ewalletdynamic_status')
             ];
             return $this->EwalletDynamic->get_datatables_handler($filters);
          } catch (Throwable $e) {
@@ -322,15 +257,17 @@ class EwalletTransactionController extends CI_Controller
       $this->load->view('ewallet/ewallet_detail', $data);
    }
 
-   public function resetewallet_dynamic()
+   public function resetewallet_dynamic($redirect = true)
    {
-      $this->session->unset_userdata('search_date_qd');
-      $this->session->unset_userdata('search_date_qd_to');
-      $this->session->unset_userdata('search_name_qd');
-      $this->session->unset_userdata('search_transid_qd');
-      $this->session->unset_userdata('search_status_transaction_qd');
-      $this->session->unset_userdata('last_search_ewd');
-      redirect('e-wallet/dynamic');
+      $this->session->unset_userdata([
+         'search_ewalletdynamic_name',
+         'search_ewalletdynamic_date1',
+         'search_ewalletdynamic_date2',
+         'search_ewalletdynamic_status',
+         'search_ewalletdynamic_transid',
+         'last_dt_search_ewalletdynamic'
+      ]);
+      if ($redirect) redirect('e-wallet/dynamic');
    }
 
    public function Sendnotifikasiewallet()

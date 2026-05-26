@@ -64,7 +64,7 @@ function initServerDataTable(tableId, ajaxUrl, columns, additionalOptions = {}) 
                     $info.html('Showing <strong>' + start + ' – ' + end + '</strong> of <strong>' + number_format(total) + '</strong> results');
                 }
             }
-
+            var total = info.recordsDisplay;
             // Render Pager
             var pagerHtml = '<div class="dt-pager-nav">';
             
@@ -72,11 +72,12 @@ function initServerDataTable(tableId, ajaxUrl, columns, additionalOptions = {}) 
             pagerHtml += '<button class="dt-pager-btn dt-prev-btn" ' + (info.page === 0 ? 'disabled' : '') + '>';
             pagerHtml += '<i class="fas fa-chevron-left mr-md-2"></i><span class="dt-pager-btn-txt">Previous</span>';
             pagerHtml += '</button>';
-
-            // Page Numbers
-            pagerHtml += '<ul class="dt-pager-numbers d-none d-md-flex">';
-            pagerHtml += generatePagerNumbers(info);
-            pagerHtml += '</ul>';
+            if (total > 0) {
+                // Page Numbers
+                pagerHtml += '<ul class="dt-pager-numbers d-none d-md-flex">';
+                pagerHtml += generatePagerNumbers(info);
+                pagerHtml += '</ul>';
+            }
 
             // Next Button
             pagerHtml += '<button class="dt-pager-btn dt-next-btn" ' + (info.page >= totalPages - 1 ? 'disabled' : '') + '>';

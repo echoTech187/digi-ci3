@@ -659,7 +659,7 @@ $(document).ready(function() {
     $('#cashinMoreFiltersPanel select').not('.select2-hidden-accessible').select2({
         width: '100%',
         dropdownAutoWidth: true,
-        dropdownParent: $(document.body),
+        dropdownParent: $(this).parent(),
         minimumResultsForSearch: 0
     });
 

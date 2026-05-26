@@ -607,7 +607,7 @@
                 $('#merchantMoreFiltersPanel select').not('.select2-hidden-accessible').select2({
                     width: '100%',
                     dropdownAutoWidth: true,
-                    dropdownParent: $(document.body),
+                    dropdownParent: $(this).parent(),
                     minimumResultsForSearch: 0
                 });
 
@@ -625,7 +625,7 @@
                     $('#creditChannelId').select2({
                         width: '100%',
                         dropdownAutoWidth: true,
-                        dropdownParent: $('#creditBalanceModal')
+                        dropdownParent: $(this).parent()
                     });
                 }, 300);
             }
@@ -637,7 +637,7 @@
                     $('#debitChannelId').select2({
                         width: '100%',
                         dropdownAutoWidth: true,
-                        dropdownParent: $('#debitBalanceModal')
+                        dropdownParent: $(this).parent()
                     });
                 }, 300);
             }

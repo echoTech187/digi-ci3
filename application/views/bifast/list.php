@@ -40,10 +40,10 @@
             </button>
             <?php
                 $download_url = base_url('finance/bi-fast/download') 
-                    . "?search_date_bifast=" . ($this->session->userdata('search_date_bifast') ?: '')
-                    . "&search_date_bifast_to=" . ($this->session->userdata('search_date_bifast_to') ?: '')
-                    . "&search_name_bifast=" . ($this->session->userdata('search_name_bifast') ?: '')
-                    . "&search_status_transaction_bifast=" . ($this->session->userdata('search_status_transaction_bifast') ?: '');
+                    . "?search_bifast_date1=" . ($this->session->userdata('search_bifast_date1') ?: '')
+                    . "&search_bifast_date2=" . ($this->session->userdata('search_bifast_date2') ?: '')
+                    . "&search_bifast_name=" . ($this->session->userdata('search_bifast_name') ?: '')
+                    . "&search_bifast_status=" . ($this->session->userdata('search_bifast_status') ?: '');
             ?>
             
         </div>
@@ -55,14 +55,14 @@
         <!-- ── Toolbar ── -->
         <?php
             // Session values already loaded above in the file, but let's re-ensure clean local vars
-            $date_from_val = $this->session->userdata('search_date_bifast') ?: '';
-            $date_to_val   = $this->session->userdata('search_date_bifast_to') ?: '';
-            $merchant_val  = $this->session->userdata('search_name_bifast') ?: '';
-            $status_val    = $this->session->userdata('search_status_transaction_bifast') ?: '';
-            $transid_val   = $this->session->userdata('search_transid_bifast') ?: '';
-            $channel_val   = $this->session->userdata('search_channel_bifast') ?: '';
-            $internal_channel_val = $this->session->userdata('search_internal_channel_bifast') ?: '';
-            $external_val  = $this->session->userdata('search_external_reff_id') ?: '';
+            $date_from_val = $this->session->userdata('search_bifast_date1') ?: '';
+            $date_to_val   = $this->session->userdata('search_bifast_date2') ?: '';
+            $merchant_val  = $this->session->userdata('search_bifast_name') ?: '';
+            $status_val    = $this->session->userdata('search_bifast_status') ?: '';
+            $transid_val   = $this->session->userdata('search_bifast_transid') ?: '';
+            $channel_val   = $this->session->userdata('search_bifast_channel') ?: '';
+            $internal_channel_val = $this->session->userdata('search_bifast_internal_channel') ?: '';
+            $external_val  = $this->session->userdata('search_bifast_external_reff') ?: '';
 
             // Badge count for More Filters (Exclude those moved to global search)
             $extra_active = 0;
@@ -81,7 +81,8 @@
                 <!-- LEFT: Global Search -->
                 <div class="dt-search-wrapper">
                     <i class="fas fa-search dt-search-icon"></i>
-                    <input type="text" id="bifastGlobalSearch" class="dt-search-input" placeholder="<?= $transid_val ?: 'Search by Trans ID, Invoice, Account No, or Beneficiary Name...'; ?>" value="<?= $transid_val; ?>">
+                    <?php $active_bifast_search = $this->session->userdata('last_dt_search_bifast') ?: ''; ?>
+                    <input type="text" id="bifastGlobalSearch" class="dt-search-input" placeholder="<?= $active_bifast_search ?: 'Search by Trans ID, Invoice, Account No, or Beneficiary Name...'; ?>" value="<?= $active_bifast_search; ?>">
                 </div>
 
                 <!-- RIGHT: Primary chips + More Filters trigger -->
@@ -484,7 +485,7 @@
         ], {
             "order": [[2, 'desc']],
             "search": {
-                "search": "<?= $transid_val ?>"
+                "search": "<?= $this->session->userdata('last_dt_search_bifast') ?: '' ?>"
             }
         });
 
@@ -521,7 +522,7 @@
         $('.bifast-select2').select2({
             width: '100%',
             dropdownAutoWidth: true,
-            
+            dropdownParent: $(this).parent(),
             minimumResultsForSearch: 5
         });
 

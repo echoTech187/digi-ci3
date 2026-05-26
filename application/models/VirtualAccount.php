@@ -42,12 +42,16 @@ class VirtualAccount extends CI_Model {
         
         // Join merchant only if needed (NOT during ID-fetch for transid search)
         $isTextSearch = $searchValue && !preg_match('/^(VA|INV|[0-9]{8,})/i', $searchValue);
+        $joined_merchant = false;
         if (!$only_ids && !$count_only || $search_merchant || $isTextSearch || strpos($sort_col, 'm.') !== false) {
             $this->db->join('merchant m', 'cpv.ref_merchantId = m.id', 'left');
+            $joined_merchant = true;
         }
 
+        $joined_submerchant = false;
         if (!$only_ids && !$count_only) {
             $this->db->join('submerchant s', 'cpv.ref_subMerchantId = s.id', 'left');
+            $joined_submerchant = true;
         }
 
         // Trans ID joins ONLY for full data display, NEVER during ID-fetch (use Pre-Lookup instead)
@@ -220,8 +224,14 @@ class VirtualAccount extends CI_Model {
                 // FALLBACK: Name search if no specific ID matched (min 3 chars)
                 if (strlen($searchValue) >= 3) {
                     // Ensure joins for name search fallback
-                    $this->db->join('submerchant s', 'cpv.ref_subMerchantId = s.id', 'left');
-                    $this->db->join('merchant m', 'cpv.ref_merchantId = m.id', 'left');
+                    if (!$joined_submerchant) {
+                        $this->db->join('submerchant s', 'cpv.ref_subMerchantId = s.id', 'left');
+                        $joined_submerchant = true;
+                    }
+                    if (!$joined_merchant) {
+                        $this->db->join('merchant m', 'cpv.ref_merchantId = m.id', 'left');
+                        $joined_merchant = true;
+                    }
                     
                     $this->db->group_start();
                     $this->db->like('s.c_name', $searchValue, 'both');

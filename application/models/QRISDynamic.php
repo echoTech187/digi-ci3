@@ -74,9 +74,11 @@ class QRISDynamic extends CI_Model
 
         // Join only if needed for text search, sorting or full data
         $isTextSearch = $searchValue && !preg_match('/^(GD|INV|[0-9]{8,})/i', $searchValue);
+        $joined_merchant_submerchant = false;
         if (!$only_ids && !$count_only || $search_name || $isTextSearch || strpos($sort_col, 's.') !== false || strpos($sort_col, 'm.') !== false) {
             $this->db->join('submerchant s', 's.id = cdq.ref_subMerchantId', 'left');
             $this->db->join('merchant m', 'm.id = cdq.ref_merchantId', 'left');
+            $joined_merchant_submerchant = true;
         }
 
         $this->_apply_filters($search_name, $search_date, $search_transid, $search_status, $search_reff, $search_date_to);
@@ -107,8 +109,11 @@ class QRISDynamic extends CI_Model
                 // FALLBACK: Name search if no specific ID matched (min 3 chars)
                 if (strlen($searchValue) >= 3) {
                     // Ensure joins are present for name search fallback
-                    $this->db->join('submerchant s', 'cdq.ref_subMerchantId = s.id', 'left');
-                    $this->db->join('merchant m', 'cdq.ref_merchantId = m.id', 'left');
+                    if (!$joined_merchant_submerchant) {
+                        $this->db->join('submerchant s', 'cdq.ref_subMerchantId = s.id', 'left');
+                        $this->db->join('merchant m', 'cdq.ref_merchantId = m.id', 'left');
+                        $joined_merchant_submerchant = true;
+                    }
                     
                     $this->db->group_start();
                     $this->db->like('s.c_name', $searchValue, 'both');

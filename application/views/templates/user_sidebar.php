@@ -44,7 +44,7 @@
     </div>
 
     <!-- Navigation Menu -->
-    <div class="sb-nav-wrapper">
+    <div class="sb-nav-wrapper pb-3">
         <ul class="sb-nav" id="sb-accordion">
 
             <?php 
@@ -133,16 +133,6 @@
 
             <?php endif; ?>
             <?php endforeach; ?>
-
-            <!-- Logout -->
-            <!-- <li class="sb-group-label mt-2"><span>Account</span></li> -->
-            <li class="sb-nav-item sb-logout-item">
-                <a class="sb-nav-link sb-logout-link" href="<?= base_url('auth/logout'); ?>" data-toggle="modal" data-target="#logoutModal">
-                    <span class="sb-nav-icon"><i class="fas fa-sign-out-alt"></i></span>
-                    <span class="sb-nav-label">Logout</span>
-                </a>
-            </li>
-
         </ul>
     </div>
 

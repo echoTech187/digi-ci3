@@ -1,8 +1,8 @@
 <?php
 // Session filter values
-$search_date_purchase_value = $this->session->userdata('search_date_purchase') ?: '';
-$search_merchant_purchase_value = $this->session->userdata('search_merchant_purchase') ?: '';
-$search_status_purchase_value = $this->session->userdata('search_status_purchase') ?: '';
+$search_date_purchase_value = $this->session->userdata('search_history_date1') ?: '';
+$search_merchant_purchase_value = $this->session->userdata('search_history_name') ?: '';
+$search_status_purchase_value = $this->session->userdata('search_history_status') ?: '';
 
 // Badge count for More Filters
 $extra_active = 0;
@@ -11,9 +11,9 @@ if ($search_merchant_purchase_value) $extra_active++;
 if ($search_status_purchase_value) $extra_active++;
 
 $download_url = base_url('finance/history/download') 
-    . "?search_date_purchase=" . $search_date_purchase_value 
-    . "&search_merchant_purchase=" . $search_merchant_purchase_value
-    . "&search_status_purchase=" . $search_status_purchase_value;
+    . "?search_history_date1=" . $search_date_purchase_value 
+    . "&search_history_name=" . $search_merchant_purchase_value
+    . "&search_history_status=" . $search_status_purchase_value;
 ?>
 
 <!-- ── Page Header ── -->
@@ -35,7 +35,7 @@ $download_url = base_url('finance/history/download')
                 <!-- LEFT: Global Search -->
                 <div class="dt-search-wrapper">
                     <i class="fas fa-search dt-search-icon"></i>
-                    <?php $active_ppob_search = $this->session->userdata('search_invoice_ppob'); ?>
+                    <?php $active_ppob_search = $this->session->userdata('last_dt_search_history') ?: ''; ?>
                     <input type="text" id="historyGlobalSearch" class="dt-search-input" placeholder="<?= $active_ppob_search ?: 'Search by Invoice, ID Product, or Phone...'; ?>" value="<?= $active_ppob_search; ?>">
                 </div>
                 <!-- RIGHT: Filters -->
@@ -156,7 +156,11 @@ $download_url = base_url('finance/history/download')
                 else if(data === 'Timeout') badgeClass = 'badge-secondary';
                 return '<span class="badge badge-pill ' + badgeClass + '">' + data + '</span>';
             }}
-        ]);
+        ], {
+            "search": {
+                "search": "<?= $this->session->userdata('last_dt_search_history') ?: '' ?>"
+            }
+        });
 
         // ── More Filters dropdown ──
         var $moreBtn   = $('#btnToggleFilters');

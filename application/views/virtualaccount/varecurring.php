@@ -1,9 +1,9 @@
 <?php
 // Session values
-$search_date_var_value        = $this->session->userdata('search_date_var') ?: '';
-$search_date_var_to_value     = $this->session->userdata('search_date_var_to') ?: '';
-$search_name_var_value        = $this->session->userdata('search_name_var') ?: '';
-$search_submerchant_var_value = $this->session->userdata('search_submerchant_var') ?: '';
+$search_date_var_value        = $this->session->userdata('search_varecurring_date1') ?: '';
+$search_date_var_to_value     = $this->session->userdata('search_varecurring_date2') ?: '';
+$search_name_var_value        = $this->session->userdata('search_varecurring_name') ?: '';
+$search_submerchant_var_value = $this->session->userdata('search_varecurring_submerchant') ?: '';
 $download_url = base_url('finance/virtual-account/download_recurring') // Assuming this exists or follows pattern
     . '?search_date_var='            . $search_date_var_value
     . '&search_date_var_to='         . $search_date_var_to_value
@@ -57,10 +57,10 @@ $download_url = base_url('finance/virtual-account/download_recurring') // Assumi
         <?php
             // Badge count for More Filters
             $extra_active = 0;
-            if ($this->session->userdata('search_date_var') || $this->session->userdata('search_date_var_to'))      $extra_active++;
-            if ($this->session->userdata('search_name_var'))      $extra_active++;
-            if ($this->session->userdata('search_submerchant_var')) $extra_active++;
-            if ($this->session->userdata('search_status_transaction_var')) $extra_active++;
+            if ($this->session->userdata('search_varecurring_date1') || $this->session->userdata('search_varecurring_date2'))      $extra_active++;
+            if ($this->session->userdata('search_varecurring_name'))      $extra_active++;
+            if ($this->session->userdata('search_varecurring_submerchant')) $extra_active++;
+            if ($this->session->userdata('search_varecurring_status')) $extra_active++;
         ?>
         <form id="varecurring_form" method="post" action="<?= base_url('virtual-account/recurring'); ?>">
             <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>">
@@ -68,7 +68,7 @@ $download_url = base_url('finance/virtual-account/download_recurring') // Assumi
                 <!-- LEFT: Global Search -->
                 <div class="dt-search-wrapper">
                     <i class="fas fa-search dt-search-icon"></i>
-                    <?php $active_var_search = $this->session->userdata('search_transid_var'); ?>
+                    <?php $active_var_search = $this->session->userdata('last_dt_search_varecurring') ?: ''; ?>
                     <input type="text" id="vaRecurringGlobalSearch" class="dt-search-input" placeholder="<?= $active_var_search ?: 'Search by Channel, Merchant, or ID...'; ?>" value="<?= $active_var_search; ?>">
                 </div>
                 <!-- RIGHT: Filters -->
@@ -117,10 +117,10 @@ $download_url = base_url('finance/virtual-account/download_recurring') // Assumi
                                     <label class="dt-more-label"><i class="fas fa-info-circle mr-1 mr-2"></i> Status</label>
                                     <select name="search_status_transaction_var" class="dt-more-select select2">
                                         <option value="">All Statuses</option>
-                                        <option value="Pending" <?= ($this->session->userdata('search_status_transaction_var') == 'Pending') ? 'selected' : ''; ?>>Pending</option>
-                                        <option value="Paid" <?= ($this->session->userdata('search_status_transaction_var') == 'Paid') ? 'selected' : ''; ?>>Paid</option>
-                                        <option value="Failed" <?= ($this->session->userdata('search_status_transaction_var') == 'Failed') ? 'selected' : ''; ?>>Failed</option>
-                                        <option value="Expired" <?= ($this->session->userdata('search_status_transaction_var') == 'Expired') ? 'selected' : ''; ?>>Expired</option>
+                                        <option value="Pending" <?= ($this->session->userdata('search_varecurring_status') == 'Pending') ? 'selected' : ''; ?>>Pending</option>
+                                        <option value="Paid" <?= ($this->session->userdata('search_varecurring_status') == 'Paid') ? 'selected' : ''; ?>>Paid</option>
+                                        <option value="Failed" <?= ($this->session->userdata('search_varecurring_status') == 'Failed') ? 'selected' : ''; ?>>Failed</option>
+                                        <option value="Expired" <?= ($this->session->userdata('search_varecurring_status') == 'Expired') ? 'selected' : ''; ?>>Expired</option>
                                     </select>
                                 </div>
                             </div>
@@ -344,7 +344,11 @@ $download_url = base_url('finance/virtual-account/download_recurring') // Assumi
                     return badge;
                 }
             }
-        ]);
+        ], {
+            "search": {
+                "search": "<?= $this->session->userdata('last_dt_search_varecurring') ?: '' ?>"
+            }
+        });
         // ── More Filters dropdown ──
         var $moreBtn   = $('#vadynamicMoreFiltersBtn');
         var $morePanel = $('#vadynamicMoreFiltersPanel');

@@ -30,9 +30,11 @@ class Ewallet extends CI_Model {
 
         // Join cashin only if searching for invoice, sorting by it, or getting full data
         // Base joins only added if needed for sorting or full data (Deferred Join pattern)
+        $joined_merchant_submerchant = false;
         if (!$only_ids && !$count_only || $search_name || $searchValue || strpos($sort_col, 's.') !== false || strpos($sort_col, 'm.') !== false) {
             $this->db->join('submerchant s', 'cpe.ref_subMerchantId = s.id', 'left');
             $this->db->join('merchant m', 'cpe.ref_merchantId = m.id', 'left');
+            $joined_merchant_submerchant = true;
         }
 
         // Apply Basic Filters
@@ -122,8 +124,11 @@ class Ewallet extends CI_Model {
                 // FALLBACK: Name search if no specific ID matched (min 3 chars)
                 if (strlen($searchValue) >= 3) {
                     // Ensure joins for name search fallback
-                    $this->db->join('submerchant s', 'cpe.ref_subMerchantId = s.id', 'left');
-                    $this->db->join('merchant m', 'cpe.ref_merchantId = m.id', 'left');
+                    if (!$joined_merchant_submerchant) {
+                        $this->db->join('submerchant s', 'cpe.ref_subMerchantId = s.id', 'left');
+                        $this->db->join('merchant m', 'cpe.ref_merchantId = m.id', 'left');
+                        $joined_merchant_submerchant = true;
+                    }
                     
                     $this->db->like('s.c_name', $searchValue, 'both');
                 } else {

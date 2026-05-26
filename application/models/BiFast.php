@@ -32,8 +32,10 @@ class BiFast extends CI_Model {
         $sort_col = isset($_POST['order']['0']['column']) ? $this->column_order[$_POST['order']['0']['column']] : '';
 
         // Always join merchant if we are searching, filtering by it, or sorting by it
+        $joined_merchant = false;
         if (!$only_ids && !$count_only || $search_name || $searchValue || strpos($sort_col, 'm.') !== false) {
             $this->db->join('merchant m', 'm.id = cpb.ref_merchantId');
+            $joined_merchant = true;
         }
         
         // Join cashout only if searching for invoice prefix, sorting by it, or getting full data
@@ -184,7 +186,10 @@ class BiFast extends CI_Model {
                 // FALLBACK: Name search if no specific ID matched (min 3 chars)
                 if (strlen($searchValue) >= 3) {
                     // Ensure joins for name search fallback
-                    $this->db->join('merchant m', 'cpb.ref_merchantId = m.id', 'left');
+                    if (!$joined_merchant) {
+                        $this->db->join('merchant m', 'cpb.ref_merchantId = m.id', 'left');
+                        $joined_merchant = true;
+                    }
                     $this->db->like('m.c_name', $searchValue, 'both');
                 } else {
                     $this->db->where('1=0', NULL, FALSE);

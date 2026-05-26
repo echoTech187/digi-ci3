@@ -35,79 +35,76 @@ class VirtualAccountTransactionController extends CI_Controller
 
    public function virtual_account()
    {
+      // Auto-reset if accessed directly without any parameters (GET or POST)
+      if (!$this->input->is_ajax_request() && empty($this->input->get()) && !$this->input->post()) {
+         $this->resetVA(false);
+      }
+
       $data['title'] = 'Virtual Account';
       $data['user'] = $this->Model_user->view_user()->row_array();
 
-      $search_name_va = $this->input->get('merchant') ?: $this->input->post('search_name_va');
-      $search_date_va = $this->input->get('date') ?: $this->input->post('search_date_va');
-      $search_date_va_to = $this->input->get('date_to') ?: $this->input->post('search_date_va_to');
-      $search_date_va_settlement = $this->input->get('settlement') ?: $this->input->post('search_date_va_settlement');
-      $search_channel_va = $this->input->get('channel') ?: $this->input->post('search_channel_va');
+      // Sync from GET/POST to Session
+      $field_map = [
+         'search_va_name'            => 'search_name_va',
+         'search_va_date1'           => 'search_date_va',
+         'search_va_date2'           => 'search_date_va_to',
+         'search_va_date_settlement' => 'search_date_va_settlement',
+         'search_va_channel'         => 'search_channel_va',
+         'search_va_number'          => 'search_va_number',
+         'search_va_transid'         => 'search_va_transid',
+         'search_va_invoice_no'      => 'search_invoice_no',
+      ];
 
-      if (!$this->input->is_ajax_request()) {
-         $search_va_number = $this->input->get('va_number') ?: ($this->input->post('search_va_number') ?: '');
-         $search_va_transid = $this->input->get('transid') ?: ($this->input->post('search_va_transid') ?: '');
-         $search_invoice_no = $this->input->get('invoice') ?: ($this->input->post('search_invoice_no') ?: '');
-         
-         if (!$this->input->get('va_number') && !$this->input->post('search_va_number') && 
-             !$this->input->get('transid') && !$this->input->post('search_va_transid') &&
-             !$this->input->get('invoice') && !$this->input->post('search_invoice_no')) {
-            $this->session->unset_userdata('search_date_va');
-            $this->session->unset_userdata('search_date_va_to');
-            $this->session->unset_userdata('search_name_va');
-            $this->session->unset_userdata('search_date_va_settlement');
-            $this->session->unset_userdata('search_channel_va');
-            $this->session->unset_userdata('search_va_number');
-            $this->session->unset_userdata('search_va_transid');
-            $this->session->unset_userdata('search_invoice_no');
-            $this->session->unset_userdata('last_search_va');
+      $get_fallback = [
+         'search_va_name'            => 'merchant',
+         'search_va_date1'           => 'date',
+         'search_va_date2'           => 'date_to',
+         'search_va_date_settlement' => 'settlement',
+         'search_va_channel'         => 'channel',
+         'search_va_number'          => 'va_number',
+         'search_va_transid'         => 'transid',
+         'search_va_invoice_no'      => 'invoice',
+      ];
+
+      foreach ($field_map as $session_key => $post_key) {
+         $val = $this->input->post($post_key);
+         if ($val === NULL && isset($get_fallback[$session_key])) {
+            $val = $this->input->get($get_fallback[$session_key]);
          }
-      } else {
-         $search_va_number = $this->session->userdata('search_va_number');
-         $search_va_transid = $this->session->userdata('search_va_transid');
-         $search_invoice_no = $this->session->userdata('search_invoice_no');
+         if ($val !== NULL) $this->session->set_userdata($session_key, $val);
       }
 
-      if ($search_name_va !== null) $this->session->set_userdata('search_name_va', $search_name_va);
-      if ($search_date_va !== null) $this->session->set_userdata('search_date_va', $search_date_va);
-      if ($search_date_va_to !== null) $this->session->set_userdata('search_date_va_to', $search_date_va_to);
-      if ($search_date_va_settlement !== null) $this->session->set_userdata('search_date_va_settlement', $search_date_va_settlement);
-      if ($search_channel_va !== null) $this->session->set_userdata('search_channel_va', $search_channel_va);
-      
-      $this->session->set_userdata('search_va_number', $search_va_number);
-      $this->session->set_userdata('search_va_transid', $search_va_transid);
-      $this->session->set_userdata('search_invoice_no', $search_invoice_no);
+      // Deep Linking & Main Search Sync
+      $active_search = $this->input->get('q') ?: $this->input->get('invoice') ?: $this->input->get('transid') ?: $this->input->get('va_number');
+      if ($active_search) $this->session->set_userdata('last_dt_search_va', $active_search);
 
       if ($this->input->is_ajax_request()) {
          try {
             $dtSearch = $this->input->post('search')['value'] ?? '';
-            $oldSearch = $this->session->userdata('last_search_va');
-            
+            $oldSearch = $this->session->userdata('last_dt_search_va');
+
             if ($dtSearch === '' && $oldSearch !== '' && $oldSearch !== null) {
-               $this->session->unset_userdata('search_date_va');
-               $this->session->unset_userdata('search_date_va_to');
-               $this->session->unset_userdata('search_name_va');
-               $this->session->unset_userdata('search_date_va_settlement');
-               $this->session->unset_userdata('search_channel_va');
-               $this->session->unset_userdata('search_va_number');
-               $this->session->unset_userdata('search_va_transid');
-               $this->session->unset_userdata('search_invoice_no');
+               $this->resetVA(false); // Silent reset
             }
 
             if ($dtSearch !== '') {
-               $this->session->set_userdata('search_va_number', $dtSearch);
-               $this->session->set_userdata('last_search_va', $dtSearch);
+               if (is_numeric($dtSearch)) {
+                  $this->session->set_userdata('search_va_number', $dtSearch);
+               } else {
+                  $this->session->set_userdata('search_va_invoice_no', $dtSearch);
+               }
+               $this->session->set_userdata('last_dt_search_va', $dtSearch);
             }
 
             $filters = [
-               'date' => $this->session->userdata('search_date_va'),
-               'date_to' => $this->session->userdata('search_date_va_to'),
-               'merchant' => $this->session->userdata('search_name_va'),
-               'settlement' => $this->session->userdata('search_date_va_settlement'),
-               'channel' => $this->session->userdata('search_channel_va'),
+               'date' => $this->session->userdata('search_va_date1'),
+               'date_to' => $this->session->userdata('search_va_date2'),
+               'merchant' => $this->session->userdata('search_va_name'),
+               'settlement' => $this->session->userdata('search_va_date_settlement'),
+               'channel' => $this->session->userdata('search_va_channel'),
                'va_number' => $this->session->userdata('search_va_number'),
                'transid' => $this->session->userdata('search_va_transid'),
-               'invoice_no' => $this->session->userdata('search_invoice_no')
+               'invoice_no' => $this->session->userdata('search_va_invoice_no')
             ];
             return $this->VirtualAccount->get_datatables_handler($filters);
          } catch (Throwable $e) {
@@ -127,17 +124,20 @@ class VirtualAccountTransactionController extends CI_Controller
       $this->load->view('virtualaccount/list', $data);
    }
 
-   public function resetVA()
+   public function resetVA($redirect = true)
    {
-      $this->session->unset_userdata('search_date_va');
-      $this->session->unset_userdata('search_date_va_to');
-      $this->session->unset_userdata('search_name_va');
-      $this->session->unset_userdata('search_date_va_settlement');
-      $this->session->unset_userdata('search_channel_va');
-      $this->session->unset_userdata('search_va_number');
-      $this->session->unset_userdata('search_va_transid');
-      $this->session->unset_userdata('last_search_va');
-      redirect('finance/virtual-account');
+      $this->session->unset_userdata([
+         'search_va_date1',
+         'search_va_date2',
+         'search_va_date_settlement',
+         'search_va_name',
+         'search_va_channel',
+         'search_va_number',
+         'search_va_transid',
+         'search_va_invoice_no',
+         'last_dt_search_va'
+      ]);
+      if ($redirect) redirect('finance/virtual-account');
    }
 
    public function VA_detail($id = NULL)
@@ -161,10 +161,10 @@ class VirtualAccountTransactionController extends CI_Controller
 
    public function download_VA()
    {
-      $search_date_va = isset($_GET['search_date_va']) ? $_GET['search_date_va'] : '';
-      $search_date_va_to = isset($_GET['search_date_va_to']) ? $_GET['search_date_va_to'] : '';
-      $search_name_va = isset($_GET['search_name_va']) ? $_GET['search_name_va'] : '';
-      $search_date_va_settlement = isset($_GET['search_date_va_settlement']) ? $_GET['search_date_va_settlement'] : '';
+      $search_date_va = isset($_GET['search_va_date1']) ? $_GET['search_va_date1'] : '';
+      $search_date_va_to = isset($_GET['search_va_date2']) ? $_GET['search_va_date2'] : '';
+      $search_name_va = isset($_GET['search_va_name']) ? $_GET['search_va_name'] : '';
+      $search_date_va_settlement = isset($_GET['search_va_date_settlement']) ? $_GET['search_va_date_settlement'] : '';
 
       if (empty($search_name_va) && (empty($search_date_va) || empty($search_date_va_settlement))) {
          $this->session->set_flashdata('error_message', 'Please fill all fields and search before continuing with download.');
@@ -193,65 +193,66 @@ class VirtualAccountTransactionController extends CI_Controller
 
    public function Va_dynamic()
    {
+      // Auto-reset if accessed directly without any parameters (GET or POST)
+      if (!$this->input->is_ajax_request() && empty($this->input->get()) && !$this->input->post()) {
+         $this->resetVa_dynamic(false);
+      }
+
       $data['title'] = 'VA Dynamic';
       $data['user'] = $this->Model_user->view_user()->row_array();
 
-      if (!$this->input->is_ajax_request()) {
-         $search_merchant_trxid = $this->input->get('transid') ?: ($this->input->post('search_merchant_trxid') ?: '');
-         if (!$this->input->get('transid') && !$this->input->post('search_merchant_trxid') && !$this->input->get('va_number')) {
-            $this->session->unset_userdata('search_name_vad');
-            $this->session->unset_userdata('search_date_vad');
-            $this->session->unset_userdata('search_date_vad_to');
-            $this->session->unset_userdata('search_va_number');
-            $this->session->unset_userdata('search_merchant_trxid');
-            $this->session->unset_userdata('search_status_transaction_vad');
-            $this->session->unset_userdata('last_search_vad');
+      // Sync from GET/POST to Session
+      $field_map = [
+         'search_vadynamic_name'      => 'search_name_vad',
+         'search_vadynamic_date1'     => 'search_date_vad',
+         'search_vadynamic_date2'     => 'search_date_vad_to',
+         'search_vadynamic_status'    => 'search_status_transaction_vad',
+         'search_vadynamic_transid'   => 'search_merchant_trxid',
+         'search_vadynamic_va_number' => 'search_va_number'
+      ];
+
+      $get_fallback = [
+         'search_vadynamic_name'      => 'merchant',
+         'search_vadynamic_transid'   => 'transid',
+         'search_vadynamic_va_number' => 'va_number'
+      ];
+
+      foreach ($field_map as $session_key => $post_key) {
+         $val = $this->input->post($post_key);
+         if ($val === NULL && isset($get_fallback[$session_key])) {
+            $val = $this->input->get($get_fallback[$session_key]);
          }
-      } else {
-         $search_merchant_trxid = $this->session->userdata('search_merchant_trxid');
+         if ($val !== NULL) $this->session->set_userdata($session_key, $val);
       }
 
-      $search_name_vad = $this->input->get('merchant') ?: ($this->input->post('search_name_vad') != NULL ? $this->input->post('search_name_vad') : $this->session->userdata('search_name_vad'));
-      $search_date_vad = $this->input->post('search_date_vad') != NULL ? $this->input->post('search_date_vad') : $this->session->userdata('search_date_vad');
-      $search_date_vad_to = $this->input->post('search_date_vad_to') != NULL ? $this->input->post('search_date_vad_to') : $this->session->userdata('search_date_vad_to');
-      $search_va_number = $this->input->get('va_number') ? $this->input->get('va_number') : ($this->input->post('search_va_number') != NULL ? $this->input->post('search_va_number') : $this->session->userdata('search_va_number'));
-      $search_status_transaction_vad = $this->input->post('search_status_transaction_vad') != NULL ? $this->input->post('search_status_transaction_vad') : $this->session->userdata('search_status_transaction_vad');
-
-      $this->session->set_userdata([
-         'search_name_vad' => $search_name_vad,
-         'search_date_vad' => $search_date_vad,
-         'search_date_vad_to' => $search_date_vad_to,
-         'search_va_number' => $search_va_number,
-         'search_merchant_trxid' => $search_merchant_trxid,
-         'search_status_transaction_vad' => $search_status_transaction_vad
-      ]);
+      $active_search = $this->input->get('q') ?: $this->input->get('transid') ?: $this->input->get('va_number');
+      if ($active_search) $this->session->set_userdata('last_dt_search_vadynamic', $active_search);
 
       if ($this->input->is_ajax_request()) {
          try {
             $dtSearch = $this->input->post('search')['value'] ?? '';
-            $oldSearch = $this->session->userdata('last_search_vad');
+            $oldSearch = $this->session->userdata('last_dt_search_vadynamic');
 
             if ($dtSearch === '' && $oldSearch !== '' && $oldSearch !== null) {
-               $this->session->unset_userdata('search_date_vad');
-               $this->session->unset_userdata('search_date_vad_to');
-               $this->session->unset_userdata('search_name_vad');
-               $this->session->unset_userdata('search_va_number');
-               $this->session->unset_userdata('search_merchant_trxid');
-               $this->session->unset_userdata('search_status_transaction_vad');
+               $this->resetVa_dynamic(false); // Silent reset
             }
 
             if ($dtSearch !== '') {
-               $this->session->set_userdata('search_merchant_trxid', $dtSearch);
-               $this->session->set_userdata('last_search_vad', $dtSearch);
+               if (is_numeric($dtSearch)) {
+                  $this->session->set_userdata('search_vadynamic_va_number', $dtSearch);
+               } else {
+                  $this->session->set_userdata('search_vadynamic_transid', $dtSearch);
+               }
+               $this->session->set_userdata('last_dt_search_vadynamic', $dtSearch);
             }
 
             $filters = [
-               'merchant' => $this->session->userdata('search_name_vad'),
-               'date' => $this->session->userdata('search_date_vad'),
-               'date_to' => $this->session->userdata('search_date_vad_to'),
-               'va_number' => $this->session->userdata('search_va_number'),
-               'merchant_trxid' => $this->session->userdata('search_merchant_trxid'),
-               'status' => $this->session->userdata('search_status_transaction_vad')
+               'merchant' => $this->session->userdata('search_vadynamic_name'),
+               'date' => $this->session->userdata('search_vadynamic_date1'),
+               'date_to' => $this->session->userdata('search_vadynamic_date2'),
+               'va_number' => $this->session->userdata('search_vadynamic_va_number'),
+               'merchant_trxid' => $this->session->userdata('search_vadynamic_transid'),
+               'status' => $this->session->userdata('search_vadynamic_status')
             ];
             return $this->VADynamic->get_datatables_handler($filters);
          } catch (Throwable $e) {
@@ -270,91 +271,84 @@ class VirtualAccountTransactionController extends CI_Controller
       $this->load->view('virtualaccount/vadynamic', $data);
    }
 
-   public function resetVa_dynamic()
+   public function resetVa_dynamic($redirect = true)
    {
-      $this->session->unset_userdata('search_name_vad');
-      $this->session->unset_userdata('search_date_vad');
-      $this->session->unset_userdata('search_date_vad_to');
-      $this->session->unset_userdata('search_va_number');
-      $this->session->unset_userdata('search_merchant_trxid');
-      $this->session->unset_userdata('search_status_transaction_vad');
-      $this->session->unset_userdata('last_search_vad');
-      redirect('virtual-account/dynamic');
+      $this->session->unset_userdata([
+         'search_vadynamic_name',
+         'search_vadynamic_date1',
+         'search_vadynamic_date2',
+         'search_vadynamic_status',
+         'search_vadynamic_transid',
+         'search_vadynamic_va_number',
+         'last_dt_search_vadynamic'
+      ]);
+      if ($redirect) redirect('virtual-account/dynamic');
    }
 
    public function VA_recurring()
    {
+      // Auto-reset if accessed directly without any parameters (GET or POST)
+      if (!$this->input->is_ajax_request() && empty($this->input->get()) && !$this->input->post()) {
+         $this->resetVa_recurring(false);
+      }
+
       $data['title'] = 'VA Recurring';
       $data['user'] = $this->Model_user->view_user()->row_array();
 
-      if (!$this->input->is_ajax_request()) {
-         $search_transid_var = $this->input->get('transid') ?: ($this->input->post('search_transid_var') ?: '');
-         $search_va_number = $this->input->get('va_number') ?: ($this->input->post('search_va_number') ?: '');
-         
-         if (!$this->input->get('transid') && !$this->input->get('va_number') && !$this->input->post('search_name_var')) {
-            $this->session->unset_userdata('search_date_var');
-            $this->session->unset_userdata('search_date_var_to');
-            $this->session->unset_userdata('search_name_var');
-            $this->session->unset_userdata('search_submerchant_var');
-            $this->session->unset_userdata('search_transid_var');
-            $this->session->unset_userdata('search_va_number_var');
-            $this->session->unset_userdata('search_status_transaction_var');
-            $this->session->unset_userdata('last_search_var');
+      // Sync from GET/POST to Session
+      $field_map = [
+         'search_varecurring_name'        => 'search_name_var',
+         'search_varecurring_date1'       => 'search_date_var',
+         'search_varecurring_date2'       => 'search_date_var_to',
+         'search_varecurring_submerchant' => 'search_submerchant_var',
+         'search_varecurring_transid'     => 'search_transid_var',
+         'search_varecurring_va_number'   => 'search_va_number_var',
+         'search_varecurring_status'      => 'search_status_transaction_var'
+      ];
+
+      $get_fallback = [
+         'search_varecurring_name'        => 'merchant',
+         'search_varecurring_transid'     => 'transid',
+         'search_varecurring_va_number'   => 'va_number'
+      ];
+
+      foreach ($field_map as $session_key => $post_key) {
+         $val = $this->input->post($post_key);
+         if ($val === NULL && isset($get_fallback[$session_key])) {
+            $val = $this->input->get($get_fallback[$session_key]);
          }
-      } else {
-         $search_transid_var = $this->session->userdata('search_transid_var');
-         $search_va_number = $this->session->userdata('search_va_number_var');
+         if ($val !== NULL) $this->session->set_userdata($session_key, $val);
       }
 
-      $search_name_var = $this->input->get('merchant') ?: $this->input->post('search_name_var');
-      $search_date_var = $this->input->post('search_date_var');
-      $search_date_var_to = $this->input->post('search_date_var_to');
-      $search_submerchant_var = $this->input->post('search_submerchant_var');
-
-      if ($search_date_var) $this->session->set_userdata('search_date_var', $search_date_var);
-      else $search_date_var = $this->session->userdata('search_date_var');
-
-      if ($search_date_var_to) $this->session->set_userdata('search_date_var_to', $search_date_var_to);
-      else $search_date_var_to = $this->session->userdata('search_date_var_to');
-
-      if ($search_name_var) $this->session->set_userdata('search_name_var', $search_name_var);
-      else $search_name_var = $this->session->userdata('search_name_var');
-
-      if ($search_submerchant_var !== null) $this->session->set_userdata('search_submerchant_var', $search_submerchant_var);
-      else $search_submerchant_var = $this->session->userdata('search_submerchant_var');
-
-      $search_status_transaction_var = $this->input->post('search_status_transaction_var');
-      if ($search_status_transaction_var !== null) $this->session->set_userdata('search_status_transaction_var', $search_status_transaction_var);
-      else $search_status_transaction_var = $this->session->userdata('search_status_transaction_var');
-
-      $this->session->set_userdata('search_transid_var', $search_transid_var);
-      $this->session->set_userdata('search_va_number_var', $search_va_number);
+      $active_search = $this->input->get('q') ?: $this->input->get('transid') ?: $this->input->get('va_number');
+      if ($active_search) $this->session->set_userdata('last_dt_search_varecurring', $active_search);
 
       if ($this->input->is_ajax_request()) {
          try {
             $dtSearch = $this->input->post('search')['value'] ?? '';
-            $oldSearch = $this->session->userdata('last_search_var');
+            $oldSearch = $this->session->userdata('last_dt_search_varecurring');
 
             if ($dtSearch === '' && $oldSearch !== '' && $oldSearch !== null) {
-               $this->session->unset_userdata('search_date_var');
-               $this->session->unset_userdata('search_date_var_to');
-               $this->session->unset_userdata('search_name_var');
-               $this->session->unset_userdata('search_submerchant_var');
-               $this->session->unset_userdata('search_transid_var');
-               $this->session->unset_userdata('search_status_transaction_var');
+               $this->resetVa_recurring(false); // Silent reset
             }
 
             if ($dtSearch !== '') {
-               $this->session->set_userdata('search_transid_var', $dtSearch);
-               $this->session->set_userdata('last_search_var', $dtSearch);
+               if (is_numeric($dtSearch)) {
+                  $this->session->set_userdata('search_varecurring_va_number', $dtSearch);
+               } else {
+                  $this->session->set_userdata('search_varecurring_transid', $dtSearch);
+               }
+               $this->session->set_userdata('last_dt_search_varecurring', $dtSearch);
             }
 
             $filters = [
-               'merchant' => $this->session->userdata('search_name_var'),
-               'date' => $this->session->userdata('search_date_var'),
-               'submerchant' => $this->session->userdata('search_submerchant_var'),
-               'transid' => $this->session->userdata('search_transid_var'),
-               'status' => $this->session->userdata('search_status_transaction_var'),
+               'merchant' => $this->session->userdata('search_varecurring_name'),
+               'date' => $this->session->userdata('search_varecurring_date1'),
+               'date_to' => $this->session->userdata('search_varecurring_date2'),
+               'submerchant' => $this->session->userdata('search_varecurring_submerchant'),
+               'transid' => $this->session->userdata('search_varecurring_transid'),
+               'va_number' => $this->session->userdata('search_varecurring_va_number'),
+               'status' => $this->session->userdata('search_varecurring_status')
             ];
             return $this->VARecurring->get_datatables_handler($filters);
          } catch (Throwable $e) {
@@ -373,17 +367,19 @@ class VirtualAccountTransactionController extends CI_Controller
       $this->load->view('virtualaccount/varecurring', $data);
    }
 
-   public function resetVa_recurring()
+   public function resetVa_recurring($redirect = true)
    {
-      $this->session->unset_userdata('search_date_var');
-      $this->session->unset_userdata('search_date_var_to');
-      $this->session->unset_userdata('search_name_var');
-      $this->session->unset_userdata('search_submerchant_var');
-      $this->session->unset_userdata('search_transid_var');
-      $this->session->unset_userdata('search_va_number_var');
-      $this->session->unset_userdata('search_status_transaction_var');
-      $this->session->unset_userdata('last_search_var');
-      redirect('virtual-account/recurring');
+      $this->session->unset_userdata([
+         'search_varecurring_name',
+         'search_varecurring_date1',
+         'search_varecurring_date2',
+         'search_varecurring_submerchant',
+         'search_varecurring_transid',
+         'search_varecurring_va_number',
+         'search_varecurring_status',
+         'last_dt_search_varecurring'
+      ]);
+      if ($redirect) redirect('virtual-account/recurring');
    }
 
    public function SendnotifikasiVA()
