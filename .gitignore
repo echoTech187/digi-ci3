@@ -42,3 +42,10 @@ scratch_remove_summary.py
 /application/config/database.php
 application/config/digi-ci3.code-workspace
 update_user_menu_urls.sql
+*.pptx
+*.docx
+*.md
+*.png
+*.jpg
+*.pdf
+*.xlsx
