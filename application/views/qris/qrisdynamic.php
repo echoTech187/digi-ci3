@@ -60,6 +60,8 @@
             if ($this->session->userdata('search_qrisdynamic_name'))             $extra_active++;
             if ($this->session->userdata('search_qrisdynamic_status')) $extra_active++;
             if ($this->session->userdata('search_qrisdynamic_reff'))           $extra_active++;
+            if ($this->session->userdata('search_qrisdynamic_channel'))        $extra_active++;
+            if ($this->session->userdata('search_qrisdynamic_external'))       $extra_active++;
         ?>
 
         <form id="qris_dynamic_form" method="post" action="<?= base_url('qris/dynamic'); ?>">
@@ -100,7 +102,7 @@
                                 <!-- Primary: Date Range -->
                                 <div class="dt-more-field">
                                     <label class="dt-more-label"><i class="fas fa-calendar-alt mr-1 mr-2"></i> Period</label>
-                                    <div class="dt-filter-chip">
+                                    <div class="premium-picker">
                                         <input type="date" name="search_date_qd" class="dt-chip-input" value="<?= $this->session->userdata('search_qrisdynamic_date1'); ?>" title="Date From">
                                         <span class="text-muted mx-1" style="font-size:11px;">→</span>
                                         <input type="date" name="search_date_qd_to" class="dt-chip-input" value="<?= $this->session->userdata('search_qrisdynamic_date2'); ?>" title="Date To">
@@ -136,12 +138,42 @@
                                     </select>
                                 </div>
                                 
-                                <!-- Reference Label -->
-                                <div class="dt-more-field">
-                                    <label class="dt-more-label"><i class="fas fa-tag mr-1 mr-2"></i> Reference Label</label>
-                                    <input type="text" name="search_reff_label" class="dt-more-input" placeholder="e.g. PROVIDER..." value="<?= $this->session->userdata('search_qrisdynamic_reff'); ?>">
-                                </div>
-                            </div>
+                                 <!-- Reference Label -->
+                                 <div class="dt-more-field">
+                                     <label class="dt-more-label"><i class="fas fa-tag mr-1 mr-2"></i> Reference Label</label>
+                                     <input type="text" name="search_reff_label" class="dt-more-input" placeholder="e.g. PROVIDER..." value="<?= $this->session->userdata('search_qrisdynamic_reff'); ?>">
+                                 </div>
+
+                                 <!-- Channel ID -->
+                                 <div class="dt-more-field">
+                                     <label class="dt-more-label"><i class="fas fa-link mr-1 mr-2"></i> Channel ID</label>
+                                     <div class="dt-filter-chip">
+                                         <select name="search_channel_qrisdynamic" class="dt-chip-select qris-dynamic-select2">
+                                             <option value="">All Channels</option>
+                                             <?php foreach ($internal_channels as $ch): ?>
+                                                 <option value="<?= $ch->id; ?>" <?= ($ch->id == $this->session->userdata('search_qrisdynamic_channel')) ? 'selected' : ''; ?>>
+                                                     <?= $ch->c_description ?: $ch->id; ?> (<?= $ch->id; ?>)
+                                                 </option>
+                                             <?php endforeach; ?>
+                                         </select>
+                                     </div>
+                                 </div>
+
+                                 <!-- External Channel -->
+                                 <div class="dt-more-field">
+                                     <label class="dt-more-label"><i class="fas fa-plug mr-1 mr-2"></i> External Channel</label>
+                                     <div class="dt-filter-chip">
+                                         <select name="search_external_qrisdynamic" class="dt-chip-select qris-dynamic-select2">
+                                             <option value="">All External Channels</option>
+                                             <?php foreach ($external_channels as $ext): ?>
+                                                 <option value="<?= $ext->c_cashinExternalId; ?>" <?= ($ext->c_cashinExternalId == $this->session->userdata('search_qrisdynamic_external')) ? 'selected' : ''; ?>>
+                                                     <?= strtoupper($ext->c_cashinExternalId); ?>
+                                                 </option>
+                                             <?php endforeach; ?>
+                                         </select>
+                                     </div>
+                                 </div>
+                             </div>
 
                             <div class="dt-more-panel-footer">
                                 <button type="submit" name="submit" class="btn-dt-apply btn-dt-action-primary shadow-sm">
@@ -169,6 +201,7 @@
                         <th>MERCHANT INFO</th>
                         <th>SUB-MERCHANT INFO</th>
                         <th>MERCHANT TRANS ID</th>
+                        <th>CHANNEL</th>
                         <th>EXTERNAL ID</th>
                         <th>AMOUNT</th>
                         <th>EXPIRED</th>
@@ -326,6 +359,17 @@
                 }
             },
             {data: 'c_merchantTransactionId', className: 'text-dark font-weight-bold text-nowrap'},
+            {
+                data: 'ref_cashinChannelId',
+                className: 'text-nowrap',
+                render: function(data, type, row) {
+                    if (row.channel_description) {
+                        return '<div class="font-weight-bold text-dark">' + row.channel_description + '</div>' +
+                               '<small class="text-muted">' + data + '</small>';
+                    }
+                    return data ? data : '-';
+                }
+            },
             {data: 'ref_cashinExternalId', className: 'text-nowrap', render: function(data, type, row) {
                 return data ? data : '-';
             }},

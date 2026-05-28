@@ -7,7 +7,7 @@ class Ewallet extends CI_Model {
     var $order = array('cpe.id' => 'desc');
     private static $cached_total = null;
 
-    private function _get_datatables_query($search_name = null, $date_from = null, $date_to = null, $search_date_settlement = null, $search_invoice_no = null, $search_transid = null, $only_ids = false, $count_only = false)
+    private function _get_datatables_query($search_name = null, $date_from = null, $date_to = null, $search_date_settlement = null, $search_invoice_no = null, $search_transid = null, $search_channel = null, $only_ids = false, $count_only = false)
     {
         // Emergency 30-second safeguard
         $this->db->query("SET SESSION max_execution_time = 30000");
@@ -40,6 +40,9 @@ class Ewallet extends CI_Model {
         // Apply Basic Filters
         if ($search_name) {
             $this->db->where('cpe.ref_merchantId', $search_name);
+        }
+        if ($search_channel) {
+            $this->db->where('cpe.ref_cashinChannelId', $search_channel);
         }
         if ($date_from && $date_to) {
             $this->db->where('cpe.c_datetimePayment >=', $date_from);
@@ -160,10 +163,10 @@ class Ewallet extends CI_Model {
         }
     }
 
-    public function get_datatables($search_name = null, $date_from = null, $date_to = null, $search_date_settlement = null, $search_invoice_no = null, $search_transid = null)
+    public function get_datatables($search_name = null, $date_from = null, $date_to = null, $search_date_settlement = null, $search_invoice_no = null, $search_transid = null, $search_channel = null)
     {
         // STEP 1: Get matching IDs only (Fast)
-        $this->_get_datatables_query($search_name, $date_from, $date_to, $search_date_settlement, $search_invoice_no, $search_transid, true);
+        $this->_get_datatables_query($search_name, $date_from, $date_to, $search_date_settlement, $search_invoice_no, $search_transid, $search_channel, true);
         if ($_POST['length'] != -1)
             $this->db->limit($_POST['length'], $_POST['start']);
         $query = $this->db->get();
@@ -177,12 +180,13 @@ class Ewallet extends CI_Model {
         
         // STEP 2: Fetch full details for those IDs
         $this->db->select("cpe.*, m.c_name as name_merchant, m.c_merchantLevel, s.c_name as name_submerchant, c.c_invoiceNo, 
-                           cde.c_merchantTransactionId AS Merchant_Transaction_Id", FALSE);
+                           cde.c_merchantTransactionId AS Merchant_Transaction_Id, cc.c_description AS channel_description", FALSE);
         $this->db->from($this->table);
         $this->db->join('cashin c', 'c.id = cpe.ref_cashinId', 'left');
         $this->db->join('submerchant s', 'cpe.ref_subMerchantId = s.id', 'left');
         $this->db->join('merchant m', 'cpe.ref_merchantId = m.id', 'left');
         $this->db->join('cashin_dynamic_ewallet cde', 'cpe.ref_cashinDynamicEwalletId = cde.id', 'left');
+        $this->db->join('cashin_channel cc', 'cpe.ref_cashinChannelId = cc.id', 'left');
         
         $this->db->where_in('cpe.id', $ids);
         
@@ -199,16 +203,16 @@ class Ewallet extends CI_Model {
         return $results;
     }
 
-    public function count_filtered($search_name = null, $date_from = null, $date_to = null, $search_date_settlement = null, $search_invoice_no = null, $search_transid = null)
+    public function count_filtered($search_name = null, $date_from = null, $date_to = null, $search_date_settlement = null, $search_invoice_no = null, $search_transid = null, $search_channel = null)
     {
         $searchValue = $this->input->post('search')['value'];
-        $is_filtered = $search_name || $date_from || $date_to || $search_date_settlement || $search_invoice_no || $search_transid || (!empty($searchValue));
+        $is_filtered = $search_name || $date_from || $date_to || $search_date_settlement || $search_invoice_no || $search_transid || $search_channel || (!empty($searchValue));
 
         if (!$is_filtered) {
             return $this->count_all_dt();
         }
 
-        $this->_get_datatables_query($search_name, $date_from, $date_to, $search_date_settlement, $search_invoice_no, $search_transid, false, true);
+        $this->_get_datatables_query($search_name, $date_from, $date_to, $search_date_settlement, $search_invoice_no, $search_transid, $search_channel, false, true);
         $query = $this->db->get();
         if (!is_object($query) || $query->num_rows() == 0) return 0;
         return $query->row()->total;
@@ -256,19 +260,20 @@ class Ewallet extends CI_Model {
         $search_date_settlement = $filters['settlement'] ?? null;
         $search_invoice_no = $filters['invoice'] ?? null;
         $search_transid = $filters['transid'] ?? null;
+        $search_channel = $filters['channel'] ?? null;
 
         // Format dates for query
         $date_from_query = !empty($date_from) ? date('Ymd', strtotime($date_from)) . "000001" : null;
         $date_to_query = !empty($date_to) ? date('Ymd', strtotime($date_to)) . "235959" : null;
 
         // Optimized Fetch (Two-Step Lookup)
-        $list = $this->get_datatables($search_name, $date_from_query, $date_to_query, $search_date_settlement, $search_invoice_no, $search_transid);
+        $list = $this->get_datatables($search_name, $date_from_query, $date_to_query, $search_date_settlement, $search_invoice_no, $search_transid, $search_channel);
         
         $searchValue = $this->input->post('search')['value'];
-        $is_filtered = $search_name || $date_from || $date_to || $search_date_settlement || $search_invoice_no || $search_transid || (!empty($searchValue));
+        $is_filtered = $search_name || $date_from || $date_to || $search_date_settlement || $search_invoice_no || $search_transid || $search_channel || (!empty($searchValue));
 
         $recordsTotal = $this->count_all_dt($search_name, $date_from_query, $date_to_query);
-        $recordsFiltered = $is_filtered ? $this->count_filtered($search_name, $date_from_query, $date_to_query, $search_date_settlement, $search_invoice_no, $search_transid) : $recordsTotal;
+        $recordsFiltered = $is_filtered ? $this->count_filtered($search_name, $date_from_query, $date_to_query, $search_date_settlement, $search_invoice_no, $search_transid, $search_channel) : $recordsTotal;
 
         // Trick the library to NOT re-slice our already-paginated $list
         $original_start = $_POST['start'];
@@ -292,6 +297,21 @@ class Ewallet extends CI_Model {
         $this->output
             ->set_content_type('application/json')
             ->set_output(json_encode($output));
+    }
+
+    public function get_internal_channels(){
+        $query = "SELECT id, c_description FROM cashin_channel 
+                WHERE c_channelGroup = 'ewallet'
+                ORDER BY c_description ASC";
+        return $this->db->query($query)->result();
+    }
+
+    public function get_external_channels(){
+        $query = "SELECT c_cashinExternalId FROM cashin_external_x_channel 
+                WHERE c_cashinChannelGroup = 'ewallet'
+                GROUP BY c_cashinExternalId
+                ORDER BY c_cashinExternalId ASC";
+        return $this->db->query($query)->result();
     }
 
     public function ewallet_detail($id)

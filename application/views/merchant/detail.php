@@ -247,9 +247,11 @@
                         <div class="card-body p-3 d-flex flex-wrap align-items-center justify-content-between gap-3">
                             <div class="d-flex align-items-center flex-wrap gap-2">
                                 <span class="text-dark font-weight-bold mr-2"><i class="fas fa-filter text-primary mr-1"></i> Audit Date Range:</span>
-                                <input type="date" id="overview-start-date" class="form-control form-control-sm d-inline-block w-auto mr-2" value="<?= date('Y-m-d', strtotime('-30 days')) ?>">
-                                <span class="mr-2">to</span>
-                                <input type="date" id="overview-end-date" class="form-control form-control-sm d-inline-block w-auto mr-2" value="<?= date('Y-m-d') ?>">
+                                <div class="premium-picker">
+                                    <input type="date" id="overview-start-date" class="form-control form-control-sm d-inline-block w-auto mr-2" value="<?= date('Y-m-d', strtotime('-30 days')) ?>">
+                                    <span class="mr-2">to</span>
+                                    <input type="date" id="overview-end-date" class="form-control form-control-sm d-inline-block w-auto mr-2" value="<?= date('Y-m-d') ?>">
+                                </div>
                                 <button id="btn-overview-filter" class="btn btn-sm btn-primary font-weight-bold px-3">
                                     <i class="fas fa-sync mr-1"></i> Apply Filter
                                 </button>
@@ -978,6 +980,9 @@ $(document).ready(function() {
 
     // Bind filter button click
     $('#btn-overview-filter').on('click', function() {
+        loadOverview();
+    });
+    $('#overview-start-date, #overview-end-date').on('change', function() {
         loadOverview();
     });
 

@@ -49,7 +49,9 @@
                         <!-- Date Filter -->
                         <div class="dt-filter-group">
                             <label class="dt-filter-label">Filter Date</label>
-                            <input type="date" id="search_date_mutation" name="search_date_mutation" class="dt-chip-input" style="height: 32px;" value="<?php echo $search_date_mutation_value; ?>">
+                            <div class="premium-picker">
+                                <input type="date" id="search_date_mutation" name="search_date_mutation" class="dt-chip-input" style="height: 32px;" value="<?php echo $search_date_mutation_value; ?>">
+                            </div>
                         </div>
 
                         <!-- Position Filter -->

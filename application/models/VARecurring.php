@@ -11,7 +11,7 @@ class VARecurring extends CI_Model {
     private static $cached_total = null;
     private static $cached_inv_ids = null;
 
-    private function _get_datatables_query($search_name = null, $search_date = null, $search_sub = null, $search_va = null, $search_trxid = null, $only_ids = false, $count_only = false, $search_status = null)
+    private function _get_datatables_query($search_name = null, $search_date = null, $search_sub = null, $search_va = null, $search_trxid = null, $only_ids = false, $count_only = false, $search_status = null, $search_channel = null, $search_external_channel = null)
     {
         // Emergency 30-second safeguard
         $this->db->query("SET SESSION max_execution_time = 30000");
@@ -39,6 +39,12 @@ class VARecurring extends CI_Model {
 
         if ($search_name) {
             $this->db->where('crv.ref_merchantId', $search_name);
+        }
+        if ($search_channel) {
+            $this->db->where('crv.ref_cashinChannelId', $search_channel);
+        }
+        if ($search_external_channel) {
+            $this->db->where('crv.ref_cashinExternalId', $search_external_channel);
         }
         if ($search_date) {
             $formatted_date = date('Y-m-d', strtotime($search_date));
@@ -123,10 +129,10 @@ class VARecurring extends CI_Model {
         }
     }
 
-    public function get_datatables($search_name = null, $search_date = null, $search_sub = null, $search_va = null, $search_trxid = null, $search_status = null)
+    public function get_datatables($search_name = null, $search_date = null, $search_sub = null, $search_va = null, $search_trxid = null, $search_status = null, $search_channel = null, $search_external_channel = null)
     {
         // STEP 1: Get matching IDs only
-        $this->_get_datatables_query($search_name, $search_date, $search_sub, $search_va, $search_trxid, true, false, $search_status);
+        $this->_get_datatables_query($search_name, $search_date, $search_sub, $search_va, $search_trxid, true, false, $search_status, $search_channel, $search_external_channel);
         if ($_POST['length'] != -1)
             $this->db->limit($_POST['length'], $_POST['start']);
         $query = $this->db->get();
@@ -137,10 +143,11 @@ class VARecurring extends CI_Model {
         $ids = array_column($id_results, 'id');
         
         // STEP 2: Fetch full records for matching IDs
-        $this->db->select("crv.*, s.c_name as name_submerchant, m.c_name as name_merchant, m.c_merchantLevel", FALSE);
+        $this->db->select("crv.*, s.c_name as name_submerchant, m.c_name as name_merchant, m.c_merchantLevel, cc.c_description AS channel_description", FALSE);
         $this->db->from($this->table);
         $this->db->join('submerchant s', 's.id = crv.ref_subMerchantId', 'left');
         $this->db->join('merchant m', 'm.id = crv.ref_merchantId', 'left');
+        $this->db->join('cashin_channel cc', 'cc.id = crv.ref_cashinChannelId', 'left');
         
         $this->db->where_in('crv.id', $ids);
         
@@ -155,15 +162,15 @@ class VARecurring extends CI_Model {
         return $query->result();
     }
 
-    public function count_filtered($search_name = null, $search_date = null, $search_sub = null, $search_va = null, $search_trxid = null, $search_status = null)
+    public function count_filtered($search_name = null, $search_date = null, $search_sub = null, $search_va = null, $search_trxid = null, $search_status = null, $search_channel = null, $search_external_channel = null)
     {
         $searchValue = isset($_POST['search']['value']) ? $_POST['search']['value'] : null;
-        $is_filtered = ($search_name || $search_date || $search_sub || $search_va || $search_trxid || $search_status || (isset($searchValue) && !empty($searchValue)));
+        $is_filtered = ($search_name || $search_date || $search_sub || $search_va || $search_trxid || $search_status || $search_channel || $search_external_channel || (isset($searchValue) && !empty($searchValue)));
         if (!$is_filtered) {
             return $this->count_all_dt();
         }
 
-        $this->_get_datatables_query($search_name, $search_date, $search_sub, $search_va, $search_trxid, false, true, $search_status);
+        $this->_get_datatables_query($search_name, $search_date, $search_sub, $search_va, $search_trxid, false, true, $search_status, $search_channel, $search_external_channel);
         $query = $this->db->get();
         return $query->row()->total;
     }
@@ -366,15 +373,17 @@ class VARecurring extends CI_Model {
         $search_va = $filters['va_number'] ?? null;
         $search_trxid = $filters['merchant_trxid'] ?? null;
         $search_status = $filters['status'] ?? null;
+        $search_channel = $filters['channel'] ?? null;
+        $search_external_channel = $filters['external_channel'] ?? null;
 
         // Optimized Fetch (Two-Step Lookup)
-        $list = $this->get_datatables($search_name, $search_date, $search_sub, $search_va, $search_trxid, $search_status);
+        $list = $this->get_datatables($search_name, $search_date, $search_sub, $search_va, $search_trxid, $search_status, $search_channel, $search_external_channel);
         
         $searchValue = $this->input->post('search')['value'];
-        $is_filtered = $search_name || $search_date || $search_sub || $search_va || $search_trxid || $search_status || (!empty($searchValue));
+        $is_filtered = $search_name || $search_date || $search_sub || $search_va || $search_trxid || $search_status || $search_channel || $search_external_channel || (!empty($searchValue));
         
         $recordsTotal = $this->count_all_dt($search_name, $search_date);
-        $recordsFiltered = $is_filtered ? $this->count_filtered($search_name, $search_date, $search_sub, $search_va, $search_trxid, $search_status) : $recordsTotal;
+        $recordsFiltered = $is_filtered ? $this->count_filtered($search_name, $search_date, $search_sub, $search_va, $search_trxid, $search_status, $search_channel, $search_external_channel) : $recordsTotal;
 
         // Use Datatables Library for final processing and JSON output
         return $this->datatables->of($this->table)

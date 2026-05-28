@@ -50,6 +50,8 @@
             if ($this->session->userdata('search_vadynamic_name'))      $extra_active++;
             if ($this->session->userdata('search_vadynamic_status')) $extra_active++;
             if ($this->session->userdata('search_vadynamic_date1') || $this->session->userdata('search_vadynamic_date2'))      $extra_active++;
+            if ($this->session->userdata('search_vadynamic_channel'))   $extra_active++;
+            if ($this->session->userdata('search_vadynamic_external'))  $extra_active++;
             
         ?>
         <form id="vadynamic_form" method="post" action="<?= base_url('virtual-account/dynamic'); ?>">
@@ -87,7 +89,7 @@
                                 <div class="dt-filter-group">
                                     <div class="dt-more-field">
                                         <label class="dt-more-label"><i class="fas fa-calendar-alt mr-1 mr-2"></i> Period</label>
-                                        <div class="dt-filter-chip w-100">
+                                        <div class="premium-picker">
                                             <input type="date" name="search_date_vad" class="dt-chip-input" value="<?= $this->session->userdata('search_vadynamic_date1'); ?>" title="Date From">
                                             <span class="text-muted mx-1" style="font-size:11px;">→</span>
                                             <input type="date" name="search_date_vad_to" class="dt-chip-input" value="<?= $this->session->userdata('search_vadynamic_date2'); ?>" title="Date To">
@@ -117,6 +119,30 @@
                                         <option value="Failed" <?= ($this->session->userdata('search_vadynamic_status') == 'Failed') ? 'selected' : ''; ?>>Failed</option>
                                         <option value="Expired" <?= ($this->session->userdata('search_vadynamic_status') == 'Expired') ? 'selected' : ''; ?>>Expired</option>
                                         <option value="Cancel" <?= ($this->session->userdata('search_vadynamic_status') == 'Cancel') ? 'selected' : ''; ?>>Cancel</option>
+                                    </select>
+                                </div>
+                                <!-- Channel ID -->
+                                <div class="dt-more-field">
+                                    <label class="dt-more-label"><i class="fas fa-wallet mr-1 mr-2"></i> Channel ID</label>
+                                    <select name="search_channel_vadynamic" class="dt-more-select vadynamic-select2">
+                                        <option value="">All Channels</option>
+                                        <?php foreach ($internal_channels as $channel): ?>
+                                            <option value="<?= $channel->id; ?>" <?= ($channel->id == $this->session->userdata('search_vadynamic_channel')) ? 'selected' : ''; ?>>
+                                                <?= $channel->c_description; ?> (<?= $channel->id; ?>)
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                                <!-- External Channel ID -->
+                                <div class="dt-more-field">
+                                    <label class="dt-more-label"><i class="fas fa-network-wired mr-1 mr-2"></i> External Channel</label>
+                                    <select name="search_external_vadynamic" class="dt-more-select vadynamic-select2">
+                                        <option value="">All External Channels</option>
+                                        <?php foreach ($external_channels as $ext): ?>
+                                            <option value="<?= $ext->c_cashinExternalId; ?>" <?= ($ext->c_cashinExternalId == $this->session->userdata('search_vadynamic_external')) ? 'selected' : ''; ?>>
+                                                <?= strtoupper($ext->c_cashinExternalId); ?>
+                                            </option>
+                                        <?php endforeach; ?>
                                     </select>
                                 </div>
                             </div>
@@ -303,7 +329,17 @@
             {data: 'c_vaNumber',className: 'text-nowrap', render: function(data){
                 return '<code>' + data + '</code>';
             }},
-            {data: 'ref_cashinChannelId',className: 'text-nowrap'},
+            {
+                data: 'ref_cashinChannelId',
+                className: 'text-nowrap',
+                render: function(data, type, row) {
+                    if (row.channel_description) {
+                        return '<div class="font-weight-bold text-dark">' + row.channel_description + '</div>' +
+                               '<small class="text-muted">' + data + '</small>';
+                    }
+                    return data;
+                }
+            },
             {
                 data: 'ref_cashinExternalId',
                 className: 'text-nowrap',

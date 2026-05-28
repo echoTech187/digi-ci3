@@ -134,7 +134,7 @@
                                 <!-- Primary: Date Range -->
                                 <div class="dt-more-field">
                                     <label class="dt-more-label"><i class="fas fa-calendar-alt mr-1 mr-2"></i> Period</label>
-                                    <div class="dt-filter-chip">
+                                    <div class="premium-picker">
                                         <input type="date" name="search_date_bifast" class="dt-chip-input" value="<?= $date_from_val; ?>" title="Date From">
                                         <span class="text-muted mx-1" style="font-size:11px;">→</span>
                                         <input type="date" name="search_date_bifast_to" class="dt-chip-input" value="<?= $date_to_val; ?>" title="Date To">
@@ -429,7 +429,17 @@
             },
             {data: 'c_merchantTransactionId',className: 'text-nowrap'},
             {data: 'c_invoiceNo',className: 'text-nowrap'},
-            {data: 'ref_cashoutChannelId',className: 'text-nowrap'},
+            {
+                data: 'ref_cashoutChannelId',
+                className: 'text-nowrap',
+                render: function(data, type, row) {
+                    if (row.channel_description) {
+                        return '<div class="font-weight-bold text-dark">' + row.channel_description + '</div>' +
+                               '<small class="text-muted">' + data + '</small>';
+                    }
+                    return data;
+                }
+            },
             {data: 'c_accountNo',className: 'text-nowrap'},
             {data: 'c_beneficiaryAccountName',className: 'text-nowrap'},
             {data: 'c_amount',className: 'text-nowrap', render: function(data){
@@ -519,11 +529,13 @@
         });
 
         // Select2 inside panel
-        $('.bifast-select2').select2({
-            width: '100%',
-            dropdownAutoWidth: true,
-            dropdownParent: $(this).parent(),
-            minimumResultsForSearch: 5
+        $('.bifast-select2').each(function () {
+            $(this).select2({
+                width: '100%',
+                dropdownAutoWidth: true,
+                dropdownParent: $('body'),
+                minimumResultsForSearch: 5
+            });
         });
 
         // Detail Modal Ajax

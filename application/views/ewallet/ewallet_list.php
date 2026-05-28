@@ -45,7 +45,8 @@
                     . "?search_ewallet_date1=" . ($this->session->userdata('search_ewallet_date1') ?: '')
                     . "&search_ewallet_date2=" . ($this->session->userdata('search_ewallet_date2') ?: '')
                     . "&search_ewallet_date_settlement=" . ($this->session->userdata('search_ewallet_date_settlement') ?: '')
-                    . "&search_ewallet_name=" . ($this->session->userdata('search_ewallet_name') ?: '');
+                    . "&search_ewallet_name=" . ($this->session->userdata('search_ewallet_name') ?: '')
+                    . "&search_ewallet_channel=" . ($this->session->userdata('search_ewallet_channel') ?: '');
             ?>
             
         </div>
@@ -61,12 +62,14 @@
             $search_name_ewallet_value            = $this->session->userdata('search_ewallet_name') ?: '';
             $search_invoice_no_value              = $this->session->userdata('search_ewallet_invoice_no') ?: '';
             $search_transid_ewallet_value         = $this->session->userdata('search_ewallet_transid') ?: '';
+            $search_channel_ewallet_value         = $this->session->userdata('search_ewallet_channel') ?: '';
 
             // Count active extra filters for badge (excludes invoice_no which is now in global search)
             $extra_active = 0;
             if ($search_date_ewallet_value || $search_date_ewallet_to_value)  $extra_active++;
             if ($search_name_ewallet_value)            $extra_active++;
             if ($search_date_ewallet_settlement_value) $extra_active++;
+            if ($search_channel_ewallet_value)         $extra_active++;
             // search_invoice_no is now in the global search input, excluded from advanced badge
         ?>
         <form id="ewallet_form" method="post" action="<?= base_url('finance/e-wallet'); ?>">
@@ -107,7 +110,7 @@
                                 <!-- Primary: Date Range -->
                                 <div class="dt-more-field">
                                     <label class="dt-more-label"><i class="fas fa-calendar-alt mr-1 mr-2"></i> Payment Date</label>
-                                    <div class="dt-filter-chip">
+                                    <div class="premium-picker">
                                         <input type="date" name="search_date_ewallet" class="dt-chip-input" value="<?= $search_date_ewallet_value; ?>" title="Date From">
                                         <span class="text-muted mx-1" style="font-size:11px;">→</span>
                                         <input type="date" name="search_date_ewallet_to" class="dt-chip-input" value="<?= $search_date_ewallet_to_value; ?>" title="Date To">
@@ -126,12 +129,26 @@
                                     </select>
                                 </div>
 
+                                <!-- Channel -->
+                                <div class="dt-more-field">
+                                    <label class="dt-more-label"><i class="fas fa-wallet mr-1 mr-2"></i> Channel</label>
+                                    <select name="search_channel_ewallet" class="dt-more-select select2-more">
+                                        <option value="">All Channels</option>
+                                        <?php foreach ($internal_channels as $channel): ?>
+                                            <option value="<?= $channel->id; ?>" <?= ($channel->id == $search_channel_ewallet_value) ? 'selected' : ''; ?>>
+                                                <?= $channel->c_description; ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+
                                 <!-- Settlement Date -->
                                 <div class="dt-more-field">
                                     <label class="dt-more-label"><i class="fas fa-check-circle mr-1 mr-2"></i> Settlement Date</label>
-                                    <input type="date" name="search_date_ewallet_settlement" class="dt-more-input" value="<?= $search_date_ewallet_settlement_value; ?>">
+                                    <div class="premium-picker">
+                                        <input type="date" name="search_date_ewallet_settlement" class="dt-chip-input" value="<?= $search_date_ewallet_settlement_value; ?>">
+                                    </div>
                                 </div>
-
                                 <!-- Invoice No removed from here as it is handled by Global Search -->
                             </div>
 
@@ -184,11 +201,13 @@
 <script>
     $(document).ready(function() {
         // Select2 for merchant chips
-        $('.dt-chip-select').select2({
-            width: 'auto',
-            dropdownAutoWidth: true,
-            dropdownParent: $(this).parent(),
-            minimumResultsForSearch: 5
+        $('.dt-chip-select').each(function () {
+            $(this).select2({
+                width: 'auto',
+                dropdownAutoWidth: true,
+                dropdownParent: $('body'),
+                minimumResultsForSearch: 5
+            });
         });
 
         // Init Server-Side DataTable
@@ -214,7 +233,17 @@
             {data: 'Merchant_Transaction_Id',className: 'text-nowrap'},
             {data: 'c_invoiceNo',className: 'text-nowrap'},
             {data: 'c_type',className: 'text-nowrap'},
-            {data: 'ref_cashinChannelId',className: 'text-nowrap'},
+            {
+                data: 'ref_cashinChannelId',
+                className: 'text-nowrap',
+                render: function(data, type, row) {
+                    if (row.channel_description) {
+                        return '<div class="font-weight-bold text-dark">' + row.channel_description + '</div>' +
+                               '<small class="text-muted">' + data + '</small>';
+                    }
+                    return data;
+                }
+            },
             {data: 'c_amount',className: 'text-nowrap', render: function(data){
                 return 'Rp ' + number_format(data, 0, ',', '.');
             }},

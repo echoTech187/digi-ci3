@@ -90,7 +90,7 @@
                                 <!-- Registration Date Range -->
                                 <div class="dt-more-field">
                                     <label class="dt-more-label"><i class="fas fa-calendar-alt mr-1 mr-2"></i> Registration Date</label>
-                                    <div class="dt-filter-chip">
+                                    <div class="premium-picker">
                                         <input type="date" name="search_spv_merchant_date_from" class="dt-chip-input" value="<?= $this->session->userdata('search_spv_merchant_date_from'); ?>" title="Date From">
                                         <span class="text-muted mx-1" style="font-size:11px;">→</span>
                                         <input type="date" name="search_spv_merchant_date_to" class="dt-chip-input" value="<?= $this->session->userdata('search_spv_merchant_date_to'); ?>" title="Date To">
@@ -295,12 +295,13 @@ $(document).ready(function() {
         $moreBtn.removeClass('dt-more-filters-open');
     });
 
-    // Select2 for ALL selects inside the More Filters panel
-    $('#spvMoreFiltersPanel select').not('.select2-hidden-accessible').select2({
-        width: '100%',
-        dropdownAutoWidth: true,
-        dropdownParent: $(this).parent(),
-        minimumResultsForSearch: 0
+    $('#spvMoreFiltersPanel select').not('.select2-hidden-accessible').each(function () {
+        $(this).select2({
+            width: '100%',
+            dropdownAutoWidth: true,
+            dropdownParent: $('body'),
+            minimumResultsForSearch: 0
+        });
     });
 });
 </script>

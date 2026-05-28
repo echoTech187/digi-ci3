@@ -1,3 +1,5 @@
+@import "components/date-picker.css";
+
 /* ── Skeleton Loading Shimmer ── */
 @keyframes shimmer {
     0% {
@@ -2199,6 +2201,12 @@ ul.sidebar {
     white-space: nowrap;
     box-sizing: border-box;
     width: 100%;
+}
+
+.dt-filter-chip ~.dt-datepicker-trigger-wrapper {
+    width: 100%;
+    padding: 0;
+    border: none;
 }
 
 .dt-chip-input {

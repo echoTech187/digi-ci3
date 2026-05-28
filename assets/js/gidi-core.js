@@ -176,7 +176,7 @@ $(document).ready(function () {
 				$(this).select2({
 					width: "100%",
 					dropdownAutoWidth: true,
-					dropdownParent: $(this).parent(),
+					dropdownParent: $('body'),
 					minimumResultsForSearch: 0,
 				});
 			});
@@ -467,7 +467,7 @@ $(document).ready(function () {
 							$select.select2({
 								width: "100%",
 								dropdownAutoWidth: true,
-								dropdownParent: $(this).parent(),
+								dropdownParent: $('body'),
 								minimumResultsForSearch: 0,
 							});
 						}
@@ -671,6 +671,105 @@ $(document).ready(function () {
 			},
 		});
 	}
+
+	// ── AUTOMATIC PREMIUM DATE RANGE PICKER MIGRATION ──
+	// Scans for any .premium-picker or .dt-filter-chip containing native date inputs and upgrades them automatically
+	$('.premium-picker, .dt-filter-chip').each(function() {
+		var $chip = $(this);
+		var $dates = $chip.find('input[type="date"]');
+		if ($dates.length === 0) return;
+		if ($dates.length === 2) {
+			var $startInput = $dates.eq(0);
+			var $endInput = $dates.eq(1);
+
+			// Generate stable/unique IDs for inputs and triggers
+			var startId = $startInput.attr('id') || 'auto-dt-start-' + Math.random().toString(36).substr(2, 9);
+			var endId = $endInput.attr('id') || 'auto-dt-end-' + Math.random().toString(36).substr(2, 9);
+			var triggerId = 'auto-dt-trigger-' + Math.random().toString(36).substr(2, 9);
+			var displayId = 'auto-dt-display-' + Math.random().toString(36).substr(2, 9);
+
+			$startInput.attr('id', startId).attr('type', 'hidden');
+			$endInput.attr('id', endId).attr('type', 'hidden');
+
+			// Read initial values to construct display range
+			var fromVal = $startInput.val();
+			var toVal = $endInput.val();
+			var displayText = 'Select Date Range';
+			if (fromVal && toVal && moment(fromVal).isValid() && moment(toVal).isValid()) {
+				displayText = moment(fromVal).format('DD/MM/YYYY') + ' to ' + moment(toVal).format('DD/MM/YYYY');
+			}
+
+			// Clean up original inner contents of the chip (like arrows, spacers)
+			$chip.contents().filter(function() {
+				return this.nodeType === 3 || $(this).is('span') || $(this).is('i');
+			}).remove();
+
+			// Append premium trigger element markup
+			var triggerHtml = `
+				<div class="dt-datepicker-trigger-wrapper" style="width: 100%;">
+					<div class="dt-datepicker-trigger" id="${triggerId}" style="width: 100%;">
+						<i class="far fa-calendar-alt dt-datepicker-trigger-icon"></i>
+						<span id="${displayId}">${displayText}</span>
+						<i class="fas fa-chevron-down dt-datepicker-trigger-chevron"></i>
+					</div>
+				</div>
+			`;
+			$chip.append(triggerHtml);
+			$chip.css('width', '100%');
+
+			// Initialize the component
+			if (typeof PremiumDateRangePicker !== 'undefined') {
+				new PremiumDateRangePicker('#' + triggerId, {
+					startInput: '#' + startId,
+					endInput: '#' + endId,
+					displayText: '#' + displayId
+				});
+			}
+		} else if ($dates.length === 1) {
+			var $startInput = $dates.eq(0);
+
+			// Generate stable/unique IDs for input and trigger
+			var startId = $startInput.attr('id') || 'auto-dt-start-' + Math.random().toString(36).substr(2, 9);
+			var triggerId = 'auto-dt-trigger-' + Math.random().toString(36).substr(2, 9);
+			var displayId = 'auto-dt-display-' + Math.random().toString(36).substr(2, 9);
+
+			$startInput.attr('id', startId).attr('type', 'hidden');
+
+			// Read initial value to construct display date
+			var fromVal = $startInput.val();
+			var displayText = 'Select Date';
+			if (fromVal && moment(fromVal).isValid()) {
+				displayText = moment(fromVal).format('DD/MM/YYYY');
+			}
+
+			// Clean up original inner contents of the chip
+			$chip.contents().filter(function() {
+				return this.nodeType === 3 || $(this).is('span') || $(this).is('i');
+			}).remove();
+
+			// Append premium trigger element markup
+			var triggerHtml = `
+				<div class="dt-datepicker-trigger-wrapper" style="width: 100%;">
+					<div class="dt-datepicker-trigger" id="${triggerId}" style="width: 100%;">
+						<i class="far fa-calendar-alt dt-datepicker-trigger-icon"></i>
+						<span id="${displayId}">${displayText}</span>
+						<i class="fas fa-chevron-down dt-datepicker-trigger-chevron"></i>
+					</div>
+				</div>
+			`;
+			$chip.append(triggerHtml);
+			$chip.css('width', '100%');
+
+			// Initialize the component
+			if (typeof PremiumDateRangePicker !== 'undefined') {
+				new PremiumDateRangePicker('#' + triggerId, {
+					startInput: '#' + startId,
+					displayText: '#' + displayId,
+					singleDate: true
+				});
+			}
+		}
+	});
 
 	// Start background polling every 100 seconds
 	setInterval(checkDatabaseStatus, 100000);

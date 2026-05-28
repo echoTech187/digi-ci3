@@ -4,6 +4,8 @@ $search_date_var_value        = $this->session->userdata('search_varecurring_dat
 $search_date_var_to_value     = $this->session->userdata('search_varecurring_date2') ?: '';
 $search_name_var_value        = $this->session->userdata('search_varecurring_name') ?: '';
 $search_submerchant_var_value = $this->session->userdata('search_varecurring_submerchant') ?: '';
+$search_channel_var_value     = $this->session->userdata('search_varecurring_channel') ?: '';
+$search_external_var_value    = $this->session->userdata('search_varecurring_external') ?: '';
 $download_url = base_url('finance/virtual-account/download_recurring') // Assuming this exists or follows pattern
     . '?search_date_var='            . $search_date_var_value
     . '&search_date_var_to='         . $search_date_var_to_value
@@ -61,6 +63,8 @@ $download_url = base_url('finance/virtual-account/download_recurring') // Assumi
             if ($this->session->userdata('search_varecurring_name'))      $extra_active++;
             if ($this->session->userdata('search_varecurring_submerchant')) $extra_active++;
             if ($this->session->userdata('search_varecurring_status')) $extra_active++;
+            if ($this->session->userdata('search_varecurring_channel'))    $extra_active++;
+            if ($this->session->userdata('search_varecurring_external'))   $extra_active++;
         ?>
         <form id="varecurring_form" method="post" action="<?= base_url('virtual-account/recurring'); ?>">
             <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>">
@@ -94,7 +98,7 @@ $download_url = base_url('finance/virtual-account/download_recurring') // Assumi
                                 <!-- Primary: Date Range -->
                                 <div class="dt-more-field">
                                     <label class="dt-more-label"><i class="fas fa-calendar-alt mr-1 mr-2"></i> Request Date</label>
-                                    <div class="dt-filter-chip">
+                                    <div class="premium-picker">
                                         <input type="date" name="search_date_var" class="dt-chip-input" value="<?= $search_date_var_value; ?>" title="Date From">
                                         <span class="text-muted mx-1" style="font-size:11px;">→</span>
                                         <input type="date" name="search_date_var_to" class="dt-chip-input" value="<?= $search_date_var_to_value; ?>" title="Date To">
@@ -121,6 +125,30 @@ $download_url = base_url('finance/virtual-account/download_recurring') // Assumi
                                         <option value="Paid" <?= ($this->session->userdata('search_varecurring_status') == 'Paid') ? 'selected' : ''; ?>>Paid</option>
                                         <option value="Failed" <?= ($this->session->userdata('search_varecurring_status') == 'Failed') ? 'selected' : ''; ?>>Failed</option>
                                         <option value="Expired" <?= ($this->session->userdata('search_varecurring_status') == 'Expired') ? 'selected' : ''; ?>>Expired</option>
+                                    </select>
+                                </div>
+                                <!-- Channel ID -->
+                                <div class="dt-more-field">
+                                    <label class="dt-more-label"><i class="fas fa-wallet mr-1 mr-2"></i> Channel ID</label>
+                                    <select name="search_channel_varecurring" class="dt-more-select select2">
+                                        <option value="">All Channels</option>
+                                        <?php foreach ($internal_channels as $channel): ?>
+                                            <option value="<?= $channel->id; ?>" <?= ($channel->id == $search_channel_var_value) ? 'selected' : ''; ?>>
+                                                <?= $channel->c_description; ?> (<?= $channel->id; ?>)
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                                <!-- External Channel ID -->
+                                <div class="dt-more-field">
+                                    <label class="dt-more-label"><i class="fas fa-network-wired mr-1 mr-2"></i> External Channel</label>
+                                    <select name="search_external_varecurring" class="dt-more-select select2">
+                                        <option value="">All External Channels</option>
+                                        <?php foreach ($external_channels as $ext): ?>
+                                            <option value="<?= $ext->c_cashinExternalId; ?>" <?= ($ext->c_cashinExternalId == $search_external_var_value) ? 'selected' : ''; ?>>
+                                                <?= strtoupper($ext->c_cashinExternalId); ?>
+                                            </option>
+                                        <?php endforeach; ?>
                                     </select>
                                 </div>
                             </div>
@@ -309,7 +337,17 @@ $download_url = base_url('finance/virtual-account/download_recurring') // Assumi
             {data: 'c_vaNumber',className: 'text-nowrap', render: function(data){
                 return '<code>' + data + '</code>';
             }},
-            {data: 'ref_cashinChannelId',className: 'text-nowrap'},
+            {
+                data: 'ref_cashinChannelId',
+                className: 'text-nowrap',
+                render: function(data, type, row) {
+                    if (row.channel_description) {
+                        return '<div class="font-weight-bold text-dark">' + row.channel_description + '</div>' +
+                               '<small class="text-muted">' + data + '</small>';
+                    }
+                    return data;
+                }
+            },
             {
                 data: 'ref_cashinExternalId',
                 className: 'text-nowrap',

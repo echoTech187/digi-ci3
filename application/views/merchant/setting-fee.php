@@ -801,12 +801,13 @@ $(document).ready(function() {
         }
     });
 
-    // Select2 for ALL selects inside the More Filters panel
-    $('#feeMoreFiltersPanel select').not('.select2-hidden-accessible').select2({
-        width: '100%',
-        dropdownAutoWidth: true,
-        dropdownParent: $(this).parent(),
-        minimumResultsForSearch: 0
+    $('#feeMoreFiltersPanel select').not('.select2-hidden-accessible').each(function () {
+        $(this).select2({
+            width: '100%',
+            dropdownAutoWidth: true,
+            dropdownParent: $('body'),
+            minimumResultsForSearch: 0
+        });
     });
 
     function updateFilterBadge() {

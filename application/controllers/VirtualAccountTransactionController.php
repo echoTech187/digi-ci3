@@ -203,12 +203,14 @@ class VirtualAccountTransactionController extends CI_Controller
 
       // Sync from GET/POST to Session
       $field_map = [
-         'search_vadynamic_name'      => 'search_name_vad',
-         'search_vadynamic_date1'     => 'search_date_vad',
-         'search_vadynamic_date2'     => 'search_date_vad_to',
-         'search_vadynamic_status'    => 'search_status_transaction_vad',
-         'search_vadynamic_transid'   => 'search_merchant_trxid',
-         'search_vadynamic_va_number' => 'search_va_number'
+         'search_vadynamic_name'      => 'search_name_qd',
+         'search_vadynamic_date1'     => 'search_date_qd',
+         'search_vadynamic_date2'     => 'search_date_qd_to',
+         'search_vadynamic_status'    => 'search_status_transaction_qd',
+         'search_vadynamic_transid'   => 'search_transid_qd',
+         'search_vadynamic_va_number' => 'search_va_number',
+         'search_vadynamic_channel'   => 'search_channel_vadynamic',
+         'search_vadynamic_external'  => 'search_external_vadynamic'
       ];
 
       $get_fallback = [
@@ -252,7 +254,9 @@ class VirtualAccountTransactionController extends CI_Controller
                'date_to' => $this->session->userdata('search_vadynamic_date2'),
                'va_number' => $this->session->userdata('search_vadynamic_va_number'),
                'merchant_trxid' => $this->session->userdata('search_vadynamic_transid'),
-               'status' => $this->session->userdata('search_vadynamic_status')
+               'status' => $this->session->userdata('search_vadynamic_status'),
+               'channel' => $this->session->userdata('search_vadynamic_channel'),
+               'external_channel' => $this->session->userdata('search_vadynamic_external')
             ];
             return $this->VADynamic->get_datatables_handler($filters);
          } catch (Throwable $e) {
@@ -268,6 +272,8 @@ class VirtualAccountTransactionController extends CI_Controller
       }
 
       $data['merchants'] = $this->VADynamic->get_merchant();
+      $data['internal_channels'] = $this->VirtualAccount->get_internal_channels();
+      $data['external_channels'] = $this->VirtualAccount->get_external_channels();
       $this->load->view('virtualaccount/vadynamic', $data);
    }
 
@@ -280,6 +286,8 @@ class VirtualAccountTransactionController extends CI_Controller
          'search_vadynamic_status',
          'search_vadynamic_transid',
          'search_vadynamic_va_number',
+         'search_vadynamic_channel',
+         'search_vadynamic_external',
          'last_dt_search_vadynamic'
       ]);
       if ($redirect) redirect('virtual-account/dynamic');
@@ -303,7 +311,9 @@ class VirtualAccountTransactionController extends CI_Controller
          'search_varecurring_submerchant' => 'search_submerchant_var',
          'search_varecurring_transid'     => 'search_transid_var',
          'search_varecurring_va_number'   => 'search_va_number_var',
-         'search_varecurring_status'      => 'search_status_transaction_var'
+         'search_varecurring_status'      => 'search_status_transaction_var',
+         'search_varecurring_channel'     => 'search_channel_varecurring',
+         'search_varecurring_external'    => 'search_external_varecurring'
       ];
 
       $get_fallback = [
@@ -348,7 +358,9 @@ class VirtualAccountTransactionController extends CI_Controller
                'submerchant' => $this->session->userdata('search_varecurring_submerchant'),
                'transid' => $this->session->userdata('search_varecurring_transid'),
                'va_number' => $this->session->userdata('search_varecurring_va_number'),
-               'status' => $this->session->userdata('search_varecurring_status')
+               'status' => $this->session->userdata('search_varecurring_status'),
+               'channel' => $this->session->userdata('search_varecurring_channel'),
+               'external_channel' => $this->session->userdata('search_varecurring_external')
             ];
             return $this->VARecurring->get_datatables_handler($filters);
          } catch (Throwable $e) {
@@ -364,6 +376,8 @@ class VirtualAccountTransactionController extends CI_Controller
       }
 
       $data['merchants'] = $this->VARecurring->get_merchant();
+      $data['internal_channels'] = $this->VirtualAccount->get_internal_channels();
+      $data['external_channels'] = $this->VirtualAccount->get_external_channels();
       $this->load->view('virtualaccount/varecurring', $data);
    }
 
@@ -377,6 +391,8 @@ class VirtualAccountTransactionController extends CI_Controller
          'search_varecurring_transid',
          'search_varecurring_va_number',
          'search_varecurring_status',
+         'search_varecurring_channel',
+         'search_varecurring_external',
          'last_dt_search_varecurring'
       ]);
       if ($redirect) redirect('virtual-account/recurring');

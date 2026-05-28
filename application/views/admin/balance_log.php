@@ -145,7 +145,7 @@
                                 <!-- Primary: Date Range -->
                                 <div class="dt-more-field">
                                     <label class="dt-more-label"><i class="fas fa-calendar-alt mr-1 mr-2"></i> Period</label>
-                                    <div class="dt-filter-chip">
+                                    <div class="premium-picker">
                                         <input type="date" name="search_date_balance_log" class="dt-chip-input" value="<?= $search_date_from; ?>" title="Date From">
                                         <span class="text-muted mx-1" style="font-size:11px;">→</span>
                                         <input type="date" name="search_date_balance_log_to" class="dt-chip-input" value="<?= $search_date_to; ?>" title="Date To">

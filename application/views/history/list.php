@@ -76,7 +76,7 @@ $download_url = base_url('finance/history/download')
                                 <!-- Primary: Single Date -->
                                 <div class="dt-more-field">
                                     <label class="dt-more-label"><i class="fas fa-calendar-alt mr-1 mr-2"></i> Transaction Date</label>
-                                    <div class="dt-filter-chip">
+                                    <div class="premium-picker">
                                         <input type="date" name="search_date_purchase" class="dt-chip-input" value="<?= $search_date_purchase_value; ?>">
                                     </div>
                                 </div>

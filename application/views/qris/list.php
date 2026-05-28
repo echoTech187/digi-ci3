@@ -119,7 +119,7 @@ $download_url = base_url('finance/qris/download')
                                 <!-- Primary: Date Range -->
                                 <div class="dt-more-field">
                                     <label class="dt-more-label"><i class="fas fa-calendar-alt mr-1 mr-2"></i> Payment Date</label>
-                                    <div class="dt-filter-chip">
+                                    <div class="premium-picker">
                                         <input type="date" name="search_date_qris" class="dt-chip-input" value="<?= $search_date_qris_value; ?>" title="Date From">
                                         <span class="text-muted mx-1" style="font-size:11px;">→</span>
                                         <input type="date" name="search_date_qris_to" class="dt-chip-input" value="<?= $search_date_qris_to_value; ?>" title="Date To">
@@ -128,7 +128,9 @@ $download_url = base_url('finance/qris/download')
                                 <!-- Settlement Date -->
                                 <div class="dt-more-field">
                                     <label class="dt-more-label"><i class="fas fa-check-circle mr-1 mr-2"></i> Settlement Date</label>
-                                    <input type="date" name="search_date_qris_settlement" class="dt-more-input" value="<?= $search_date_qris_settlement_value; ?>">
+                                    <div class="premium-picker">
+                                        <input type="date" name="search_date_qris_settlement" class="dt-chip-input" value="<?= $search_date_qris_settlement_value; ?>">
+                                    </div>
                                 </div>
 
                                 <!-- Transaction ID & RRN moved to Global Search -->

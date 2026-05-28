@@ -2,7 +2,7 @@
 
 class QRISRecurring extends CI_Model {
     var $table = 'cashin_recurring_qris_mpm as crqm';
-    var $column_order = array(null, 'crqm.c_datetimeRequest', 'm.c_name', 's.c_name', 'crqm.c_merchantTransactionId', 'crqm.ref_cashinExternalId', 'crqm.c_amount', 'crqm.c_status');
+    var $column_order = array(null, 'crqm.c_datetimeRequest', 'm.c_name', 's.c_name', 'crqm.c_merchantTransactionId', 'ref_cashinChannelId', 'crqm.ref_cashinExternalId', 'crqm.c_amount', 'crqm.c_status');
     var $column_search = array('crqm.c_merchantTransactionId', 'crqm.ref_merchantId', 'crqm.ref_subMerchantId', 's.c_name', 'm.c_name');
     var $order = array('crqm.id' => 'desc');
     
@@ -11,7 +11,7 @@ class QRISRecurring extends CI_Model {
     private static $cached_total = null;
     private static $cached_inv_ids = null;
 
-    private function _apply_filters($search_name = null, $search_date = null, $search_date_to = null, $search_submerchant = null, $search_transid = null, $search_status = null)
+    private function _apply_filters($search_name = null, $search_date = null, $search_date_to = null, $search_submerchant = null, $search_transid = null, $search_status = null, $search_channel = null, $search_external_channel = null)
     {
         if ($search_name) {
             $this->db->where('crqm.ref_merchantId', $search_name);
@@ -35,9 +35,19 @@ class QRISRecurring extends CI_Model {
         if ($search_status) {
             $this->db->where('crqm.c_status', $search_status);
         }
+        if ($search_channel) {
+            if ($search_channel === 'qris_mpm') {
+                // Matches all
+            } else {
+                $this->db->where('1=0', NULL, FALSE);
+            }
+        }
+        if ($search_external_channel) {
+            $this->db->where('crqm.ref_cashinExternalId', $search_external_channel);
+        }
     }
 
-    private function _get_datatables_query($search_name = null, $search_date = null, $search_date_to = null, $search_submerchant = null, $search_transid = null, $only_ids = false, $count_only = false, $search_status = null)
+    private function _get_datatables_query($search_name = null, $search_date = null, $search_date_to = null, $search_submerchant = null, $search_transid = null, $only_ids = false, $count_only = false, $search_status = null, $search_channel = null, $search_external_channel = null)
     {
         // Emergency 30-second safeguard
         $this->db->query("SET SESSION max_execution_time = 30000");
@@ -63,7 +73,7 @@ class QRISRecurring extends CI_Model {
             $joined_merchant_submerchant = true;
         }
 
-        $this->_apply_filters($search_name, $search_date, $search_date_to, $search_submerchant, $search_transid, $search_status);
+        $this->_apply_filters($search_name, $search_date, $search_date_to, $search_submerchant, $search_transid, $search_status, $search_channel, $search_external_channel);
 
         if ($searchValue) {
             $safeSearch = $this->db->escape_str($searchValue);
@@ -117,10 +127,10 @@ class QRISRecurring extends CI_Model {
         }
     }
 
-    public function get_datatables($search_name = null, $search_date = null, $search_date_to = null, $search_submerchant = null, $search_transid = null, $search_status = null)
+    public function get_datatables($search_name = null, $search_date = null, $search_date_to = null, $search_submerchant = null, $search_transid = null, $search_status = null, $search_channel = null, $search_external_channel = null)
     {
         // STEP 1: Get matching IDs only (Fast)
-        $this->_get_datatables_query($search_name, $search_date, $search_date_to, $search_submerchant, $search_transid, true, false, $search_status);
+        $this->_get_datatables_query($search_name, $search_date, $search_date_to, $search_submerchant, $search_transid, true, false, $search_status, $search_channel, $search_external_channel);
         if (isset($_POST['length']) && $_POST['length'] != -1)
             $this->db->limit($_POST['length'], $_POST['start']);
         $query = $this->db->get();
@@ -131,10 +141,11 @@ class QRISRecurring extends CI_Model {
         $ids = array_column($id_results, 'id');
         
         // STEP 2: Fetch full details for those IDs
-        $this->db->select("crqm.*, s.c_name as name_submerchant, m.c_name as name_merchant, m.c_merchantLevel", FALSE);
+        $this->db->select("crqm.*, s.c_name as name_submerchant, m.c_name as name_merchant, m.c_merchantLevel, 'qris_mpm' AS ref_cashinChannelId, IF(cc.c_description IS NULL OR cc.c_description = '', 'QRIS', cc.c_description) AS channel_description", FALSE);
         $this->db->from($this->table);
         $this->db->join('submerchant s', 'crqm.ref_subMerchantId = s.id', 'left');
         $this->db->join('merchant m', 'crqm.ref_merchantId = m.id', 'left');
+        $this->db->join('cashin_channel cc', "cc.id = 'qris_mpm'", 'left');
         
         $this->db->where_in('crqm.id', $ids);
         
@@ -149,16 +160,16 @@ class QRISRecurring extends CI_Model {
         return $query->result();
     }
 
-    public function count_filtered($search_name = null, $search_date = null, $search_date_to = null, $search_submerchant = null, $search_transid = null, $search_status = null)
+    public function count_filtered($search_name = null, $search_date = null, $search_date_to = null, $search_submerchant = null, $search_transid = null, $search_status = null, $search_channel = null, $search_external_channel = null)
     {
         $searchValue = $this->input->post('search')['value'];
-        $is_filtered = $search_name || $search_date || $search_date_to || $search_submerchant || $search_transid || $search_status || (!empty($searchValue));
+        $is_filtered = $search_name || $search_date || $search_date_to || $search_submerchant || $search_transid || $search_status || $search_channel || $search_external_channel || (!empty($searchValue));
 
         if (!$is_filtered) {
             return $this->count_all_dt();
         }
 
-        $this->_get_datatables_query($search_name, $search_date, $search_date_to, $search_submerchant, $search_transid, false, true, $search_status);
+        $this->_get_datatables_query($search_name, $search_date, $search_date_to, $search_submerchant, $search_transid, false, true, $search_status, $search_channel, $search_external_channel);
         $query = $this->db->get();
         if (!is_object($query) || $query->num_rows() == 0) return 0;
         return $query->row()->total;
@@ -174,15 +185,17 @@ class QRISRecurring extends CI_Model {
         $search_submerchant = $filters['submerchant'] ?? null;
         $search_transid = $filters['transid'] ?? null;
         $search_status = $filters['status'] ?? null;
+        $search_channel = $filters['channel'] ?? null;
+        $search_external_channel = $filters['external_channel'] ?? null;
 
         // Optimized Fetch (Two-Step Lookup)
-        $list = $this->get_datatables($search_name, $search_date, $search_date_to, $search_submerchant, $search_transid, $search_status);
+        $list = $this->get_datatables($search_name, $search_date, $search_date_to, $search_submerchant, $search_transid, $search_status, $search_channel, $search_external_channel);
         
         $searchValue = $this->input->post('search')['value'];
-        $is_filtered = $search_name || $search_date || $search_date_to || $search_submerchant || $search_transid || $search_status || (!empty($searchValue));
+        $is_filtered = $search_name || $search_date || $search_date_to || $search_submerchant || $search_transid || $search_status || $search_channel || $search_external_channel || (!empty($searchValue));
 
         $recordsTotal = $this->count_all_dt($search_name, $search_date, $search_date_to);
-        $recordsFiltered = $is_filtered ? $this->count_filtered($search_name, $search_date, $search_date_to, $search_submerchant, $search_transid, $search_status) : $recordsTotal;
+        $recordsFiltered = $is_filtered ? $this->count_filtered($search_name, $search_date, $search_date_to, $search_submerchant, $search_transid, $search_status, $search_channel, $search_external_channel) : $recordsTotal;
 
         // Use Datatables Library for final processing and JSON output
         return $this->datatables->of($this->table)

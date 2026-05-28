@@ -53,6 +53,7 @@ class EwalletTransactionController extends CI_Controller
          'search_ewallet_date_settlement' => 'search_date_ewallet_settlement',
          'search_ewallet_invoice_no'      => 'search_invoice_no',
          'search_ewallet_transid'         => 'search_transid_ewallet',
+         'search_ewallet_channel'         => 'search_channel_ewallet',
       ];
 
       $get_fallback = [
@@ -62,6 +63,7 @@ class EwalletTransactionController extends CI_Controller
          'search_ewallet_date_settlement' => 'settlement',
          'search_ewallet_invoice_no'      => 'invoice',
          'search_ewallet_transid'         => 'transid',
+         'search_ewallet_channel'         => 'channel',
       ];
 
       foreach ($field_map as $session_key => $post_key) {
@@ -96,7 +98,8 @@ class EwalletTransactionController extends CI_Controller
                'date_to' => $this->session->userdata('search_ewallet_date2'),
                'settlement' => $this->session->userdata('search_ewallet_date_settlement'),
                'invoice' => $this->session->userdata('search_ewallet_invoice_no'),
-               'transid' => $this->session->userdata('search_ewallet_transid')
+               'transid' => $this->session->userdata('search_ewallet_transid'),
+               'channel' => $this->session->userdata('search_ewallet_channel')
             ];
             return $this->Ewallet->get_datatables_handler($filters);
          } catch (Throwable $e) {
@@ -114,6 +117,7 @@ class EwalletTransactionController extends CI_Controller
       $data['pagination'] = '';
       $data['ewallets'] = [];
       $data['merchants'] = $this->Ewallet->get_merchant();
+      $data['internal_channels'] = $this->Ewallet->get_internal_channels();
 
       $this->load->view('ewallet/ewallet_list', $data);
    }
@@ -127,6 +131,7 @@ class EwalletTransactionController extends CI_Controller
          'search_ewallet_date_settlement',
          'search_ewallet_invoice_no',
          'search_ewallet_transid',
+         'search_ewallet_channel',
          'last_dt_search_ewallet'
       ]);
       if ($redirect) redirect('finance/e-wallet');
@@ -176,16 +181,20 @@ class EwalletTransactionController extends CI_Controller
 
       // Sync from GET/POST to Session
       $field_map = [
-         'search_ewalletdynamic_name'   => 'search_name_qd',
-         'search_ewalletdynamic_date1'  => 'search_date_qd',
-         'search_ewalletdynamic_date2'  => 'search_date_qd_to',
-         'search_ewalletdynamic_status' => 'search_status_transaction_qd',
-         'search_ewalletdynamic_transid'=> 'search_transid_qd',
+         'search_ewalletdynamic_name'     => 'search_name_qd',
+         'search_ewalletdynamic_date1'    => 'search_date_qd',
+         'search_ewalletdynamic_date2'    => 'search_date_qd_to',
+         'search_ewalletdynamic_status'   => 'search_status_transaction_qd',
+         'search_ewalletdynamic_transid'  => 'search_transid_qd',
+         'search_ewalletdynamic_channel'  => 'search_channel_ewalletdynamic',
+         'search_ewalletdynamic_external' => 'search_external_ewalletdynamic',
       ];
 
       $get_fallback = [
-         'search_ewalletdynamic_name'   => 'merchant',
-         'search_ewalletdynamic_transid'=> 'transid',
+         'search_ewalletdynamic_name'     => 'merchant',
+         'search_ewalletdynamic_transid'  => 'transid',
+         'search_ewalletdynamic_channel'  => 'channel',
+         'search_ewalletdynamic_external' => 'external',
       ];
 
       foreach ($field_map as $session_key => $post_key) {
@@ -214,11 +223,13 @@ class EwalletTransactionController extends CI_Controller
             }
 
             $filters = [
-               'merchant' => $this->session->userdata('search_ewalletdynamic_name'),
-               'date' => $this->session->userdata('search_ewalletdynamic_date1'),
-               'date_to' => $this->session->userdata('search_ewalletdynamic_date2'),
-               'transid' => $this->session->userdata('search_ewalletdynamic_transid'),
-               'status' => $this->session->userdata('search_ewalletdynamic_status')
+               'merchant'         => $this->session->userdata('search_ewalletdynamic_name'),
+               'date'             => $this->session->userdata('search_ewalletdynamic_date1'),
+               'date_to'          => $this->session->userdata('search_ewalletdynamic_date2'),
+               'transid'          => $this->session->userdata('search_ewalletdynamic_transid'),
+               'status'           => $this->session->userdata('search_ewalletdynamic_status'),
+               'channel'          => $this->session->userdata('search_ewalletdynamic_channel'),
+               'external_channel' => $this->session->userdata('search_ewalletdynamic_external')
             ];
             return $this->EwalletDynamic->get_datatables_handler($filters);
          } catch (Throwable $e) {
@@ -234,6 +245,8 @@ class EwalletTransactionController extends CI_Controller
       }
 
       $data['merchants'] = $this->EwalletDynamic->get_merchant();
+      $data['internal_channels'] = $this->Ewallet->get_internal_channels();
+      $data['external_channels'] = $this->Ewallet->get_external_channels();
       $this->load->view('ewallet/ewallet_dynamic', $data);
    }
 
@@ -265,6 +278,8 @@ class EwalletTransactionController extends CI_Controller
          'search_ewalletdynamic_date2',
          'search_ewalletdynamic_status',
          'search_ewalletdynamic_transid',
+         'search_ewalletdynamic_channel',
+         'search_ewalletdynamic_external',
          'last_dt_search_ewalletdynamic'
       ]);
       if ($redirect) redirect('e-wallet/dynamic');

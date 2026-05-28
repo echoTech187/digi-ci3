@@ -60,6 +60,9 @@
     <!-- input formatter -->
     <script src="<?= base_url('assets/js/input-formatter.js') ?>"></script>
 
+    <!-- Date Range Picker Component -->
+    <script src="<?= base_url('assets/js/datepicker.js?v=' . time()) ?>"></script>
+
     <script>
         $('.custom-file-input').on('change', function() {
             let fileName = $(this).val().split('\\').pop();

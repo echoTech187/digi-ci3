@@ -12,7 +12,7 @@ class EwalletDynamic extends CI_Model
     private static $cached_total = null;
     private static $cached_inv_ids = null;
 
-    private function _apply_filters($search_name = null, $search_date = null, $search_date_to = null, $search_transid = null, $search_status = null)
+    private function _apply_filters($search_name = null, $search_date = null, $search_date_to = null, $search_transid = null, $search_status = null, $search_channel = null, $search_external_channel = null)
     {
         if ($search_name) {
             $this->db->where('cde.ref_merchantId', $search_name);
@@ -29,9 +29,15 @@ class EwalletDynamic extends CI_Model
         if ($search_status) {
             $this->db->where('cde.c_status', $search_status);
         }
+        if ($search_channel) {
+            $this->db->where('cde.ref_cashinChannelId', $search_channel);
+        }
+        if ($search_external_channel) {
+            $this->db->where('cde.ref_cashinExternalId', $search_external_channel);
+        }
     }
 
-    private function _get_datatables_query($search_name = null, $search_date = null, $search_date_to = null, $search_transid = null, $search_status = null, $only_ids = false)
+    private function _get_datatables_query($search_name = null, $search_date = null, $search_date_to = null, $search_transid = null, $search_status = null, $search_channel = null, $search_external_channel = null, $only_ids = false)
     {
         // Emergency safeguard
         $this->db->query("SET SESSION max_execution_time = 30000");
@@ -48,7 +54,7 @@ class EwalletDynamic extends CI_Model
             $this->db->join('merchant m', 'cde.ref_merchantId = m.id', 'left');
         }
 
-        $this->_apply_filters($search_name, $search_date, $search_date_to, $search_transid, $search_status);
+        $this->_apply_filters($search_name, $search_date, $search_date_to, $search_transid, $search_status, $search_channel, $search_external_channel);
 
         $searchValue = isset($_POST['search']['value']) ? trim($_POST['search']['value']) : '';
         if ($searchValue) {
@@ -94,10 +100,10 @@ class EwalletDynamic extends CI_Model
         }
     }
 
-    public function get_datatables($search_name = null, $search_date = null, $search_date_to = null, $search_transid = null, $search_status = null)
+    public function get_datatables($search_name = null, $search_date = null, $search_date_to = null, $search_transid = null, $search_status = null, $search_channel = null, $search_external_channel = null)
     {
         // STEP 1: Get matching IDs only (Fast)
-        $this->_get_datatables_query($search_name, $search_date, $search_date_to, $search_transid, $search_status, true);
+        $this->_get_datatables_query($search_name, $search_date, $search_date_to, $search_transid, $search_status, $search_channel, $search_external_channel, true);
         if (isset($_POST['length']) && $_POST['length'] != -1)
             $this->db->limit($_POST['length'], $_POST['start']);
         $query = $this->db->get();
@@ -108,10 +114,11 @@ class EwalletDynamic extends CI_Model
         $ids = array_column($id_results, 'id');
         
         // STEP 2: Fetch full details for those IDs
-        $this->db->select("cde.*, s.c_name as name_submerchant, m.c_name as name_merchant");
+        $this->db->select("cde.*, s.c_name as name_submerchant, m.c_name as name_merchant, cc.c_description AS channel_description", FALSE);
         $this->db->from($this->table);
         $this->db->join('submerchant s', 'cde.ref_subMerchantId = s.id', 'left');
         $this->db->join('merchant m', 'cde.ref_merchantId = m.id', 'left');
+        $this->db->join('cashin_channel cc', 'cde.ref_cashinChannelId = cc.id', 'left');
         
         $this->db->where_in('cde.id', $ids);
         
@@ -126,10 +133,10 @@ class EwalletDynamic extends CI_Model
         return $query->result();
     }
 
-    public function count_filtered($search_name = null, $search_date = null, $search_date_to = null, $search_transid = null, $search_status = null)
+    public function count_filtered($search_name = null, $search_date = null, $search_date_to = null, $search_transid = null, $search_status = null, $search_channel = null, $search_external_channel = null)
     {
         $searchValue = isset($_POST['search']['value']) ? trim($_POST['search']['value']) : '';
-        $is_filtered = $search_name || $search_date || $search_date_to || $search_transid || $search_status || (!empty($searchValue));
+        $is_filtered = $search_name || $search_date || $search_date_to || $search_transid || $search_status || $search_channel || $search_external_channel || (!empty($searchValue));
 
         if (!$is_filtered) {
             return $this->count_all_dt();
@@ -137,7 +144,7 @@ class EwalletDynamic extends CI_Model
 
         $this->db->select('count(DISTINCT cde.id) as total');
         $this->db->from($this->table);
-        $this->_apply_filters($search_name, $search_date, $search_date_to, $search_transid, $search_status);
+        $this->_apply_filters($search_name, $search_date, $search_date_to, $search_transid, $search_status, $search_channel, $search_external_channel);
 
         // Truly Smart Search in Count
         if (!empty($searchValue)) {
@@ -286,15 +293,17 @@ class EwalletDynamic extends CI_Model
         $search_date_to = $filters['date_to'] ?? null;
         $search_transid = $filters['transid'] ?? null;
         $search_status = $filters['status'] ?? null;
+        $search_channel = $filters['channel'] ?? null;
+        $search_external_channel = $filters['external_channel'] ?? null;
 
         // Optimized Fetch (Two-Step Lookup)
-        $list = $this->get_datatables($search_name, $search_date, $search_date_to, $search_transid, $search_status);
+        $list = $this->get_datatables($search_name, $search_date, $search_date_to, $search_transid, $search_status, $search_channel, $search_external_channel);
         
         $searchValue = $this->input->post('search')['value'];
-        $is_filtered = $search_name || $search_date || $search_date_to || $search_transid || $search_status || (!empty($searchValue));
+        $is_filtered = $search_name || $search_date || $search_date_to || $search_transid || $search_status || $search_channel || $search_external_channel || (!empty($searchValue));
 
         $recordsTotal = $this->count_all_dt($search_name, $search_date, $search_date_to);
-        $recordsFiltered = $is_filtered ? $this->count_filtered($search_name, $search_date, $search_date_to, $search_transid, $search_status) : $recordsTotal;
+        $recordsFiltered = $is_filtered ? $this->count_filtered($search_name, $search_date, $search_date_to, $search_transid, $search_status, $search_channel, $search_external_channel) : $recordsTotal;
 
         // Use Datatables Library for final processing and JSON output
         return $this->datatables->of($this->table)

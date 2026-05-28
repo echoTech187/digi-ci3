@@ -665,5 +665,20 @@ class Qris extends CI_Model {
         }
         return array_unique($ids);
     }
+
+    public function get_internal_channels(){
+        $query = "SELECT id, c_description FROM cashin_channel 
+                WHERE c_channelGroup ='qris_mpm'
+                ORDER BY c_description ASC";
+        return $this->db->query($query)->result();
+    }
+
+    public function get_external_channels(){
+        $query = "SELECT c_cashinExternalId FROM cashin_external_x_channel 
+                WHERE c_cashinChannelGroup ='qris_mpm'
+                GROUP BY c_cashinExternalId
+                ORDER BY c_cashinExternalId ASC";
+        return $this->db->query($query)->result();
+    }
 }
 ?>

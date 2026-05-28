@@ -100,7 +100,7 @@ $download_url = base_url('finance/mutation/download')
                                 <!-- Period: Date Range -->
                                 <div class="dt-more-field">
                                     <label class="dt-more-label"><i class="fas fa-calendar-alt mr-1 mr-2"></i> Date Range</label>
-                                    <div class="dt-filter-chip">
+                                    <div class="premium-picker">
                                         <input type="date" name="search_date_mutation" class="dt-chip-input" value="<?= $search_date_mutation_value ?>" title="From Date">
                                         <span class="text-muted mx-1" style="font-size:11px;">→</span>
                                         <input type="date" name="search_date_mutation_to" class="dt-chip-input" value="<?= $search_date_mutation_to_value ?>" title="To Date">
@@ -181,13 +181,16 @@ $download_url = base_url('finance/mutation/download')
 <script>
 $(document).ready(function() {
     // Select2 integration inside filters panel
-    const channelSelect = $('.select2-channel').select2({
-        width: '100%',
-        dropdownAutoWidth: true,
-        dropdownParent: $(this).parent(),
-        minimumResultsForSearch: 5,
-        placeholder: "All Channels",
-        allowClear: true
+    const channelSelect = $('.select2-channel');
+    channelSelect.each(function() {
+        $(this).select2({
+            width: '100%',
+            dropdownAutoWidth: true,
+            dropdownParent: $('body'),
+            minimumResultsForSearch: 5,
+            placeholder: "All Channels",
+            allowClear: true
+        });
     });
 
     // Sub-channel dynamic loading

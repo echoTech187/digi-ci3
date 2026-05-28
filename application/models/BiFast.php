@@ -22,7 +22,7 @@ class BiFast extends CI_Model {
             $this->db->select("MAX(cpb.id) as id");
         } else {
             $this->db->select("cpb.id, cpb.c_datetime, cpb.c_merchantTransactionId, cpb.ref_cashoutChannelId, cpb.c_accountNo, cpb.c_amount, cpb.c_fee, cpb.c_status, cpb.ref_merchantId, cpb.ref_cashoutId, m.c_name AS name_merchant, c.c_invoiceNo, mab.c_beneficiaryAccountName,
-                               COALESCE(epb.c_responseBody, egb.c_responseBody) AS c_responseBody");
+                               COALESCE(epb.c_responseBody, egb.c_responseBody) AS c_responseBody, cc.c_description AS channel_description");
         }
         
         $this->db->from($this->table);
@@ -53,6 +53,7 @@ class BiFast extends CI_Model {
         if (!$only_ids && !$count_only) {
             $this->db->join('external_paylabs_disbursement_transfer_bank epb', 'epb.ref_cashoutPaymentBifastId = cpb.id', 'left');
             $this->db->join('external_gvconnect_snap_disbursement_transfer_bank egb', 'egb.ref_cashoutPaymentBifastId = cpb.id', 'left');
+            $this->db->join('cashout_channel cc', 'cc.id = cpb.ref_cashoutChannelId', 'left');
         }
         
         if ($search_name) {
@@ -238,7 +239,7 @@ class BiFast extends CI_Model {
         
         // STEP 2: Fetch full data for only these specific IDs
         $this->db->select("cpb.*, m.c_name AS name_merchant, m.c_merchantLevel, c.c_invoiceNo, mab.c_beneficiaryAccountName,
-                           COALESCE(epb.c_responseBody, egb.c_responseBody, eif.c_responseBody, epd.c_responseBody) AS c_responseBody", FALSE);
+                           COALESCE(epb.c_responseBody, egb.c_responseBody, eif.c_responseBody, epd.c_responseBody) AS c_responseBody, cc.c_description AS channel_description", FALSE);
         $this->db->from($this->table);
         $this->db->join('cashout c', 'c.id = cpb.ref_cashoutId', 'left');
         $this->db->join('merchant m', 'm.id = cpb.ref_merchantId', 'left');
@@ -247,6 +248,7 @@ class BiFast extends CI_Model {
         $this->db->join('external_gvconnect_snap_disbursement_transfer_bank egb', 'egb.ref_cashoutPaymentBifastId = cpb.id', 'left');
         $this->db->join('external_ifp_bifast_transfer_interbank eif', 'eif.ref_cashoutPaymentBifastId = cpb.id', 'left');
         $this->db->join('external_paydgn_disbursement_transfer_bank epd', 'epd.ref_cashoutPaymentBifastId = cpb.id', 'left');
+        $this->db->join('cashout_channel cc', 'cc.id = cpb.ref_cashoutChannelId', 'left');
         
         $this->db->where_in('cpb.id', $ids);
         

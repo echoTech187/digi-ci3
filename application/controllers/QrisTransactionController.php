@@ -219,17 +219,21 @@ class QrisTransactionController extends CI_Controller
 
       // Sync from GET/POST to Session
       $field_map = [
-         'search_qrisdynamic_name'   => 'search_name_qd',
-         'search_qrisdynamic_date1'  => 'search_date_qd',
-         'search_qrisdynamic_date2'  => 'search_date_qd_to',
-         'search_qrisdynamic_status' => 'search_status_transaction_qd',
-         'search_qrisdynamic_reff'   => 'search_reff_label',
-         'search_qrisdynamic_transid'=> 'search_transid_qd',
+         'search_qrisdynamic_name'     => 'search_name_qd',
+         'search_qrisdynamic_date1'    => 'search_date_qd',
+         'search_qrisdynamic_date2'    => 'search_date_qd_to',
+         'search_qrisdynamic_status'   => 'search_status_transaction_qd',
+         'search_qrisdynamic_reff'     => 'search_reff_label',
+         'search_qrisdynamic_transid'  => 'search_transid_qd',
+         'search_qrisdynamic_channel'  => 'search_channel_qrisdynamic',
+         'search_qrisdynamic_external' => 'search_external_qrisdynamic',
       ];
 
       $get_fallback = [
-         'search_qrisdynamic_name'   => 'merchant',
-         'search_qrisdynamic_transid'=> 'transid',
+         'search_qrisdynamic_name'     => 'merchant',
+         'search_qrisdynamic_transid'  => 'transid',
+         'search_qrisdynamic_channel'  => 'channel',
+         'search_qrisdynamic_external' => 'external',
       ];
 
       foreach ($field_map as $session_key => $post_key) {
@@ -258,12 +262,14 @@ class QrisTransactionController extends CI_Controller
             }
 
             $filters = [
-               'merchant' => $this->session->userdata('search_qrisdynamic_name'),
-               'date' => $this->session->userdata('search_qrisdynamic_date1'),
-               'date_to' => $this->session->userdata('search_qrisdynamic_date2'),
-               'transid' => $this->session->userdata('search_qrisdynamic_transid'),
-               'status' => $this->session->userdata('search_qrisdynamic_status'),
-               'reff' => $this->session->userdata('search_qrisdynamic_reff')
+               'merchant'         => $this->session->userdata('search_qrisdynamic_name'),
+               'date'             => $this->session->userdata('search_qrisdynamic_date1'),
+               'date_to'          => $this->session->userdata('search_qrisdynamic_date2'),
+               'transid'          => $this->session->userdata('search_qrisdynamic_transid'),
+               'status'           => $this->session->userdata('search_qrisdynamic_status'),
+               'reff'             => $this->session->userdata('search_qrisdynamic_reff'),
+               'channel'          => $this->session->userdata('search_qrisdynamic_channel'),
+               'external_channel' => $this->session->userdata('search_qrisdynamic_external')
             ];
             return $this->QRISDynamic->get_datatables_handler($filters);
          } catch (Throwable $e) {
@@ -280,6 +286,8 @@ class QrisTransactionController extends CI_Controller
 
       $data['merchants'] = $this->QRISDynamic->get_merchant();
       $data['search_reff_label'] = $this->session->userdata('search_qrisdynamic_reff');
+      $data['internal_channels'] = $this->Qris->get_internal_channels();
+      $data['external_channels'] = $this->Qris->get_external_channels();
       $this->load->view('qris/qrisdynamic', $data);
    }
 
@@ -292,6 +300,8 @@ class QrisTransactionController extends CI_Controller
          'search_qrisdynamic_status',
          'search_qrisdynamic_reff',
          'search_qrisdynamic_transid',
+         'search_qrisdynamic_channel',
+         'search_qrisdynamic_external',
          'last_dt_search_qrisdynamic'
       ]);
       if ($redirect) redirect('qris/dynamic');
@@ -315,11 +325,15 @@ class QrisTransactionController extends CI_Controller
          'search_qrisrecurring_submerchant' => 'search_submerchant_qr',
          'search_qrisrecurring_status'      => 'search_status_transaction_qr',
          'search_qrisrecurring_transid'     => 'search_transid_qr',
+         'search_qrisrecurring_channel'     => 'search_channel_qrisrecurring',
+         'search_qrisrecurring_external'    => 'search_external_qrisrecurring',
       ];
 
       $get_fallback = [
          'search_qrisrecurring_name'        => 'merchant',
          'search_qrisrecurring_transid'     => 'transid',
+         'search_qrisrecurring_channel'     => 'channel',
+         'search_qrisrecurring_external'    => 'external',
       ];
 
       foreach ($field_map as $session_key => $post_key) {
@@ -348,12 +362,14 @@ class QrisTransactionController extends CI_Controller
             }
 
             $filters = [
-               'merchant' => $this->session->userdata('search_qrisrecurring_name'),
-               'date' => $this->session->userdata('search_qrisrecurring_date1'),
-               'date_to' => $this->session->userdata('search_qrisrecurring_date2'),
-               'transid' => $this->session->userdata('search_qrisrecurring_transid'),
-               'submerchant' => $this->session->userdata('search_qrisrecurring_submerchant'),
-               'status' => $this->session->userdata('search_qrisrecurring_status')
+               'merchant'         => $this->session->userdata('search_qrisrecurring_name'),
+               'date'             => $this->session->userdata('search_qrisrecurring_date1'),
+               'date_to'          => $this->session->userdata('search_qrisrecurring_date2'),
+               'transid'          => $this->session->userdata('search_qrisrecurring_transid'),
+               'submerchant'      => $this->session->userdata('search_qrisrecurring_submerchant'),
+               'status'           => $this->session->userdata('search_qrisrecurring_status'),
+               'channel'          => $this->session->userdata('search_qrisrecurring_channel'),
+               'external_channel' => $this->session->userdata('search_qrisrecurring_external')
             ];
             return $this->QRISRecurring->get_datatables_handler($filters);
          } catch (Throwable $e) {
@@ -369,6 +385,8 @@ class QrisTransactionController extends CI_Controller
       }
 
       $data['merchants'] = $this->QRISRecurring->get_merchant();
+      $data['internal_channels'] = $this->Qris->get_internal_channels();
+      $data['external_channels'] = $this->Qris->get_external_channels();
       $this->load->view('qris/qrisrecurring', $data);
    }
 
@@ -381,6 +399,8 @@ class QrisTransactionController extends CI_Controller
          'search_qrisrecurring_submerchant',
          'search_qrisrecurring_status',
          'search_qrisrecurring_transid',
+         'search_qrisrecurring_channel',
+         'search_qrisrecurring_external',
          'last_dt_search_qrisrecurring'
       ]);
       if ($redirect) redirect('qris/recurring');

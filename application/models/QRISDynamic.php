@@ -3,7 +3,7 @@
 class QRISDynamic extends CI_Model
 {
     var $table = 'cashin_dynamic_qris_mpm cdq';
-    var $column_order = array(null, 'cdq.c_datetimeRequest', 'm.c_name', 's.c_name', 'cdq.c_merchantTransactionId', 'cdq.ref_cashinExternalId', 'cdq.c_amount', 'cdq.c_datetimeExpired', 'cdq.c_status');
+    var $column_order = array(null, 'cdq.c_datetimeRequest', 'm.c_name', 's.c_name', 'cdq.c_merchantTransactionId', 'ref_cashinChannelId', 'cdq.ref_cashinExternalId', 'cdq.c_amount', 'cdq.c_datetimeExpired', 'cdq.c_status');
     var $column_search = array('cdq.c_merchantTransactionId', 'cdq.ref_merchantId', 'cdq.ref_subMerchantId', 's.c_name', 'm.c_name');
     var $order = array('cdq.id' => 'desc');
     
@@ -12,7 +12,7 @@ class QRISDynamic extends CI_Model
     private static $cached_total = null;
     private static $cached_inv_ids = null;
 
-    private function _apply_filters($search_name = null, $search_date = null, $search_transid = null, $search_status = null, $search_reff = null, $search_date_to = null)
+    private function _apply_filters($search_name = null, $search_date = null, $search_transid = null, $search_status = null, $search_reff = null, $search_date_to = null, $search_channel = null, $search_external_channel = null)
     {
         if ($search_name) {
             $this->db->where('cdq.ref_merchantId', $search_name);
@@ -53,9 +53,21 @@ class QRISDynamic extends CI_Model
             $this->db->where('epq.refId', $search_reff);
             $this->db->where('cdq.ref_cashinExternalId', 'paydgn');
         }
+
+        if ($search_channel) {
+            if ($search_channel === 'qris_mpm') {
+                // Matches all
+            } else {
+                $this->db->where('1=0', NULL, FALSE);
+            }
+        }
+
+        if ($search_external_channel) {
+            $this->db->where('cdq.ref_cashinExternalId', $search_external_channel);
+        }
     }
 
-    private function _get_datatables_query($search_name = null, $search_date = null, $search_transid = null, $search_status = null, $search_reff = null, $search_date_to = null, $only_ids = false, $count_only = false)
+    private function _get_datatables_query($search_name = null, $search_date = null, $search_transid = null, $search_status = null, $search_reff = null, $search_date_to = null, $only_ids = false, $count_only = false, $search_channel = null, $search_external_channel = null)
     {
         // Emergency 30-second safeguard
         $this->db->query("SET SESSION max_execution_time = 30000");
@@ -81,7 +93,7 @@ class QRISDynamic extends CI_Model
             $joined_merchant_submerchant = true;
         }
 
-        $this->_apply_filters($search_name, $search_date, $search_transid, $search_status, $search_reff, $search_date_to);
+        $this->_apply_filters($search_name, $search_date, $search_transid, $search_status, $search_reff, $search_date_to, $search_channel, $search_external_channel);
 
         if ($searchValue) {
             $safeSearch = $this->db->escape_str($searchValue);
@@ -135,10 +147,10 @@ class QRISDynamic extends CI_Model
         }
     }
 
-    public function get_datatables($search_name = null, $search_date = null, $search_transid = null, $search_status = null, $search_reff = null, $search_date_to = null)
+    public function get_datatables($search_name = null, $search_date = null, $search_transid = null, $search_status = null, $search_reff = null, $search_date_to = null, $search_channel = null, $search_external_channel = null)
     {
         // STEP 1: Get matching IDs only (Fast)
-        $this->_get_datatables_query($search_name, $search_date, $search_transid, $search_status, $search_reff, $search_date_to, true);
+        $this->_get_datatables_query($search_name, $search_date, $search_transid, $search_status, $search_reff, $search_date_to, true, false, $search_channel, $search_external_channel);
         if ($_POST['length'] != -1)
             $this->db->limit($_POST['length'], $_POST['start']);
         $query = $this->db->get();
@@ -151,10 +163,11 @@ class QRISDynamic extends CI_Model
         $ids = array_column($id_results, 'id');
         
         // STEP 2: Fetch full details for those IDs
-        $this->db->select("cdq.*, m.c_name as name_merchant, m.c_merchantLevel, s.c_name as name_submerchant", FALSE);
+        $this->db->select("cdq.*, m.c_name as name_merchant, m.c_merchantLevel, s.c_name as name_submerchant, 'qris_mpm' AS ref_cashinChannelId, IF(cc.c_description IS NULL OR cc.c_description = '', 'QRIS', cc.c_description) AS channel_description", FALSE);
         $this->db->from($this->table);
         $this->db->join('merchant m', 'cdq.ref_merchantId = m.id','left');
         $this->db->join('submerchant s', 's.id = cdq.ref_subMerchantId', 'left');
+        $this->db->join('cashin_channel cc', "cc.id = 'qris_mpm'", 'left');
         $this->db->where_in('cdq.id', $ids);
         
         if (isset($_POST['order'])) {
@@ -168,16 +181,16 @@ class QRISDynamic extends CI_Model
         return $query->result();
     }
 
-    public function count_filtered($search_name = null, $search_date = null, $search_transid = null, $search_status = null, $search_reff = null, $search_date_to = null)
+    public function count_filtered($search_name = null, $search_date = null, $search_transid = null, $search_status = null, $search_reff = null, $search_date_to = null, $search_channel = null, $search_external_channel = null)
     {
         $searchValue = $this->input->post('search')['value'];
-        $is_filtered = $search_name || $search_date || $search_date_to || $search_transid || $search_status || $search_reff || (!empty($searchValue));
+        $is_filtered = $search_name || $search_date || $search_date_to || $search_transid || $search_status || $search_reff || $search_channel || $search_external_channel || (!empty($searchValue));
 
         if (!$is_filtered) {
             return $this->count_all_dt();
         }
 
-        $this->_get_datatables_query($search_name, $search_date, $search_transid, $search_status, $search_reff, $search_date_to, false, true);
+        $this->_get_datatables_query($search_name, $search_date, $search_transid, $search_status, $search_reff, $search_date_to, false, true, $search_channel, $search_external_channel);
         $query = $this->db->get();
         if (!is_object($query) || $query->num_rows() == 0) return 0;
         return $query->row()->total;
@@ -193,15 +206,17 @@ class QRISDynamic extends CI_Model
         $search_transid = $filters['transid'] ?? null;
         $search_status = $filters['status'] ?? null;
         $search_reff = $filters['reff'] ?? null;
+        $search_channel = $filters['channel'] ?? null;
+        $search_external_channel = $filters['external_channel'] ?? null;
 
         // Optimized Fetch (Two-Step Lookup)
-        $list = $this->get_datatables($search_name, $search_date, $search_transid, $search_status, $search_reff, $search_date_to);
+        $list = $this->get_datatables($search_name, $search_date, $search_transid, $search_status, $search_reff, $search_date_to, $search_channel, $search_external_channel);
         
         $searchValue = $this->input->post('search')['value'];
-        $is_filtered = $search_name || $search_date || $search_date_to || $search_transid || $search_status || $search_reff || (!empty($searchValue));
+        $is_filtered = $search_name || $search_date || $search_date_to || $search_transid || $search_status || $search_reff || $search_channel || $search_external_channel || (!empty($searchValue));
 
         $recordsTotal = $this->count_all_dt($search_name, $search_date, $search_date_to);
-        $recordsFiltered = $is_filtered ? $this->count_filtered($search_name, $search_date, $search_transid, $search_status, $search_reff, $search_date_to) : $recordsTotal;
+        $recordsFiltered = $is_filtered ? $this->count_filtered($search_name, $search_date, $search_transid, $search_status, $search_reff, $search_date_to, $search_channel, $search_external_channel) : $recordsTotal;
 
         // Use Datatables Library for final processing and JSON output
         return $this->datatables->of($this->table)
