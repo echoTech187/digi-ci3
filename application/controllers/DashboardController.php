@@ -314,32 +314,6 @@ class DashboardController extends CI_Controller
       } else show_404();
    }
 
-   public function testDB() {
-        echo "<pre>";
-        try {
-            $q = $this->db->query("DESCRIBE cashin");
-            print_r($q->result_array());
-            $q2 = $this->db->query("DESCRIBE cashout");
-            print_r($q2->result_array());
-            
-            // Try testing the recent query
-            $q3 = $this->db->query("
-                SELECT 'Cash-In' as type, c_cashinChannelGroup as channel, c_amount as amount, c_status as status, c_created as date, c_referenceId as ref 
-                FROM cashin 
-                WHERE ref_merchantId = 3739 
-                ORDER BY c_created DESC LIMIT 5
-            ");
-            print_r($q3->result_array());
-        } catch (Exception $e) {
-            echo "Exception: " . $e->getMessage();
-        }
-        $error = $this->db->error();
-        if ($error['code']) {
-            echo "DB Error: " . print_r($error, true);
-        }
-        echo "</pre>";
-    }
-
    public function getMaintenanceStatus()
    {
        $this->load->model('Merchant');

@@ -67,7 +67,6 @@ $route['dashboard/today-stats/json'] = 'DashboardController/ajax_today_stats_jso
 $route['dashboard/monthly-stats/json'] = 'DashboardController/ajax_monthly_stats_json';
 $route['dashboard/metadata/json'] = 'DashboardController/ajax_dashboard_metadata_json';
 $route['dashboard/analytics-data/json'] = 'DashboardController/ajax_analytics_data_json';
-$route['dashboard/testdb'] = 'DashboardController/testDB';
 
 // ── GlobalSearchController ─────────────────────────────────────────────
 $route['dashboard/global-search'] = 'GlobalSearchController/globalSearch';
