@@ -9,6 +9,9 @@ class UserAccessController extends CI_Controller {
       $this->load->model('AdminModel');
       $this->load->model('HolidayModel');
       is_logged_in();
+      
+      global $internalUrlHit;
+      $this->internalUrlHit = $internalUrlHit;
    }
 
    public function holiday()
@@ -189,35 +192,73 @@ class UserAccessController extends CI_Controller {
          return;
       }
 
-      $data = [
-         'c_email'   => $c_email,
-         'c_name'    => $c_name,
-         'c_level'   => $c_level,
-         'role_id'   => $role_id,
-         'c_status'  => $c_status,
-         'c_password'=> password_hash($c_password, PASSWORD_DEFAULT)
-      ];
+      $internalRequestBody = array(
+         "adminEmail"    => $c_email,
+         "adminName"     => $c_name,
+         "adminLevel"    => $c_level,
+         "roleId"        => $role_id,
+         "adminStatus"   => $c_status,
+         "adminPassword" => $c_password
+      );
 
-      $result = $this->AdminModel->add_admin($data);
-      if ($result === true) {
-         if ($this->input->is_ajax_request()) {
-             echo json_encode(['status' => 'success', 'message' => 'Admin added successfully.']);
-             return;
-         }
-         $this->session->set_flashdata('success', 'Admin added successfully.');
-      } else {
-         $code = isset($result['code']) ? $result['code'] : 0;
-         $msg = 'Unable to create admin account due to a system constraint. Please verify your input or contact technical support.';
-         if ($code == 1142) {
-            $msg = 'Access Denied. You do not have sufficient database privileges to create administrator accounts.';
-         } elseif ($code == 1062) {
-            $msg = 'An account with these credentials already exists in the system.';
-         }
+      $internalUrlHit = $this->internalUrlHit . "/Internal/registerAdmin";
+
+      $internalCurl = curl_init();
+      curl_setopt_array($internalCurl, array(
+         CURLOPT_URL => $internalUrlHit,
+         CURLOPT_RETURNTRANSFER => true,
+         CURLOPT_ENCODING => '',
+         CURLOPT_MAXREDIRS => 10,
+         CURLOPT_TIMEOUT => 30,
+         CURLOPT_FOLLOWLOCATION => true,
+         CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+         CURLOPT_SSL_VERIFYHOST => 0,
+         CURLOPT_SSL_VERIFYPEER => 0,
+         CURLOPT_CUSTOMREQUEST => 'POST',
+         CURLOPT_POSTFIELDS => json_encode($internalRequestBody),
+         CURLOPT_HTTPHEADER => array('Content-Type: application/json'),
+      ));
+
+      $response = curl_exec($internalCurl);
+      $err = curl_error($internalCurl);
+      curl_close($internalCurl);
+
+      if ($err) {
+         $msg = 'Unable to reach internal gateway: ' . $err;
          if ($this->input->is_ajax_request()) {
              echo json_encode(['status' => 'error', 'message' => $msg]);
              return;
          }
          $this->session->set_flashdata('error', $msg);
+      } else {
+         $responseData = json_decode($response, true);
+         if ($responseData && isset($responseData['responseCode']) && $responseData['responseCode'] === 'SUCCESS') {
+            if ($this->input->is_ajax_request()) {
+                echo json_encode(['status' => 'success', 'message' => 'Admin added successfully.']);
+                return;
+            }
+            $this->session->set_flashdata('success', 'Admin added successfully.');
+         } else {
+            $apiCode = isset($responseData['responseCode']) ? $responseData['responseCode'] : 'UNKNOWN_ERROR';
+            $msg = 'Failed to create admin via API. Code: ' . $apiCode;
+            if ($apiCode === 'EMAIL_HAS_TAKEN') {
+                $msg = 'An account with these credentials already exists in the system.';
+            } else if ($apiCode === 'INVALID_PARAMETER') {
+                $msg = 'Failed: Invalid parameters sent to API.';
+                if (isset($responseData['responseMessage'])) {
+                    if (is_array($responseData['responseMessage'])) {
+                        $msg .= ' ' . implode(', ', array_map('strip_tags', $responseData['responseMessage']));
+                    } else if (is_string($responseData['responseMessage'])) {
+                        $msg .= ' ' . strip_tags($responseData['responseMessage']);
+                    }
+                }
+            }
+            if ($this->input->is_ajax_request()) {
+                echo json_encode(['status' => 'error', 'message' => $msg]);
+                return;
+            }
+            $this->session->set_flashdata('error', $msg);
+         }
       }
       redirect('access-control/accounts');
    }
