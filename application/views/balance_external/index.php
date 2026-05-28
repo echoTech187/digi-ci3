@@ -167,8 +167,8 @@ $(document).ready(function() {
         }
     });
 
-    $('#dt-global-search').on('keyup', function() {
+    $('#dt-global-search').on('input', debounce(function() {
         table.search(this.value).draw();
-    });
+    }, 400));
 });
 </script>

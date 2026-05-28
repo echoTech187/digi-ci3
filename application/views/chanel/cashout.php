@@ -375,9 +375,7 @@
             });
 
         // Global Search mapping
-        $('#cashoutGlobalSearch').on('keyup', function() {
-            table.search(this.value).draw();
-        });
+        $('#cashoutGlobalSearch').on('input', debounce(function() { table.search(this.value).draw(); }, 400));
 
         // Edit button mapping
         $(document).on('click', '.edit-cashout', function() {

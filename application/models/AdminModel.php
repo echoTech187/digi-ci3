@@ -17,13 +17,10 @@ class AdminModel extends CI_Model {
   }
   
   public function add_admin($data) {
-    $db_debug = $this->db->db_debug;
-    $this->db->db_debug = FALSE;
     
     $success = $this->db->insert('admin', $data);
     $error = $this->db->error();
     
-    $this->db->db_debug = $db_debug;
     
     if ($success) {
         return true;
@@ -35,13 +32,10 @@ class AdminModel extends CI_Model {
   public function update_admin($id, $data) {
     $this->db->where('id', $id);
     
-    $db_debug = $this->db->db_debug;
-    $this->db->db_debug = FALSE;
     
     $success = $this->db->update('admin', $data);
     $error = $this->db->error();
     
-    $this->db->db_debug = $db_debug;
     
     if ($success) {
         return true;
@@ -53,13 +47,10 @@ class AdminModel extends CI_Model {
   public function delete_admin($id) {
     $this->db->where('id', $id);
     
-    $db_debug = $this->db->db_debug;
-    $this->db->db_debug = FALSE;
     
     $success = $this->db->delete('admin');
     $error = $this->db->error();
     
-    $this->db->db_debug = $db_debug;
     
     if ($success) {
         return true;

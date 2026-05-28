@@ -80,7 +80,7 @@
                 <div class="dt-search-wrapper">
                     <i class="fas fa-search dt-search-icon"></i>
                     <?php $active_ewallet_search = $this->session->userdata('last_dt_search_ewallet') ?: ''; ?>
-                    <input type="text" id="ewalletGlobalSearch" class="dt-search-input" placeholder="<?= $active_ewallet_search ?: 'Search by Invoice or Trans ID...'; ?>" value="<?= $active_ewallet_search; ?>">
+                    <input type="text" id="ewalletGlobalSearch" class="dt-search-input" placeholder="Search by Invoice or Trans ID..." value="<?= $active_ewallet_search; ?>">
                 </div>
 
                 <!-- RIGHT: Primary chips + More Filters trigger -->

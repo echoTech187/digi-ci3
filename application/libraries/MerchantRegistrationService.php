@@ -46,8 +46,6 @@ class MerchantRegistrationService
             'c_created_date' => date('Y-m-d H:i:s')
         ];
 
-        $db_debug = $this->CI->db->db_debug;
-        $this->CI->db->db_debug = FALSE;
 
         // 3. Begin Database Transaction
         $this->CI->db->trans_start();
@@ -57,7 +55,6 @@ class MerchantRegistrationService
         if (!$success) {
             $err = $this->CI->db->error();
             $this->CI->db->trans_rollback();
-            $this->CI->db->db_debug = $db_debug;
             return $err;
         }
         $supervisorId = $this->CI->db->insert_id();
@@ -67,14 +64,12 @@ class MerchantRegistrationService
             $errAssign = $this->assignMerchantsToSupervisor($requestData['c_merchant_spv'], $supervisorId);
             if ($errAssign !== true) {
                 $this->CI->db->trans_rollback();
-                $this->CI->db->db_debug = $db_debug;
                 return $errAssign;
             }
         }
 
         // Commit transaction
         $this->CI->db->trans_complete();
-        $this->CI->db->db_debug = $db_debug;
 
         if ($this->CI->db->trans_status() === FALSE) {
             throw new Exception('Database transaction failed. Data rolled back.');
@@ -116,8 +111,6 @@ class MerchantRegistrationService
             $dataSupervisor['c_password'] = password_hash($requestData['c_password'], PASSWORD_DEFAULT);
         }
 
-        $db_debug = $this->CI->db->db_debug;
-        $this->CI->db->db_debug = FALSE;
 
         // 3. Begin Database Transaction
         $this->CI->db->trans_start();
@@ -128,7 +121,6 @@ class MerchantRegistrationService
         if (!$success) {
             $err = $this->CI->db->error();
             $this->CI->db->trans_rollback();
-            $this->CI->db->db_debug = $db_debug;
             return $err;
         }
 
@@ -138,7 +130,6 @@ class MerchantRegistrationService
         if (!$successReset) {
             $err = $this->CI->db->error();
             $this->CI->db->trans_rollback();
-            $this->CI->db->db_debug = $db_debug;
             return $err;
         }
 
@@ -147,14 +138,12 @@ class MerchantRegistrationService
             $errAssign = $this->assignMerchantsToSupervisor($requestData['c_merchant_spv'], $id);
             if ($errAssign !== true) {
                 $this->CI->db->trans_rollback();
-                $this->CI->db->db_debug = $db_debug;
                 return $errAssign;
             }
         }
 
         // Commit transaction
         $this->CI->db->trans_complete();
-        $this->CI->db->db_debug = $db_debug;
 
         if ($this->CI->db->trans_status() === FALSE) {
             throw new Exception('Database transaction failed. Data rolled back.');

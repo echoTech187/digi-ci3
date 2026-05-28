@@ -88,7 +88,7 @@ $download_url = base_url('finance/virtual-account/download')
                 <div class="dt-search-wrapper">
                     <i class="fas fa-search dt-search-icon"></i>
                     <?php $active_va_search = $this->session->userdata('last_dt_search_va') ?: ''; ?>
-                    <input type="text" id="vaGlobalSearch" class="dt-search-input" placeholder="<?= $active_va_search ?: 'Search by VA Number, Custom ID, Invoice, or Trans ID...'; ?>" value="<?= $active_va_search; ?>">
+                    <input type="text" id="vaGlobalSearch" class="dt-search-input" placeholder="Search by VA Number, Custom ID, Invoice, or Trans ID..." value="<?= $active_va_search; ?>">
                 </div>
 
                 <!-- RIGHT: Primary chips + More Filters trigger -->

@@ -72,7 +72,7 @@ $download_url = base_url('finance/mutation/download')
                 <div class="dt-search-wrapper">
                     <i class="fas fa-search dt-search-icon"></i>
                     <?php $active_mutation_search = $this->session->userdata('last_dt_search_mutation') ?: ''; ?>
-                    <input type="text" id="dt-search" class="dt-search-input" placeholder="<?= $active_mutation_search ?: 'Search by Channel, Description, ID...'; ?>" value="<?= $active_mutation_search; ?>">
+                    <input type="text" id="dt-search" class="dt-search-input" placeholder="Search by Channel, Description, ID..." value="<?= $active_mutation_search; ?>">
                 </div>
 
                 <!-- RIGHT: Filters & Download -->

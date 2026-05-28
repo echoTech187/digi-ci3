@@ -492,9 +492,7 @@
             });
 
         // Global Search mapping
-        $('#cashinGlobalSearch').on('keyup', function() {
-            table.search(this.value).draw();
-        });
+        $('#cashinGlobalSearch').on('input', debounce(function() { table.search(this.value).draw(); }, 400));
 
         // Edit button mapping
         $(document).on('click', '.edit-cashin', function() {

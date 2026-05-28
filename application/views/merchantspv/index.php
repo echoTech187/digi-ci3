@@ -100,6 +100,7 @@
                                         <option value="">All Account Statuses</option>
                                         <option value="Pending" <?= ($this->session->userdata('search_spv_status') == 'Pending') ? 'selected' : ''; ?>>Pending Approval</option>
                                         <option value="Active" <?= ($this->session->userdata('search_spv_status') == 'Active') ? 'selected' : ''; ?>>Active</option>
+                                        <option value="Not Active" <?= ($this->session->userdata('search_spv_status') == 'Not Active') ? 'selected' : ''; ?>>Not Active</option>
                                         <option value="Blocked" <?= ($this->session->userdata('search_spv_status') == 'Blocked') ? 'selected' : ''; ?>>Blocked</option>
                                         <option value="Freeze" <?= ($this->session->userdata('search_spv_status') == 'Freeze') ? 'selected' : ''; ?>>Frozen</option>
                                     </select>
@@ -509,9 +510,9 @@ $(document).ready(function() {
     });
 
     // Global Search
-    $('#dt-global-search').on('keyup', function() {
+    $('#dt-global-search').on('input', debounce(function() {
         table.search(this.value).draw();
-    });
+    }, 400));
 
     // More Filters dropdown
     var $moreBtn   = $('#spvMoreFiltersBtn');

@@ -29,7 +29,7 @@ class QRISRecurring extends CI_Model {
             $search_transid = trim($search_transid);
             if ($search_transid !== '') {
                 $safeTrans = $this->db->escape_str($search_transid);
-                $this->db->where("(crqm.c_merchantTransactionId LIKE '$safeTrans%' OR crqm.id LIKE '$safeTrans%')");
+                $this->db->where("(crqm.c_merchantTransactionId LIKE '$safeTrans%' OR crqm.id LIKE '$safeTrans%' OR crqm.c_referenceNo LIKE '$safeTrans%')");
             }
         }
         if ($search_status) {
@@ -83,7 +83,12 @@ class QRISRecurring extends CI_Model {
                 $matching_ids = [-1];
                 
                 // Check in technical ID columns
-                $res = $this->db->query("SELECT id FROM cashin_recurring_qris_mpm WHERE c_merchantTransactionId LIKE '$safeSearch%' LIMIT 100")->result();
+                $res = $this->db->query("
+                    SELECT id FROM cashin_recurring_qris_mpm WHERE c_merchantTransactionId LIKE '$safeSearch%'
+                    UNION
+                    SELECT id FROM cashin_recurring_qris_mpm WHERE c_referenceNo LIKE '$safeSearch%'
+                    LIMIT 100
+                ")->result();
                 if (!empty($res)) $matching_ids = array_merge($matching_ids, array_column($res, 'id'));
 
                 if (is_numeric($searchValue) && strlen($searchValue) < 15) {

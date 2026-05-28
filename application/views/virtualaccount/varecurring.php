@@ -73,7 +73,7 @@ $download_url = base_url('finance/virtual-account/download_recurring') // Assumi
                 <div class="dt-search-wrapper">
                     <i class="fas fa-search dt-search-icon"></i>
                     <?php $active_var_search = $this->session->userdata('last_dt_search_varecurring') ?: ''; ?>
-                    <input type="text" id="vaRecurringGlobalSearch" class="dt-search-input" placeholder="<?= $active_var_search ?: 'Search by Channel, Merchant, or ID...'; ?>" value="<?= $active_var_search; ?>">
+                    <input type="text" id="vaRecurringGlobalSearch" class="dt-search-input" placeholder="Search by Channel, Merchant, or ID..." value="<?= $active_var_search; ?>">
                 </div>
                 <!-- RIGHT: Filters -->
                 <div class="dt-toolbar-filters">
@@ -121,10 +121,10 @@ $download_url = base_url('finance/virtual-account/download_recurring') // Assumi
                                     <label class="dt-more-label"><i class="fas fa-info-circle mr-1 mr-2"></i> Status</label>
                                     <select name="search_status_transaction_var" class="dt-more-select select2">
                                         <option value="">All Statuses</option>
+                                        <option value="Created" <?= ($this->session->userdata('search_varecurring_status') == 'Created') ? 'selected' : ''; ?>>Created</option>
                                         <option value="Pending" <?= ($this->session->userdata('search_varecurring_status') == 'Pending') ? 'selected' : ''; ?>>Pending</option>
-                                        <option value="Paid" <?= ($this->session->userdata('search_varecurring_status') == 'Paid') ? 'selected' : ''; ?>>Paid</option>
                                         <option value="Failed" <?= ($this->session->userdata('search_varecurring_status') == 'Failed') ? 'selected' : ''; ?>>Failed</option>
-                                        <option value="Expired" <?= ($this->session->userdata('search_varecurring_status') == 'Expired') ? 'selected' : ''; ?>>Expired</option>
+                                        <option value="Cancel" <?= ($this->session->userdata('search_varecurring_status') == 'Cancel') ? 'selected' : ''; ?>>Cancel</option>
                                     </select>
                                 </div>
                                 <!-- Channel ID -->

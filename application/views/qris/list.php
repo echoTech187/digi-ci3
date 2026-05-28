@@ -77,7 +77,7 @@ $download_url = base_url('finance/qris/download')
                 <div class="dt-search-wrapper">
                     <i class="fas fa-search dt-search-icon"></i>
                     <?php $active_qris_search = $last_dt_search_qris_value; ?>
-                    <input type="text" id="qrisGlobalSearch" class="dt-search-input" placeholder="<?= htmlspecialchars($active_qris_search ?: 'Search by Invoice, Trans ID, or RRN...'); ?>" value="<?= htmlspecialchars($active_qris_search); ?>">
+                    <input type="text" id="qrisGlobalSearch" class="dt-search-input" placeholder="Search by Invoice, Trans ID, or RRN..." value="<?= htmlspecialchars($active_qris_search); ?>">
                 </div>
 
                 <!-- RIGHT: Primary chips + More Filters trigger -->
@@ -169,6 +169,9 @@ $download_url = base_url('finance/qris/download')
                         <th>RRN</th>
                         <th>Invoice No</th>
                         <th>Type</th>
+                        <th>Ext Channel</th>
+                        <th>Ext Ref ID 1</th>
+                        <th>Ext Ref ID 2</th>
                         <th>Amount</th>
                         <th>MDR</th>
                         <th>Fee</th>
@@ -209,6 +212,29 @@ $download_url = base_url('finance/qris/download')
             {data: 'c_issuerRrn',className: 'text-nowrap'},
             {data: 'c_invoiceNo',className: 'text-nowrap'},
             {data: 'c_type',className: 'text-nowrap'},
+            {
+                data: 'ref_cashinExternalId',
+                className: 'text-nowrap',
+                render: function(data) {
+                    return data ? data.toUpperCase() : '-';
+                }
+            },
+            {
+                data: 'c_partnerRefId',
+                className: 'text-nowrap',
+                render: function(data, type, row) {
+                    var ref = data || '-';
+                    return ref;
+                }
+            },
+            {
+                data: 'c_referenceNo',
+                className: 'text-nowrap',
+                render: function(data, type, row) {
+                    var ref = data || '-';
+                    return ref;
+                }
+            },
             {data: 'c_amount',className: 'text-nowrap', render: function(data){
                 return 'Rp ' + number_format(data, 0, ',', '.');
             }},

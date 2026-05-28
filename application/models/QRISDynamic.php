@@ -4,7 +4,7 @@ class QRISDynamic extends CI_Model
 {
     var $table = 'cashin_dynamic_qris_mpm cdq';
     var $column_order = array(null, 'cdq.c_datetimeRequest', 'm.c_name', 's.c_name', 'cdq.c_merchantTransactionId', 'ref_cashinChannelId', 'cdq.ref_cashinExternalId', 'cdq.c_amount', 'cdq.c_datetimeExpired', 'cdq.c_status');
-    var $column_search = array('cdq.c_merchantTransactionId', 'cdq.ref_merchantId', 'cdq.ref_subMerchantId', 's.c_name', 'm.c_name');
+    var $column_search = array('cdq.c_merchantTransactionId', 'cdq.ref_merchantId', 'cdq.ref_subMerchantId', 's.c_name', 'm.c_name', 'cdq.c_partnerRefId', 'cdq.c_referenceNo');
     var $order = array('cdq.id' => 'desc');
     
     // Request-level caching to prevent redundant pre-lookups
@@ -34,7 +34,14 @@ class QRISDynamic extends CI_Model
             if ($search_transid !== '') {
                 $safeTrans = $this->db->escape_str($search_transid);
                 // Pre-Lookup IDs to keep query indexed
-                $res = $this->db->query("SELECT id FROM cashin_dynamic_qris_mpm WHERE c_merchantTransactionId LIKE '$safeTrans%' LIMIT 100")->result();
+                $res = $this->db->query("
+                    SELECT id FROM cashin_dynamic_qris_mpm WHERE c_merchantTransactionId LIKE '$safeTrans%'
+                    UNION 
+                    SELECT id FROM cashin_dynamic_qris_mpm WHERE c_partnerRefId LIKE '$safeTrans%'
+                    UNION 
+                    SELECT id FROM cashin_dynamic_qris_mpm WHERE c_referenceNo LIKE '$safeTrans%'
+                    LIMIT 100
+                ")->result();
                 if (!empty($res)) {
                     $this->db->where_in('cdq.id', array_column($res, 'id'));
                 } else {
@@ -48,10 +55,7 @@ class QRISDynamic extends CI_Model
         }
 
         if ($search_reff) {
-            // Only join external if explicitly searched
-            $this->db->join('external_paydgn_qris_mpm_create epq', 'cdq.ref_cashinExternalLogQrisMpmIdCreate = epq.id', 'left');
-            $this->db->where('epq.refId', $search_reff);
-            $this->db->where('cdq.ref_cashinExternalId', 'paydgn');
+            $this->db->where('cdq.c_partnerRefId', $search_reff);
         }
 
         if ($search_channel) {
@@ -105,6 +109,9 @@ class QRISDynamic extends CI_Model
                 // Check in technical ID columns
                 $res = $this->db->query("SELECT id FROM cashin_dynamic_qris_mpm WHERE c_merchantTransactionId LIKE '$safeSearch%' LIMIT 100")->result();
                 if (!empty($res)) $matching_ids = array_merge($matching_ids, array_column($res, 'id'));
+                
+                $ext_res = $this->db->query("SELECT id FROM cashin_dynamic_qris_mpm WHERE c_partnerRefId LIKE '$safeSearch%' OR c_referenceNo LIKE '$safeSearch%' LIMIT 100")->result();
+                if (!empty($ext_res)) $matching_ids = array_merge($matching_ids, array_column($ext_res, 'id'));
                 
                 if (is_numeric($searchValue) && strlen($searchValue) < 15) {
                     $matching_ids[] = (int)$searchValue;
@@ -433,8 +440,8 @@ class QRISDynamic extends CI_Model
             $query1_1   = $this->db->query($qtxt1_1);
             $result1_1  = $query1_1->num_rows() ? $query1_1->row() : false;
             if ($result1_1) {
-                $TransactionIdExternal1     = $result1_1->c_transactionId;
-                $TransactionIdExternal2     = $result1_1->c_transactionCode;
+                $TransactionIdExternal1     = $result1_1->c_transactionCode;
+                $TransactionIdExternal2     = $result1_1->c_transactionId;
                 $DatetimeRequest            = $result1_1->c_datetimeRequest;
                 $RequestHeader              = $result1_1->c_requestHeader;
                 $RequestBody                = $result1_1->c_requestBody;

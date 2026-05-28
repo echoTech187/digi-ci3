@@ -758,9 +758,7 @@ $(document).ready(function() {
     });
 
     // Global search
-    $('#dt-search').on('keyup', function() {
-        table.search(this.value).draw();
-    });
+    $('#dt-search').on('input', debounce(function() { table.search(this.value).draw(); }, 400));
 
     // ── More Filters dropdown ──
     var $moreBtn   = $('#feeMoreFiltersBtn');

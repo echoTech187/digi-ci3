@@ -72,7 +72,7 @@
                 <div class="dt-search-wrapper">
                     <i class="fas fa-search dt-search-icon"></i>
                     <?php $active_qd_search = $this->session->userdata('last_dt_search_qrisdynamic'); ?>
-                    <input type="text" id="qrisDynamicGlobalSearch" class="dt-search-input" placeholder="<?= htmlspecialchars($active_qd_search ?: 'Search by Merchant, ID, or Reference...'); ?>" value="<?= htmlspecialchars($active_qd_search); ?>">
+                    <input type="text" id="qrisDynamicGlobalSearch" class="dt-search-input" placeholder="Search by Merchant, ID, or Reference..." value="<?= htmlspecialchars($active_qd_search); ?>">
                 </div>
 
                 <!-- RIGHT: Filters -->
@@ -200,10 +200,12 @@
                         <th>DATE REQUEST</th>
                         <th>MERCHANT INFO</th>
                         <th>SUB-MERCHANT INFO</th>
-                        <th>MERCHANT TRANS ID</th>
-                        <th>CHANNEL</th>
-                        <th>EXTERNAL ID</th>
-                        <th>AMOUNT</th>
+                        <th>Merchant Trans ID</th>
+                        <th>Channel</th>
+                        <th>External ID</th>
+                        <th>Ext Ref ID 1</th>
+                        <th>Ext Ref ID 2</th>
+                        <th>Amount</th>
                         <th>EXPIRED</th>
                         <th>STATUS</th>
                     </tr>
@@ -371,6 +373,12 @@
                 }
             },
             {data: 'ref_cashinExternalId', className: 'text-nowrap', render: function(data, type, row) {
+                return data ? data : '-';
+            }},
+            {data: 'c_partnerRefId', className: 'text-nowrap', render: function(data, type, row) {
+                return data ? data : '-';
+            }},
+            {data: 'c_referenceNo', className: 'text-nowrap', render: function(data, type, row) {
                 return data ? data : '-';
             }},
             {data: 'c_amount',className: 'text-nowrap', render: function(data){

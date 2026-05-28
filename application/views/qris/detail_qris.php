@@ -170,8 +170,161 @@
                                     </div>
                                 </div>
                             </div>
+                    </div>
+
+                    <?php if (!empty($create_log)): ?>
+                    <div class="col-12 mt-4">
+                        <div class="mb-0">
+                            <div class="d-flex align-items-start p-3 w-100 mb-3" style="background:rgba(78,115,223,0.06);border:1px solid rgba(78,115,223,0.12);border-radius:12px;">
+                                <div class="bg-info text-white rounded-circle d-flex align-items-center justify-content-center mr-3 flex-shrink-0" style="width:32px;height:32px;"><i class="fas fa-qrcode" style="font-size:13px;"></i></div>
+                                <div>
+                                    <h6 class="fw-bold mb-1" style="font-size:12px;color:var(--text-dark);">QRIS Generation Log (Create)</h6>
+                                    <p class="text-muted mb-0" style="font-size:11px;line-height:1.5;">Inspect QRIS dynamic payment details including QR generation data, merchant info, settlement routing, and external channel responses.</p>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <div class="mb-3">
+                                    <div class="small text-uppercase font-weight-bold text-muted mb-1">Provider</div>
+                                    <div class="h6 font-weight-bold text-light mb-0 text-uppercase"><?= $data['ref_cashinExternalId']; ?></div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3 mb-md-0">
+                                        <div class="small text-uppercase font-weight-bold text-muted mb-1">Ext Ref ID 1</div>
+                                        <div class="d-flex align-items-start">
+                                            <div class="h6 font-weight-bold text-light mb-0 text-break mr-2" style="word-break: break-all;"><?= $create_log['TransactionIdExternal1'] ?: '-'; ?></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="small text-uppercase font-weight-bold text-muted mb-1">Ext Ref ID 2</div>
+                                        <div class="d-flex align-items-start">
+                                            <div class="h6 font-weight-bold text-light mb-0 text-break mr-2" style="word-break: break-all;"><?= $create_log['TransactionIdExternal2'] ?: '-'; ?></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <ul class="nav nav-pills mb-3" id="createLogTab" role="tablist" style="gap: 10px;">
+                                <li class="nav-item">
+                                    <a class="nav-link active rounded-pill px-4 font-weight-bold" id="create-request-tab" data-toggle="pill" href="#create-request" style="font-size: 11px; border: 1px solid #4e73df;">REQUEST</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link rounded-pill px-4 font-weight-bold text-muted" id="create-response-tab" data-toggle="pill" href="#create-response" style="font-size: 11px; border: 1px solid #ddd;">RESPONSE</a>
+                                </li>
+                            </ul>
+                            
+                            <div class="tab-content" id="createLogTabContent">
+                                <div class="tab-pane fade show active" id="create-request">
+                                    <div class="bg-white rounded-lg p-3 border">
+                                        <div class="mb-3">
+                                            <label class="small font-weight-bold text-primary mb-1">Request Datetime</label>
+                                            <div class="text-dark small"><?= $create_log['RequestDatetime'] ?? '-'; ?></div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="small font-weight-bold text-primary mb-1">Headers</label>
+                                            <?php $reqH = is_array($create_log['RequestHeader']) ? json_encode($create_log['RequestHeader'], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) : $create_log['RequestHeader']; ?>
+                                            <pre class="p-3 bg-dark text-light rounded small border-0 mb-0" style="max-height: 150px; overflow-y: auto;"><?= htmlspecialchars($reqH ?: ''); ?></pre>
+                                        </div>
+                                        <div>
+                                            <label class="small font-weight-bold text-primary mb-1">Payload</label>
+                                            <?php $reqB = is_array($create_log['RequestBody']) ? json_encode($create_log['RequestBody'], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) : $create_log['RequestBody']; ?>
+                                            <pre class="p-3 bg-dark text-light rounded small border-0 mb-0" style="max-height: 250px; overflow-y: auto;"><?= htmlspecialchars($reqB ?: ''); ?></pre>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade" id="create-response">
+                                    <div class="bg-white rounded-lg p-3 border">
+                                        <div class="mb-3">
+                                            <label class="small font-weight-bold text-primary mb-1">Response Datetime</label>
+                                            <div class="text-dark small"><?= $create_log['ResponseDatetime'] ?? '-'; ?></div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="small font-weight-bold text-primary mb-1">Headers</label>
+                                            <?php $resH = is_array($create_log['ResponseHeader']) ? json_encode($create_log['ResponseHeader'], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) : $create_log['ResponseHeader']; ?>
+                                            <pre class="p-3 bg-dark text-light rounded small border-0 mb-0" style="max-height: 150px; overflow-y: auto;"><?= htmlspecialchars($resH ?: ''); ?></pre>
+                                        </div>
+                                        <div>
+                                            <label class="small font-weight-bold text-primary mb-1">Body</label>
+                                            <?php $resB = is_array($create_log['ResponseBody']) ? json_encode($create_log['ResponseBody'], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) : $create_log['ResponseBody']; ?>
+                                            <pre class="p-3 bg-dark text-light rounded small border-0 mb-0" style="max-height: 250px; overflow-y: auto;"><?= htmlspecialchars($resB ?: ''); ?></pre>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
+                    <?php endif; ?>
+
+                    <?php if (!empty($external_log)): ?>
+                    <div class="col-12 mt-4">
+                        <div class="mb-0">
+                            <div class="d-flex align-items-start p-3 w-100 mb-3" style="background:rgba(231,74,59,0.06);border:1px solid rgba(231,74,59,0.12);border-radius:12px;">
+                                <div class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center mr-3 flex-shrink-0" style="width:32px;height:32px;"><i class="fas fa-satellite-dish" style="font-size:13px;"></i></div>
+                                <div>
+                                    <h6 class="fw-bold mb-1" style="font-size:12px;color:var(--text-dark);">External Webhook / Payment Callback Log</h6>
+                                    <p class="text-muted mb-0" style="font-size:11px;line-height:1.5;">Inspect raw webhook payloads received from the external provider when this payment was settled.</p>
+                                </div>
+                            </div>
+
+                            <ul class="nav nav-pills mb-3" id="extLogTab" role="tablist" style="gap: 10px;">
+                                <li class="nav-item">
+                                    <a class="nav-link active rounded-pill px-4 font-weight-bold" id="ext-request-tab" data-toggle="pill" href="#ext-request" style="font-size: 11px; border: 1px solid #e74a3b;">REQUEST (INCOMING)</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link rounded-pill px-4 font-weight-bold text-muted" id="ext-response-tab" data-toggle="pill" href="#ext-response" style="font-size: 11px; border: 1px solid #ddd;">RESPONSE (OUTGOING)</a>
+                                </li>
+                            </ul>
+                            
+                            <div class="tab-content" id="extLogTabContent">
+                                <div class="tab-pane fade show active" id="ext-request">
+                                    <div class="bg-white rounded-lg p-3 border">
+                                        <div class="mb-3">
+                                            <label class="small font-weight-bold text-danger mb-1">Request Datetime</label>
+                                            <div class="text-dark small"><?= $external_log['c_datetimeRequest'] ?? '-'; ?></div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="small font-weight-bold text-danger mb-1">Headers</label>
+                                            <pre class="p-3 bg-dark text-light rounded small border-0 mb-0" style="max-height: 150px; overflow-y: auto;"><?= htmlspecialchars($external_log['c_requestHeader'] ?? ''); ?></pre>
+                                        </div>
+                                        <div>
+                                            <label class="small font-weight-bold text-danger mb-1">Payload Body</label>
+                                            <?php
+                                                $reqBody = $external_log['c_requestBody'] ?? '';
+                                                $reqJson = json_decode($reqBody, true);
+                                                $reqFormatted = $reqJson ? json_encode($reqJson, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) : $reqBody;
+                                            ?>
+                                            <pre class="p-3 bg-dark text-light rounded small border-0 mb-0" style="max-height: 250px; overflow-y: auto;"><?= htmlspecialchars($reqFormatted); ?></pre>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade" id="ext-response">
+                                    <div class="bg-white rounded-lg p-3 border">
+                                        <div class="mb-3">
+                                            <label class="small font-weight-bold text-danger mb-1">Response Datetime</label>
+                                            <div class="text-dark small"><?= $external_log['c_datetimeResponse'] ?? '-'; ?></div>
+                                        </div>
+                                        <?php if (isset($external_log['c_responseHeader'])): ?>
+                                        <div class="mb-3">
+                                            <label class="small font-weight-bold text-danger mb-1">Headers</label>
+                                            <pre class="p-3 bg-dark text-light rounded small border-0 mb-0" style="max-height: 150px; overflow-y: auto;"><?= htmlspecialchars($external_log['c_responseHeader'] ?? ''); ?></pre>
+                                        </div>
+                                        <?php endif; ?>
+                                        <div>
+                                            <label class="small font-weight-bold text-danger mb-1">Response Body</label>
+                                            <?php
+                                                $resBody = $external_log['c_responseBody'] ?? '';
+                                                $resJson = json_decode($resBody, true);
+                                                $resFormatted = $resJson ? json_encode($resJson, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) : $resBody;
+                                            ?>
+                                            <pre class="p-3 bg-dark text-light rounded small border-0 mb-0" style="max-height: 250px; overflow-y: auto;"><?= htmlspecialchars($resFormatted); ?></pre>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+
                 <?php endforeach; ?>
             </div>
             

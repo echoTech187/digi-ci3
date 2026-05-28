@@ -148,7 +148,19 @@ class QrisTransactionController extends CI_Controller
 
       $displayId = '#' . $id;
       if (!empty($data['qris_data'])) {
-         $displayId = '#' . $data['qris_data'][0]['c_invoiceNo'];
+         $row = $data['qris_data'][0];
+         $displayId = '#' . $row['c_invoiceNo'];
+         
+         // Fetch Callback Payment Log
+         $data['external_log'] = $this->Qris->get_external_payment_log($id, $row['ref_cashinExternalId']);
+         
+         // Fetch Generation (Create) Log
+         $data['create_log'] = null;
+         if ($row['c_type'] == 'Dynamic' && $row['dynamic_create_log_id']) {
+             $data['create_log'] = $this->QRISDynamic->getDataQrisDynamicChannelExternal($row['ref_cashinExternalId'], $row['dynamic_create_log_id'], $row['ref_cashinDynamicQrisMpmId']);
+         } elseif ($row['c_type'] == 'Recurring' && $row['recurring_create_log_id']) {
+             $data['create_log'] = $this->QRISRecurring->getDataQrisRecurringChannelExternal($row['ref_cashinExternalId'], $row['recurring_create_log_id'], $row['ref_cashinRecurringQrisMpmId']);
+         }
       }
       $data['breadcrumb_replace'] = [$id => $displayId];
 

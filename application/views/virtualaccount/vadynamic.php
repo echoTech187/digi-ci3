@@ -61,7 +61,7 @@
                 <div class="dt-search-wrapper">
                     <i class="fas fa-search dt-search-icon"></i>
                     <?php $active_vad_search = $this->session->userdata('last_dt_search_vadynamic') ?: ''; ?>
-                    <input type="text" id="vadynamicGlobalSearch" class="dt-search-input" placeholder="<?= $active_vad_search ?: 'Search by Channel, Merchant, or ID...'; ?>" value="<?= $active_vad_search; ?>">
+                    <input type="text" id="vadynamicGlobalSearch" class="dt-search-input" placeholder="Search by Channel, Merchant, or ID..." value="<?= $active_vad_search; ?>">
                 </div>
                 <!-- RIGHT: Filters -->
                 <div class="dt-toolbar-filters">

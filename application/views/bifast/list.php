@@ -82,7 +82,7 @@
                 <div class="dt-search-wrapper">
                     <i class="fas fa-search dt-search-icon"></i>
                     <?php $active_bifast_search = $this->session->userdata('last_dt_search_bifast') ?: ''; ?>
-                    <input type="text" id="bifastGlobalSearch" class="dt-search-input" placeholder="<?= $active_bifast_search ?: 'Search by Trans ID, Invoice, Account No, or Beneficiary Name...'; ?>" value="<?= $active_bifast_search; ?>">
+                    <input type="text" id="bifastGlobalSearch" class="dt-search-input" placeholder="Search by Trans ID, Invoice, Account No, or Beneficiary Name..." value="<?= $active_bifast_search; ?>">
                 </div>
 
                 <!-- RIGHT: Primary chips + More Filters trigger -->
@@ -145,7 +145,7 @@
                                     <label class="dt-more-label"><i class="fas fa-info-circle mr-1 mr-2"></i> Transaction Status</label>
                                     <select name="search_status_transaction_bifast" class="dt-more-select bifast-select2">
                                         <option value="">All Statuses</option>
-                                        <?php foreach(['Pending', 'Process', 'Success', 'Failed', 'Init', 'Timeout'] as $st): ?>
+                                        <?php foreach(['Pending', 'Process', 'Success', 'Failed', 'Cancel', 'Init', 'Timeout'] as $st): ?>
                                             <option value="<?= $st; ?>" <?= ($status_val == $st) ? 'selected' : ''; ?>><?= $st; ?></option>
                                         <?php endforeach; ?>
                                     </select>

@@ -95,8 +95,6 @@ class Merchant extends CI_Model
     }
 
     public function create_merchant($data, $gvconnectBusinessId, $gvconnectBusinessName) {
-        $db_debug = $this->db->db_debug;
-        $this->db->db_debug = FALSE;
         $this->db->trans_begin();
         if ($this->db->insert('merchant', $data)) {
             $submerchant_data = [
@@ -110,23 +108,19 @@ class Merchant extends CI_Model
             if (!$this->db->insert('submerchant', $submerchant_data)) {
                 $err = $this->db->error();
                 $this->db->trans_rollback();
-                $this->db->db_debug = $db_debug;
                 return $err;
             }
 
             if ($this->db->trans_status() === false) {
                 $this->db->trans_rollback();
-                $this->db->db_debug = $db_debug;
                 return ['code' => '500', 'message' => 'Transaction failed'];
             } else {
                 $this->db->trans_commit();
-                $this->db->db_debug = $db_debug;
                 return true;
             }
         } else {
             $err = $this->db->error();
             $this->db->trans_rollback();
-            $this->db->db_debug = $db_debug;
             return $err; // Returns array with 'code' and 'message'
         }
     }
@@ -174,12 +168,9 @@ class Merchant extends CI_Model
     }
 
     public function update_merchant($merchant_id, $data) {
-        $db_debug = $this->db->db_debug;
-        $this->db->db_debug = FALSE;
         $this->db->where('id', $merchant_id);
         $success = $this->db->update('merchant', $data);
         $error = $this->db->error();
-        $this->db->db_debug = $db_debug;
         return $success ? true : $error;
     }
 
@@ -299,8 +290,6 @@ class Merchant extends CI_Model
 
     public function save_merchant_delegation($granteeId, $permissionId, $action)
     {
-        $db_debug = $this->db->db_debug;
-        $this->db->db_debug = FALSE;
         // Action can be: 'Grant', 'Deny', 'Inherit'
         if ($action === 'Inherit') {
             // Delete any explicit grant by Admin (NULL or 0 granter)
@@ -309,7 +298,6 @@ class Merchant extends CI_Model
             $this->db->where('(ref_granterMerchantId IS NULL OR ref_granterMerchantId = 0)', null, false);
             $success = $this->db->delete('rbac_merchant_access_grants');
             $err = $this->db->error();
-            $this->db->db_debug = $db_debug;
             return $success ? true : $err;
         } else {
             $isAllowed = ($action === 'Grant') ? 1 : 0;
@@ -338,7 +326,6 @@ class Merchant extends CI_Model
                 $success = $this->db->insert('rbac_merchant_access_grants', $data);
             }
             $err = $this->db->error();
-            $this->db->db_debug = $db_debug;
             return $success ? true : $err;
         }
     }

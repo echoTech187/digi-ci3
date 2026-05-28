@@ -398,8 +398,6 @@ class MenuController extends CI_Controller
    {
       $id = $this->input->post('id');
       
-      $db_debug = $this->db->db_debug;
-      $this->db->db_debug = FALSE;
 
       // Also delete submenus
       $this->db->where('parent_id', $id);
@@ -414,7 +412,6 @@ class MenuController extends CI_Controller
       $successAccess = $this->db->delete('user_access_menu');
       $errAccess = $this->db->error();
 
-      $this->db->db_debug = $db_debug;
 
       if (!$successSub || $resultMenu !== true || !$successAccess) {
          $err = (!$successSub) ? $errSub : (($resultMenu !== true) ? $resultMenu : $errAccess);

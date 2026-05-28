@@ -64,44 +64,45 @@
             <div class="d-none d-lg-block ml-4 flex-grow-1" style="max-width: 450px;">
                 <div class="premium-search-container">
                     <?php
+                        $segment1 = $this->uri->segment(1);
                         $segment2 = $this->uri->segment(2);
                         $active_term = '';
                         
-                        if ($segment2 == 'qris') {
+                        if ($segment1 == 'finance' && $segment2 == 'qris') {
                             $active_term = $this->session->userdata('last_dt_search_qris');
-                        } elseif ($segment2 == 'virtual_account') {
+                        } elseif ($segment1 == 'finance' && $segment2 == 'virtual_account') {
                             $active_term = $this->session->userdata('last_dt_search_va');
-                        } elseif ($segment2 == 'ewallet') {
+                        } elseif ($segment1 == 'finance' && $segment2 == 'ewallet') {
                             $active_term = $this->session->userdata('last_dt_search_ewallet');
-                        } elseif ($segment2 == 'bi_fast') {
+                        } elseif ($segment1 == 'finance' && $segment2 == 'bi_fast') {
                             $active_term = $this->session->userdata('last_dt_search_bifast');
-                        } elseif ($segment2 == 'history') {
+                        } elseif ($segment1 == 'finance' && $segment2 == 'history') {
                             $active_term = $this->session->userdata('last_dt_search_history');
-                        } elseif ($segment2 == 'mutation') {
+                        } elseif ($segment1 == 'finance' && $segment2 == 'mutation') {
                             $active_term = $this->session->userdata('last_dt_search_mutation');
-                        } elseif ($segment2 == 'qris_dynamic') {
+                        } elseif ($segment1 == 'qris' && $segment2 == 'dynamic') {
                             $active_term = $this->session->userdata('last_dt_search_qrisdynamic');
-                        } elseif ($segment2 == 'ewallet_dynamic') {
+                        } elseif ($segment1 == 'e-wallet' && $segment2 == 'dynamic') {
                             $active_term = $this->session->userdata('last_dt_search_ewalletdynamic');
-                        } elseif ($segment2 == 'qris_recurring') {
+                        } elseif ($segment1 == 'qris' && $segment2 == 'recurring') {
                             $active_term = $this->session->userdata('last_dt_search_qrisrecurring');
-                        } elseif ($segment2 == 'Va_dynamic') {
+                        } elseif ($segment1 == 'virtual-account' && $segment2 == 'dynamic') {
                             $active_term = $this->session->userdata('last_dt_search_vadynamic');
-                        } elseif ($segment2 == 'VA_recurring') {
+                        } elseif ($segment1 == 'virtual-account' && $segment2 == 'recurring') {
                             $active_term = $this->session->userdata('last_dt_search_varecurring');
-                        } elseif ($segment2 == 'manage' && $this->uri->segment(1) == 'merchant') {
+                        } elseif ($segment1 == 'merchant' && $segment2 == 'manage') {
                             $active_term = $this->session->userdata('search_merchant');
-                        } elseif ($segment2 == 'accounts' && $this->uri->segment(1) == 'access-control') {
+                        } elseif ($segment1 == 'access-control' && $segment2 == 'accounts') {
                             $active_term = $this->session->userdata('search_admin');
-                        } elseif ($segment2 == 'supervisor' && $this->uri->segment(1) == 'merchant') {
+                        } elseif ($segment1 == 'merchant' && $segment2 == 'supervisor') {
                             $active_term = $this->session->userdata('search_spv');
-                        } elseif ($segment2 == 'cashin' && $this->uri->segment(1) == 'channel') {
+                        } elseif ($segment1 == 'channel' && $segment2 == 'cashin') {
                             $active_term = $this->session->userdata('search_channel');
-                        } elseif ($segment2 == 'cashout' && $this->uri->segment(1) == 'channel') {
+                        } elseif ($segment1 == 'channel' && $segment2 == 'cashout') {
                             $active_term = $this->session->userdata('search_channel_out');
-                        } elseif ($segment2 == 'cashin' && $this->uri->segment(1) == 'external') {
+                        } elseif ($segment1 == 'external' && $segment2 == 'cashin') {
                             $active_term = $this->session->userdata('search_external_cashin');
-                        } elseif ($segment2 == 'cashout' && $this->uri->segment(1) == 'external') {
+                        } elseif ($segment1 == 'external' && $segment2 == 'cashout') {
                             $active_term = $this->session->userdata('search_external_cashout');
                         }
                         

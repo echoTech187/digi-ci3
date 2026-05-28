@@ -1002,8 +1002,6 @@ class MerchantManagementController extends CI_Controller
          }
          $data['c_openapiSecurityType'] = !empty($data['c_openapiIPAllow']) ? 'Whitelist IP' : 'Not Both';
 
-         $db_debug = $this->db->db_debug;
-         $this->db->db_debug = FALSE;
 
          $this->db->trans_begin();
          $updMerchant = $this->Merchant->update_merchant($merchant_id, $data);
@@ -1062,7 +1060,6 @@ class MerchantManagementController extends CI_Controller
             }
             $this->session->set_flashdata('success', 'Merchant successfully updated.');
          }
-         $this->db->db_debug = $db_debug;
          redirect('merchant/manage/edit/' . $merchant_id);
       }
    }
@@ -1114,8 +1111,6 @@ class MerchantManagementController extends CI_Controller
          redirect('merchant/supervisor');
       }
 
-      $db_debug = $this->db->db_debug;
-      $this->db->db_debug = FALSE;
 
       $this->db->trans_start();
       $this->db->where('c_refSupervisor', $id);
@@ -1127,7 +1122,6 @@ class MerchantManagementController extends CI_Controller
       $errDelete = $this->db->error();
 
       $this->db->trans_complete();
-      $this->db->db_debug = $db_debug;
 
       if (!$successDelete || !$successUpdate) {
          $err = !$successDelete ? $errDelete : $errUpdate;

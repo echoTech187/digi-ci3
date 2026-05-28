@@ -203,11 +203,11 @@ class VirtualAccountTransactionController extends CI_Controller
 
       // Sync from GET/POST to Session
       $field_map = [
-         'search_vadynamic_name'      => 'search_name_qd',
-         'search_vadynamic_date1'     => 'search_date_qd',
-         'search_vadynamic_date2'     => 'search_date_qd_to',
-         'search_vadynamic_status'    => 'search_status_transaction_qd',
-         'search_vadynamic_transid'   => 'search_transid_qd',
+         'search_vadynamic_name'      => 'search_name_vad',
+         'search_vadynamic_date1'     => 'search_date_vad',
+         'search_vadynamic_date2'     => 'search_date_vad_to',
+         'search_vadynamic_status'    => 'search_status_transaction_vad',
+         'search_vadynamic_transid'   => 'search_transid_vad',
          'search_vadynamic_va_number' => 'search_va_number',
          'search_vadynamic_channel'   => 'search_channel_vadynamic',
          'search_vadynamic_external'  => 'search_external_vadynamic'

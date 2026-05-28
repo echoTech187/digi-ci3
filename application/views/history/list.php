@@ -36,7 +36,7 @@ $download_url = base_url('finance/history/download')
                 <div class="dt-search-wrapper">
                     <i class="fas fa-search dt-search-icon"></i>
                     <?php $active_ppob_search = $this->session->userdata('last_dt_search_history') ?: ''; ?>
-                    <input type="text" id="historyGlobalSearch" class="dt-search-input" placeholder="<?= $active_ppob_search ?: 'Search by Invoice, ID Product, or Phone...'; ?>" value="<?= $active_ppob_search; ?>">
+                    <input type="text" id="historyGlobalSearch" class="dt-search-input" placeholder="Search by Invoice, ID Product, or Phone..." value="<?= $active_ppob_search; ?>">
                 </div>
                 <!-- RIGHT: Filters -->
                 <div class="dt-toolbar-filters">

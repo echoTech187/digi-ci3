@@ -66,7 +66,7 @@
                 <div class="dt-search-wrapper">
                     <i class="fas fa-search dt-search-icon"></i>
                     <?php $active_ed_search = $this->session->userdata('last_dt_search_ewalletdynamic') ?: ''; ?>
-                    <input type="text" id="ewalletDynamicGlobalSearch" class="dt-search-input" placeholder="<?= $active_ed_search ?: 'Search Transaction, Merchant, or ID...'; ?>" value="<?= $active_ed_search; ?>">
+                    <input type="text" id="ewalletDynamicGlobalSearch" class="dt-search-input" placeholder="Search Transaction, Merchant, or ID..." value="<?= $active_ed_search; ?>">
                 </div>
 
                 <!-- RIGHT: Filters -->

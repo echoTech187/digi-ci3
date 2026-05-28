@@ -61,7 +61,7 @@
                 <div class="dt-search-wrapper">
                     <i class="fas fa-search dt-search-icon"></i>
                     <?php $active_qr_search = $this->session->userdata('last_dt_search_qrisrecurring'); ?>
-                    <input type="text" id="qrisRecurringGlobalSearch" class="dt-search-input" placeholder="<?= htmlspecialchars($active_qr_search ?: 'Search by Merchant, ID, or Reference...'); ?>" value="<?= htmlspecialchars($active_qr_search); ?>">
+                    <input type="text" id="qrisRecurringGlobalSearch" class="dt-search-input" placeholder="Search by Merchant, ID, or Reference..." value="<?= htmlspecialchars($active_qr_search); ?>">
                 </div>
                 
                 <!-- RIGHT: Filters -->
@@ -112,11 +112,9 @@
                                     <label class="dt-more-label"><i class="fas fa-info-circle mr-1 mr-2"></i> Status</label>
                                     <select name="search_status_transaction_qr" class="dt-more-select qris-recurring-select2">
                                         <option value="">All Statuses</option>
-                                        <option value="Pending" <?= ($this->session->userdata('search_qrisrecurring_status') == 'Pending') ? 'selected' : ''; ?>>Pending</option>
                                         <option value="Created" <?= ($this->session->userdata('search_qrisrecurring_status') == 'Created') ? 'selected' : ''; ?>>Created</option>
-                                        <option value="Paid" <?= ($this->session->userdata('search_qrisrecurring_status') == 'Paid') ? 'selected' : ''; ?>>Paid</option>
+                                        <option value="Pending" <?= ($this->session->userdata('search_qrisrecurring_status') == 'Pending') ? 'selected' : ''; ?>>Pending</option>
                                         <option value="Failed" <?= ($this->session->userdata('search_qrisrecurring_status') == 'Failed') ? 'selected' : ''; ?>>Failed</option>
-                                        <option value="Expired" <?= ($this->session->userdata('search_qrisrecurring_status') == 'Expired') ? 'selected' : ''; ?>>Expired</option>
                                         <option value="Cancel" <?= ($this->session->userdata('search_qrisrecurring_status') == 'Cancel') ? 'selected' : ''; ?>>Cancel</option>
                                     </select>
                                 </div>

@@ -37,43 +37,31 @@ class Model_menu extends CI_Model
 
    public function insert_menu($data, $table)
    {
-      $db_debug = $this->db->db_debug;
-      $this->db->db_debug = FALSE;
       $success = $this->db->insert($table, $data);
       $error = $this->db->error();
-      $this->db->db_debug = $db_debug;
       return $success ? true : $error;
    }
 
    public function insert_subMenu($data, $table)
    {
-      $db_debug = $this->db->db_debug;
-      $this->db->db_debug = FALSE;
       $success = $this->db->insert($table, $data);
       $error = $this->db->error();
-      $this->db->db_debug = $db_debug;
       return $success ? true : $error;
    }
 
    public function hapus_menu($where, $table)
    {
       $this->db->where($where);
-      $db_debug = $this->db->db_debug;
-      $this->db->db_debug = FALSE;
       $success = $this->db->delete($table);
       $error = $this->db->error();
-      $this->db->db_debug = $db_debug;
       return $success ? true : $error;
    }
 
    public function hapus_subMenu($where, $table)
    {
       $this->db->where($where);
-      $db_debug = $this->db->db_debug;
-      $this->db->db_debug = FALSE;
       $success = $this->db->delete($table);
       $error = $this->db->error();
-      $this->db->db_debug = $db_debug;
       return $success ? true : $error;
    }
 
@@ -85,11 +73,8 @@ class Model_menu extends CI_Model
    public function changeSubMenu($where, $data, $table)
    {
       $this->db->where($where);
-      $db_debug = $this->db->db_debug;
-      $this->db->db_debug = FALSE;
       $success = $this->db->update($table, $data);
       $error = $this->db->error();
-      $this->db->db_debug = $db_debug;
       return $success ? true : $error;
    }
 
@@ -101,11 +86,8 @@ class Model_menu extends CI_Model
    public function changeMenu($where, $data, $table)
    {
       $this->db->where($where);
-      $db_debug = $this->db->db_debug;
-      $this->db->db_debug = FALSE;
       $success = $this->db->update($table, $data);
       $error = $this->db->error();
-      $this->db->db_debug = $db_debug;
       return $success ? true : $error;
    }
 
