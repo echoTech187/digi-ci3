@@ -260,11 +260,11 @@
                             </div>
                             <div class="mb-3">
                                 <label class="small font-weight-bold text-primary mb-1">Headers</label>
-                                <pre class="p-3 rounded small border-0 mb-0" id="RequestHeader" style="max-height: 150px; overflow-y: auto;"></pre>
+                                <pre class="p-3 bg-dark text-light rounded small border-0 mb-0" id="RequestHeader" style="max-height: 150px; overflow-y: auto;"></pre>
                             </div>
                             <div>
                                 <label class="small font-weight-bold text-primary mb-1">Payload</label>
-                                <pre class="p-3 rounded small border-0 mb-0" id="RequestBody" style="max-height: 250px; overflow-y: auto;"></pre>
+                                <pre class="p-3 bg-dark text-light rounded small border-0 mb-0" id="RequestBody" style="max-height: 250px; overflow-y: auto;"></pre>
                             </div>
                         </div>
                     </div>
@@ -276,11 +276,11 @@
                             </div>
                             <div class="mb-3">
                                 <label class="small font-weight-bold text-primary mb-1">Headers</label>
-                                <pre class="p-3 rounded small border-0 mb-0" id="ResponseHeader" style="max-height: 150px; overflow-y: auto;"></pre>
+                                <pre class="p-3 bg-dark text-light rounded small border-0 mb-0" id="ResponseHeader" style="max-height: 150px; overflow-y: auto;"></pre>
                             </div>
                             <div>
                                 <label class="small font-weight-bold text-primary mb-1">Body</label>
-                                <pre class="p-3 rounded small border-0 mb-0" id="ResponseBody" style="max-height: 250px; overflow-y: auto;"></pre>
+                                <pre class="p-3 bg-dark text-light rounded small border-0 mb-0" id="ResponseBody" style="max-height: 250px; overflow-y: auto;"></pre>
                             </div>
                         </div>
                     </div>

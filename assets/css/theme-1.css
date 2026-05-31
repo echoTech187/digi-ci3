@@ -7270,3 +7270,12 @@ body>.dropdown-menu .dropdown-divider {
 
 
 
+[data-theme="dark"] .bg-dark {
+    background-color: #010101 !important;
+    color: var(--gray-800) !important;
+}
+
+[data-theme="dark"] .bg-secondary {
+    background-color: #020202 !important;
+    color: var(--gray-800) !important;
+}

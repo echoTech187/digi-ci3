@@ -170,8 +170,6 @@ $download_url = base_url('finance/qris/download')
                         <th>Invoice No</th>
                         <th>Type</th>
                         <th>Ext Channel</th>
-                        <th>Ext Ref ID 1</th>
-                        <th>Ext Ref ID 2</th>
                         <th>Amount</th>
                         <th>MDR</th>
                         <th>Fee</th>
@@ -217,22 +215,6 @@ $download_url = base_url('finance/qris/download')
                 className: 'text-nowrap',
                 render: function(data) {
                     return data ? data.toUpperCase() : '-';
-                }
-            },
-            {
-                data: 'c_partnerRefId',
-                className: 'text-nowrap',
-                render: function(data, type, row) {
-                    var ref = data || '-';
-                    return ref;
-                }
-            },
-            {
-                data: 'c_referenceNo',
-                className: 'text-nowrap',
-                render: function(data, type, row) {
-                    var ref = data || '-';
-                    return ref;
                 }
             },
             {data: 'c_amount',className: 'text-nowrap', render: function(data){

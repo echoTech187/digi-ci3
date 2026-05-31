@@ -203,8 +203,6 @@
                         <th>Merchant Trans ID</th>
                         <th>Channel</th>
                         <th>External ID</th>
-                        <th>Ext Ref ID 1</th>
-                        <th>Ext Ref ID 2</th>
                         <th>Amount</th>
                         <th>EXPIRED</th>
                         <th>STATUS</th>
@@ -294,11 +292,11 @@
                             </div>
                             <div class="mb-3">
                                 <label class="small font-weight-bold text-primary mb-1">Headers</label>
-                                <pre class="p-3 rounded small border-0 mb-0" id="RequestHeader" style="max-height: 150px; overflow-y: auto;"></pre>
+                                <pre class="p-3 bg-dark text-light rounded small border-0 mb-0" id="RequestHeader" style="max-height: 150px; overflow-y: auto;"></pre>
                             </div>
                             <div>
                                 <label class="small font-weight-bold text-primary mb-1">Payload</label>
-                                <pre class="p-3 rounded small border-0 mb-0" id="RequestBody" style="max-height: 250px; overflow-y: auto;"></pre>
+                                <pre class="p-3 bg-dark text-light rounded small border-0 mb-0" id="RequestBody" style="max-height: 250px; overflow-y: auto;"></pre>
                             </div>
                         </div>
                     </div>
@@ -310,11 +308,11 @@
                             </div>
                             <div class="mb-3">
                                 <label class="small font-weight-bold text-primary mb-1">Headers</label>
-                                <pre class="p-3 rounded small border-0 mb-0" id="ResponseHeader" style="max-height: 150px; overflow-y: auto;"></pre>
+                                <pre class="p-3 bg-dark text-light rounded small border-0 mb-0" id="ResponseHeader" style="max-height: 150px; overflow-y: auto;"></pre>
                             </div>
                             <div>
                                 <label class="small font-weight-bold text-primary mb-1">Body</label>
-                                <pre class="p-3 rounded small border-0 mb-0" id="ResponseBody" style="max-height: 250px; overflow-y: auto;"></pre>
+                                <pre class="p-3 bg-dark text-light rounded small border-0 mb-0" id="ResponseBody" style="max-height: 250px; overflow-y: auto;"></pre>
                             </div>
                         </div>
                     </div>
@@ -373,12 +371,6 @@
                 }
             },
             {data: 'ref_cashinExternalId', className: 'text-nowrap', render: function(data, type, row) {
-                return data ? data : '-';
-            }},
-            {data: 'c_extRefId1', className: 'text-nowrap', render: function(data, type, row) {
-                return data ? data : '-';
-            }},
-            {data: 'c_extRefId2', className: 'text-nowrap', render: function(data, type, row) {
                 return data ? data : '-';
             }},
             {data: 'c_amount',className: 'text-nowrap', render: function(data){

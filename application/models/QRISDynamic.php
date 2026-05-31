@@ -4,7 +4,7 @@ class QRISDynamic extends CI_Model
 {
     var $table = 'cashin_dynamic_qris_mpm cdq';
     var $column_order = array(null, 'cdq.c_datetimeRequest', 'm.c_name', 's.c_name', 'cdq.c_merchantTransactionId', 'ref_cashinChannelId', 'cdq.ref_cashinExternalId', 'cdq.c_amount', 'cdq.c_datetimeExpired', 'cdq.c_status');
-    var $column_search = array('cdq.c_merchantTransactionId', 'cdq.ref_merchantId', 'cdq.ref_subMerchantId', 's.c_name', 'm.c_name', 'cdq.c_extRefId1', 'cdq.c_extRefId2');
+    var $column_search = array('cdq.c_merchantTransactionId', 'cdq.ref_merchantId', 'cdq.ref_subMerchantId', 's.c_name', 'm.c_name');
     var $order = array('cdq.id' => 'desc');
     
     // Request-level caching to prevent redundant pre-lookups
@@ -36,10 +36,6 @@ class QRISDynamic extends CI_Model
                 // Pre-Lookup IDs to keep query indexed
                 $res = $this->db->query("
                     SELECT id FROM cashin_dynamic_qris_mpm WHERE c_merchantTransactionId LIKE '$safeTrans%'
-                    UNION 
-                    SELECT id FROM cashin_dynamic_qris_mpm WHERE c_extRefId1 LIKE '$safeTrans%'
-                    UNION 
-                    SELECT id FROM cashin_dynamic_qris_mpm WHERE c_extRefId2 LIKE '$safeTrans%'
                     LIMIT 100
                 ")->result();
                 if (!empty($res)) {
@@ -54,13 +50,6 @@ class QRISDynamic extends CI_Model
             $this->db->where('cdq.c_status', $search_status);
         }
 
-        if ($search_reff) {
-            $this->db->where('cdq.c_extRefId2', $search_reff);
-        }
-
-        if ($search_partner_reff) {
-            $this->db->where('cdq.c_extRefId1', $search_partner_reff);
-        }
 
         if ($search_channel) {
             if ($search_channel === 'qris_mpm') {
@@ -85,7 +74,7 @@ class QRISDynamic extends CI_Model
         } else if ($only_ids) {
             $this->db->select("cdq.id");
         } else {
-            $this->db->select("cdq.id,cdp.c_extRefId1,cdp.c_extRefId2, cdq.c_datetimeRequest, cdq.c_merchantTransactionId, cdq.ref_cashinExternalId, cdq.c_amount, cdq.c_datetimeExpired, cdq.c_status, cdq.ref_merchantId, cdq.ref_subMerchantId, s.c_name as name_submerchant, m.c_name as name_merchant");
+            $this->db->select("cdq.id, cdq.c_datetimeRequest, cdq.c_merchantTransactionId, cdq.ref_cashinExternalId, cdq.c_amount, cdq.c_datetimeExpired, cdq.c_status, cdq.ref_merchantId, cdq.ref_subMerchantId, s.c_name as name_submerchant, m.c_name as name_merchant");
         }
         $this->db->from($this->table);
         

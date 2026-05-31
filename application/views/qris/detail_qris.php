@@ -192,13 +192,13 @@
                                     <div class="col-md-6 mb-3 mb-md-0">
                                         <div class="small text-uppercase font-weight-bold text-muted mb-1">Ext Ref ID 1</div>
                                         <div class="d-flex align-items-start">
-                                            <div class="h6 font-weight-bold text-light mb-0 text-break mr-2" style="word-break: break-all;"><?= $create_log['TransactionIdExternal1'] ?: '-'; ?></div>
+                                            <div class="h6 font-weight-bold text-light mb-0 text-break mr-2" style="word-break: break-all;"><?= isset($create_log['TransactionIdExternal1']) && $create_log['TransactionIdExternal1'] ? $create_log['TransactionIdExternal1'] : '-'; ?></div>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="small text-uppercase font-weight-bold text-muted mb-1">Ext Ref ID 2</div>
                                         <div class="d-flex align-items-start">
-                                            <div class="h6 font-weight-bold text-light mb-0 text-break mr-2" style="word-break: break-all;"><?= $create_log['TransactionIdExternal2'] ?: '-'; ?></div>
+                                            <div class="h6 font-weight-bold text-light mb-0 text-break mr-2" style="word-break: break-all;"><?= isset($create_log['TransactionIdExternal2']) && $create_log['TransactionIdExternal2'] ? $create_log['TransactionIdExternal2'] : '-'; ?></div>
                                         </div>
                                     </div>
                                 </div>
