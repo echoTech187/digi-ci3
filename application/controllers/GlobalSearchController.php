@@ -144,8 +144,9 @@ class GlobalSearchController extends CI_Controller
 
                 if ($needQris) {
                     $parts[] = "(SELECT 'qdt' AS s, CAST(id AS CHAR) AS r, c_merchantTransactionId AS tid, CAST(c_amount AS CHAR) AS amt FROM cashin_dynamic_qris_mpm WHERE c_merchantTransactionId $op $val LIMIT 5)";
-                    $parts[] = "(SELECT 'qdp', CAST(id AS CHAR), c_merchantTransactionId, CAST(c_amount AS CHAR) FROM cashin_dynamic_qris_mpm WHERE c_partnerRefId $op $val LIMIT 5)";
-                    $parts[] = "(SELECT 'qdr', CAST(id AS CHAR), c_merchantTransactionId, CAST(c_amount AS CHAR) FROM cashin_dynamic_qris_mpm WHERE c_referenceNo $op $val LIMIT 5)";
+                    $parts[] = "(SELECT 'qdp', CAST(id AS CHAR), c_merchantTransactionId, CAST(c_amount AS CHAR) FROM cashin_dynamic_qris_mpm WHERE c_extRefId1 $op $val LIMIT 5)";
+                    $parts[] = "(SELECT 'qdr', CAST(id AS CHAR), c_merchantTransactionId, CAST(c_amount AS CHAR) FROM cashin_dynamic_qris_mpm WHERE c_extRefId2 $op $val LIMIT 5)";
+                    
                     if ($has_access('finance/qris'))
                         $parts[] = "(SELECT 'qrn', CAST(id AS CHAR), '', '0' FROM cashin_payment_qris_mpm WHERE c_issuerRrn $op $val LIMIT 5)";
                     if ($has_access('qris/recurring'))

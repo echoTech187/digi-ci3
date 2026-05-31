@@ -278,8 +278,10 @@ class CashoutExternalController extends CI_Controller {
             $this->session->set_flashdata('error', validation_errors());
             if ($mode == 'add') {
                 redirect('external/cashout/create');
-            } else {
+            } else if($mode == 'edit') {
                 redirect('external/cashout/edit/' . $id);
+            }else{
+                redirect('external/cashout');
             }
         }
     }

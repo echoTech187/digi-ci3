@@ -157,14 +157,6 @@ $id = $this->uri->segment(3);
                                         <h6 class="fw-bold mb-1 d-flex align-items-center" style="font-size: 12.5px;"><i class="fas fa-sitemap text-warning mr-2"></i> 1. Hierarchy Integrity</h6>
                                         <p class="text-muted mb-0" style="font-size: 11px; line-height: 1.5;">Sub-accounts operate as branch entities under the parent merchant's clearance and financial settlement umbrella.</p>
                                     </div>
-                                    <div class="bg-white p-3 rounded-4 shadow-sm border-0 mb-3" style="background-color: rgba(255, 255, 255, 0.03) !important; border: 1px solid rgba(255, 255, 255, 0.08) !important;">
-                                        <h6 class="fw-bold mb-1 d-flex align-items-center" style="font-size: 12.5px;"><i class="fas fa-plug text-info mr-2"></i> 2. GVConnect Gateway</h6>
-                                        <p class="text-muted mb-0" style="font-size: 11px; line-height: 1.5;">Ensure Business ID and Keys match the gateway configuration for seamless static VA and QRIS generation.</p>
-                                    </div>
-                                    <div class="bg-white p-3 rounded-4 shadow-sm border-0 mb-3" style="background-color: rgba(255, 255, 255, 0.03) !important; border: 1px solid rgba(255, 255, 255, 0.08) !important;">
-                                        <h6 class="fw-bold mb-1 d-flex align-items-center" style="font-size: 12.5px;"><i class="fas fa-user-shield text-success mr-2"></i> 3. Status Control</h6>
-                                        <p class="text-muted mb-0" style="font-size: 11px; line-height: 1.5;">Toggling account status instantly enables or revokes access to the merchant portal and API endpoints.</p>
-                                    </div>
                                 </div>
                             </div>
                             <div class="bg-white p-3 rounded-4 shadow-sm border-0 mt-3 d-flex align-items-center" style="background-color: rgba(255, 255, 255, 0.03) !important; border: 1px solid rgba(255, 255, 255, 0.08) !important;">
@@ -172,7 +164,6 @@ $id = $this->uri->segment(3);
                                 <span class="text-muted" style="font-size: 11px; line-height: 1.4;">Need help? Contact system administrator for advanced routing configurations.</span>
                             </div>
                         </div>
-
                         <!-- Right Form Area -->
                         <div class="col-lg-8 p-4 bg-light mb-0">
                             <div class="row g-4 mb-4">
@@ -190,7 +181,11 @@ $id = $this->uri->segment(3);
                                                 <label class="form-label small fw-bold text-muted">Email Address <span class="text-danger">*</span></label>
                                                 <input type="email" class="form-control border-1 bg-dark text-white" name="c_email" id="modal_c_email" required placeholder="e.g. branch1@store.com" style="border-color: rgba(255,255,255,0.1);">
                                             </div>
-                                            <div class="col-md-6 mb-0">
+                                            <div class="col-md-12 mb-0">
+                                                <label class="form-label small fw-bold text-muted">Callback Transfer <span class="text-danger">*</span></label>
+                                                <input type="text" class="form-control border-1 bg-dark text-white" name="c_callbackTransfer" id="modal_c_callbackTransfer" required placeholder="e.g. transfer/disbursement" style="border-color: rgba(255,255,255,0.1);">
+                                            </div>
+                                            <div class="col-md-12 mb-0">
                                                 <label class="form-label small fw-bold text-muted">Account Status <span class="text-danger">*</span></label>
                                                 <select class="form-control border-1 bg-dark text-white" name="c_status" id="modal_c_status" required style="border-color: rgba(255,255,255,0.1);">
                                                     <option value="Active">Active</option>
@@ -203,47 +198,7 @@ $id = $this->uri->segment(3);
                                     </div>
                                 </div>
 
-                                <div class="col-md-12">
-                                    <div class="card h-100 border-0 shadow-none p-4 rounded-4">
-                                        <h6 class="text-primary fw-bold mb-3 d-flex align-items-center">
-                                            <i class="fas fa-plug mr-2"></i> GVCONNECT &amp; STATIC VA
-                                        </h6>
-                                        <div class="row g-3">
-                                            <div class="col-md-6 mb-3">
-                                                <label class="form-label small fw-bold text-muted">GVConnect Business ID <span class="text-danger">*</span></label>
-                                                <input type="text" class="form-control border-1 bg-dark text-white" name="c_gvconnectBusinessId" id="modal_c_gvconnectBusinessId" required placeholder="Business ID" style="border-color: rgba(255,255,255,0.1);">
-                                            </div>
-                                            <div class="col-md-6 mb-3">
-                                                <label class="form-label small fw-bold text-muted">GVConnect Business Name</label>
-                                                <input type="text" class="form-control border-1 bg-dark text-white" name="c_gvconnectBusinessName" id="modal_c_gvconnectBusinessName" placeholder="Business Name" style="border-color: rgba(255,255,255,0.1);">
-                                            </div>
-                                            <div class="col-12 mb-3">
-                                                <label class="form-label small fw-bold text-muted">GVConnect Key</label>
-                                                <input type="text" class="form-control border-1 bg-dark text-white" name="c_gvconnectGVConnectKey" id="modal_c_gvconnectGVConnectKey" placeholder="API Key / Secret" style="border-color: rgba(255,255,255,0.1);">
-                                            </div>
-                                            <div class="col-12 mb-3">
-                                                <label class="form-label small fw-bold text-muted">Static QRIS Raw</label>
-                                                <textarea class="form-control border-1 bg-dark text-white" name="c_gvconnectStaticQrisRaw" id="modal_c_gvconnectStaticQrisRaw" rows="2" placeholder="QRIS Raw String" style="border-color: rgba(255,255,255,0.1);"></textarea>
-                                            </div>
-                                            <div class="col-md-6 mb-3">
-                                                <label class="form-label small fw-bold text-muted">Static VA BNI</label>
-                                                <input type="text" class="form-control border-1 bg-dark text-white" name="c_gvconnectStaticVaBni" id="modal_c_gvconnectStaticVaBni" placeholder="BNI Virtual Account" style="border-color: rgba(255,255,255,0.1);">
-                                            </div>
-                                            <div class="col-md-6 mb-3">
-                                                <label class="form-label small fw-bold text-muted">Static VA BCA</label>
-                                                <input type="text" class="form-control border-1 bg-dark text-white" name="c_gvconnectStaticVaBca" id="modal_c_gvconnectStaticVaBca" placeholder="BCA Virtual Account" style="border-color: rgba(255,255,255,0.1);">
-                                            </div>
-                                            <div class="col-md-6 mb-3">
-                                                <label class="form-label small fw-bold text-muted">Static VA CIMB</label>
-                                                <input type="text" class="form-control border-1 bg-dark text-white" name="c_gvconnectStaticVaCimb" id="modal_c_gvconnectStaticVaCimb" placeholder="CIMB Virtual Account" style="border-color: rgba(255,255,255,0.1);">
-                                            </div>
-                                            <div class="col-md-6 mb-0">
-                                                <label class="form-label small fw-bold text-muted">Static VA PERMATA</label>
-                                                <input type="text" class="form-control border-1 bg-dark text-white" name="c_gvconnectStaticVaPermata" id="modal_c_gvconnectStaticVaPermata" placeholder="Permata Virtual Account" style="border-color: rgba(255,255,255,0.1);">
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                
                             </div>
                         </div>
                     </div>
@@ -306,14 +261,7 @@ $(document).ready(function() {
                                     data-name="${row.c_name}"
                                     data-email="${row.c_email}"
                                     data-merchantid="${row.parent_merchant_id}"
-                                    data-businessname="${row.c_gvconnectBusinessName}"
-                                    data-businessid="${row.c_gvconnectBusinessId}"
-                                    data-key="${row.c_gvconnectGVConnectKey}"
-                                    data-qris="${row.c_gvconnectStaticQrisRaw}"
-                                    data-bni="${row.c_gvconnectStaticVaBni}"
-                                    data-bca="${row.c_gvconnectStaticVaBca}"
-                                    data-cimb="${row.c_gvconnectStaticVaCimb}"
-                                    data-permata="${row.c_gvconnectStaticVaPermata}"
+                                    data-callbacktransfer="${row.c_callbackTransfer}"
                                     data-status="${row.c_status}">
                                     <i class="fas fa-edit mr-2 text-info"></i>Edit Details
                                 </button>
@@ -371,14 +319,7 @@ $(document).ready(function() {
         $('#modal_c_name').val($(this).data('name'));
         $('#modal_c_email').val($(this).data('email'));
         $('#modal_c_status').val($(this).data('status') || 'Active');
-        $('#modal_c_gvconnectBusinessId').val($(this).data('businessid'));
-        $('#modal_c_gvconnectBusinessName').val($(this).data('businessname'));
-        $('#modal_c_gvconnectGVConnectKey').val($(this).data('key'));
-        $('#modal_c_gvconnectStaticQrisRaw').val($(this).data('qris'));
-        $('#modal_c_gvconnectStaticVaBni').val($(this).data('bni'));
-        $('#modal_c_gvconnectStaticVaBca').val($(this).data('bca'));
-        $('#modal_c_gvconnectStaticVaCimb').val($(this).data('cimb'));
-        $('#modal_c_gvconnectStaticVaPermata').val($(this).data('permata'));
+        $('#modal_c_callbackTransfer').val($(this).data('callbacktransfer'));
     });
 
     // Handle Instructional Drawer Toggle

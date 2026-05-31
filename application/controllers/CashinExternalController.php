@@ -281,8 +281,10 @@ class CashinExternalController extends CI_Controller {
             $this->session->set_flashdata('error', validation_errors());
             if ($mode == 'add') {
                 redirect('external/cashin/create');
-            } else {
+            }else if($mode == 'edit') {
                 redirect('external/cashin/edit/' . $id);
+            }else{
+                redirect('external/cashin');
             }
         }
     }

@@ -4,7 +4,7 @@ class QRISDynamic extends CI_Model
 {
     var $table = 'cashin_dynamic_qris_mpm cdq';
     var $column_order = array(null, 'cdq.c_datetimeRequest', 'm.c_name', 's.c_name', 'cdq.c_merchantTransactionId', 'ref_cashinChannelId', 'cdq.ref_cashinExternalId', 'cdq.c_amount', 'cdq.c_datetimeExpired', 'cdq.c_status');
-    var $column_search = array('cdq.c_merchantTransactionId', 'cdq.ref_merchantId', 'cdq.ref_subMerchantId', 's.c_name', 'm.c_name', 'cdq.c_partnerRefId', 'cdq.c_referenceNo');
+    var $column_search = array('cdq.c_merchantTransactionId', 'cdq.ref_merchantId', 'cdq.ref_subMerchantId', 's.c_name', 'm.c_name', 'cdq.c_extRefId1', 'cdq.c_extRefId2');
     var $order = array('cdq.id' => 'desc');
     
     // Request-level caching to prevent redundant pre-lookups
@@ -12,7 +12,7 @@ class QRISDynamic extends CI_Model
     private static $cached_total = null;
     private static $cached_inv_ids = null;
 
-    private function _apply_filters($search_name = null, $search_date = null, $search_transid = null, $search_status = null, $search_reff = null, $search_date_to = null, $search_channel = null, $search_external_channel = null)
+    private function _apply_filters($search_name = null, $search_date = null, $search_transid = null, $search_status = null, $search_reff = null, $search_date_to = null, $search_channel = null, $search_external_channel = null,$search_partner_reff=null)
     {
         if ($search_name) {
             $this->db->where('cdq.ref_merchantId', $search_name);
@@ -37,9 +37,9 @@ class QRISDynamic extends CI_Model
                 $res = $this->db->query("
                     SELECT id FROM cashin_dynamic_qris_mpm WHERE c_merchantTransactionId LIKE '$safeTrans%'
                     UNION 
-                    SELECT id FROM cashin_dynamic_qris_mpm WHERE c_partnerRefId LIKE '$safeTrans%'
+                    SELECT id FROM cashin_dynamic_qris_mpm WHERE c_extRefId1 LIKE '$safeTrans%'
                     UNION 
-                    SELECT id FROM cashin_dynamic_qris_mpm WHERE c_referenceNo LIKE '$safeTrans%'
+                    SELECT id FROM cashin_dynamic_qris_mpm WHERE c_extRefId2 LIKE '$safeTrans%'
                     LIMIT 100
                 ")->result();
                 if (!empty($res)) {
@@ -55,7 +55,11 @@ class QRISDynamic extends CI_Model
         }
 
         if ($search_reff) {
-            $this->db->where('cdq.c_partnerRefId', $search_reff);
+            $this->db->where('cdq.c_extRefId2', $search_reff);
+        }
+
+        if ($search_partner_reff) {
+            $this->db->where('cdq.c_extRefId1', $search_partner_reff);
         }
 
         if ($search_channel) {
@@ -71,7 +75,7 @@ class QRISDynamic extends CI_Model
         }
     }
 
-    private function _get_datatables_query($search_name = null, $search_date = null, $search_transid = null, $search_status = null, $search_reff = null, $search_date_to = null, $only_ids = false, $count_only = false, $search_channel = null, $search_external_channel = null)
+    private function _get_datatables_query($search_name = null, $search_date = null, $search_transid = null, $search_status = null, $search_reff = null, $search_date_to = null, $only_ids = false, $count_only = false, $search_channel = null, $search_external_channel = null,$search_partner_reff=null)
     {
         // Emergency 30-second safeguard
         $this->db->query("SET SESSION max_execution_time = 30000");
@@ -81,7 +85,7 @@ class QRISDynamic extends CI_Model
         } else if ($only_ids) {
             $this->db->select("cdq.id");
         } else {
-            $this->db->select("cdq.id, cdq.c_datetimeRequest, cdq.c_merchantTransactionId, cdq.ref_cashinExternalId, cdq.c_amount, cdq.c_datetimeExpired, cdq.c_status, cdq.ref_merchantId, cdq.ref_subMerchantId, s.c_name as name_submerchant, m.c_name as name_merchant");
+            $this->db->select("cdq.id,cdp.c_extRefId1,cdp.c_extRefId2, cdq.c_datetimeRequest, cdq.c_merchantTransactionId, cdq.ref_cashinExternalId, cdq.c_amount, cdq.c_datetimeExpired, cdq.c_status, cdq.ref_merchantId, cdq.ref_subMerchantId, s.c_name as name_submerchant, m.c_name as name_merchant");
         }
         $this->db->from($this->table);
         
@@ -97,7 +101,7 @@ class QRISDynamic extends CI_Model
             $joined_merchant_submerchant = true;
         }
 
-        $this->_apply_filters($search_name, $search_date, $search_transid, $search_status, $search_reff, $search_date_to, $search_channel, $search_external_channel);
+        $this->_apply_filters($search_name, $search_date, $search_transid, $search_status, $search_reff, $search_date_to, $search_channel, $search_external_channel,$search_partner_reff);
 
         if ($searchValue) {
             $safeSearch = $this->db->escape_str($searchValue);

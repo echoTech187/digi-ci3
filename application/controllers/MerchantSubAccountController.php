@@ -72,13 +72,6 @@ class MerchantSubAccountController extends CI_Controller
          ['field' => 'ref_merchantId', 'label' => 'Merchant ID', 'rules' => 'trim|required'],
          ['field' => 'c_name', 'label' => 'Nama', 'rules' => 'trim|required'],
          ['field' => 'c_email', 'label' => 'Email', 'rules' => 'trim|required|valid_email'],
-         ['field' => 'c_gvconnectBusinessId', 'label' => 'GVConnect Business ID', 'rules' => 'trim|required'],
-         ['field' => 'c_gvconnectGVConnectKey', 'label' => 'GVConnect Key', 'rules' => 'trim'],
-         ['field' => 'c_gvconnectStaticQrisRaw', 'label' => 'GVConnect Static Qris Raw', 'rules' => 'trim'],
-         ['field' => 'c_gvconnectStaticVaBni', 'label' => 'GVConnect Static VA BNI', 'rules' => 'trim'],
-         ['field' => 'c_gvconnectStaticVaBca', 'label' => 'GVConnect Static VA BCA', 'rules' => 'trim'],
-         ['field' => 'c_gvconnectStaticVaCimb', 'label' => 'GVConnect Static VA CIMB', 'rules' => 'trim'],
-         ['field' => 'c_gvconnectStaticVaPermata', 'label' => 'GVConnect Static VA PERMATA', 'rules' => 'trim'],
          ['field' => 'c_status', 'label' => 'Status', 'rules' => 'trim|required']
       ];
 
@@ -153,14 +146,6 @@ class MerchantSubAccountController extends CI_Controller
       $data = [
          'c_name' => $this->input->post('c_name', true),
          'c_email' => $this->input->post('c_email', true),
-         'c_gvconnectBusinessId' => $this->input->post('c_gvconnectBusinessId', true),
-         'c_gvconnectBusinessName' => $this->input->post('c_gvconnectBusinessName', true),
-         'c_gvconnectGVConnectKey' => $this->input->post('c_gvconnectGVConnectKey', true),
-         'c_gvconnectStaticQrisRaw' => $this->input->post('c_gvconnectStaticQrisRaw', true),
-         'c_gvconnectStaticVaBni' => $this->input->post('c_gvconnectStaticVaBni', true),
-         'c_gvconnectStaticVaBca' => $this->input->post('c_gvconnectStaticVaBca', true),
-         'c_gvconnectStaticVaCimb' => $this->input->post('c_gvconnectStaticVaCimb', true),
-         'c_gvconnectStaticVaPermata' => $this->input->post('c_gvconnectStaticVaPermata', true),
          'c_status' => $this->input->post('c_status', true),
       ];
 

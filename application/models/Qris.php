@@ -5,7 +5,7 @@ class Qris extends CI_Model {
     // DataTables variables
     var $table = 'cashin_payment_qris_mpm cpq';
     var $column_order = array(null, 'cpq.c_datetime', 'm.c_name', 's.c_name', 'Merchant_Transaction_Id', 'c.c_invoiceNo', 'cpq.c_type', 'cpq.c_amount', 'cpq.c_mdr', 'cpq.c_fee', 'cpq.c_issuerRrn', 'cpq.c_isSettlementRealtime', 'cpq.c_datetimeSettlement', null); 
-    var $column_search = array('cpq.id', 'm.c_name', 's.c_name', 'cdq.c_merchantTransactionId', 'crq.c_merchantTransactionId', 'cpq.c_issuerRrn', 'cdq.c_partnerRefId', 'cdq.c_referenceNo', 'crq.c_referenceNo');
+    var $column_search = array('cpq.id', 'm.c_name', 's.c_name', 'cdq.c_merchantTransactionId', 'crq.c_merchantTransactionId', 'cpq.c_issuerRrn', 'cdq.c_extRefId1', 'cdq.c_extRefId2');
     var $order = array('cpq.id' => 'desc');
     private static $cached_total = null;
 
@@ -281,8 +281,8 @@ class Qris extends CI_Model {
         $this->db->select("cpq.*, m.c_name as name_merchant, s.c_name as name_submerchant, c.c_invoiceNo, 
                            IF(cpq.c_type='Dynamic', cdq.c_merchantTransactionId, crq.c_merchantTransactionId) AS Merchant_Transaction_Id,
                            IF(cpq.c_type='Dynamic', cdq.ref_cashinExternalId, crq.ref_cashinExternalId) AS ref_cashinExternalId,
-                           IF(cpq.c_type='Dynamic', cdq.c_partnerRefId, NULL) AS c_partnerRefId,
-                           IF(cpq.c_type='Dynamic', cdq.c_referenceNo, crq.c_referenceNo) AS c_referenceNo");
+                           IF(cpq.c_type='Dynamic', cdq.c_extRefId1, NULL) AS extRefId1,
+                           IF(cpq.c_type='Dynamic', cdq.c_extRefId2, NULL) AS extRefId2");
         $this->db->from($this->table);
         $this->db->join('cashin c', 'c.id = cpq.ref_cashinId', 'left');
         $this->db->join('submerchant s', 'cpq.ref_subMerchantId = s.id', 'left');
@@ -387,7 +387,9 @@ class Qris extends CI_Model {
         cashin_payment_qris_mpm.c_datetimePayment,        cashin_payment_qris_mpm.c_isSettlementRealtime, 
         cashin_payment_qris_mpm.c_datetimeSettlement, cashin_payment_qris_mpm.c_isSettlementRealtimeExternal, 
         cashin_payment_qris_mpm.c_feeExternal, cashin_payment_qris_mpm.c_datetimeSettlementExternal,
-        IF(cashin_payment_qris_mpm.c_type='Dynamic', cashin_dynamic_qris_mpm.c_merchantTransactionId, cashin_recurring_qris_mpm.c_merchantTransactionId) AS Merchant_Transaction_Id
+        IF(cashin_payment_qris_mpm.c_type='Dynamic', cashin_dynamic_qris_mpm.c_merchantTransactionId, cashin_recurring_qris_mpm.c_merchantTransactionId) AS Merchant_Transaction_Id,
+        IF(cashin_payment_qris_mpm.c_type='Dynamic', cashin_dynamic_qris_mpm.c_extRefId1, NULL) AS extRefId1,
+        IF(cashin_payment_qris_mpm.c_type='Dynamic', cashin_dynamic_qris_mpm.c_extRefId2, NULL) AS extRefId2
         FROM cashin_payment_qris_mpm 
         JOIN cashin on cashin.id = cashin_payment_qris_mpm.ref_cashinId
         JOIN submerchant on cashin_payment_qris_mpm.ref_subMerchantId = submerchant.id 
@@ -495,7 +497,7 @@ class Qris extends CI_Model {
                     a.c_isSettlementRealtime, a.c_datetimeSettlement, 
                     IF(a.c_type='Dynamic', e.c_merchantTransactionId, f.c_merchantTransactionId) AS c_merchantTransactionId,
                     a.ref_cashinExternalId, a.c_isSettlementRealtimeExternal, a.c_datetimeSettlementExternal,
-                    a.c_mdrExternal, a.c_feeExternal, a.c_issuerRrn, e.c_partnerRefId, 
+                    a.c_mdrExternal, a.c_feeExternal, a.c_issuerRrn, e.c_extRefId2, e.c_extRefId1,
                     e.ref_cashinExternalLogQrisMpmIdCreate AS dynamic_create_log_id,
                     f.ref_cashinExternalLogQrisMpmIdCreate AS recurring_create_log_id,
                     a.ref_cashinDynamicQrisMpmId, a.ref_cashinRecurringQrisMpmId

@@ -375,10 +375,10 @@
             {data: 'ref_cashinExternalId', className: 'text-nowrap', render: function(data, type, row) {
                 return data ? data : '-';
             }},
-            {data: 'c_partnerRefId', className: 'text-nowrap', render: function(data, type, row) {
+            {data: 'c_extRefId1', className: 'text-nowrap', render: function(data, type, row) {
                 return data ? data : '-';
             }},
-            {data: 'c_referenceNo', className: 'text-nowrap', render: function(data, type, row) {
+            {data: 'c_extRefId2', className: 'text-nowrap', render: function(data, type, row) {
                 return data ? data : '-';
             }},
             {data: 'c_amount',className: 'text-nowrap', render: function(data){

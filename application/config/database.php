@@ -95,48 +95,5 @@ $query_builder = TRUE;
 // 	'save_queries' => TRUE
 // );
 
-$db['default'] = array(
-	'dsn'	=> '',
-	'hostname' => '110.239.88.113:3306',
-	'username' => 'eko',
-	'password' => 'PasswordBaru123!',
-	'database' => 'db_stagging',
-	'dbdriver' => 'mysqli',
-	'dbprefix' => '',
-	'pconnect' => FALSE,
-	'db_debug' => (ENVIRONMENT !== 'production'),
-	'cache_on' => FALSE,
-	'cachedir' => '',
-	'char_set' => 'utf8',
-	'dbcollat' => 'utf8_general_ci',
-	'swap_pre' => '',
-	'encrypt' => FALSE,
-	'compress' => FALSE,
-	'stricton' => FALSE,
-	'failover' => array(),
-	'save_queries' => TRUE
-);
 
-// $db['default'] = array(
-// 	'dsn'	=> '',
-// 	'hostname' => '110.239.94.37:3306',
-// 	'username' => 'eko',
-// 	'password' => 'w%s@MN%3W6xoREwV7y?-',
-// 	'database' => 'db_prod',
-// 	'dbdriver' => 'mysqli',
-// 	'dbprefix' => '',
-// 	'pconnect' => FALSE,
-// 	'db_debug' => (ENVIRONMENT !== 'production'),
-// 	'cache_on' => FALSE,
-// 	'cachedir' => '',
-// 	'char_set' => 'utf8',
-// 	'dbcollat' => 'utf8_general_ci',
-// 	'swap_pre' => '',
-// 	'encrypt' => TRUE,
-// 	'compress' => TRUE,
-// 	'stricton' => FALSE,
-// 	'failover' => array(),
-// 	'save_queries' => TRUE
-// );
-
-// include '/var/www/config_db/config_ci.php';
+include '/var/www/config_db/config_ci.php';
