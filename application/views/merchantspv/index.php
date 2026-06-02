@@ -184,7 +184,7 @@
 </div><!-- /.container-fluid -->
 
 <!-- Modal: Register Merchant SPV -->
-<div class="modal fade" id="registerMerchantSpv" tabindex="-1" role="dialog" aria-labelledby="registerMerchantSpvLabel" aria-hidden="true">
+<div class="modal fade" data-backdrop="static" data-keyboard="false" id="registerMerchantSpv" tabindex="-1" role="dialog" aria-labelledby="registerMerchantSpvLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
             <!-- Header Legacy Migrated -->
@@ -306,7 +306,7 @@
 </div>
 
 <!-- Modal: Edit Merchant SPV -->
-<div class="modal fade" id="editMerchantSpv" tabindex="-1" role="dialog" aria-labelledby="editMerchantSpvLabel" aria-hidden="true">
+<div class="modal fade" data-backdrop="static" data-keyboard="false" id="editMerchantSpv" tabindex="-1" role="dialog" aria-labelledby="editMerchantSpvLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
             <!-- Header Legacy Migrated -->

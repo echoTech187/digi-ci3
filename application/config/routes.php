@@ -238,6 +238,8 @@ $route['external/cashin/update'] = 'CashinExternalController/update';
 $route['external/cashin/delete/(:num)'] = 'CashinExternalController/delete/$1';
 $route['external/cashin/bulk-update'] = 'CashinExternalController/bulk_update';
 $route['external/cashin/get-channels'] = 'CashinExternalController/get_channel_ids';
+$route['external/cashin/get-filter-options'] = 'CashinExternalController/get_filter_options';
+$route['external/cashin/get-merchant-mappings'] = 'CashinExternalController/get_merchant_mappings';
 
 // ── CashoutExternalController ─────────────────────────────────────────────
 $route['external/cashout'] = 'CashoutExternalController/index';
@@ -249,6 +251,8 @@ $route['external/cashout/update'] = 'CashoutExternalController/update';
 $route['external/cashout/delete/(:num)'] = 'CashoutExternalController/delete/$1';
 $route['external/cashout/bulk-update'] = 'CashoutExternalController/bulk_update';
 $route['external/cashout/get-channels'] = 'CashoutExternalController/get_channel_ids';
+$route['external/cashout/get-filter-options'] = 'CashoutExternalController/get_filter_options';
+$route['external/cashout/get-merchant-mappings'] = 'CashoutExternalController/get_merchant_mappings';
 
 // ── ChannelController ─────────────────────────────────────────────
 $route['channel/cashin'] = 'ChannelController/cashin';
@@ -259,6 +263,7 @@ $route['channel/cashin/update'] = 'ChannelController/updateCashinChanel';
 $route['channel/cashout/update'] = 'ChannelController/updateCashOutChanel';
 $route['channel/cashin/delete/(:any)'] = 'ChannelController/deleteCashInChanel/$1';
 $route['channel/cashout/delete/(:any)'] = 'ChannelController/deleteCashOutChanel/$1';
+$route['channel/get-master-filter-options'] = 'ChannelController/get_master_filter_options';
 
 // ── ServiceController ─────────────────────────────────────────────
 $route['product/pulsa-reguler'] = 'ServiceController/pulsa_reguler';

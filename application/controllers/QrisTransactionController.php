@@ -83,7 +83,7 @@ class QrisTransactionController extends CI_Controller
             $oldSearch = $this->session->userdata('last_dt_search_qris');
 
             if ($dtSearch === '' && $oldSearch !== '' && $oldSearch !== null) {
-               $this->resetqris(false); // Silent reset
+               $this->session->unset_userdata(['last_dt_search_qris', 'search_qris_invoice_no', 'search_qris_transid', 'search_qris_rrn']);
             }
 
             if ($dtSearch !== '') {
@@ -265,7 +265,7 @@ class QrisTransactionController extends CI_Controller
             $oldSearch = $this->session->userdata('last_dt_search_qrisdynamic');
 
             if ($dtSearch === '' && $oldSearch !== '' && $oldSearch !== null) {
-               $this->resetqris_dynamic(false); // Silent reset
+               $this->session->unset_userdata(['last_dt_search_qrisdynamic', 'search_qrisdynamic_transid']);
             }
 
             if ($dtSearch !== '') {
@@ -365,7 +365,7 @@ class QrisTransactionController extends CI_Controller
             $oldSearch = $this->session->userdata('last_dt_search_qrisrecurring');
 
             if ($dtSearch === '' && $oldSearch !== '' && $oldSearch !== null) {
-               $this->resetqris_recurring(false); // Silent reset
+               $this->session->unset_userdata(['last_dt_search_qrisrecurring', 'search_qrisrecurring_transid']);
             }
 
             if ($dtSearch !== '') {

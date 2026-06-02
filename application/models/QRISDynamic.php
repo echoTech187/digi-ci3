@@ -103,9 +103,6 @@ class QRISDynamic extends CI_Model
                 $res = $this->db->query("SELECT id FROM cashin_dynamic_qris_mpm WHERE c_merchantTransactionId LIKE '$safeSearch%' LIMIT 100")->result();
                 if (!empty($res)) $matching_ids = array_merge($matching_ids, array_column($res, 'id'));
                 
-                $ext_res = $this->db->query("SELECT id FROM cashin_dynamic_qris_mpm WHERE c_partnerRefId LIKE '$safeSearch%' OR c_referenceNo LIKE '$safeSearch%' LIMIT 100")->result();
-                if (!empty($ext_res)) $matching_ids = array_merge($matching_ids, array_column($ext_res, 'id'));
-                
                 if (is_numeric($searchValue) && strlen($searchValue) < 15) {
                     $matching_ids[] = (int)$searchValue;
                 }

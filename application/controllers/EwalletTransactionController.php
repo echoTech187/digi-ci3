@@ -84,7 +84,7 @@ class EwalletTransactionController extends CI_Controller
             $oldSearch = $this->session->userdata('last_dt_search_ewallet');
 
             if ($dtSearch === '' && $oldSearch !== '' && $oldSearch !== null) {
-               $this->resetewallet(false); // Silent reset
+               $this->session->unset_userdata(['last_dt_search_ewallet', 'search_ewallet_invoice_no', 'search_ewallet_transid']);
             }
 
             if ($dtSearch !== '') {
@@ -214,7 +214,7 @@ class EwalletTransactionController extends CI_Controller
             $oldSearch = $this->session->userdata('last_dt_search_ewalletdynamic');
 
             if ($dtSearch === '' && $oldSearch !== '' && $oldSearch !== null) {
-               $this->resetewallet_dynamic(false); // Silent reset
+               $this->session->unset_userdata(['last_dt_search_ewalletdynamic', 'search_ewalletdynamic_transid']);
             }
 
             if ($dtSearch !== '') {

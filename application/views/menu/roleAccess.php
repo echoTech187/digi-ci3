@@ -183,7 +183,7 @@
 <!-- ── Modals ── -->
 
 <!-- Add Menu Modal -->
-<div class="modal fade" id="addMenuModal" tabindex="-1" role="dialog" aria-hidden="true">
+<div class="modal fade" data-backdrop="static" data-keyboard="false" id="addMenuModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
             <!-- Header Legacy Migrated -->
@@ -302,7 +302,7 @@
 </div>
 
 <!-- Edit Menu Modal -->
-<div class="modal fade" id="editMenuModal" tabindex="-1" role="dialog" aria-hidden="true">
+<div class="modal fade" data-backdrop="static" data-keyboard="false" id="editMenuModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
             <!-- Header Legacy Migrated -->
@@ -419,7 +419,7 @@
 
 
 <!-- Add Group Module Modal -->
-<div class="modal fade" id="addGroupModal" tabindex="-1" role="dialog" aria-hidden="true" style="z-index: 1060;">
+<div class="modal fade" data-backdrop="static" data-keyboard="false" id="addGroupModal" tabindex="-1" role="dialog" aria-hidden="true" style="z-index: 1060;">
     <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
         <div class="modal-content border-0 shadow-lg">
             <!-- Header Legacy Migrated -->

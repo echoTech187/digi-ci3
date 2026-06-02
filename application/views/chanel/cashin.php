@@ -596,10 +596,43 @@
         });
 
         $moreClear.on('click', function() {
-            $('.filter-select').val('').trigger('change');
+            $('.filter-select').val('').trigger('change.select2');
+            fetchMasterFilterOptions('');
             updateFilterBadge();
             table.ajax.reload(null, false);
         });
+
+        // Cascading logic for Master Channel Filters
+        $('#filter_channel_group').on('change', function() {
+            const group = $(this).val();
+            $('#filter_external_id').val('').trigger('change.select2');
+            fetchMasterFilterOptions(group);
+        });
+
+        function fetchMasterFilterOptions(group) {
+            var csrfName = $('meta[name="csrf-token-name"]').attr('content') || '<?= $this->security->get_csrf_token_name(); ?>';
+            var csrfHash = $('meta[name="csrf-token-hash"]').attr('content') || '<?= $this->security->get_csrf_hash(); ?>';
+            
+            $('#filter_external_id').prop('disabled', true).html('<option value="">Loading...</option>').trigger('change.select2');
+
+            $.ajax({
+                url: "<?= base_url('channel/get-master-filter-options') ?>",
+                type: "POST",
+                data: { type: 'cashin', group: group, [csrfName]: csrfHash },
+                dataType: "json",
+                success: function(data) {
+                    let providerOptions = '<option value="">All External IDs</option>';
+                    const currentProvider = $('#filter_external_id').val();
+                    data.providers.forEach(function(item) {
+                        providerOptions += `<option value="${item}">${item}</option>`;
+                    });
+                    $('#filter_external_id').html(providerOptions).prop('disabled', false).trigger('change.select2');
+                },
+                error: function() {
+                    $('#filter_external_id').prop('disabled', false).html('<option value="">All External IDs</option>').trigger('change.select2');
+                }
+            });
+        }
     });
 </script>
 

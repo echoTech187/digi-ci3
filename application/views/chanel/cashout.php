@@ -219,9 +219,9 @@
                                 <div class="col-md-6"><label class="dt-more-label mb-2">Fee Type</label><select class="dt-more-select" required name="feetype"><option value="" selected disabled>Select fee type</option><option value="fixed">Fixed</option><option value="Percentage">Percentage</option></select></div>
                             </div>
                             <div class="row mb-0">
-                                <div class="col-md-4 mb-3 mb-md-0"><label class="dt-more-label mb-2">Fee Value</label><div class="input-group"><div class="input-group-prepend"><span class="input-group-text border-right-0" style="border-radius:8px 0 0 8px;font-size:12px;">Rp</span></div><input type="text" class="input-rupiah" class="dt-more-input h-auto" required name="fee" style="border-radius:0 8px 8px 0;"></div></div>
-                                <div class="col-md-4 mb-3 mb-md-0"><label class="dt-more-label mb-2">Amount Min</label><input type="text" class="input-rupiah" class="dt-more-input" required name="amountmin" value="10000"></div>
-                                <div class="col-md-4"><label class="dt-more-label mb-2">Amount Max</label><input type="text" class="input-rupiah" class="dt-more-input" required name="amountmax" value="50000000"></div>
+                                <div class="col-md-4 mb-3 mb-md-0"><label class="dt-more-label mb-2">Fee Value</label><div class="input-group"><div class="input-group-prepend"><span class="input-group-text border-right-0" style="border-radius:8px 0 0 8px;font-size:12px;">Rp</span></div><input type="text" class="input-rupiah form-control" class="dt-more-input h-auto" required name="fee" style="border-radius:0 8px 8px 0;"></div></div>
+                                <div class="col-md-4 mb-3 mb-md-0"><label class="dt-more-label mb-2">Amount Min</label><input type="text" class="input-rupiah form-control" class="dt-more-input" required name="amountmin" value="10000"></div>
+                                <div class="col-md-4"><label class="dt-more-label mb-2">Amount Max</label><input type="text" class="input-rupiah form-control" class="dt-more-input" required name="amountmax" value="50000000"></div>
                             </div>
                         </div>
                     </div>
@@ -275,9 +275,9 @@
                                 <div class="col-md-6"><label class="dt-more-label mb-2">Fee Type</label><select class="dt-more-select" required name="feetype" id="edit_feetype"><option value="" disabled>Select fee type</option><option value="fixed">Fixed</option><option value="Percentage">Percentage</option></select></div>
                             </div>
                             <div class="row mb-0">
-                                <div class="col-md-4 mb-3 mb-md-0"><label class="dt-more-label mb-2">Fee Value</label><div class="input-group"><div class="input-group-prepend"><span class="input-group-text border-right-0" style="border-radius:8px 0 0 8px;font-size:12px;">Rp</span></div><input type="text" class="input-rupiah" class="dt-more-input h-auto" required name="fee" id="edit_fee" style="border-radius:0 8px 8px 0;"></div></div>
-                                <div class="col-md-4 mb-3 mb-md-0"><label class="dt-more-label mb-2">Amount Min</label><input type="text" class="input-rupiah" class="dt-more-input" required name="amountmin" id="edit_amountmin"></div>
-                                <div class="col-md-4"><label class="dt-more-label mb-2">Amount Max</label><input type="text" class="input-rupiah" class="dt-more-input" required name="amountmax" id="edit_amountmax"></div>
+                                <div class="col-md-4 mb-3 mb-md-0"><label class="dt-more-label mb-2">Fee Value</label><div class="input-group"><div class="input-group-prepend"><span class="input-group-text border-right-0" style="border-radius:8px 0 0 8px;font-size:12px;">Rp</span></div><input type="text" class="input-rupiah form-control" class="dt-more-input h-auto" required name="fee" id="edit_fee" style="border-radius:0 8px 8px 0;"></div></div>
+                                <div class="col-md-4 mb-3 mb-md-0"><label class="dt-more-label mb-2">Amount Min</label><input type="text" class="input-rupiah form-control" class="dt-more-input" required name="amountmin" id="edit_amountmin"></div>
+                                <div class="col-md-4"><label class="dt-more-label mb-2">Amount Max</label><input type="text" class="input-rupiah form-control" class="dt-more-input" required name="amountmax" id="edit_amountmax"></div>
                             </div>
                         </div>
                     </div>
@@ -478,10 +478,43 @@
         });
 
         $moreClear.on('click', function() {
-            $('.filter-select').val('').trigger('change');
+            $('.filter-select').val('').trigger('change.select2');
+            fetchMasterFilterOptions('');
             updateFilterBadge();
             table.ajax.reload(null, false);
         });
+
+        // Cascading logic for Master Channel Filters
+        $('#filter_channel_group').on('change', function() {
+            const group = $(this).val();
+            $('#filter_external_id').val('').trigger('change.select2');
+            fetchMasterFilterOptions(group);
+        });
+
+        function fetchMasterFilterOptions(group) {
+            var csrfName = $('meta[name="csrf-token-name"]').attr('content') || '<?= $this->security->get_csrf_token_name(); ?>';
+            var csrfHash = $('meta[name="csrf-token-hash"]').attr('content') || '<?= $this->security->get_csrf_hash(); ?>';
+            
+            $('#filter_external_id').prop('disabled', true).html('<option value="">Loading...</option>').trigger('change.select2');
+
+            $.ajax({
+                url: "<?= base_url('channel/get-master-filter-options') ?>",
+                type: "POST",
+                data: { type: 'cashout', group: group, [csrfName]: csrfHash },
+                dataType: "json",
+                success: function(data) {
+                    let providerOptions = '<option value="">All External IDs</option>';
+                    const currentProvider = $('#filter_external_id').val();
+                    data.providers.forEach(function(item) {
+                        providerOptions += `<option value="${item}">${item}</option>`;
+                    });
+                    $('#filter_external_id').html(providerOptions).prop('disabled', false).trigger('change.select2');
+                },
+                error: function() {
+                    $('#filter_external_id').prop('disabled', false).html('<option value="">All External IDs</option>').trigger('change.select2');
+                }
+            });
+        }
     });
 </script>
 

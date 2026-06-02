@@ -63,8 +63,12 @@ class Qris extends CI_Model {
             $this->db->where('cpq.c_datetime <=', $date_to);
         }
         if ($search_rrn && !$searchValue) {
-            $safeRrn = $this->db->escape_str($search_rrn);
-            $this->db->like('cpq.c_issuerRrn', $safeRrn, 'after');
+            $matching_rrn_ids = $this->_get_ids_by_rrn($search_rrn);
+            if (!empty($matching_rrn_ids)) {
+                $this->db->where_in('cpq.id', $matching_rrn_ids);
+            } else {
+                $this->db->where('1=0', NULL, FALSE);
+            }
         }
         if ($search_settlement) {
             $formatted_date = date('Y-m-d', strtotime($search_settlement));
@@ -77,10 +81,6 @@ class Qris extends CI_Model {
             
             $cdq_res = $this->db->query("
                 SELECT id FROM cashin_dynamic_qris_mpm WHERE c_merchantTransactionId = '$safeTransId'
-                UNION
-                SELECT id FROM cashin_dynamic_qris_mpm WHERE c_partnerRefId = '$safeTransId'
-                UNION
-                SELECT id FROM cashin_dynamic_qris_mpm WHERE c_referenceNo = '$safeTransId'
                 LIMIT 20
             ")->result();
             if (!empty($cdq_res)) {
@@ -91,8 +91,6 @@ class Qris extends CI_Model {
             
             $crq_res = $this->db->query("
                 SELECT id FROM cashin_recurring_qris_mpm WHERE c_merchantTransactionId = '$safeTransId'
-                UNION
-                SELECT id FROM cashin_recurring_qris_mpm WHERE c_referenceNo = '$safeTransId'
                 LIMIT 20
             ")->result();
             if (!empty($crq_res)) {
@@ -139,22 +137,7 @@ class Qris extends CI_Model {
                     if (!empty($cpq_res)) $matching_ids = array_merge($matching_ids, array_column($cpq_res, 'id'));
                 }
                 
-                // 1.5 Check Ext Ref IDs
-                if (count($matching_ids) <= 1) {
-                    $cdq_ext = $this->db->query("SELECT id FROM cashin_dynamic_qris_mpm WHERE c_partnerRefId $op $val OR c_referenceNo $op $val LIMIT 20")->result();
-                    if (!empty($cdq_ext)) {
-                        $cdq_ext_ids = array_column($cdq_ext, 'id');
-                        $cpq_ext = $this->db->query("SELECT id FROM cashin_payment_qris_mpm WHERE ref_cashinDynamicQrisMpmId IN (".implode(',', $cdq_ext_ids).") LIMIT 50")->result();
-                        if (!empty($cpq_ext)) $matching_ids = array_merge($matching_ids, array_column($cpq_ext, 'id'));
-                    }
-                    
-                    $crq_ext = $this->db->query("SELECT id FROM cashin_recurring_qris_mpm WHERE c_referenceNo $op $val LIMIT 20")->result();
-                    if (!empty($crq_ext)) {
-                        $crq_ext_ids = array_column($crq_ext, 'id');
-                        $cpq_ext = $this->db->query("SELECT id FROM cashin_payment_qris_mpm WHERE ref_cashinRecurringQrisMpmId IN (".implode(',', $crq_ext_ids).") LIMIT 50")->result();
-                        if (!empty($cpq_ext)) $matching_ids = array_merge($matching_ids, array_column($cpq_ext, 'id'));
-                    }
-                }
+                // Ext Ref IDs removed (columns don't exist on dynamic/recurring tables)
 
                 // 2. Check Invoice Number (Only if specific ID not found OR query is short)
                 // CRITICAL: Removed leading % to prevent full table scan on 80M+ rows
@@ -676,6 +659,10 @@ class Qris extends CI_Model {
             'external_quantum_qris_mpm_calback_payment'
         ];
 
+        // Disable db_debug to prevent HTML error output on missing columns/tables breaking JSON
+        $db_debug = $this->db->db_debug;
+        $this->db->db_debug = FALSE;
+
         foreach ($tables as $t) {
             $col = ($t == 'external_quantum_qris_mpm_calback_payment') ? 'c_transactionId' : 'c_issuerRrn';
             $q = $this->db->query("SELECT ref_cashinPaymentQrisMpmId FROM $t WHERE $col LIKE '$safeRrn%' LIMIT 50");
@@ -685,6 +672,8 @@ class Qris extends CI_Model {
                 }
             }
         }
+
+        $this->db->db_debug = $db_debug;
         return array_unique($ids);
     }
 

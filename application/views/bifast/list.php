@@ -217,7 +217,7 @@
 </div>
 
 <!-- Detail Modal -->
-<div class="modal fade" id="detailBiFastChannelExternalModal" tabindex="-1" aria-labelledby="detailBiFastChannelExternalModalLabel">
+<div class="modal fade" data-backdrop="static" data-keyboard="false" id="detailBiFastChannelExternalModal" tabindex="-1" aria-labelledby="detailBiFastChannelExternalModalLabel">
     <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
 

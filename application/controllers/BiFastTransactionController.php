@@ -100,7 +100,7 @@ class BiFastTransactionController extends CI_Controller
             $oldSearch = $this->session->userdata('last_dt_search_bifast');
 
             if ($dtSearch === '' && $oldSearch !== '' && $oldSearch !== null) {
-               $this->resetbi_fast(false); // Silent reset
+               $this->session->unset_userdata(['last_dt_search_bifast', 'search_bifast_transid', 'search_bifast_invoice_no']);
             }
 
             if ($dtSearch !== '') {

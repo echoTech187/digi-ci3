@@ -567,15 +567,28 @@ $(document).ready(function () {
 	});
 
 	// 3. Smooth Button Loading Logic
-	$(document).on("submit", "form", function () {
-		let $btn = $(this).find('button[type="submit"]');
+	window.loadingBtn = function($btn, customText) {
+		let text = customText || 'Processing...';
 		if (!$btn.hasClass("no-loader")) {
-			let originalHtml = $btn.html();
-			$btn.data("original-html", originalHtml);
+			if (!$btn.data("original-html")) {
+				$btn.data("original-html", $btn.html());
+			}
 			$btn
 				.prop("disabled", true)
-				.html('<i class="fas fa-circle-notch fa-spin mr-2"></i> Processing...');
+				.html('<i class="fas fa-circle-notch fa-spin mr-2"></i> ' + text);
 		}
+	};
+
+	window.restoreBtn = function($form) {
+		let $btn = $form.find('button[type="submit"]');
+		if ($btn.length && $btn.data("original-html")) {
+			$btn.html($btn.data("original-html")).prop("disabled", false);
+		}
+	};
+
+	$(document).on("submit", "form", function () {
+		let $btn = $(this).find('button[type="submit"]');
+		window.loadingBtn($btn);
 	});
 });
 $(document).ready(function () {

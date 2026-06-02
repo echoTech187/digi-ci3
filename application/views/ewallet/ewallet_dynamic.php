@@ -203,7 +203,7 @@
 <!-- /.container-fluid -->
 
 <!-- Details Modal -->
-<div class="modal fade" id="detailQrisDynamicChannelExternalModal" tabindex="-1">
+<div class="modal fade" data-backdrop="static" data-keyboard="false" id="detailQrisDynamicChannelExternalModal" tabindex="-1">
     <div class="modal-dialog modal-lg border-0">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
             <!-- Header Legacy Migrated -->

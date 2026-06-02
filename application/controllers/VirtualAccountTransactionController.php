@@ -84,7 +84,7 @@ class VirtualAccountTransactionController extends CI_Controller
             $oldSearch = $this->session->userdata('last_dt_search_va');
 
             if ($dtSearch === '' && $oldSearch !== '' && $oldSearch !== null) {
-               $this->resetVA(false); // Silent reset
+               $this->session->unset_userdata(['last_dt_search_va', 'search_va_invoice_no', 'search_va_transid', 'search_va_number']);
             }
 
             if ($dtSearch !== '') {
@@ -236,7 +236,7 @@ class VirtualAccountTransactionController extends CI_Controller
             $oldSearch = $this->session->userdata('last_dt_search_vadynamic');
 
             if ($dtSearch === '' && $oldSearch !== '' && $oldSearch !== null) {
-               $this->resetVa_dynamic(false); // Silent reset
+               $this->session->unset_userdata(['last_dt_search_vadynamic', 'search_vadynamic_transid', 'search_vadynamic_va_number']);
             }
 
             if ($dtSearch !== '') {
@@ -339,7 +339,7 @@ class VirtualAccountTransactionController extends CI_Controller
             $oldSearch = $this->session->userdata('last_dt_search_varecurring');
 
             if ($dtSearch === '' && $oldSearch !== '' && $oldSearch !== null) {
-               $this->resetVa_recurring(false); // Silent reset
+               $this->session->unset_userdata(['last_dt_search_varecurring', 'search_varecurring_transid', 'search_varecurring_va_number']);
             }
 
             if ($dtSearch !== '') {

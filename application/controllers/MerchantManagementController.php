@@ -353,11 +353,16 @@ class MerchantManagementController extends CI_Controller
          ['field' => 'c_phoneNumber', 'label' => 'Merchant Phone', 'rules' => 'trim'],
          ['field' => 'c_password', 'label' => 'Merchant Password', 'rules' => 'trim|required'],
          ['field' => 'c_confirmPassword', 'label' => 'Merchant Confirm Password', 'rules' => 'trim|required|matches[c_password]'],
+         ['field' => 'c_openapiIPAllow', 'label' => 'Whitelist IP', 'rules' => 'trim'],
+         ['field' => 'c_openapiUrlCallbackQrisMpm', 'label' => 'URL Callback QRIS', 'rules' => 'trim'],
+         ['field' => 'c_openapiUrlCallbackEwallet', 'label' => 'URL Callback Ewallet', 'rules' => 'trim'],
+         ['field' => 'c_openapiUrlCallbackVa', 'label' => 'URL Callback VA', 'rules' => 'trim'],
+         ['field' => 'c_openapiStatus', 'label' => 'OpenAPI Status', 'rules' => 'trim'],
+         ['field' => 'c_gvconnectBusinessId', 'label' => 'GVConnect Business ID', 'rules' => 'trim'],
+         ['field' => 'c_gvconnectBusinessName', 'label' => 'GVConnect Business Name', 'rules' => 'trim'],
       ];
 
       $optionalFields = [
-         'c_openapiUrlCallbackEwallet', 'c_openapiUrlCallbackVa', 'c_openapiStatus',
-         'c_gvconnectBusinessId', 'c_gvconnectBusinessName',
          'c_openapiChannelVaDynamicCreate', 'c_openapiChannelVaDynamicQuery', 'c_openapiChannelVaDynamicCancel',
          'c_openapiChannelVaRecurringCreate', 'c_openapiChannelVaRecurringCancel',
          'c_openapiChannelQrisMpmDynamicCreate', 'c_openapiChannelQrisMpmDynamicQuery', 'c_openapiChannelQrisMpmDynamicCancel',
@@ -947,10 +952,13 @@ class MerchantManagementController extends CI_Controller
          ['field' => 'c_name', 'label' => 'Merchant Name', 'rules' => 'trim|required'],
          ['field' => 'c_email', 'label' => 'Merchant Email', 'rules' => 'trim|required|valid_email'],
          ['field' => 'c_phoneNumber', 'label' => 'Merchant Phone', 'rules' => 'trim'],
-         ['field' => 'c_openapiUrlCallbackQrisMpm', 'label' => 'URL Callback Qris Mpm', 'rules' => 'valid_url'],
-         ['field' => 'c_openapiUrlCallbackVa',      'label' => 'URL Callback VA',       'rules' => 'valid_url'],
-         ['field' => 'c_openapiUrlCallbackEwallet', 'label' => 'URL Callback Ewallet',  'rules' => 'valid_url'],
-         ['field' => 'c_openapiStatus',             'label' => 'OpenAPI Status',        'rules' => 'required'],
+         ['field' => 'c_openapiIPAllow', 'label' => 'Whitelist IP', 'rules' => 'trim'],
+         ['field' => 'c_openapiUrlCallbackQrisMpm', 'label' => 'URL Callback QRIS', 'rules' => 'trim'],
+         ['field' => 'c_openapiUrlCallbackEwallet', 'label' => 'URL Callback Ewallet', 'rules' => 'trim'],
+         ['field' => 'c_openapiUrlCallbackVa', 'label' => 'URL Callback VA', 'rules' => 'trim'],
+         ['field' => 'c_openapiStatus', 'label' => 'OpenAPI Status', 'rules' => 'required'],
+         ['field' => 'c_gvconnectBusinessId', 'label' => 'GVConnect Business ID', 'rules' => 'trim'],
+         ['field' => 'c_gvconnectBusinessName', 'label' => 'GVConnect Business Name', 'rules' => 'trim'],
       ];
       $this->form_validation->set_rules($rules);
 
@@ -1574,6 +1582,42 @@ class MerchantManagementController extends CI_Controller
          redirect('merchant/setting-cashin-fee/' . $merchant_id);
       } else {
          $channelGroups = $this->Chanel->get_cashin_channels($this->input->post('c_externalIdDefault'), $this->input->post('c_cashinChannelGroup'));
+         
+         if (empty($channelGroups)) {
+             $msg = 'Tidak ada channel yang ditemukan untuk grup dan provider ini.';
+             if ($this->input->is_ajax_request()) {
+                 echo json_encode(['status' => 'error', 'message' => $msg]);
+                 return;
+             }
+             $this->session->set_flashdata('error', $msg);
+             redirect('merchant/setting-cashin-fee/' . $merchant_id);
+             return;
+         }
+
+         // Check for existing duplicates
+         $channelIds = array_column($channelGroups, 'id');
+         $existing = $this->db->where('ref_merchantId', $merchant_id)
+                              ->where_in('ref_cashinChannelId', $channelIds)
+                              ->get('cashin_channel_x_merchant')
+                              ->result_array();
+                              
+         if (!empty($existing)) {
+             $existingIds = array_unique(array_column($existing, 'ref_cashinChannelId'));
+             $duplicates = [];
+             foreach ($existingIds as $eid) {
+                 $duplicates[] = "<strong>{$eid}</strong>";
+             }
+             $msg = 'Gagal menyimpan pengaturan Bulk. Channel berikut telah terdaftar untuk merchant ini:<br> • ' . implode('<br> • ', $duplicates) . '<br><br>Mohon gunakan opsi <em>Edit Mapping</em> jika ingin memperbarui data yang sudah ada.';
+             
+             if ($this->input->is_ajax_request()) {
+                 echo json_encode(['status' => 'error', 'message' => $msg]);
+                 return;
+             }
+             $this->session->set_flashdata('error', $msg);
+             redirect('merchant/setting-cashin-fee/' . $merchant_id);
+             return;
+         }
+
          $data = [];
          foreach ($channelGroups as $row) {
             $data []= [
@@ -1806,6 +1850,41 @@ class MerchantManagementController extends CI_Controller
          redirect('merchant/setting-cashout-fee/' . $merchant_id);
       } else {
          $channelGroups = $this->Chanel->get_cashout_channels($this->input->post('c_externalIdDefault'), $this->input->post('c_cashoutChannelGroup'));
+         
+         if (empty($channelGroups)) {
+             if ($this->input->is_ajax_request()) {
+                 echo json_encode(['status' => 'error', 'message' => 'Tidak ada channel yang ditemukan untuk grup dan provider ini.']);
+                 return;
+             }
+             $this->session->set_flashdata('error', 'Tidak ada channel yang ditemukan untuk grup dan provider ini.');
+             redirect('merchant/setting-cashout-fee/' . $merchant_id);
+             return;
+         }
+
+         // Check for existing duplicates
+         $channelIds = array_column($channelGroups, 'id');
+         $existing = $this->db->where('ref_merchantId', $merchant_id)
+                              ->where_in('ref_cashoutChannelId', $channelIds)
+                              ->get('cashout_channel_x_merchant')
+                              ->result_array();
+                              
+         if (!empty($existing)) {
+             $existingIds = array_unique(array_column($existing, 'ref_cashoutChannelId'));
+             $duplicates = [];
+             foreach ($existingIds as $eid) {
+                 $duplicates[] = "<strong>{$eid}</strong>";
+             }
+             $msg = 'Gagal menyimpan pengaturan Bulk. Channel berikut telah terdaftar untuk merchant ini:<br> • ' . implode('<br> • ', $duplicates) . '<br><br>Mohon gunakan opsi <em>Edit Mapping</em> jika ingin memperbarui data yang sudah ada.';
+             
+             if ($this->input->is_ajax_request()) {
+                 echo json_encode(['status' => 'error', 'message' => $msg]);
+                 return;
+             }
+             $this->session->set_flashdata('error', $msg);
+             redirect('merchant/setting-cashout-fee/' . $merchant_id);
+             return;
+         }
+
          $data = [];
          foreach ($channelGroups as $row) {
             $data []= [
@@ -1816,7 +1895,6 @@ class MerchantManagementController extends CI_Controller
                'c_feeType'                => $this->input->post('c_feeType'),
                'c_fee'                    => $this->input->post('c_fee'),
                'c_feePercetange'          => $this->input->post('c_feePercetange'),
-               'c_settlementInterval'     => $this->input->post('c_settlementInterval') !== null && $this->input->post('c_settlementInterval') !== '' ? $this->input->post('c_settlementInterval') : 0,
                'c_amountMin'              => $this->input->post('c_amountMin'),
                'c_amountMax'              => $this->input->post('c_amountMax'),
                'c_status'                 => $this->input->post('c_status'),     

@@ -121,7 +121,7 @@
 </button>
 
 <!-- ── Add / Edit Holiday Modal ── -->
-<div class="modal fade" id="settingHolidayModal" tabindex="-1" role="dialog" aria-labelledby="settingHolidayModalTitle" aria-hidden="true">
+<div class="modal fade" data-backdrop="static" data-keyboard="false" id="settingHolidayModal" tabindex="-1" role="dialog" aria-labelledby="settingHolidayModalTitle" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 24px; overflow: hidden;">
             <div class="modal-header border-0 py-4" style="background: linear-gradient(135deg, var(--primary) 0%, #4f39ce 100%) !important; color: white;">

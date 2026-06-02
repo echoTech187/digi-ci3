@@ -69,7 +69,7 @@ class HistoryController extends CI_Controller
             $oldSearch = $this->session->userdata('last_dt_search_history');
 
             if ($dtSearch === '' && $oldSearch !== '' && $oldSearch !== null) {
-               $this->resetHistory(false); // Silent reset
+               $this->session->unset_userdata(['last_dt_search_history', 'search_history_invoice']);
             }
 
             if ($dtSearch !== '') {

@@ -309,4 +309,60 @@ class CashinExternalController extends CI_Controller {
             ->set_content_type('application/json')
             ->set_output(json_encode($channels));
     }
+
+    public function get_filter_options() {
+        if (!$this->input->is_ajax_request()) return;
+        $group = $this->input->post('group');
+        $externalId = $this->input->post('external_id');
+
+        $this->db->select('c_cashinExternalId as provider');
+        $this->db->from('cashin_external_x_channel');
+        if (!empty($group)) {
+            $this->db->where('c_cashinChannelGroup', $group);
+        }
+        $this->db->group_by('c_cashinExternalId');
+        $providers = $this->db->get()->result_array();
+
+        $this->db->select('ref_cashinChannelId as id');
+        $this->db->from('cashin_external_x_channel');
+        if (!empty($group)) {
+            $this->db->where('c_cashinChannelGroup', $group);
+        }
+        if (!empty($externalId)) {
+            $this->db->where('c_cashinExternalId', $externalId);
+        }
+        $this->db->group_by('ref_cashinChannelId');
+        $channels = $this->db->get()->result_array();
+
+        return $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode([
+                'providers' => array_column($providers, 'provider'),
+                'channels' => array_column($channels, 'id')
+            ]));
+    }
+
+    public function get_merchant_mappings() {
+        if (!$this->input->is_ajax_request()) return;
+        $merchantId = $this->input->post('merchant_id');
+
+        $this->db->select('c_cashinChannelGroup as group');
+        $this->db->from('cashin_external_x_channel');
+        $this->db->where('ref_merchantId', $merchantId);
+        $this->db->group_by('c_cashinChannelGroup');
+        $groups = $this->db->get()->result_array();
+
+        $this->db->select('c_cashinExternalId as provider');
+        $this->db->from('cashin_external_x_channel');
+        $this->db->where('ref_merchantId', $merchantId);
+        $this->db->group_by('c_cashinExternalId');
+        $providers = $this->db->get()->result_array();
+
+        return $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode([
+                'groups' => array_column($groups, 'group'),
+                'providers' => array_column($providers, 'provider')
+            ]));
+    }
 }

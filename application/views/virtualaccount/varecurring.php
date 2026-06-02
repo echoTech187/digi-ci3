@@ -188,7 +188,7 @@ $download_url = base_url('finance/virtual-account/download_recurring') // Assumi
     </div><!-- /.dt-card -->
 </div>
 <!-- Details Modal -->
-<div class="modal fade" id="detailVaDynamicChannelExternalModal" tabindex="-1">
+<div class="modal fade" data-backdrop="static" data-keyboard="false" id="detailVaDynamicChannelExternalModal" tabindex="-1">
     <div class="modal-dialog modal-lg border-0">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
             <!-- Header Legacy Migrated -->

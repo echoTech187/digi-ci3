@@ -89,7 +89,7 @@ class TransactionMutationController extends CI_Controller
             $oldSearch = $this->session->userdata('last_dt_search_mutation');
 
             if ($dtSearch === '' && $oldSearch !== '' && $oldSearch !== null) {
-               $this->resetMutation($id, false); // Silent reset
+               $this->session->unset_userdata(['last_dt_search_mutation', 'search_mutation_transid']);
             }
 
             if ($dtSearch !== '') {

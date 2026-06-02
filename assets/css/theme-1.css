@@ -4377,9 +4377,9 @@ div.dataTables_processing[style*="display: block"] {
 
 /* Event Status Coloring */
 .holiday-active {
-    background: linear-gradient(135deg, var(--primary) 0%, #4433ff 100%) !important;
+    background: linear-gradient(135deg, var(--danger) 0%, #e74a3b 100%) !important;
     color: #fff !important;
-    box-shadow: 0 4px 10px var(--primary-glow) !important;
+    box-shadow: 0 4px 10px var(--danger-soft) !important;
 }
 
 .holiday-inactive {

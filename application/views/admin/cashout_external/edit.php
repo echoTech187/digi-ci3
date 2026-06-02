@@ -197,35 +197,56 @@
 
 <script>
     $(document).ready(function() {
-        function updateChannelIds() {
-            let group = $('#c_cashoutChannelGroup').val();
-            let external = $('#c_externalIdDefault').val();
-            const $channelId = $('#ref_cashoutChannelId');
+        $('#c_cashoutChannelGroup').on('change', function() {
+            const group = $(this).val();
+            $('#c_externalIdDefault').val('').trigger('change.select2');
+            $('#ref_cashoutChannelId').val('').trigger('change.select2');
+            fetchOptions(group, '', true);
+        });
 
-            if (group && external) {
-                $channelId.prop('disabled', true).html('<option value="">Loading...</option>');
-                $.post('<?= base_url("merchant/setting-cashout-fee/groups") ?>', { 
-                    c_cashoutChannelGroup: group, 
-                    c_externalIdDefault: external,
-                    '<?= $this->security->get_csrf_token_name(); ?>': $('input[name="<?= $this->security->get_csrf_token_name(); ?>"]').val() || '<?= $this->security->get_csrf_hash(); ?>'
-                }, function(data) {
-                    const options = typeof data === 'string' ? JSON.parse(data) : data;
-                    const currentVal = '<?= $mapping['ref_cashoutChannelId'] ?>';
-                    $channelId.empty().append('<option disabled>Select channel ID</option>');
-                    if (options.length > 0) {
-                        options.forEach(item => {
-                            const selected = (item.id == currentVal) ? 'selected' : '';
-                            $channelId.append(`<option value="${item.id}" ${selected}>${item.id}</option>`);
-                        });
-                        $channelId.prop('disabled', false);
-                    } else {
-                        $channelId.append('<option disabled>No channels found</option>').prop('disabled', true);
-                    }
-                    $channelId.trigger('change');
-                });
+        $('#c_externalIdDefault').on('change', function() {
+            const group = $('#c_cashoutChannelGroup').val();
+            const external_id = $(this).val();
+            $('#ref_cashoutChannelId').val('').trigger('change.select2');
+            fetchOptions(group, external_id, false);
+        });
+
+        function fetchOptions(group, external_id, updateProvider) {
+            const csrfName = '<?= $this->security->get_csrf_token_name(); ?>';
+            const csrfHash = $('input[name="' + csrfName + '"]').val() || '<?= $this->security->get_csrf_hash(); ?>';
+
+            if (!group) return;
+
+            if (updateProvider) {
+                $('#c_externalIdDefault').prop('disabled', true).html('<option value="">Loading...</option>').trigger('change.select2');
             }
-        }
+            $('#ref_cashoutChannelId').prop('disabled', true).html('<option value="">Loading...</option>').trigger('change.select2');
 
-        $('#c_cashoutChannelGroup, #c_externalIdDefault').change(updateChannelIds);
+            $.ajax({
+                url: "<?= base_url('external/cashout/get-filter-options') ?>",
+                type: "POST",
+                data: { group: group, external_id: external_id, [csrfName]: csrfHash },
+                dataType: "json",
+                success: function(data) {
+                    if (updateProvider) {
+                        let providerOptions = '<option value="">Select external ID</option>';
+                        data.providers.forEach(function(item) {
+                            providerOptions += `<option value="${item}">${item}</option>`;
+                        });
+                        $('#c_externalIdDefault').html(providerOptions).prop('disabled', false).trigger('change.select2');
+                    }
+
+                    let channelOptions = '<option value="">Select channel ID</option>';
+                    data.channels.forEach(function(item) {
+                        channelOptions += `<option value="${item}">${item}</option>`;
+                    });
+                    $('#ref_cashoutChannelId').html(channelOptions).prop('disabled', false).trigger('change.select2');
+                },
+                error: function() {
+                    if (updateProvider) $('#c_externalIdDefault').prop('disabled', false).html('<option value="">Select external ID</option>').trigger('change.select2');
+                    $('#ref_cashoutChannelId').prop('disabled', false).html('<option value="">Select channel ID</option>').trigger('change.select2');
+                }
+            });
+        }
     });
 </script>

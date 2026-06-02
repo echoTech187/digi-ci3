@@ -162,7 +162,7 @@
         </div>
 
         <!-- Modal: Credit Balance -->
-        <div class="modal fade" id="creditBalanceModal" tabindex="-1" aria-hidden="true">
+        <div class="modal fade" data-backdrop="static" data-keyboard="false" id="creditBalanceModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-lg modal-dialog-centered">
                 <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
                     <div class="modal-header modal-header-primary border-0 mh-premium">
@@ -253,7 +253,7 @@
         </div>
 
         <!-- Modal: Debit Balance -->
-        <div class="modal fade" id="debitBalanceModal" tabindex="-1" aria-hidden="true">
+        <div class="modal fade" data-backdrop="static" data-keyboard="false" id="debitBalanceModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-lg modal-dialog-centered">
                 <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
                     <div class="modal-header modal-header-primary border-0 mh-premium">
@@ -345,7 +345,7 @@
 
 
         <!-- Modal: Delegate Access -->
-        <div class="modal fade" id="delegateModal" tabindex="-1" aria-hidden="true">
+        <div class="modal fade" data-backdrop="static" data-keyboard="false" id="delegateModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-xl modal-dialog-centered">
                 <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
                     <div class="modal-header modal-header-primary border-0 mh-premium">

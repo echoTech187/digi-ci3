@@ -11,7 +11,7 @@ class AuthController extends CI_Controller
     public function index()
     {
         if ($this->session->userdata('c_email')) {
-            redirect('dashboard');
+            $this->_redirect_based_on_access();
         } elseif ($this->session->userdata('email')) {
             redirect('user');
         }
@@ -95,8 +95,8 @@ class AuthController extends CI_Controller
                     // Clear any stale RBAC cache for this session
                     $this->load->library('rbac');
                     $this->rbac->clear_menu_cache();
-
-                    redirect('dashboard');
+                    
+                    $this->_redirect_based_on_access($admin['role_id']);
                 } else {
                    
                     $this->session->set_flashdata('message', '<div class="alert alert-danger" role="alert">Wrong password!</div>');
@@ -117,7 +117,7 @@ class AuthController extends CI_Controller
     public function register()
     {
         if ($this->session->userdata('c_email')) {
-            redirect('dashboard');
+            $this->_redirect_based_on_access();
         } elseif ($this->session->userdata('email')) {
             redirect('user');
         }
@@ -347,6 +347,47 @@ class AuthController extends CI_Controller
 
             $this->session->set_flashdata('message', '<div class="alert alert-success" role="alert">Password has been changed! Please login.</div>');
             redirect('auth');
+        }
+    }
+
+    private function _redirect_based_on_access($role_id = null)
+    {
+        if ($role_id === null) {
+            $role_id = $this->session->userdata('role') ?: $this->session->userdata('role_id');
+        }
+        
+        $this->load->library('rbac');
+        $menus = $this->rbac->get_menus_by_role($role_id);
+        
+        $has_dashboard = false;
+        if (!empty($menus)) {
+            foreach ($menus as $m) {
+                if (strtolower($m['url']) === 'dashboard') {
+                    $has_dashboard = true;
+                    break;
+                }
+                if (!empty($m['sub_menus'])) {
+                    foreach ($m['sub_menus'] as $sm) {
+                        if (strtolower($sm['url']) === 'dashboard') {
+                            $has_dashboard = true;
+                            break 2;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (!$has_dashboard) {
+            $this->db->select('id')->from('user_menu')->where('url', 'dashboard')->limit(1);
+            if ($this->db->get()->num_rows() == 0) {
+                $has_dashboard = true;
+            }
+        }
+
+        if (empty($menus) || !$has_dashboard) {
+            redirect('welcome');
+        } else {
+            redirect('dashboard');
         }
     }
 }

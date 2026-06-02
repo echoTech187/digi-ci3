@@ -375,4 +375,29 @@ class ChannelController extends CI_Controller {
       }
       redirect('channel/cashout');
    }
+
+   public function get_master_filter_options() {
+       if (!$this->input->is_ajax_request()) return;
+       $type = $this->input->post('type'); // 'cashin' or 'cashout'
+       $group = $this->input->post('group');
+
+       $table = ($type === 'cashin') ? 'cashin_channel' : 'cashout_channel';
+
+       $this->db->select('c_externalIdDefault as provider');
+       $this->db->from($table);
+       if (!empty($group)) {
+           $this->db->where('c_channelGroup', $group);
+       }
+       // Don't include empty providers
+       $this->db->where('c_externalIdDefault !=', '');
+       $this->db->where('c_externalIdDefault IS NOT NULL', null, false);
+       $this->db->group_by('c_externalIdDefault');
+       $providers = $this->db->get()->result_array();
+
+       return $this->output
+           ->set_content_type('application/json')
+           ->set_output(json_encode([
+               'providers' => array_column($providers, 'provider')
+           ]));
+   }
 }

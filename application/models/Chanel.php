@@ -302,10 +302,6 @@ class Chanel extends CI_Model {
                 if (!$resp) {
                     $error = $this->db->error();
 
-                    if ($error['code'] == 1062) {
-                        continue;
-                    }
-
                     $this->db->trans_rollback();
                     return [
                         'code' => $error['code'],
@@ -350,10 +346,6 @@ class Chanel extends CI_Model {
 
                 if (!$resp) {
                     $error = $this->db->error();
-
-                    if ($error['code'] == 1062) {
-                        continue;
-                    }
 
                     $this->db->trans_rollback();
                     return [

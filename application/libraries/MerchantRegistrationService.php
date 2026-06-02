@@ -223,10 +223,13 @@ class MerchantRegistrationService
         $securityType = 'Not Both';
         if (!empty($data['c_openapiIPAllow'])) {
             $securityType = 'Whitelist IP';
+            $data['c_openapiIPAllow'] = $data['c_openapiIPAllow'];
         }
         $data['c_openapiSecurityType'] = $securityType;
+
         $data['c_dateCreated'] = date('Y-m-d H:i:s');
-        $data['c_status'] = 'Active';
+        $data['c_status'] = 'Pending';
+        $data['c_openapiStatus'] = 'Pending';
         
         unset($data['c_confirmPassword']);
 

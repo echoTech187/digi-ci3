@@ -306,4 +306,60 @@ class CashoutExternalController extends CI_Controller {
             ->set_content_type('application/json')
             ->set_output(json_encode($channels));
     }
+
+    public function get_filter_options() {
+        if (!$this->input->is_ajax_request()) return;
+        $group = $this->input->post('group');
+        $externalId = $this->input->post('external_id');
+
+        $this->db->select('c_cashoutExternalId as provider');
+        $this->db->from('cashout_external_x_channel');
+        if (!empty($group)) {
+            $this->db->where('c_cashoutChannelGroup', $group);
+        }
+        $this->db->group_by('c_cashoutExternalId');
+        $providers = $this->db->get()->result_array();
+
+        $this->db->select('ref_cashoutChannelId as id');
+        $this->db->from('cashout_external_x_channel');
+        if (!empty($group)) {
+            $this->db->where('c_cashoutChannelGroup', $group);
+        }
+        if (!empty($externalId)) {
+            $this->db->where('c_cashoutExternalId', $externalId);
+        }
+        $this->db->group_by('ref_cashoutChannelId');
+        $channels = $this->db->get()->result_array();
+
+        return $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode([
+                'providers' => array_column($providers, 'provider'),
+                'channels' => array_column($channels, 'id')
+            ]));
+    }
+
+    public function get_merchant_mappings() {
+        if (!$this->input->is_ajax_request()) return;
+        $merchantId = $this->input->post('merchant_id');
+
+        $this->db->select('c_cashoutChannelGroup as group');
+        $this->db->from('cashout_external_x_channel');
+        $this->db->where('ref_merchantId', $merchantId);
+        $this->db->group_by('c_cashoutChannelGroup');
+        $groups = $this->db->get()->result_array();
+
+        $this->db->select('c_cashoutExternalId as provider');
+        $this->db->from('cashout_external_x_channel');
+        $this->db->where('ref_merchantId', $merchantId);
+        $this->db->group_by('c_cashoutExternalId');
+        $providers = $this->db->get()->result_array();
+
+        return $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode([
+                'groups' => array_column($groups, 'group'),
+                'providers' => array_column($providers, 'provider')
+            ]));
+    }
 }

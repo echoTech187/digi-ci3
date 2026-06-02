@@ -79,7 +79,7 @@
 
                         <div class="dt-more-panel-body">
                             <!-- Channel Group -->
-                            <div class="dt-more-field">
+                            <div class="dt-more-field mb-3">
                                 <label class="dt-more-label"><i class="fas fa-layer-group mr-1 mr-2"></i> Channel Group</label>
                                 <select id="filter_channel_group" class="dt-more-select filter-select">
                                     <option value="">All Groups</option>
@@ -89,8 +89,19 @@
                                 </select>
                             </div>
 
+                            <!-- Provider -->
+                            <div class="dt-more-field mb-3">
+                                <label class="dt-more-label"><i class="fas fa-server mr-1 mr-2"></i> External ID Default</label>
+                                <select id="filter_provider" class="dt-more-select filter-select">
+                                    <option value="">All External IDs</option>
+                                    <?php foreach ($channel_external_id_defaults as $prd): ?>
+                                        <option value="<?= $prd->c_externalIdDefault ?>"><?= $prd->c_externalIdDefault ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            
                             <!-- Channel ID -->
-                            <div class="dt-more-field">
+                            <div class="dt-more-field mb-3">
                                 <label class="dt-more-label"><i class="fas fa-hashtag mr-1 mr-2"></i> Channel ID</label>
                                 <select id="filter_channel_id" class="dt-more-select filter-select">
                                     <option value="">All Channel IDs</option>
@@ -99,20 +110,9 @@
                                     <?php endforeach; ?>
                                 </select>
                             </div>
-
-                            <!-- Provider -->
-                            <div class="dt-more-field">
-                                <label class="dt-more-label"><i class="fas fa-server mr-1 mr-2"></i> Provider / External Default</label>
-                                <select id="filter_provider" class="dt-more-select filter-select">
-                                    <option value="">All Providers</option>
-                                    <?php foreach ($channel_external_id_defaults as $prd): ?>
-                                        <option value="<?= $prd->c_externalIdDefault ?>"><?= $prd->c_externalIdDefault ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-
+                            
                             <!-- Status -->
-                            <div class="dt-more-field">
+                            <div class="dt-more-field mb-3">
                                 <label class="dt-more-label"><i class="fas fa-info-circle mr-1 mr-2"></i> Status</label>
                                 <select id="filter_status" class="dt-more-select filter-select">
                                     <option value="">All Statuses</option>
@@ -157,7 +157,7 @@
 </div>
 
 <!-- Edit Mapping Modal -->
-<div class="modal fade" id="globalUpdateModal" tabindex="-1" aria-hidden="true">
+<div class="modal fade" data-backdrop="static" data-keyboard="false" id="globalUpdateModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg">
             <div class="modal-header modal-header-primary border-0 mh-premium" style="background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);">
@@ -254,9 +254,9 @@
                                 </select>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label smaller fw-bold text-muted mb-1">External Provider (Optional)</label>
+                                <label class="form-label smaller fw-bold text-muted mb-1">External ID Default (Optional)</label>
                                 <select class="form-control select2" name="current_externalId" id="global_current_external">
-                                    <option value="" selected>All External Providers</option>
+                                    <option value="" selected>All External IDs</option>
                                     <?php foreach ($channel_external_id_defaults as $ecd): ?>
                                         <option value="<?= $ecd->c_externalIdDefault ?>"><?= $ecd->c_externalIdDefault ?></option>
                                     <?php endforeach; ?>
@@ -286,7 +286,7 @@
                                 </select>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label smaller fw-bold text-muted mb-1">New External Provider (Optional)</label>
+                                <label class="form-label smaller fw-bold text-muted mb-1">New External ID Default (Optional)</label>
                                 <select class="form-control select2" name="new_externalId" id="global_new_external">
                                     <option value="" selected>Don't Update (Keep Original)</option>
                                     <?php foreach ($channel_external_id_defaults as $ecd): ?>
@@ -337,7 +337,8 @@ $(document).ready(function() {
             }
             $(this).select2({ 
                 dropdownParent: $('body'),
-                width: '100%' 
+                width: '100%',
+                minimumResultsForSearch: 0
             });
         });
     });
@@ -445,81 +446,170 @@ $(document).ready(function() {
         if (typeof restoreBtn === 'function') restoreBtn($form);
     });
 
+    let origGroups = '';
+    let origExternals = '';
+
+    $(document).ready(function() {
+        origGroups = $('#global_current_group').html();
+        origExternals = $('#global_current_external').html();
+    });
+
     // Update Scope Radio Toggle
     $('input[name="update_type"]').on('change', function() {
         if (this.value === 'merchant') {
             $('#merchantSelectGroup').slideDown();
         } else {
             $('#merchantSelectGroup').slideUp();
-            $('#global_merchant').val(null).trigger('change');
+            $('#global_merchant').val('').trigger('change.select2');
+            
+            // Restore ALL options for Group and External ID
+            if (origGroups) {
+                $('#global_current_group').html(origGroups).val('').trigger('change.select2');
+                $('#global_current_external').html(origExternals).val('').trigger('change.select2');
+            }
         }
+        
+        // Always reset other selects when switching tabs
+        $('#global_current_channel').val('').trigger('change.select2');
+        $('#global_new_group').val('').trigger('change.select2');
+        $('#global_new_external').val('').trigger('change.select2');
+        $('#global_new_channel').val('').trigger('change.select2');
     });
 
-    // Dynamic Channel ID population for Current Configuration
-    $('#global_current_group, #global_current_external').on('change', function() {
+    $('#global_merchant').on('change', function() {
+        const merchantId = $(this).val();
+        if (!merchantId) return;
+        const tokenVal = $('input[name="' + csrfName + '"]').val() || csrfHash;
+
+        $.ajax({
+            url: "<?= base_url('external/cashout/get-merchant-mappings') ?>",
+            type: "POST",
+            data: { 
+                merchant_id: merchantId,
+                [csrfName]: tokenVal 
+            },
+            dataType: "json",
+            success: function(data) {
+                // Update current group
+                let groupOptions = '<option value="" selected disabled>Select group</option>';
+                data.groups.forEach(function(item) {
+                    groupOptions += `<option value="${item}">${item}</option>`;
+                });
+                $('#global_current_group').html(groupOptions).trigger('change');
+
+                // Update current external
+                let extOptions = '<option value="" selected>All External IDs</option>';
+                data.providers.forEach(function(item) {
+                    extOptions += `<option value="${item}">${item}</option>`;
+                });
+                $('#global_current_external').html(extOptions).trigger('change');
+            }
+        });
+    });
+
+    // Dynamic population for Current Configuration
+    $('#global_current_group').on('change', function() {
+        const group = $(this).val();
+        $('#global_current_external').val('').trigger('change.select2');
+        $('#global_current_channel').val('').trigger('change.select2');
+        fetchCurrentConfigOptions(group, '', true);
+    });
+
+    $('#global_current_external').on('change', function() {
         const group = $('#global_current_group').val();
-        const external_id = $('#global_current_external').val();
-        const $channelSelect = $('#global_current_channel');
+        const external_id = $(this).val();
+        $('#global_current_channel').val('').trigger('change.select2');
+        fetchCurrentConfigOptions(group, external_id, false);
+    });
+
+    function fetchCurrentConfigOptions(group, external_id, updateProvider) {
         const tokenVal = $('input[name="' + csrfName + '"]').val() || csrfHash;
 
         if (!group) return;
 
-        $channelSelect.html('<option value="" selected>Loading channels...</option>');
+        if (updateProvider) {
+            $('#global_current_external').prop('disabled', true).html('<option value="">Loading...</option>').trigger('change.select2');
+        }
+        $('#global_current_channel').prop('disabled', true).html('<option value="">Loading...</option>').trigger('change.select2');
 
         $.ajax({
-            url: "<?= base_url('external/cashout/get-channels') ?>",
+            url: "<?= base_url('external/cashout/get-filter-options') ?>",
             type: "POST",
-            data: { 
-                group: group, 
-                external_id: external_id,
-                [csrfName]: tokenVal 
-            },
+            data: { group: group, external_id: external_id, [csrfName]: tokenVal },
             dataType: "json",
             success: function(data) {
-                let options = '<option value="" selected>All Channel IDs</option>';
-                data.forEach(function(item) {
-                    options += `<option value="${item.id}">${item.id}</option>`;
+                if (updateProvider) {
+                    let providerOptions = '<option value="" selected>All External IDs</option>';
+                    data.providers.forEach(function(item) {
+                        providerOptions += `<option value="${item}">${item}</option>`;
+                    });
+                    $('#global_current_external').html(providerOptions).prop('disabled', false).trigger('change.select2');
+                }
+
+                let channelOptions = '<option value="" selected>All Channel IDs</option>';
+                data.channels.forEach(function(item) {
+                    channelOptions += `<option value="${item}">${item}</option>`;
                 });
-                $channelSelect.html(options);
+                $('#global_current_channel').html(channelOptions).prop('disabled', false).trigger('change.select2');
             },
             error: function() {
-                $channelSelect.html('<option value="" selected>All Channel IDs</option>');
+                if (updateProvider) $('#global_current_external').prop('disabled', false).html('<option value="" selected>All External IDs</option>').trigger('change.select2');
+                $('#global_current_channel').prop('disabled', false).html('<option value="" selected>All Channel IDs</option>').trigger('change.select2');
             }
         });
+    }
+
+    // Dynamic population for New Configuration
+    $('#global_new_group').on('change', function() {
+        const group = $(this).val();
+        $('#global_new_external').val('').trigger('change.select2');
+        $('#global_new_channel').val('').trigger('change.select2');
+        fetchNewConfigOptions(group, '', true);
     });
 
-    // Dynamic Channel ID population for New Configuration
-    $('#global_new_group, #global_new_external').on('change', function() {
+    $('#global_new_external').on('change', function() {
         const group = $('#global_new_group').val();
-        const external_id = $('#global_new_external').val();
-        const $channelSelect = $('#global_new_channel');
+        const external_id = $(this).val();
+        $('#global_new_channel').val('').trigger('change.select2');
+        fetchNewConfigOptions(group, external_id, false);
+    });
+
+    function fetchNewConfigOptions(group, external_id, updateProvider) {
         const tokenVal = $('input[name="' + csrfName + '"]').val() || csrfHash;
 
         if (!group) return;
 
-        $channelSelect.html('<option value="" selected>Loading channels...</option>');
+        if (updateProvider) {
+            $('#global_new_external').prop('disabled', true).html('<option value="">Loading...</option>').trigger('change.select2');
+        }
+        $('#global_new_channel').prop('disabled', true).html('<option value="">Loading...</option>').trigger('change.select2');
 
         $.ajax({
-            url: "<?= base_url('external/cashout/get-channels') ?>",
+            url: "<?= base_url('external/cashout/get-filter-options') ?>",
             type: "POST",
-            data: { 
-                group: group, 
-                external_id: external_id,
-                [csrfName]: tokenVal 
-            },
+            data: { group: group, external_id: external_id, [csrfName]: tokenVal },
             dataType: "json",
             success: function(data) {
-                let options = '<option value="" selected>Don\'t Update (Keep Original)</option>';
-                data.forEach(function(item) {
-                    options += `<option value="${item.id}">${item.id}</option>`;
+                if (updateProvider) {
+                    let providerOptions = '<option value="" selected>Don\'t Update (Keep Original)</option>';
+                    data.providers.forEach(function(item) {
+                        providerOptions += `<option value="${item}">${item}</option>`;
+                    });
+                    $('#global_new_external').html(providerOptions).prop('disabled', false).trigger('change.select2');
+                }
+
+                let channelOptions = '<option value="" selected>Don\'t Update (Keep Original)</option>';
+                data.channels.forEach(function(item) {
+                    channelOptions += `<option value="${item}">${item}</option>`;
                 });
-                $channelSelect.html(options);
+                $('#global_new_channel').html(channelOptions).prop('disabled', false).trigger('change.select2');
             },
             error: function() {
-                $channelSelect.html('<option value="" selected>Don\'t Update (Keep Original)</option>');
+                if (updateProvider) $('#global_new_external').prop('disabled', false).html('<option value="" selected>Don\'t Update (Keep Original)</option>').trigger('change.select2');
+                $('#global_new_channel').prop('disabled', false).html('<option value="" selected>Don\'t Update (Keep Original)</option>').trigger('change.select2');
             }
         });
-    });
+    }
 
     $('#globalUpdateForm').on('submit', function(e) {
         e.preventDefault();
@@ -737,9 +827,62 @@ $(document).ready(function() {
     });
 
     $moreClear.on('click', function() {
-        $('.filter-select').val('').trigger('change');
+        $('.filter-select').val('').trigger('change.select2');
+        fetchFilterOptions('', '', true);
         updateFilterBadge();
         table.ajax.reload(null, false);
     });
+
+    // Cascading logic for Advanced Filters
+    $('#filter_channel_group').on('change', function() {
+        const group = $(this).val();
+        $('#filter_provider').val('').trigger('change.select2');
+        $('#filter_channel_id').val('').trigger('change.select2');
+        fetchFilterOptions(group, '', true);
+    });
+
+    $('#filter_provider').on('change', function() {
+        const group = $('#filter_channel_group').val();
+        const external_id = $(this).val();
+        $('#filter_channel_id').val('').trigger('change.select2');
+        fetchFilterOptions(group, external_id, false);
+    });
+
+    function fetchFilterOptions(group, external_id, updateProvider) {
+        const tokenVal = $('input[name="' + csrfName + '"]').val() || csrfHash;
+        
+        if (updateProvider) {
+            $('#filter_provider').prop('disabled', true).html('<option value="">Loading...</option>').trigger('change.select2');
+        }
+        $('#filter_channel_id').prop('disabled', true).html('<option value="">Loading...</option>').trigger('change.select2');
+
+        $.ajax({
+            url: "<?= base_url('external/cashout/get-filter-options') ?>",
+            type: "POST",
+            data: { group: group, external_id: external_id, [csrfName]: tokenVal },
+            dataType: "json",
+            success: function(data) {
+                if (updateProvider) {
+                    let providerOptions = '<option value="">All External IDs</option>';
+                    const currentProvider = $('#filter_provider').val();
+                    data.providers.forEach(function(item) {
+                        providerOptions += `<option value="${item}">${item}</option>`;
+                    });
+                    $('#filter_provider').html(providerOptions).prop('disabled', false).trigger('change.select2');
+                }
+
+                let channelOptions = '<option value="">All Channel IDs</option>';
+                const currentChannel = $('#filter_channel_id').val();
+                data.channels.forEach(function(item) {
+                    channelOptions += `<option value="${item}">${item}</option>`;
+                });
+                $('#filter_channel_id').html(channelOptions).prop('disabled', false).trigger('change.select2');
+            },
+            error: function() {
+                if (updateProvider) $('#filter_provider').prop('disabled', false).html('<option value="">All External IDs</option>').trigger('change.select2');
+                $('#filter_channel_id').prop('disabled', false).html('<option value="">All Channel IDs</option>').trigger('change.select2');
+            }
+        });
+    }
 });
 </script>

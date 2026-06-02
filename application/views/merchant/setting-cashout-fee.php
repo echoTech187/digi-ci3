@@ -122,16 +122,7 @@
                                 </select>
                             </div>
 
-                            <!-- Channel ID -->
-                            <div class="dt-more-field">
-                                <label class="dt-more-label"><i class="fas fa-hashtag mr-1 mr-2"></i> Channel ID</label>
-                                <select id="filter_channel_id" class="dt-more-select filter-select">
-                                    <option value="">All Channel IDs</option>
-                                    <?php foreach ($channel_ids as $cid): ?>
-                                        <option value="<?= $cid->id ?>"><?= $cid->id ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
+                            
 
                             <!-- Provider -->
                             <div class="dt-more-field">
@@ -143,7 +134,17 @@
                                     <?php endforeach; ?>
                                 </select>
                             </div>
-
+                            
+                            <!-- Channel ID -->
+                            <div class="dt-more-field">
+                                <label class="dt-more-label"><i class="fas fa-hashtag mr-1 mr-2"></i> Channel ID</label>
+                                <select id="filter_channel_id" class="dt-more-select filter-select">
+                                    <option value="">All Channel IDs</option>
+                                    <?php foreach ($channel_ids as $cid): ?>
+                                        <option value="<?= $cid->id ?>"><?= $cid->id ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
                             <!-- Status -->
                             <div class="dt-more-field">
                                 <label class="dt-more-label"><i class="fas fa-info-circle mr-1 mr-2"></i> Status</label>
@@ -210,7 +211,7 @@
 </div>
 
 <!-- Add/Edit Modal -->
-<div class="modal fade" id="feeModal" tabindex="-1" aria-hidden="true">
+<div class="modal fade" data-backdrop="static" data-keyboard="false" id="feeModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
             <!-- Header Legacy Migrated -->
@@ -372,7 +373,7 @@
 </div>
 
 <!-- Bulk Modal -->
-<div class="modal fade" id="bulkModal" tabindex="-1" aria-hidden="true">
+<div class="modal fade" data-backdrop="static" data-keyboard="false" id="bulkModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
             <!-- Header Legacy Migrated -->
@@ -433,7 +434,7 @@
                                         <h6 class="text-success fw-bold mb-3"><i class="fas fa-bullseye mr-2"></i> TARGET GROUPS</h6>
                                         <div class="mb-3">
                                             <label class="form-label small fw-bold text-muted">Cashout Channel Group</label>
-                                            <select class="form-control border-1 select2" required name="c_cashoutChannelGroup">
+                                            <select class="form-control border-1 select2" id="bulk_c_cashoutChannelGroup" required name="c_cashoutChannelGroup">
                                                 <option value="" selected disabled>Select group</option>
                                                 <?php foreach ($channel_groups as $chg): ?>
                                                     <option value="<?= $chg->c_channelGroup ?>"><?= $chg->c_channelGroup ?></option>
@@ -442,7 +443,7 @@
                                         </div>
                                         <div class="mb-0">
                                             <label class="form-label small fw-bold text-muted">External ID Default</label>
-                                            <select class="form-control border-1 select2" required name="c_externalIdDefault">
+                                            <select class="form-control border-1 select2" id="bulk_c_externalIdDefault" required name="c_externalIdDefault">
                                                 <option value="" selected disabled>Select external ID</option>
                                                 <?php foreach ($channel_external_id_defaults as $ecd): ?>
                                                     <option value="<?= $ecd->c_externalIdDefault ?>"><?= $ecd->c_externalIdDefault ?></option>
@@ -659,42 +660,62 @@ $(document).ready(function() {
             }
         });
 
-    // Dynamic Channel ID loading
-    function updateChannelIds() {
-        let group = $('#c_cashoutChannelGroup').val();
-        let external = $('#c_externalIdDefault').val();
+    function fetchOptions(group, external_id, updateProvider) {
+        const csrfName = $('meta[name="csrf-token-name"]').attr('content');
+        const csrfHash = $('meta[name="csrf-token-hash"]').attr('content');
+        const tokenObj = {};
+        if (csrfName) tokenObj[csrfName] = csrfHash;
 
-        if (group && external) {
-            let csrfName = $('meta[name="csrf-token-name"]').attr('content');
-            let csrfHash = $('meta[name="csrf-token-hash"]').attr('content');
-            
-            let postData = {
-                c_cashoutChannelGroup: group,
-                c_externalIdDefault: external
-            };
-            if (csrfName) postData[csrfName] = csrfHash;
+        if (!group) return;
 
-            $.post('<?= base_url("merchant/setting-cashout-fee/groups") ?>', postData, function(data) {
-                const options = typeof data === 'string' ? JSON.parse(data) : data;
-                const $channelId = $('#ref_cashoutChannelId');
-                
-                let currentVal = $channelId.val();
-                
-                $channelId.empty().append('<option disabled selected>Select channel ID</option>');
-                if (options.length > 0) {
-                    options.forEach(item => $channelId.append(`<option value="${item.id}">${item.id}</option>`));
-                    $channelId.prop('disabled', false);
-                    if (currentVal) $channelId.val(currentVal).trigger('change');
-                } else {
-                    $channelId.append('<option disabled>No channels found</option>').prop('disabled', true);
-                }
-            }).fail(() => {
-                console.error('Failed to load channel IDs');
-            });
+        if (updateProvider) {
+            $('#c_externalIdDefault').prop('disabled', true).html('<option value="">Loading...</option>').trigger('change.select2');
         }
+        $('#ref_cashoutChannelId').prop('disabled', true).html('<option value="">Loading...</option>').trigger('change.select2');
+
+        $.ajax({
+            url: "<?= base_url('external/cashout/get-filter-options') ?>",
+            type: "POST",
+            data: Object.assign({ group: group, external_id: external_id }, tokenObj),
+            dataType: "json",
+            success: function(data) {
+                if (updateProvider) {
+                    let providerOptions = '<option value="" selected disabled>Select external ID</option>';
+                    data.providers.forEach(function(item) {
+                        providerOptions += `<option value="${item}">${item}</option>`;
+                    });
+                    $('#c_externalIdDefault').html(providerOptions).prop('disabled', false).trigger('change.select2');
+                }
+
+                let channelOptions = '<option value="" selected disabled>Select channel ID</option>';
+                data.channels.forEach(function(item) {
+                    channelOptions += `<option value="${item}">${item}</option>`;
+                });
+                $('#ref_cashoutChannelId').html(channelOptions).prop('disabled', false).trigger('change.select2');
+            },
+            error: function() {
+                if (updateProvider) $('#c_externalIdDefault').prop('disabled', false).html('<option value="" selected disabled>Select external ID</option>').trigger('change.select2');
+                $('#ref_cashoutChannelId').prop('disabled', false).html('<option value="" selected disabled>Select channel ID</option>').trigger('change.select2');
+            }
+        });
     }
 
-    $('#c_cashoutChannelGroup, #c_externalIdDefault').change(updateChannelIds);
+    function onGroupChange() {
+        const group = $(this).val();
+        $('#c_externalIdDefault').val('').trigger('change.select2');
+        $('#ref_cashoutChannelId').val('').trigger('change.select2');
+        fetchOptions(group, '', true);
+    }
+
+    function onExternalChange() {
+        const group = $('#c_cashoutChannelGroup').val();
+        const external_id = $(this).val();
+        $('#ref_cashoutChannelId').val('').trigger('change.select2');
+        fetchOptions(group, external_id, false);
+    }
+
+    $('#c_cashoutChannelGroup').on('change', onGroupChange);
+    $('#c_externalIdDefault').on('change', onExternalChange);
 
     // Edit Button Handler
     $(document).on('click', '.edit-btn', function() {
@@ -704,17 +725,19 @@ $(document).ready(function() {
         $('#feeForm').attr('action', `<?= base_url('merchant/setting-cashout-fee/edit/' . $merchant_id) ?>/${d.id}`);
         
         // Prevent trigger during population
-        $('#c_cashoutChannelGroup, #c_externalIdDefault').off('change', updateChannelIds);
+        $('#c_cashoutChannelGroup').off('change', onGroupChange);
+        $('#c_externalIdDefault').off('change', onExternalChange);
         
-        $('#c_cashoutChannelGroup').val(d.group).trigger('change');
-        $('#c_externalIdDefault').val(d.externalid).trigger('change');
+        $('#c_cashoutChannelGroup').empty().append(`<option value="${d.group}" selected>${d.group}</option>`).trigger('change');
+        $('#c_externalIdDefault').empty().append(`<option value="${d.externalid}" selected>${d.externalid}</option>`).trigger('change');
         
         // Manual populate for channel ID
         const $channelId = $('#ref_cashoutChannelId');
         $channelId.empty().append(`<option value="${d.channelid}" selected>${d.channelid}</option>`).prop('disabled', false);
 
         // Re-enable trigger
-        $('#c_cashoutChannelGroup, #c_externalIdDefault').on('change', updateChannelIds);
+        $('#c_cashoutChannelGroup').on('change', onGroupChange);
+        $('#c_externalIdDefault').on('change', onExternalChange);
 
         $('#c_feeType').val(d.feetype).trigger('change');
         $('#c_fee').val(Math.floor(parseFloat(d.fee)));
@@ -818,12 +841,93 @@ $(document).ready(function() {
     });
 
     $moreClear.on('click', function() {
-        $('.filter-select').val('').trigger('change');
+        $('.filter-select').val('').trigger('change.select2');
+        fetchFilterOptions('', '', true);
         updateFilterBadge();
         table.ajax.reload(null, false);
     });
+
+    // Cascading logic for Advanced Filters
+    $('#filter_channel_group').on('change', function() {
+        const group = $(this).val();
+        $('#filter_provider').val('').trigger('change.select2');
+        $('#filter_channel_id').val('').trigger('change.select2');
+        fetchFilterOptions(group, '', true);
+    });
+
+    $('#filter_provider').on('change', function() {
+        const group = $('#filter_channel_group').val();
+        const external_id = $(this).val();
+        $('#filter_channel_id').val('').trigger('change.select2');
+        fetchFilterOptions(group, external_id, false);
+    });
+
+    function fetchFilterOptions(group, external_id, updateProvider) {
+        const csrfName = $('meta[name="csrf-token-name"]').attr('content');
+        const csrfHash = $('meta[name="csrf-token-hash"]').attr('content');
+        const tokenObj = {};
+        if (csrfName) tokenObj[csrfName] = csrfHash;
+
+        if (updateProvider) {
+            $('#filter_provider').prop('disabled', true).html('<option value="">Loading...</option>').trigger('change.select2');
+        }
+        $('#filter_channel_id').prop('disabled', true).html('<option value="">Loading...</option>').trigger('change.select2');
+
+        $.ajax({
+            url: "<?= base_url('external/cashout/get-filter-options') ?>",
+            type: "POST",
+            data: Object.assign({ group: group, external_id: external_id }, tokenObj),
+            dataType: "json",
+            success: function(data) {
+                if (updateProvider) {
+                    let providerOptions = '<option value="">All Providers</option>';
+                    data.providers.forEach(function(item) {
+                        providerOptions += `<option value="${item}">${item}</option>`;
+                    });
+                    $('#filter_provider').html(providerOptions).prop('disabled', false).trigger('change.select2');
+                }
+
+                let channelOptions = '<option value="">All Channel IDs</option>';
+                data.channels.forEach(function(item) {
+                    channelOptions += `<option value="${item}">${item}</option>`;
+                });
+                $('#filter_channel_id').html(channelOptions).prop('disabled', false).trigger('change.select2');
+            },
+            error: function() {
+                if (updateProvider) $('#filter_provider').prop('disabled', false).html('<option value="">All Providers</option>').trigger('change.select2');
+                $('#filter_channel_id').prop('disabled', false).html('<option value="">All Channel IDs</option>').trigger('change.select2');
+            }
+        });
+    }
+
+    // Bulk modal dynamic logic
+    $('#bulk_c_cashoutChannelGroup').on('change', function() {
+        const group = $(this).val();
+        const csrfName = $('meta[name="csrf-token-name"]').attr('content');
+        const csrfHash = $('meta[name="csrf-token-hash"]').attr('content');
+        const tokenVal = $('input[name="' + csrfName + '"]').val() || csrfHash;
+        
+        $('#bulk_c_externalIdDefault').prop('disabled', true).html('<option value="">Loading...</option>').trigger('change.select2');
+
+        $.ajax({
+            url: "<?= base_url('channel/get-master-filter-options') ?>",
+            type: "POST",
+            data: { type: 'cashout', group: group, [csrfName]: tokenVal },
+            dataType: "json",
+            success: function(data) {
+                let providerOptions = '<option value="" selected disabled>Select external ID</option>';
+                data.providers.forEach(function(item) {
+                    providerOptions += `<option value="${item}">${item}</option>`;
+                });
+                $('#bulk_c_externalIdDefault').html(providerOptions).prop('disabled', false).trigger('change.select2');
+            },
+            error: function() {
+                $('#bulk_c_externalIdDefault').prop('disabled', false).html('<option value="" selected disabled>Select external ID</option>').trigger('change.select2');
+            }
+        });
+    });
+
+    // Initialize tooltips
+    $('[data-toggle="tooltip"]').tooltip();
 });
 </script>
-
-
-

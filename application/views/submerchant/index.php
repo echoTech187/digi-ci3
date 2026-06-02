@@ -118,7 +118,7 @@ $id = $this->uri->segment(3);
 </div>
 
 <!-- ── Sub Merchant Modal (Add & Edit) ── -->
-<div class="modal fade" id="subMerchantModal" tabindex="-1" role="dialog" aria-hidden="true">
+<div class="modal fade" data-backdrop="static" data-keyboard="false" id="subMerchantModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
         <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
             <div class="modal-header modal-header-primary border-0 mh-premium">
