@@ -182,7 +182,7 @@
                     <div class="modal-body p-0">
                         <div class="d-flex g-0 w-100 flex-column flex-lg-row">
                             <!-- Left Column: Instructions Guide -->
-                            <div class="col-lg-5 p-4 d-flex flex-column justify-content-between mb-0" style="background:#202328;color:#fff;border-right:1px solid rgba(255,255,255,0.05);">
+                            <div class="col-lg-5 p-4 d-flex flex-column justify-content-between mb-0" style="">
                                 <div>
                                     <div class="d-flex align-items-center mb-3">
                                         <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center mr-3 shadow-sm" style="width: 36px; height: 36px; background-color: rgba(40, 167, 69, 0.2) !important;">
@@ -273,7 +273,7 @@
                     <div class="modal-body p-0">
                         <div class="d-flex g-0 w-100 flex-column flex-lg-row">
                             <!-- Left Column: Instructions Guide -->
-                            <div class="col-lg-5 p-4 d-flex flex-column justify-content-between mb-0" style="background:#202328;color:#fff;border-right:1px solid rgba(255,255,255,0.05);">
+                            <div class="col-lg-5 p-4 d-flex flex-column justify-content-between mb-0" style="">
                                 <div>
                                     <div class="d-flex align-items-center mb-3">
                                         <div class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center mr-3 shadow-sm" style="width: 36px; height: 36px; background-color: rgba(220, 53, 69, 0.2) !important;">
@@ -367,7 +367,7 @@
                             <input type="hidden" id="delegateMerchantId" name="merchantId">
                             <div class="d-flex g-0 w-100 flex-column flex-lg-row">
                                 <!-- Left Column: Instructions Guide -->
-                                <div class="col-lg-5 p-4 d-flex flex-column justify-content-between mb-0" style="background:#202328;color:#fff;border-right:1px solid rgba(255,255,255,0.05);">
+                                <div class="col-lg-5 p-4 d-flex flex-column justify-content-between mb-0" style="">
                                     <div>
                                         <div class="d-flex align-items-center mb-3">
                                             <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mr-3 shadow-sm" style="width: 36px; height: 36px;">
@@ -547,12 +547,12 @@
                                         ${row.c_merchantLevel == 0 ? `<li><button class="dropdown-item" data-toggle="modal" data-target="#delegateModal" onClick="openDelegateModal(${row.id}, '${row.c_name.replace(/'/g, "\\'")}')"><i class="fas fa-key text-warning"></i> Delegate</button></li>` : ''}
                                         ${row.hasBalancePermission ? `
                                             <li><hr class="dropdown-divider"></li>
-                                            <li><button class="dropdown-item" data-toggle="modal" data-target="#creditBalanceModal" onClick="detail(${row.id}, '${row.c_name.replace(/'/g, "\\'")}')"><i class="fas fa-plus-circle text-success"></i> Credit Balance</button></li>
-                                            <li><button class="dropdown-item" data-toggle="modal" data-target="#debitBalanceModal" onClick="detaildebit(${row.id}, '${row.c_name.replace(/'/g, "\\'")}')"><i class="fas fa-minus-circle text-danger"></i> Debit Balance</button></li>
+                                            <li><button class="dropdown-item" data-toggle="modal" data-target="#creditBalanceModal" onClick="detail(${row.id}, '${row.c_name.replace(/'/g, "\\'")}')"><i class="fas fa-plus-circle text-success"></i> Add Credit Balance</button></li>
+                                            <li><button class="dropdown-item" data-toggle="modal" data-target="#debitBalanceModal" onClick="detaildebit(${row.id}, '${row.c_name.replace(/'/g, "\\'")}')"><i class="fas fa-minus-circle text-danger"></i> Deduct Debit Balance</button></li>
                                         ` : ''}
                                         <li><hr class="dropdown-divider"></li>
-                                        <li><a class="dropdown-item" href="${baseUrl}merchant/setting-cashin-fee/${row.id}"><i class="fas fa-cog text-secondary"></i> Cashin Fee</a></li>
-                                        <li><a class="dropdown-item" href="${baseUrl}merchant/setting-cashout-fee/${row.id}"><i class="fas fa-cog text-secondary"></i> Cashout Fee</a></li>
+                                        <li><a class="dropdown-item" href="${baseUrl}merchant/setting-cashin-fee/${row.id}"><i class="fas fa-cog text-secondary"></i> Cashin Fee Settings</a></li>
+                                        <li><a class="dropdown-item" href="${baseUrl}merchant/setting-cashout-fee/${row.id}"><i class="fas fa-cog text-secondary"></i> Cashout Fee Settings</a></li>
                                     </ul>
                                 </div>
                             `;

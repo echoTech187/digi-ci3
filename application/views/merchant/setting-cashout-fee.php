@@ -540,6 +540,8 @@ $(document).ready(function() {
         });
     });
 
+
+
     var table = initServerDataTable("#cashoutTable", window.location.href, [
                 { "data": "no", "className": "ps-4 text-muted small" },
                 { 

@@ -46,38 +46,6 @@ $id = $this->uri->segment(3);
         </div>
     </div>
 
-    <!-- Alerts -->
-    <!-- Alerts Standardized to Swal2 Premium -->
-    <script>
-        $(document).ready(function() {
-            <?php if ($this->session->flashdata('success')) : ?>
-                Swal.fire({
-                    title: 'Success!',
-                    text: '<?= $this->session->flashdata('success'); ?>',
-                    icon: 'success',
-                    customClass: {
-                        popup: 'swal2-premium-popup',
-                        confirmButton: 'swal2-premium-confirm'
-                    },
-                    buttonsStyling: false
-                });
-            <?php endif; ?>
-
-            <?php if ($this->session->flashdata('error')) : ?>
-                Swal.fire({
-                    title: 'Error!',
-                    html: '<?= trim(str_replace(["\r", "\n"], '', $this->session->flashdata('error'))); ?>',
-                    icon: 'error',
-                    customClass: {
-                        popup: 'swal2-premium-popup',
-                        confirmButton: 'swal2-premium-confirm'
-                    },
-                    buttonsStyling: false
-                });
-            <?php endif; ?>
-        });
-    </script>
-
     <!-- ── Main Data Card ── -->
     <div class="card border-0 shadow-sm dt-card">
         <!-- ── Toolbar ── -->
@@ -87,12 +55,15 @@ $id = $this->uri->segment(3);
                 <i class="fas fa-search dt-search-icon"></i>
                 <input type="text" id="dt-search" class="dt-search-input" placeholder="Search by name, ID, or email...">
             </div>
-            
             <!-- RIGHT: Actions -->
             <div class="dt-toolbar-filters">
-                <button type="button" class="btn-dt-action btn-dt-action-success add-sub-btn border-0 d-flex align-items-center shadow-sm" data-toggle="modal" data-target="#subMerchantModal" style="height: 38px; border-radius: 8px; padding: 0 16px; font-weight: 600; font-size: 13px;">
-                    <i class="fas fa-plus mr-2"></i> Add Sub Account
-                </button>
+                <?php if ($merchant_level < 3): ?>
+                    <button type="button" class="btn-dt-action btn-dt-action-success add-sub-btn border-0 d-flex align-items-center shadow-sm" data-toggle="modal" data-target="#subMerchantModal" style="height: 38px; border-radius: 8px; padding: 0 16px; font-weight: 600; font-size: 13px;">
+                        <i class="fas fa-plus mr-2"></i> Add Sub Account
+                    </button>
+                <?php else: ?>
+                    <span class="badge badge-sm badge-danger">Maximum of 4 Sub Accounts reached</span>
+                <?php endif; ?>
             </div>
         </div>
 
@@ -142,7 +113,7 @@ $id = $this->uri->segment(3);
                 <div class="modal-body p-0 bg-light">
                     <div class="d-flex g-0 w-100 flex-column flex-lg-row">
                         <!-- Left Information Sidebar -->
-                        <div class="col-lg-4 p-4 d-flex flex-column justify-content-between mb-0" style="background:#202328;color:#fff;border-right:1px solid rgba(255,255,255,0.05);">
+                        <div class="col-lg-4 p-4 d-flex flex-column justify-content-between mb-0" style="">
                             <div>
                                 <div class="d-flex align-items-center mb-3">
                                     <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mr-3 shadow-sm" style="width: 40px; height: 40px; background-color: rgba(0, 123, 255, 0.2) !important;">
@@ -182,8 +153,8 @@ $id = $this->uri->segment(3);
                                                 <input type="email" class="form-control border-1 bg-dark text-white" name="c_email" id="modal_c_email" required placeholder="e.g. branch1@store.com" style="border-color: rgba(255,255,255,0.1);">
                                             </div>
                                             <div class="col-md-12 mb-0">
-                                                <label class="form-label small fw-bold text-muted">Callback Transfer <span class="text-danger">*</span></label>
-                                                <input type="text" class="form-control border-1 bg-dark text-white" name="c_callbackTransfer" id="modal_c_callbackTransfer" required placeholder="e.g. transfer/disbursement" style="border-color: rgba(255,255,255,0.1);">
+                                                <label class="form-label small fw-bold text-muted">Callback Transfer</label>
+                                                <input type="text" class="form-control border-1 bg-dark text-white" name="c_callbackTransfer" id="modal_c_callbackTransfer" placeholder="e.g. transfer/disbursement" style="border-color: rgba(255,255,255,0.1);">
                                             </div>
                                             <div class="col-md-12 mb-0">
                                                 <label class="form-label small fw-bold text-muted">Account Status <span class="text-danger">*</span></label>
@@ -197,8 +168,6 @@ $id = $this->uri->segment(3);
                                         </div>
                                     </div>
                                 </div>
-
-                                
                             </div>
                         </div>
                     </div>
@@ -242,18 +211,21 @@ $(document).ready(function() {
             orderable: false,
             render: function(data, type, row) {
                 var baseUrl = "<?= base_url() ?>";
+                var merchant_level = "<?= $merchant_level ?>";
                 return `
                     <div class="dropdown">
                         <button class="btn btn-sm rounded-circle p-2 border-0 bg-transparent" type="button" data-toggle="dropdown" data-boundary="viewport" aria-expanded="false">
                             <i class="fas fa-ellipsis-v"></i>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-right shadow border-0 py-2">
+                        ${merchant_level < 3 ? `
                             <li>
                                 <a class="dropdown-item" href="${baseUrl}merchant/sub-account/${data}">
                                     <i class="fas fa-users mr-2 text-success"></i>Sub Accounts
                                 </a>
                             </li>
                             <li><hr class="dropdown-divider"></li>
+                        ` : ''}
                             <li>
                                 <button type="button" class="dropdown-item edit-sub-btn" 
                                     data-toggle="modal" data-target="#subMerchantModal"

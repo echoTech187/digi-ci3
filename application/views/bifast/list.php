@@ -107,6 +107,15 @@
                             </div>
 
                             <div class="dt-more-panel-body">
+                                <!-- Primary: Date Range -->
+                                <div class="dt-more-field">
+                                    <label class="dt-more-label"><i class="fas fa-calendar-alt mr-1 mr-2"></i> Period</label>
+                                    <div class="premium-picker">
+                                        <input type="date" name="search_date_bifast" class="dt-chip-input" value="<?= $date_from_val; ?>" title="Date From">
+                                        <span class="text-muted mx-1" style="font-size:11px;">→</span>
+                                        <input type="date" name="search_date_bifast_to" class="dt-chip-input" value="<?= $date_to_val; ?>" title="Date To">
+                                    </div>
+                                </div>
                                 <!-- Merchant -->
                                 <div class="dt-more-field">
                                     <label class="dt-more-label"><i class="fas fa-store mr-1 mr-2"></i> Merchant</label>
@@ -131,15 +140,7 @@
                                         <?php endforeach; ?>
                                     </select>
                                 </div>
-                                <!-- Primary: Date Range -->
-                                <div class="dt-more-field">
-                                    <label class="dt-more-label"><i class="fas fa-calendar-alt mr-1 mr-2"></i> Period</label>
-                                    <div class="premium-picker">
-                                        <input type="date" name="search_date_bifast" class="dt-chip-input" value="<?= $date_from_val; ?>" title="Date From">
-                                        <span class="text-muted mx-1" style="font-size:11px;">→</span>
-                                        <input type="date" name="search_date_bifast_to" class="dt-chip-input" value="<?= $date_to_val; ?>" title="Date To">
-                                    </div>
-                                </div>
+                                
                                 <!-- Status -->
                                 <div class="dt-more-field">
                                     <label class="dt-more-label"><i class="fas fa-info-circle mr-1 mr-2"></i> Transaction Status</label>

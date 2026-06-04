@@ -15,9 +15,9 @@ class ServiceController extends CI_Controller {
     private function _render_product_datatable($where, $view_name, $page_title, $requires_provider = false)
     {
         is_logged_in();
-        $table = 'cashout_channel cc';
-        $column_order = array(null, 'cc.c_caption', 'cc.c_description', 'cc.c_fee', null);
-        $column_search = array('cc.c_caption', 'cc.c_description', 'cc.c_fee');
+        $table = 'cashout_external_x_channel cc';
+        $column_order = array(null, 'cc.c_caption', 'cc.id', 'cc.c_fee', null);
+        $column_search = array('cc.c_caption', 'cc.id', 'cc.c_fee');
         $order = array('cc.id' => 'asc');
 
         if ($this->input->is_ajax_request()) {
@@ -25,7 +25,7 @@ class ServiceController extends CI_Controller {
                 if ($requires_provider) {
                     $provider = $this->input->post('provider');
                     if (!empty($provider)) {
-                        $where["cc.c_channelGroup2 LIKE '%" . $this->db->escape_like_str($provider) . "%' ESCAPE '!'"] = NULL;
+                        $where["cc.c_cashoutChannelGroup2 LIKE '%" . $this->db->escape_like_str($provider) . "%' ESCAPE '!'"] = NULL;
                     }
                 }
                 return $this->Chanel->get_datatables_handler($table, $column_order, $column_search, $order, $where);
@@ -61,57 +61,57 @@ class ServiceController extends CI_Controller {
     }
 
     public function pulsa_reguler() {
-        $where = array('cc.c_channelGroup' => 'ppob', "cc.c_channelGroup2 LIKE '%pulsa%' ESCAPE '!'" => NULL);
+        $where = array('cc.c_cashinChannelGroup' => 'ppob', "cc.c_cashinChannelGroup2 LIKE '%pulsa%' ESCAPE '!'" => NULL);
         $this->_render_product_datatable($where, 'pulsa_reguler', 'Pulsa Reguler', true);
     }
 
     public function paket_data() {
-        $where = array('cc.c_channelGroup' => 'ppob', "cc.c_channelGroup2 LIKE '%paket_data%' ESCAPE '!'" => NULL);
+        $where = array('cc.c_cashinChannelGroup' => 'ppob', "cc.c_cashinChannelGroup2 LIKE '%paket_data%' ESCAPE '!'" => NULL);
         $this->_render_product_datatable($where, 'paket_data', 'Paket Data', true);
     }
 
     public function token_listrik() {
-        $where = array('cc.c_channelGroup2' => 'token_pln');
+        $where = array('cc.c_cashinChannelGroup2' => 'token_pln');
         $this->_render_product_datatable($where, 'token_listrik', 'Token Listrik');
     }
 
     public function topupgopay() {
-        $where = array('cc.c_channelGroup2' => 'topup_gopay');
+        $where = array('cc.c_cashinChannelGroup2' => 'topup_gopay');
         $this->_render_product_datatable($where, 'topup_gopay', 'Top Up Gopay');
     }
 
     public function topupdana() {
-        $where = array('cc.c_channelGroup2' => 'topup_dana');
+        $where = array('cc.c_cashinChannelGroup2' => 'topup_dana');
         $this->_render_product_datatable($where, 'topup_dana', 'Top Up Dana');
     }
 
     public function topupovo() {
-        $where = array('cc.c_channelGroup2' => 'topup_ovo');
+        $where = array('cc.c_cashinChannelGroup2' => 'topup_ovo');
         $this->_render_product_datatable($where, 'topup_ovo', 'Top Up Ovo');
     }
 
     public function googleplay() {
-        $where = array('cc.c_channelGroup2' => 'google_play');
+        $where = array('cc.c_cashinChannelGroup2' => 'google_play');
         $this->_render_product_datatable($where, 'googleplay', 'Google Play');
     }
 
     public function freefire() {
-        $where = array('cc.c_channelGroup2' => 'free_fire');
+        $where = array('cc.c_cashinChannelGroup2' => 'free_fire');
         $this->_render_product_datatable($where, 'freefire', 'Free Fire');
     }
 
     public function hago() {
-        $where = array('cc.c_channelGroup2' => 'hago');
+        $where = array('cc.c_cashinChannelGroup2' => 'hago');
         $this->_render_product_datatable($where, 'hago', 'Hago');
     }
 
     public function mobilelegend() {
-        $where = array('cc.c_channelGroup2' => 'diamond_mlbb');
+        $where = array('cc.c_cashinChannelGroup2' => 'diamond_mlbb');
         $this->_render_product_datatable($where, 'mobilelegend', 'Diamond Mobile Legend');
     }
 
     public function pubgmobile() {
-        $where = array('cc.c_channelGroup2' => 'pubg_mobile');
+        $where = array('cc.c_cashinChannelGroup2' => 'pubg_mobile');
         $this->_render_product_datatable($where, 'pubgmobile', 'PUBG Mobile');
     }
 
@@ -159,11 +159,11 @@ class ServiceController extends CI_Controller {
       $data = array(
          'id' => $id,
          'c_caption' => $caption,
-         'c_description' => $description,
+         'id' => $description,
          'c_fee' => $price,
-         'c_channelGroup' => $channelgroup,
-         'c_channelGroup2' => $channelgroup2,
-         'c_externalIdDefault' => 'portalpulsa',
+         'c_cashoutChannelGroup' => $channelgroup,
+         'c_cashoutChannelGroup2' => $channelgroup2,
+         'c_cashinExternalId' => 'portalpulsa',
          'c_feeType' => 'Fixed',
          'c_amountMin' => 0,
          'c_amountMax' => 0
@@ -212,12 +212,12 @@ class ServiceController extends CI_Controller {
 
       $data = array(
          'c_caption' => $caption,
-         'c_description' => $description,
+         'id' => $description,
          'c_fee' => $price
       );
 
       if (!empty($channelgroup2)) {
-         $data['c_channelGroup2'] = $channelgroup2;
+         $data['c_cashoutChannelGroup2'] = $channelgroup2;
       }
 
       if ($this->Chanel->update_cashout_chanel($id, $data)) {

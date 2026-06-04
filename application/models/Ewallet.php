@@ -180,13 +180,13 @@ class Ewallet extends CI_Model {
         
         // STEP 2: Fetch full details for those IDs
         $this->db->select("cpe.*, m.c_name as name_merchant, m.c_merchantLevel, s.c_name as name_submerchant, c.c_invoiceNo, 
-                           cde.c_merchantTransactionId AS Merchant_Transaction_Id, cc.c_description AS channel_description", FALSE);
+                           cde.c_merchantTransactionId AS Merchant_Transaction_Id, cc.id AS channel_description", FALSE);
         $this->db->from($this->table);
         $this->db->join('cashin c', 'c.id = cpe.ref_cashinId', 'left');
         $this->db->join('submerchant s', 'cpe.ref_subMerchantId = s.id', 'left');
         $this->db->join('merchant m', 'cpe.ref_merchantId = m.id', 'left');
         $this->db->join('cashin_dynamic_ewallet cde', 'cpe.ref_cashinDynamicEwalletId = cde.id', 'left');
-        $this->db->join('cashin_channel cc', 'cpe.ref_cashinChannelId = cc.id', 'left');
+        $this->db->join('cashin_external_x_channel cc', 'cpe.ref_cashinChannelId = cc.id', 'left');
         
         $this->db->where_in('cpe.id', $ids);
         
@@ -300,9 +300,9 @@ class Ewallet extends CI_Model {
     }
 
     public function get_internal_channels(){
-        $query = "SELECT id, c_description FROM cashin_channel 
-                WHERE c_channelGroup = 'ewallet'
-                ORDER BY c_description ASC";
+        $query = "SELECT id, id FROM cashin_external_x_channel 
+                WHERE c_cashinChannelGroup = 'ewallet'
+                ORDER BY id ASC";
         return $this->db->query($query)->result();
     }
 

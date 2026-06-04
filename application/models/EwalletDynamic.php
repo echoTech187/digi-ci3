@@ -114,11 +114,11 @@ class EwalletDynamic extends CI_Model
         $ids = array_column($id_results, 'id');
         
         // STEP 2: Fetch full details for those IDs
-        $this->db->select("cde.*, s.c_name as name_submerchant, m.c_name as name_merchant, cc.c_description AS channel_description", FALSE);
+        $this->db->select("cde.*, s.c_name as name_submerchant, m.c_name as name_merchant, cc.id AS channel_description", FALSE);
         $this->db->from($this->table);
         $this->db->join('submerchant s', 'cde.ref_subMerchantId = s.id', 'left');
         $this->db->join('merchant m', 'cde.ref_merchantId = m.id', 'left');
-        $this->db->join('cashin_channel cc', 'cde.ref_cashinChannelId = cc.id', 'left');
+        $this->db->join('cashin_external_x_channel cc', 'cde.ref_cashinChannelId = cc.id', 'left');
         
         $this->db->where_in('cde.id', $ids);
         

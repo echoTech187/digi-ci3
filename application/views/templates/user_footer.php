@@ -187,6 +187,48 @@
                     }, 1500);
                 }
             });
+
+            // Global modal reset functionality on close
+            $(document).on('hidden.bs.modal', '.modal', function () {
+                var $modal = $(this);
+                
+                // Reset all forms inside the modal
+                $modal.find('form').each(function() {
+                    var form = this;
+                    form.reset(); // Standard inputs, checkboxes, textareas
+                    
+                    // Reset hidden inputs (excluding CSRF token & merchant context ID)
+                    $(form).find('input[type="hidden"]').each(function() {
+                        var name = $(this).attr('name') || '';
+                        if (!name.toLowerCase().includes('csrf') && name !== 'ref_merchantId') {
+                            $(this).val('');
+                        }
+                    });
+
+                    // Reset Select2 dropdowns
+                    $(form).find('.select2').val('').trigger('change.select2');
+                    
+                    // Reset Custom File Inputs
+                    $(form).find('.custom-file-input').each(function() {
+                        $(this).val('');
+                        $(this).next('.custom-file-label').removeClass("selected").html('Choose file');
+                    });
+
+                    // Clear form validation states
+                    $(form).removeClass('was-validated');
+                    $(form).find('.is-invalid, .is-valid').removeClass('is-invalid is-valid');
+                    $(form).find('.invalid-feedback, .valid-feedback').hide();
+                });
+
+                // Reset modal-specific select2s that might be outside of a form tag
+                $modal.find('.select2').val('').trigger('change.select2');
+
+                // Reset specific dynamic elements (e.g. Channel ID selectors)
+                var $refChannelId = $modal.find('#ref_cashinChannelId, #ref_cashoutChannelId');
+                if ($refChannelId.length) {
+                    $refChannelId.prop('disabled', true).empty().append('<option disabled selected>Select channel ID</option>').trigger('change.select2');
+                }
+            });
         });
     </script>
 

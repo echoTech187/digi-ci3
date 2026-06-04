@@ -148,7 +148,7 @@
         <!-- Total Balance -->
         <div class="col-xl-4 col-md-6 mb-4 mb-xl-0">
             <div class="card border-0 shadow-sm dt-card h-100 overflow-hidden" style="border-radius: 16px;">
-                <div class="card-body p-4 position-relative">
+                <div class="card p-4 position-relative">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <span class="text-uppercase font-weight-bold text-muted small">Total Balance</span>
                         <div class="avatar-sm bg-primary-soft text-primary rounded-circle p-2" style="background-color: rgba(78, 115, 223, 0.1); width: 42px; height: 42px; display: flex; align-items: center; justify-content: center;">
@@ -167,7 +167,7 @@
         <!-- Hold Balance -->
         <div class="col-xl-4 col-md-6 mb-4 mb-xl-0">
             <div class="card border-0 shadow-sm dt-card h-100 overflow-hidden" style="border-radius: 16px;">
-                <div class="card-body p-4 position-relative">
+                <div class="card p-4 position-relative">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <span class="text-uppercase font-weight-bold text-muted small">Hold Balance</span>
                         <div class="avatar-sm bg-warning-soft text-warning rounded-circle p-2" style="background-color: rgba(255, 193, 7, 0.1); width: 42px; height: 42px; display: flex; align-items: center; justify-content: center;">
@@ -186,7 +186,7 @@
         <!-- Available Balance -->
         <div class="col-xl-4 col-md-12">
             <div class="card border-0 shadow-sm dt-card h-100 overflow-hidden" style="border-radius: 16px;">
-                <div class="card-body p-4 position-relative">
+                <div class="card p-4 position-relative">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <span class="text-uppercase font-weight-bold text-muted small">Available Balance</span>
                         <div class="avatar-sm bg-success-soft text-success rounded-circle p-2" style="background-color: rgba(40, 167, 69, 0.1); width: 42px; height: 42px; display: flex; align-items: center; justify-content: center;">
@@ -254,11 +254,6 @@
                                 </div>
                                 <button id="btn-overview-filter" class="btn btn-sm btn-primary font-weight-bold px-3">
                                     <i class="fas fa-sync mr-1"></i> Apply Filter
-                                </button>
-                            </div>
-                            <div>
-                                <button id="btn-overview-print" class="btn btn-sm btn-outline-secondary font-weight-bold" onclick="window.print()">
-                                    <i class="fas fa-print mr-1"></i> Print / PDF Audit Report
                                 </button>
                             </div>
                         </div>

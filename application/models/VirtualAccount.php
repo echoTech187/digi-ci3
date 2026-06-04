@@ -22,7 +22,7 @@ class VirtualAccount extends CI_Model {
         } else {
             $this->db->select("cpv.id, cpv.c_datetime, cpv.c_type, cpv.c_vaNumber, cpv.c_amount, cpv.c_fee, cpv.c_isSettlementRealtime, cpv.c_datetimeSettlement, cpv.ref_merchantId, cpv.ref_subMerchantId, cpv.ref_cashinId, cpv.ref_cashinChannelId, cpv.ref_cashinDynamicVaId, cpv.ref_cashinRecurringVaId, c.c_invoiceNo, m.c_name AS merchant_name, s.c_name AS submerchant_name, 
                                IF(cpv.c_type = 'Dynamic', cdv.c_merchantTransactionId, crv.c_merchantTransactionId) AS Merchant_Transaction_Id,
-                               egv.c_custom, cc.c_description AS channel_description");
+                               egv.c_custom, cc.id AS channel_description");
         }
         $this->db->from($this->table);
         
@@ -51,7 +51,7 @@ class VirtualAccount extends CI_Model {
         $joined_submerchant = false;
         if (!$only_ids && !$count_only) {
             $this->db->join('submerchant s', 'cpv.ref_subMerchantId = s.id', 'left');
-            $this->db->join('cashin_channel cc', 'cc.id = cpv.ref_cashinChannelId', 'left');
+            $this->db->join('cashin_external_x_channel cc', 'cc.id = cpv.ref_cashinChannelId', 'left');
             $joined_submerchant = true;
         }
 
@@ -286,7 +286,7 @@ class VirtualAccount extends CI_Model {
         // STEP 2: Fetch full data for only these specific IDs
         $this->db->select("cpv.*, c.c_invoiceNo, m.c_name AS merchant_name, m.c_merchantLevel, s.c_name AS submerchant_name, 
                            IF(cpv.c_type = 'Dynamic', cdv.c_merchantTransactionId, crv.c_merchantTransactionId) AS Merchant_Transaction_Id,
-                           egv.c_custom, cc.c_description AS channel_description", FALSE);
+                           egv.c_custom, cc.id AS channel_description", FALSE);
         $this->db->from($this->table);
         $this->db->join('cashin c', 'cpv.ref_cashinId = c.id', 'left');
         $this->db->join('submerchant s', 'cpv.ref_subMerchantId = s.id', 'left');
@@ -294,7 +294,7 @@ class VirtualAccount extends CI_Model {
         $this->db->join('cashin_dynamic_va cdv', 'cdv.id = cpv.ref_cashinDynamicVaId AND cdv.ref_merchantId = cpv.ref_merchantId', 'left');
         $this->db->join('cashin_recurring_va crv', 'crv.id = cpv.ref_cashinRecurringVaId AND crv.ref_merchantId = cpv.ref_merchantId', 'left');
         $this->db->join('external_gvpay_va_callback_payment egv', 'egv.ref_subMerchantId = cpv.ref_subMerchantId AND egv.ref_cashinPaymentVaId = cpv.id', 'left');
-        $this->db->join('cashin_channel cc', 'cc.id = cpv.ref_cashinChannelId', 'left');
+        $this->db->join('cashin_external_x_channel cc', 'cc.id = cpv.ref_cashinChannelId', 'left');
         
         $this->db->where_in('cpv.id', $ids);
         
@@ -451,9 +451,9 @@ class VirtualAccount extends CI_Model {
 
 
     public function get_internal_channels(){
-        $query = "SELECT id, c_description FROM cashin_channel 
-                WHERE c_channelGroup IN ('va', 'VIRTUAL_ACCOUNT')
-                ORDER BY c_description ASC";
+        $query = "SELECT id, id FROM cashin_external_x_channel 
+                WHERE c_cashinChannelGroup IN ('va', 'VIRTUAL_ACCOUNT')
+                ORDER BY id ASC";
         return $this->db->query($query)->result();
     }
 

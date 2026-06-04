@@ -116,15 +116,16 @@ $download_url = base_url('finance/virtual-account/download_recurring') // Assumi
                                         <?php endforeach; ?>
                                     </select>
                                 </div>
-                                <!-- Status -->
+                                <!-- External Channel ID -->
                                 <div class="dt-more-field">
-                                    <label class="dt-more-label"><i class="fas fa-info-circle mr-1 mr-2"></i> Status</label>
-                                    <select name="search_status_transaction_var" class="dt-more-select select2">
-                                        <option value="">All Statuses</option>
-                                        <option value="Created" <?= ($this->session->userdata('search_varecurring_status') == 'Created') ? 'selected' : ''; ?>>Created</option>
-                                        <option value="Pending" <?= ($this->session->userdata('search_varecurring_status') == 'Pending') ? 'selected' : ''; ?>>Pending</option>
-                                        <option value="Failed" <?= ($this->session->userdata('search_varecurring_status') == 'Failed') ? 'selected' : ''; ?>>Failed</option>
-                                        <option value="Cancel" <?= ($this->session->userdata('search_varecurring_status') == 'Cancel') ? 'selected' : ''; ?>>Cancel</option>
+                                    <label class="dt-more-label"><i class="fas fa-network-wired mr-1 mr-2"></i> External Channel</label>
+                                    <select name="search_external_varecurring" class="dt-more-select select2">
+                                        <option value="">All External Channels</option>
+                                        <?php foreach ($external_channels as $ext): ?>
+                                            <option value="<?= $ext->c_cashinExternalId; ?>" <?= ($ext->c_cashinExternalId == $search_external_var_value) ? 'selected' : ''; ?>>
+                                                <?= strtoupper($ext->c_cashinExternalId); ?>
+                                            </option>
+                                        <?php endforeach; ?>
                                     </select>
                                 </div>
                                 <!-- Channel ID -->
@@ -139,16 +140,15 @@ $download_url = base_url('finance/virtual-account/download_recurring') // Assumi
                                         <?php endforeach; ?>
                                     </select>
                                 </div>
-                                <!-- External Channel ID -->
+                                <!-- Status -->
                                 <div class="dt-more-field">
-                                    <label class="dt-more-label"><i class="fas fa-network-wired mr-1 mr-2"></i> External Channel</label>
-                                    <select name="search_external_varecurring" class="dt-more-select select2">
-                                        <option value="">All External Channels</option>
-                                        <?php foreach ($external_channels as $ext): ?>
-                                            <option value="<?= $ext->c_cashinExternalId; ?>" <?= ($ext->c_cashinExternalId == $search_external_var_value) ? 'selected' : ''; ?>>
-                                                <?= strtoupper($ext->c_cashinExternalId); ?>
-                                            </option>
-                                        <?php endforeach; ?>
+                                    <label class="dt-more-label"><i class="fas fa-info-circle mr-1 mr-2"></i> Status</label>
+                                    <select name="search_status_transaction_var" class="dt-more-select select2">
+                                        <option value="">All Statuses</option>
+                                        <option value="Created" <?= ($this->session->userdata('search_varecurring_status') == 'Created') ? 'selected' : ''; ?>>Created</option>
+                                        <option value="Pending" <?= ($this->session->userdata('search_varecurring_status') == 'Pending') ? 'selected' : ''; ?>>Pending</option>
+                                        <option value="Failed" <?= ($this->session->userdata('search_varecurring_status') == 'Failed') ? 'selected' : ''; ?>>Failed</option>
+                                        <option value="Cancel" <?= ($this->session->userdata('search_varecurring_status') == 'Cancel') ? 'selected' : ''; ?>>Cancel</option>
                                     </select>
                                 </div>
                             </div>
@@ -263,11 +263,11 @@ $download_url = base_url('finance/virtual-account/download_recurring') // Assumi
                             </div>
                             <div class="mb-3">
                                 <label class="small font-weight-bold text-primary mb-1">Headers</label>
-                                <pre class="p-3 bg-dark text-light rounded small border-0 mb-0" id="RequestHeader" style="max-height: 150px; overflow-y: auto;"></pre>
+                                <pre class="p-3 rounded small border-0 mb-0" id="RequestHeader" style="max-height: 150px; overflow-y: auto;"></pre>
                             </div>
                             <div>
                                 <label class="small font-weight-bold text-primary mb-1">Payload</label>
-                                <pre class="p-3 bg-dark text-light rounded small border-0 mb-0" id="RequestBody" style="max-height: 250px; overflow-y: auto;"></pre>
+                                <pre class="p-3 rounded small border-0 mb-0" id="RequestBody" style="max-height: 250px; overflow-y: auto;"></pre>
                             </div>
                         </div>
                     </div>
@@ -279,11 +279,11 @@ $download_url = base_url('finance/virtual-account/download_recurring') // Assumi
                             </div>
                             <div class="mb-3">
                                 <label class="small font-weight-bold text-primary mb-1">Headers</label>
-                                <pre class="p-3 bg-dark text-light rounded small border-0 mb-0" id="ResponseHeader" style="max-height: 150px; overflow-y: auto;"></pre>
+                                <pre class="p-3 rounded small border-0 mb-0" id="ResponseHeader" style="max-height: 150px; overflow-y: auto;"></pre>
                             </div>
                             <div>
                                 <label class="small font-weight-bold text-primary mb-1">Body</label>
-                                <pre class="p-3 bg-dark text-light rounded small border-0 mb-0" id="ResponseBody" style="max-height: 250px; overflow-y: auto;"></pre>
+                                <pre class="p-3 rounded small border-0 mb-0" id="ResponseBody" style="max-height: 250px; overflow-y: auto;"></pre>
                             </div>
                         </div>
                     </div>

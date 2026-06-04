@@ -37,6 +37,16 @@ class MerchantSubAccountController extends CI_Controller
       $data['merchant'] = $this->Mutation_model->get_merchant($id);
       $data['total_submerchants'] = $this->SubMerchant->count_all_dt($id);
 
+      // Calculate merchant level from c_ancestorPath
+      $curr_merchant = $this->db->select('c_ancestorPath')->get_where('merchant', ['id' => $id])->row_array();
+      $ancestorPath = (isset($curr_merchant['c_ancestorPath']) && $curr_merchant['c_ancestorPath'] !== '') ? trim($curr_merchant['c_ancestorPath'], '/') : '';
+      if (empty($ancestorPath)) {
+          $merchant_level = 0;
+      } else {
+          $merchant_level = count(explode('/', $ancestorPath)) - 1;
+      }
+      $data['merchant_level'] = $merchant_level;
+
       // Breadcrumb override: Replace ID with Merchant Name
       $merchant_name = isset($data['merchant'][0]) ? $data['merchant'][0]->c_name : 'Merchant';
       $data['breadcrumb_replace'] = [$id => $merchant_name];
@@ -104,10 +114,29 @@ class MerchantSubAccountController extends CI_Controller
 
       $parent_id = $this->input->post('ref_merchantId');
       
+      // Check maximum level depth limit of 3 using c_ancestorPath
+      $parent_merchant = $this->db->select('c_ancestorPath')->get_where('merchant', ['id' => $parent_id])->row_array();
+      $ancestorPath = (isset($parent_merchant['c_ancestorPath']) && $parent_merchant['c_ancestorPath'] !== '') ? trim($parent_merchant['c_ancestorPath'], '/') : '';
+      if (empty($ancestorPath)) {
+          $parent_level = 0;
+      } else {
+          $parent_level = count(explode('/', $ancestorPath)) - 1;
+      }
+      
+      if ($parent_level >= 3) {
+          if ($this->input->is_ajax_request()) {
+              echo json_encode(['status' => 'error', 'message' => 'Maximum hierarchy depth level of 3 has been reached. Cannot create deeper sub-accounts.']);
+          } else {
+              $this->session->set_flashdata('error', 'Maximum hierarchy depth level of 3 has been reached. Cannot create deeper sub-accounts.');
+              redirect('merchant/sub-account/' . $parent_id);
+          }
+          return;
+      }
+      
       // Set default values for the new merchant account
       $data['c_password'] = password_hash($this->input->post('c_email'), PASSWORD_DEFAULT);
       $data['c_status'] = $this->input->post('c_status') ?: 'Active';
-      $data['c_type'] = "Sub Account";
+
 
       $newId = $this->SubMerchant->create_submerchant_standard($parent_id, $data, $subData);
 

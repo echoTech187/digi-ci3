@@ -73,12 +73,12 @@ class Merchant extends CI_Model
 
 
     public function get_cashin_channel(){
-        $query = "select * from cashin_channel WHERE c_externalIdDefault='internal' ";
+        $query = "select * from cashin_external_x_channel WHERE c_cashinExternalId='internal' ";
         return $this->db->query($query)->result();
     }
 
     public function get_cashout_channel(){
-        $query = "select * from cashout_channel WHERE c_externalIdDefault='internal' ";
+        $query = "select * FROM cashout_external_x_channel WHERE c_cashoutExternalId='internal' ";
         return $this->db->query($query)->result();
     }
 

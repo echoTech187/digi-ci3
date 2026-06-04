@@ -146,11 +146,11 @@ class QRISRecurring extends CI_Model {
         $ids = array_column($id_results, 'id');
         
         // STEP 2: Fetch full details for those IDs
-        $this->db->select("crqm.*, s.c_name as name_submerchant, m.c_name as name_merchant, m.c_merchantLevel, 'qris_mpm' AS ref_cashinChannelId, IF(cc.c_description IS NULL OR cc.c_description = '', 'QRIS', cc.c_description) AS channel_description", FALSE);
+        $this->db->select("crqm.*, s.c_name as name_submerchant, m.c_name as name_merchant, m.c_merchantLevel, 'qris_mpm' AS ref_cashinChannelId, IF(cc.id IS NULL OR cc.id = '', 'QRIS', cc.id) AS channel_description", FALSE);
         $this->db->from($this->table);
         $this->db->join('submerchant s', 'crqm.ref_subMerchantId = s.id', 'left');
         $this->db->join('merchant m', 'crqm.ref_merchantId = m.id', 'left');
-        $this->db->join('cashin_channel cc', "cc.id = 'qris_mpm'", 'left');
+        $this->db->join('cashin_external_x_channel cc', "cc.id = 'qris_mpm'", 'left');
         
         $this->db->where_in('crqm.id', $ids);
         

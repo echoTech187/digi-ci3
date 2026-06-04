@@ -223,12 +223,12 @@
                                         <div class="mb-3">
                                             <label class="small font-weight-bold text-primary mb-1">Headers</label>
                                             <?php $reqH = is_array($create_log['RequestHeader']) ? json_encode($create_log['RequestHeader'], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) : $create_log['RequestHeader']; ?>
-                                            <pre class="p-3 bg-dark text-light rounded small border-0 mb-0" style="max-height: 150px; overflow-y: auto;"><?= htmlspecialchars($reqH ?: ''); ?></pre>
+                                            <pre class="p-3 rounded small border-0 mb-0" style="max-height: 150px; overflow-y: auto;"><?= htmlspecialchars($reqH ?: ''); ?></pre>
                                         </div>
                                         <div>
                                             <label class="small font-weight-bold text-primary mb-1">Payload</label>
                                             <?php $reqB = is_array($create_log['RequestBody']) ? json_encode($create_log['RequestBody'], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) : $create_log['RequestBody']; ?>
-                                            <pre class="p-3 bg-dark text-light rounded small border-0 mb-0" style="max-height: 250px; overflow-y: auto;"><?= htmlspecialchars($reqB ?: ''); ?></pre>
+                                            <pre class="p-3 rounded small border-0 mb-0" style="max-height: 250px; overflow-y: auto;"><?= htmlspecialchars($reqB ?: ''); ?></pre>
                                         </div>
                                     </div>
                                 </div>
@@ -241,12 +241,12 @@
                                         <div class="mb-3">
                                             <label class="small font-weight-bold text-primary mb-1">Headers</label>
                                             <?php $resH = is_array($create_log['ResponseHeader']) ? json_encode($create_log['ResponseHeader'], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) : $create_log['ResponseHeader']; ?>
-                                            <pre class="p-3 bg-dark text-light rounded small border-0 mb-0" style="max-height: 150px; overflow-y: auto;"><?= htmlspecialchars($resH ?: ''); ?></pre>
+                                            <pre class="p-3 rounded small border-0 mb-0" style="max-height: 150px; overflow-y: auto;"><?= htmlspecialchars($resH ?: ''); ?></pre>
                                         </div>
                                         <div>
                                             <label class="small font-weight-bold text-primary mb-1">Body</label>
                                             <?php $resB = is_array($create_log['ResponseBody']) ? json_encode($create_log['ResponseBody'], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) : $create_log['ResponseBody']; ?>
-                                            <pre class="p-3 bg-dark text-light rounded small border-0 mb-0" style="max-height: 250px; overflow-y: auto;"><?= htmlspecialchars($resB ?: ''); ?></pre>
+                                            <pre class="p-3 rounded small border-0 mb-0" style="max-height: 250px; overflow-y: auto;"><?= htmlspecialchars($resB ?: ''); ?></pre>
                                         </div>
                                     </div>
                                 </div>
@@ -284,7 +284,7 @@
                                         </div>
                                         <div class="mb-3">
                                             <label class="small font-weight-bold text-danger mb-1">Headers</label>
-                                            <pre class="p-3 bg-dark text-light rounded small border-0 mb-0" style="max-height: 150px; overflow-y: auto;"><?= htmlspecialchars($external_log['c_requestHeader'] ?? ''); ?></pre>
+                                            <pre class="p-3 rounded small border-0 mb-0" style="max-height: 150px; overflow-y: auto;"><?= htmlspecialchars($external_log['c_requestHeader'] ?? ''); ?></pre>
                                         </div>
                                         <div>
                                             <label class="small font-weight-bold text-danger mb-1">Payload Body</label>
@@ -293,7 +293,7 @@
                                                 $reqJson = json_decode($reqBody, true);
                                                 $reqFormatted = $reqJson ? json_encode($reqJson, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) : $reqBody;
                                             ?>
-                                            <pre class="p-3 bg-dark text-light rounded small border-0 mb-0" style="max-height: 250px; overflow-y: auto;"><?= htmlspecialchars($reqFormatted); ?></pre>
+                                            <pre class="p-3 rounded small border-0 mb-0" style="max-height: 250px; overflow-y: auto;"><?= htmlspecialchars($reqFormatted); ?></pre>
                                         </div>
                                     </div>
                                 </div>
@@ -306,7 +306,7 @@
                                         <?php if (isset($external_log['c_responseHeader'])): ?>
                                         <div class="mb-3">
                                             <label class="small font-weight-bold text-danger mb-1">Headers</label>
-                                            <pre class="p-3 bg-dark text-light rounded small border-0 mb-0" style="max-height: 150px; overflow-y: auto;"><?= htmlspecialchars($external_log['c_responseHeader'] ?? ''); ?></pre>
+                                            <pre class="p-3 rounded small border-0 mb-0" style="max-height: 150px; overflow-y: auto;"><?= htmlspecialchars($external_log['c_responseHeader'] ?? ''); ?></pre>
                                         </div>
                                         <?php endif; ?>
                                         <div>
@@ -316,7 +316,7 @@
                                                 $resJson = json_decode($resBody, true);
                                                 $resFormatted = $resJson ? json_encode($resJson, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) : $resBody;
                                             ?>
-                                            <pre class="p-3 bg-dark text-light rounded small border-0 mb-0" style="max-height: 250px; overflow-y: auto;"><?= htmlspecialchars($resFormatted); ?></pre>
+                                            <pre class="p-3 rounded small border-0 mb-0" style="max-height: 250px; overflow-y: auto;"><?= htmlspecialchars($resFormatted); ?></pre>
                                         </div>
                                     </div>
                                 </div>

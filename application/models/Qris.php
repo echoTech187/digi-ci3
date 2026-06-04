@@ -678,9 +678,9 @@ class Qris extends CI_Model {
     }
 
     public function get_internal_channels(){
-        $query = "SELECT id, c_description FROM cashin_channel 
-                WHERE c_channelGroup ='qris_mpm'
-                ORDER BY c_description ASC";
+        $query = "SELECT id, id FROM cashin_external_x_channel 
+                WHERE c_cashinChannelGroup ='qris_mpm'
+                ORDER BY id ASC";
         return $this->db->query($query)->result();
     }
 

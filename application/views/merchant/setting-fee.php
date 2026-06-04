@@ -549,6 +549,8 @@ $(document).ready(function() {
         });
     });
 
+
+
     var table = initServerDataTable("#cashinTable", window.location.href, [
                 { "data": "no", "className": "ps-4 text-muted small" },
                 { 
@@ -939,8 +941,7 @@ $(document).ready(function() {
                 }
             });
         });
-    }
-});
+    });
 </script>
 
 

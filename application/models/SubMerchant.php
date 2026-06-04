@@ -121,7 +121,7 @@ class SubMerchant extends CI_Model
                 'ref_roleId' => $defaultRole['id'],
                 'ref_grantedByMerchantId' => $parentId,
                 'c_isActive' => 1,
-                'c_createdAt' => date('Y-m-d H:i:s')
+                'c_grantedAt' => date('Y-m-d H:i:s')
             ];
             $this->db->insert('rbac_user_roles', $roleData);
         }

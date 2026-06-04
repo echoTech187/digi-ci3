@@ -114,18 +114,20 @@
                                         </select>
                                     </div>
                                 </div>
-                                <!-- Status -->
+                                
+                                <!-- External Channel -->
                                 <div class="dt-more-field">
-                                    <label class="dt-more-label"><i class="fas fa-info-circle mr-1 mr-2"></i> Status Transaction</label>
-                                    <select name="search_status_transaction_qd" class="dt-more-select ewallet-dynamic-select2 no-search">
-                                        <option value="">All Statuses</option>
-                                        <option value="Pending"  <?= ($this->session->userdata('search_ewalletdynamic_status') == 'Pending')  ? 'selected' : ''; ?>>Pending</option>
-                                        <option value="Created"  <?= ($this->session->userdata('search_ewalletdynamic_status') == 'Created')  ? 'selected' : ''; ?>>Created</option>
-                                        <option value="Paid"     <?= ($this->session->userdata('search_ewalletdynamic_status') == 'Paid')     ? 'selected' : ''; ?>>Paid</option>
-                                        <option value="Failed"   <?= ($this->session->userdata('search_ewalletdynamic_status') == 'Failed')   ? 'selected' : ''; ?>>Failed</option>
-                                        <option value="Expired"  <?= ($this->session->userdata('search_ewalletdynamic_status') == 'Expired')  ? 'selected' : ''; ?>>Expired</option>
-                                        <option value="Cancel"   <?= ($this->session->userdata('search_ewalletdynamic_status') == 'Cancel')   ? 'selected' : ''; ?>>Cancel</option>
-                                    </select>
+                                    <label class="dt-more-label"><i class="fas fa-plug mr-1 mr-2"></i> External Channel</label>
+                                    <div class="dt-filter-chip">
+                                        <select name="search_external_ewalletdynamic" class="dt-chip-select ewallet-dynamic-select2">
+                                            <option value="">All External Channels</option>
+                                            <?php foreach ($external_channels as $ext): ?>
+                                                <option value="<?= $ext->c_cashinExternalId; ?>" <?= ($ext->c_cashinExternalId == $this->session->userdata('search_ewalletdynamic_external')) ? 'selected' : ''; ?>>
+                                                    <?= strtoupper($ext->c_cashinExternalId); ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
                                 </div>
 
                                 <!-- Channel ID -->
@@ -142,22 +144,20 @@
                                         </select>
                                     </div>
                                 </div>
-
-                                <!-- External Channel -->
-                                <div class="dt-more-field">
-                                    <label class="dt-more-label"><i class="fas fa-plug mr-1 mr-2"></i> External Channel</label>
-                                    <div class="dt-filter-chip">
-                                        <select name="search_external_ewalletdynamic" class="dt-chip-select ewallet-dynamic-select2">
-                                            <option value="">All External Channels</option>
-                                            <?php foreach ($external_channels as $ext): ?>
-                                                <option value="<?= $ext->c_cashinExternalId; ?>" <?= ($ext->c_cashinExternalId == $this->session->userdata('search_ewalletdynamic_external')) ? 'selected' : ''; ?>>
-                                                    <?= strtoupper($ext->c_cashinExternalId); ?>
-                                                </option>
-                                            <?php endforeach; ?>
-                                        </select>
-                                    </div>
-                                </div>
                                 
+                                <!-- Status -->
+                                <div class="dt-more-field">
+                                    <label class="dt-more-label"><i class="fas fa-info-circle mr-1 mr-2"></i> Status Transaction</label>
+                                    <select name="search_status_transaction_qd" class="dt-more-select ewallet-dynamic-select2 no-search">
+                                        <option value="">All Statuses</option>
+                                        <option value="Pending"  <?= ($this->session->userdata('search_ewalletdynamic_status') == 'Pending')  ? 'selected' : ''; ?>>Pending</option>
+                                        <option value="Created"  <?= ($this->session->userdata('search_ewalletdynamic_status') == 'Created')  ? 'selected' : ''; ?>>Created</option>
+                                        <option value="Paid"     <?= ($this->session->userdata('search_ewalletdynamic_status') == 'Paid')     ? 'selected' : ''; ?>>Paid</option>
+                                        <option value="Failed"   <?= ($this->session->userdata('search_ewalletdynamic_status') == 'Failed')   ? 'selected' : ''; ?>>Failed</option>
+                                        <option value="Expired"  <?= ($this->session->userdata('search_ewalletdynamic_status') == 'Expired')  ? 'selected' : ''; ?>>Expired</option>
+                                        <option value="Cancel"   <?= ($this->session->userdata('search_ewalletdynamic_status') == 'Cancel')   ? 'selected' : ''; ?>>Cancel</option>
+                                    </select>
+                                </div>
                             </div>
 
                             <div class="dt-more-panel-footer">
@@ -278,11 +278,11 @@
                             </div>
                             <div class="mb-3">
                                 <label class="small font-weight-bold text-primary mb-1">Headers</label>
-                                <pre class="p-3 bg-dark text-light rounded small border-0 mb-0" id="RequestHeader" style="max-height: 150px; overflow-y: auto;"></pre>
+                                <pre class="p-3 rounded small border-0 mb-0" id="RequestHeader" style="max-height: 150px; overflow-y: auto;"></pre>
                             </div>
                             <div>
                                 <label class="small font-weight-bold text-primary mb-1">Payload</label>
-                                <pre class="p-3 bg-dark text-light rounded small border-0 mb-0" id="RequestBody" style="max-height: 250px; overflow-y: auto;"></pre>
+                                <pre class="p-3 rounded small border-0 mb-0" id="RequestBody" style="max-height: 250px; overflow-y: auto;"></pre>
                             </div>
                         </div>
                     </div>
@@ -294,11 +294,11 @@
                             </div>
                             <div class="mb-3">
                                 <label class="small font-weight-bold text-primary mb-1">Headers</label>
-                                <pre class="p-3 bg-dark text-light rounded small border-0 mb-0" id="ResponseHeader" style="max-height: 150px; overflow-y: auto;"></pre>
+                                <pre class="p-3 rounded small border-0 mb-0" id="ResponseHeader" style="max-height: 150px; overflow-y: auto;"></pre>
                             </div>
                             <div>
                                 <label class="small font-weight-bold text-primary mb-1">Body</label>
-                                <pre class="p-3 bg-dark text-light rounded small border-0 mb-0" id="ResponseBody" style="max-height: 250px; overflow-y: auto;"></pre>
+                                <pre class="p-3 rounded small border-0 mb-0" id="ResponseBody" style="max-height: 250px; overflow-y: auto;"></pre>
                             </div>
                         </div>
                     </div>

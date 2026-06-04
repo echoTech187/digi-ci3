@@ -17,17 +17,17 @@ class ChannelController extends CI_Controller {
    {
       is_logged_in();
 
-      $table = 'cashin_channel cc';
-      $column_order = array(null, 'cc.id', 'cc.c_channelGroup', 'cc.c_description', 'cc.c_externalIdDefault', 'cc.c_feeType', 'cc.c_fee', null);
-      $column_search = array('cc.id', 'cc.c_channelGroup', 'cc.c_description', 'cc.c_externalIdDefault');
+      $table = 'cashin_external_x_channel cc';
+      $column_order = array(null, 'cc.id', 'cc.c_cashinChannelGroup', 'cc.id', 'cc.c_cashinExternalId', 'cc.c_feeType', 'cc.c_fee', null);
+      $column_search = array('cc.id', 'cc.c_cashinChannelGroup', 'cc.id', 'cc.c_cashinExternalId');
       $order = array('cc.id' => 'desc');
       $where = [];
 
       if ($this->input->post('channel_group')) {
-          $where['cc.c_channelGroup'] = $this->input->post('channel_group');
+          $where['cc.c_cashinChannelGroup'] = $this->input->post('channel_group');
       }
       if ($this->input->post('external_id')) {
-          $where['cc.c_externalIdDefault'] = $this->input->post('external_id');
+          $where['cc.c_cashinExternalId'] = $this->input->post('external_id');
       }
 
       // Clear session if direct access (not ajax) without parameters
@@ -83,17 +83,17 @@ class ChannelController extends CI_Controller {
    {
       is_logged_in();
 
-      $table = 'cashout_channel cc';
-      $column_order = array(null, 'cc.id', 'cc.c_channelGroup', 'cc.c_description', 'cc.c_externalIdDefault', 'cc.c_feeType', 'cc.c_fee', null);
-      $column_search = array('cc.id', 'cc.c_channelGroup', 'cc.c_description', 'cc.c_externalIdDefault');
+      $table = 'cashout_external_x_channel cc';
+      $column_order = array(null, 'cc.id', 'cc.c_cashoutChannelGroup', 'cc.id', 'cc.c_cashoutExternalId', 'cc.c_feeType', 'cc.c_fee', null);
+      $column_search = array('cc.id', 'cc.c_cashoutChannelGroup', 'cc.id', 'cc.c_cashoutExternalId');
       $order = array('cc.id' => 'desc');
-      $where = array('cc.c_channelGroup !=' => 'ppob');
+      $where = array('cc.c_cashoutChannelGroup !=' => 'ppob');
 
       if ($this->input->post('channel_group')) {
-          $where['cc.c_channelGroup'] = $this->input->post('channel_group');
+          $where['cc.c_cashoutChannelGroup'] = $this->input->post('channel_group');
       }
       if ($this->input->post('external_id')) {
-          $where['cc.c_externalIdDefault'] = $this->input->post('external_id');
+          $where['cc.c_cashoutExternalId'] = $this->input->post('external_id');
       }
 
       // Clear session if direct access (not ajax) without parameters
@@ -166,9 +166,9 @@ class ChannelController extends CI_Controller {
       } else {
          $data = array(
             'id' => $this->input->post('id'),
-            'c_channelGroup' => $this->input->post('chanelgroup'),
-            'c_description' => $this->input->post('description'),
-            'c_externalIdDefault' => $this->input->post('externaldefault'),
+            'c_cashoutChannelGroup' => $this->input->post('chanelgroup'),
+            'id' => $this->input->post('description'),
+            'c_cashinExternalId' => $this->input->post('externaldefault'),
             'c_feeType' => $this->input->post('feetype'),
             'c_fee' => $this->input->post('fee'),
             'c_settlementInterval' => $this->input->post('settlementinterval'),
@@ -211,9 +211,9 @@ class ChannelController extends CI_Controller {
       } else {
          $data = array(
             'id' => $this->input->post('id'),
-            'c_channelGroup' => $this->input->post('chanelgroup'),
-            'c_description' => $this->input->post('description'),
-            'c_externalIdDefault' => $this->input->post('externaldefault'),
+            'c_cashoutChannelGroup' => $this->input->post('chanelgroup'),
+            'id' => $this->input->post('description'),
+            'c_cashinExternalId' => $this->input->post('externaldefault'),
             'c_feeType' => $this->input->post('feetype'),
             'c_fee' => $this->input->post('fee'),
             'c_amountMin' => $this->input->post('amountmin'),
@@ -256,9 +256,9 @@ class ChannelController extends CI_Controller {
       } else {
          $id = $this->input->post('id');
          $data = array(
-            'c_channelGroup' => $this->input->post('chanelgroup'),
-            'c_description' => $this->input->post('description'),
-            'c_externalIdDefault' => $this->input->post('externaldefault'),
+            'c_cashoutChannelGroup' => $this->input->post('chanelgroup'),
+            'id' => $this->input->post('description'),
+            'c_cashinExternalId' => $this->input->post('externaldefault'),
             'c_feeType' => $this->input->post('feetype'),
             'c_fee' => $this->input->post('fee'),
             'c_settlementInterval' => $this->input->post('settlementinterval'),
@@ -301,9 +301,9 @@ class ChannelController extends CI_Controller {
       } else {
          $id = $this->input->post('id');
          $data = array(
-            'c_channelGroup' => $this->input->post('chanelgroup'),
-            'c_description' => $this->input->post('description'),
-            'c_externalIdDefault' => $this->input->post('externaldefault'),
+            'c_cashoutChannelGroup' => $this->input->post('chanelgroup'),
+            'id' => $this->input->post('description'),
+            'c_cashinExternalId' => $this->input->post('externaldefault'),
             'c_feeType' => $this->input->post('feetype'),
             'c_fee' => $this->input->post('fee'),
             'c_amountMin' => $this->input->post('amountmin'),
@@ -381,17 +381,19 @@ class ChannelController extends CI_Controller {
        $type = $this->input->post('type'); // 'cashin' or 'cashout'
        $group = $this->input->post('group');
 
-       $table = ($type === 'cashin') ? 'cashin_channel' : 'cashout_channel';
+       $table = ($type === 'cashin') ? 'cashin_external_x_channel' : 'cashout_external_x_channel';
+       $col_id = ($type === 'cashin') ? 'c_cashinExternalId' : 'c_cashoutExternalId';
+       $col_group = ($type === 'cashin') ? 'c_cashinChannelGroup' : 'c_cashoutChannelGroup';
 
-       $this->db->select('c_externalIdDefault as provider');
+       $this->db->select("$col_id as provider");
        $this->db->from($table);
        if (!empty($group)) {
-           $this->db->where('c_channelGroup', $group);
+           $this->db->where($col_group, $group);
        }
        // Don't include empty providers
-       $this->db->where('c_externalIdDefault !=', '');
-       $this->db->where('c_externalIdDefault IS NOT NULL', null, false);
-       $this->db->group_by('c_externalIdDefault');
+       $this->db->where("$col_id !=", '');
+       $this->db->where("$col_id IS NOT NULL", null, false);
+       $this->db->group_by($col_id);
        $providers = $this->db->get()->result_array();
 
        return $this->output

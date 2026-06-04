@@ -160,11 +160,11 @@ class QRISDynamic extends CI_Model
         $ids = array_column($id_results, 'id');
         
         // STEP 2: Fetch full details for those IDs
-        $this->db->select("cdq.*, m.c_name as name_merchant, m.c_merchantLevel, s.c_name as name_submerchant, 'qris_mpm' AS ref_cashinChannelId, IF(cc.c_description IS NULL OR cc.c_description = '', 'QRIS', cc.c_description) AS channel_description", FALSE);
+        $this->db->select("cdq.*, m.c_name as name_merchant, m.c_merchantLevel, s.c_name as name_submerchant, 'qris_mpm' AS ref_cashinChannelId, IF(cc.id IS NULL OR cc.id = '', 'QRIS', cc.id) AS channel_description", FALSE);
         $this->db->from($this->table);
         $this->db->join('merchant m', 'cdq.ref_merchantId = m.id','left');
         $this->db->join('submerchant s', 's.id = cdq.ref_subMerchantId', 'left');
-        $this->db->join('cashin_channel cc', "cc.id = 'qris_mpm'", 'left');
+        $this->db->join('cashin_external_x_channel cc', "cc.id = 'qris_mpm'", 'left');
         $this->db->where_in('cdq.id', $ids);
         
         if (isset($_POST['order'])) {
