@@ -1543,7 +1543,7 @@ class MerchantManagementController extends CI_Controller
          $errorMessage = 'Failed to retrieve merchant balance.';
          if ($isAjax) {
             header('Content-Type: application/json');
-            echo json_encode(['status' => 'error', 'message' => $errorMessage]);
+            echo json_encode(['status' => 'error', 'message' => $errorMessage,'response'=>$balanceResponse]);
             return;
          }
          $this->session->set_flashdata('error', $errorMessage);
