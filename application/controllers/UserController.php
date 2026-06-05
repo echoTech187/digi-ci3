@@ -42,13 +42,13 @@ class UserController extends CI_Controller
             // Periksa password saat ini
             if (!password_verify($currentPassword, $data['user']['c_password'])) {
                 $this->session->set_flashdata('message', '<div class="alert alert-danger">Wrong current password!</div>');
-                redirect('user/changePassword');
+                redirect('user/change-password');
             }
     
             // Periksa apakah password baru sama dengan password lama
             if ($currentPassword == $newPassword) {
                 $this->session->set_flashdata('message', '<div class="alert alert-danger">New password cannot be the same as current password!</div>');
-                redirect('user/changePassword');
+                redirect('user/change-password');
             }
     
             // Update password
@@ -56,7 +56,7 @@ class UserController extends CI_Controller
             $this->Model_user->updatePassword($this->session->userdata('c_email'), $password_hash);
     
             $this->session->set_flashdata('message', '<div class="alert alert-success">Password changed successfully!</div>');
-            redirect('user/changePassword');
+            redirect('user/change-password');
         }
     }
     

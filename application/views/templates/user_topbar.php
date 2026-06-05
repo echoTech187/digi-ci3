@@ -190,7 +190,7 @@
                                 </div>
                             <?php endif; ?>
 
-                            <a class="dropdown-item px-3 rounded-lg" href="<?= base_url('user/changePassword'); ?>">
+                            <a class="dropdown-item px-3 rounded-lg" href="<?= base_url('user/change-password'); ?>">
                                 <div class="d-flex align-items-center">
                                     <div class="dropdown-icon-wrap mr-3 bg-warning-soft text-warning">
                                         <i class="fas fa-lock fa-sm"></i>
