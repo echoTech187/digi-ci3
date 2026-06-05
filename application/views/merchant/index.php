@@ -228,7 +228,7 @@
                                     </div>
                                     <div class="mb-4">
                                         <label class="form-label text-muted small fw-bold">Description</label>
-                                        <input type="text" class="form-control border-1 py-2" id="creditDescription" name="description" placeholder="e.g. Manual top-up" required>
+                                        <input type="text" class="form-control border-1 py-2" id="creditDescription" name="description" placeholder="e.g. Manual top-up">
                                     </div>
                                     <div class="mb-4">
                                         <label class="form-label text-muted small fw-bold">Amount (IDR)</label>
@@ -319,7 +319,7 @@
                                     </div>
                                     <div class="mb-4">
                                         <label class="form-label text-muted small fw-bold">Description</label>
-                                        <input type="text" class="form-control border-1 py-2" id="debitDescription" name="description" placeholder="e.g. Administrative deduction" required>
+                                        <input type="text" class="form-control border-1 py-2" id="debitDescription" name="description" placeholder="e.g. Administrative deduction">
                                     </div>
                                     <div class="mb-4">
                                         <label class="form-label text-muted small fw-bold">Amount (IDR)</label>
@@ -691,7 +691,7 @@
                                 <tr>
                                     <td>
                                         <div class="font-weight-bold text-dark">${perm.label}</div>
-                                        <div class="text-muted small">${perm.name}</div>
+                                        <div class="text-muted small">${perm.description}</div>
                                     </td>
                                     <td class="text-center">
                                         <div class="delegation-toggle-group">

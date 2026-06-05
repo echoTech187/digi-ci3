@@ -73,12 +73,12 @@ class Merchant extends CI_Model
 
 
     public function get_cashin_channel(){
-        $query = "select * from cashin_external_x_channel WHERE c_cashinExternalId='internal' ";
+        $query = "select * from cashin_channel WHERE c_externalIdDefault='internal' ";
         return $this->db->query($query)->result();
     }
 
     public function get_cashout_channel(){
-        $query = "select * FROM cashout_external_x_channel WHERE c_cashoutExternalId='internal' ";
+        $query = "select * FROM cashout_channel WHERE c_externalIdDefault='internal' ";
         return $this->db->query($query)->result();
     }
 
@@ -273,10 +273,20 @@ class Merchant extends CI_Model
      */
     public function get_rbac_permissions()
     {
-        $this->db->select('id, c_code, c_name');
-        $this->db->from('rbac_permissions');
-        $this->db->order_by('c_name', 'ASC');
-        return $this->db->get()->result();
+        $this->db->select('p.id, p.c_code, p.c_name, p.c_description');
+        $this->db->select('(SELECT c_label FROM rbac_sidebar_menus m WHERE m.c_isActive=1 AND m.c_visibleToMerchant=1 AND m.ref_permissionId = p.id AND m.c_url IS NOT NULL AND m.c_url != "" ORDER BY m.c_sortOrder ASC LIMIT 1) AS menu_label');
+        $this->db->from('rbac_permissions p');
+        $this->db->order_by('p.c_sortOrder', 'ASC');
+        
+        $results = $this->db->get()->result();
+        $filtered = [];
+        foreach ($results as &$r) {
+            if (!empty($r->menu_label)) {
+                $r->c_name = $r->menu_label;
+                $filtered[] = $r;
+            }
+        }
+        return $filtered;
     }
 
     public function get_merchant_explicit_grants($merchantId)

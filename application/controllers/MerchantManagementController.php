@@ -27,8 +27,8 @@ class MerchantManagementController extends CI_Controller
       // Sinkronisasi variabel global untuk URL hit
       global $internalUrlHit;
       global $externalUrlHit;
-      $this->internalUrlHit = $internalUrlHit;
-      $this->externalUrlHit = $externalUrlHit;
+      $this->internalUrlHit = $this->config->item('internal_url_hit') ?? $internalUrlHit;
+      $this->externalUrlHit = $this->config->item('external_url_hit') ?? $externalUrlHit;
    }
 
    public function merchant()
@@ -1414,6 +1414,12 @@ class MerchantManagementController extends CI_Controller
       ])->row();
       if ($user_role) {
          $role_id = $user_role->ref_roleId;
+      } else {
+         // Fallback to default merchant role if none assigned
+         $default_role = $this->db->get_where('rbac_roles', ['c_isDefault' => 1, 'c_name' => 'merchant_basic'])->row();
+         if ($default_role) {
+            $role_id = $default_role->id;
+         }
       }
 
       $role_permissions = [];
@@ -1432,7 +1438,7 @@ class MerchantManagementController extends CI_Controller
             // Default to the role's inherited permission status (rather than hardcoded Deny)
             $status = isset($role_permissions[$p->id]) ? 'Grant' : 'Deny';
          }
-         $data[] = ['id' => $p->id, 'name' => $p->c_code, 'label' => $p->c_name, 'status' => $status];
+         $data[] = ['id' => $p->id, 'name' => $p->c_code, 'label' => $p->c_name, 'description' => $p->c_description, 'status' => $status];
       }
       $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'success', 'data' => $data]));
    }
@@ -1465,7 +1471,7 @@ class MerchantManagementController extends CI_Controller
       $description = $this->input->post('description');
       $amount      = $this->input->post('rawAmountCredit');
 
-      if (empty($merchantId) || empty($channelId) || empty($description) || empty($amount)) {
+      if (empty($merchantId) || empty($channelId) || empty($amount)) {
          $errorMessage = 'All fields are required.';
          if ($isAjax) {
             header('Content-Type: application/json');
@@ -1480,7 +1486,7 @@ class MerchantManagementController extends CI_Controller
       $internalRequestBody = [
          "merchantId" => $merchantId,
          "channelId"  => $channelId,
-         'description' => $description,
+         'description' => $description ?? 'Credit balance added by Admin',
          'amount'      => $amount
       ];
 
@@ -1515,7 +1521,7 @@ class MerchantManagementController extends CI_Controller
       $description = $this->input->post('description');
       $amount      = $this->input->post('rawAmountDebit');
 
-      if (empty($merchantId) || empty($channelId) || empty($description) || empty($amount)) {
+      if (empty($merchantId) || empty($channelId) || empty($amount)) {
          $errorMessage = 'All fields are required.';
          if ($isAjax) {
             header('Content-Type: application/json');
@@ -1527,10 +1533,41 @@ class MerchantManagementController extends CI_Controller
          return;
       }
 
+      // ── CHECK AVAILABLE BALANCE ──
+      $balanceRequestBody = ["merchantId" => $merchantId];
+      $balanceUrlHit = $this->internalUrlHit . "/Merchant/balanceQuery";
+      $balanceResponseRaw = $this->_internalCurl($balanceUrlHit, $balanceRequestBody);
+      $balanceResponse = json_decode($balanceResponseRaw, true);
+
+      if (!$balanceResponse || !isset($balanceResponse['responseCode']) || $balanceResponse['responseCode'] !== 'SUCCESS') {
+         $errorMessage = 'Failed to retrieve merchant balance.';
+         if ($isAjax) {
+            header('Content-Type: application/json');
+            echo json_encode(['status' => 'error', 'message' => $errorMessage]);
+            return;
+         }
+         $this->session->set_flashdata('error', $errorMessage);
+         redirect('merchant/manage');
+         return;
+      }
+
+      $availableBalance = floatval($balanceResponse['responseDetail']['balanceAvailable']);
+      if (floatval($amount) > $availableBalance) {
+         $errorMessage = 'Debit amount cannot exceed available balance (Rp ' . number_format($availableBalance, 0, ',', '.') . ').';
+         if ($isAjax) {
+            header('Content-Type: application/json');
+            echo json_encode(['status' => 'error', 'message' => $errorMessage]);
+            return;
+         }
+         $this->session->set_flashdata('error', $errorMessage);
+         redirect('merchant/manage');
+         return;
+      }
+
       $internalRequestBody = [
          "merchantId" => $merchantId,
          "channelId"  => $channelId,
-         'description' => $description,
+         'description' => $description ?? 'Debit balance processed by Admin',
          'amount'      => $amount
       ];
 
