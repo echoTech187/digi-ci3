@@ -7282,3 +7282,18 @@ body>.dropdown-menu .dropdown-divider {
             rgba(255, 255, 255, 0.2) 60%,
             rgba(255, 255, 255, 0)) !important;
 }
+
+/* ── Global Required Form Indicators ── */
+div:has(input[required]) > label:not(:has(.text-danger))::after,
+div:has(select[required]) > label:not(:has(.text-danger))::after,
+div:has(textarea[required]) > label:not(:has(.text-danger))::after,
+.form-group:has(input[required]) > label:not(:has(.text-danger))::after,
+.form-group:has(select[required]) > label:not(:has(.text-danger))::after,
+.form-group:has(textarea[required]) > label:not(:has(.text-danger))::after,
+label:has(input[required]):not(:has(.text-danger))::after,
+label:has(select[required]):not(:has(.text-danger))::after,
+label:has(textarea[required]):not(:has(.text-danger))::after {
+    content: " *";
+    color: var(--danger, #e74a3b) !important;
+    font-weight: bold !important;
+}

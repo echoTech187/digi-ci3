@@ -214,7 +214,7 @@
                                 <form id="creditBalanceForm">
                                     <div class="mb-4">
                                         <label class="form-label text-muted small fw-bold">Merchant Name</label>
-                                        <input type="text" class="form-control border-0 py-2 bg-dark text-white fw-bold" readonly id="merchantName" style="border-color: rgba(255,255,255,0.1);">
+                                        <input type="text" class="form-control border-0 py-2 bg-dark text-white fw-bold" readonly required id="merchantName" style="border-color: rgba(255,255,255,0.1);">
                                         <input type="hidden" id="merchantId" name="merchantId">
                                     </div>
                                     <div class="mb-4">
@@ -234,7 +234,7 @@
                                         <label class="form-label text-muted small fw-bold">Amount (IDR)</label>
                                         <div class="input-group">
                                             <span class="input-group-text border-1">Rp</span>
-                                            <input type="text" class="form-control border-1 py-2 fw-bold text-success" id="amountCredit" name="amount" oninput="formatNumber(this)" placeholder="0">
+                                            <input type="text" class="form-control border-1 py-2 fw-bold text-success" id="amountCredit" name="amount" oninput="formatNumber(this)" placeholder="0" required>
                                         </div>
                                         <input type="hidden" id="rawAmountCredit" name="rawAmountCredit">
                                     </div>
@@ -305,7 +305,7 @@
                                 <form id="debitBalanceForm">
                                     <div class="mb-4">
                                         <label class="form-label text-muted small fw-bold">Merchant Name</label>
-                                        <input type="text" class="form-control border-0 py-2 bg-dark text-white fw-bold" readonly id="merchantNameDebit" style="border-color: rgba(255,255,255,0.1);">
+                                        <input type="text" class="form-control border-0 py-2 bg-dark text-white fw-bold" required readonly id="merchantNameDebit" style="border-color: rgba(255,255,255,0.1);">
                                         <input type="hidden" id="merchantIdDebit" name="merchantIdDebit">
                                     </div>
                                     <div class="mb-4">
@@ -325,7 +325,7 @@
                                         <label class="form-label text-muted small fw-bold">Amount (IDR)</label>
                                         <div class="input-group">
                                             <span class="input-group-text border-1">Rp</span>
-                                            <input type="text" class="form-control border-1 py-2 fw-bold text-danger" id="amountDebit" name="amount" oninput="formatNumber(this)" placeholder="0">
+                                            <input type="text" class="form-control border-1 py-2 fw-bold text-danger" id="amountDebit" name="amount" oninput="formatNumber(this)" placeholder="0" required>
                                         </div>
                                         <input type="hidden" id="rawAmountDebit" name="rawAmountDebit">
                                     </div>

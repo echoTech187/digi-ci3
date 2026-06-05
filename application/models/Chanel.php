@@ -366,18 +366,18 @@ class Chanel extends CI_Model {
             $this->db->select("
                 COUNT(*) as qty,
                 COUNT(DISTINCT c_cashinChannelGroup) as total_groups,
-                COUNT(DISTINCT c_externalIdDefault) as providers,
+                COUNT(DISTINCT c_cashinExternalId) as providers,
                 AVG(c_fee) as avg_fee
             ");
-            $this->db->from("cashin_channel_x_merchant");
+            $this->db->from("cashin_external_x_channel");
             return $this->db->get()->row();
         }
 
         public function get_cashout_summary() {
             $this->db->select("
                 COUNT(*) as qty,
-                COUNT(DISTINCT c_cashinChannelGroup) as total_groups,
-                COUNT(DISTINCT c_externalIdDefault) as providers,
+                COUNT(DISTINCT c_cashoutChannelGroup) as total_groups,
+                COUNT(DISTINCT c_cashoutExternalId) as providers,
                 AVG(c_fee) as avg_fee
             ");
             $this->db->from("cashout_external_x_channel");
@@ -489,7 +489,10 @@ class Chanel extends CI_Model {
         $cols = '*';
         if ($tableName == 'cashout_external_x_channel') {
             $prefix = $alias ? $alias . '.' : '';
-            $cols = "{$prefix}id, {$prefix}c_caption, {$prefix}c_description, {$prefix}c_fee, {$prefix}c_cashoutChannelGroup, {$prefix}c_cashoutChannelGroup2, {$prefix}c_externalIdDefault, {$prefix}c_feeType, {$prefix}c_amountMin, {$prefix}c_amountMax";
+            $cols = "{$prefix}id, co.c_caption, co.c_description, {$prefix}c_fee, {$prefix}c_cashoutChannelGroup as c_channelGroup, {$prefix}c_cashoutChannelGroup2, {$prefix}c_cashoutExternalId as c_externalIdDefault, {$prefix}c_feeType, {$prefix}c_amountMin, {$prefix}c_amountMax";
+        } elseif ($tableName == 'cashin_external_x_channel') {
+            $prefix = $alias ? $alias . '.' : '';
+            $cols = "{$prefix}id, ci.c_description, {$prefix}c_cashinChannelGroup as c_channelGroup, {$prefix}c_cashinExternalId as c_externalIdDefault, {$prefix}c_feeType, {$prefix}c_fee, {$prefix}c_feePercetange, {$prefix}c_settlementInterval, {$prefix}c_amountMin, {$prefix}c_amountMax, {$prefix}c_status";
         }
 
         $dt = $this->datatables->of($table)
@@ -498,10 +501,24 @@ class Chanel extends CI_Model {
             ->set_column_search($column_search)
             ->set_default_order($order);
 
+        if ($tableName == 'cashout_external_x_channel') {
+            $prefix = $alias ? $alias : 'cashout_external_x_channel';
+            $dt->join('cashout_channel co', "co.id = {$prefix}.ref_cashoutChannelId", 'left');
+        } elseif ($tableName == 'cashin_external_x_channel') {
+            $prefix = $alias ? $alias : 'cashin_external_x_channel';
+            $dt->join('cashin_channel ci', "ci.id = {$prefix}.ref_cashinChannelId", 'left');
+        }
+
         if (isset($where['custom_search'])) {
             $search = $this->db->escape_like_str($where['custom_search']);
             $prefix = $alias ? $alias . '.' : '';
-            $dt->where("({$prefix}id LIKE '%$search%' ESCAPE '!' OR {$prefix}c_cashinChannelGroup LIKE '%$search%' ESCAPE '!' OR {$prefix}c_description LIKE '%$search%' ESCAPE '!' OR {$prefix}c_externalIdDefault LIKE '%$search%' ESCAPE '!')", null, false);
+            if ($tableName == 'cashout_external_x_channel') {
+                $dt->where("({$prefix}id LIKE '%$search%' ESCAPE '!' OR {$prefix}c_cashoutChannelGroup LIKE '%$search%' ESCAPE '!' OR co.c_description LIKE '%$search%' ESCAPE '!' OR {$prefix}c_cashoutExternalId LIKE '%$search%' ESCAPE '!')", null, false);
+            } elseif ($tableName == 'cashin_external_x_channel') {
+                $dt->where("({$prefix}id LIKE '%$search%' ESCAPE '!' OR {$prefix}c_cashinChannelGroup LIKE '%$search%' ESCAPE '!' OR ci.c_description LIKE '%$search%' ESCAPE '!' OR {$prefix}c_cashinExternalId LIKE '%$search%' ESCAPE '!')", null, false);
+            } else {
+                $dt->where("({$prefix}id LIKE '%$search%' ESCAPE '!' OR {$prefix}c_cashinChannelGroup LIKE '%$search%' ESCAPE '!' OR {$prefix}c_description LIKE '%$search%' ESCAPE '!' OR {$prefix}c_externalIdDefault LIKE '%$search%' ESCAPE '!')", null, false);
+            }
             unset($where['custom_search']);
         }
 
