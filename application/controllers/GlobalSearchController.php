@@ -113,11 +113,11 @@ class GlobalSearchController extends CI_Controller
                         $results[] = ['title' => "Supervisor: $s->c_name ($s->c_email)", 'url' => base_url('merchant/supervisor?search_spv=' . urlencode($query)), 'category' => 'Supervisor Management', 'icon' => 'fas fa-user-tie'];
                 }
                 if ($has_access('channel/cashin')) {
-                    foreach ($this->db->query("SELECT id, id FROM cashin_external_x_channel WHERE id LIKE '$safeQ%' OR c_cashinExternalId LIKE '$safeQ%' LIMIT 2")->result() as $cc)
+                    foreach ($this->db->query("SELECT id, c_description FROM cashin_channel WHERE c_description LIKE '$safeQ%' OR c_externalIdDefault LIKE '$safeQ%' LIMIT 2")->result() as $cc)
                         $results[] = ['title' => "Cash-In Channel: $cc->id", 'url' => base_url('channel/cashin?search_channel=' . urlencode($query)), 'category' => 'Configuration', 'icon' => 'fas fa-download'];
                 }
                 if ($has_access('channel/cashout')) {
-                    foreach ($this->db->query("SELECT id, id FROM cashout_external_x_channel WHERE id LIKE '$safeQ%' OR c_cashinExternalId LIKE '$safeQ%' LIMIT 2")->result() as $cc)
+                    foreach ($this->db->query("SELECT id, c_description FROM cashout_channel WHERE c_description LIKE '$safeQ%' OR c_externalIdDefault LIKE '$safeQ%' LIMIT 2")->result() as $cc)
                         $results[] = ['title' => "Cash-Out Channel: $cc->id", 'url' => base_url('channel/cashout?search_channel=' . urlencode($query)), 'category' => 'Configuration', 'icon' => 'fas fa-upload'];
                 }
             } // end if !$isNumericTid
