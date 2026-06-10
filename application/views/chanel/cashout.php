@@ -266,7 +266,11 @@
                         </div>
                         <div class="col-lg-8 p-4 bg-light mb-0 text-dark">
                             <div class="row">
-                                <div class="col-md-6 mb-3"><label class="dt-more-label mb-2">Channel ID</label><input type="text" class="dt-more-input bg-light" readonly required name="id" id="edit_id"></div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="dt-more-label mb-2">Channel ID</label>
+                                    <input type="text" class="dt-more-input bg-light" readonly required name="id" id="edit_id">
+                                    <input type="hidden" name="pk_id" id="edit_pk_id">
+                                </div>
                                 <div class="col-md-6 mb-3"><label class="dt-more-label mb-2">Channel Group</label><input type="text" class="dt-more-input" required name="chanelgroup" id="edit_chanelgroup"></div>
                             </div>
                             <div class="mb-3"><label class="dt-more-label mb-2">Description</label><textarea class="dt-more-input" name="description" rows="2" id="edit_description"></textarea></div>
@@ -309,7 +313,7 @@
         // Standardize DataTables for premium look
         var table = initServerDataTable('#cashoutTable', "<?= base_url('channel/cashout') ?>", [
                 {data: 'no', orderable: false, className: 'text-center'},
-                {data: 'id', className: 'font-weight-bold text-primary dt-id-column'},
+                {data: 'ref_cashoutChannelId', className: 'font-weight-bold text-primary dt-id-column'},
                 {data: 'c_channelGroup', render: function(data){
                     return '<span class="badge badge-light text-dark border px-2 py-1 text-uppercase" style="font-size:10px; letter-spacing:0.5px; border-radius:4px;">'+data+'</span>';
                 }},
@@ -337,6 +341,7 @@
                                         <button type="button" class="dropdown-item edit-cashout" 
                                             data-toggle="modal" data-target="#editChanelModal" 
                                             data-id="${row.id}" 
+                                            data-channelid="${row.ref_cashoutChannelId}"
                                             data-group="${row.c_channelGroup}"
                                             data-desc="${row.c_description || ''}"
                                             data-ext="${row.c_externalIdDefault || ''}"
@@ -377,9 +382,9 @@
         // Global Search mapping
         $('#cashoutGlobalSearch').on('input', debounce(function() { table.search(this.value).draw(); }, 400));
 
-        // Edit button mapping
         $(document).on('click', '.edit-cashout', function() {
-            $('#edit_id').val($(this).data('id'));
+            $('#edit_pk_id').val($(this).data('id'));
+            $('#edit_id').val($(this).data('channelid'));
             $('#edit_chanelgroup').val($(this).data('group'));
             $('#edit_description').val($(this).data('desc'));
             $('#edit_externaldefault').val($(this).data('ext'));

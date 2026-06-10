@@ -18,8 +18,8 @@ class ChannelController extends CI_Controller {
       is_logged_in();
 
       $table = 'cashin_external_x_channel cc';
-      $column_order = array(null, 'cc.id', 'cc.c_cashinChannelGroup', 'cc.id', 'cc.c_cashinExternalId', 'cc.c_feeType', 'cc.c_fee', null);
-      $column_search = array('cc.id', 'cc.c_cashinChannelGroup', 'cc.id', 'cc.c_cashinExternalId');
+      $column_order = array(null, 'cc.ref_cashinChannelId', 'cc.c_cashinChannelGroup', 'cc.c_cashinChannelGroup2', 'cc.c_cashinExternalId', 'cc.c_feeType', 'cc.c_fee', null);
+      $column_search = array('cc.ref_cashinChannelId', 'cc.c_cashinChannelGroup', 'cc.c_cashinChannelGroup2', 'cc.c_cashinExternalId');
       $order = array('cc.id' => 'desc');
       $where = [];
 
@@ -84,8 +84,8 @@ class ChannelController extends CI_Controller {
       is_logged_in();
 
       $table = 'cashout_external_x_channel cc';
-      $column_order = array(null, 'cc.id', 'cc.c_cashoutChannelGroup', 'cc.id', 'cc.c_cashoutExternalId', 'cc.c_feeType', 'cc.c_fee', null);
-      $column_search = array('cc.id', 'cc.c_cashoutChannelGroup', 'cc.id', 'cc.c_cashoutExternalId');
+      $column_order = array(null, 'cc.ref_cashoutChannelId', 'cc.c_cashoutChannelGroup', 'cc.c_cashoutChannelGroup2', 'cc.c_cashoutExternalId', 'cc.c_feeType', 'cc.c_fee', null);
+      $column_search = array('cc.ref_cashoutChannelId', 'cc.c_cashoutChannelGroup', 'cc.c_cashoutChannelGroup2', 'cc.c_cashoutExternalId');
       $order = array('cc.id' => 'desc');
       $where = array('cc.c_cashoutChannelGroup !=' => 'ppob');
 
@@ -165,9 +165,9 @@ class ChannelController extends CI_Controller {
          redirect('channel/cashin');
       } else {
          $data = array(
-            'id' => $this->input->post('id'),
-            'c_cashoutChannelGroup' => $this->input->post('chanelgroup'),
-            'id' => $this->input->post('description'),
+            'ref_cashinChannelId' => $this->input->post('id'),
+            'c_cashinChannelGroup' => $this->input->post('chanelgroup'),
+            'c_cashinChannelGroup2' => $this->input->post('description'),
             'c_cashinExternalId' => $this->input->post('externaldefault'),
             'c_feeType' => $this->input->post('feetype'),
             'c_fee' => $this->input->post('fee'),
@@ -210,10 +210,10 @@ class ChannelController extends CI_Controller {
          redirect('channel/cashout');
       } else {
          $data = array(
-            'id' => $this->input->post('id'),
+            'ref_cashoutChannelId' => $this->input->post('id'),
             'c_cashoutChannelGroup' => $this->input->post('chanelgroup'),
-            'id' => $this->input->post('description'),
-            'c_cashinExternalId' => $this->input->post('externaldefault'),
+            'c_cashoutChannelGroup2' => $this->input->post('description'),
+            'c_cashoutExternalId' => $this->input->post('externaldefault'),
             'c_feeType' => $this->input->post('feetype'),
             'c_fee' => $this->input->post('fee'),
             'c_amountMin' => $this->input->post('amountmin'),
@@ -254,10 +254,11 @@ class ChannelController extends CI_Controller {
          $this->session->set_flashdata('error', validation_errors());
          redirect('channel/cashin');
       } else {
-         $id = $this->input->post('id');
+         $id = $this->input->post('pk_id');
          $data = array(
-            'c_cashoutChannelGroup' => $this->input->post('chanelgroup'),
-            'id' => $this->input->post('description'),
+            'ref_cashinChannelId' => $this->input->post('id'),
+            'c_cashinChannelGroup' => $this->input->post('chanelgroup'),
+            'c_cashinChannelGroup2' => $this->input->post('description'),
             'c_cashinExternalId' => $this->input->post('externaldefault'),
             'c_feeType' => $this->input->post('feetype'),
             'c_fee' => $this->input->post('fee'),
@@ -299,11 +300,12 @@ class ChannelController extends CI_Controller {
          $this->session->set_flashdata('error', validation_errors());
          redirect('channel/cashout');
       } else {
-         $id = $this->input->post('id');
+         $id = $this->input->post('pk_id');
          $data = array(
+            'ref_cashoutChannelId' => $this->input->post('id'),
             'c_cashoutChannelGroup' => $this->input->post('chanelgroup'),
-            'id' => $this->input->post('description'),
-            'c_cashinExternalId' => $this->input->post('externaldefault'),
+            'c_cashoutChannelGroup2' => $this->input->post('description'),
+            'c_cashoutExternalId' => $this->input->post('externaldefault'),
             'c_feeType' => $this->input->post('feetype'),
             'c_fee' => $this->input->post('fee'),
             'c_amountMin' => $this->input->post('amountmin'),

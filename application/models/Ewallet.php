@@ -301,7 +301,7 @@ class Ewallet extends CI_Model {
     }
 
     public function get_internal_channels(){
-        $query = "SELECT id, c_description FROM cashout_channel 
+        $query = "SELECT id, c_description FROM cashin_channel 
                 WHERE c_channelGroup = 'ewallet'
                 ORDER BY c_description ASC";
         return $this->db->query($query)->result();

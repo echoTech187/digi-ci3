@@ -56,7 +56,6 @@ class BiFastTransactionController extends CI_Controller
          'search_bifast_name'               => 'search_name_bifast',
          'search_bifast_date1'              => 'search_date_bifast',
          'search_bifast_date2'              => 'search_date_bifast_to',
-         'search_bifast_status'             => 'search_status_transaction_bifast',
          'search_bifast_transid'            => 'search_transid_bifast',
          'search_bifast_external_reff'      => 'search_external_reff_id',
          'search_bifast_channel'            => 'search_channel_bifast',
@@ -67,7 +66,6 @@ class BiFastTransactionController extends CI_Controller
          'search_bifast_name'               => 'merchant',
          'search_bifast_date1'              => 'date_from',
          'search_bifast_date2'              => 'date_to',
-         'search_bifast_status'             => 'status',
          'search_bifast_transid'            => 'transid',
       ];
 
@@ -115,8 +113,7 @@ class BiFastTransactionController extends CI_Controller
                'transid' => $this->session->userdata('search_bifast_transid'),
                'external_reff' => $this->session->userdata('search_bifast_external_reff'),
                'channel' => $this->session->userdata('search_bifast_channel'),
-               'internal_channel' => $this->session->userdata('search_bifast_internal_channel'),
-               'status' => $this->session->userdata('search_bifast_status')
+               'internal_channel' => $this->session->userdata('search_bifast_internal_channel')
             ];
             return $this->BiFast->get_datatables_handler($filters);
          } catch (Throwable $e) {
@@ -134,7 +131,6 @@ class BiFastTransactionController extends CI_Controller
       $data['merchants'] = $this->BiFast->get_merchant();
       $data['channels'] = $this->BiFast->get_channels();
       $data['internal_channels'] = $this->BiFast->get_internal_channels();
-      $data['search_status_transaction_bifast'] = $this->session->userdata('search_bifast_status') ?: '';
 
       $this->load->view('bifast/list', $data);
    }
@@ -150,7 +146,6 @@ class BiFastTransactionController extends CI_Controller
          'search_bifast_date2',
          'search_bifast_name',
          'search_bifast_transid',
-         'search_bifast_status',
          'search_bifast_external_reff',
          'search_bifast_channel',
          'search_bifast_internal_channel',

@@ -37,14 +37,12 @@ class HistoryController extends CI_Controller
       $field_map = [
          'search_history_name'      => 'search_merchant_purchase',
          'search_history_date1'     => 'search_date_purchase',
-         'search_history_status'    => 'search_status_purchase',
          'search_history_invoice'   => 'search_invoice_ppob',
       ];
 
       $get_fallback = [
          'search_history_name'      => 'merchant',
          'search_history_date1'     => 'date',
-         'search_history_status'    => 'status',
          'search_history_invoice'   => 'invoice',
       ];
 
@@ -80,7 +78,6 @@ class HistoryController extends CI_Controller
             $filters = [
                'date' => $this->session->userdata('search_history_date1'),
                'merchant' => $this->session->userdata('search_history_name'),
-               'status' => $this->session->userdata('search_history_status'),
                'invoice' => $this->session->userdata('search_history_invoice')
             ];
             return $this->History->get_datatables_handler($filters);
@@ -104,9 +101,8 @@ class HistoryController extends CI_Controller
    public function resetHistory($redirect = true)
    {
       $this->session->unset_userdata([
-         'search_history_date1',
          'search_history_name',
-         'search_history_status',
+         'search_history_date1',
          'search_history_invoice',
          'last_dt_search_history'
       ]);
@@ -115,11 +111,10 @@ class HistoryController extends CI_Controller
 
    public function download_history()
    {
-      $search_date_purchase = $this->input->get('search_history_date1') ?: '';
       $search_merchant_purchase = $this->input->get('search_history_name') ?: '';
-      $search_status_purchase = $this->input->get('search_history_status') ?: '';
+      $search_date_purchase = $this->input->get('search_history_date1') ?: '';
 
-      if (empty($search_date_purchase) && empty($search_merchant_purchase) && empty($search_status_purchase)) {
+      if (empty($search_date_purchase) && empty($search_merchant_purchase)) {
          $this->session->set_flashdata('error_message', 'Please select at least one filter before downloading.');
          redirect('finance/history');
       }

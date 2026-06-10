@@ -67,6 +67,10 @@ class BiFast extends CI_Model {
         if ($search_transid && !$searchValue) {
             $this->db->where('cpb.c_merchantTransactionId', $search_transid);
         }
+        
+        // Force display only Paid/Success/Settlement status
+        $this->db->where("cpb.c_status IN ('Paid', 'Success', 'SUCCESS', 'PAID', 'Settlement', 'SETTLEMENT', 'paid', 'success', 'settlement')", NULL, FALSE);
+
         if ($search_status) {
             $this->db->where('cpb.c_status', $search_status);
         }

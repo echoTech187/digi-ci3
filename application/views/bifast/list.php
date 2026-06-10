@@ -42,8 +42,7 @@
                 $download_url = base_url('finance/bi-fast/download') 
                     . "?search_bifast_date1=" . ($this->session->userdata('search_bifast_date1') ?: '')
                     . "&search_bifast_date2=" . ($this->session->userdata('search_bifast_date2') ?: '')
-                    . "&search_bifast_name=" . ($this->session->userdata('search_bifast_name') ?: '')
-                    . "&search_bifast_status=" . ($this->session->userdata('search_bifast_status') ?: '');
+                    . "&search_bifast_name=" . ($this->session->userdata('search_bifast_name') ?: '');
             ?>
             
         </div>
@@ -58,7 +57,6 @@
             $date_from_val = $this->session->userdata('search_bifast_date1') ?: '';
             $date_to_val   = $this->session->userdata('search_bifast_date2') ?: '';
             $merchant_val  = $this->session->userdata('search_bifast_name') ?: '';
-            $status_val    = $this->session->userdata('search_bifast_status') ?: '';
             $transid_val   = $this->session->userdata('search_bifast_transid') ?: '';
             $channel_val   = $this->session->userdata('search_bifast_channel') ?: '';
             $internal_channel_val = $this->session->userdata('search_bifast_internal_channel') ?: '';
@@ -68,7 +66,6 @@
             $extra_active = 0;
             if($date_from_val || $date_to_val )  $extra_active++;
             if ($merchant_val)  $extra_active++;
-            if ($status_val)    $extra_active++;
             if ($channel_val)   $extra_active++;
             if ($internal_channel_val) $extra_active++;
         ?>
@@ -141,16 +138,7 @@
                                     </select>
                                 </div>
                                 
-                                <!-- Status -->
-                                <div class="dt-more-field">
-                                    <label class="dt-more-label"><i class="fas fa-info-circle mr-1 mr-2"></i> Transaction Status</label>
-                                    <select name="search_status_transaction_bifast" class="dt-more-select bifast-select2">
-                                        <option value="">All Statuses</option>
-                                        <?php foreach(['Pending', 'Process', 'Success', 'Failed', 'Cancel', 'Init', 'Timeout'] as $st): ?>
-                                            <option value="<?= $st; ?>" <?= ($status_val == $st) ? 'selected' : ''; ?>><?= $st; ?></option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                </div>
+
 
 
                                 

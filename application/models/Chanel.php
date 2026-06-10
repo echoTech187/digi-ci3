@@ -94,296 +94,298 @@ class Chanel extends CI_Model {
         return self::$cached_total;
     }
 
-        public function get_pulsa_reguler($limit, $start, $provider = null) {
-            $this->db->limit($limit, $start);
-            $this->db->from('cashout_external_x_channel');
-            $this->db->where('c_cashoutChannelGroup', 'ppob');
+    public function get_pulsa_reguler($limit, $start, $provider = null) {
+        $this->db->limit($limit, $start);
+        $this->db->from('cashout_external_x_channel');
+        $this->db->where('c_cashoutChannelGroup', 'ppob');
+        if ($provider) {
+            $this->db->like('c_cashoutChannelGroup2', $provider);
+        }else{
             $this->db->like('c_cashoutChannelGroup2', 'pulsa');
-            if ($provider) {
-                $this->db->like('c_cashoutChannelGroup2', $provider);
-            }
-            return $this->db->get()->result();
-        }  
+        }
+        return $this->db->get()->result();
+    }  
 
-        public function get_paket_data($limit, $start, $provider = null) {
-            $this->db->limit($limit, $start);
-            $this->db->from('cashout_external_x_channel');
-            $this->db->where('c_cashoutChannelGroup', 'ppob');
+    public function get_paket_data($limit, $start, $provider = null) {
+        $this->db->limit($limit, $start);
+        $this->db->from('cashout_external_x_channel');
+        $this->db->where('c_cashoutChannelGroup', 'ppob');
+        if ($provider) {
+            $this->db->like('c_cashoutChannelGroup2', $provider);
+        }else{
             $this->db->like('c_cashoutChannelGroup2', 'paket_data');
-            if ($provider) {
-                $this->db->like('c_cashoutChannelGroup2', $provider);
-            }
-            return $this->db->get()->result();
-        }  
-        public function get_token_listrik($limit, $start){
-            $query = "select * from cashout_external_x_channel cc where c_cashoutChannelGroup2 = 'token_pln' order by c_fee asc  ";
-            return $this->db->query($query)->result();
-        }      
+        }
+        return $this->db->get()->result();
+    }  
+    public function get_token_listrik($limit, $start){
+        $query = "select * from cashout_external_x_channel cc where c_cashoutChannelGroup2 = 'token_pln' order by c_fee asc  ";
+        return $this->db->query($query)->result();
+    }      
 
-        public function get_topup_gopay($limit, $start){
-            $query = "select * from cashout_external_x_channel cc where c_cashoutChannelGroup2 = 'topup_gopay' order by c_fee asc  ";
-            return $this->db->query($query)->result();
-        }      
+    public function get_topup_gopay($limit, $start){
+        $query = "select * from cashout_external_x_channel cc where c_cashoutChannelGroup2 = 'topup_gopay' order by c_fee asc  ";
+        return $this->db->query($query)->result();
+    }      
 
-        public function get_topup_dana($limit, $start){
-            $query = "select * from cashout_external_x_channel cc where c_cashoutChannelGroup2 = 'topup_dana' order by c_fee asc  ";
-            return $this->db->query($query)->result();
-        }    
+    public function get_topup_dana($limit, $start){
+        $query = "select * from cashout_external_x_channel cc where c_cashoutChannelGroup2 = 'topup_dana' order by c_fee asc  ";
+        return $this->db->query($query)->result();
+    }    
 
-        public function get_topup_ovo($limit, $start){
-            $query = "select * from cashout_external_x_channel cc where c_cashoutChannelGroup2 = 'topup_ovo' order by c_fee asc  ";
-            return $this->db->query($query)->result();
-        }      
-        public function insert_cashout_chanel($data) {
-            return $this->db->insert('cashout_external_x_channel', $data);
-        }
-        public function update_cashout_chanel($id, $data) {
-            $this->db->where('id', $id);
-            return $this->db->update('cashout_external_x_channel', $data);
-        }
-        public function get_mobile_legend($limit, $start){
-            $query = "select * from cashout_external_x_channel cc where c_cashoutChannelGroup2 = 'diamond_mlbb' order by c_fee asc  ";
-            return $this->db->query($query)->result();
-        }   
-        public function get_pubg_mobile($limit, $start){
-            $query = "select * from cashout_external_x_channel cc where c_cashoutChannelGroup2 = 'pubg_mobile' order by c_fee asc  ";
-            return $this->db->query($query)->result();
-        }   
-        public function get_free_fire($limit, $start){
-            $query = "select * from cashout_external_x_channel cc where c_cashoutChannelGroup2 = 'free_fire' order by c_fee_asc  ";
-            return $this->db->query($query)->result();
-        }   
-        public function get_hago($limit, $start){
-            $query = "select * from cashout_external_x_channel cc where c_cashoutChannelGroup2 = 'hago' order by c_fee asc  ";
-            return $this->db->query($query)->result();
-        }   
-        public function get_google_play($limit, $start){
-            $query = "select * from cashout_external_x_channel cc where c_cashoutChannelGroup2 = 'google_play' order by c_fee asc  ";
-            return $this->db->query($query)->result();
-        }   
-        public function get_cashin_chanel($limit, $start){
-            $query = "SELECT * FROM cashin_channel_x_merchant LIMIT ?, ?";
-            return $this->db->query($query, array((int)$start, (int)$limit))->result();
-        } 
-        public function get_cashin_chanel_group(){
-            $query = "SELECT c_cashinChannelGroup as c_channelGroup FROM cashin_channel_x_merchant GROUP BY c_cashinChannelGroup";
-            return $this->db->query($query)->result();
-        }
-        public function get_cashin_chanel_id(){
-            $query = "SELECT id FROM cashin_channel_x_merchant GROUP BY id";
-            return $this->db->query($query)->result();
-        }
-        public function get_cashin_chanel_external_id_default(){
-            $query = "SELECT c_cashinExternalId as c_externalIdDefault FROM cashin_external_x_channel GROUP BY c_cashinExternalId";
-            return $this->db->query($query)->result();
-        }
-        public function get_cashout_chanel($limit, $start){
-            $query = "SELECT * FROM cashout_external_x_channel WHERE c_cashoutChannelGroup != 'ppob' LIMIT ?, ?";
-            return $this->db->query($query, array((int)$start, (int)$limit))->result();
-        } 
-        public function get_cashout_chanel_group(){
-            $query = "SELECT c_cashoutChannelGroup as c_channelGroup FROM cashout_external_x_channel GROUP BY c_cashoutChannelGroup";
-            return $this->db->query($query)->result();
-        }
-        public function get_cashout_chanel_id(){
-            $query = "SELECT id FROM cashout_external_x_channel GROUP BY id";
-            return $this->db->query($query)->result();
-        }
-        public function get_cashout_chanel_external_id_default(){
-            $query = "SELECT c_cashoutExternalId as c_externalIdDefault FROM cashout_external_x_channel GROUP BY c_cashoutExternalId";
-            return $this->db->query($query)->result();
-        }
-        public function get_cashout_channels($externalId, $channelGroup){
-            $this->db->select('ref_cashoutChannelId as id');
-            $this->db->from('cashout_external_x_channel');
-            $this->db->where('c_cashoutExternalId', $externalId);
-            $this->db->where('c_cashoutChannelGroup', $channelGroup);
-            return $this->db->get()->result();
-        }
+    public function get_topup_ovo($limit, $start){
+        $query = "select * from cashout_external_x_channel cc where c_cashoutChannelGroup2 = 'topup_ovo' order by c_fee asc  ";
+        return $this->db->query($query)->result();
+    }      
+    public function insert_cashout_chanel($data) {
+        return $this->db->insert('cashout_external_x_channel', $data);
+    }
+    public function update_cashout_chanel($id, $data) {
+        $this->db->where('id', $id);
+        return $this->db->update('cashout_external_x_channel', $data);
+    }
+    public function get_mobile_legend($limit, $start){
+        $query = "select * from cashout_external_x_channel cc where c_cashoutChannelGroup2 = 'diamond_mlbb' order by c_fee asc  ";
+        return $this->db->query($query)->result();
+    }   
+    public function get_pubg_mobile($limit, $start){
+        $query = "select * from cashout_external_x_channel cc where c_cashoutChannelGroup2 = 'pubg_mobile' order by c_fee asc  ";
+        return $this->db->query($query)->result();
+    }   
+    public function get_free_fire($limit, $start){
+        $query = "select * from cashout_external_x_channel cc where c_cashoutChannelGroup2 = 'free_fire' order by c_fee_asc  ";
+        return $this->db->query($query)->result();
+    }   
+    public function get_hago($limit, $start){
+        $query = "select * from cashout_external_x_channel cc where c_cashoutChannelGroup2 = 'hago' order by c_fee asc  ";
+        return $this->db->query($query)->result();
+    }   
+    public function get_google_play($limit, $start){
+        $query = "select * from cashout_external_x_channel cc where c_cashoutChannelGroup2 = 'google_play' order by c_fee asc  ";
+        return $this->db->query($query)->result();
+    }   
+    public function get_cashin_chanel($limit, $start){
+        $query = "SELECT * FROM cashin_channel_x_merchant LIMIT ?, ?";
+        return $this->db->query($query, array((int)$start, (int)$limit))->result();
+    } 
+    public function get_cashin_chanel_group(){
+        $query = "SELECT c_cashinChannelGroup as c_channelGroup FROM cashin_channel_x_merchant GROUP BY c_cashinChannelGroup";
+        return $this->db->query($query)->result();
+    }
+    public function get_cashin_chanel_id(){
+        $query = "SELECT ref_cashinChannelId as id FROM cashin_channel_x_merchant GROUP BY id";
+        return $this->db->query($query)->result();
+    }
+    public function get_cashin_chanel_external_id_default(){
+        $query = "SELECT c_cashinExternalId as c_externalIdDefault FROM cashin_external_x_channel GROUP BY c_cashinExternalId";
+        return $this->db->query($query)->result();
+    }
+    public function get_cashout_chanel($limit, $start){
+        $query = "SELECT * FROM cashout_external_x_channel WHERE c_cashoutChannelGroup != 'ppob' LIMIT ?, ?";
+        return $this->db->query($query, array((int)$start, (int)$limit))->result();
+    } 
+    public function get_cashout_chanel_group(){
+        $query = "SELECT c_cashoutChannelGroup as c_channelGroup FROM cashout_external_x_channel GROUP BY c_cashoutChannelGroup";
+        return $this->db->query($query)->result();
+    }
+    public function get_cashout_chanel_id(){
+        $query = "SELECT ref_cashoutChannelId as id FROM cashout_external_x_channel GROUP BY id";
+        return $this->db->query($query)->result();
+    }
+    public function get_cashout_chanel_external_id_default(){
+        $query = "SELECT c_cashoutExternalId as c_externalIdDefault FROM cashout_external_x_channel GROUP BY c_cashoutExternalId";
+        return $this->db->query($query)->result();
+    }
+    public function get_cashout_channels($externalId, $channelGroup){
+        $this->db->select('ref_cashoutChannelId as id');
+        $this->db->from('cashout_external_x_channel');
+        $this->db->where('c_cashoutExternalId', $externalId);
+        $this->db->where('c_cashoutChannelGroup', $channelGroup);
+        return $this->db->get()->result();
+    }
 
-        public function get_cashout_channels_all(){
-            $this->db->from('cashout_external_x_channel');
-            $this->db->where('c_cashoutChannelGroup !=', 'ppob');
-            return $this->db->get()->result();
-        }
-        public function get_cashin_channels($externalId, $channelGroup){
-            $this->db->select('ref_cashinChannelId as id');
-            $this->db->from('cashin_external_x_channel');
-            $this->db->where('c_cashinExternalId', $externalId);
-            $this->db->where('c_cashinChannelGroup', $channelGroup);
-            return $this->db->get()->result();
-        }
-        public function createCashinChannel($data) {
-            $success = $this->db->insert('cashin_channel_x_merchant', $data);
-            $error = $this->db->error();
-            return $success ? true : $error;
-        }
-        public function updateCashinChannel($id, $data) {
-            $this->db->where('id', $id);
-            $success = $this->db->update('cashin_channel_x_merchant', $data);
-            $error = $this->db->error();
-            return $success ? true : $error;
-        }
-        public function deleteCashinChannel($id) {
-            $this->db->where('id', $id);
-            $success = $this->db->delete('cashin_channel_x_merchant');
-            $error = $this->db->error();
-            return $success ? true : $error;
-        }
-        public function createCashoutChannel($data) {
-            $success = $this->db->insert('cashout_external_x_channel', $data);
-            $error = $this->db->error();
-            return $success ? true : $error;
-        }
-        public function updateCashoutChannel($id, $data) {
-            $this->db->where('id', $id);
-            $success = $this->db->update('cashout_external_x_channel', $data);
-            $error = $this->db->error();
-            return $success ? true : $error;
-        }
-        public function deleteCashoutChannel($id) {
-            $this->db->where('id', $id);
-            $success = $this->db->delete('cashout_external_x_channel');
-            $error = $this->db->error();
-            return $success ? true : $error;
-        }
-        public function insertPaketData($data) {
-            return $this->db->insert('cashout_external_x_channel', $data);
-        }
-        public function createCashinChannelXMerchant($data) {
-            $result = $this->db->insert('cashin_channel_x_merchant', $data);
-            $error = $this->db->error();
+    public function get_cashout_channels_all(){
+        $this->db->from('cashout_external_x_channel');
+        $this->db->where('c_cashoutChannelGroup !=', 'ppob');
+        return $this->db->get()->result();
+    }
+    public function get_cashin_channels($externalId, $channelGroup){
+        $this->db->select('ref_cashinChannelId as id');
+        $this->db->from('cashin_external_x_channel');
+        $this->db->where('c_cashinExternalId', $externalId);
+        $this->db->where('c_cashinChannelGroup', $channelGroup);
+        return $this->db->get()->result();
+    }
+    public function createCashinChannel($data) {
+        $success = $this->db->insert('cashin_channel_x_merchant', $data);
+        $error = $this->db->error();
+        return $success ? true : $error;
+    }
+    public function updateCashinChannel($id, $data) {
+        $this->db->where('id', $id);
+        $success = $this->db->update('cashin_channel_x_merchant', $data);
+        $error = $this->db->error();
+        return $success ? true : $error;
+    }
+    public function deleteCashinChannel($id) {
+        $this->db->where('id', $id);
+        $success = $this->db->delete('cashin_channel_x_merchant');
+        $error = $this->db->error();
+        return $success ? true : $error;
+    }
+    public function createCashoutChannel($data) {
+        $success = $this->db->insert('cashout_external_x_channel', $data);
+        $error = $this->db->error();
+        return $success ? true : $error;
+    }
+    public function updateCashoutChannel($id, $data) {
+        $this->db->where('id', $id);
+        $success = $this->db->update('cashout_external_x_channel', $data);
+        $error = $this->db->error();
+        return $success ? true : $error;
+    }
+    public function deleteCashoutChannel($id) {
+        $this->db->where('id', $id);
+        $success = $this->db->delete('cashout_external_x_channel');
+        $error = $this->db->error();
+        return $success ? true : $error;
+    }
+    public function insertPaketData($data) {
+        return $this->db->insert('cashout_external_x_channel', $data);
+    }
+    public function createCashinChannelXMerchant($data) {
+        $result = $this->db->insert('cashin_channel_x_merchant', $data);
+        $error = $this->db->error();
 
-            if ($result) {
-                return true;
-            } else {
-                return $error;
-            }
-        }
-
-        public function updateCashinChannelXMerchant($id, $data) {
-            $this->db->where('id', $id);
-            $success = $this->db->update('cashin_channel_x_merchant', $data);
-            $error = $this->db->error();
-            if ($success) {
-                return true;
-            } else {
-                return $error;
-            }
-        }
-
-        public function deleteCashinChannelXMerchant($id) {
-            $this->db->where('id', $id);
-            $success = $this->db->delete('cashin_channel_x_merchant');
-            $error = $this->db->error();
-            if ($success) {
-                return true;
-            } else {
-                return $error;
-            }
-        }
-
-        public function createCashoutChannelXMerchant($data) {
-            $result = $this->db->insert('cashout_channel_x_merchant', $data);
-            $error = $this->db->error();
-
-            if ($result) {
-                return true;
-            } else {
-                return $error;
-            }
-        }
-
-        public function bulkCreateCashoutChannelXMerchant($data) {
-            $this->db->trans_begin();
-            foreach ($data as $row) {
-                $resp = $this->db->insert('cashout_channel_x_merchant', $row);
-
-                if (!$resp) {
-                    $error = $this->db->error();
-
-                    $this->db->trans_rollback();
-                    return [
-                        'code' => $error['code'],
-                        'message' => $error['message'],
-                        'row_data' => $row,
-                        'last_query' => $this->db->last_query(),
-                        'resp' => $resp,
-                    ];
-                }
-            }
-
-            $this->db->trans_commit();
+        if ($result) {
             return true;
+        } else {
+            return $error;
         }
+    }
 
-        public function updateCashoutChannelXMerchant($id, $data) {
-            $this->db->where('id', $id);
-            $success = $this->db->update('cashout_channel_x_merchant', $data);
-            $error = $this->db->error();
-            if ($success) {
-                return true;
-            } else {
-                return $error;
-            }
-        }
-
-        public function deleteCashoutChannelXMerchant($id) {
-            $this->db->where('id', $id);
-            $success = $this->db->delete('cashout_channel_x_merchant');
-            $error = $this->db->error();
-            if ($success) {
-                return true;
-            } else {
-                return $error;
-            }
-        }
-
-        public function bulkCreateCashinChannelXMerchant($data) {
-            $this->db->trans_begin();
-            foreach ($data as $row) {
-                $resp = $this->db->insert('cashin_channel_x_merchant', $row);
-
-                if (!$resp) {
-                    $error = $this->db->error();
-
-                    $this->db->trans_rollback();
-                    return [
-                        'code' => $error['code'],
-                        'message' => $error['message'],
-                        'row_data' => $row,
-                        'last_query' => $this->db->last_query(),
-                        'resp' => $resp,
-                    ];
-                }
-            }
-
-            $this->db->trans_commit();
+    public function updateCashinChannelXMerchant($id, $data) {
+        $this->db->where('id', $id);
+        $success = $this->db->update('cashin_channel_x_merchant', $data);
+        $error = $this->db->error();
+        if ($success) {
             return true;
+        } else {
+            return $error;
+        }
+    }
+
+    public function deleteCashinChannelXMerchant($id) {
+        $this->db->where('id', $id);
+        $success = $this->db->delete('cashin_channel_x_merchant');
+        $error = $this->db->error();
+        if ($success) {
+            return true;
+        } else {
+            return $error;
+        }
+    }
+
+    public function createCashoutChannelXMerchant($data) {
+        $result = $this->db->insert('cashout_channel_x_merchant', $data);
+        $error = $this->db->error();
+
+        if ($result) {
+            return true;
+        } else {
+            return $error;
+        }
+    }
+
+    public function bulkCreateCashoutChannelXMerchant($data) {
+        $this->db->trans_begin();
+        foreach ($data as $row) {
+            $resp = $this->db->insert('cashout_channel_x_merchant', $row);
+
+            if (!$resp) {
+                $error = $this->db->error();
+
+                $this->db->trans_rollback();
+                return [
+                    'code' => $error['code'],
+                    'message' => $error['message'],
+                    'row_data' => $row,
+                    'last_query' => $this->db->last_query(),
+                    'resp' => $resp,
+                ];
+            }
         }
 
-        public function get_cashin_summary() {
-            $this->db->select("
-                COUNT(*) as qty,
-                COUNT(DISTINCT c_cashinChannelGroup) as total_groups,
-                COUNT(DISTINCT c_cashinExternalId) as providers,
-                AVG(c_fee) as avg_fee
-            ");
-            $this->db->from("cashin_external_x_channel");
-            return $this->db->get()->row();
+        $this->db->trans_commit();
+        return true;
+    }
+
+    public function updateCashoutChannelXMerchant($id, $data) {
+        $this->db->where('id', $id);
+        $success = $this->db->update('cashout_channel_x_merchant', $data);
+        $error = $this->db->error();
+        if ($success) {
+            return true;
+        } else {
+            return $error;
+        }
+    }
+
+    public function deleteCashoutChannelXMerchant($id) {
+        $this->db->where('id', $id);
+        $success = $this->db->delete('cashout_channel_x_merchant');
+        $error = $this->db->error();
+        if ($success) {
+            return true;
+        } else {
+            return $error;
+        }
+    }
+
+    public function bulkCreateCashinChannelXMerchant($data) {
+        $this->db->trans_begin();
+        foreach ($data as $row) {
+            $resp = $this->db->insert('cashin_channel_x_merchant', $row);
+
+            if (!$resp) {
+                $error = $this->db->error();
+
+                $this->db->trans_rollback();
+                return [
+                    'code' => $error['code'],
+                    'message' => $error['message'],
+                    'row_data' => $row,
+                    'last_query' => $this->db->last_query(),
+                    'resp' => $resp,
+                ];
+            }
         }
 
-        public function get_cashout_summary() {
-            $this->db->select("
-                COUNT(*) as qty,
-                COUNT(DISTINCT c_cashoutChannelGroup) as total_groups,
-                COUNT(DISTINCT c_cashoutExternalId) as providers,
-                AVG(c_fee) as avg_fee
-            ");
-            $this->db->from("cashout_external_x_channel");
-            $this->db->where("c_cashoutChannelGroup !=", "ppob");
-            return $this->db->get()->row();
-        }
+        $this->db->trans_commit();
+        return true;
+    }
+
+    public function get_cashin_summary() {
+        $this->db->select("
+            COUNT(*) as qty,
+            COUNT(DISTINCT c_cashinChannelGroup) as total_groups,
+            COUNT(DISTINCT c_cashinExternalId) as providers,
+            AVG(c_fee) as avg_fee
+        ");
+        $this->db->from("cashin_external_x_channel");
+        return $this->db->get()->row();
+    }
+
+    public function get_cashout_summary() {
+        $this->db->select("
+            COUNT(*) as qty,
+            COUNT(DISTINCT c_cashoutChannelGroup) as total_groups,
+            COUNT(DISTINCT c_cashoutExternalId) as providers,
+            AVG(c_fee) as avg_fee
+        ");
+        $this->db->from("cashout_external_x_channel");
+        $this->db->where("c_cashoutChannelGroup !=", "ppob");
+        return $this->db->get()->row();
+    }
     
     public function updateCashinChannelGlobal($data) {
         $updateType      = $data['update_type'];
@@ -489,10 +491,10 @@ class Chanel extends CI_Model {
         $cols = '*';
         if ($tableName == 'cashout_external_x_channel') {
             $prefix = $alias ? $alias . '.' : '';
-            $cols = "{$prefix}id, co.c_caption, co.c_description, {$prefix}c_fee, {$prefix}c_cashoutChannelGroup as c_channelGroup, {$prefix}c_cashoutChannelGroup2, {$prefix}c_cashoutExternalId as c_externalIdDefault, {$prefix}c_feeType, {$prefix}c_amountMin, {$prefix}c_amountMax";
+            $cols = "{$prefix}id, {$prefix}ref_cashoutChannelId, co.c_caption, co.c_description, {$prefix}c_fee, {$prefix}c_cashoutChannelGroup as c_channelGroup, {$prefix}c_cashoutChannelGroup2, {$prefix}c_cashoutExternalId as c_externalIdDefault, {$prefix}c_feeType, {$prefix}c_amountMin, {$prefix}c_amountMax";
         } elseif ($tableName == 'cashin_external_x_channel') {
             $prefix = $alias ? $alias . '.' : '';
-            $cols = "{$prefix}id, ci.c_description, {$prefix}c_cashinChannelGroup as c_channelGroup, {$prefix}c_cashinExternalId as c_externalIdDefault, {$prefix}c_feeType, {$prefix}c_fee, {$prefix}c_feePercetange, {$prefix}c_settlementInterval, {$prefix}c_amountMin, {$prefix}c_amountMax, {$prefix}c_status";
+            $cols = "{$prefix}id, {$prefix}ref_cashinChannelId, ci.c_description, {$prefix}c_cashinChannelGroup as c_channelGroup, {$prefix}c_cashinExternalId as c_externalIdDefault, {$prefix}c_feeType, {$prefix}c_fee, {$prefix}c_feePercetange, {$prefix}c_settlementInterval, {$prefix}c_amountMin, {$prefix}c_amountMax, {$prefix}c_status";
         }
 
         $dt = $this->datatables->of($table)

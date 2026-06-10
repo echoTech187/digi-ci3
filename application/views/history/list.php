@@ -2,18 +2,15 @@
 // Session filter values
 $search_date_purchase_value = $this->session->userdata('search_history_date1') ?: '';
 $search_merchant_purchase_value = $this->session->userdata('search_history_name') ?: '';
-$search_status_purchase_value = $this->session->userdata('search_history_status') ?: '';
 
 // Badge count for More Filters
 $extra_active = 0;
 if ($search_date_purchase_value)  $extra_active++;
 if ($search_merchant_purchase_value) $extra_active++;
-if ($search_status_purchase_value) $extra_active++;
 
 $download_url = base_url('finance/history/download') 
     . "?search_history_date1=" . $search_date_purchase_value 
-    . "&search_history_name=" . $search_merchant_purchase_value
-    . "&search_history_status=" . $search_status_purchase_value;
+    . "&search_history_name=" . $search_merchant_purchase_value;
 ?>
 
 <!-- ── Page Header ── -->
@@ -78,19 +75,6 @@ $download_url = base_url('finance/history/download')
                                     <label class="dt-more-label"><i class="fas fa-calendar-alt mr-1 mr-2"></i> Transaction Date</label>
                                     <div class="premium-picker">
                                         <input type="date" name="search_date_purchase" class="dt-chip-input" value="<?= $search_date_purchase_value; ?>">
-                                    </div>
-                                </div>
-                                <!-- Status Filter -->
-                                <div class="mb-3">
-                                    <label class="dt-more-label"><i class="fas fa-info-circle mr-1 mr-2"></i> Status</label>
-                                    <div class="dt-filter-chip" style="min-width: 180px;">
-                                        <select name="search_status_purchase" class="dt-chip-input history-select2">
-                                            <option value="">All Statuses</option>
-                                            <option value="Success" <?= ('Success' == $search_status_purchase_value) ? 'selected' : ''; ?>>Success</option>
-                                            <option value="Failed" <?= ('Failed' == $search_status_purchase_value) ? 'selected' : ''; ?>>Failed</option>
-                                            <option value="Pending" <?= ('Pending' == $search_status_purchase_value) ? 'selected' : ''; ?>>Pending</option>
-                                            <option value="Timeout" <?= ('Timeout' == $search_status_purchase_value) ? 'selected' : ''; ?>>Timeout</option>
-                                        </select>
                                     </div>
                                 </div>
                             </div>

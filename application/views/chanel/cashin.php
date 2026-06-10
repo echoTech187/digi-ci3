@@ -342,6 +342,7 @@
                                 <div class="col-md-6 mb-3">
                                     <label class="dt-more-label mb-2">Channel ID</label>
                                     <input type="text" class="dt-more-input bg-light" readonly required name="id" id="edit_id">
+                                    <input type="hidden" name="pk_id" id="edit_pk_id">
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="dt-more-label mb-2">Channel Group</label>
@@ -425,7 +426,7 @@
         // Standardize DataTables for premium look
         var table = initServerDataTable('#cashinTable', "<?= base_url('channel/cashin') ?>", [
                 {data: 'no', orderable: false, className: 'text-center'},
-                {data: 'id', className: 'font-weight-bold text-primary dt-id-column'},
+                {data: 'ref_cashinChannelId', className: 'font-weight-bold text-primary dt-id-column'},
                 {data: 'c_channelGroup', render: function(data){
                     return '<span class="badge badge-light text-dark border px-2 py-1 text-uppercase" style="font-size:10px; letter-spacing:0.5px; border-radius:4px;">'+data+'</span>';
                 }},
@@ -453,6 +454,7 @@
                                         <button type="button" class="dropdown-item edit-cashin" 
                                             data-toggle="modal" data-target="#editChanelModal" 
                                             data-id="${row.id}" 
+                                            data-channelid="${row.ref_cashinChannelId}"
                                             data-group="${row.c_channelGroup}"
                                             data-desc="${row.c_description || ''}"
                                             data-ext="${row.c_externalIdDefault || ''}"
@@ -496,7 +498,8 @@
 
         // Edit button mapping
         $(document).on('click', '.edit-cashin', function() {
-            $('#edit_id').val($(this).data('id'));
+            $('#edit_pk_id').val($(this).data('id'));
+            $('#edit_id').val($(this).data('channelid'));
             $('#edit_chanelgroup').val($(this).data('group'));
             $('#edit_description').val($(this).data('desc'));
             $('#edit_externaldefault').val($(this).data('ext'));
