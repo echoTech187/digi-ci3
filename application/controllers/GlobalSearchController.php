@@ -341,12 +341,10 @@ class GlobalSearchController extends CI_Controller
                 }
             }
 
-            file_put_contents('search_debug.txt', json_encode(array_slice($results, 0, 15)));
             echo json_encode(array_slice($results, 0, 15));
 
         } catch (Exception $e) {
-            file_put_contents('search_debug.txt', $e->getMessage());
-            echo json_encode([]);
+            echo json_encode(['status' => 'error', 'message' => 'Exception : ' . $e->getMessage()]);
         }
     }
 

@@ -33,14 +33,14 @@
                 $links = [];
                 
                 // Case 1: The parent menu itself has a URL
-                if (!empty($m['url'])) {
+                if (!empty($m['url']) && $m['url'] !== '#') {
                     $links[] = $m;
                 }
                 
                 // Case 2: Process Submenus
                 if (!empty($m['sub_menus'])) {
                     foreach ($m['sub_menus'] as $sm) {
-                        if (!empty($sm['url'])) {
+                        if (!empty($sm['url']) && $sm['url'] !== '#') {
                             $links[] = $sm;
                         }
                     }
