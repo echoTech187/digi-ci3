@@ -91,18 +91,18 @@
             <form id="addProductForm">
                 <div class="modal-body p-0 bg-light">
                     <div class="d-flex g-0 w-100 flex-column flex-lg-row">
-                        <div class="col-lg-4 p-4 d-flex flex-column mb-0" style="background:#202328;border-right:1px solid rgba(255,255,255,0.05);color:#fff;">
+                        <div class="col-lg-4 p-4 d-flex flex-column mb-0" >
                             <div class="d-flex align-items-center mb-3">
                                 <div class="bg-warning text-white rounded-circle d-flex align-items-center justify-content-center mr-3" style="width:40px;height:40px;flex-shrink:0;"><i class="fas fa-gamepad fa-lg"></i></div>
                                 <h6 class="fw-bold text-warning mb-0" style="font-size:15px;">Hago Topup Guide</h6>
                             </div>
                             <p class="text-muted small mb-3" style="font-size:12px;line-height:1.5;">Register Hago game currency denominations for in-app purchases.</p>
                             <div class="p-3 mb-3" style="border-radius:12px;">
-                                <h6 class="fw-bold text-white mb-1 d-flex align-items-center" style="font-size:12px;"><i class="fas fa-gem text-warning mr-2"></i> 1. Caption</h6>
+                                <h6 class="fw-bold mb-1 d-flex align-items-center" style="font-size:12px;"><i class="fas fa-gem text-warning mr-2"></i> 1. Caption</h6>
                                 <p class="text-muted mb-0" style="font-size:11px;line-height:1.4;">Label clearly e.g. 'Hago 50 Coins' for player recognition.</p>
                             </div>
                             <div class="p-3 mb-3" style="border-radius:12px;">
-                                <h6 class="fw-bold text-white mb-1 d-flex align-items-center" style="font-size:12px;"><i class="fas fa-tag text-info mr-2"></i> 2. Price</h6>
+                                <h6 class="fw-bold mb-1 d-flex align-items-center" style="font-size:12px;"><i class="fas fa-tag text-info mr-2"></i> 2. Price</h6>
                                 <p class="text-muted mb-0" style="font-size:11px;line-height:1.4;">Ensure pricing covers Hago supplier cost. Review regularly for market rates.</p>
                             </div>
                         </div>

@@ -150,10 +150,12 @@ class GlobalSearchController extends CI_Controller
                         $parts[] = "(SELECT 'qrc', CAST(id AS CHAR), c_merchantTransactionId, CAST(c_amount AS CHAR) FROM cashin_recurring_qris_mpm WHERE c_merchantTransactionId $op $val LIMIT 3)";
                 }
                 if ($needVa) {
-                    $parts[] = "(SELECT 'vdt', CAST(id AS CHAR), c_merchantTransactionId,                           CAST(c_amount AS CHAR) FROM cashin_dynamic_va WHERE c_merchantTransactionId $op $val LIMIT 5)";
-                    $parts[] = "(SELECT 'vdn', CAST(id AS CHAR), IFNULL(c_vaNumber, c_merchantTransactionId),       CAST(c_amount AS CHAR) FROM cashin_dynamic_va WHERE c_vaNumber $op $val LIMIT 5)";
-                    if ($has_access('virtual-account/recurring'))
-                        $parts[] = "(SELECT 'vrc', CAST(id AS CHAR), IFNULL(c_vaNumber, c_merchantTransactionId),   CAST(c_amount AS CHAR) FROM cashin_recurring_va WHERE c_merchantTransactionId $op $val LIMIT 3)";
+                    $parts[] = "(SELECT 'vdt', CAST(id AS CHAR), c_merchantTransactionId, CAST(c_amount AS CHAR) FROM cashin_dynamic_va WHERE c_merchantTransactionId $op $val LIMIT 5)";
+                    $parts[] = "(SELECT 'vdn', CAST(id AS CHAR), c_vaNumber,              CAST(c_amount AS CHAR) FROM cashin_dynamic_va WHERE c_vaNumber $op $val LIMIT 5)";
+                    if ($has_access('virtual-account/recurring')) {
+                        $parts[] = "(SELECT 'vrt', CAST(id AS CHAR), c_merchantTransactionId, CAST(c_amount AS CHAR) FROM cashin_recurring_va WHERE c_merchantTransactionId $op $val LIMIT 3)";
+                        $parts[] = "(SELECT 'vrn', CAST(id AS CHAR), c_vaNumber,              CAST(c_amount AS CHAR) FROM cashin_recurring_va WHERE c_vaNumber $op $val LIMIT 3)";
+                    }
                 }
                 if ($needEw) {
                     $parts[] = "(SELECT 'ewt', CAST(id AS CHAR), c_merchantTransactionId, CAST(c_amount AS CHAR) FROM cashin_dynamic_ewallet WHERE c_merchantTransactionId $op $val LIMIT 5)";
@@ -165,8 +167,7 @@ class GlobalSearchController extends CI_Controller
                 }
                 if ($has_access('finance/history')) {
                     $parts[] = "(SELECT 'ppb', CAST(ref_cashoutId AS CHAR), ref_cashoutChannelId, '0' FROM cashout_payment_ppob WHERE ref_cashoutChannelId $op $val LIMIT 5)";
-                    if (!$isNumericTid)
-                        $parts[] = "(SELECT 'pph', CAST(ref_cashoutId AS CHAR), c_phone, '0' FROM cashout_payment_ppob WHERE c_phone $op $val LIMIT 5)";
+                    $parts[] = "(SELECT 'pph', CAST(ref_cashoutId AS CHAR), c_phone, '0' FROM cashout_payment_ppob WHERE c_phone $op $val LIMIT 5)";
                 }
 
                 if ($parts) {
@@ -200,12 +201,17 @@ class GlobalSearchController extends CI_Controller
                                 $vaDynIds[] = $rid;
                                 if ($has_access('virtual-account/dynamic') && $tid && !isset($seen['disp_vd'][$rid])) {
                                     $seen['disp_vd'][$rid] = true;
-                                    $results[] = ['title' => "$tid - Rp " . number_format($amt), 'url' => base_url('virtual-account/dynamic?transid=' . $query), 'category' => 'VA Dynamic', 'icon' => 'fas fa-university'];
+                                    $qs = ($src === 'vdn') ? '?va_number=' : '?transid=';
+                                    $results[] = ['title' => "$tid - Rp " . number_format($amt), 'url' => base_url('virtual-account/dynamic' . $qs . $query), 'category' => 'VA Dynamic', 'icon' => 'fas fa-university'];
                                 }
                                 break;
-                            case 'vrc':
-                                if ($has_access('virtual-account/recurring') && $tid)
-                                    $results[] = ['title' => "$tid - Rp " . number_format($amt), 'url' => base_url('virtual-account/recurring?transid=' . $query), 'category' => 'VA Recurring', 'icon' => 'fas fa-history'];
+                            case 'vrt':
+                            case 'vrn':
+                                if ($has_access('virtual-account/recurring') && $tid && !isset($seen['disp_vr'][$rid])) {
+                                    $seen['disp_vr'][$rid] = true;
+                                    $qs = ($src === 'vrn') ? '?va_number=' : '?transid=';
+                                    $results[] = ['title' => "$tid - Rp " . number_format($amt), 'url' => base_url('virtual-account/recurring' . $qs . $query), 'category' => 'VA Recurring', 'icon' => 'fas fa-history'];
+                                }
                                 break;
                             case 'ewt':
                                 $ewDynIds[] = $rid;
@@ -292,7 +298,10 @@ class GlobalSearchController extends CI_Controller
                 $this->db->group_end()->group_by('c.id');
                 foreach ($this->db->limit(3)->get()->result() as $r) {
                     $isInv = stripos($r->c_invoiceNo, $query) !== false;
-                    $results[] = ['title' => ($isInv ? $r->c_invoiceNo : $query) . " - Rp " . number_format($r->c_amount), 'url' => base_url('finance/virtual-account?' . ($isInv ? 'invoice=' : 'transid=') . ($isInv ? $r->c_invoiceNo : $query)), 'category' => 'VA', 'icon' => 'fas fa-university'];
+                    $isVa  = stripos((string)$r->c_vaNumber, $query) !== false;
+                    $qsKey = $isInv ? 'invoice' : ($isVa ? 'va_number' : 'transid');
+                    $qsVal = $isInv ? $r->c_invoiceNo : ($isVa ? $r->c_vaNumber : $query);
+                    $results[] = ['title' => "$qsVal - Rp " . number_format($r->c_amount), 'url' => base_url("finance/virtual-account?$qsKey=" . urlencode($qsVal)), 'category' => 'VA', 'icon' => 'fas fa-university'];
                 }
             }
             if (count($cashin_ids) > 1 && $has_access('finance/e-wallet')) {
@@ -332,9 +341,11 @@ class GlobalSearchController extends CI_Controller
                 }
             }
 
+            file_put_contents('search_debug.txt', json_encode(array_slice($results, 0, 15)));
             echo json_encode(array_slice($results, 0, 15));
 
         } catch (Exception $e) {
+            file_put_contents('search_debug.txt', $e->getMessage());
             echo json_encode([]);
         }
     }

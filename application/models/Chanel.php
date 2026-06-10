@@ -491,7 +491,7 @@ class Chanel extends CI_Model {
         $cols = '*';
         if ($tableName == 'cashout_external_x_channel') {
             $prefix = $alias ? $alias . '.' : '';
-            $cols = "{$prefix}id, {$prefix}ref_cashoutChannelId, co.c_caption, co.c_description, {$prefix}c_fee, {$prefix}c_cashoutChannelGroup as c_channelGroup, {$prefix}c_cashoutChannelGroup2, {$prefix}c_cashoutExternalId as c_externalIdDefault, {$prefix}c_feeType, {$prefix}c_amountMin, {$prefix}c_amountMax";
+            $cols = "{$prefix}id, {$prefix}ref_cashoutChannelId, co.c_caption, co.c_description, {$prefix}c_fee, {$prefix}c_cashoutChannelGroup as c_channelGroup, {$prefix}c_cashoutChannelGroup2 as c_channelGroup2, {$prefix}c_cashoutExternalId as c_externalIdDefault, {$prefix}c_feeType, {$prefix}c_amountMin, {$prefix}c_amountMax";
         } elseif ($tableName == 'cashin_external_x_channel') {
             $prefix = $alias ? $alias . '.' : '';
             $cols = "{$prefix}id, {$prefix}ref_cashinChannelId, ci.c_description, {$prefix}c_cashinChannelGroup as c_channelGroup, {$prefix}c_cashinExternalId as c_externalIdDefault, {$prefix}c_feeType, {$prefix}c_fee, {$prefix}c_feePercetange, {$prefix}c_settlementInterval, {$prefix}c_amountMin, {$prefix}c_amountMax, {$prefix}c_status";

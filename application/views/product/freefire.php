@@ -92,18 +92,18 @@
             <form id="addProductForm">
                 <div class="modal-body p-0 bg-light">
                     <div class="d-flex g-0 w-100 flex-column flex-lg-row">
-                        <div class="col-lg-4 p-4 d-flex flex-column mb-0" style="background:#202328;border-right:1px solid rgba(255,255,255,0.05);color:#fff;">
+                        <div class="col-lg-4 p-4 d-flex flex-column mb-0" >
                             <div class="d-flex align-items-center mb-3">
                                 <div class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center mr-3" style="width:40px;height:40px;flex-shrink:0;"><i class="fas fa-gamepad fa-lg"></i></div>
                                 <h6 class="fw-bold text-danger mb-0" style="font-size:15px;">Free Fire Topup Guide</h6>
                             </div>
                             <p class="text-muted small mb-3" style="font-size:12px;line-height:1.5;">Register Free Fire diamond denominations for in-game currency topups.</p>
                             <div class="p-3 mb-3" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;">
-                                <h6 class="fw-bold text-white mb-1 d-flex align-items-center" style="font-size:12px;"><i class="fas fa-gem text-warning mr-2"></i> 1. Diamond Amount</h6>
+                                <h6 class="fw-bold mb-1 d-flex align-items-center" style="font-size:12px;"><i class="fas fa-gem text-warning mr-2"></i> 1. Diamond Amount</h6>
                                 <p class="text-muted mb-0" style="font-size:11px;line-height:1.4;">Use clear caption e.g. 'FF 100 Diamond' so players identify instantly.</p>
                             </div>
                             <div class="p-3 mb-3" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;">
-                                <h6 class="fw-bold text-white mb-1 d-flex align-items-center" style="font-size:12px;"><i class="fas fa-tag text-info mr-2"></i> 2. Sell Price</h6>
+                                <h6 class="fw-bold mb-1 d-flex align-items-center" style="font-size:12px;"><i class="fas fa-tag text-info mr-2"></i> 2. Sell Price</h6>
                                 <p class="text-muted mb-0" style="font-size:11px;line-height:1.4;">Price must cover supplier cost. Monitor competitor prices for competitiveness.</p>
                             </div>
                         </div>
@@ -158,14 +158,14 @@
             <form id="editProductForm">
                 <div class="modal-body p-0 bg-light">
                     <div class="d-flex g-0 w-100 flex-column flex-lg-row">
-                        <div class="col-lg-4 p-4 d-flex flex-column mb-0" style="background:#202328;border-right:1px solid rgba(255,255,255,0.05);color:#fff;">
+                        <div class="col-lg-4 p-4 d-flex flex-column mb-0" >
                             <div class="d-flex align-items-center mb-3">
                                 <div class="bg-warning text-white rounded-circle d-flex align-items-center justify-content-center mr-3" style="width:40px;height:40px;flex-shrink:0;"><i class="fas fa-edit fa-lg"></i></div>
                                 <h6 class="fw-bold text-warning mb-0" style="font-size:15px;">Edit Guide</h6>
                             </div>
                             <p class="text-muted small mb-3" style="font-size:12px;line-height:1.5;">Update product details. Price changes apply immediately.</p>
                             <div class="p-3 mb-3" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;">
-                                <h6 class="fw-bold text-white mb-1 d-flex align-items-center" style="font-size:12px;"><i class="fas fa-exclamation-circle text-warning mr-2"></i> Price Impact</h6>
+                                <h6 class="fw-bold mb-1 d-flex align-items-center" style="font-size:12px;"><i class="fas fa-exclamation-circle text-warning mr-2"></i> Price Impact</h6>
                                 <p class="text-muted mb-0" style="font-size:11px;line-height:1.4;">Price updates affect merchant fee calculations. Review after changes.</p>
                             </div>
                         </div>

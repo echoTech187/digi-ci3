@@ -67,16 +67,6 @@
             
         </div>
 
-        <!-- Alerts -->
-        <?php if ($this->session->flashdata('message')): ?>
-            <div class="alert alert-success alert-dismissible fade show m-3" role="alert">
-                <?= $this->session->flashdata('message'); ?>
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-        <?php endif; ?>
-
         <div class="p-0">       
             <div class="table-responsive">       
                 <table id="productTable" class="table dt-table mb-0" style="width: 100%;">
@@ -115,17 +105,17 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <form method="post" action="<?php echo base_url('admin/ServiceController/createProduk'); ?>">
+            <form method="post" action="<?php echo base_url('product/create'); ?>">
                 <div class="modal-body p-0 bg-light">
                     <div class="d-flex g-0 w-100 flex-column flex-lg-row">
-                        <div class="col-lg-4 p-4 d-flex flex-column mb-0" style="background:#202328;border-right:1px solid rgba(255,255,255,0.05);color:#fff;">
+                        <div class="col-lg-4 p-4 d-flex flex-column mb-0" >
                             <div class="d-flex align-items-center mb-3">
                                 <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mr-3" style="width:40px;height:40px;flex-shrink:0;"><i class="fas fa-wifi fa-lg"></i></div>
                                 <h6 class="fw-bold text-primary mb-0" style="font-size:15px;">Data Package Guide</h6>
                             </div>
                             <p class="text-muted small mb-3" style="font-size:12px;line-height:1.5;">Register a new internet data package for a specific provider.</p>
                             <div class="p-3 mb-3" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;">
-                                <h6 class="fw-bold text-white mb-1 d-flex align-items-center" style="font-size:12px;"><i class="fas fa-broadcast-tower text-primary mr-2"></i> Pricing Note</h6>
+                                <h6 class="fw-bold mb-1 d-flex align-items-center" style="font-size:12px;"><i class="fas fa-broadcast-tower text-primary mr-2"></i> Pricing Note</h6>
                                 <p class="text-muted mb-0" style="font-size:11px;line-height:1.4;">Set competitive pricing. Data packages are auto-synced to merchant product catalogues after creation.</p>
                             </div>
                         </div>
@@ -187,17 +177,17 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <form method="post" action="<?php echo base_url('admin/ServiceController/updateProduct'); ?>">
+            <form method="post" action="<?php echo base_url('product/update'); ?>">
                 <div class="modal-body p-0 bg-light">
                     <div class="d-flex g-0 w-100 flex-column flex-lg-row">
-                        <div class="col-lg-4 p-4 d-flex flex-column mb-0" style="background:#202328;border-right:1px solid rgba(255,255,255,0.05);color:#fff;">
+                        <div class="col-lg-4 p-4 d-flex flex-column mb-0" >
                             <div class="d-flex align-items-center mb-3">
                                 <div class="bg-warning text-dark rounded-circle d-flex align-items-center justify-content-center mr-3" style="width:40px;height:40px;flex-shrink:0;"><i class="fas fa-edit fa-lg"></i></div>
                                 <h6 class="fw-bold text-warning mb-0" style="font-size:15px;">Edit Guide</h6>
                             </div>
                             <p class="text-muted small mb-3" style="font-size:12px;line-height:1.5;">Update data package details. Price changes apply immediately to all merchant catalogues.</p>
                             <div class="p-3 mb-3" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;">
-                                <h6 class="fw-bold text-white mb-1 d-flex align-items-center" style="font-size:12px;"><i class="fas fa-exclamation-circle text-warning mr-2"></i> Price Impact</h6>
+                                <h6 class="fw-bold mb-1 d-flex align-items-center" style="font-size:12px;"><i class="fas fa-exclamation-circle text-warning mr-2"></i> Price Impact</h6>
                                 <p class="text-muted mb-0" style="font-size:11px;line-height:1.4;">Price updates affect active merchant fee calculations. Review fee settings after any price changes.</p>
                             </div>
                         </div>

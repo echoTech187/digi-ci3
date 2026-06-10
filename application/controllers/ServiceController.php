@@ -16,8 +16,8 @@ class ServiceController extends CI_Controller {
     {
         is_logged_in();
         $table = 'cashout_external_x_channel cc';
-        $column_order = array(null, 'cc.c_caption', 'cc.id', 'cc.c_fee', null);
-        $column_search = array('cc.c_caption', 'cc.id', 'cc.c_fee');
+        $column_order = array(null, 'co.c_caption', 'cc.id', 'cc.c_fee', null);
+        $column_search = array('co.c_caption', 'cc.id', 'cc.c_fee');
         $order = array('cc.id' => 'asc');
 
         if ($this->input->is_ajax_request()) {
@@ -61,57 +61,57 @@ class ServiceController extends CI_Controller {
     }
 
     public function pulsa_reguler() {
-        $where = array('cc.c_cashinChannelGroup' => 'ppob', "cc.c_cashinChannelGroup2 LIKE '%pulsa%' ESCAPE '!'" => NULL);
+        $where = array('cc.c_cashoutChannelGroup' => 'ppob', "cc.c_cashoutChannelGroup2 LIKE '%pulsa%' ESCAPE '!'" => NULL);
         $this->_render_product_datatable($where, 'pulsa_reguler', 'Pulsa Reguler', true);
     }
 
     public function paket_data() {
-        $where = array('cc.c_cashinChannelGroup' => 'ppob', "cc.c_cashinChannelGroup2 LIKE '%paket_data%' ESCAPE '!'" => NULL);
+        $where = array('cc.c_cashoutChannelGroup' => 'ppob', "cc.c_cashoutChannelGroup2 LIKE '%paket_data%' ESCAPE '!'" => NULL);
         $this->_render_product_datatable($where, 'paket_data', 'Paket Data', true);
     }
 
     public function token_listrik() {
-        $where = array('cc.c_cashinChannelGroup2' => 'token_pln');
+        $where = array('cc.c_cashoutChannelGroup2' => 'token_pln');
         $this->_render_product_datatable($where, 'token_listrik', 'Token Listrik');
     }
 
     public function topupgopay() {
-        $where = array('cc.c_cashinChannelGroup2' => 'topup_gopay');
+        $where = array('cc.c_cashoutChannelGroup2' => 'topup_gopay');
         $this->_render_product_datatable($where, 'topup_gopay', 'Top Up Gopay');
     }
 
     public function topupdana() {
-        $where = array('cc.c_cashinChannelGroup2' => 'topup_dana');
+        $where = array('cc.c_cashoutChannelGroup2' => 'topup_dana');
         $this->_render_product_datatable($where, 'topup_dana', 'Top Up Dana');
     }
 
     public function topupovo() {
-        $where = array('cc.c_cashinChannelGroup2' => 'topup_ovo');
+        $where = array('cc.c_cashoutChannelGroup2' => 'topup_ovo');
         $this->_render_product_datatable($where, 'topup_ovo', 'Top Up Ovo');
     }
 
     public function googleplay() {
-        $where = array('cc.c_cashinChannelGroup2' => 'google_play');
+        $where = array('cc.c_cashoutChannelGroup2' => 'google_play');
         $this->_render_product_datatable($where, 'googleplay', 'Google Play');
     }
 
     public function freefire() {
-        $where = array('cc.c_cashinChannelGroup2' => 'free_fire');
+        $where = array('cc.c_cashoutChannelGroup2' => 'free_fire');
         $this->_render_product_datatable($where, 'freefire', 'Free Fire');
     }
 
     public function hago() {
-        $where = array('cc.c_cashinChannelGroup2' => 'hago');
+        $where = array('cc.c_cashoutChannelGroup2' => 'hago');
         $this->_render_product_datatable($where, 'hago', 'Hago');
     }
 
     public function mobilelegend() {
-        $where = array('cc.c_cashinChannelGroup2' => 'diamond_mlbb');
+        $where = array('cc.c_cashoutChannelGroup2' => 'diamond_mlbb');
         $this->_render_product_datatable($where, 'mobilelegend', 'Diamond Mobile Legend');
     }
 
     public function pubgmobile() {
-        $where = array('cc.c_cashinChannelGroup2' => 'pubg_mobile');
+        $where = array('cc.c_cashoutChannelGroup2' => 'pubg_mobile');
         $this->_render_product_datatable($where, 'pubgmobile', 'PUBG Mobile');
     }
 
@@ -145,6 +145,7 @@ class ServiceController extends CI_Controller {
       $channelgroup = $this->input->post('channelgroup');
       $channelgroup2 = $this->input->post('channelgroup2');
       $name = $this->input->post('name');
+      log_message('error', 'CREATE_PRODUK_POST: ' . json_encode($_POST));
 
       if ($this->form_validation->run() == FALSE) {
          if ($this->input->is_ajax_request()) {
@@ -156,20 +157,56 @@ class ServiceController extends CI_Controller {
          return;
       }
 
-      $data = array(
-         'id' => $id,
+      $channel_id = str_replace(' ', '_', strtolower($caption));
+      
+      // Insert or Update the master channel in cashout_channel
+      $data_channel = array(
+         'id' => $channel_id,
+         'c_channelGroup' => $channelgroup,
+         'c_channelGroup2' => $channelgroup2,
+         'c_description' => $description,
          'c_caption' => $caption,
-         'id' => $description,
-         'c_fee' => $price,
-         'c_cashoutChannelGroup' => $channelgroup,
-         'c_cashoutChannelGroup2' => $channelgroup2,
-         'c_cashinExternalId' => 'portalpulsa',
+         'c_externalIdDefault' => 'portalpulsa',
          'c_feeType' => 'Fixed',
+         'c_fee' => 0,
          'c_amountMin' => 0,
          'c_amountMax' => 0
       );
+      // Handle potential duplicates gracefully by updating caption/desc
+      $exists = $this->db->get_where('cashout_channel', ['id' => $channel_id])->num_rows() > 0;
+      if ($exists) {
+          $this->db->where('id', $channel_id)->update('cashout_channel', $data_channel);
+      } else {
+          $this->db->insert('cashout_channel', $data_channel);
+      }
 
-      if ($this->Chanel->insert_cashout_chanel($data)) {
+      // Insert or Update the pricing in cashout_external_x_channel
+      $data_external = array(
+         'c_cashoutExternalId' => 'portalpulsa',
+         'c_cashoutChannelGroup' => $channelgroup,
+         'c_cashoutChannelGroup2' => $channelgroup2,
+         'ref_cashoutChannelId' => $channel_id,
+         'c_feeType' => 'Fixed',
+         'c_fee' => $price,
+         'c_amountMin' => 0,
+         'c_amountMax' => 0,
+         'c_status' => 'Active'
+      );
+
+      $pricing_exists = $this->db->get_where('cashout_external_x_channel', [
+          'ref_cashoutChannelId' => $channel_id,
+          'c_cashoutExternalId' => 'portalpulsa'
+      ])->num_rows() > 0;
+
+      if ($pricing_exists) {
+          $this->db->where('ref_cashoutChannelId', $channel_id);
+          $this->db->where('c_cashoutExternalId', 'portalpulsa');
+          $success = $this->db->update('cashout_external_x_channel', $data_external);
+      } else {
+          $success = $this->Chanel->insert_cashout_chanel($data_external);
+      }
+
+      if ($success) {
          if ($this->input->is_ajax_request()) {
             echo json_encode(['status' => 'success', 'message' => 'Product created successfully']);
          } else {
@@ -210,17 +247,43 @@ class ServiceController extends CI_Controller {
          return;
       }
 
-      $data = array(
-         'c_caption' => $caption,
-         'id' => $description,
+      // Update cashout_channel (caption & description)
+      $cc = $this->db->get_where('cashout_external_x_channel', ['id' => $id])->row();
+      if ($cc && !empty($cc->ref_cashoutChannelId)) {
+          $exists = $this->db->get_where('cashout_channel', ['id' => $cc->ref_cashoutChannelId])->num_rows() > 0;
+          $data_channel = [
+              'c_caption' => $caption,
+              'c_description' => $description
+          ];
+          if (!empty($channelgroup2)) {
+              $data_channel['c_channelGroup2'] = $channelgroup2;
+          }
+          if ($exists) {
+              $this->db->where('id', $cc->ref_cashoutChannelId);
+              $this->db->update('cashout_channel', $data_channel);
+          } else {
+              $data_channel['id'] = $cc->ref_cashoutChannelId;
+              $data_channel['c_channelGroup'] = $cc->c_cashoutChannelGroup;
+              $data_channel['c_channelGroup2'] = $cc->c_cashoutChannelGroup2;
+              $data_channel['c_externalIdDefault'] = $cc->c_cashoutExternalId;
+              $data_channel['c_feeType'] = $cc->c_feeType;
+              $data_channel['c_fee'] = 0;
+              $data_channel['c_amountMin'] = 0;
+              $data_channel['c_amountMax'] = 0;
+              $this->db->insert('cashout_channel', $data_channel);
+          }
+      }
+
+      // Update cashout_external_x_channel (fee)
+      $data_external = array(
          'c_fee' => $price
       );
 
       if (!empty($channelgroup2)) {
-         $data['c_cashoutChannelGroup2'] = $channelgroup2;
+         $data_external['c_cashoutChannelGroup2'] = $channelgroup2;
       }
 
-      if ($this->Chanel->update_cashout_chanel($id, $data)) {
+      if ($this->Chanel->update_cashout_chanel($id, $data_external)) {
          if ($this->input->is_ajax_request()) {
             echo json_encode(['status' => 'success', 'message' => 'Product updated successfully']);
          } else {
