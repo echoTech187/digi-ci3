@@ -184,7 +184,7 @@ class Chanel extends CI_Model {
         return $this->db->query($query, array((int)$start, (int)$limit))->result();
     } 
     public function get_cashout_chanel_group(){
-        $query = "SELECT c_cashoutChannelGroup as c_channelGroup FROM cashout_external_x_channel GROUP BY c_cashoutChannelGroup";
+        $query = "SELECT c_cashoutChannelGroup as c_channelGroup FROM cashout_external_x_channel WHERE c_cashoutChannelGroup IS NOT NULL AND c_cashoutChannelGroup != '' GROUP BY c_cashoutChannelGroup";
         return $this->db->query($query)->result();
     }
     public function get_cashout_chanel_id(){
@@ -539,6 +539,9 @@ class Chanel extends CI_Model {
         $this->load->library('datatables');
 
         $where = [];
+        if ($this->input->post('merchant_id')) {
+            $where['cxm.ref_merchantId'] = $this->input->post('merchant_id');
+        }
         if ($this->input->post('channel_group')) {
             $where['cxm.c_cashinChannelGroup'] = $this->input->post('channel_group');
         }
@@ -577,6 +580,9 @@ class Chanel extends CI_Model {
         $this->load->library('datatables');
 
         $where = [];
+        if ($this->input->post('merchant_id')) {
+            $where['cxm.ref_merchantId'] = $this->input->post('merchant_id');
+        }
         if ($this->input->post('channel_group')) {
             $where['cxm.c_cashoutChannelGroup'] = $this->input->post('channel_group');
         }

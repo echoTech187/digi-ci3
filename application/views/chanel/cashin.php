@@ -74,7 +74,7 @@
 
                         <div class="dt-more-panel-body">
                             <!-- Channel Group -->
-                            <div class="dt-more-field mb-3">
+                            <div class="dt-more-field">
                                 <label class="dt-more-label"><i class="fas fa-layer-group mr-1 mr-2"></i> Channel Group</label>
                                 <select id="filter_channel_group" class="dt-more-select filter-select">
                                     <option value="">All Groups</option>
@@ -85,7 +85,7 @@
                             </div>
 
                             <!-- External ID Default -->
-                            <div class="dt-more-field mb-3">
+                            <div class="dt-more-field">
                                 <label class="dt-more-label"><i class="fas fa-server mr-1 mr-2"></i> External ID Default</label>
                                 <select id="filter_external_id" class="dt-more-select filter-select">
                                     <option value="">All External IDs</option>

@@ -78,8 +78,19 @@
                         </div>
 
                         <div class="dt-more-panel-body">
+                            <!-- Merchant -->
+                            <div class="dt-more-field">
+                                <label class="dt-more-label"><i class="fas fa-store mr-1 mr-2"></i> Merchant</label>
+                                <select id="filter_merchant" class="dt-more-select filter-select">
+                                    <option value="">All Merchants</option>
+                                    <?php foreach ($merchants as $m): ?>
+                                        <option value="<?= $m->id ?>"><?= $m->c_name ?> (ID: <?= $m->id ?>)</option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+
                             <!-- Channel Group -->
-                            <div class="dt-more-field mb-3">
+                            <div class="dt-more-field">
                                 <label class="dt-more-label"><i class="fas fa-layer-group mr-1 mr-2"></i> Channel Group</label>
                                 <select id="filter_channel_group" class="dt-more-select filter-select">
                                     <option value="">All Groups</option>
@@ -90,7 +101,7 @@
                             </div>
 
                             <!-- Provider -->
-                            <div class="dt-more-field mb-3">
+                            <div class="dt-more-field">
                                 <label class="dt-more-label"><i class="fas fa-server mr-1 mr-2"></i> External ID Default</label>
                                 <select id="filter_provider" class="dt-more-select filter-select">
                                     <option value="">All External IDs</option>
@@ -101,7 +112,7 @@
                             </div>
                             
                             <!-- Channel ID -->
-                            <div class="dt-more-field mb-3">
+                            <div class="dt-more-field">
                                 <label class="dt-more-label"><i class="fas fa-hashtag mr-1 mr-2"></i> Channel ID</label>
                                 <select id="filter_channel_id" class="dt-more-select filter-select">
                                     <option value="">All Channel IDs</option>
@@ -111,7 +122,7 @@
                                 </select>
                             </div>
                             <!-- Status -->
-                            <div class="dt-more-field mb-3">
+                            <div class="dt-more-field">
                                 <label class="dt-more-label"><i class="fas fa-info-circle mr-1 mr-2"></i> Status</label>
                                 <select id="filter_status" class="dt-more-select filter-select">
                                     <option value="">All Statuses</option>
@@ -231,7 +242,7 @@
                     <div id="merchantSelectGroup" class="mb-3" style="display: none;">
                         <label class="form-label small fw-bold text-muted">Select Merchant</label>
                         <select class="form-control select2" name="ref_merchantId" id="global_merchant">
-                            <option value="" selected disabled>Select merchant</option>
+                            <option value="">Select merchant</option>
                             <?php foreach ($merchants as $m): ?>
                                 <option value="<?= $m->id ?>"><?= $m->c_name ?> (ID: <?= $m->id ?>)</option>
                             <?php endforeach; ?>
@@ -247,7 +258,7 @@
                             <div class="mb-3">
                                 <label class="form-label smaller fw-bold text-muted mb-1">Channel Group</label>
                                 <select class="form-control select2" name="current_group" id="global_current_group" required>
-                                    <option value="" selected disabled>Select group</option>
+                                    <option value="">Select group</option>
                                     <?php foreach ($channel_groups as $chg): ?>
                                         <option value="<?= $chg->c_channelGroup ?>"><?= $chg->c_channelGroup ?></option>
                                     <?php endforeach; ?>
@@ -255,8 +266,8 @@
                             </div>
                             <div class="mb-3">
                                 <label class="form-label smaller fw-bold text-muted mb-1">External ID Default (Optional)</label>
-                                <select class="form-control select2" name="current_externalId" id="global_current_external">
-                                    <option value="" selected>All External IDs</option>
+                                <select class="form-control select2" name="current_externalId" id="global_current_external" disabled>
+                                    <option value="">All External IDs</option>
                                     <?php foreach ($channel_external_id_defaults as $ecd): ?>
                                         <option value="<?= $ecd->c_externalIdDefault ?>"><?= $ecd->c_externalIdDefault ?></option>
                                     <?php endforeach; ?>
@@ -264,8 +275,8 @@
                             </div>
                             <div class="mb-0">
                                 <label class="form-label smaller fw-bold text-muted mb-1">Specific Channel ID (Optional)</label>
-                                <select class="form-control select2" name="current_cashinChannelId" id="global_current_channel">
-                                    <option value="" selected>All Channel IDs</option>
+                                <select class="form-control select2" name="current_cashinChannelId" id="global_current_channel" disabled>
+                                    <option value="">All Channel IDs</option>
                                 </select>
                             </div>
                         </div>
@@ -279,7 +290,7 @@
                             <div class="mb-3">
                                 <label class="form-label smaller fw-bold text-muted mb-1">New Channel Group</label>
                                 <select class="form-control select2" name="new_group" id="global_new_group" required>
-                                    <option value="" selected disabled>Select group</option>
+                                    <option value="">Select group</option>
                                     <?php foreach ($channel_groups as $chg): ?>
                                         <option value="<?= $chg->c_channelGroup ?>"><?= $chg->c_channelGroup ?></option>
                                     <?php endforeach; ?>
@@ -287,8 +298,8 @@
                             </div>
                             <div class="mb-3">
                                 <label class="form-label smaller fw-bold text-muted mb-1">New External ID Default (Optional)</label>
-                                <select class="form-control select2" name="new_externalId" id="global_new_external">
-                                    <option value="" selected>Don't Update (Keep Original)</option>
+                                <select class="form-control select2" name="new_externalId" id="global_new_external" disabled>
+                                    <option value="">Don't Update (Keep Original)</option>
                                     <?php foreach ($channel_external_id_defaults as $ecd): ?>
                                         <option value="<?= $ecd->c_externalIdDefault ?>"><?= $ecd->c_externalIdDefault ?></option>
                                     <?php endforeach; ?>
@@ -296,8 +307,8 @@
                             </div>
                             <div class="mb-0">
                                 <label class="form-label smaller fw-bold text-muted mb-1">New Specific Channel ID (Optional)</label>
-                                <select class="form-control select2" name="new_cashinChannelId" id="global_new_channel">
-                                    <option value="" selected>Don't Update (Keep Original)</option>
+                                <select class="form-control select2" name="new_cashinChannelId" id="global_new_channel" disabled>
+                                    <option value="">Don't Update (Keep Original)</option>
                                 </select>
                             </div>
                         </div>
@@ -431,6 +442,7 @@ $(document).ready(function() {
                 if (csrfName && csrfHash) {
                     d[csrfName] = csrfHash;
                 }
+                d.merchant_id = $('#filter_merchant').val();
                 d.channel_group = $('#filter_channel_group').val();
                 d.channel_id = $('#filter_channel_id').val();
                 d.provider = $('#filter_provider').val();
@@ -488,7 +500,7 @@ $(document).ready(function() {
             dataType: "json",
             success: function(data) {
                 // Update current group
-                let groupOptions = '<option value="" selected disabled>Select group</option>';
+                let groupOptions = '<option value="">Select group</option>';
                 data.groups.forEach(function(item) {
                     groupOptions += `<option value="${item}">${item}</option>`;
                 });
@@ -507,6 +519,11 @@ $(document).ready(function() {
     // Dynamic population for Current Configuration
     $('#global_current_group').on('change', function() {
         const group = $(this).val();
+        if (!group) {
+            $('#global_current_external').val('').prop('disabled', true).trigger('change.select2');
+            $('#global_current_channel').val('').prop('disabled', true).trigger('change.select2');
+            return;
+        }
         $('#global_current_external').val('').trigger('change.select2');
         $('#global_current_channel').val('').trigger('change.select2');
         fetchCurrentConfigOptions(group, '', true);
@@ -515,6 +532,10 @@ $(document).ready(function() {
     $('#global_current_external').on('change', function() {
         const group = $('#global_current_group').val();
         const external_id = $(this).val();
+        if (!external_id) {
+            $('#global_current_channel').val('').prop('disabled', true).trigger('change.select2');
+            return;
+        }
         $('#global_current_channel').val('').trigger('change.select2');
         fetchCurrentConfigOptions(group, external_id, false);
     });
@@ -526,8 +547,10 @@ $(document).ready(function() {
 
         if (updateProvider) {
             $('#global_current_external').prop('disabled', true).html('<option value="">Loading...</option>').trigger('change.select2');
+            $('#global_current_channel').prop('disabled', true).html('<option value="">All Channel IDs</option>').trigger('change.select2');
+        } else {
+            $('#global_current_channel').prop('disabled', true).html('<option value="">Loading...</option>').trigger('change.select2');
         }
-        $('#global_current_channel').prop('disabled', true).html('<option value="">Loading...</option>').trigger('change.select2');
 
         $.ajax({
             url: "<?= base_url('external/cashin/get-filter-options') ?>",
@@ -536,22 +559,25 @@ $(document).ready(function() {
             dataType: "json",
             success: function(data) {
                 if (updateProvider) {
-                    let providerOptions = '<option value="" selected>All External IDs</option>';
+                    let providerOptions = '<option value="">All External IDs</option>';
                     data.providers.forEach(function(item) {
                         providerOptions += `<option value="${item}">${item}</option>`;
                     });
                     $('#global_current_external').html(providerOptions).prop('disabled', false).trigger('change.select2');
+                } else {
+                    let channelOptions = '<option value="">All Channel IDs</option>';
+                    data.channels.forEach(function(item) {
+                        channelOptions += `<option value="${item}">${item}</option>`;
+                    });
+                    $('#global_current_channel').html(channelOptions).prop('disabled', false).trigger('change.select2');
                 }
-
-                let channelOptions = '<option value="" selected>All Channel IDs</option>';
-                data.channels.forEach(function(item) {
-                    channelOptions += `<option value="${item}">${item}</option>`;
-                });
-                $('#global_current_channel').html(channelOptions).prop('disabled', false).trigger('change.select2');
             },
             error: function() {
-                if (updateProvider) $('#global_current_external').prop('disabled', false).html('<option value="" selected>All External IDs</option>').trigger('change.select2');
-                $('#global_current_channel').prop('disabled', false).html('<option value="" selected>All Channel IDs</option>').trigger('change.select2');
+                if (updateProvider) {
+                    $('#global_current_external').prop('disabled', false).html('<option value="">All External IDs</option>').trigger('change.select2');
+                } else {
+                    $('#global_current_channel').prop('disabled', false).html('<option value="">All Channel IDs</option>').trigger('change.select2');
+                }
             }
         });
     }
@@ -559,6 +585,11 @@ $(document).ready(function() {
     // Dynamic population for New Configuration
     $('#global_new_group').on('change', function() {
         const group = $(this).val();
+        if (!group) {
+            $('#global_new_external').val('').prop('disabled', true).trigger('change.select2');
+            $('#global_new_channel').val('').prop('disabled', true).trigger('change.select2');
+            return;
+        }
         $('#global_new_external').val('').trigger('change.select2');
         $('#global_new_channel').val('').trigger('change.select2');
         fetchNewConfigOptions(group, '', true);
@@ -567,6 +598,10 @@ $(document).ready(function() {
     $('#global_new_external').on('change', function() {
         const group = $('#global_new_group').val();
         const external_id = $(this).val();
+        if (!external_id) {
+            $('#global_new_channel').val('').prop('disabled', true).trigger('change.select2');
+            return;
+        }
         $('#global_new_channel').val('').trigger('change.select2');
         fetchNewConfigOptions(group, external_id, false);
     });
@@ -578,8 +613,10 @@ $(document).ready(function() {
 
         if (updateProvider) {
             $('#global_new_external').prop('disabled', true).html('<option value="">Loading...</option>').trigger('change.select2');
+            $('#global_new_channel').prop('disabled', true).html('<option value="">Don\'t Update (Keep Original)</option>').trigger('change.select2');
+        } else {
+            $('#global_new_channel').prop('disabled', true).html('<option value="">Loading...</option>').trigger('change.select2');
         }
-        $('#global_new_channel').prop('disabled', true).html('<option value="">Loading...</option>').trigger('change.select2');
 
         $.ajax({
             url: "<?= base_url('external/cashin/get-filter-options') ?>",
@@ -588,22 +625,25 @@ $(document).ready(function() {
             dataType: "json",
             success: function(data) {
                 if (updateProvider) {
-                    let providerOptions = '<option value="" selected>Don\'t Update (Keep Original)</option>';
+                    let providerOptions = '<option value="">Don\'t Update (Keep Original)</option>';
                     data.providers.forEach(function(item) {
                         providerOptions += `<option value="${item}">${item}</option>`;
                     });
                     $('#global_new_external').html(providerOptions).prop('disabled', false).trigger('change.select2');
+                } else {
+                    let channelOptions = '<option value="">Don\'t Update (Keep Original)</option>';
+                    data.channels.forEach(function(item) {
+                        channelOptions += `<option value="${item}">${item}</option>`;
+                    });
+                    $('#global_new_channel').html(channelOptions).prop('disabled', false).trigger('change.select2');
                 }
-
-                let channelOptions = '<option value="" selected>Don\'t Update (Keep Original)</option>';
-                data.channels.forEach(function(item) {
-                    channelOptions += `<option value="${item}">${item}</option>`;
-                });
-                $('#global_new_channel').html(channelOptions).prop('disabled', false).trigger('change.select2');
             },
             error: function() {
-                if (updateProvider) $('#global_new_external').prop('disabled', false).html('<option value="" selected>Don\'t Update (Keep Original)</option>').trigger('change.select2');
-                $('#global_new_channel').prop('disabled', false).html('<option value="" selected>Don\'t Update (Keep Original)</option>').trigger('change.select2');
+                if (updateProvider) {
+                    $('#global_new_external').prop('disabled', false).html('<option value="">Don\'t Update (Keep Original)</option>').trigger('change.select2');
+                } else {
+                    $('#global_new_channel').prop('disabled', false).html('<option value="">Don\'t Update (Keep Original)</option>').trigger('change.select2');
+                }
             }
         });
     }

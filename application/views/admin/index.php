@@ -67,7 +67,7 @@
 
                         <div class="dt-more-panel-body">
                             <!-- Role -->
-                            <div class="dt-more-field mb-3">
+                            <div class="dt-more-field">
                                 <label class="dt-more-label"><i class="fas fa-user-shield mr-1 mr-2"></i> Role</label>
                                 <select id="filter_role" class="dt-more-select filter-select">
                                     <option value="">All Roles</option>
@@ -78,7 +78,7 @@
                             </div>
 
                             <!-- Status -->
-                            <div class="dt-more-field mb-3">
+                            <div class="dt-more-field">
                                 <label class="dt-more-label"><i class="fas fa-info-circle mr-1 mr-2"></i> Status</label>
                                 <select id="filter_status" class="dt-more-select filter-select">
                                     <option value="">All Statuses</option>

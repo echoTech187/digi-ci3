@@ -54,9 +54,6 @@
     <!-- Custom scripts for all pages-->
     <script src="<?= base_url('assets/'); ?>js/sb-admin-2.min.js"></script>
 
-    <!-- Page level custom scripts -->
-    <script src="<?= base_url('assets/'); ?>js/demo/datatables-demo.js"></script>
-
     <!-- input formatter -->
     <script src="<?= base_url('assets/js/input-formatter.js') ?>"></script>
 

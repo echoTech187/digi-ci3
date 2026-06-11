@@ -199,6 +199,11 @@
     $(document).ready(function() {
         $('#c_cashoutChannelGroup').on('change', function() {
             const group = $(this).val();
+            if (!group) {
+                $('#c_externalIdDefault').val('').prop('disabled', true).trigger('change.select2');
+                $('#ref_cashoutChannelId').val('').prop('disabled', true).trigger('change.select2');
+                return;
+            }
             $('#c_externalIdDefault').val('').trigger('change.select2');
             $('#ref_cashoutChannelId').val('').trigger('change.select2');
             fetchOptions(group, '', true);
@@ -207,6 +212,10 @@
         $('#c_externalIdDefault').on('change', function() {
             const group = $('#c_cashoutChannelGroup').val();
             const external_id = $(this).val();
+            if (!external_id) {
+                $('#ref_cashoutChannelId').val('').prop('disabled', true).trigger('change.select2');
+                return;
+            }
             $('#ref_cashoutChannelId').val('').trigger('change.select2');
             fetchOptions(group, external_id, false);
         });
@@ -219,8 +228,10 @@
 
             if (updateProvider) {
                 $('#c_externalIdDefault').prop('disabled', true).html('<option value="">Loading...</option>').trigger('change.select2');
+                $('#ref_cashoutChannelId').prop('disabled', true).html('<option value="">Select channel ID</option>').trigger('change.select2');
+            } else {
+                $('#ref_cashoutChannelId').prop('disabled', true).html('<option value="">Loading...</option>').trigger('change.select2');
             }
-            $('#ref_cashoutChannelId').prop('disabled', true).html('<option value="">Loading...</option>').trigger('change.select2');
 
             $.ajax({
                 url: "<?= base_url('external/cashout/get-filter-options') ?>",
@@ -234,17 +245,20 @@
                             providerOptions += `<option value="${item}">${item}</option>`;
                         });
                         $('#c_externalIdDefault').html(providerOptions).prop('disabled', false).trigger('change.select2');
+                    } else {
+                        let channelOptions = '<option value="">Select channel ID</option>';
+                        data.channels.forEach(function(item) {
+                            channelOptions += `<option value="${item}">${item}</option>`;
+                        });
+                        $('#ref_cashoutChannelId').html(channelOptions).prop('disabled', false).trigger('change.select2');
                     }
-
-                    let channelOptions = '<option value="">Select channel ID</option>';
-                    data.channels.forEach(function(item) {
-                        channelOptions += `<option value="${item}">${item}</option>`;
-                    });
-                    $('#ref_cashoutChannelId').html(channelOptions).prop('disabled', false).trigger('change.select2');
                 },
                 error: function() {
-                    if (updateProvider) $('#c_externalIdDefault').prop('disabled', false).html('<option value="">Select external ID</option>').trigger('change.select2');
-                    $('#ref_cashoutChannelId').prop('disabled', false).html('<option value="">Select channel ID</option>').trigger('change.select2');
+                    if (updateProvider) {
+                        $('#c_externalIdDefault').prop('disabled', false).html('<option value="">Select external ID</option>').trigger('change.select2');
+                    } else {
+                        $('#ref_cashoutChannelId').prop('disabled', false).html('<option value="">Select channel ID</option>').trigger('change.select2');
+                    }
                 }
             });
         }
