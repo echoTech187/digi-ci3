@@ -253,8 +253,8 @@ class History extends CI_Model {
             $dt->where('cpp.ref_merchantId', $search_merchant);
         }
         
-        // Force display only Paid/Success/Settlement status
-        $dt->where("cpp.c_status IN ('Paid', 'Success', 'SUCCESS', 'PAID', 'Settlement', 'SETTLEMENT', 'paid', 'success', 'settlement')", NULL, FALSE);
+        // Force display only Paid/Success status
+        $dt->where("cpp.c_status IN ('Paid', 'Success', 'SUCCESS', 'PAID', 'paid', 'success')", NULL, FALSE);
 
         if ($search_status) {
             $dt->where('cpp.c_status', $search_status);
