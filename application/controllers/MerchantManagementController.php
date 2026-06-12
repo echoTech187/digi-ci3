@@ -27,8 +27,8 @@ class MerchantManagementController extends CI_Controller
       // Sinkronisasi variabel global untuk URL hit
       global $internalUrlHit;
       global $externalUrlHit;
-      $this->internalUrlHit = $this->config->item('internal_url_hit') ?? $internalUrlHit;
-      $this->externalUrlHit = $this->config->item('external_url_hit') ?? $externalUrlHit;
+      $this->internalUrlHit = $internalUrlHit;
+      $this->externalUrlHit = $externalUrlHit;
    }
 
    public function merchant()

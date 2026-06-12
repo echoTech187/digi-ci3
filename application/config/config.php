@@ -3,9 +3,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 /* |-------------------------------------------------------------------------- | Base Site URL |-------------------------------------------------------------------------- | | URL to your CodeIgniter root. Typically this will be your base URL, | WITH a trailing slash: | |	http://example.com/ | | WARNING: You MUST set this value! | | If it is not set, then CodeIgniter will try guess the protocol and path | your installation, but due to security concerns the hostname will be set | to $_SERVER['SERVER_ADDR'] if available, or localhost otherwise. | The auto-detection mechanism exists only for convenience during | development and MUST NOT be used in production! | | If you need to allow multiple domains, remember that this file is still | a PHP script and you can easily do that on your own. | */
 $config['base_url'] = 'http://' . $_SERVER['HTTP_HOST'] . '/digi-ci3/';
-$config['internal_url_hit'] = 'http://127.0.0.1/gatewayinternal';
-$config['external_url_hit'] = 'http://127.0.0.1/gatewayexternal';
-$config['open_url_hit'] = 'http://127.0.0.1/openapi';
+
 /* |-------------------------------------------------------------------------- | Index File |-------------------------------------------------------------------------- | | Typically this will be your index.php file, unless you've renamed it to | something else. If you are using mod_rewrite to remove the page set this | variable so that it is blank. | */
 $config['index_page'] = '';
 
@@ -111,3 +109,21 @@ $config['rewrite_short_tags'] = FALSE;
 
 /* |-------------------------------------------------------------------------- | Reverse Proxy IPs |-------------------------------------------------------------------------- | | If your server is behind a reverse proxy, you must whitelist the proxy | IP addresses from which CodeIgniter should trust headers such as | HTTP_X_FORWARDED_FOR and HTTP_CLIENT_IP in order to properly identify | the visitor's IP address. | | You can use both an array or a comma-separated list of proxy addresses, | as well as specifying whole subnets. Here are a few examples: | | Comma-separated:	'10.0.1.200,192.168.5.0/24' | Array:		array('10.0.1.200', '192.168.5.0/24') */
 $config['proxy_ips'] = '192.168.0.1,192.168.200.1';
+
+global $whitelistIp;
+$whitelistIp = ['127.0.0.1', '::1'];
+
+global $internalUrlHit;
+$internalUrlHit = 'http://127.0.0.1/gatewayinternal';
+
+global $externalUrlHit;
+$externalUrlHit = 'http://127.0.0.1/gatewayexternal';
+
+global $openUrlHit;
+$openUrlHit = 'http://127.0.0.1/openapi';
+
+global $stateProgram;
+$stateProgram = 'Development';
+
+global $base_url;
+$base_url = 'http://127.0.0.1/digi-ci3';

@@ -135,7 +135,7 @@
                         </div>
                     </div>
                     <h6 class="font-weight-bold mb-1" style="opacity: 0.8; font-size: 11px; text-transform: uppercase; letter-spacing: 1px;">Ecosystem Partners</h6>
-                    <h3 class="font-weight-bold mb-3" style="font-size: 1.6rem; letter-spacing: -0.5px;"><span id="stat_merchant_count"><span class="skeleton-box" style="width: 80px;"></span></span> Accounts</h3>
+                    <h3 class="font-weight-bold mb-3 d-flex align-items-baseline" style="font-size: 1.4rem; letter-spacing: -0.5px; white-space: nowrap; gap: 10px;"><span id="stat_merchant_count"><span class="skeleton-box" style="width: 80px;"></span></span> <span>Accounts</span></h3>
                     <div class="d-flex align-items-center mt-auto">
                         <div class="px-2 py-1 rounded-pill d-flex align-items-center" style="background: rgba(255,255,255,0.15); font-size: 10px;">
                             <i class="fas fa-user-check mr-1" style="font-size: 8px;"></i> All Active

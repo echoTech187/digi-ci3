@@ -137,7 +137,7 @@
                     </a>
 
                     <!-- Dropdown - User Information -->
-                    <div class="dropdown-menu dropdown-menu-right shadow-lg border-0 animated--grow-in mt-3 p-0 overflow-hidden" aria-labelledby="userDropdown" style="border-radius: 20px; width: 280px; background: var(--bg-glass); backdrop-filter: blur(10px);">
+                    <div class="dropdown-menu dropdown-menu-right shadow-lg border-0 animated--grow-in mt-3 p-0 overflow-hidden" aria-labelledby="userDropdown" style="border-radius: 20px; width: 280px; backdrop-filter: blur(10px);">
                         <!-- Header Section -->
                         <div class="px-4 py-4 border-bottom bg-light-subtle d-flex align-items-center">
                             <div class="mr-3">
