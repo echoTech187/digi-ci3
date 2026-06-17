@@ -216,7 +216,7 @@
                             <div class="mb-3"><label class="dt-more-label mb-2">Description</label><textarea class="dt-more-input" name="description" rows="2" placeholder="Detail channel configuration..."></textarea></div>
                             <div class="row mb-3">
                                 <div class="col-md-6 mb-3 mb-md-0"><label class="dt-more-label mb-2">External Default</label><input type="text" class="dt-more-input" required name="externaldefault" placeholder="External provider key"></div>
-                                <div class="col-md-6"><label class="dt-more-label mb-2">Fee Type</label><select class="dt-more-select" required name="feetype"><option value="" selected disabled>Select fee type</option><option value="fixed">Fixed</option><option value="Percentage">Percentage</option></select></div>
+                                <div class="col-md-6"><label class="dt-more-label mb-2">Fee Type</label><select class="dt-more-select" required name="feetype"><option value="" selected disabled>Select fee type</option><option value="Fixed">Fixed</option><option value="Percetange">Percentage</option><option value="Both">Both</option></select></div>
                             </div>
                             <div class="row mb-0">
                                 <div class="col-md-4 mb-3 mb-md-0"><label class="dt-more-label mb-2">Fee Value</label><div class="input-group"><div class="input-group-prepend"><span class="input-group-text border-right-0" style="border-radius:8px 0 0 8px;font-size:12px;">Rp</span></div><input type="text" class="input-rupiah form-control" class="dt-more-input h-auto" required name="fee" style="border-radius:0 8px 8px 0;"></div></div>
@@ -276,7 +276,7 @@
                             <div class="mb-3"><label class="dt-more-label mb-2">Description</label><textarea class="dt-more-input" name="description" rows="2" id="edit_description"></textarea></div>
                             <div class="row mb-3">
                                 <div class="col-md-6 mb-3 mb-md-0"><label class="dt-more-label mb-2">External Default</label><input type="text" class="dt-more-input" required name="externaldefault" id="edit_externaldefault"></div>
-                                <div class="col-md-6"><label class="dt-more-label mb-2">Fee Type</label><select class="dt-more-select" required name="feetype" id="edit_feetype"><option value="" disabled>Select fee type</option><option value="fixed">Fixed</option><option value="Percentage">Percentage</option></select></div>
+                                <div class="col-md-6"><label class="dt-more-label mb-2">Fee Type</label><select class="dt-more-select" required name="feetype" id="edit_feetype"><option value="" disabled>Select fee type</option><option value="Fixed">Fixed</option><option value="Percetange">Percentage</option><option value="Both">Both</option></select></div>
                             </div>
                             <div class="row mb-0">
                                 <div class="col-md-4 mb-3 mb-md-0"><label class="dt-more-label mb-2">Fee Value</label><div class="input-group"><div class="input-group-prepend"><span class="input-group-text border-right-0" style="border-radius:8px 0 0 8px;font-size:12px;">Rp</span></div><input type="text" class="input-rupiah form-control" class="dt-more-input h-auto" required name="fee" id="edit_fee" style="border-radius:0 8px 8px 0;"></div></div>
@@ -391,12 +391,15 @@
             
             var ft = ($(this).data('feetype') || '').toLowerCase();
             if (ft === 'fixed') {
-                $('#edit_feetype').val('fixed');
-            } else if (ft === 'percentage') {
-                $('#edit_feetype').val('Percentage');
+                $('#edit_feetype').val('Fixed');
+            } else if (ft === 'percentage' || ft === 'percetange') {
+                $('#edit_feetype').val('Percetange');
+            } else if (ft === 'both') {
+                $('#edit_feetype').val('Both');
             } else {
                 $('#edit_feetype').val('');
             }
+            $('#edit_feetype').trigger('change');
 
             $('#edit_fee').val(Math.floor(parseFloat($(this).data('fee'))));
             $('#edit_amountmin').val(Math.floor(parseFloat($(this).data('min'))));

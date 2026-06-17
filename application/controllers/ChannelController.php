@@ -152,7 +152,7 @@ class ChannelController extends CI_Controller {
    {
       $this->form_validation->set_rules('id', 'Id', 'required');
       $this->form_validation->set_rules('chanelgroup', 'Chanel Group', 'required');
-      $this->form_validation->set_rules('description', 'Description', 'required');
+      $this->form_validation->set_rules('description', 'Description', 'trim|xss_clean');
       $this->form_validation->set_rules('externaldefault', 'External Default', 'required');
       $this->form_validation->set_rules('feetype', 'Fee Type', 'required');
       $this->form_validation->set_rules('fee', 'Fee', 'required|numeric');
@@ -167,7 +167,6 @@ class ChannelController extends CI_Controller {
          $data = array(
             'ref_cashinChannelId' => $this->input->post('id'),
             'c_cashinChannelGroup' => $this->input->post('chanelgroup'),
-            'c_cashinChannelGroup2' => $this->input->post('description'),
             'c_cashinExternalId' => $this->input->post('externaldefault'),
             'c_feeType' => $this->input->post('feetype'),
             'c_fee' => $this->input->post('fee'),
@@ -198,7 +197,7 @@ class ChannelController extends CI_Controller {
    {
       $this->form_validation->set_rules('id', 'Id', 'required');
       $this->form_validation->set_rules('chanelgroup', 'Chanel Group', 'required');
-      $this->form_validation->set_rules('description', 'Description', 'required');
+      $this->form_validation->set_rules('description', 'Description', 'trim|xss_clean');
       $this->form_validation->set_rules('externaldefault', 'External Default', 'required');
       $this->form_validation->set_rules('feetype', 'Fee Type', 'required');
       $this->form_validation->set_rules('fee', 'Fee', 'required|numeric');
@@ -242,7 +241,7 @@ class ChannelController extends CI_Controller {
    {
       $this->form_validation->set_rules('id', 'Id', 'required');
       $this->form_validation->set_rules('chanelgroup', 'Chanel Group', 'required');
-      $this->form_validation->set_rules('description', 'Description', 'required');
+      $this->form_validation->set_rules('description', 'Description', 'trim|xss_clean');
       $this->form_validation->set_rules('externaldefault', 'External Default', 'required');
       $this->form_validation->set_rules('feetype', 'Fee Type', 'required');
       $this->form_validation->set_rules('fee', 'Fee', 'required|numeric');
@@ -258,7 +257,6 @@ class ChannelController extends CI_Controller {
          $data = array(
             'ref_cashinChannelId' => $this->input->post('id'),
             'c_cashinChannelGroup' => $this->input->post('chanelgroup'),
-            'c_cashinChannelGroup2' => $this->input->post('description'),
             'c_cashinExternalId' => $this->input->post('externaldefault'),
             'c_feeType' => $this->input->post('feetype'),
             'c_fee' => $this->input->post('fee'),
@@ -289,7 +287,7 @@ class ChannelController extends CI_Controller {
    {
       $this->form_validation->set_rules('id', 'Id', 'required');
       $this->form_validation->set_rules('chanelgroup', 'Chanel Group', 'required');
-      $this->form_validation->set_rules('description', 'Description', 'required');
+      $this->form_validation->set_rules('description', 'Description', 'trim|xss_clean');
       $this->form_validation->set_rules('externaldefault', 'External Default', 'required');
       $this->form_validation->set_rules('feetype', 'Fee Type', 'required');
       $this->form_validation->set_rules('fee', 'Fee', 'required|numeric');

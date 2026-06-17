@@ -216,19 +216,19 @@ class Chanel extends CI_Model {
         return $this->db->get()->result();
     }
     public function createCashinChannel($data) {
-        $success = $this->db->insert('cashin_channel_x_merchant', $data);
+        $success = $this->db->insert('cashin_external_x_channel', $data);
         $error = $this->db->error();
         return $success ? true : $error;
     }
     public function updateCashinChannel($id, $data) {
         $this->db->where('id', $id);
-        $success = $this->db->update('cashin_channel_x_merchant', $data);
+        $success = $this->db->update('cashin_external_x_channel', $data);
         $error = $this->db->error();
         return $success ? true : $error;
     }
     public function deleteCashinChannel($id) {
         $this->db->where('id', $id);
-        $success = $this->db->delete('cashin_channel_x_merchant');
+        $success = $this->db->delete('cashin_external_x_channel');
         $error = $this->db->error();
         return $success ? true : $error;
     }

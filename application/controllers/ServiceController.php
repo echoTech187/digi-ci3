@@ -15,9 +15,9 @@ class ServiceController extends CI_Controller {
     private function _render_product_datatable($where, $view_name, $page_title, $requires_provider = false)
     {
         is_logged_in();
-        $table = 'cashout_external_x_channel cc';
-        $column_order = array(null, 'co.c_caption', 'cc.id', 'cc.c_fee', null);
-        $column_search = array('co.c_caption', 'cc.id', 'cc.c_fee');
+        $table = 'cashout_channel cc';
+        $column_order = array(null, 'cc.c_caption', 'cc.id', 'cc.c_fee', null);
+        $column_search = array('cc.c_caption', 'cc.id', 'cc.c_fee');
         $order = array('cc.id' => 'asc');
 
         if ($this->input->is_ajax_request()) {
@@ -25,7 +25,7 @@ class ServiceController extends CI_Controller {
                 if ($requires_provider) {
                     $provider = $this->input->post('provider');
                     if (!empty($provider)) {
-                        $where["cc.c_cashoutChannelGroup2 LIKE '%" . $this->db->escape_like_str($provider) . "%' ESCAPE '!'"] = NULL;
+                        $where["cc.c_channelGroup2 LIKE '%" . $this->db->escape_like_str($provider) . "%' ESCAPE '!'"] = NULL;
                     }
                 }
                 return $this->Chanel->get_datatables_handler($table, $column_order, $column_search, $order, $where);
@@ -61,57 +61,57 @@ class ServiceController extends CI_Controller {
     }
 
     public function pulsa_reguler() {
-        $where = array('cc.c_cashoutChannelGroup' => 'ppob', "cc.c_cashoutChannelGroup2 LIKE '%pulsa%' ESCAPE '!'" => NULL);
+        $where = array('cc.c_cashoutGroup' => 'ppob', "cc.c_cashoutGroup2 LIKE '%pulsa%' ESCAPE '!'" => NULL);
         $this->_render_product_datatable($where, 'pulsa_reguler', 'Pulsa Reguler', true);
     }
 
     public function paket_data() {
-        $where = array('cc.c_cashoutChannelGroup' => 'ppob', "cc.c_cashoutChannelGroup2 LIKE '%paket_data%' ESCAPE '!'" => NULL);
+        $where = array('cc.c_cashoutGroup' => 'ppob', "cc.c_channelGroup2 LIKE '%paket_data%' ESCAPE '!'" => NULL);
         $this->_render_product_datatable($where, 'paket_data', 'Paket Data', true);
     }
 
     public function token_listrik() {
-        $where = array('cc.c_cashoutChannelGroup2' => 'token_pln');
+        $where = array('cc.c_channelGroup2' => 'token_pln');
         $this->_render_product_datatable($where, 'token_listrik', 'Token Listrik');
     }
 
     public function topupgopay() {
-        $where = array('cc.c_cashoutChannelGroup2' => 'topup_gopay');
+        $where = array('cc.c_channelGroup2' => 'topup_gopay');
         $this->_render_product_datatable($where, 'topup_gopay', 'Top Up Gopay');
     }
 
     public function topupdana() {
-        $where = array('cc.c_cashoutChannelGroup2' => 'topup_dana');
+        $where = array('cc.c_channelGroup2' => 'topup_dana');
         $this->_render_product_datatable($where, 'topup_dana', 'Top Up Dana');
     }
 
     public function topupovo() {
-        $where = array('cc.c_cashoutChannelGroup2' => 'topup_ovo');
+        $where = array('cc.c_channelGroup2' => 'topup_ovo');
         $this->_render_product_datatable($where, 'topup_ovo', 'Top Up Ovo');
     }
 
     public function googleplay() {
-        $where = array('cc.c_cashoutChannelGroup2' => 'google_play');
+        $where = array('cc.c_channelGroup2' => 'google_play');
         $this->_render_product_datatable($where, 'googleplay', 'Google Play');
     }
 
     public function freefire() {
-        $where = array('cc.c_cashoutChannelGroup2' => 'free_fire');
+        $where = array('cc.c_channelGroup2' => 'free_fire');
         $this->_render_product_datatable($where, 'freefire', 'Free Fire');
     }
 
     public function hago() {
-        $where = array('cc.c_cashoutChannelGroup2' => 'hago');
+        $where = array('cc.c_channelGroup2' => 'hago');
         $this->_render_product_datatable($where, 'hago', 'Hago');
     }
 
     public function mobilelegend() {
-        $where = array('cc.c_cashoutChannelGroup2' => 'diamond_mlbb');
+        $where = array('cc.c_channelGroup2' => 'diamond_mlbb');
         $this->_render_product_datatable($where, 'mobilelegend', 'Diamond Mobile Legend');
     }
 
     public function pubgmobile() {
-        $where = array('cc.c_cashoutChannelGroup2' => 'pubg_mobile');
+        $where = array('cc.c_channelGroup2' => 'pubg_mobile');
         $this->_render_product_datatable($where, 'pubgmobile', 'PUBG Mobile');
     }
 
@@ -142,9 +142,25 @@ class ServiceController extends CI_Controller {
       $id = str_replace(' ', '_', $caption);
       $description = $this->input->post('description');
       $price = $this->input->post('price');
-      $channelgroup = $this->input->post('channelgroup');
-      $channelgroup2 = $this->input->post('channelgroup2');
       $name = $this->input->post('name');
+      $channelgroup = $this->input->post('channelgroup') ? $this->input->post('channelgroup') : 'ppob';
+      $channelgroup2 = $this->input->post('channelgroup2');
+      if (empty($channelgroup2) && !empty($name)) {
+          $mapping = [
+              'topupovo' => 'topup_ovo',
+              'topupgopay' => 'topup_gopay',
+              'topupdana' => 'topup_dana',
+              'token_listrik' => 'token_pln',
+              'pubgmobile' => 'pubg_mobile',
+              'mobilelegend' => 'diamond_mlbb',
+              'hago' => 'hago',
+              'googleplay' => 'google_play',
+              'freefire' => 'free_fire',
+          ];
+          if (isset($mapping[$name])) {
+              $channelgroup2 = $mapping[$name];
+          }
+      }
       log_message('error', 'CREATE_PRODUK_POST: ' . json_encode($_POST));
 
       if ($this->form_validation->run() == FALSE) {
@@ -168,42 +184,16 @@ class ServiceController extends CI_Controller {
          'c_caption' => $caption,
          'c_externalIdDefault' => 'portalpulsa',
          'c_feeType' => 'Fixed',
-         'c_fee' => 0,
+         'c_fee' => $price,
          'c_amountMin' => 0,
          'c_amountMax' => 0
       );
       // Handle potential duplicates gracefully by updating caption/desc
       $exists = $this->db->get_where('cashout_channel', ['id' => $channel_id])->num_rows() > 0;
       if ($exists) {
-          $this->db->where('id', $channel_id)->update('cashout_channel', $data_channel);
+          $success = $this->db->where('id', $channel_id)->update('cashout_channel', $data_channel);
       } else {
-          $this->db->insert('cashout_channel', $data_channel);
-      }
-
-      // Insert or Update the pricing in cashout_external_x_channel
-      $data_external = array(
-         'c_cashoutExternalId' => 'portalpulsa',
-         'c_cashoutChannelGroup' => $channelgroup,
-         'c_cashoutChannelGroup2' => $channelgroup2,
-         'ref_cashoutChannelId' => $channel_id,
-         'c_feeType' => 'Fixed',
-         'c_fee' => $price,
-         'c_amountMin' => 0,
-         'c_amountMax' => 0,
-         'c_status' => 'Active'
-      );
-
-      $pricing_exists = $this->db->get_where('cashout_external_x_channel', [
-          'ref_cashoutChannelId' => $channel_id,
-          'c_cashoutExternalId' => 'portalpulsa'
-      ])->num_rows() > 0;
-
-      if ($pricing_exists) {
-          $this->db->where('ref_cashoutChannelId', $channel_id);
-          $this->db->where('c_cashoutExternalId', 'portalpulsa');
-          $success = $this->db->update('cashout_external_x_channel', $data_external);
-      } else {
-          $success = $this->Chanel->insert_cashout_chanel($data_external);
+          $success= $this->db->insert('cashout_channel', $data_channel);
       }
 
       if ($success) {
@@ -225,54 +215,67 @@ class ServiceController extends CI_Controller {
 
    public function updateProduct()
    {
-      $this->form_validation->set_rules('id', 'Product ID', 'required');
-      $this->form_validation->set_rules('caption', 'Caption', 'required');
-    //   $this->form_validation->set_rules('description', 'Description', 'required');
-      $this->form_validation->set_rules('price', 'Price', 'required|numeric');
+        $this->form_validation->set_rules('id', 'Product ID', 'required');
+        $this->form_validation->set_rules('caption', 'Caption', 'required');
+        //   $this->form_validation->set_rules('description', 'Description', 'required');
+        $this->form_validation->set_rules('price', 'Price', 'required|numeric');
 
-      $id = $this->input->post('id');
-      $caption = $this->input->post('caption');
-      $description = $this->input->post('description');
-      $price = $this->input->post('price');
-      $view_name = $this->input->post('view_name');
-      $channelgroup2 = $this->input->post('channelgroup2');
-
-      if ($this->form_validation->run() == FALSE) {
-         if ($this->input->is_ajax_request()) {
-            echo json_encode(['status' => 'error', 'message' => validation_errors()]);
-         } else {
-            $this->session->set_flashdata('error', validation_errors());
-            redirect($this->_get_route_by_view($view_name));
-         }
-         return;
-      }
-
-      // Update cashout_channel (caption & description)
-      $cc = $this->db->get_where('cashout_external_x_channel', ['id' => $id])->row();
-      if ($cc && !empty($cc->ref_cashoutChannelId)) {
-          $exists = $this->db->get_where('cashout_channel', ['id' => $cc->ref_cashoutChannelId])->num_rows() > 0;
-          $data_channel = [
-              'c_caption' => $caption,
-              'c_description' => $description
+        $id = $this->input->post('id');
+        $caption = $this->input->post('caption');
+        $description = $this->input->post('description');
+        $price = $this->input->post('price');
+        $view_name = $this->input->post('name') ? $this->input->post('name') : $this->input->post('view_name');
+        $channelgroup = $this->input->post('channelgroup') ? $this->input->post('channelgroup') : 'ppob';
+        $channelgroup2 = $this->input->post('channelgroup2');
+        if (empty($channelgroup2) && !empty($view_name)) {
+          $mapping = [
+              'topupovo' => 'topup_ovo',
+              'topupgopay' => 'topup_gopay',
+              'topupdana' => 'topup_dana',
+              'token_listrik' => 'token_pln',
+              'pubgmobile' => 'pubg_mobile',
+              'mobilelegend' => 'diamond_mlbb',
+              'hago' => 'hago',
+              'googleplay' => 'google_play',
+              'freefire' => 'free_fire',
           ];
-          if (!empty($channelgroup2)) {
-              $data_channel['c_channelGroup2'] = $channelgroup2;
+          if (isset($mapping[$name])) {
+              $channelgroup2 = $mapping[$name];
           }
-          if ($exists) {
-              $this->db->where('id', $cc->ref_cashoutChannelId);
-              $this->db->update('cashout_channel', $data_channel);
-          } else {
-              $data_channel['id'] = $cc->ref_cashoutChannelId;
-              $data_channel['c_channelGroup'] = $cc->c_cashoutChannelGroup;
-              $data_channel['c_channelGroup2'] = $cc->c_cashoutChannelGroup2;
-              $data_channel['c_externalIdDefault'] = $cc->c_cashoutExternalId;
-              $data_channel['c_feeType'] = $cc->c_feeType;
-              $data_channel['c_fee'] = 0;
-              $data_channel['c_amountMin'] = 0;
-              $data_channel['c_amountMax'] = 0;
-              $this->db->insert('cashout_channel', $data_channel);
-          }
-      }
+        }
+        if ($this->form_validation->run() == FALSE) {
+            if ($this->input->is_ajax_request()) {
+                echo json_encode(['status' => 'error', 'message' => validation_errors()]);
+            } else {
+                $this->session->set_flashdata('error', validation_errors());
+                redirect($this->_get_route_by_view($view_name));
+            }
+            return;
+        }
+      
+        $exists = $this->db->get_where('cashout_channel', ['id' => $id])->num_rows() > 0;
+        $data_channel = [
+            'c_caption' => $caption,
+            'c_description' => $description,
+            'c_fee' => $price
+        ];
+        if (!empty($channelgroup2)) {
+            $data_channel['c_channelGroup2'] = $channelgroup2;
+        }
+        if ($exists) {
+            $this->db->where('id', $id);
+            $this->db->update('cashout_channel', $data_channel);
+        } else {
+            $data_channel['id'] = $id;
+            $data_channel['c_channelGroup'] = $channelgroup;
+            $data_channel['c_channelGroup2'] = $channelgroup2;
+            $data_channel['c_externalIdDefault'] = 'portalpulsa';
+            $data_channel['c_feeType'] = 'Fixed';
+            $data_channel['c_fee'] = $price;
+            $data_channel['c_amountMin'] = 0;
+            $data_channel['c_amountMax'] = 0;
+            $this->db->insert('cashout_channel', $data_channel);
+        }
 
       // Update cashout_external_x_channel (fee)
       $data_external = array(

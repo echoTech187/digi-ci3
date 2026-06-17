@@ -198,7 +198,9 @@
                     $(form).find('input[type="hidden"]').each(function() {
                         var name = $(this).attr('name') || '';
                         if (!name.toLowerCase().includes('csrf') && name !== 'ref_merchantId') {
-                            $(this).val('');
+                            // Restore original default value attribute if present, otherwise clear
+                            var defaultValue = $(this).attr('value');
+                            $(this).val(defaultValue !== undefined ? defaultValue : '');
                         }
                     });
 

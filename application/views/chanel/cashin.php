@@ -249,9 +249,10 @@
                                 <div class="col-md-6">
                                     <label class="dt-more-label mb-2">Fee Type</label>
                                     <select class="dt-more-select" required name="feetype">
-                                        <option value="" selected disabled>Select fee type</option>
-                                        <option value="fixed">Fixed</option>
-                                        <option value="Percentage">Percentage</option>
+                                        <option value="">Select fee type</option>
+                                        <option value="Fixed">Fixed</option>
+                                        <option value="Percetange">Percentage</option>
+                                        <option value="Both">Both</option>
                                     </select>
                                 </div>
                             </div>
@@ -364,8 +365,9 @@
                                     <label class="dt-more-label mb-2">Fee Type</label>
                                     <select class="dt-more-select" required name="feetype" id="edit_feetype">
                                         <option value="" disabled>Select fee type</option>
-                                        <option value="fixed">Fixed</option>
-                                        <option value="Percentage">Percentage</option>
+                                        <option value="Fixed">Fixed</option>
+                                        <option value="Percetange">Percentage</option>
+                                        <option value="Both">Both</option>
                                     </select>
                                 </div>
                             </div>
@@ -506,13 +508,15 @@
             
             var ft = ($(this).data('feetype') || '').toLowerCase();
             if (ft === 'fixed') {
-                $('#edit_feetype').val('fixed');
-            } else if (ft === 'percentage') {
-                $('#edit_feetype').val('Percentage');
+                $('#edit_feetype').val('Fixed');
+            } else if (ft === 'percentage' || ft === 'percetange') {
+                $('#edit_feetype').val('Percetange');
+            } else if (ft === 'both') {
+                $('#edit_feetype').val('Both');
             } else {
                 $('#edit_feetype').val('');
             }
-
+            $('#edit_feetype').trigger('change');
             $('#edit_fee').val(Math.floor(parseFloat($(this).data('fee'))));
             $('#edit_amountmin').val(Math.floor(parseFloat($(this).data('min'))));
             $('#edit_amountmax').val(Math.floor(parseFloat($(this).data('max'))));

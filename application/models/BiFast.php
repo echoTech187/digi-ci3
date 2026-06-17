@@ -4,7 +4,7 @@ class BiFast extends CI_Model {
 
     // DataTables variables
     var $table = 'cashout_payment_bifast cpb';
-    var $column_order = array(null, 'm.c_name', 'cpb.c_datetime', 'cpb.c_merchantTransactionId', 'c.c_invoiceNo', 'cpb.ref_cashoutChannelId', 'cpb.c_accountNo', 'mab.c_beneficiaryAccountName', 'cpb.c_amount', 'cpb.c_fee', 'cpb.c_status', null, null);
+    var $column_order = array(null, 'm.c_name', 'cpb.c_datetime', 'cpb.c_merchantTransactionId', 'c.c_invoiceNo', 'cpb.ref_cashoutExternalId', 'cpb.ref_cashoutChannelId', 'cpb.c_accountNo', 'mab.c_beneficiaryAccountName', 'cpb.c_amount', 'cpb.c_fee', 'cpb.c_status', null, null);
     var $column_search = array('cpb.id', 'm.c_name', 'cpb.c_merchantTransactionId', 'cpb.c_accountNo', 'mab.c_beneficiaryAccountName');
     private static $cached_total = null;
     var $order = array('cpb.id' => 'desc');
@@ -21,7 +21,7 @@ class BiFast extends CI_Model {
         } else if ($only_ids) {
             $this->db->select("MAX(cpb.id) as id");
         } else {
-            $this->db->select("cpb.id, cpb.c_datetime, cpb.c_merchantTransactionId, cpb.ref_cashoutChannelId, cpb.c_accountNo, cpb.c_amount, cpb.c_fee, cpb.c_status, cpb.ref_merchantId, cpb.ref_cashoutId, m.c_name AS name_merchant, c.c_invoiceNo, mab.c_beneficiaryAccountName,
+            $this->db->select("cpb.id, cpb.c_datetime, cpb.c_merchantTransactionId, cpb.ref_cashoutExternalId, cpb.ref_cashoutChannelId, cpb.c_accountNo, cpb.c_amount, cpb.c_fee, cpb.c_status, cpb.ref_merchantId, cpb.ref_cashoutId, m.c_name AS name_merchant, c.c_invoiceNo, mab.c_beneficiaryAccountName,
                             COALESCE(epb.c_responseBody, egb.c_responseBody) AS c_responseBody");
 
         }
@@ -69,7 +69,7 @@ class BiFast extends CI_Model {
         }
         
         // Force display only Paid/Success status
-        $this->db->where("cpb.c_status IN ('Paid', 'Success', 'SUCCESS', 'PAID','paid', 'success')", NULL, FALSE);
+        // $this->db->where("cpb.c_status IN ('Paid', 'Success', 'SUCCESS', 'PAID','paid', 'success')", NULL, FALSE);
 
         if ($search_status) {
             $this->db->where('cpb.c_status', $search_status);
@@ -78,51 +78,27 @@ class BiFast extends CI_Model {
             $this->db->where('cpb.ref_cashoutChannelId', $search_internal_channel);
         }
         
-        // Handle External Channel and External Reff ID filters
-        if (($search_channel || $search_external_reff) && !$searchValue) {
+        // Handle External Channel filter (independent of Reff ID)
+        if ($search_channel && !$searchValue) {
+            $this->db->where('cpb.ref_cashoutExternalId', $search_channel);
+        }
+
+        // Handle External Reff ID filter
+        if ($search_external_reff && !$searchValue) {
             if ($search_channel == "paylabs") {
-                // Channel selected: paylabs
-                if ($search_external_reff) {
-                    // Channel + Reff ID: join and filter by reff ID
-                    if ($only_ids || $count_only) $this->db->join('external_paylabs_disbursement_transfer_bank epb', 'epb.ref_cashoutPaymentBifastId = cpb.id');
-                    $this->db->where('epb.c_referenceNo', $search_external_reff);
-                } else {
-                    // Channel only: filter by ref_cashoutExternalId
-                    $this->db->where('cpb.ref_cashoutExternalId', $search_channel);
-                }
+                if ($only_ids || $count_only) $this->db->join('external_paylabs_disbursement_transfer_bank epb', 'epb.ref_cashoutPaymentBifastId = cpb.id');
+                $this->db->where('epb.c_referenceNo', $search_external_reff);
             } else if ($search_channel == "gvconnect") {
-                // Channel selected: gvconnect
-                if ($search_external_reff) {
-                    // Channel + Reff ID: join and filter by reff ID
-                    if ($only_ids || $count_only) $this->db->join('external_gvconnect_snap_disbursement_transfer_bank egb', 'egb.ref_cashoutPaymentBifastId = cpb.id');
-                    $this->db->where('egb.c_partnerReferenceNo', $search_external_reff);
-                } else {
-                    // Channel only: filter by ref_cashoutExternalId
-                    $this->db->where('cpb.ref_cashoutExternalId', $search_channel);
-                }
+                if ($only_ids || $count_only) $this->db->join('external_gvconnect_snap_disbursement_transfer_bank egb', 'egb.ref_cashoutPaymentBifastId = cpb.id');
+                $this->db->where('egb.c_partnerReferenceNo', $search_external_reff);
             } else if ($search_channel == "ifp") {
-                // Channel selected: ifp
-                if ($search_external_reff) {
-                    // Channel + Reff ID: join and filter by reff ID
-                    if ($only_ids || $count_only) $this->db->join('external_ifp_bifast_transfer_interbank eif', 'eif.ref_cashoutPaymentBifastId = cpb.id');
-                    $this->db->where('eif.c_referenceNo', $search_external_reff);
-                } else {
-                    // Channel only: filter by ref_cashoutExternalId
-                    $this->db->where('cpb.ref_cashoutExternalId', $search_channel);
-                }
+                if ($only_ids || $count_only) $this->db->join('external_ifp_bifast_transfer_interbank eif', 'eif.ref_cashoutPaymentBifastId = cpb.id');
+                $this->db->where('eif.c_referenceNo', $search_external_reff);
             } else if ($search_channel == "paydgn") {
-                // Channel selected: paydgn
-                if ($search_external_reff) {
-                    // Channel + Reff ID: join and filter by reff ID
-                    if ($only_ids || $count_only) $this->db->join('external_paydgn_disbursement_transfer_bank epd', 'epd.ref_cashoutPaymentBifastId = cpb.id');
-                    $this->db->where('epd.c_refId', $search_external_reff);
-                } else {
-                    // Channel only: filter by ref_cashoutExternalId
-                    $this->db->where('cpb.ref_cashoutExternalId', $search_channel);
-                }
-            } else if ($search_external_reff) {
-                // Reff ID only without channel: should not happen (handled in controller with alert)
-                // But if it reaches here, search in all tables with OR
+                if ($only_ids || $count_only) $this->db->join('external_paydgn_disbursement_transfer_bank epd', 'epd.ref_cashoutPaymentBifastId = cpb.id');
+                $this->db->where('epd.c_refId', $search_external_reff);
+            } else {
+                // If channel is unknown or no channel is selected, search in all tables
                 if ($only_ids || $count_only) {
                     $this->db->join('external_paylabs_disbursement_transfer_bank epb', 'epb.ref_cashoutPaymentBifastId = cpb.id', 'left');
                     $this->db->join('external_gvconnect_snap_disbursement_transfer_bank egb', 'egb.ref_cashoutPaymentBifastId = cpb.id', 'left');
@@ -412,9 +388,15 @@ class BiFast extends CI_Model {
 
     public function get_channels(){
         $query = "SELECT c_cashoutExternalId FROM cashout_external_x_channel  
-                WHERE c_cashoutChannelGroup = 'bifast' 
+                WHERE c_cashoutChannelGroup = 'bifast' AND c_status = 'Active' 
                 GROUP BY c_cashoutExternalId  ";
         return $this->db->query($query)->result();
+    }
+
+    public function get_channel_mappings() {
+        $query = "SELECT c_cashoutExternalId, ref_cashoutChannelId FROM cashout_external_x_channel 
+                WHERE c_cashoutChannelGroup = 'bifast' AND c_status = 'Active'";
+        return $this->db->query($query)->result_array();
     }
 
     public function get_internal_channels(){
@@ -594,7 +576,7 @@ class BiFast extends CI_Model {
         $search_external_reff = $filters['external_reff'] ?? null;
         $search_channel = $filters['channel'] ?? null;
         $search_internal_channel = $filters['internal_channel'] ?? null;
-        $search_status = $filters['status'] ?? null;
+        $search_status = $filters['search_status'] ?? null;
 
         // Format dates for query
         $date_from_query = !empty($date_from) ? date('Ymd', strtotime($date_from)) . "000001" : null;

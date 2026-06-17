@@ -60,6 +60,7 @@ class BiFastTransactionController extends CI_Controller
          'search_bifast_external_reff'      => 'search_external_reff_id',
          'search_bifast_channel'            => 'search_channel_bifast',
          'search_bifast_internal_channel'   => 'search_internal_channel_bifast',
+         'search_bifast_status'             => 'search_status_bifast',
       ];
 
       $get_fallback = [
@@ -67,6 +68,7 @@ class BiFastTransactionController extends CI_Controller
          'search_bifast_date1'              => 'date_from',
          'search_bifast_date2'              => 'date_to',
          'search_bifast_transid'            => 'transid',
+         'search_bifast_status'             => 'status'
       ];
 
       foreach ($field_map as $session_key => $post_key) {
@@ -113,6 +115,7 @@ class BiFastTransactionController extends CI_Controller
                'transid' => $this->session->userdata('search_bifast_transid'),
                'external_reff' => $this->session->userdata('search_bifast_external_reff'),
                'channel' => $this->session->userdata('search_bifast_channel'),
+               'search_status' => $this->session->userdata('search_bifast_status'),
                'internal_channel' => $this->session->userdata('search_bifast_internal_channel')
             ];
             return $this->BiFast->get_datatables_handler($filters);
@@ -131,6 +134,7 @@ class BiFastTransactionController extends CI_Controller
       $data['merchants'] = $this->BiFast->get_merchant();
       $data['channels'] = $this->BiFast->get_channels();
       $data['internal_channels'] = $this->BiFast->get_internal_channels();
+      $data['channel_mappings'] = $this->BiFast->get_channel_mappings();
 
       $this->load->view('bifast/list', $data);
    }
@@ -148,6 +152,7 @@ class BiFastTransactionController extends CI_Controller
          'search_bifast_transid',
          'search_bifast_external_reff',
          'search_bifast_channel',
+         'search_bifast_status',
          'search_bifast_internal_channel',
          'last_dt_search_bifast'
       ]);

@@ -42,7 +42,12 @@
                 $download_url = base_url('finance/bi-fast/download') 
                     . "?search_bifast_date1=" . ($this->session->userdata('search_bifast_date1') ?: '')
                     . "&search_bifast_date2=" . ($this->session->userdata('search_bifast_date2') ?: '')
-                    . "&search_bifast_name=" . ($this->session->userdata('search_bifast_name') ?: '');
+                    . "&search_bifast_name=" . ($this->session->userdata('search_bifast_name') ?: '')
+                    . "&search_bifast_transid=" . ($this->session->userdata('search_bifast_transid') ?: '')
+                    . "&search_bifast_channel=" . ($this->session->userdata('search_bifast_channel') ?: '')
+                    . "&search_bifast_internal_channel=" . ($this->session->userdata('search_bifast_internal_channel') ?: '')
+                    . "&search_bifast_external_reff=" . ($this->session->userdata('search_bifast_external_reff') ?: '')
+                    . "&search_bifast_status=" . ($this->session->userdata('search_bifast_status') ?: '');
             ?>
             
         </div>
@@ -60,6 +65,7 @@
             $transid_val   = $this->session->userdata('search_bifast_transid') ?: '';
             $channel_val   = $this->session->userdata('search_bifast_channel') ?: '';
             $internal_channel_val = $this->session->userdata('search_bifast_internal_channel') ?: '';
+            $status_val = $this->session->userdata('search_bifast_status') ?: '';
             $external_val  = $this->session->userdata('search_bifast_external_reff') ?: '';
 
             // Badge count for More Filters (Exclude those moved to global search)
@@ -67,6 +73,7 @@
             if($date_from_val || $date_to_val )  $extra_active++;
             if ($merchant_val)  $extra_active++;
             if ($channel_val)   $extra_active++;
+            if ($status_val)    $extra_active++;
             if ($internal_channel_val) $extra_active++;
         ?>
 
@@ -125,10 +132,20 @@
                                         <?php endforeach; ?>
                                     </select>
                                 </div>
+                                <!-- External Channel -->
+                                <div class="dt-more-field">
+                                    <label class="dt-more-label"><i class="fas fa-network-wired mr-1 mr-2"></i> External Channel</label>
+                                    <select name="search_channel_bifast" id="search_channel_bifast" class="dt-more-select bifast-select2">
+                                        <option value="">All Channels</option>
+                                        <?php foreach ($channels as $ch): ?>
+                                            <option value="<?= $ch->c_cashoutExternalId; ?>" <?= ($ch->c_cashoutExternalId == $channel_val) ? 'selected' : ''; ?>><?= $ch->c_cashoutExternalId; ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
                                 <!-- Channel -->
                                 <div class="dt-more-field">
                                     <label class="dt-more-label"><i class="fas fa-network-wired mr-1 mr-2"></i> Channel ID</label>
-                                    <select name="search_internal_channel_bifast" class="dt-more-select bifast-select2">
+                                    <select name="search_internal_channel_bifast" id="search_internal_channel_bifast" class="dt-more-select bifast-select2">
                                         <option value="">All Channels</option>
                                         <?php foreach ($internal_channels as $ic): ?>
                                             <option value="<?= $ic->id; ?>" <?= ($ic->id == $internal_channel_val) ? 'selected' : ''; ?>>
@@ -137,23 +154,17 @@
                                         <?php endforeach; ?>
                                     </select>
                                 </div>
-                                
-
-
-
-                                
-
-                                <!-- External Channel -->
-                                <div class="dt-more-field d-none">
-                                    <label class="dt-more-label"><i class="fas fa-network-wired mr-1 mr-2"></i> External Channel</label>
-                                    <select name="search_channel_bifast" class="dt-more-select">
-                                        <option value="">All Channels</option>
-                                        <?php foreach ($channels as $ch): ?>
-                                            <option value="<?= $ch->c_cashoutExternalId; ?>" <?= ($ch->c_cashoutExternalId == $channel_val) ? 'selected' : ''; ?>><?= $ch->c_cashoutExternalId; ?></option>
-                                        <?php endforeach; ?>
+                                <!-- Status -->
+                                <div class="dt-more-field">
+                                    <label class="dt-more-label"><i class="fas fa-calendar-alt mr-1 mr-2"></i> Status</label>
+                                    <select name="search_status_bifast" class="dt-more-select bifast-select2">
+                                        <option value="">All Status</option>
+                                        <option value="Pending" <?= ($status_val == 'Pending') ? 'selected' : ''; ?>>Pending</option>
+                                        <option value="Success" <?= ($status_val == 'Success') ? 'selected' : ''; ?>>Success</option>
+                                        <option value="Failed" <?= ($status_val == 'Failed') ? 'selected' : ''; ?>>Failed</option>
+                                        <option value="Timeout" <?= ($status_val == 'Timeout') ? 'selected' : ''; ?>>Timeout</option>
                                     </select>
                                 </div>
-
                             </div>
 
                             <div class="dt-more-panel-footer">
@@ -188,6 +199,7 @@
                             <th>Merchant Info</th>
                             <th>Merchant Trans ID</th>
                             <th>Invoice No</th>
+                            <th>External Channel</th>
                             <th>Channel</th>
                             <th>Account No</th>
                             <th>Beneficiary Name</th>
@@ -419,6 +431,16 @@
             {data: 'c_merchantTransactionId',className: 'text-nowrap'},
             {data: 'c_invoiceNo',className: 'text-nowrap'},
             {
+                data: 'ref_cashoutExternalId',
+                className: 'text-nowrap',
+                render: function(data) {
+                    if (data) {
+                        return '<span class="badge badge-primary">' + data.toUpperCase() + '</span>';
+                    }
+                    return '-';
+                }
+            },
+            {
                 data: 'ref_cashoutChannelId',
                 className: 'text-nowrap',
                 render: function(data, type, row) {
@@ -441,7 +463,7 @@
                 var badge = 'badge-secondary';
                 if(data == 'Success') badge = 'badge-success';
                 else if(data == 'Failed') badge = 'badge-danger';
-                else if(data == 'Process' || data == 'Pending') badge = 'badge-primary';
+                else if(data == 'Pending') badge = 'badge-primary';
                 return '<span class="badge badge-pill ' + badge + '">' + data + '</span>';
             }},
             {
@@ -526,6 +548,55 @@
                 minimumResultsForSearch: 5
             });
         });
+
+        // Dynamic Filtering for Internal Channel based on External Channel
+        var channelMappings = <?= json_encode($channel_mappings ?? []) ?>;
+        var selectedInternalChannel = "<?= $internal_channel_val ?>";
+        var allInternalChannels = [
+            <?php foreach($internal_channels as $ic): ?>
+                {id: "<?= $ic->id ?>", text: "<?= $ic->c_description ?>"},
+            <?php endforeach; ?>
+        ];
+
+        $('#search_channel_bifast').on('change', function() {
+            var selectedExternal = $(this).val();
+            var $internalSelect = $('#search_internal_channel_bifast');
+            
+            // clear options
+            $internalSelect.empty();
+            $internalSelect.append(new Option("All Channels", "", false, false));
+            
+            if (selectedExternal) {
+                $internalSelect.prop('disabled', false);
+                // filter internal channels
+                var validInternalIds = channelMappings.filter(function(m) {
+                    return m.c_cashoutExternalId == selectedExternal;
+                }).map(function(m) {
+                    return m.ref_cashoutChannelId;
+                });
+                
+                var validChannels = allInternalChannels.filter(function(c) {
+                    return validInternalIds.includes(c.id);
+                });
+                
+                validChannels.forEach(function(c) {
+                    var isSelected = (c.id == selectedInternalChannel);
+                    $internalSelect.append(new Option(c.text, c.id, false, isSelected));
+                });
+            } else {
+                $internalSelect.prop('disabled', true);
+                // show all
+                allInternalChannels.forEach(function(c) {
+                    var isSelected = (c.id == selectedInternalChannel);
+                    $internalSelect.append(new Option(c.text, c.id, false, isSelected));
+                });
+            }
+            // re-init select2
+            $internalSelect.trigger('change.select2');
+        });
+        
+        // Trigger on load to set initial state
+        $('#search_channel_bifast').trigger('change');
 
         // Detail Modal Ajax
         $(document).on('click', '.btn-info-request', function(e) {

@@ -16,16 +16,16 @@ class Mutation_model extends CI_Model
             mutation.c_potition,
             IF(mutation.c_potition = 'Credit', cashin.ref_cashinChannelId, cashout.ref_cashoutChannelId) AS channelName,
             IF(mutation.c_potition = 'Credit', mutation.ref_cashinId, mutation.ref_cashoutId) AS refLog,
-            IF(mutation.c_potition = 'Credit', cashin.c_Datetime, cashout.c_Datetime) AS timeRefLog,
+            IF(mutation.c_potition = 'Credit', cashin.c_datetime, cashout.c_datetime) AS timeRefLog,
             IF(mutation.c_potition = 'Credit', cashin.c_description, cashout.c_description) AS description,
-            IF(mutation.c_potition = 'Credit', cashin.c_InvoiceNo, cashout.c_InvoiceNo) AS refNoLog,
+            IF(mutation.c_potition = 'Credit', cashin.c_invoiceNo, cashout.c_invoiceNo) AS refNoLog,
             mutation.c_amount,
-            mutation.c_BalanceAfter 
+            mutation.c_balanceAfter 
         ", FALSE);
         $this->db->from('mutation');
         // Optimized: Only join cashin/cashout if we actually need the columns for display
         $this->db->join('cashin', 'cashin.ref_merchantId = mutation.ref_merchantId AND cashin.id = mutation.ref_cashinId', 'left');
-        $this->db->join('cashout', 'cashout.ref_merchantId = mutation.ref_merchantId AND cashout.Id = mutation.ref_cashoutId', 'left');
+        $this->db->join('cashout', 'cashout.ref_merchantId = mutation.ref_merchantId AND cashout.id = mutation.ref_cashoutId', 'left');
         $this->db->where('mutation.ref_merchantId', $id);
 
         if ($search_date_mutation && $search_date_mutation_to) {
@@ -87,7 +87,7 @@ class Mutation_model extends CI_Model
 
         // Standard DataTables Order
         if (isset($_POST['order'])) {
-            $column_order = [null, 'mutation.id', 'mutation.c_datetime', 'mutation.c_potition', 'channelName', 'description', 'mutation.c_amount', 'mutation.c_BalanceAfter'];
+            $column_order = [null, 'mutation.id', 'mutation.c_datetime', 'mutation.c_potition', 'channelName', 'description', 'mutation.c_amount', 'mutation.c_balanceAfter'];
             $this->db->order_by($column_order[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);
         } else {
             $this->db->order_by('mutation.id', 'DESC');
@@ -284,14 +284,14 @@ class Mutation_model extends CI_Model
                 mutation.c_potition,
                 IF(mutation.c_potition = 'Credit', cashin.ref_cashinChannelId, cashout.ref_cashoutChannelId) AS channelName,
                 IF(mutation.c_potition = 'Credit', mutation.ref_cashinId, mutation.ref_cashoutId) AS refLog,
-                IF(mutation.c_potition = 'Credit', cashin.c_Datetime, cashout.c_Datetime) AS timeRefLog,
+                IF(mutation.c_potition = 'Credit', cashin.c_datetime, cashout.c_datetime) AS timeRefLog,
                 IF(mutation.c_potition = 'Credit', cashin.c_description, cashout.c_description) AS description,
-                IF(mutation.c_potition = 'Credit', cashin.c_InvoiceNo, cashout.c_InvoiceNo) AS refNoLog,
+                IF(mutation.c_potition = 'Credit', cashin.c_invoiceNo, cashout.c_invoiceNo) AS refNoLog,
                 mutation.c_amount,
-                mutation.c_BalanceAfter
+                mutation.c_balanceAfter
             ", FALSE)
             ->join('cashin', 'cashin.ref_merchantId = mutation.ref_merchantId AND cashin.id = mutation.ref_cashinId', 'left')
-            ->join('cashout', 'cashout.ref_merchantId = mutation.ref_merchantId AND cashout.Id = mutation.ref_cashoutId', 'left')
+            ->join('cashout', 'cashout.ref_merchantId = mutation.ref_merchantId AND cashout.id = mutation.ref_cashoutId', 'left')
             ->where('mutation.ref_merchantId', $id);
 
         if ($search_date && $search_date_to) {
@@ -315,7 +315,7 @@ class Mutation_model extends CI_Model
             }
         }
 
-        return $dt->set_column_order([null, 'mutation.id', 'mutation.c_datetime', 'mutation.c_potition', 'channelName', 'description', 'mutation.c_amount', 'mutation.c_BalanceAfter'])
+        return $dt->set_column_order([null, 'mutation.id', 'mutation.c_datetime', 'mutation.c_potition', 'channelName', 'description', 'mutation.c_amount', 'mutation.c_balanceAfter'])
             ->set_column_search(['mutation.id', 'mutation.c_potition'])
             ->set_default_order(['mutation.id' => 'desc'])
             ->addColumn('no', function($row) {
@@ -330,7 +330,7 @@ class Mutation_model extends CI_Model
                 return $row->description ?: '-';
             })
             ->addColumn('c_amount_raw', function($row) { return $row->c_amount; })
-            ->addColumn('c_balance_raw', function($row) { return $row->c_BalanceAfter; })
+            ->addColumn('c_balance_raw', function($row) { return $row->c_balanceAfter; })
             ->addColumn('c_position_raw', function($row) { return $row->c_potition; })
             ->make(true);
     }
