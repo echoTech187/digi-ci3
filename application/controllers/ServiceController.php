@@ -239,8 +239,8 @@ class ServiceController extends CI_Controller {
               'googleplay' => 'google_play',
               'freefire' => 'free_fire',
           ];
-          if (isset($mapping[$name])) {
-              $channelgroup2 = $mapping[$name];
+          if (isset($mapping[$view_name])) {
+              $channelgroup2 = $mapping[$view_name];
           }
         }
         if ($this->form_validation->run() == FALSE) {

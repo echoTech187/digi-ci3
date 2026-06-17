@@ -10,13 +10,13 @@ class Merchant extends CI_Model
             $hasBalancePermission = $this->load->library('rbac') ? $this->rbac->has_permission($role_id, 'balance_merchant_module') : true;
         }
 
-        $cols = 'id, c_name, c_email, c_phoneNumber, c_status, c_merchantLevel, c_openapiStatus, c_dateCreated, c_openapiUrlCallbackQrisMpm, c_openapiUrlCallbackVa, c_openapiUrlCallbackEwallet, c_openapiIPAllow, c_openapiSecurityType, c_refSupervisor, ref_entity, c_openapiChannelVaDynamicCreate, c_openapiChannelVaDynamicQuery, c_openapiChannelVaDynamicCancel, c_openapiChannelVaRecurringCreate, c_openapiChannelVaRecurringCancel, c_openapiChannelQrisMpmDynamicCreate, c_openapiChannelQrisMpmDynamicQuery, c_openapiChannelQrisMpmDynamicCancel, c_openapiChannelEwalletDynamicCreate, c_openapiChannelEwalletDynamicQuery, c_openapiChannelEwalletDynamicCancel, c_openapiChannelTransferToBifast, c_openapiChannelTransferToRealtimeOnline, c_allowTransferFromDashboard';
+        $cols = 'id, c_name, c_email, c_phoneNumber, c_status, c_merchantLevel, c_openapiStatus, c_dateCreated, c_openapiUrlCallbackQrisMpm, c_openapiUrlCallbackVa, c_openapiUrlCallbackEwallet, c_openapiIPAllow, c_openapiSecurityType, c_refSupervisor, ref_entity, c_openapiChannelVaDynamicCreate, c_openapiChannelVaDynamicQuery, c_openapiChannelVaDynamicCancel, c_openapiChannelVaRecurringCreate, c_openapiChannelVaRecurringCancel, c_openapiChannelQrisMpmDynamicCreate, c_openapiChannelQrisMpmDynamicQuery, c_openapiChannelQrisMpmDynamicCancel, c_openapiChannelEwalletDynamicCreate, c_openapiChannelEwalletDynamicQuery, c_openapiChannelEwalletDynamicCancel, c_openapiChannelTransferToBifast, c_openapiChannelTransferToRealtimeOnline, c_allowTransferFromDashboard, c_balanceTotal, c_balanceHold';
         
-        if ($hasBalancePermission) {
-            $cols .= ', c_balanceTotal, c_balanceHold';
-        } else {
-            $cols .= ', (NULL) AS c_balanceTotal, (NULL) AS c_balanceHold';
-        }
+        // if ($hasBalancePermission) {
+        //     $cols .= ', c_balanceTotal, c_balanceHold';
+        // } else {
+        //     $cols .= ', (NULL) AS c_balanceTotal, (NULL) AS c_balanceHold';
+        // }
 
         return $cols;
     }
