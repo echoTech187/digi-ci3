@@ -254,7 +254,7 @@ class History extends CI_Model {
         }
         
         // Force display only Paid/Success status
-        $dt->where("cpp.c_status IN ('Paid', 'Success', 'SUCCESS', 'PAID', 'paid', 'success')", NULL, FALSE);
+        // $dt->where("cpp.c_status IN ('Paid', 'Success', 'SUCCESS', 'PAID', 'paid', 'success')", NULL, FALSE);
 
         if ($search_status) {
             $dt->where('cpp.c_status', $search_status);

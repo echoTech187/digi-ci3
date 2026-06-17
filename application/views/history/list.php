@@ -2,15 +2,18 @@
 // Session filter values
 $search_date_purchase_value = $this->session->userdata('search_history_date1') ?: '';
 $search_merchant_purchase_value = $this->session->userdata('search_history_name') ?: '';
+$search_status_purchase_value = $this->session->userdata('search_history_status') ?: '';
 
 // Badge count for More Filters
 $extra_active = 0;
 if ($search_date_purchase_value)  $extra_active++;
 if ($search_merchant_purchase_value) $extra_active++;
+if ($search_status_purchase_value) $extra_active++;
 
 $download_url = base_url('finance/history/download') 
     . "?search_history_date1=" . $search_date_purchase_value 
-    . "&search_history_name=" . $search_merchant_purchase_value;
+    . "&search_history_name=" . $search_merchant_purchase_value
+    . "&search_history_status=" . $search_status_purchase_value;
 ?>
 
 <!-- ── Page Header ── -->
@@ -71,10 +74,23 @@ $download_url = base_url('finance/history/download')
                                     </div>
                                 </div>
                                 <!-- Primary: Single Date -->
-                                <div class="dt-more-field">
+                                <div class="mb-3 dt-more-field">
                                     <label class="dt-more-label"><i class="fas fa-calendar-alt mr-1 mr-2"></i> Transaction Date</label>
                                     <div class="premium-picker">
                                         <input type="date" name="search_date_purchase" class="dt-chip-input" value="<?= $search_date_purchase_value; ?>">
+                                    </div>
+                                </div>
+                                <!-- Status Filter -->
+                                <div class="dt-more-field">
+                                    <label class="dt-more-label"><i class="fas fa-info-circle mr-1 mr-2"></i> Status</label>
+                                    <div class="dt-filter-chip" style="min-width: 180px;">
+                                        <select name="search_status_purchase" class="dt-chip-input history-select2">
+                                            <option value="">All Status</option>
+                                            <option value="Pending" <?= ($search_status_purchase_value == 'Pending') ? 'selected' : ''; ?>>Pending</option>
+                                            <option value="Success" <?= ($search_status_purchase_value == 'Success') ? 'selected' : ''; ?>>Success</option>
+                                            <option value="Failed" <?= ($search_status_purchase_value == 'Failed') ? 'selected' : ''; ?>>Failed</option>
+                                            <option value="Timeout" <?= ($search_status_purchase_value == 'Timeout') ? 'selected' : ''; ?>>Timeout</option>
+                                        </select>
                                     </div>
                                 </div>
                             </div>
