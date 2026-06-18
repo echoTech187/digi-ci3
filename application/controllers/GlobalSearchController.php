@@ -71,15 +71,18 @@ class GlobalSearchController extends CI_Controller
 
                     // QUERY 3: ONE UNION ALL → all 7 module-presence checks in 1 roundtrip (was 3 queries)
                     $presence = [];
-                    foreach ($this->db->query("
-                        (SELECT ref_merchantId, CONCAT('ci_', c_cashinChannelGroup) AS grp FROM cashin WHERE ref_merchantId IN ($m_ids_str) GROUP BY ref_merchantId, c_cashinChannelGroup)
-                        UNION ALL (SELECT ref_merchantId, CONCAT('co_', c_cashoutChannelGroup) FROM cashout WHERE ref_merchantId IN ($m_ids_str) GROUP BY ref_merchantId, c_cashoutChannelGroup)
-                        UNION ALL (SELECT ref_merchantId, 'qd' FROM cashin_dynamic_qris_mpm WHERE ref_merchantId IN ($m_ids_str) GROUP BY ref_merchantId)
-                        UNION ALL (SELECT ref_merchantId, 'qr' FROM cashin_recurring_qris_mpm WHERE ref_merchantId IN ($m_ids_str) GROUP BY ref_merchantId)
-                        UNION ALL (SELECT ref_merchantId, 'vd' FROM cashin_dynamic_va WHERE ref_merchantId IN ($m_ids_str) GROUP BY ref_merchantId)
-                        UNION ALL (SELECT ref_merchantId, 'vr' FROM cashin_recurring_va WHERE ref_merchantId IN ($m_ids_str) GROUP BY ref_merchantId)
-                        UNION ALL (SELECT ref_merchantId, 'ed' FROM cashin_dynamic_ewallet WHERE ref_merchantId IN ($m_ids_str) GROUP BY ref_merchantId)
-                    ")->result() as $p) $presence[$p->ref_merchantId][$p->grp] = true;
+                    $pres_res = $this->db->query("
+                        (SELECT ref_merchantId, CAST(CONCAT('ci_', c_cashinChannelGroup) AS CHAR) AS grp FROM cashin WHERE ref_merchantId IN ($m_ids_str) GROUP BY ref_merchantId, c_cashinChannelGroup)
+                        UNION ALL (SELECT ref_merchantId, CAST(CONCAT('co_', c_cashoutChannelGroup) AS CHAR) FROM cashout WHERE ref_merchantId IN ($m_ids_str) GROUP BY ref_merchantId, c_cashoutChannelGroup)
+                        UNION ALL (SELECT ref_merchantId, CAST('qd' AS CHAR) FROM cashin_dynamic_qris_mpm WHERE ref_merchantId IN ($m_ids_str) GROUP BY ref_merchantId)
+                        UNION ALL (SELECT ref_merchantId, CAST('qr' AS CHAR) FROM cashin_recurring_qris_mpm WHERE ref_merchantId IN ($m_ids_str) GROUP BY ref_merchantId)
+                        UNION ALL (SELECT ref_merchantId, CAST('vd' AS CHAR) FROM cashin_dynamic_va WHERE ref_merchantId IN ($m_ids_str) GROUP BY ref_merchantId)
+                        UNION ALL (SELECT ref_merchantId, CAST('vr' AS CHAR) FROM cashin_recurring_va WHERE ref_merchantId IN ($m_ids_str) GROUP BY ref_merchantId)
+                        UNION ALL (SELECT ref_merchantId, CAST('ed' AS CHAR) FROM cashin_dynamic_ewallet WHERE ref_merchantId IN ($m_ids_str) GROUP BY ref_merchantId)
+                    ");
+                    if ($pres_res) {
+                        foreach ($pres_res->result() as $p) $presence[$p->ref_merchantId][$p->grp] = true;
+                    }
 
                     foreach ($merchants as $m) {
                         $mid = $m->id;
@@ -143,93 +146,96 @@ class GlobalSearchController extends CI_Controller
                 $needEw   = $has_access('finance/e-wallet') || $has_access('e-wallet/dynamic');
 
                 if ($needQris) {
-                    $parts[] = "(SELECT 'qdt' AS s, CAST(id AS CHAR) AS r, c_merchantTransactionId AS tid, CAST(c_amount AS CHAR) AS amt FROM cashin_dynamic_qris_mpm WHERE c_merchantTransactionId $op $val LIMIT 5)";
+                    $parts[] = "(SELECT 'qdt' AS s, CAST(id AS CHAR) AS r, CAST(c_merchantTransactionId AS CHAR) AS tid, CAST(c_amount AS CHAR) AS amt FROM cashin_dynamic_qris_mpm WHERE c_merchantTransactionId $op $val LIMIT 5)";
                     if ($has_access('finance/qris'))
-                        $parts[] = "(SELECT 'qrn', CAST(id AS CHAR), '', '0' FROM cashin_payment_qris_mpm WHERE c_issuerRrn $op $val LIMIT 5)";
+                        $parts[] = "(SELECT 'qrn', CAST(id AS CHAR), CAST('' AS CHAR), '0' FROM cashin_payment_qris_mpm WHERE c_issuerRrn $op $val LIMIT 5)";
                     if ($has_access('qris/recurring'))
-                        $parts[] = "(SELECT 'qrc', CAST(id AS CHAR), c_merchantTransactionId, CAST(c_amount AS CHAR) FROM cashin_recurring_qris_mpm WHERE c_merchantTransactionId $op $val LIMIT 3)";
+                        $parts[] = "(SELECT 'qrc', CAST(id AS CHAR), CAST(c_merchantTransactionId AS CHAR), CAST(c_amount AS CHAR) FROM cashin_recurring_qris_mpm WHERE c_merchantTransactionId $op $val LIMIT 3)";
                 }
                 if ($needVa) {
-                    $parts[] = "(SELECT 'vdt', CAST(id AS CHAR), c_merchantTransactionId, CAST(c_amount AS CHAR) FROM cashin_dynamic_va WHERE c_merchantTransactionId $op $val LIMIT 5)";
-                    $parts[] = "(SELECT 'vdn', CAST(id AS CHAR), c_vaNumber,              CAST(c_amount AS CHAR) FROM cashin_dynamic_va WHERE c_vaNumber $op $val LIMIT 5)";
+                    $parts[] = "(SELECT 'vdt', CAST(id AS CHAR), CAST(c_merchantTransactionId AS CHAR), CAST(c_amount AS CHAR) FROM cashin_dynamic_va WHERE c_merchantTransactionId $op $val LIMIT 5)";
+                    $parts[] = "(SELECT 'vdn', CAST(id AS CHAR), CAST(c_vaNumber AS CHAR),              CAST(c_amount AS CHAR) FROM cashin_dynamic_va WHERE c_vaNumber $op $val LIMIT 5)";
                     if ($has_access('virtual-account/recurring')) {
-                        $parts[] = "(SELECT 'vrt', CAST(id AS CHAR), c_merchantTransactionId, CAST(c_amount AS CHAR) FROM cashin_recurring_va WHERE c_merchantTransactionId $op $val LIMIT 3)";
-                        $parts[] = "(SELECT 'vrn', CAST(id AS CHAR), c_vaNumber,              CAST(c_amount AS CHAR) FROM cashin_recurring_va WHERE c_vaNumber $op $val LIMIT 3)";
+                        $parts[] = "(SELECT 'vrt', CAST(id AS CHAR), CAST(c_merchantTransactionId AS CHAR), CAST(c_amount AS CHAR) FROM cashin_recurring_va WHERE c_merchantTransactionId $op $val LIMIT 3)";
+                        $parts[] = "(SELECT 'vrn', CAST(id AS CHAR), CAST(c_vaNumber AS CHAR),              CAST(c_amount AS CHAR) FROM cashin_recurring_va WHERE c_vaNumber $op $val LIMIT 3)";
                     }
                 }
                 if ($needEw) {
-                    $parts[] = "(SELECT 'ewt', CAST(id AS CHAR), c_merchantTransactionId, CAST(c_amount AS CHAR) FROM cashin_dynamic_ewallet WHERE c_merchantTransactionId $op $val LIMIT 5)";
+                    $parts[] = "(SELECT 'ewt', CAST(id AS CHAR), CAST(c_merchantTransactionId AS CHAR), CAST(c_amount AS CHAR) FROM cashin_dynamic_ewallet WHERE c_merchantTransactionId $op $val LIMIT 5)";
                 }
                 if ($has_access('finance/bi-fast')) {
-                    $parts[] = "(SELECT 'bft', CAST(ref_cashoutId AS CHAR), c_merchantTransactionId, '0' FROM cashout_payment_bifast WHERE c_merchantTransactionId $op $val LIMIT 5)";
+                    $parts[] = "(SELECT 'bft', CAST(ref_cashoutId AS CHAR), CAST(c_merchantTransactionId AS CHAR), '0' FROM cashout_payment_bifast WHERE c_merchantTransactionId $op $val LIMIT 5)";
                     if (is_numeric($query) && $qLen <= 16)
-                        $parts[] = "(SELECT 'bfa', CAST(ref_cashoutId AS CHAR), c_accountNo, '0' FROM cashout_payment_bifast WHERE c_accountNo $op $val LIMIT 5)";
+                        $parts[] = "(SELECT 'bfa', CAST(ref_cashoutId AS CHAR), CAST(c_accountNo AS CHAR), '0' FROM cashout_payment_bifast WHERE c_accountNo $op $val LIMIT 5)";
                 }
                 if ($has_access('finance/history')) {
-                    $parts[] = "(SELECT 'ppb', CAST(ref_cashoutId AS CHAR), ref_cashoutChannelId, '0' FROM cashout_payment_ppob WHERE ref_cashoutChannelId $op $val LIMIT 5)";
-                    $parts[] = "(SELECT 'pph', CAST(ref_cashoutId AS CHAR), c_phone, '0' FROM cashout_payment_ppob WHERE c_phone $op $val LIMIT 5)";
+                    $parts[] = "(SELECT 'ppb', CAST(ref_cashoutId AS CHAR), CAST(ref_cashoutChannelId AS CHAR), '0' FROM cashout_payment_ppob WHERE ref_cashoutChannelId $op $val LIMIT 5)";
+                    $parts[] = "(SELECT 'pph', CAST(ref_cashoutId AS CHAR), CAST(c_phone AS CHAR), '0' FROM cashout_payment_ppob WHERE c_phone $op $val LIMIT 5)";
                 }
 
                 if ($parts) {
                     $seen = [];
-                    foreach ($this->db->query(implode(" UNION ALL ", $parts))->result() as $row) {
-                        $rid = (int) $row->r;
-                        if (!$rid) continue;
-                        $src = $row->s;
-                        if (isset($seen[$src][$rid])) continue;
-                        $seen[$src][$rid] = true;
-                        $tid = $row->tid;
-                        $amt = (float) $row->amt;
+                    $u_res = $this->db->query(implode(" UNION ALL ", $parts));
+                    if ($u_res) {
+                        foreach ($u_res->result() as $row) {
+                            $rid = (int) $row->r;
+                            if (!$rid) continue;
+                            $src = $row->s;
+                            if (isset($seen[$src][$rid])) continue;
+                            $seen[$src][$rid] = true;
+                            $tid = $row->tid;
+                            $amt = (float) $row->amt;
 
-                        switch ($src) {
-                            case 'qdt':
-                                $qrisDynIds[] = $rid;
-                                if ($has_access('qris/dynamic') && $tid && !isset($seen['disp_qd'][$rid])) {
-                                    $seen['disp_qd'][$rid] = true;
-                                    $results[] = ['title' => "$tid - Rp " . number_format($amt), 'url' => base_url('qris/dynamic?transid=' . $query), 'category' => 'QRIS Dynamic', 'icon' => 'fas fa-qrcode'];
-                                }
-                                break;
-                            case 'qrn':
-                                $qrisRrnPids[] = $rid;
-                                break;
-                            case 'qrc':
-                                if ($has_access('qris/recurring') && $tid)
-                                    $results[] = ['title' => "$tid - Rp " . number_format($amt), 'url' => base_url('qris/recurring?transid=' . $query), 'category' => 'QRIS Recurring', 'icon' => 'fas fa-redo'];
-                                break;
-                            case 'vdt':
-                            case 'vdn':
-                                $vaDynIds[] = $rid;
-                                if ($has_access('virtual-account/dynamic') && $tid && !isset($seen['disp_vd'][$rid])) {
-                                    $seen['disp_vd'][$rid] = true;
-                                    $qs = ($src === 'vdn') ? '?va_number=' : '?transid=';
-                                    $results[] = ['title' => "$tid - Rp " . number_format($amt), 'url' => base_url('virtual-account/dynamic' . $qs . $query), 'category' => 'VA Dynamic', 'icon' => 'fas fa-university'];
-                                }
-                                break;
-                            case 'vrt':
-                            case 'vrn':
-                                if ($has_access('virtual-account/recurring') && $tid && !isset($seen['disp_vr'][$rid])) {
-                                    $seen['disp_vr'][$rid] = true;
-                                    $qs = ($src === 'vrn') ? '?va_number=' : '?transid=';
-                                    $results[] = ['title' => "$tid - Rp " . number_format($amt), 'url' => base_url('virtual-account/recurring' . $qs . $query), 'category' => 'VA Recurring', 'icon' => 'fas fa-history'];
-                                }
-                                break;
-                            case 'ewt':
-                                $ewDynIds[] = $rid;
-                                if ($has_access('e-wallet/dynamic') && $tid && !isset($seen['disp_ew'][$rid])) {
-                                    $seen['disp_ew'][$rid] = true;
-                                    $results[] = ['title' => "$tid - Rp " . number_format($amt), 'url' => base_url('e-wallet/dynamic?transid=' . $query), 'category' => 'E-Wallet Dynamic', 'icon' => 'fas fa-wallet'];
-                                }
-                                break;
-                            case 'bft':
-                            case 'bfa':
-                                $cashout_ids[] = $rid;
-                                break;
-                            case 'ppb':
-                            case 'pph':
-                                $cashout_ids[] = $rid;
-                                break;
-                        }
-                    } // end foreach MASTER UNION ALL
+                            switch ($src) {
+                                case 'qdt':
+                                    $qrisDynIds[] = $rid;
+                                    if ($has_access('qris/dynamic') && $tid && !isset($seen['disp_qd'][$rid])) {
+                                        $seen['disp_qd'][$rid] = true;
+                                        $results[] = ['title' => "$tid - Rp " . number_format($amt), 'url' => base_url('qris/dynamic?transid=' . $query), 'category' => 'QRIS Dynamic', 'icon' => 'fas fa-qrcode'];
+                                    }
+                                    break;
+                                case 'qrn':
+                                    $qrisRrnPids[] = $rid;
+                                    break;
+                                case 'qrc':
+                                    if ($has_access('qris/recurring') && $tid)
+                                        $results[] = ['title' => "$tid - Rp " . number_format($amt), 'url' => base_url('qris/recurring?transid=' . $query), 'category' => 'QRIS Recurring', 'icon' => 'fas fa-redo'];
+                                    break;
+                                case 'vdt':
+                                case 'vdn':
+                                    $vaDynIds[] = $rid;
+                                    if ($has_access('virtual-account/dynamic') && $tid && !isset($seen['disp_vd'][$rid])) {
+                                        $seen['disp_vd'][$rid] = true;
+                                        $qs = ($src === 'vdn') ? '?va_number=' : '?transid=';
+                                        $results[] = ['title' => "$tid - Rp " . number_format($amt), 'url' => base_url('virtual-account/dynamic' . $qs . $query), 'category' => 'VA Dynamic', 'icon' => 'fas fa-university'];
+                                    }
+                                    break;
+                                case 'vrt':
+                                case 'vrn':
+                                    if ($has_access('virtual-account/recurring') && $tid && !isset($seen['disp_vr'][$rid])) {
+                                        $seen['disp_vr'][$rid] = true;
+                                        $qs = ($src === 'vrn') ? '?va_number=' : '?transid=';
+                                        $results[] = ['title' => "$tid - Rp " . number_format($amt), 'url' => base_url('virtual-account/recurring' . $qs . $query), 'category' => 'VA Recurring', 'icon' => 'fas fa-history'];
+                                    }
+                                    break;
+                                case 'ewt':
+                                    $ewDynIds[] = $rid;
+                                    if ($has_access('e-wallet/dynamic') && $tid && !isset($seen['disp_ew'][$rid])) {
+                                        $seen['disp_ew'][$rid] = true;
+                                        $results[] = ['title' => "$tid - Rp " . number_format($amt), 'url' => base_url('e-wallet/dynamic?transid=' . $query), 'category' => 'E-Wallet Dynamic', 'icon' => 'fas fa-wallet'];
+                                    }
+                                    break;
+                                case 'bft':
+                                case 'bfa':
+                                    $cashout_ids[] = $rid;
+                                    break;
+                                case 'ppb':
+                                case 'pph':
+                                    $cashout_ids[] = $rid;
+                                    break;
+                            }
+                        } // end foreach MASTER UNION ALL
+                    } // end if $u_res
                 } // end if $parts
 
                 // ── QUERY 5: Resolve dynamic IDs → cashin refs (1 UNION ALL) ──────────
@@ -245,14 +251,17 @@ class GlobalSearchController extends CI_Controller
                 if ($qrisRrnPids)
                     $refParts[] = "(SELECT 'qr' AS s, ref_cashinId AS cid, CAST(id AS CHAR) AS pid FROM cashin_payment_qris_mpm WHERE id IN (" . implode(',', $qrisRrnPids) . ") LIMIT 5)";
                 if ($vaDynIds)
-                    $refParts[] = "(SELECT 'vp' AS s, ref_cashinId AS cid, '0' AS pid FROM cashin_payment_va WHERE ref_cashinDynamicVaId IN (" . implode(',', $vaDynIds) . ") LIMIT 5)";
+                    $refParts[] = "(SELECT 'vp' AS s, ref_cashinId AS cid, CAST('0' AS CHAR) AS pid FROM cashin_payment_va WHERE ref_cashinDynamicVaId IN (" . implode(',', $vaDynIds) . ") LIMIT 5)";
                 if ($ewDynIds)
-                    $refParts[] = "(SELECT 'ep' AS s, ref_cashinId AS cid, '0' AS pid FROM cashin_payment_ewallet WHERE ref_cashinDynamicEwalletId IN (" . implode(',', $ewDynIds) . ") LIMIT 5)";
+                    $refParts[] = "(SELECT 'ep' AS s, ref_cashinId AS cid, CAST('0' AS CHAR) AS pid FROM cashin_payment_ewallet WHERE ref_cashinDynamicEwalletId IN (" . implode(',', $ewDynIds) . ") LIMIT 5)";
 
                 if ($refParts) {
-                    foreach ($this->db->query(implode(" UNION ALL ", $refParts))->result() as $r) {
-                        $cashin_ids[] = $r->cid;
-                        if ($r->s === 'qp' || $r->s === 'qr') $rrn_ids[] = (int) $r->pid;
+                    $ref_res = $this->db->query(implode(" UNION ALL ", $refParts));
+                    if ($ref_res) {
+                        foreach ($ref_res->result() as $r) {
+                            $cashin_ids[] = $r->cid;
+                            if ($r->s === 'qp' || $r->s === 'qr') $rrn_ids[] = (int) $r->pid;
+                        }
                     }
                 }
             } // end if $qLen >= 6
