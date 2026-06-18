@@ -388,11 +388,50 @@ class MerchantManagementController extends CI_Controller
          try {
             $result = $this->MerchantRegistrationService->registerMerchant($this->input->post(), $formValidationRules, $optionalFields);
             if ($result === true) {
-               if ($this->input->is_ajax_request()) {
-                   echo json_encode(['status' => 'success', 'message' => 'Data successfully inserted']);
-                   return;
-               }
-               $this->session->set_flashdata('success', 'Data successfully inserted');
+                // --- INTEGRASI ONE-TIME SECRET ---
+                $merchantData = $this->input->post();
+                
+                // Hapus password asli (jika ada) demi keamanan
+                unset($merchantData['c_confirmPassword']); 
+                
+                $secretContent = json_encode($merchantData, JSON_PRETTY_PRINT);
+                
+                $ch = curl_init('https://password.gidi.co.id/api/v1/share');
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                curl_setopt($ch, CURLOPT_POST, true);
+                curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query([
+                    'secret' => $secretContent,
+                    'ttl' => 86400 // Set kedaluwarsa 1 hari (24 jam)
+                ]));
+                curl_setopt($ch, CURLOPT_TIMEOUT, 5); // Hindari freeze jika server down
+                
+                $response = curl_exec($ch);
+                curl_close($ch);
+                
+                $secretUrl = '';
+                $msg = 'Data successfully inserted';
+                
+                if ($response) {
+                    $resData = json_decode($response, true);
+                    if (!empty($resData['secret_key'])) {
+                        $secretUrl = 'https://password.gidi.co.id/secret/' . $resData['secret_key'];
+                        $msg .= 'Data successfully inserted';
+                    }
+                }
+                // ---------------------------------
+
+                if ($this->input->is_ajax_request()) {
+                    $this->session->set_flashdata('secret_url', $secretUrl);
+                    echo json_encode([
+                        'status' => 'success', 
+                        'message' => $msg, 
+                        'redirect_url' => base_url('private/secret')
+                    ]);
+                    return;
+                }
+                $this->session->set_flashdata('success', $msg);
+                $this->session->set_flashdata('secret_url', $secretUrl);
+                redirect('private/secret');
             } else {
                $code = isset($result['code']) ? $result['code'] : 0;
                $msg = 'Unable to create merchant account due to a system constraint. Please verify your input or contact technical support.';
@@ -2285,5 +2324,25 @@ class MerchantManagementController extends CI_Controller
 
       $this->session->set_flashdata('success', 'Menu item saved successfully.');
       redirect('merchant/access-control/menus');
+   }
+   public function secretPublished()
+   {
+      // Ambil secretUrl dari flashdata. Jika kosong, asumsikan testing atau redirect back.
+      $secretUrl = $this->session->flashdata('secret_url');
+      if (!$secretUrl) {
+         redirect('merchant/manage');
+         return;
+      }
+
+      $data['title'] = 'Secret URL Published';
+      $data['user'] = $this->Model_user->view_user()->row_array();
+      $data['secretUrl'] = $secretUrl;
+
+      // Render the new view
+      $this->load->view('templates/user_header', $data);
+      $this->load->view('templates/user_sidebar', $data);
+      $this->load->view('templates/user_topbar', $data);
+      $this->load->view('merchant/secret-published', $data);
+      $this->load->view('templates/user_footer');
    }
 }
