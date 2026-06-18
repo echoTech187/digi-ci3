@@ -50,6 +50,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
 |		my-controller/my-method	-> my_controller/my_method
 */
 $route['default_controller'] = 'DashboardController';
+$route['helpcenter'] = 'HelpCenterController/index';
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
 
@@ -157,6 +158,7 @@ $route['merchant/manage/edit/(:num)'] = 'MerchantManagementController/editMercha
 $route['merchant/manage/update/(:num)'] = 'MerchantManagementController/updateMerchant/$1';
 $route['merchant/manage/search'] = 'MerchantManagementController/searchMerchants';
 $route['merchant/manage/add'] = 'MerchantManagementController/addMerchant';
+$route['private/secret'] = 'MerchantManagementController/secretPublished';
 $route['merchant/manage/detail/(:num)'] = 'MerchantManagementController/detailMerchant/$1';
 $route['merchant/manage/history-ajax/(:num)'] = 'MerchantManagementController/detailHistoryAjax/$1';
 $route['merchant/manage/mutation-ajax/(:num)'] = 'MerchantManagementController/detailMutationAjax/$1';
