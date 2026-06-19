@@ -443,6 +443,7 @@ class MerchantManagementController extends CI_Controller
 
                  if ($this->input->is_ajax_request()) {
                      $this->session->set_flashdata('secret_url', $secretUrl);
+                     $this->session->set_flashdata('secret_expires_at', time() + 86400);
                      echo json_encode([
                          'status'       => 'success',
                          'message'      => $msg,
@@ -452,6 +453,7 @@ class MerchantManagementController extends CI_Controller
                  }
                  $this->session->set_flashdata('success', $msg);
                  $this->session->set_flashdata('secret_url', $secretUrl);
+                 $this->session->set_flashdata('secret_expires_at', time() + 86400);
                  redirect('private/secret');
             } else {
                $code = isset($result['code']) ? $result['code'] : 0;
@@ -2358,6 +2360,7 @@ class MerchantManagementController extends CI_Controller
       $data['title'] = 'Secret URL Published';
       $data['user'] = $this->Model_user->view_user()->row_array();
       $data['secretUrl'] = $secretUrl;
+      $data['secretExpiresAt'] = $this->session->flashdata('secret_expires_at') ?: (time() + 86400);
 
       // Render the new view
       $this->load->view('templates/user_header', $data);
