@@ -418,11 +418,8 @@ class QrisTransactionController extends CI_Controller
       if ($redirect) redirect('qris/recurring');
    }
 
-   public function SendnotifikasiQRIS()
+   public function SendnotifikasiQRIS($ref_cashinPaymentQrisMpmId=NULL, $refMerchantId=NULL)
    {
-      $ref_cashinPaymentQrisMpmId = $this->uri->segment(3);
-      $refMerchantId = $this->uri->segment(4);
-
       if (!$ref_cashinPaymentQrisMpmId) {
          $this->session->set_flashdata('error', 'Transaction ID not found.');
          redirect('finance/qris');

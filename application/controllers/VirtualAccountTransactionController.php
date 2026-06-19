@@ -398,11 +398,8 @@ class VirtualAccountTransactionController extends CI_Controller
       if ($redirect) redirect('virtual-account/recurring');
    }
 
-   public function SendnotifikasiVA()
+   public function SendnotifikasiVA($ref_cashinPaymentVaId = NULL, $refMerchantId = NULL)
    {
-      $ref_cashinPaymentVaId = $this->uri->segment(3);
-      $refMerchantId = $this->uri->segment(4);
-
       if (!$ref_cashinPaymentVaId) {
          $this->session->set_flashdata('error', 'Transaction ID not found.');
          redirect('finance/virtual-account');

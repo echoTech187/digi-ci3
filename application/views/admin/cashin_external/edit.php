@@ -107,8 +107,9 @@
                             <div class="col-md-6 mb-4">
                                 <label class="font-weight-bold text-gray-700 small">Fee Type</label>
                                 <select name="c_feeType" class="form-control select2" required>
-                                    <option value="IDR" <?= ($mapping['c_feeType'] == 'IDR') ? 'selected' : '' ?>>IDR (Fixed)</option>
-                                    <option value="Percentage" <?= ($mapping['c_feeType'] == 'Percentage') ? 'selected' : '' ?>>Percentage (%)</option>
+                                    <option value="Fixed" <?= ($mapping['c_feeType'] == 'Fixed') ? 'selected' : '' ?>>Fixed (IDR)</option>
+                                    <option value="Percetange" <?= ($mapping['c_feeType'] == 'Percetange') ? 'selected' : '' ?>>Percentage (%)</option>
+                                    <option value="Both" <?= ($mapping['c_feeType'] == 'Both') ? 'selected' : '' ?>>Both</option>
                                 </select>
                             </div>
                             <div class="col-md-6 mb-4">

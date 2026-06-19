@@ -100,8 +100,9 @@
                             <div class="col-md-6 mb-4">
                                 <label class="font-weight-bold text-gray-700 small">Fee Type</label>
                                 <select name="c_feeType" class="form-control select2" required>
-                                    <option value="IDR">IDR (Fixed)</option>
-                                    <option value="Percentage">Percentage (%)</option>
+                                    <option value="Fixed">Fixed (IDR)</option>
+                                    <option value="Percetange">Percentage (%)</option>
+                                    <option value="Both">Both</option>
                                 </select>
                             </div>
                             <div class="col-md-6 mb-4">

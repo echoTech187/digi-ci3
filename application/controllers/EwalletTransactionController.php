@@ -285,11 +285,8 @@ class EwalletTransactionController extends CI_Controller
       if ($redirect) redirect('e-wallet/dynamic');
    }
 
-   public function Sendnotifikasiewallet()
+   public function Sendnotifikasiewallet($ref_cashinPaymentEwalletId = NULL, $refMerchantId = NULL)
    {
-      $ref_cashinPaymentEwalletId = $this->uri->segment(3);
-      $refMerchantId = $this->uri->segment(4);
-
       if (!$ref_cashinPaymentEwalletId) {
          $this->session->set_flashdata('error', 'Transaction ID not found.');
          redirect('finance/e-wallet');
