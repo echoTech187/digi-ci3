@@ -388,50 +388,71 @@ class MerchantManagementController extends CI_Controller
          try {
             $result = $this->MerchantRegistrationService->registerMerchant($this->input->post(), $formValidationRules, $optionalFields);
             if ($result === true) {
-                // --- INTEGRASI ONE-TIME SECRET ---
-                $merchantData = $this->input->post();
-                
-                // Hapus password asli (jika ada) demi keamanan
-                unset($merchantData['c_confirmPassword']); 
-                
-                $secretContent = json_encode($merchantData, JSON_PRETTY_PRINT);
-                
-                $ch = curl_init('https://password.gidi.co.id/api/v1/share');
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                curl_setopt($ch, CURLOPT_POST, true);
-                curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query([
-                    'secret' => $secretContent,
-                    'ttl' => 86400 // Set kedaluwarsa 1 hari (24 jam)
-                ]));
-                curl_setopt($ch, CURLOPT_TIMEOUT, 5); // Hindari freeze jika server down
-                
-                $response = curl_exec($ch);
-                curl_close($ch);
-                
-                $secretUrl = '';
-                $msg = 'Data successfully inserted';
-                
-                if ($response) {
-                    $resData = json_decode($response, true);
-                    if (!empty($resData['secret_key'])) {
-                        $secretUrl = 'https://password.gidi.co.id/secret/' . $resData['secret_key'];
-                        $msg .= 'Data successfully inserted';
-                    }
-                }
-                // ---------------------------------
+                 // --- INTEGRASI ONE-TIME SECRET ---
+                 $postedEmail    = $this->input->post('c_email');
+                 $postedPassword = $this->input->post('c_password');
 
-                if ($this->input->is_ajax_request()) {
-                    $this->session->set_flashdata('secret_url', $secretUrl);
-                    echo json_encode([
-                        'status' => 'success', 
-                        'message' => $msg, 
-                        'redirect_url' => base_url('private/secret')
-                    ]);
-                    return;
-                }
-                $this->session->set_flashdata('success', $msg);
-                $this->session->set_flashdata('secret_url', $secretUrl);
-                redirect('private/secret');
+                 // Ambil data merchant yang baru dibuat dari DB berdasarkan email
+                 $newMerchant = $this->db
+                     ->select('id, c_openapiCredentialKey')
+                     ->get_where('merchant', ['c_email' => $postedEmail, 'c_merchantLevel' => 0])
+                     ->row_array();
+
+                 $merchantId     = $newMerchant ? $newMerchant['id'] : null;
+                 $credentialKey  = $newMerchant ? $newMerchant['c_openapiCredentialKey'] : null;
+
+                 // Ambil Submerchant ID dari tabel submerchant berdasarkan ref_merchantId
+                 $submerchant = $this->db
+                     ->select('id')
+                     ->get_where('submerchant', ['ref_merchantId' => $merchantId])
+                     ->row_array();
+                 $submerchantId = $submerchant ? $submerchant['id'] : null;
+
+                 // Susun isi secret: hanya 6 field yang disepakati
+                 $secretContent = json_encode([
+                     'Dashboard URL'     => "https://merchant.gidi.co.id",
+                     'Merchant ID'       => $merchantId,
+                     'Submerchant ID'    => $submerchantId,
+                     'Merchant Email'    => $postedEmail,
+                     'Merchant Password' => $postedPassword,
+                     'Credential Key'    => $credentialKey,
+                 ], JSON_PRETTY_PRINT);
+
+                 $ch = curl_init('https://password.gidi.co.id/api/v1/share');
+                 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                 curl_setopt($ch, CURLOPT_POST, true);
+                 curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query([
+                     'secret' => $secretContent,
+                     'ttl'    => 86400 // Kedaluwarsa 1 hari (24 jam)
+                 ]));
+                 curl_setopt($ch, CURLOPT_TIMEOUT, 5); // Hindari freeze jika server down
+
+                 $response = curl_exec($ch);
+                 curl_close($ch);
+
+                 $secretUrl = '';
+                 $msg = 'Data successfully inserted';
+
+                 if ($response) {
+                     $resData = json_decode($response, true);
+                     if (!empty($resData['secret_key'])) {
+                         $secretUrl = 'https://password.gidi.co.id/secret/' . $resData['secret_key'];
+                     }
+                 }
+                 // ---------------------------------
+
+                 if ($this->input->is_ajax_request()) {
+                     $this->session->set_flashdata('secret_url', $secretUrl);
+                     echo json_encode([
+                         'status'       => 'success',
+                         'message'      => $msg,
+                         'redirect_url' => base_url('private/secret')
+                     ]);
+                     return;
+                 }
+                 $this->session->set_flashdata('success', $msg);
+                 $this->session->set_flashdata('secret_url', $secretUrl);
+                 redirect('private/secret');
             } else {
                $code = isset($result['code']) ? $result['code'] : 0;
                $msg = 'Unable to create merchant account due to a system constraint. Please verify your input or contact technical support.';
