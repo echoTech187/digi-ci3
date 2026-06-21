@@ -47,9 +47,9 @@
 
             <div class="pl-4 border-left border-primary ml-2 mb-4">
                 <ol class="text-muted mb-0">
-                    <li class="mb-3"><strong>Quick Search:</strong> Type the <em>Merchant Trans ID</em> or <em>VA Number</em> directly into the search box to find a specific subscriber's monthly invoice.</li>
+                    <li class="mb-3"><strong>Quick Search:</strong> Type the <em>Channel</em>, <em>Merchant</em>, or <em>ID</em> (like Merchant Trans ID or VA Number) directly into the search box.</li>
                     <li class="mb-3"><strong>Advanced Filters:</strong> Click the <i class="fas fa-sliders-h"></i> Filters button to open the dropdown menu.</li>
-                    <li class="mb-3">Filter your parameters: <strong>Request Date</strong>, <strong>Merchant</strong>, <strong>External Channel</strong>, or <strong>Status</strong>.</li>
+                    <li class="mb-3">Filter your parameters: <strong>Request Date</strong>, <strong>Merchant</strong>, <strong>External Channel</strong>, <strong>Channel ID</strong>, or <strong>Status</strong>.</li>
                     <li class="mb-2">Click <strong>APPLY FILTER</strong> to load the data. Click <strong>Clear All</strong> to reset the view.</li>
                 </ol>
             </div>
@@ -162,10 +162,10 @@
 
             <div class="pl-4 border-left border-primary ml-2 mb-4">
                 <ol class="text-muted mb-0">
-                    <li class="mb-3"><strong>Pencarian Cepat:</strong> Ketik <em>Merchant Trans ID</em> atau <em>VA Number</em> langsung ke kotak pencarian untuk segera menemukan invoice bulanan pelanggan tertentu.</li>
+                    <li class="mb-3"><strong>Pencarian Cepat:</strong> Ketik <em>Channel</em>, <em>Merchant</em>, atau <em>ID</em> (seperti Merchant Trans ID atau VA Number) langsung ke kotak pencarian.</li>
                     <li class="mb-3"><strong>Filter Lanjutan:</strong> Klik tombol <i class="fas fa-sliders-h"></i> Filters untuk membuka menu dropdown.</li>
-                    <li class="mb-3">Saring data Anda: <strong>Request Date</strong>, <strong>Merchant</strong>, <strong>External Channel</strong>, atau <strong>Status</strong>.</li>
-                    <li class="mb-2">Klik <strong>APPLY FILTER</strong> untuk memuat data. Klik <strong>Clear All</strong> untuk reset.</li>
+                    <li class="mb-3">Saring data Anda berdasarkan: <strong>Request Date</strong>, <strong>Merchant</strong>, <strong>External Channel</strong>, <strong>Channel ID</strong>, atau <strong>Status</strong>.</li>
+                    <li class="mb-2">Klik <strong>APPLY FILTER</strong> untuk memuat data. Klik <strong>Clear All</strong> untuk mengosongkan semua filter.</li>
                 </ol>
             </div>
         </div>

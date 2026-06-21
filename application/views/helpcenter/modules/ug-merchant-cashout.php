@@ -85,6 +85,54 @@
             </div>
         </div>
 
+        <!-- New Section: Form Validations -->
+        <div class="mb-5">
+            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-shield-alt text-primary mr-2"></i> 3. Form Validations & Constraints</h5>
+            <div class="table-responsive shadow-sm mb-4" style="border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05);">
+                <table class="table table-borderless table-striped small mb-0" style="background: rgba(255,255,255,0.02);">
+                    <thead style="background: rgba(0,0,0,0.4);">
+                        <tr>
+                            <th class="p-3 border-0" style="width: 25%;">Constraint Type</th>
+                            <th class="p-3 border-0">System Enforcement Rule</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td class="p-3 border-0"><strong>Required Fields</strong></td><td class="p-3 border-0">All fields must be populated (<code>Channel ID</code>, <code>Fee Type</code>, <code>Fee</code>, <code>Percentage</code>, <code>Interval</code>, <code>Min Amount</code>, <code>Max Amount</code>, <code>Status</code>).</td></tr>
+                        <tr><td class="p-3 border-0"><strong>Data Types</strong></td><td class="p-3 border-0">All fee and amount fields must be valid numeric values (integers or decimals).</td></tr>
+                        <tr><td class="p-3 border-0"><strong>Unique Channel Config</strong></td><td class="p-3 border-0">Only one fee configuration per channel is allowed per merchant.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- New Section: System Notifications -->
+            <h6 class="font-weight-bold mb-3 mt-4 text-dark"><i class="fas fa-bell text-info mr-2"></i> System Notifications</h6>
+            <div class="d-flex flex-column mb-4">
+                <div class="mb-3">
+                    <div class="p-3 rounded border" style="background-color: rgba(22, 163, 74, 0.05); border-color: rgba(22, 163, 74, 0.2) !important;">
+                        <strong class="text-success d-block mb-2"><i class="fas fa-check-circle mr-1"></i> Success Events</strong>
+                        <ul class="small text-muted mb-0 pl-3">
+                            <li class="mb-0"><strong>Configuration Saved:</strong> <code>Data successfully inserted</code> / <code>updated</code></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="mb-1">
+                    <div class="p-3 rounded border" style="background-color: rgba(220, 38, 38, 0.05); border-color: rgba(220, 38, 38, 0.2) !important;">
+                        <strong class="text-danger d-block mb-2"><i class="fas fa-exclamation-circle mr-1"></i> Error Events & Solutions</strong>
+                        <ul class="small text-muted mb-0 pl-3">
+                            <li class="mb-3">
+                                <strong>Duplicate Entry (1062):</strong> <code>Failed to insert data: A fee configuration for this channel already exists.</code>
+                                <div class="text-dark mt-1"><i class="fas fa-lightbulb text-warning mr-1"></i> <strong>Solution:</strong> You cannot create a second fee rule for the same channel. Edit the existing configuration instead.</div>
+                            </li>
+                            <li class="mb-0">
+                                <strong>Access Denied (1142):</strong> <code>Access Denied. You do not have sufficient database privileges to add cashout fee settings.</code>
+                                <div class="text-dark mt-1"><i class="fas fa-lightbulb text-warning mr-1"></i> <strong>Solution:</strong> The MySQL user lacks INSERT or UPDATE privileges. Contact the Database Administrator.</div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- FAQ -->
         <h5 class="font-weight-bold mb-4 mt-5 d-flex align-items-center"><i class="fas fa-question-circle text-warning mr-3"></i> Common Issues &amp; Troubleshooting</h5>
         <div class="faq-accordion mb-5">
@@ -204,6 +252,54 @@
                 <div class="callout-content">
                     <strong class="d-block mb-1 text-body" style="font-size: 16px;">Memeriksa Detail Potongan Biaya</strong>
                     <p class="mb-0 text-muted small">Setelah merchant melakukan cashout, periksa tab <strong>Mutation Log</strong> mereka. Anda akan mendapati dua entri <span class="text-danger font-weight-bold">Debit</span> terpisah: satu untuk dana pokok transfer, dan satu lagi dengan keterangan <em>Cashout Fee</em> sebagai potongan layanan.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- New Section: Form Validations -->
+        <div class="mb-5">
+            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-shield-alt text-primary mr-2"></i> 3. Validasi Form & Batasan (Constraints)</h5>
+            <div class="table-responsive shadow-sm mb-4" style="border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05);">
+                <table class="table table-borderless table-striped small mb-0" style="background: rgba(255,255,255,0.02);">
+                    <thead style="background: rgba(0,0,0,0.4);">
+                        <tr>
+                            <th class="p-3 border-0" style="width: 25%;">Tipe Validasi</th>
+                            <th class="p-3 border-0">Aturan Penegakan Sistem</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td class="p-3 border-0"><strong>Kolom Wajib</strong></td><td class="p-3 border-0">Semua kolom harus diisi (<code>Channel ID</code>, <code>Fee Type</code>, <code>Fee</code>, <code>Percentage</code>, <code>Interval</code>, <code>Min Amount</code>, <code>Max Amount</code>, <code>Status</code>).</td></tr>
+                        <tr><td class="p-3 border-0"><strong>Tipe Data</strong></td><td class="p-3 border-0">Semua isian nilai biaya (fee) dan limit nominal transaksi harus berupa nilai numerik valid.</td></tr>
+                        <tr><td class="p-3 border-0"><strong>Unik per Channel</strong></td><td class="p-3 border-0">Setiap merchant hanya boleh memiliki satu pengaturan fee per layanan.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- New Section: System Notifications -->
+            <h6 class="font-weight-bold mb-3 mt-4 text-dark"><i class="fas fa-bell text-info mr-2"></i> Notifikasi Sistem</h6>
+            <div class="d-flex flex-column mb-4">
+                <div class="mb-3">
+                    <div class="p-3 rounded border" style="background-color: rgba(22, 163, 74, 0.05); border-color: rgba(22, 163, 74, 0.2) !important;">
+                        <strong class="text-success d-block mb-2"><i class="fas fa-check-circle mr-1"></i> Notifikasi Sukses</strong>
+                        <ul class="small text-muted mb-0 pl-3">
+                            <li class="mb-0"><strong>Pengaturan Disimpan:</strong> <code>Data successfully inserted</code> / <code>updated</code></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="mb-1">
+                    <div class="p-3 rounded border" style="background-color: rgba(220, 38, 38, 0.05); border-color: rgba(220, 38, 38, 0.2) !important;">
+                        <strong class="text-danger d-block mb-2"><i class="fas fa-exclamation-circle mr-1"></i> Notifikasi Error & Solusinya</strong>
+                        <ul class="small text-muted mb-0 pl-3">
+                            <li class="mb-3">
+                                <strong>Duplikat Konfigurasi (1062):</strong> <code>Failed to insert data: A fee configuration for this channel already exists.</code>
+                                <div class="text-dark mt-1"><i class="fas fa-lightbulb text-warning mr-1"></i> <strong>Solusi:</strong> Anda tidak dapat membuat pengaturan fee baru untuk kanal yang sama. Silakan edit konfigurasi yang sudah ada.</div>
+                            </li>
+                            <li class="mb-0">
+                                <strong>Access Denied (1142):</strong> <code>Access Denied. You do not have sufficient database privileges to add cashout fee settings.</code>
+                                <div class="text-dark mt-1"><i class="fas fa-lightbulb text-warning mr-1"></i> <strong>Solusi:</strong> User MySQL tidak memiliki izin INSERT. Silakan hubungi Database Administrator.</div>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>

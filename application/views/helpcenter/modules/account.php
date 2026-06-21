@@ -112,6 +112,60 @@
                     <li class="mb-2"><strong>To Delete:</strong> Click the Action Menu (⋮) and select <strong><i class="fas fa-trash-alt"></i> Delete Account</strong>. Only use this if the admin was created by mistake and has zero activity logs.</li>
                 </ol>
             </div>
+
+            <!-- New Section: Form Validations -->
+            <h6 class="font-weight-bold mb-3 mt-5 text-dark"><i class="fas fa-shield-alt text-primary mr-2"></i> Form Validations & Constraints</h6>
+            <div class="table-responsive shadow-sm mb-4" style="border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05);">
+                <table class="table table-borderless table-striped small mb-0" style="background: rgba(255,255,255,0.02);">
+                    <thead style="background: rgba(0,0,0,0.4);">
+                        <tr>
+                            <th class="p-3 border-0" style="width: 25%;">Constraint Type</th>
+                            <th class="p-3 border-0">System Enforcement Rule</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td class="p-3 border-0"><strong>Required Fields</strong></td><td class="p-3 border-0"><code>Email</code>, <code>Password</code>, and <code>Password Confirmation</code> cannot be empty during creation.</td></tr>
+                        <tr><td class="p-3 border-0"><strong>Password Match</strong></td><td class="p-3 border-0">The <code>Password</code> and <code>Password Confirmation</code> fields must exactly match.</td></tr>
+                        <tr><td class="p-3 border-0"><strong>Level Validation</strong></td><td class="p-3 border-0">The system only accepts <code>Level 1</code> or <code>Level 2</code>. Any bypassed input will be rejected.</td></tr>
+                        <tr><td class="p-3 border-0"><strong>Unique Email</strong></td><td class="p-3 border-0">The database enforces a strict unique constraint on the Email address. Duplicates will trigger an <code>EMAIL_HAS_TAKEN</code> error.</td></tr>
+                        <tr><td class="p-3 border-0"><strong>Self-Deletion</strong></td><td class="p-3 border-0">The system actively prevents the deletion of your own currently active session account.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- New Section: System Notifications -->
+            <h6 class="font-weight-bold mb-3 mt-4 text-dark"><i class="fas fa-bell text-info mr-2"></i> System Notifications</h6>
+            <div class="d-flex flex-column mb-4">
+                <div class="mb-3">
+                    <div class="p-3 rounded border" style="background-color: rgba(22, 163, 74, 0.05); border-color: rgba(22, 163, 74, 0.2) !important;">
+                        <strong class="text-success d-block mb-2"><i class="fas fa-check-circle mr-1"></i> Success Events</strong>
+                        <ul class="small text-muted mb-0 pl-3">
+                            <li class="mb-1"><strong>Creation:</strong> <code>Admin added successfully.</code></li>
+                            <li class="mb-1"><strong>Update:</strong> <code>Admin updated successfully.</code></li>
+                            <li class="mb-0"><strong>Deletion:</strong> <code>Admin account deleted successfully.</code></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="mb-1">
+                    <div class="p-3 rounded border" style="background-color: rgba(220, 38, 38, 0.05); border-color: rgba(220, 38, 38, 0.2) !important;">
+                        <strong class="text-danger d-block mb-2"><i class="fas fa-exclamation-circle mr-1"></i> Error Events & Solutions</strong>
+                        <ul class="small text-muted mb-0 pl-3">
+                            <li class="mb-3">
+                                <strong>Duplicate:</strong> <code>Email already exists for another account.</code>
+                                <div class="text-dark mt-1"><i class="fas fa-lightbulb text-warning mr-1"></i> <strong>Solution:</strong> Use the global search to find the existing staff profile and update it instead of creating a new one.</div>
+                            </li>
+                            <li class="mb-3">
+                                <strong>Mismatch:</strong> <code>Password and Password Confirmation do not match.</code>
+                                <div class="text-dark mt-1"><i class="fas fa-lightbulb text-warning mr-1"></i> <strong>Solution:</strong> Retype the password carefully in both fields to ensure they are identical.</div>
+                            </li>
+                            <li class="mb-0">
+                                <strong>Constraint (1451):</strong> <code>Cannot delete this account because it is currently linked to existing transaction or activity records.</code>
+                                <div class="text-dark mt-1"><i class="fas fa-lightbulb text-warning mr-1"></i> <strong>Solution:</strong> Do not delete. Instead, edit the account and change its Status to "Blocked" or "Freeze" to safely deny access.</div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- FAQ -->
@@ -260,9 +314,63 @@
             <h6 class="font-weight-bold mb-3 mt-4 text-dark"><i class="fas fa-chevron-circle-right text-success mr-2"></i> Alur Kerja C: Menangguhkan vs Menghapus</h6>
             <div class="pl-4 border-left border-success ml-2 mb-4">
                 <ol class="text-muted mb-0">
-                    <li class="mb-3"><strong>Untuk Menangguhkan:</strong> Buka <strong>Manage Account</strong> dan ubah Statusnya menjadi <code>Blocked</code> atau <code>Freeze</code>. Ini langsung menolak akses login mereka tetapi mempertahankan riwayat audit mereka.</li>
-                    <li class="mb-2"><strong>Untuk Menghapus:</strong> Klik Menu Aksi (⋮) dan pilih <strong><i class="fas fa-trash-alt"></i> Delete Account</strong>. Gunakan opsi ini HANYA jika admin tersebut dibuat karena kesalahan ketik dan belum memiliki log aktivitas apa pun.</li>
+                    <li class="mb-3"><strong>Untuk Menangguhkan:</strong> Buka <strong>Manage Account</strong> dan ubah Status menjadi <code>Blocked</code> atau <code>Freeze</code>. Ini segera memblokir login tapi mempertahankan log riwayat aktivitasnya.</li>
+                    <li class="mb-2"><strong>Untuk Menghapus:</strong> Klik Menu Aksi (⋮) dan pilih <strong><i class="fas fa-trash-alt"></i> Delete Account</strong>. Gunakan aksi ini HANYA jika admin dibuat karena kesalahan dan belum memiliki riwayat aksi apapun.</li>
                 </ol>
+            </div>
+
+            <!-- New Section: Form Validations -->
+            <h6 class="font-weight-bold mb-3 mt-5 text-dark"><i class="fas fa-shield-alt text-primary mr-2"></i> Validasi Form & Batasan (Constraints)</h6>
+            <div class="table-responsive shadow-sm mb-4" style="border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05);">
+                <table class="table table-borderless table-striped small mb-0" style="background: rgba(255,255,255,0.02);">
+                    <thead style="background: rgba(0,0,0,0.4);">
+                        <tr>
+                            <th class="p-3 border-0" style="width: 25%;">Tipe Validasi</th>
+                            <th class="p-3 border-0">Aturan Penegakan Sistem</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td class="p-3 border-0"><strong>Kolom Wajib</strong></td><td class="p-3 border-0"><code>Email</code>, <code>Password</code>, dan <code>Password Confirmation</code> tidak boleh kosong saat pembuatan akun.</td></tr>
+                        <tr><td class="p-3 border-0"><strong>Kecocokan Password</strong></td><td class="p-3 border-0">Kolom <code>Password</code> dan <code>Password Confirmation</code> harus sama persis (match).</td></tr>
+                        <tr><td class="p-3 border-0"><strong>Validasi Level</strong></td><td class="p-3 border-0">Sistem hanya menerima input <code>Level 1</code> atau <code>Level 2</code>. Input selain ini akan langsung ditolak.</td></tr>
+                        <tr><td class="p-3 border-0"><strong>Email Unik</strong></td><td class="p-3 border-0">Database memberlakukan constraint unik ketat pada alamat Email. Duplikasi akan memicu error <code>EMAIL_HAS_TAKEN</code>.</td></tr>
+                        <tr><td class="p-3 border-0"><strong>Penghapusan Diri Sendiri</strong></td><td class="p-3 border-0">Sistem memblokir perintah hapus terhadap sesi akun milik Anda sendiri yang sedang aktif.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- New Section: System Notifications -->
+            <h6 class="font-weight-bold mb-3 mt-4 text-dark"><i class="fas fa-bell text-info mr-2"></i> Notifikasi Sistem</h6>
+            <div class="d-flex flex-column mb-4">
+                <div class="mb-3">
+                    <div class="p-3 rounded border" style="background-color: rgba(22, 163, 74, 0.05); border-color: rgba(22, 163, 74, 0.2) !important;">
+                        <strong class="text-success d-block mb-2"><i class="fas fa-check-circle mr-1"></i> Notifikasi Sukses</strong>
+                        <ul class="small text-muted mb-0 pl-3">
+                            <li class="mb-1"><strong>Pembuatan:</strong> <code>Admin added successfully.</code></li>
+                            <li class="mb-1"><strong>Pembaruan:</strong> <code>Admin updated successfully.</code></li>
+                            <li class="mb-0"><strong>Penghapusan:</strong> <code>Admin account deleted successfully.</code></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="mb-1">
+                    <div class="p-3 rounded border" style="background-color: rgba(220, 38, 38, 0.05); border-color: rgba(220, 38, 38, 0.2) !important;">
+                        <strong class="text-danger d-block mb-2"><i class="fas fa-exclamation-circle mr-1"></i> Notifikasi Error & Solusinya</strong>
+                        <ul class="small text-muted mb-0 pl-3">
+                            <li class="mb-3">
+                                <strong>Duplikat:</strong> <code>Email already exists for another account.</code>
+                                <div class="text-dark mt-1"><i class="fas fa-lightbulb text-warning mr-1"></i> <strong>Solusi:</strong> Gunakan fitur pencarian (search) untuk mencari profil yang sudah ada dan perbarui profil tersebut, daripada membuat akun baru.</div>
+                            </li>
+                            <li class="mb-3">
+                                <strong>Tidak Cocok:</strong> <code>Password and Password Confirmation do not match.</code>
+                                <div class="text-dark mt-1"><i class="fas fa-lightbulb text-warning mr-1"></i> <strong>Solusi:</strong> Ketik ulang kata sandi dengan perlahan di kedua kolom untuk memastikan keduanya sama persis.</div>
+                            </li>
+                            <li class="mb-0">
+                                <strong>Constraint (1451):</strong> <code>Cannot delete this account because it is currently linked to existing transaction or activity records.</code>
+                                <div class="text-dark mt-1"><i class="fas fa-lightbulb text-warning mr-1"></i> <strong>Solusi:</strong> Jangan dihapus. Edit akun tersebut dan ubah Statusnya menjadi "Blocked" atau "Freeze" untuk memutus akses login secara aman.</div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
 

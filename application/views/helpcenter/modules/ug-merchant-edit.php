@@ -58,6 +58,58 @@
             </div>
         </div>
 
+        <!-- New Section: Form Validations -->
+        <div class="mb-5">
+            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-shield-alt text-primary mr-2"></i> 2. Form Validations & Constraints</h5>
+            <div class="table-responsive shadow-sm mb-4" style="border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05);">
+                <table class="table table-borderless table-striped small mb-0" style="background: rgba(255,255,255,0.02);">
+                    <thead style="background: rgba(0,0,0,0.4);">
+                        <tr>
+                            <th class="p-3 border-0" style="width: 25%;">Constraint Type</th>
+                            <th class="p-3 border-0">System Enforcement Rule</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td class="p-3 border-0"><strong>Required Fields</strong></td><td class="p-3 border-0"><code>Merchant Name</code>, <code>Merchant Email</code>, and <code>OpenAPI Status</code> cannot be empty.</td></tr>
+                        <tr><td class="p-3 border-0"><strong>Email Format & Uniqueness</strong></td><td class="p-3 border-0">The <code>Merchant Email</code> must be a valid email string and uniquely identify the merchant across the database (1062 constraint).</td></tr>
+                        <tr><td class="p-3 border-0"><strong>Password Matching</strong></td><td class="p-3 border-0">If resetting the password, both the new password and confirmation password fields must be identical.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- New Section: System Notifications -->
+            <h6 class="font-weight-bold mb-3 mt-4 text-dark"><i class="fas fa-bell text-info mr-2"></i> System Notifications</h6>
+            <div class="d-flex flex-column mb-4">
+                <div class="mb-3">
+                    <div class="p-3 rounded border" style="background-color: rgba(22, 163, 74, 0.05); border-color: rgba(22, 163, 74, 0.2) !important;">
+                        <strong class="text-success d-block mb-2"><i class="fas fa-check-circle mr-1"></i> Success Events</strong>
+                        <ul class="small text-muted mb-0 pl-3">
+                            <li class="mb-0"><strong>Update:</strong> <code>Merchant successfully updated.</code></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="mb-1">
+                    <div class="p-3 rounded border" style="background-color: rgba(220, 38, 38, 0.05); border-color: rgba(220, 38, 38, 0.2) !important;">
+                        <strong class="text-danger d-block mb-2"><i class="fas fa-exclamation-circle mr-1"></i> Error Events & Solutions</strong>
+                        <ul class="small text-muted mb-0 pl-3">
+                            <li class="mb-3">
+                                <strong>Duplicate Email (1062):</strong> <code>A merchant account with this email already exists.</code>
+                                <div class="text-dark mt-1"><i class="fas fa-lightbulb text-warning mr-1"></i> <strong>Solution:</strong> Ensure you are not accidentally duplicating an existing merchant. Use the search function to verify if the email is already registered.</div>
+                            </li>
+                            <li class="mb-3">
+                                <strong>Password Mismatch:</strong> <code>Password not match</code>
+                                <div class="text-dark mt-1"><i class="fas fa-lightbulb text-warning mr-1"></i> <strong>Solution:</strong> Retype the password carefully in both fields.</div>
+                            </li>
+                            <li class="mb-0">
+                                <strong>Access Denied (1142):</strong> <code>Access Denied. You do not have sufficient database privileges to modify merchant accounts.</code>
+                                <div class="text-dark mt-1"><i class="fas fa-lightbulb text-warning mr-1"></i> <strong>Solution:</strong> Contact the Database Administrator to grant UPDATE privileges to the database user.</div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- FAQ -->
         <h5 class="font-weight-bold mb-4 mt-5 d-flex align-items-center"><i class="fas fa-question-circle text-warning mr-3"></i> Common Issues &amp; What To Do</h5>
         <div class="faq-accordion mb-5">
@@ -152,6 +204,58 @@
                 <div class="callout-content">
                     <strong class="d-block mb-1 text-body" style="font-size: 16px;">Status Account vs OpenAPI</strong>
                     <p class="mb-0 text-muted small"><strong>Account Status</strong> mengontrol kemampuan mereka untuk login ke UI dasbor. <strong>OpenAPI Access Status</strong> mengontrol panggilan API antar-server. Anda dapat memblokir akses API (menangguhkan transaksi) tetapi membiarkan Status Akun tetap aktif sehingga mereka masih bisa login untuk melihat laporan lama atau menarik sisa saldo mereka.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- New Section: Form Validations -->
+        <div class="mb-5">
+            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-shield-alt text-primary mr-2"></i> 2. Validasi Form & Batasan (Constraints)</h5>
+            <div class="table-responsive shadow-sm mb-4" style="border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05);">
+                <table class="table table-borderless table-striped small mb-0" style="background: rgba(255,255,255,0.02);">
+                    <thead style="background: rgba(0,0,0,0.4);">
+                        <tr>
+                            <th class="p-3 border-0" style="width: 25%;">Tipe Validasi</th>
+                            <th class="p-3 border-0">Aturan Penegakan Sistem</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td class="p-3 border-0"><strong>Kolom Wajib</strong></td><td class="p-3 border-0">Kolom <code>Merchant Name</code>, <code>Merchant Email</code>, dan <code>OpenAPI Status</code> tidak boleh kosong.</td></tr>
+                        <tr><td class="p-3 border-0"><strong>Format & Keunikan Email</strong></td><td class="p-3 border-0"><code>Merchant Email</code> harus berupa format email yang valid dan merupakan pengenal unik merchant di dalam database (Constraint 1062).</td></tr>
+                        <tr><td class="p-3 border-0"><strong>Kecocokan Kata Sandi</strong></td><td class="p-3 border-0">Jika Anda mereset kata sandi, isian pada kolom kata sandi baru dan kolom konfirmasi harus sama persis.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- New Section: System Notifications -->
+            <h6 class="font-weight-bold mb-3 mt-4 text-dark"><i class="fas fa-bell text-info mr-2"></i> Notifikasi Sistem</h6>
+            <div class="d-flex flex-column mb-4">
+                <div class="mb-3">
+                    <div class="p-3 rounded border" style="background-color: rgba(22, 163, 74, 0.05); border-color: rgba(22, 163, 74, 0.2) !important;">
+                        <strong class="text-success d-block mb-2"><i class="fas fa-check-circle mr-1"></i> Notifikasi Sukses</strong>
+                        <ul class="small text-muted mb-0 pl-3">
+                            <li class="mb-0"><strong>Pembaruan:</strong> <code>Merchant successfully updated.</code></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="mb-1">
+                    <div class="p-3 rounded border" style="background-color: rgba(220, 38, 38, 0.05); border-color: rgba(220, 38, 38, 0.2) !important;">
+                        <strong class="text-danger d-block mb-2"><i class="fas fa-exclamation-circle mr-1"></i> Notifikasi Error & Solusinya</strong>
+                        <ul class="small text-muted mb-0 pl-3">
+                            <li class="mb-3">
+                                <strong>Duplikat Email (1062):</strong> <code>A merchant account with this email already exists.</code>
+                                <div class="text-dark mt-1"><i class="fas fa-lightbulb text-warning mr-1"></i> <strong>Solusi:</strong> Pastikan Anda tidak menduplikasi merchant. Gunakan fitur pencarian untuk memverifikasi apakah email tersebut sudah terdaftar sebelumnya.</div>
+                            </li>
+                            <li class="mb-3">
+                                <strong>Kata Sandi Berbeda:</strong> <code>Password not match</code>
+                                <div class="text-dark mt-1"><i class="fas fa-lightbulb text-warning mr-1"></i> <strong>Solusi:</strong> Ketik ulang kata sandi dengan teliti di kedua kolom.</div>
+                            </li>
+                            <li class="mb-0">
+                                <strong>Access Denied (1142):</strong> <code>Access Denied. You do not have sufficient database privileges to modify merchant accounts.</code>
+                                <div class="text-dark mt-1"><i class="fas fa-lightbulb text-warning mr-1"></i> <strong>Solusi:</strong> Hubungi Database Administrator untuk memberikan izin UPDATE pada pengguna database MySQL.</div>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>

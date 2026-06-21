@@ -103,6 +103,55 @@
                     <li class="mb-2"><em>Note: Deleting a Main Menu will also delete all of its Submenus automatically via SQL Cascade.</em></li>
                 </ol>
             </div>
+
+            <!-- New Section: Form Validations -->
+            <h6 class="font-weight-bold mb-3 mt-5 text-dark"><i class="fas fa-shield-alt text-primary mr-2"></i> Form Validations & Constraints</h6>
+            <div class="table-responsive shadow-sm mb-4" style="border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05);">
+                <table class="table table-borderless table-striped small mb-0" style="background: rgba(255,255,255,0.02);">
+                    <thead style="background: rgba(0,0,0,0.4);">
+                        <tr>
+                            <th class="p-3 border-0" style="width: 25%;">Constraint Type</th>
+                            <th class="p-3 border-0">System Enforcement Rule</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td class="p-3 border-0"><strong>Required Fields</strong></td><td class="p-3 border-0">When creating a Submenu, the <code>Menu Title</code>, <code>Parent Menu</code>, <code>URL</code>, and <code>Icon</code> fields cannot be empty.</td></tr>
+                        <tr><td class="p-3 border-0"><strong>Foreign Key Protection</strong></td><td class="p-3 border-0">A Menu cannot be deleted if it is currently mapped to roles in the <code>user_access_menu</code> table to prevent orphan records.</td></tr>
+                        <tr><td class="p-3 border-0"><strong>Super-Admin Privileges</strong></td><td class="p-3 border-0">Only Role ID 1 (Super Admin) is authorized to perform Role Configuration and Menu modifications.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- New Section: System Notifications -->
+            <h6 class="font-weight-bold mb-3 mt-4 text-dark"><i class="fas fa-bell text-info mr-2"></i> System Notifications</h6>
+            <div class="d-flex flex-column mb-4">
+                <div class="mb-3">
+                    <div class="p-3 rounded border" style="background-color: rgba(22, 163, 74, 0.05); border-color: rgba(22, 163, 74, 0.2) !important;">
+                        <strong class="text-success d-block mb-2"><i class="fas fa-check-circle mr-1"></i> Success Events</strong>
+                        <ul class="small text-muted mb-0 pl-3">
+                            <li class="mb-1"><strong>Toggle Access:</strong> <code>Menu Access Modified!</code></li>
+                            <li class="mb-1"><strong>Create Menu:</strong> <code>New Menu Added Successfully.</code></li>
+                            <li class="mb-1"><strong>Update Menu:</strong> <code>Menu Updated Successfully.</code></li>
+                            <li class="mb-0"><strong>Delete Menu:</strong> <code>Menu Deleted Successfully.</code></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="mb-1">
+                    <div class="p-3 rounded border" style="background-color: rgba(220, 38, 38, 0.05); border-color: rgba(220, 38, 38, 0.2) !important;">
+                        <strong class="text-danger d-block mb-2"><i class="fas fa-exclamation-circle mr-1"></i> Error Events & Solutions</strong>
+                        <ul class="small text-muted mb-0 pl-3">
+                            <li class="mb-3">
+                                <strong>Constraint (1451):</strong> <code>Cannot delete this menu because it contains active submenus or access permissions.</code>
+                                <div class="text-dark mt-1"><i class="fas fa-lightbulb text-warning mr-1"></i> <strong>Solution:</strong> You must toggle the menu's access to OFF for all roles before attempting to delete it.</div>
+                            </li>
+                            <li class="mb-0">
+                                <strong>Access Denied (1142):</strong> <code>Access Denied. You do not have sufficient database privileges to modify menu items.</code>
+                                <div class="text-dark mt-1"><i class="fas fa-lightbulb text-warning mr-1"></i> <strong>Solution:</strong> The configured MySQL user lacks UPDATE/DELETE privileges. Contact the Database Administrator.</div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- FAQ -->
@@ -250,11 +299,60 @@
             <h6 class="font-weight-bold mb-3 mt-4 text-dark"><i class="fas fa-chevron-circle-right text-success mr-2"></i> Alur Kerja C: Menghapus Menu Secara Global</h6>
             <div class="pl-4 border-left border-success ml-2 mb-4">
                 <ol class="text-muted mb-0">
-                    <li class="mb-3">Klik ikon titik tiga vertikal (⋮) di ujung kanan baris menu yang ingin dihapus.</li>
+                    <li class="mb-3">Klik tombol elipsis (⋮) pada menu target.</li>
                     <li class="mb-3">Pilih opsi merah <strong>Delete Menu</strong>.</li>
-                    <li class="mb-3">Akan muncul pop-up konfirmasi. Klik <strong>Yes, delete it!</strong></li>
-                    <li class="mb-2"><em>Catatan: Menghapus Menu Utama juga akan secara otomatis menghapus semua Submenu di bawahnya via SQL Cascade.</em></li>
+                    <li class="mb-3">Pop-up konfirmasi akan muncul. Klik <strong>Yes, delete it!</strong></li>
+                    <li class="mb-2"><em>Catatan: Menghapus Menu Utama akan otomatis menghapus semua Submenu di bawahnya melalui fitur SQL Cascade.</em></li>
                 </ol>
+            </div>
+
+            <!-- New Section: Form Validations -->
+            <h6 class="font-weight-bold mb-3 mt-5 text-dark"><i class="fas fa-shield-alt text-primary mr-2"></i> Validasi Form & Batasan (Constraints)</h6>
+            <div class="table-responsive shadow-sm mb-4" style="border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05);">
+                <table class="table table-borderless table-striped small mb-0" style="background: rgba(255,255,255,0.02);">
+                    <thead style="background: rgba(0,0,0,0.4);">
+                        <tr>
+                            <th class="p-3 border-0" style="width: 25%;">Tipe Validasi</th>
+                            <th class="p-3 border-0">Aturan Penegakan Sistem</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td class="p-3 border-0"><strong>Kolom Wajib</strong></td><td class="p-3 border-0">Saat membuat Submenu baru, kolom <code>Menu Title</code>, <code>Parent Menu</code>, <code>URL</code>, dan <code>Icon</code> tidak boleh kosong.</td></tr>
+                        <tr><td class="p-3 border-0"><strong>Proteksi Foreign Key</strong></td><td class="p-3 border-0">Menu tidak dapat dihapus jika masih terkait dengan role apa pun di tabel <code>user_access_menu</code> guna mencegah data yatim (orphan).</td></tr>
+                        <tr><td class="p-3 border-0"><strong>Hak Akses Super-Admin</strong></td><td class="p-3 border-0">Hanya Role ID 1 (Super Admin) yang memiliki otorisasi untuk melakukan Konfigurasi Role dan memodifikasi Menu.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- New Section: System Notifications -->
+            <h6 class="font-weight-bold mb-3 mt-4 text-dark"><i class="fas fa-bell text-info mr-2"></i> Notifikasi Sistem</h6>
+            <div class="d-flex flex-column mb-4">
+                <div class="mb-3">
+                    <div class="p-3 rounded border" style="background-color: rgba(22, 163, 74, 0.05); border-color: rgba(22, 163, 74, 0.2) !important;">
+                        <strong class="text-success d-block mb-2"><i class="fas fa-check-circle mr-1"></i> Notifikasi Sukses</strong>
+                        <ul class="small text-muted mb-0 pl-3">
+                            <li class="mb-1"><strong>Ubah Akses:</strong> <code>Menu Access Modified!</code></li>
+                            <li class="mb-1"><strong>Pembuatan Menu:</strong> <code>New Menu Added Successfully.</code></li>
+                            <li class="mb-1"><strong>Pembaruan Menu:</strong> <code>Menu Updated Successfully.</code></li>
+                            <li class="mb-0"><strong>Penghapusan Menu:</strong> <code>Menu Deleted Successfully.</code></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="mb-1">
+                    <div class="p-3 rounded border" style="background-color: rgba(220, 38, 38, 0.05); border-color: rgba(220, 38, 38, 0.2) !important;">
+                        <strong class="text-danger d-block mb-2"><i class="fas fa-exclamation-circle mr-1"></i> Notifikasi Error & Solusinya</strong>
+                        <ul class="small text-muted mb-0 pl-3">
+                            <li class="mb-3">
+                                <strong>Constraint (1451):</strong> <code>Cannot delete this menu because it contains active submenus or access permissions.</code>
+                                <div class="text-dark mt-1"><i class="fas fa-lightbulb text-warning mr-1"></i> <strong>Solusi:</strong> Anda wajib mematikan saklar akses (OFF) untuk menu ini pada SEMUA role sebelum bisa menghapusnya secara global.</div>
+                            </li>
+                            <li class="mb-0">
+                                <strong>Access Denied (1142):</strong> <code>Access Denied. You do not have sufficient database privileges to modify menu items.</code>
+                                <div class="text-dark mt-1"><i class="fas fa-lightbulb text-warning mr-1"></i> <strong>Solusi:</strong> User MySQL yang dikonfigurasi tidak punya izin UPDATE/DELETE. Hubungi Database Administrator.</div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
 

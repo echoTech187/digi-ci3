@@ -28,6 +28,63 @@
             </div>
         </div>
 
+        <!-- Form Validations & Constraints -->
+        <div class="mb-5">
+            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-shield-alt text-danger mr-2"></i> Form Validations & Constraints</h5>
+            <div class="table-responsive shadow-sm" style="border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05);">
+                <table class="table table-borderless table-striped small mb-0" style="background: rgba(255,255,255,0.02);">
+                    <thead style="background: rgba(0,0,0,0.4);">
+                        <tr>
+                            <th class="p-3 border-0" style="width: 25%;">Constraint Type</th>
+                            <th class="p-3 border-0">System Enforcement Rule</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td class="p-3 border-0"><strong>Unique Channel</strong></td><td class="p-3 border-0">A merchant can only have one configuration per <code>Channel Group</code> and <code>Specific Channel ID</code>. Duplicates trigger an error.</td></tr>
+                        <tr><td class="p-3 border-0"><strong>Required Fields</strong></td><td class="p-3 border-0"><code>Fee Type</code>, <code>Fixed Fee</code>, <code>Percentage Fee</code>, <code>Amount Min</code>, and <code>Amount Max</code> cannot be empty.</td></tr>
+                        <tr><td class="p-3 border-0"><strong>Numeric Bounds</strong></td><td class="p-3 border-0">Percentage fee must be between <code>0</code> and <code>100</code>. Amount Min must not be greater than Amount Max.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- System Notifications -->
+        <div class="mb-5">
+            <h6 class="font-weight-bold mb-3 mt-4 text-dark"><i class="fas fa-bell text-info mr-2"></i> System Notifications</h6>
+            <div class="d-flex flex-column mb-4">
+                <div class="mb-3">
+                    <div class="p-3 rounded border" style="background-color: rgba(22, 163, 74, 0.05); border-color: rgba(22, 163, 74, 0.2) !important;">
+                        <strong class="text-success d-block mb-2"><i class="fas fa-check-circle mr-1"></i> Success Events</strong>
+                        <ul class="small text-muted mb-0 pl-3">
+                            <li class="mb-1"><strong>Creation:</strong> <code>Cashin channel mapped successfully.</code></li>
+                            <li class="mb-1"><strong>Bulk Add:</strong> <code>Bulk cashin channels added successfully. Skipped X existing channels.</code></li>
+                            <li class="mb-1"><strong>Update:</strong> <code>Cashin channel updated successfully.</code></li>
+                            <li class="mb-0"><strong>Deletion:</strong> <code>Cashin channel mapping removed.</code></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="mb-1">
+                    <div class="p-3 rounded border" style="background-color: rgba(220, 38, 38, 0.05); border-color: rgba(220, 38, 38, 0.2) !important;">
+                        <strong class="text-danger d-block mb-2"><i class="fas fa-exclamation-circle mr-1"></i> Error Events & Solutions</strong>
+                        <ul class="small text-muted mb-0 pl-3">
+                            <li class="mb-3">
+                                <strong>Duplicate (1062):</strong> <code>This channel mapping already exists for the selected merchant.</code>
+                                <div class="text-dark mt-1"><i class="fas fa-lightbulb text-warning mr-1"></i> <strong>Solution:</strong> Find the existing mapping in the table and edit it, rather than creating a new one.</div>
+                            </li>
+                            <li class="mb-3">
+                                <strong>Foreign Key (1451):</strong> <code>Cannot delete or update a parent row: a foreign key constraint fails.</code>
+                                <div class="text-dark mt-1"><i class="fas fa-lightbulb text-warning mr-1"></i> <strong>Solution:</strong> You cannot delete this channel if it has active transactional history associated with it. Disable the channel instead by setting its status to Inactive.</div>
+                            </li>
+                            <li class="mb-0">
+                                <strong>Invalid Limits:</strong> <code>Minimum amount cannot be greater than Maximum amount.</code>
+                                <div class="text-dark mt-1"><i class="fas fa-lightbulb text-warning mr-1"></i> <strong>Solution:</strong> Correct the amount thresholds so that Min &lt;= Max, or set both to 0 to inherit global limits.</div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Section 1: Architecture -->
         <div class="mb-5">
             <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-project-diagram text-primary mr-2"></i> 1. Architecture: Cashin Processing</h5>
@@ -160,6 +217,63 @@
                         <tr><td class="p-3 border-0"><strong>AMOUNT MIN & MAX</strong></td><td class="p-3 border-0">Batas nilai transaksi paling rendah/tinggi opsional. Isi <code>0</code> untuk mewarisi limit global.</td></tr>
                     </tbody>
                 </table>
+            </div>
+        </div>
+
+        <!-- Form Validations & Constraints -->
+        <div class="mb-5">
+            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-shield-alt text-danger mr-2"></i> Validasi Formulir & Kendala Sistem</h5>
+            <div class="table-responsive shadow-sm" style="border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05);">
+                <table class="table table-borderless table-striped small mb-0" style="background: rgba(255,255,255,0.02);">
+                    <thead style="background: rgba(0,0,0,0.4);">
+                        <tr>
+                            <th class="p-3 border-0" style="width: 25%;">Tipe Kendala</th>
+                            <th class="p-3 border-0">Aturan Sistem</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td class="p-3 border-0"><strong>Kanal Unik</strong></td><td class="p-3 border-0">Merchant hanya dapat memiliki satu konfigurasi per <code>Channel Group</code> dan <code>Specific Channel ID</code>. Duplikat akan memicu error.</td></tr>
+                        <tr><td class="p-3 border-0"><strong>Kolom Wajib</strong></td><td class="p-3 border-0"><code>Fee Type</code>, <code>Fixed Fee</code>, <code>Percentage Fee</code>, <code>Amount Min</code>, dan <code>Amount Max</code> tidak boleh kosong.</td></tr>
+                        <tr><td class="p-3 border-0"><strong>Batas Numerik</strong></td><td class="p-3 border-0">Biaya persentase harus antara <code>0</code> dan <code>100</code>. Amount Min tidak boleh lebih besar dari Amount Max.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- System Notifications -->
+        <div class="mb-5">
+            <h6 class="font-weight-bold mb-3 mt-4 text-dark"><i class="fas fa-bell text-info mr-2"></i> Notifikasi Sistem</h6>
+            <div class="d-flex flex-column mb-4">
+                <div class="mb-3">
+                    <div class="p-3 rounded border" style="background-color: rgba(22, 163, 74, 0.05); border-color: rgba(22, 163, 74, 0.2) !important;">
+                        <strong class="text-success d-block mb-2"><i class="fas fa-check-circle mr-1"></i> Event Berhasil</strong>
+                        <ul class="small text-muted mb-0 pl-3">
+                            <li class="mb-1"><strong>Pembuatan:</strong> <code>Cashin channel mapped successfully.</code></li>
+                            <li class="mb-1"><strong>Penambahan Massal:</strong> <code>Bulk cashin channels added successfully. Skipped X existing channels.</code></li>
+                            <li class="mb-1"><strong>Pembaruan:</strong> <code>Cashin channel updated successfully.</code></li>
+                            <li class="mb-0"><strong>Penghapusan:</strong> <code>Cashin channel mapping removed.</code></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="mb-1">
+                    <div class="p-3 rounded border" style="background-color: rgba(220, 38, 38, 0.05); border-color: rgba(220, 38, 38, 0.2) !important;">
+                        <strong class="text-danger d-block mb-2"><i class="fas fa-exclamation-circle mr-1"></i> Event Error & Solusi</strong>
+                        <ul class="small text-muted mb-0 pl-3">
+                            <li class="mb-3">
+                                <strong>Duplikat (1062):</strong> <code>This channel mapping already exists for the selected merchant.</code>
+                                <div class="text-dark mt-1"><i class="fas fa-lightbulb text-warning mr-1"></i> <strong>Solusi:</strong> Cari mapping yang sudah ada di tabel lalu edit, jangan membuat yang baru.</div>
+                            </li>
+                            <li class="mb-3">
+                                <strong>Foreign Key (1451):</strong> <code>Cannot delete or update a parent row: a foreign key constraint fails.</code>
+                                <div class="text-dark mt-1"><i class="fas fa-lightbulb text-warning mr-1"></i> <strong>Solusi:</strong> Anda tidak dapat menghapus kanal ini jika sudah memiliki riwayat transaksi aktif. Nonaktifkan (Inactive) kanal tersebut sebagai gantinya.</div>
+                            </li>
+                            <li class="mb-0">
+                                <strong>Limit Tidak Valid:</strong> <code>Minimum amount cannot be greater than Maximum amount.</code>
+                                <div class="text-dark mt-1"><i class="fas fa-lightbulb text-warning mr-1"></i> <strong>Solusi:</strong> Perbaiki ambang batas jumlah sehingga Min &lt;= Max, atau set keduanya ke 0 untuk mewarisi limit global.</div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
 

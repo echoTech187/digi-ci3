@@ -57,6 +57,54 @@
             </div>
         </div>
 
+        <!-- New Section: Form Validations -->
+        <div class="mb-5">
+            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-shield-alt text-primary mr-2"></i> 3. Form Validations & Constraints</h5>
+            <div class="table-responsive shadow-sm mb-4" style="border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05);">
+                <table class="table table-borderless table-striped small mb-0" style="background: rgba(255,255,255,0.02);">
+                    <thead style="background: rgba(0,0,0,0.4);">
+                        <tr>
+                            <th class="p-3 border-0" style="width: 25%;">Constraint Type</th>
+                            <th class="p-3 border-0">System Enforcement Rule</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td class="p-3 border-0"><strong>Required Fields</strong></td><td class="p-3 border-0"><code>Sub Account Name</code>, <code>Email Address</code>, and initial <code>Password</code> cannot be empty.</td></tr>
+                        <tr><td class="p-3 border-0"><strong>Email Uniqueness</strong></td><td class="p-3 border-0">Even though it is a sub-account, the <code>Email Address</code> must be completely unique across the entire system (cannot be the same as the parent or any other merchant).</td></tr>
+                        <tr><td class="p-3 border-0"><strong>Depth Limit</strong></td><td class="p-3 border-0">The system prevents creation if the hierarchy depth exceeds Level 3.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- New Section: System Notifications -->
+            <h6 class="font-weight-bold mb-3 mt-4 text-dark"><i class="fas fa-bell text-info mr-2"></i> System Notifications</h6>
+            <div class="d-flex flex-column mb-4">
+                <div class="mb-3">
+                    <div class="p-3 rounded border" style="background-color: rgba(22, 163, 74, 0.05); border-color: rgba(22, 163, 74, 0.2) !important;">
+                        <strong class="text-success d-block mb-2"><i class="fas fa-check-circle mr-1"></i> Success Events</strong>
+                        <ul class="small text-muted mb-0 pl-3">
+                            <li class="mb-0"><strong>Creation:</strong> <code>Merchant successfully registered.</code></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="mb-1">
+                    <div class="p-3 rounded border" style="background-color: rgba(220, 38, 38, 0.05); border-color: rgba(220, 38, 38, 0.2) !important;">
+                        <strong class="text-danger d-block mb-2"><i class="fas fa-exclamation-circle mr-1"></i> Error Events & Solutions</strong>
+                        <ul class="small text-muted mb-0 pl-3">
+                            <li class="mb-3">
+                                <strong>Duplicate Email (1062):</strong> <code>A merchant account with this email already exists.</code>
+                                <div class="text-dark mt-1"><i class="fas fa-lightbulb text-warning mr-1"></i> <strong>Solution:</strong> You must use a unique email for every sub-account. Try adding an alias, e.g., <code>contact+branch1@merchant.com</code>.</div>
+                            </li>
+                            <li class="mb-0">
+                                <strong>Access Denied (1142):</strong> <code>Access Denied. You do not have sufficient database privileges to create merchant accounts.</code>
+                                <div class="text-dark mt-1"><i class="fas fa-lightbulb text-warning mr-1"></i> <strong>Solution:</strong> The MySQL user lacks INSERT privileges. Contact the Database Administrator.</div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- FAQ -->
         <h5 class="font-weight-bold mb-4 mt-5 d-flex align-items-center"><i class="fas fa-question-circle text-warning mr-3"></i> Common Issues &amp; What To Do</h5>
         <div class="faq-accordion mb-5">
@@ -138,6 +186,54 @@
                         <tr><td class="p-3 border-0"><strong><i class="fas fa-exchange-alt text-warning"></i> Mutations</strong></td><td class="p-3 border-0">Langsung melompat ke Log Mutasi yang difilter khusus untuk sub-akun ini guna mengaudit pergerakan finansial individualnya.</td></tr>
                     </tbody>
                 </table>
+            </div>
+        </div>
+
+        <!-- New Section: Form Validations -->
+        <div class="mb-5">
+            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-shield-alt text-primary mr-2"></i> 3. Validasi Form & Batasan (Constraints)</h5>
+            <div class="table-responsive shadow-sm mb-4" style="border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05);">
+                <table class="table table-borderless table-striped small mb-0" style="background: rgba(255,255,255,0.02);">
+                    <thead style="background: rgba(0,0,0,0.4);">
+                        <tr>
+                            <th class="p-3 border-0" style="width: 25%;">Tipe Validasi</th>
+                            <th class="p-3 border-0">Aturan Penegakan Sistem</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td class="p-3 border-0"><strong>Kolom Wajib</strong></td><td class="p-3 border-0">Kolom <code>Sub Account Name</code>, <code>Email Address</code>, dan <code>Password</code> awal tidak boleh kosong.</td></tr>
+                        <tr><td class="p-3 border-0"><strong>Keunikan Email</strong></td><td class="p-3 border-0">Meskipun hanya sub-akun, <code>Email Address</code> harus benar-benar unik di seluruh sistem (tidak boleh sama dengan induk atau merchant lainnya).</td></tr>
+                        <tr><td class="p-3 border-0"><strong>Batas Kedalaman</strong></td><td class="p-3 border-0">Sistem mencegah pembuatan akun jika kedalaman hierarki telah mencapai Level 3.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- New Section: System Notifications -->
+            <h6 class="font-weight-bold mb-3 mt-4 text-dark"><i class="fas fa-bell text-info mr-2"></i> Notifikasi Sistem</h6>
+            <div class="d-flex flex-column mb-4">
+                <div class="mb-3">
+                    <div class="p-3 rounded border" style="background-color: rgba(22, 163, 74, 0.05); border-color: rgba(22, 163, 74, 0.2) !important;">
+                        <strong class="text-success d-block mb-2"><i class="fas fa-check-circle mr-1"></i> Notifikasi Sukses</strong>
+                        <ul class="small text-muted mb-0 pl-3">
+                            <li class="mb-0"><strong>Pembuatan:</strong> <code>Merchant successfully registered.</code></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="mb-1">
+                    <div class="p-3 rounded border" style="background-color: rgba(220, 38, 38, 0.05); border-color: rgba(220, 38, 38, 0.2) !important;">
+                        <strong class="text-danger d-block mb-2"><i class="fas fa-exclamation-circle mr-1"></i> Notifikasi Error & Solusinya</strong>
+                        <ul class="small text-muted mb-0 pl-3">
+                            <li class="mb-3">
+                                <strong>Duplikat Email (1062):</strong> <code>A merchant account with this email already exists.</code>
+                                <div class="text-dark mt-1"><i class="fas fa-lightbulb text-warning mr-1"></i> <strong>Solusi:</strong> Anda wajib menggunakan email yang unik untuk setiap sub-akun. Coba tambahkan alias, misal <code>contact+cabang1@merchant.com</code>.</div>
+                            </li>
+                            <li class="mb-0">
+                                <strong>Access Denied (1142):</strong> <code>Access Denied. You do not have sufficient database privileges to create merchant accounts.</code>
+                                <div class="text-dark mt-1"><i class="fas fa-lightbulb text-warning mr-1"></i> <strong>Solusi:</strong> User MySQL tidak memiliki izin INSERT. Silakan hubungi Database Administrator.</div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
 

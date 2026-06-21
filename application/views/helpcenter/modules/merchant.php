@@ -107,6 +107,53 @@
             </div>
         </div>
 
+        <!-- New Section: Form Validations -->
+        <div class="mb-5">
+            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-shield-alt text-primary mr-2"></i> 3. Form Validations & Constraints</h5>
+            <div class="table-responsive shadow-sm mb-4" style="border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05);">
+                <table class="table table-borderless table-striped small mb-0" style="background: rgba(255,255,255,0.02);">
+                    <thead style="background: rgba(0,0,0,0.4);">
+                        <tr>
+                            <th class="p-3 border-0" style="width: 25%;">Constraint Type</th>
+                            <th class="p-3 border-0">System Enforcement Rule</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td class="p-3 border-0"><strong>Required Fields</strong></td><td class="p-3 border-0"><code>Merchant Name</code>, <code>Merchant Email</code>, and <code>Password</code> are strictly required during onboarding.</td></tr>
+                        <tr><td class="p-3 border-0"><strong>Unique Identity</strong></td><td class="p-3 border-0"><code>Merchant Email</code> must be unique globally. The system will reject duplicate emails.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- New Section: System Notifications -->
+            <h6 class="font-weight-bold mb-3 mt-4 text-dark"><i class="fas fa-bell text-info mr-2"></i> System Notifications</h6>
+            <div class="d-flex flex-column mb-4">
+                <div class="mb-3">
+                    <div class="p-3 rounded border" style="background-color: rgba(22, 163, 74, 0.05); border-color: rgba(22, 163, 74, 0.2) !important;">
+                        <strong class="text-success d-block mb-2"><i class="fas fa-check-circle mr-1"></i> Success Events</strong>
+                        <ul class="small text-muted mb-0 pl-3">
+                            <li class="mb-0"><strong>Merchant Created:</strong> <code>Merchant successfully registered.</code></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="mb-1">
+                    <div class="p-3 rounded border" style="background-color: rgba(220, 38, 38, 0.05); border-color: rgba(220, 38, 38, 0.2) !important;">
+                        <strong class="text-danger d-block mb-2"><i class="fas fa-exclamation-circle mr-1"></i> Error Events & Solutions</strong>
+                        <ul class="small text-muted mb-0 pl-3">
+                            <li class="mb-3">
+                                <strong>Duplicate Email (1062):</strong> <code>Email address already in use.</code>
+                                <div class="text-dark mt-1"><i class="fas fa-lightbulb text-warning mr-1"></i> <strong>Solution:</strong> Ask the client for a different email address or search for the existing merchant record.</div>
+                            </li>
+                            <li class="mb-0">
+                                <strong>Access Denied (1142):</strong> <code>Access Denied. You do not have sufficient privileges.</code>
+                                <div class="text-dark mt-1"><i class="fas fa-lightbulb text-warning mr-1"></i> <strong>Solution:</strong> The MySQL user lacks INSERT privileges. Contact the Database Administrator.</div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- FAQ -->
         <h5 class="font-weight-bold mb-4 mt-5 d-flex align-items-center"><i class="fas fa-question-circle text-warning mr-3"></i> Common Issues & Troubleshooting</h5>
         <div class="faq-accordion mb-5">
@@ -268,6 +315,53 @@
                     <li class="mb-3">Ubah opsi <strong>OpenAPI Status</strong> menjadi <code>Blocked</code>.</li>
                     <li class="mb-2">Simpan perubahan. Merchant masih tetap bisa login ke Dasbor mereka, tetapi seluruh proses transaksi API live dan pengiriman webhook akan langsung dihentikan.</li>
                 </ol>
+            </div>
+        </div>
+
+        <!-- New Section: Form Validations -->
+        <div class="mb-5">
+            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-shield-alt text-primary mr-2"></i> 3. Validasi Form & Batasan (Constraints)</h5>
+            <div class="table-responsive shadow-sm mb-4" style="border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05);">
+                <table class="table table-borderless table-striped small mb-0" style="background: rgba(255,255,255,0.02);">
+                    <thead style="background: rgba(0,0,0,0.4);">
+                        <tr>
+                            <th class="p-3 border-0" style="width: 25%;">Tipe Validasi</th>
+                            <th class="p-3 border-0">Aturan Penegakan Sistem</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td class="p-3 border-0"><strong>Kolom Wajib</strong></td><td class="p-3 border-0"><code>Merchant Name</code>, <code>Merchant Email</code>, dan <code>Password</code> wajib diisi penuh saat mendaftarkan merchant baru.</td></tr>
+                        <tr><td class="p-3 border-0"><strong>Identitas Unik</strong></td><td class="p-3 border-0"><code>Merchant Email</code> wajib unik secara sistem. Pendaftaran email ganda akan langsung ditolak sistem.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- New Section: System Notifications -->
+            <h6 class="font-weight-bold mb-3 mt-4 text-dark"><i class="fas fa-bell text-info mr-2"></i> Notifikasi Sistem</h6>
+            <div class="d-flex flex-column mb-4">
+                <div class="mb-3">
+                    <div class="p-3 rounded border" style="background-color: rgba(22, 163, 74, 0.05); border-color: rgba(22, 163, 74, 0.2) !important;">
+                        <strong class="text-success d-block mb-2"><i class="fas fa-check-circle mr-1"></i> Notifikasi Sukses</strong>
+                        <ul class="small text-muted mb-0 pl-3">
+                            <li class="mb-0"><strong>Merchant Dibuat:</strong> <code>Merchant successfully registered.</code></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="mb-1">
+                    <div class="p-3 rounded border" style="background-color: rgba(220, 38, 38, 0.05); border-color: rgba(220, 38, 38, 0.2) !important;">
+                        <strong class="text-danger d-block mb-2"><i class="fas fa-exclamation-circle mr-1"></i> Notifikasi Error & Solusinya</strong>
+                        <ul class="small text-muted mb-0 pl-3">
+                            <li class="mb-3">
+                                <strong>Duplikat Email (1062):</strong> <code>Email address already in use.</code>
+                                <div class="text-dark mt-1"><i class="fas fa-lightbulb text-warning mr-1"></i> <strong>Solusi:</strong> Email sudah dipakai akun lain. Silakan pakai alamat email yang lain atau gunakan fitur pencarian untuk mencari akun tersebut.</div>
+                            </li>
+                            <li class="mb-0">
+                                <strong>Access Denied (1142):</strong> <code>Access Denied. You do not have sufficient privileges.</code>
+                                <div class="text-dark mt-1"><i class="fas fa-lightbulb text-warning mr-1"></i> <strong>Solusi:</strong> User MySQL tidak memiliki hak akses INSERT. Silakan kontak Database Administrator Anda.</div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
 

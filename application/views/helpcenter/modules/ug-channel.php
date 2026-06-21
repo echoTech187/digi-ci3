@@ -90,6 +90,58 @@
             </div>
         </div>
 
+        <!-- New Section: Form Validations -->
+        <div class="mb-5">
+            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-shield-alt text-primary mr-2"></i> 4. Form Validations & Constraints</h5>
+            <div class="table-responsive shadow-sm mb-4" style="border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05);">
+                <table class="table table-borderless table-striped small mb-0" style="background: rgba(255,255,255,0.02);">
+                    <thead style="background: rgba(0,0,0,0.4);">
+                        <tr>
+                            <th class="p-3 border-0" style="width: 25%;">Constraint Type</th>
+                            <th class="p-3 border-0">System Enforcement Rule</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td class="p-3 border-0"><strong>Required Fields</strong></td><td class="p-3 border-0"><code>ID</code>, <code>Channel Group</code>, <code>External Default</code>, <code>Fee Type</code>, <code>Fee</code>, <code>Amount Min</code>, and <code>Amount Max</code> must be populated. (Cashin also requires <code>Settlement Interval</code>).</td></tr>
+                        <tr><td class="p-3 border-0"><strong>Data Types</strong></td><td class="p-3 border-0"><code>Fee</code>, <code>Settlement Interval</code>, <code>Amount Min</code>, and <code>Amount Max</code> must be valid numeric values.</td></tr>
+                        <tr><td class="p-3 border-0"><strong>Deletion Protection</strong></td><td class="p-3 border-0">A channel cannot be deleted if it is still linked to active merchant configurations or transactions.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- New Section: System Notifications -->
+            <h6 class="font-weight-bold mb-3 mt-4 text-dark"><i class="fas fa-bell text-info mr-2"></i> System Notifications</h6>
+            <div class="d-flex flex-column mb-4">
+                <div class="mb-3">
+                    <div class="p-3 rounded border" style="background-color: rgba(22, 163, 74, 0.05); border-color: rgba(22, 163, 74, 0.2) !important;">
+                        <strong class="text-success d-block mb-2"><i class="fas fa-check-circle mr-1"></i> Success Events</strong>
+                        <ul class="small text-muted mb-0 pl-3">
+                            <li class="mb-0"><strong>Configuration Saved/Deleted:</strong> <code>Data successfully inserted/updated</code> or <code>Channel successfully deleted</code>.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="mb-1">
+                    <div class="p-3 rounded border" style="background-color: rgba(220, 38, 38, 0.05); border-color: rgba(220, 38, 38, 0.2) !important;">
+                        <strong class="text-danger d-block mb-2"><i class="fas fa-exclamation-circle mr-1"></i> Error Events & Solutions</strong>
+                        <ul class="small text-muted mb-0 pl-3">
+                            <li class="mb-3">
+                                <strong>Duplicate Entry (1062):</strong> <code>Failed to insert/update data: A channel with this ID or configuration already exists.</code>
+                                <div class="text-dark mt-1"><i class="fas fa-lightbulb text-warning mr-1"></i> <strong>Solution:</strong> Ensure you are using a unique ID or edit the existing channel configuration instead.</div>
+                            </li>
+                            <li class="mb-3">
+                                <strong>Dependency Constraint (1451):</strong> <code>Cannot delete this channel because it is currently linked to existing merchant fee configurations or transactions.</code>
+                                <div class="text-dark mt-1"><i class="fas fa-lightbulb text-warning mr-1"></i> <strong>Solution:</strong> You must first disable the channel or remove its references from all merchant accounts before attempting deletion.</div>
+                            </li>
+                            <li class="mb-0">
+                                <strong>Access Denied (1142):</strong> <code>Access Denied. You do not have sufficient database privileges.</code>
+                                <div class="text-dark mt-1"><i class="fas fa-lightbulb text-warning mr-1"></i> <strong>Solution:</strong> The MySQL user lacks INSERT/UPDATE/DELETE privileges. Contact the Database Administrator.</div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- FAQ -->
         <h5 class="font-weight-bold mb-4 mt-5 d-flex align-items-center"><i class="fas fa-question-circle text-warning mr-3"></i> Common Issues &amp; What To Do</h5>
         <div class="faq-accordion mb-5">
@@ -217,6 +269,58 @@
                     <li class="mb-3">Klik <strong>Save Changes</strong>. Konfigurasi baru langsung berlaku untuk semua request API berikutnya — tidak perlu restart server.</li>
                     <li class="mb-2">Jika menambahkan channel baru (integrasi bank/agregator baru), harus di-seed terlebih dahulu ke tabel <code>master_channels</code> oleh tim teknik dan cache dibersihkan sebelum muncul di daftar ini.</li>
                 </ol>
+            </div>
+        </div>
+
+        <!-- New Section: Form Validations -->
+        <div class="mb-5">
+            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-shield-alt text-primary mr-2"></i> 4. Validasi Form & Batasan (Constraints)</h5>
+            <div class="table-responsive shadow-sm mb-4" style="border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05);">
+                <table class="table table-borderless table-striped small mb-0" style="background: rgba(255,255,255,0.02);">
+                    <thead style="background: rgba(0,0,0,0.4);">
+                        <tr>
+                            <th class="p-3 border-0" style="width: 25%;">Tipe Validasi</th>
+                            <th class="p-3 border-0">Aturan Penegakan Sistem</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td class="p-3 border-0"><strong>Kolom Wajib</strong></td><td class="p-3 border-0">Kolom <code>ID</code>, <code>Channel Group</code>, <code>External Default</code>, <code>Fee Type</code>, <code>Fee</code>, <code>Amount Min</code>, dan <code>Amount Max</code> harus diisi. (Khusus Cashin memerlukan <code>Settlement Interval</code>).</td></tr>
+                        <tr><td class="p-3 border-0"><strong>Tipe Data</strong></td><td class="p-3 border-0">Kolom <code>Fee</code>, <code>Settlement Interval</code>, <code>Amount Min</code>, dan <code>Amount Max</code> harus berupa angka numerik.</td></tr>
+                        <tr><td class="p-3 border-0"><strong>Proteksi Penghapusan</strong></td><td class="p-3 border-0">Channel tidak dapat dihapus jika masih terikat dengan konfigurasi fee merchant aktif atau rekam jejak transaksi.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- New Section: System Notifications -->
+            <h6 class="font-weight-bold mb-3 mt-4 text-dark"><i class="fas fa-bell text-info mr-2"></i> Notifikasi Sistem</h6>
+            <div class="d-flex flex-column mb-4">
+                <div class="mb-3">
+                    <div class="p-3 rounded border" style="background-color: rgba(22, 163, 74, 0.05); border-color: rgba(22, 163, 74, 0.2) !important;">
+                        <strong class="text-success d-block mb-2"><i class="fas fa-check-circle mr-1"></i> Notifikasi Sukses</strong>
+                        <ul class="small text-muted mb-0 pl-3">
+                            <li class="mb-0"><strong>Aksi Berhasil:</strong> <code>Data successfully inserted/updated</code> atau <code>Channel successfully deleted</code>.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="mb-1">
+                    <div class="p-3 rounded border" style="background-color: rgba(220, 38, 38, 0.05); border-color: rgba(220, 38, 38, 0.2) !important;">
+                        <strong class="text-danger d-block mb-2"><i class="fas fa-exclamation-circle mr-1"></i> Notifikasi Error & Solusinya</strong>
+                        <ul class="small text-muted mb-0 pl-3">
+                            <li class="mb-3">
+                                <strong>Duplikat Konfigurasi (1062):</strong> <code>Failed to insert/update data: A channel with this ID or configuration already exists.</code>
+                                <div class="text-dark mt-1"><i class="fas fa-lightbulb text-warning mr-1"></i> <strong>Solusi:</strong> Pastikan Anda menggunakan ID yang unik atau ubah data channel yang sudah ada.</div>
+                            </li>
+                            <li class="mb-3">
+                                <strong>Dependensi (1451):</strong> <code>Cannot delete this channel because it is currently linked to existing merchant fee configurations or transactions.</code>
+                                <div class="text-dark mt-1"><i class="fas fa-lightbulb text-warning mr-1"></i> <strong>Solusi:</strong> Anda harus menonaktifkan channel atau menghapus referensi penggunaannya pada akun merchant sebelum Anda bisa menghapusnya.</div>
+                            </li>
+                            <li class="mb-0">
+                                <strong>Access Denied (1142):</strong> <code>Access Denied. You do not have sufficient database privileges.</code>
+                                <div class="text-dark mt-1"><i class="fas fa-lightbulb text-warning mr-1"></i> <strong>Solusi:</strong> User MySQL tidak memiliki izin modifikasi data. Silakan hubungi Database Administrator.</div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
 

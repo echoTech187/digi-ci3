@@ -254,6 +254,8 @@
             pointer-events: none;
             z-index: -1;
             visibility: hidden;
+            height: 0;
+            overflow: hidden;
         }
         .hc-doc-section.active { 
             position: relative;
@@ -261,6 +263,8 @@
             pointer-events: auto;
             z-index: 1;
             visibility: visible;
+            height: auto;
+            overflow: visible;
             animation: slideUp 0.4s ease-out forwards; 
         }
         
@@ -705,6 +709,9 @@
                 <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-merchant-edit">
                     Edit Merchant
                 </a>
+                <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-merchant-supervisor">
+                    Merchant Supervisor
+                </a>
                 <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-merchant-subaccount">
                     Sub Accounts
                 </a>
@@ -740,29 +747,40 @@
                 <i class="fas fa-chevron-down hc-submenu-icon" style="width:auto; font-size:10px; opacity:0.5;"></i>
             </a>
             <div id="submenu-products" class="hc-submenu-container" style="display: none;">
+                <!-- Global Providers -->
+                <div style="padding: 12px 32px 4px 56px; font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">Global Providers</div>
                 <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-cashin">
-                    <i class="fas fa-arrow-circle-down"></i> Cash-In Providers
+                    Cash-In Providers
                 </a>
                 <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-cashout">
-                    <i class="fas fa-arrow-circle-up"></i> Cash-Out Providers
+                    Cash-Out Providers
                 </a>
+
+                <!-- Virtual Accounts -->
+                <div style="padding: 12px 32px 4px 56px; font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">Virtual Accounts</div>
                 <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-va-dynamic">
-                    <i class="fas fa-university"></i> VA Dynamic
+                    VA Dynamic
                 </a>
                 <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-va-recurring">
-                    <i class="fas fa-history"></i> VA Recurring
+                    VA Recurring
                 </a>
+
+                <!-- QRIS & E-Wallet -->
+                <div style="padding: 12px 32px 4px 56px; font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">QRIS & E-Wallet</div>
                 <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-qris-dynamic">
-                    <i class="fas fa-qrcode"></i> QRIS Dynamic
+                    QRIS Dynamic
                 </a>
                 <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-qris-recurring">
-                    <i class="fas fa-redo"></i> QRIS Recurring
+                    QRIS Recurring
                 </a>
                 <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-ewallet-dynamic">
-                    <i class="fas fa-wallet"></i> E-Wallet Dynamic
+                    E-Wallet Dynamic
                 </a>
+
+                <!-- Digital Goods -->
+                <div style="padding: 12px 32px 4px 56px; font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">Digital Goods</div>
                 <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-prepaid-products">
-                    <i class="fas fa-mobile-alt"></i> Prepaid Products
+                    Prepaid Products
                 </a>
             </div>
 
@@ -772,17 +790,25 @@
                 <i class="fas fa-chevron-down hc-submenu-icon" style="width:auto; font-size:10px; opacity:0.5;"></i>
             </a>
             <div id="submenu-finance" class="hc-submenu-container" style="display: none;">
+                <!-- Treasury Operations -->
+                <div style="padding: 12px 32px 4px 56px; font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">Treasury Operations</div>
                 <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-external-balance-log">
-                    <i class="fas fa-balance-scale"></i> External Balance Log
+                    External Balance Log
                 </a>
                 <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-bifast">
-                    <i class="fas fa-fighter-jet"></i> Bi-Fast Transfer
+                    Bi-Fast Transfer
                 </a>
+                <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-settlement-holidays">
+                    Settlement Holidays
+                </a>
+
+                <!-- Audit & Reporting -->
+                <div style="padding: 12px 32px 4px 56px; font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">Audit & Reporting</div>
                 <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-financial-exports">
-                    <i class="fas fa-file-export"></i> Financial Exports
+                    Financial Exports
                 </a>
                 <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-balance-logs">
-                    <i class="fas fa-book"></i> Audit Balance Logs
+                    Audit Balance Logs
                 </a>
             </div>
 
@@ -792,17 +818,22 @@
                 <i class="fas fa-chevron-down hc-submenu-icon" style="width:auto; font-size:10px; opacity:0.5;"></i>
             </a>
             <div id="submenu-system" class="hc-submenu-container" style="display: none;">
+                <!-- Security & Access -->
+                <div style="padding: 12px 32px 4px 56px; font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">Security & Access</div>
                 <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-login">
-                    <i class="fas fa-sign-in-alt"></i> Authentication
+                    Authentication
                 </a>
                 <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-rbac">
-                    <i class="fas fa-users-cog"></i> RBAC & Permissions
+                    RBAC & Permissions
                 </a>
+
+                <!-- Platform Config -->
+                <div style="padding: 12px 32px 4px 56px; font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">Platform Config</div>
                 <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-account">
-                    <i class="fas fa-user-circle"></i> Account Setup
+                    Account Setup
                 </a>
                 <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-channel">
-                    <i class="fas fa-exchange-alt"></i> Gateway Channel
+                    Gateway Channel
                 </a>
             </div>
 
@@ -884,6 +915,8 @@
                 <?php include APPPATH . 'views/helpcenter/modules/ug-bifast.php'; ?>
                 <?php include APPPATH . 'views/helpcenter/modules/ug-channel.php'; ?>
                 <?php include APPPATH . 'views/helpcenter/modules/ug-report.php'; ?>
+                <?php include APPPATH . 'views/helpcenter/modules/ug-merchant-supervisor.php'; ?>
+                <?php include APPPATH . 'views/helpcenter/modules/ug-settlement-holidays.php'; ?>
                 <!-- Universal Feedback Widget -->
                 <div id="hc-feedback-widget" class="mt-5 pt-4 pb-4 border-top text-center" style="border-color: var(--hc-border) !important;">
                     <h6 class="font-weight-bold mb-3" style="color: var(--hc-heading);">Was this page helpful?</h6>
