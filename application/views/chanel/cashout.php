@@ -36,7 +36,7 @@
             
             <div class="drawer-card">
                 <div class="drawer-card-title"><i class="fas fa-coins text-primary mr-2"></i> Limits & Fees</div>
-                <p class="drawer-card-text">Audit fixed/percentage processing fees and the ceiling/floor transaction amounts permitted per cash-out request.</p>
+                <p class="drawer-card-text">Audit fixed/percetange processing fees and the ceiling/floor transaction amounts permitted per cash-out request.</p>
             </div>
         </div>
     </div>
@@ -198,7 +198,7 @@
                             <p class="text-muted small mb-3" style="font-size:12px;line-height:1.5;">Configure outbound payout channels for external bank or provider endpoints.</p>
                             <div class="p-3 mb-3" style="border-radius:12px;">
                                 <h6 class="fw-bold mb-1 d-flex align-items-center" style="font-size:12px;"><i class="fas fa-money-check-alt text-warning mr-2"></i> 1. Fee Type</h6>
-                                <p class="text-muted mb-0" style="font-size:11px;line-height:1.4;">Fixed: flat deduction per transaction. Percentage: dynamic slice of payout amount.</p>
+                                <p class="text-muted mb-0" style="font-size:11px;line-height:1.4;">Fixed: flat deduction per transaction. percetange: dynamic slice of payout amount.</p>
                             </div>
                             <div class="p-3" style="border-radius:12px;">
                                 <h6 class="fw-bold mb-1 d-flex align-items-center" style="font-size:12px;"><i class="fas fa-shield-alt text-info mr-2"></i> 2. Amount Limits</h6>
@@ -216,7 +216,7 @@
                             <div class="mb-3"><label class="dt-more-label mb-2">Description</label><textarea class="dt-more-input" name="description" rows="2" placeholder="Detail channel configuration..."></textarea></div>
                             <div class="row mb-3">
                                 <div class="col-md-6 mb-3 mb-md-0"><label class="dt-more-label mb-2">External Default</label><input type="text" class="dt-more-input" required name="externaldefault" placeholder="External provider key"></div>
-                                <div class="col-md-6"><label class="dt-more-label mb-2">Fee Type</label><select class="dt-more-select" required name="feetype"><option value="" selected disabled>Select fee type</option><option value="Fixed">Fixed</option><option value="Percetange">Percentage</option><option value="Both">Both</option></select></div>
+                                <div class="col-md-6"><label class="dt-more-label mb-2">Fee Type</label><select class="dt-more-select" required name="feetype"><option value="" selected disabled>Select fee type</option><option value="Fixed">Fixed</option><option value="Percetange">percetange</option><option value="Both">Both</option></select></div>
                             </div>
                             <div class="row mb-0">
                                 <div class="col-md-4 mb-3 mb-md-0"><label class="dt-more-label mb-2">Fee Value</label><div class="input-group"><div class="input-group-prepend"><span class="input-group-text border-right-0" style="border-radius:8px 0 0 8px;font-size:12px;">Rp</span></div><input type="text" class="input-rupiah form-control" class="dt-more-input h-auto" required name="fee" style="border-radius:0 8px 8px 0;"></div></div>
@@ -276,7 +276,13 @@
                             <div class="mb-3"><label class="dt-more-label mb-2">Description</label><textarea class="dt-more-input" name="description" rows="2" id="edit_description"></textarea></div>
                             <div class="row mb-3">
                                 <div class="col-md-6 mb-3 mb-md-0"><label class="dt-more-label mb-2">External Default</label><input type="text" class="dt-more-input" required name="externaldefault" id="edit_externaldefault"></div>
-                                <div class="col-md-6"><label class="dt-more-label mb-2">Fee Type</label><select class="dt-more-select" required name="feetype" id="edit_feetype"><option value="" disabled>Select fee type</option><option value="Fixed">Fixed</option><option value="Percetange">Percentage</option><option value="Both">Both</option></select></div>
+                                <div class="col-md-6"><label class="dt-more-label mb-2">Fee Type</label>
+                                <select class="dt-more-select" required name="feetype" id="edit_feetype">
+                                    <option value="" disabled>Select fee type</option>
+                                    <option value="Fixed">Fixed</option>
+                                    <option value="Percetange">Percentange</option>
+                                    <option value="Both">Both</option></select>
+                                </div>
                             </div>
                             <div class="row mb-0">
                                 <div class="col-md-4 mb-3 mb-md-0"><label class="dt-more-label mb-2">Fee Value</label><div class="input-group"><div class="input-group-prepend"><span class="input-group-text border-right-0" style="border-radius:8px 0 0 8px;font-size:12px;">Rp</span></div><input type="text" class="input-rupiah form-control" class="dt-more-input h-auto" required name="fee" id="edit_fee" style="border-radius:0 8px 8px 0;"></div></div>
@@ -392,7 +398,7 @@
             var ft = ($(this).data('feetype') || '').toLowerCase();
             if (ft === 'fixed') {
                 $('#edit_feetype').val('Fixed');
-            } else if (ft === 'percentage' || ft === 'percetange') {
+            } else if (ft === 'percetange' || ft === 'percetange') {
                 $('#edit_feetype').val('Percetange');
             } else if (ft === 'both') {
                 $('#edit_feetype').val('Both');

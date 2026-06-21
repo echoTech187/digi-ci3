@@ -6,46 +6,9 @@
             <h1 class="dt-page-title">Merchant Management</h1>
             <p class="dt-page-subtitle">View and manage all registered merchants and their balances.</p>
         </div>
-        <button type="button" class="btn-dt-action btn-dt-action-primary border-0 d-flex align-items-center shadow-sm" id="toggleGuideBtn" >
+        <a href="<?= base_url('helpcenter#merchant') ?>" target="_blank" class="btn-dt-action btn-dt-action-primary border-0 text-white d-flex align-items-center shadow-sm text-decoration-none">
             <i class="fas fa-book-open mr-2"></i> <span class="d-none d-md-block">Instructions Guide</span>
-        </button>
-    </div>
-
-    <!-- ── Toggleable Page Instructional Drawer ── -->
-    <div class="drawer-overlay" id="instructionOverlay"></div>
-    <div class="drawer-right" id="instructionDrawer">
-        <div class="drawer-header">
-            <h6 class="drawer-title"><i class="fas fa-book mr-2"></i> Merchant Management Overview</h6>
-            <button type="button" class="drawer-close" id="closeDrawerBtn">&times;</button>
-        </div>
-        <div class="drawer-body">
-            <p class="drawer-desc">Welcome to the core Merchant Management portal. Here you can oversee all registered merchants, track their API statuses, and manage their fund balances with absolute precision.</p>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-search text-primary mr-2"></i> Global Search</div>
-                <p class="drawer-card-text">Find any merchant instantly by their Name, Merchant ID, Business ID, or Email Address using the fast search bar.</p>
-            </div>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-filter text-primary mr-2"></i> Advanced Filters</div>
-                <p class="drawer-card-text">Narrow down the list by Account Status (Active, Blocked, Frozen), OpenAPI Status, and Registration Date range.</p>
-            </div>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-wallet text-primary mr-2"></i> Balance Controls</div>
-                <p class="drawer-card-text">Authorized admins can manually Credit (Add) or Debit (Deduct) a merchant's balance directly from the actions menu.</p>
-            </div>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-key text-primary mr-2"></i> Delegation & Security</div>
-                <p class="drawer-card-text">Configure a merchant's maximum hierarchy permissions, ensuring sub-accounts never exceed their parent's access ceilings.</p>
-            </div>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-sliders-h text-primary mr-2"></i> Deep Configuration</div>
-                <p class="drawer-card-text">Use the Action (⋮) menu to jump to a merchant's specific Mutation Logs, Sub-Accounts, or Cashin/Cashout Fee Settings.</p>
-            </div>
-        </div>
+        </a>
     </div>
 
     <!-- Data Table Card -->
@@ -566,17 +529,6 @@
                     if (json && json.redirect) {
                         window.location = json.redirect;
                     }
-                });
-
-                // Drawer Logic
-                $('#toggleGuideBtn').on('click', function() {
-                    $('#instructionDrawer, #instructionOverlay').addClass('open');
-                    $('body').css('overflow', 'hidden');
-                });
-
-                $('#closeDrawerBtn, #instructionOverlay').on('click', function() {
-                    $('#instructionDrawer, #instructionOverlay').removeClass('open');
-                    $('body').css('overflow', '');
                 });
 
                 // ── More Filters dropdown ──

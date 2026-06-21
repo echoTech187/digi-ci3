@@ -32,10 +32,28 @@
                     $displayName = '#' . $segment;
                 }
 
-                // 3. URL Override: If segment match in breadcrumb_url_replace, use custom URL
+                // 3. URL Override & Unclickable Fallback
+                // Berikut adalah daftar segment yang murni HANYA berupa grup (tanpa halaman index) 
+                // atau action method (butuh parameter).
+                $unclickable_segments = [
+                    // Grup Modul Utama (tidak ada halamannya sendiri)
+                    'finance', 'merchant', 'report', 'access-control', 'external', 'channel', 'product', 'health', 'auth', 'games',
+                    
+                    // Aksi / Method (Pasti error kalau dibuka tanpa parameter / POST)
+                    'detail', 'edit', 'update', 'delete', 'add', 'create', 'bulk-create', 'reset', 'download',
+                    'notification', 'resend', 'ajax', 'json', 'save', 'get', 'search', 'groups', 'register',
+                    'history-ajax', 'mutation-ajax', 'submerchant-ajax', 'overview-ajax', 'bulk-update',
+                    'get-channels', 'get-filter-options', 'get-merchant-mappings', 'change-password', 'forgot-password', 'reset-password',
+                    'verify', 'blocked', 'toggle-openapi', 'maintenance-status', 'sync-balance', 'recent-mutations', 'today-stats',
+                    'monthly-stats', 'metadata', 'analytics-data', 'global-search', 'recent-search', 'channels',
+                    'setting-cashin-fee', 'setting-cashout-fee', 'balance', 'credit', 'debit', 'permissions'
+                ];
+                
                 $finalUrl = base_url($current_url);
                 if (isset($breadcrumb_url_replace) && isset($breadcrumb_url_replace[$segment])) {
                     $finalUrl = base_url($breadcrumb_url_replace[$segment]);
+                } elseif (in_array(strtolower($segment), $unclickable_segments) || is_numeric($segment)) {
+                    $finalUrl = 'javascript:void(0)';
                 }
 
                 $breadcrumb[] = [
@@ -45,18 +63,63 @@
             }
             ?>
             <nav aria-label="breadcrumb" class="d-none d-lg-block">
-                <ol class="dt-breadcrumb ">
-                    <li class="dt-breadcrumb-item"><a href="<?= base_url('dashboard') ?>" title="Home"><i class="fas fa-home" style="font-size:12px;"></i></a></li>
-                    <?php foreach ($breadcrumb as $index => $item): ?>
-                        <li class="dt-breadcrumb-separator"><i class="fas fa-chevron-right"></i></li>
-                        <li class="dt-breadcrumb-item">
-                            <?php if ($index === count($breadcrumb) - 1): ?>
-                                <span><?= $item['name'] ?></span>
-                            <?php else: ?>
-                                <a href="<?= $item['url'] ?>"><?= $item['name'] ?></a>
-                            <?php endif; ?>
+                <ol class="dt-breadcrumb align-items-center">
+                    <li class="dt-breadcrumb-item"><a href="<?= base_url('dashboard') ?>" title="Home" style="font-weight: 600;">Home</a></li>
+                    <?php
+                    $breadcrumbCount = count($breadcrumb);
+                    $maxVisible = 1; // Show only the last item normally
+
+                    if ($breadcrumbCount > $maxVisible) {
+                        $hiddenItems = array_slice($breadcrumb, 0, $breadcrumbCount - $maxVisible);
+                        $visibleItems = array_slice($breadcrumb, $breadcrumbCount - $maxVisible);
+                        
+                        // Render ellipsis dropdown
+                        ?>
+                        <li class="dt-breadcrumb-separator"><i class="fas fa-chevron-right" style="font-size: 10px;"></i></li>
+                        <li class="dt-breadcrumb-item dropdown">
+                            <a href="#" class="text-decoration-none d-flex align-items-center" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="font-weight: 700; font-size: 16px; margin-top: -6px; letter-spacing: 1px;">
+                                ... <i class="fas fa-chevron-down ml-1" style="font-size: 10px; margin-top: 6px;"></i>
+                            </a>
+                            <div class="dropdown-menu shadow-sm border-0 animated--fade-in p-2 mt-2" style="border-radius: 8px;">
+                                <?php foreach ($hiddenItems as $hItem): ?>
+                                    <a class="dropdown-item rounded py-2 font-weight-bold" href="<?= $hItem['url'] ?>"><?= $hItem['name'] ?></a>
+                                <?php endforeach; ?>
+                            </div>
                         </li>
-                    <?php endforeach; ?>
+                        <?php
+                        
+                        // Render visible items
+                        foreach ($visibleItems as $index => $item):
+                            $isLast = ($index === count($visibleItems) - 1);
+                            ?>
+                            <li class="dt-breadcrumb-separator"><i class="fas fa-chevron-right" style="font-size: 10px;"></i></li>
+                            <li class="dt-breadcrumb-item">
+                                <?php if ($isLast): ?>
+                                    <span class="text-dark font-weight-bold"><?= $item['name'] ?></span>
+                                <?php else: ?>
+                                    <a href="<?= $item['url'] ?>" style="font-weight: 600;"><?= $item['name'] ?></a>
+                                <?php endif; ?>
+                            </li>
+                            <?php
+                        endforeach;
+
+                    } else {
+                        // Render normally
+                        foreach ($breadcrumb as $index => $item):
+                            $isLast = ($index === $breadcrumbCount - 1);
+                            ?>
+                            <li class="dt-breadcrumb-separator"><i class="fas fa-chevron-right" style="font-size: 10px;"></i></li>
+                            <li class="dt-breadcrumb-item">
+                                <?php if ($isLast): ?>
+                                    <span class="text-dark font-weight-bold"><?= $item['name'] ?></span>
+                                <?php else: ?>
+                                    <a href="<?= $item['url'] ?>" style="font-weight: 600;"><?= $item['name'] ?></a>
+                                <?php endif; ?>
+                            </li>
+                            <?php
+                        endforeach;
+                    }
+                    ?>
                 </ol>
             </nav>
             
@@ -160,7 +223,17 @@
                                 </div>
                                 <div class="col-6 text-right">
                                     <p class="text-xs font-weight-bold text-uppercase text-muted mb-1" style="letter-spacing: 0.5px;">Level</p>
-                                    <span class="badge badge-primary-soft text-primary font-weight-bold px-2 py-1" style="font-size: 10px;">Admin</span>
+                                    <?php 
+                                        $topbar_role_name = $this->session->userdata('role_name');
+                                        if (!$topbar_role_name && isset($user['role_id'])) {
+                                            $role_query = $this->db->get_where('roles', ['id' => $user['role_id']])->row_array();
+                                            $topbar_role_name = $role_query ? $role_query['role_name'] : 'ADMIN';
+                                        }
+                                        $topbar_role_name = $topbar_role_name ? strtoupper($topbar_role_name) : 'ADMIN';
+                                    ?>
+                                    <span class="badge badge-primary-soft text-primary font-weight-bold px-2 py-1" style="font-size: 10px;">
+                                        <?= htmlspecialchars($topbar_role_name); ?>
+                                    </span>
                                 </div>
                             </div>
                             <div class="d-flex align-items-center justify-content-between">
@@ -189,6 +262,15 @@
                                     </div>
                                 </div>
                             <?php endif; ?>
+
+                            <a class="dropdown-item px-3 rounded-lg" href="<?= base_url('helpcenter'); ?>" target="_blank">
+                                <div class="d-flex align-items-center">
+                                    <div class="dropdown-icon-wrap mr-3 bg-primary-soft text-primary">
+                                        <i class="fas fa-book fa-sm"></i>
+                                    </div>
+                                    <span class="font-weight-bold small">Help Center / Docs</span>
+                                </div>
+                            </a>
 
                             <a class="dropdown-item px-3 rounded-lg" href="<?= base_url('user/change-password'); ?>">
                                 <div class="d-flex align-items-center">
