@@ -28,6 +28,18 @@
             </div>
         </div>
 
+        <!-- Searching -->
+        <div class="mb-5">
+            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-search text-primary mr-2"></i> Searching</h5>
+            <p class="text-muted mb-4">Use the built-in search to track down specific fee configurations.</p>
+
+            <div class="pl-4 border-left border-primary ml-2 mb-4">
+                <ol class="text-muted mb-0">
+                    <li class="mb-2"><strong>Quick Search:</strong> Type in the <em>Search setting...</em> box to instantly filter the channel list.</li>
+                </ol>
+            </div>
+        </div>
+
         <!-- Section 1: Fee Hierarchy -->
         <div class="mb-5">
             <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-sitemap text-primary mr-2"></i> 1. Architecture: The Fee Hierarchy</h5>
@@ -187,6 +199,18 @@
                         <tr><td class="p-3 border-0"><strong>SAVE BUTTON</strong></td><td class="p-3 border-0">Menyimpan perubahan secara instan. Hanya berlaku untuk transaksi baru ke depannya.</td></tr>
                     </tbody>
                 </table>
+            </div>
+        </div>
+
+        <!-- Pencarian -->
+        <div class="mb-5">
+            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-search text-primary mr-2"></i> Pencarian</h5>
+            <p class="text-muted mb-4">Gunakan pencarian bawaan untuk melacak konfigurasi biaya spesifik.</p>
+
+            <div class="pl-4 border-left border-primary ml-2 mb-4">
+                <ol class="text-muted mb-0">
+                    <li class="mb-2"><strong>Pencarian Cepat:</strong> Ketik di kotak <em>Search setting...</em> untuk memfilter daftar kanal secara instan.</li>
+                </ol>
             </div>
         </div>
 

@@ -39,7 +39,7 @@
                 <h5 class="font-weight-bold text-body mb-2">Workflow:</h5>
                 <ol class="text-muted mb-0">
                     <li class="mb-3">Navigate to <strong>Finance &amp; Treasury → Audit Balance Logs</strong>.</li>
-                    <li class="mb-3">Click <strong><i class="fas fa-sliders-h"></i> Filters</strong>. Select the specific <strong>Merchant</strong> and <strong>Date Range</strong> you want to audit. Without filters, the table shows all mutations across all merchants.</li>
+                    <li class="mb-3">Click <strong><i class="fas fa-sliders-h"></i> Filters</strong>. Configure your parameters like <strong>MERCHANT</strong> and <strong>REQUEST DATE</strong>, then click the area outside the dropdown to load the data. Active filters are indicated by a red badge number. Click <strong>Clear All</strong> to clear all filters.</li>
                     <li class="mb-3">Read the <strong>Position</strong> column: <span class="badge badge-success-soft text-success">Credit</span> adds funds (e.g., a successful Cashin payment settled), <span class="badge badge-danger-soft text-danger">Debit</span> removes funds (e.g., a Cashout disbursement or fee deduction).</li>
                     <li class="mb-3">If tracing a missing payment, type the <strong>Invoice ID</strong> in the Quick Search box. Look for a <strong>Credit</strong> mutation with that ID in the Description column — if it exists, the payment was received and credited successfully.</li>
                     <li class="mb-3">Verify the <strong>Balance</strong> column is consistent: each row's balance should equal the previous row's balance ± the current row's Amount. Any jump indicates a data anomaly.</li>
@@ -155,7 +155,7 @@
                 <h5 class="font-weight-bold text-body mb-2">Alur Kerja:</h5>
                 <ol class="text-muted mb-0">
                     <li class="mb-3">Navigasikan ke <strong>Finance &amp; Treasury → Audit Balance Logs</strong>.</li>
-                    <li class="mb-3">Klik <strong><i class="fas fa-sliders-h"></i> Filters</strong>. Pilih <strong>Merchant</strong> spesifik dan <strong>Rentang Tanggal</strong> yang ingin Anda audit. Tanpa filter, tabel menampilkan semua mutasi lintas semua merchant.</li>
+                    <li class="mb-3">Klik tombol <strong><i class="fas fa-sliders-h"></i> Filters</strong>. Atur parameter <strong>MERCHANT</strong> spesifik dan <strong>REQUEST DATE</strong>, lalu klik area di luar dropdown untuk memuat data. Filter aktif ditandai dengan lencana merah. Klik <strong>Clear All</strong> untuk mengosongkan semua filter.</li>
                     <li class="mb-3">Baca kolom <strong>Position</strong>: <span class="badge badge-success-soft text-success">Credit</span> menambah dana (mis. pembayaran Cashin ter-settle), <span class="badge badge-danger-soft text-danger">Debit</span> mengurangi dana (mis. pencairan Cashout atau pemotongan biaya).</li>
                     <li class="mb-3">Jika melacak pembayaran yang hilang, ketik <strong>Invoice ID</strong> di kotak Pencarian Cepat. Cari mutasi <strong>Credit</strong> dengan ID tersebut di kolom Description — jika ada, pembayaran berhasil diterima dan dikreditkan.</li>
                     <li class="mb-3">Verifikasi kolom <strong>Balance</strong> konsisten: saldo setiap baris harus sama dengan saldo baris sebelumnya ± Amount baris saat ini. Lompatan apapun menunjukkan anomali data.</li>

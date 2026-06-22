@@ -28,6 +28,19 @@
             </div>
         </div>
 
+        <!-- Searching & Filtering -->
+        <div class="mb-5">
+            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-search text-primary mr-2"></i> Searching & Filtering</h5>
+            <p class="text-muted mb-4">Use the built-in filters to track down specific mutation records.</p>
+
+            <div class="pl-4 border-left border-primary ml-2 mb-4">
+                <ol class="text-muted mb-0">
+                    <li class="mb-3"><strong>Filters:</strong> You can filter by <strong>Filter Date</strong>, <strong>Position</strong> (Credit/Debit), and <strong>Channel Source</strong>.</li>
+                    <li class="mb-2">Click the area outside the dropdown to load the data. Active filters will narrow down the ledger entries accordingly. Click <strong>Clear All</strong> to clear all filters.</li>
+                </ol>
+            </div>
+        </div>
+
         <!-- Section 1: Business vs Ledger -->
         <div class="mb-5">
             <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-exchange-alt text-primary mr-2"></i> 1. Business Events vs Ledger Events</h5>
@@ -131,6 +144,19 @@
                         <tr><td class="p-3 border-0"><strong>Balance</strong></td><td class="p-3 border-0">Total kumulatif berjalan yang menunjukkan saldo tersedia yang tepat dari merchant <em>segera setelah</em> mutasi spesifik ini terjadi.</td></tr>
                     </tbody>
                 </table>
+            </div>
+        </div>
+
+        <!-- Pencarian & Pemfilteran -->
+        <div class="mb-5">
+            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-search text-primary mr-2"></i> Pencarian & Pemfilteran</h5>
+            <p class="text-muted mb-4">Gunakan filter bawaan untuk melacak catatan mutasi spesifik.</p>
+
+            <div class="pl-4 border-left border-primary ml-2 mb-4">
+                <ol class="text-muted mb-0">
+                    <li class="mb-3"><strong>Filter:</strong> Anda dapat memfilter berdasarkan <strong>Filter Date</strong>, <strong>Position</strong> (Kredit/Debit), dan <strong>Channel Source</strong>.</li>
+                    <li class="mb-2">Klik area di luar dropdown untuk memuat data. Filter yang aktif akan mempersempit entri buku besar yang ditampilkan. Klik <strong>Clear All</strong> untuk mengosongkan semua filter.</li>
+                </ol>
             </div>
         </div>
 

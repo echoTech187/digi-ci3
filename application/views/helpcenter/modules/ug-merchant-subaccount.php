@@ -20,6 +20,18 @@
             </div>
         </div>
 
+        <!-- Searching -->
+        <div class="mb-5">
+            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-search text-primary mr-2"></i> Searching</h5>
+            <p class="text-muted mb-4">Use the built-in search to track down specific sub-accounts.</p>
+
+            <div class="pl-4 border-left border-primary ml-2 mb-4">
+                <ol class="text-muted mb-0">
+                    <li class="mb-2"><strong>Quick Search:</strong> Type in the <em>Search by name, ID, or email...</em> box to instantly filter the sub-accounts list.</li>
+                </ol>
+            </div>
+        </div>
+
         <!-- Section 1: Creating a Sub Account -->
         <div class="mb-5">
             <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-user-plus text-primary mr-2"></i> 1. Registering a New Sub Account</h5>
@@ -149,6 +161,18 @@
                     <li class="mb-1"><strong>Pelacakan Finansial:</strong> Setiap sub-akun melacak log mutasi dan saldonya sendiri secara terisolasi, memungkinkan pelaporan keuangan tingkat cabang yang presisi.</li>
                     <li class="mb-0"><strong>Pewarisan Izin:</strong> Semua sub-akun beroperasi secara ketat di bawah batas izin (permission ceiling) yang ditetapkan oleh merchant induk tertinggi mereka.</li>
                 </ul>
+            </div>
+        </div>
+
+        <!-- Pencarian -->
+        <div class="mb-5">
+            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-search text-primary mr-2"></i> Pencarian</h5>
+            <p class="text-muted mb-4">Gunakan pencarian bawaan untuk melacak sub-akun spesifik.</p>
+
+            <div class="pl-4 border-left border-primary ml-2 mb-4">
+                <ol class="text-muted mb-0">
+                    <li class="mb-2"><strong>Pencarian Cepat:</strong> Ketik di kotak <em>Search by name, ID, or email...</em> untuk memfilter daftar sub-akun secara instan.</li>
+                </ol>
             </div>
         </div>
 

@@ -46,10 +46,10 @@
 
             <div class="pl-4 border-left border-primary ml-2 mb-4">
                 <ol class="text-muted mb-0">
-                    <li class="mb-3"><strong>Quick Search:</strong> Type the <em>Merchant Trans ID</em> into the search box to instantly filter the table. This is the fastest way to check why a customer's monthly payment didn't process.</li>
-                    <li class="mb-3"><strong>Advanced Filters:</strong> Click the <i class="fas fa-sliders-h"></i> Filters button to open the dropdown menu.</li>
-                    <li class="mb-3">Filter your parameters: <strong>Period</strong>, <strong>Merchant</strong>, <strong>External Channel</strong>, <strong>Channel ID</strong>, or <strong>Status</strong>.</li>
-                    <li class="mb-2">Click <strong>APPLY FILTER</strong> to load the data. Click <strong>Clear All</strong> to reset the view.</li>
+                    <li class="mb-3"><strong>Quick Search:</strong> Type in the <em>Search by Channel, Merchant, or ID...</em> box to instantly filter the table. This is the fastest way to check why a customer's monthly payment didn't process.</li>
+                    <li class="mb-3"><strong>Advanced Filters:</strong> Click the <i class="fas fa-sliders-h"></i> <strong>Filters</strong> button to open the <strong>Advanced Filters</strong> panel.</li>
+                    <li class="mb-3">Configure your parameters: <strong>REQUEST DATE</strong>, <strong>MERCHANT</strong>, <strong>EXTERNAL CHANNEL</strong>, <strong>CHANNEL ID</strong>, or <strong>STATUS</strong>.</li>
+                    <li class="mb-2">Click the area outside the dropdown to load the data. Active filters are indicated by a red badge number. Click <strong>Clear All</strong> to clear all filters.</li>
                 </ol>
             </div>
         </div>
@@ -160,10 +160,10 @@
 
             <div class="pl-4 border-left border-primary ml-2 mb-4">
                 <ol class="text-muted mb-0">
-                    <li class="mb-3"><strong>Pencarian Cepat:</strong> Ketik <em>Merchant Trans ID</em> di kotak pencarian untuk langsung memfilter. Sangat berguna jika merchant bertanya mengapa pembayaran bulanan pelanggan mereka tidak terproses.</li>
-                    <li class="mb-3"><strong>Filter Lanjutan:</strong> Klik tombol <i class="fas fa-sliders-h"></i> Filters untuk membuka panel menu.</li>
-                    <li class="mb-3">Saring parameter: <strong>Period</strong>, <strong>Merchant</strong>, <strong>External Channel</strong>, <strong>Channel ID</strong>, atau <strong>Status</strong>.</li>
-                    <li class="mb-2">Klik <strong>APPLY FILTER</strong> untuk memuat data. Klik <strong>Clear All</strong> untuk mengatur ulang filter.</li>
+                    <li class="mb-3"><strong>Pencarian Cepat:</strong> Ketik di kotak <em>Search by Channel, Merchant, or ID...</em> untuk memfilter tabel secara instan. Sangat berguna jika merchant bertanya mengapa pembayaran bulanan pelanggan mereka tidak terproses.</li>
+                    <li class="mb-3"><strong>Filter Lanjutan:</strong> Klik tombol <i class="fas fa-sliders-h"></i> <strong>Filters</strong> untuk membuka panel <strong>Advanced Filters</strong>.</li>
+                    <li class="mb-3">Saring parameter Anda: <strong>REQUEST DATE</strong>, <strong>MERCHANT</strong>, <strong>EXTERNAL CHANNEL</strong>, <strong>CHANNEL ID</strong>, atau <strong>STATUS</strong>.</li>
+                    <li class="mb-2">Klik area di luar dropdown untuk memuat data. Filter aktif ditandai dengan lencana merah. Klik <strong>Clear All</strong> untuk mengosongkan semua filter.</li>
                 </ol>
             </div>
         </div>

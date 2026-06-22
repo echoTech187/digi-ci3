@@ -27,6 +27,55 @@
                 </table>
             </div>
         </div>
+        <!-- Action Menu -->
+        <div class="mb-5">
+            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-bolt text-primary mr-2"></i> Action Menu</h5>
+            <p class="text-muted mb-4">Click the three dots (⋮) on any cashin channel row to access these management tools:</p>
+            <div class="table-responsive shadow-sm" style="border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05);">
+                <table class="table table-borderless table-striped small mb-0" style="background: rgba(255,255,255,0.02);">
+                    <thead style="background: rgba(0,0,0,0.4);">
+                        <tr>
+                            <th class="p-3 border-0" style="width:25%">Action Menu Item</th>
+                            <th class="p-3 border-0">Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td class="p-3 border-0"><strong><i class="fas fa-edit text-info"></i> Edit Channel</strong></td><td class="p-3 border-0">Update the fee values, fee types, limits, or settlement interval for this specific channel.</td></tr>
+                        <tr><td class="p-3 border-0"><strong><i class="fas fa-trash-alt text-danger"></i> Delete Channel</strong></td><td class="p-3 border-0">Permanently remove this channel configuration. The merchant will no longer be able to receive funds through this specific channel ID.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Step by Step Add Channel -->
+        <div class="mb-5">
+            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-plus-circle text-success mr-2"></i> Adding a New Cash In Channel</h5>
+            <div class="pl-4 border-left border-success ml-2 mb-4">
+                <ol class="text-muted mb-0">
+                    <li class="mb-3">Click the <strong><i class="fas fa-plus"></i> New Cash In Channel</strong> button at the top right of the table.</li>
+                    <li class="mb-3">In the modal, select or input the <strong>CHANNEL ID</strong> and <strong>CHANNEL GROUP</strong>.</li>
+                    <li class="mb-3">Set the <strong>FEE TYPE</strong> (e.g., PERCENTAGE, FIXED, or BOTH) and input the respective fee values.</li>
+                    <li class="mb-3">Optionally configure the minimum and maximum amount limits, and the settlement interval.</li>
+                    <li class="mb-2">Click <strong>Save New Channel</strong> to apply the configuration immediately.</li>
+                </ol>
+            </div>
+        </div>
+
+
+        <!-- Searching & Filtering -->
+        <div class="mb-5">
+            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-search text-primary mr-2"></i> Searching & Filtering</h5>
+            <p class="text-muted mb-4">Use the built-in search and filters to track down specific configuration parameters.</p>
+
+            <div class="pl-4 border-left border-primary ml-2 mb-4">
+                <ol class="text-muted mb-0">
+                    <li class="mb-3"><strong>Quick Search:</strong> Type in the <em>Search by Channel, ID, or Category...</em> box to instantly filter the table.</li>
+                    <li class="mb-3"><strong>Advanced Filters:</strong> Click the <i class="fas fa-sliders-h"></i> <strong>Filters</strong> button to open the <strong>Advanced Filters</strong> panel.</li>
+                    <li class="mb-3">Configure your parameters: <strong>CHANNEL GROUP</strong> or <strong>EXTERNAL ID</strong>.</li>
+                    <li class="mb-2">Click the area outside the dropdown to load the data. Active filters are indicated by a red badge number. Click <strong>Clear All</strong> to clear all filters.</li>
+                </ol>
+            </div>
+        </div>
 
         <!-- Form Validations & Constraints -->
         <div class="mb-5">
@@ -217,6 +266,55 @@
                         <tr><td class="p-3 border-0"><strong>AMOUNT MIN & MAX</strong></td><td class="p-3 border-0">Batas nilai transaksi paling rendah/tinggi opsional. Isi <code>0</code> untuk mewarisi limit global.</td></tr>
                     </tbody>
                 </table>
+            </div>
+        </div>
+        <!-- Action Menu -->
+        <div class="mb-5">
+            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-bolt text-primary mr-2"></i> Menu Aksi (Action Menu)</h5>
+            <p class="text-muted mb-4">Klik tiga titik (⋮) pada baris kanal cashin mana pun untuk mengakses alat manajemen ini:</p>
+            <div class="table-responsive shadow-sm" style="border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05);">
+                <table class="table table-borderless table-striped small mb-0" style="background: rgba(255,255,255,0.02);">
+                    <thead style="background: rgba(0,0,0,0.4);">
+                        <tr>
+                            <th class="p-3 border-0" style="width:25%">Menu Aksi</th>
+                            <th class="p-3 border-0">Deskripsi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td class="p-3 border-0"><strong><i class="fas fa-edit text-info"></i> Edit Channel</strong></td><td class="p-3 border-0">Perbarui nilai biaya, jenis biaya, limit, atau interval setelmen untuk kanal spesifik ini.</td></tr>
+                        <tr><td class="p-3 border-0"><strong><i class="fas fa-trash-alt text-danger"></i> Delete Channel</strong></td><td class="p-3 border-0">Hapus konfigurasi kanal ini secara permanen. Merchant tidak akan lagi bisa menerima dana melalui ID kanal ini.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Step by Step Add Channel -->
+        <div class="mb-5">
+            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-plus-circle text-success mr-2"></i> Menambahkan Kanal Cash In Baru</h5>
+            <div class="pl-4 border-left border-success ml-2 mb-4">
+                <ol class="text-muted mb-0">
+                    <li class="mb-3">Klik tombol <strong><i class="fas fa-plus"></i> New Cash In Channel</strong> di kanan atas tabel.</li>
+                    <li class="mb-3">Di dalam modal, pilih atau ketik <strong>CHANNEL ID</strong> dan <strong>CHANNEL GROUP</strong>.</li>
+                    <li class="mb-3">Atur <strong>FEE TYPE</strong> (misal, PERCENTAGE, FIXED, atau BOTH) lalu masukkan nominal biaya masing-masing.</li>
+                    <li class="mb-3">Secara opsional, konfigurasikan limit jumlah minimum dan maksimum, serta interval setelmen.</li>
+                    <li class="mb-2">Klik <strong>Save New Channel</strong> untuk segera menerapkan konfigurasi.</li>
+                </ol>
+            </div>
+        </div>
+
+
+        <!-- Searching & Filtering -->
+        <div class="mb-5">
+            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-search text-primary mr-2"></i> Pencarian & Pemfilteran</h5>
+            <p class="text-muted mb-4">Gunakan pencarian bawaan dan filter untuk melacak parameter konfigurasi spesifik.</p>
+
+            <div class="pl-4 border-left border-primary ml-2 mb-4">
+                <ol class="text-muted mb-0">
+                    <li class="mb-3"><strong>Pencarian Cepat:</strong> Ketik di kotak <em>Search by Channel, ID, or Category...</em> untuk memfilter tabel secara instan.</li>
+                    <li class="mb-3"><strong>Filter Lanjutan:</strong> Klik tombol <i class="fas fa-sliders-h"></i> <strong>Filters</strong> untuk membuka panel <strong>Advanced Filters</strong>.</li>
+                    <li class="mb-3">Saring parameter Anda: <strong>CHANNEL GROUP</strong> atau <strong>EXTERNAL ID</strong>.</li>
+                    <li class="mb-2">Klik area di luar dropdown untuk memuat data. Filter aktif ditandai dengan lencana merah. Klik <strong>Clear All</strong> untuk mengosongkan semua filter.</li>
+                </ol>
             </div>
         </div>
 

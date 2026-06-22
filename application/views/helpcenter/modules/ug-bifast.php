@@ -20,7 +20,7 @@
                     <tbody>
                         <tr><td class="p-3 border-0"><strong>Transaction Table</strong></td><td class="p-3 border-0">Live feed of all BI-FAST disbursements sorted by most recent. Includes originating merchant, beneficiary account, amount, and current status.</td></tr>
                         <tr><td class="p-3 border-0"><strong>Status Badge</strong></td><td class="p-3 border-0"><span class="badge badge-success">SUCCESS</span> Funds credited to beneficiary. <span class="badge badge-warning">PENDING</span> Awaiting BI-FAST switch confirmation. <span class="badge badge-danger">FAILED</span> Transfer rejected (invalid account, insufficient balance, or BI-Fast network error).</td></tr>
-                        <tr><td class="p-3 border-0"><strong>Filters Panel</strong></td><td class="p-3 border-0">Filter by Date Range, Merchant, Destination Bank, and Status to narrow down the view for specific investigations.</td></tr>
+                        <tr><td class="p-3 border-0"><strong>Filters Panel</strong></td><td class="p-3 border-0">Filter by REQUEST DATE, MERCHANT, Destination Bank, and STATUS to narrow down the view for specific investigations.</td></tr>
                         <tr><td class="p-3 border-0"><strong>Row Detail</strong></td><td class="p-3 border-0">Click any row to view the full detail: Reference ID, beneficiary name, account number, channel, fee mode, timestamps, and the raw error code (for FAILED transactions).</td></tr>
                         <tr><td class="p-3 border-0"><strong>Download Excel</strong></td><td class="p-3 border-0">Asynchronous bulk export of filtered BI-FAST records. Available from the Download Report menu when ready.</td></tr>
                     </tbody>
@@ -46,7 +46,7 @@
                     </li>
                     <li class="mb-3">If a transfer is stuck in <strong>PENDING</strong> for more than 10 minutes, click the row to get the <code>referenceId</code> and escalate to your payment gateway provider for manual investigation with Bank Indonesia.</li>
                     <li class="mb-3">For <strong>FAILED</strong> transfers: confirm the failure reason from the detail view (e.g., <code>ACCOUNT_NOT_FOUND</code>, <code>INSUFFICIENT_BALANCE</code>). The merchant must submit a new Cashout request — the failed transaction's funds are automatically returned to their Available Balance.</li>
-                    <li class="mb-2">Use the <strong>Filters Panel</strong> to isolate transfers for a specific merchant or date range for reconciliation reporting.</li>
+                    <li class="mb-2">Use the <strong>Filters Panel</strong> to configure parameters like <strong>MERCHANT</strong> or <strong>REQUEST DATE</strong> for reconciliation reporting. Then click the area outside the dropdown to load the data. Active filters are indicated by a red badge number. Click <strong>Clear All</strong> to clear all filters.</li>
                 </ol>
             </div>
 
@@ -139,7 +139,7 @@
                     <tbody>
                         <tr><td class="p-3 border-0"><strong>Tabel Transaksi</strong></td><td class="p-3 border-0">Feed langsung semua pencairan BI-FAST diurutkan berdasarkan yang terbaru. Mencakup merchant asal, rekening penerima, nominal, dan status saat ini.</td></tr>
                         <tr><td class="p-3 border-0"><strong>Badge Status</strong></td><td class="p-3 border-0"><span class="badge badge-success">SUCCESS</span> Dana dikreditkan ke penerima. <span class="badge badge-warning">PENDING</span> Menunggu konfirmasi switch BI-FAST. <span class="badge badge-danger">FAILED</span> Transfer ditolak (rekening tidak valid, saldo tidak cukup, atau error jaringan BI-Fast).</td></tr>
-                        <tr><td class="p-3 border-0"><strong>Panel Filter</strong></td><td class="p-3 border-0">Filter berdasarkan Rentang Tanggal, Merchant, Bank Tujuan, dan Status untuk mempersempit tampilan guna investigasi spesifik.</td></tr>
+                        <tr><td class="p-3 border-0"><strong>Panel Filters</strong></td><td class="p-3 border-0">Filter berdasarkan REQUEST DATE, MERCHANT, Bank Tujuan, dan STATUS untuk mempersempit tampilan investigasi.</td></tr>
                         <tr><td class="p-3 border-0"><strong>Detail Baris</strong></td><td class="p-3 border-0">Klik baris mana pun untuk melihat detail lengkap: Reference ID, nama penerima, nomor rekening, channel, mode biaya, timestamp, dan kode error mentah (untuk transaksi FAILED).</td></tr>
                         <tr><td class="p-3 border-0"><strong>Download Excel</strong></td><td class="p-3 border-0">Ekspor massal asinkron dari record BI-FAST yang difilter. Tersedia dari menu Download Report saat sudah siap.</td></tr>
                     </tbody>
@@ -165,7 +165,7 @@
                     </li>
                     <li class="mb-3">Jika transfer tersangkut di <strong>PENDING</strong> lebih dari 10 menit, klik baris untuk mendapatkan <code>referenceId</code> dan eskalasikan ke penyedia payment gateway Anda untuk investigasi manual dengan Bank Indonesia.</li>
                     <li class="mb-3">Untuk transfer <strong>FAILED</strong>: konfirmasi alasan kegagalan dari tampilan detail (mis. <code>ACCOUNT_NOT_FOUND</code>, <code>INSUFFICIENT_BALANCE</code>). Merchant harus mengajukan request Cashout baru — dana dari transaksi yang gagal otomatis dikembalikan ke Saldo Tersedia mereka.</li>
-                    <li class="mb-2">Gunakan <strong>Panel Filter</strong> untuk mengisolasi transfer dari merchant atau rentang tanggal tertentu untuk pelaporan rekonsiliasi.</li>
+                    <li class="mb-2">Gunakan <strong>Panel Filters</strong> untuk mengatur parameter seperti <strong>MERCHANT</strong> atau <strong>REQUEST DATE</strong> untuk pelaporan rekonsiliasi. Lalu klik area di luar dropdown untuk memuat data. Filter aktif ditandai dengan lencana merah. Klik <strong>Clear All</strong> untuk mengosongkan semua filter.</li>
                 </ol>
             </div>
 
