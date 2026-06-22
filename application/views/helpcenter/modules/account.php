@@ -28,6 +28,26 @@
             </div>
         </div>
 
+        <!-- Action Menu -->
+        <div class="mb-5">
+            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-bolt text-primary mr-2"></i> Action Menu</h5>
+            <p class="text-muted mb-4">Click the three dots (⋮) on any admin row to access these management tools:</p>
+            <div class="table-responsive shadow-sm" style="border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05);">
+                <table class="table table-borderless table-striped small mb-0" style="background: rgba(255,255,255,0.02);">
+                    <thead style="background: rgba(0,0,0,0.4);">
+                        <tr>
+                            <th class="p-3 border-0" style="width:25%">Action Menu Item</th>
+                            <th class="p-3 border-0">Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td class="p-3 border-0"><strong><i class="fas fa-edit text-info"></i> Edit Account</strong></td><td class="p-3 border-0">Update the admin's name, change their password, assign a different role, or toggle their active status.</td></tr>
+                        <tr><td class="p-3 border-0"><strong><i class="fas fa-trash-alt text-danger"></i> Delete Account</strong></td><td class="p-3 border-0">Permanently remove this administrative account from the system.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
         <!-- Section 1: Architecture -->
         <div class="mb-5">
             <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-project-diagram text-primary mr-2"></i> 1. Architecture: ERD & Authentication Flow</h5>
@@ -229,6 +249,26 @@
                         <tr><td class="p-3 border-0"><strong>Status</strong></td><td class="p-3 border-0">Mengatur kemampuan login. <span style="color:#16a34a;font-weight:600;">Active</span> = Bisa login. <span style="color:#dc2626;font-weight:600;">Blocked/Freeze</span> = Login ditolak.</td></tr>
                         <tr><td class="p-3 border-0"><strong>Pencarian & Filter</strong></td><td class="p-3 border-0">Pencarian AJAX real-time. Sistem mengingat kata kunci dan filter Anda dalam sesi (session), sehingga tidak hilang saat Anda berpindah halaman.</td></tr>
                         <tr><td class="p-3 border-0"><strong>Menu Aksi (⋮)</strong></td><td class="p-3 border-0">Menyediakan tautan untuk Mengedit akun atau Menghapusnya secara permanen.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Menu Aksi (Action Menu) -->
+        <div class="mb-5">
+            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-bolt text-primary mr-2"></i> Menu Aksi (Action Menu)</h5>
+            <p class="text-muted mb-4">Klik tiga titik (⋮) pada baris admin mana pun untuk mengakses alat manajemen ini:</p>
+            <div class="table-responsive shadow-sm" style="border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05);">
+                <table class="table table-borderless table-striped small mb-0" style="background: rgba(255,255,255,0.02);">
+                    <thead style="background: rgba(0,0,0,0.4);">
+                        <tr>
+                            <th class="p-3 border-0" style="width:25%">Menu Aksi</th>
+                            <th class="p-3 border-0">Deskripsi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td class="p-3 border-0"><strong><i class="fas fa-edit text-info"></i> Edit Account</strong></td><td class="p-3 border-0">Perbarui nama admin, ubah password mereka, tetapkan peran (role) yang berbeda, atau alihkan status aktif mereka.</td></tr>
+                        <tr><td class="p-3 border-0"><strong><i class="fas fa-trash-alt text-danger"></i> Delete Account</strong></td><td class="p-3 border-0">Hapus akun administratif ini dari sistem secara permanen.</td></tr>
                     </tbody>
                 </table>
             </div>

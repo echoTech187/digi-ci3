@@ -18,7 +18,7 @@
                     </thead>
                     <tbody>
                         <tr><td class="p-3 border-0"><strong>Global Search Bar</strong></td><td class="p-3 border-0">Simultaneously queries <code>Invoice ID</code>, <code>Transaction ID</code>, and <code>Phone Number</code>.</td></tr>
-                        <tr><td class="p-3 border-0"><strong>Advanced Filters</strong></td><td class="p-3 border-0">Multi-dimensional filtering (Date Range, Merchant Name, Payment Channel, Status). The system permanently caches your filter state in your active session.</td></tr>
+                        <tr><td class="p-3 border-0"><strong>Advanced Filters</strong></td><td class="p-3 border-0">Multi-dimensional filtering (REQUEST DATE, MERCHANT, EXTERNAL CHANNEL, STATUS). The system permanently caches your filter state in your active session.</td></tr>
                         <tr><td class="p-3 border-0"><strong>Reset Filter Button</strong></td><td class="p-3 border-0">Flushes all session caches and returns the table to the default un-filtered view.</td></tr>
                         <tr><td class="p-3 border-0"><strong>Transaction Row</strong></td><td class="p-3 border-0">Clickable rows that reveal the full forensic detail of a transaction (including Callback statuses).</td></tr>
                         <tr><td class="p-3 border-0"><strong>Download Excel</strong></td><td class="p-3 border-0">Dispatches an asynchronous export job to the background worker.</td></tr>
@@ -70,7 +70,7 @@
                 <ol class="text-muted mb-0">
                     <li class="mb-3">Navigate to <strong>Transaction History</strong>. By default, the table displays the last 7 days.</li>
                     <li class="mb-3">For quick lookup, use the search bar to find an <strong>Invoice ID</strong> or <strong>Transaction ID</strong>.</li>
-                    <li class="mb-3">For deep audits, click <strong><i class="fas fa-sliders-h"></i> Advanced Filters</strong>. Set the <strong>Date Range</strong> and <strong>Status</strong>, then click <strong>Apply Filter</strong>.</li>
+                    <li class="mb-3">For deep audits, click <strong><i class="fas fa-sliders-h"></i> Filters</strong>. Configure your parameters like <strong>REQUEST DATE</strong> and <strong>STATUS</strong>, then click the area outside the dropdown to load the data. Active filters are indicated by a red badge number. Click <strong>Clear All</strong> to clear all filters.</li>
                     <li class="mb-2"><strong>Crucial Step:</strong> If you want to start a new search, you <strong>must</strong> click the <strong>Reset Filter</strong> button to clear your locked session memory.</li>
                 </ol>
             </div>
@@ -152,7 +152,7 @@
                     </thead>
                     <tbody>
                         <tr><td class="p-3 border-0"><strong>Global Search Bar</strong></td><td class="p-3 border-0">Mencari secara bersamaan pada <code>Invoice ID</code>, <code>Transaction ID</code>, dan <code>Nomor Telepon</code>.</td></tr>
-                        <tr><td class="p-3 border-0"><strong>Filter Lanjutan</strong></td><td class="p-3 border-0">Filter multi-dimensi (Rentang Tanggal, Nama Merchant, Channel, Status). Sistem menyiman status filter Anda di sesi aktif.</td></tr>
+                        <tr><td class="p-3 border-0"><strong>Filter Lanjutan</strong></td><td class="p-3 border-0">Filter multi-dimensi (REQUEST DATE, MERCHANT, EXTERNAL CHANNEL, STATUS). Sistem menyiman status filter Anda di sesi aktif.</td></tr>
                         <tr><td class="p-3 border-0"><strong>Tombol Reset Filter</strong></td><td class="p-3 border-0">Membersihkan seluruh memori sesi filter dan mengembalikan tabel ke tampilan default awal.</td></tr>
                         <tr><td class="p-3 border-0"><strong>Baris Transaksi</strong></td><td class="p-3 border-0">Baris yang dapat diklik untuk membuka detail forensik lengkap dari transaksi (termasuk status Callback).</td></tr>
                         <tr><td class="p-3 border-0"><strong>Download Excel</strong></td><td class="p-3 border-0">Mengirim instruksi ekspor data asinkron ke sistem latar belakang (*background worker*).</td></tr>
@@ -204,7 +204,7 @@
                 <ol class="text-muted mb-0">
                     <li class="mb-3">Arahkan ke <strong>Transaction History</strong>. Secara default, tabel menampilkan 7 hari terakhir.</li>
                     <li class="mb-3">Untuk pencarian instan, gunakan search bar untuk menemukan <strong>Invoice ID</strong> atau <strong>Transaction ID</strong>.</li>
-                    <li class="mb-3">Untuk audit mendalam, klik <strong><i class="fas fa-sliders-h"></i> Advanced Filters</strong>. Atur <strong>Rentang Tanggal</strong> dan <strong>Status</strong>, lalu klik <strong>Apply Filter</strong>.</li>
+                    <li class="mb-3">Untuk audit mendalam, klik tombol <strong><i class="fas fa-sliders-h"></i> Filters</strong>. Atur <strong>REQUEST DATE</strong> dan <strong>STATUS</strong>, lalu klik area di luar dropdown untuk memuat data. Filter aktif ditandai dengan lencana merah. Klik <strong>Clear All</strong> untuk mengosongkan semua filter.</li>
                     <li class="mb-2"><strong>Langkah Krusial:</strong> Jika Anda ingin memulai pencarian baru yang segar, Anda <strong>wajib</strong> mengklik tombol <strong>Reset Filter</strong> untuk menghapus memori sesi yang terkunci.</li>
                 </ol>
             </div>

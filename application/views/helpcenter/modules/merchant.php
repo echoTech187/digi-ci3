@@ -28,6 +28,44 @@
             </div>
         </div>
 
+        <!-- Searching & Filtering -->
+        <div class="mb-5">
+            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-search text-primary mr-2"></i> Searching & Filtering</h5>
+            <p class="text-muted mb-4">Use the built-in search and filters to track down specific merchants.</p>
+
+            <div class="pl-4 border-left border-primary ml-2 mb-4">
+                <ol class="text-muted mb-0">
+                    <li class="mb-3"><strong>Quick Search:</strong> Type in the <em>Search by name, ID, email, or Business ID...</em> box to instantly filter the table.</li>
+                    <li class="mb-3"><strong>Advanced Filters:</strong> Click the <i class="fas fa-sliders-h"></i> <strong>Filters</strong> button to open the <strong>Advanced Filters</strong> panel.</li>
+                    <li class="mb-3">Configure your parameters: <strong>Registration Date</strong>, <strong>Account Status</strong>, or <strong>OpenAPI Status</strong>.</li>
+                    <li class="mb-2">Click the area outside the dropdown to load the data. Active filters are indicated by a red badge number. Click <strong>Clear All</strong> to clear all filters.</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- Action Menu -->
+        <div class="mb-5">
+            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-bolt text-primary mr-2"></i> Action Menu</h5>
+            <p class="text-muted mb-4">Click the three dots (⋮) on any merchant row to access these management tools:</p>
+            <div class="table-responsive shadow-sm" style="border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05);">
+                <table class="table table-borderless table-striped small mb-0" style="background: rgba(255,255,255,0.02);">
+                    <thead style="background: rgba(0,0,0,0.4);">
+                        <tr>
+                            <th class="p-3 border-0" style="width:25%">Action Menu Item</th>
+                            <th class="p-3 border-0">Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td class="p-3 border-0"><strong><i class="fas fa-edit text-info"></i> Edit Merchant</strong></td><td class="p-3 border-0">Update the merchant's profile, callback URLs, change their password, or toggle their Account/OpenAPI status.</td></tr>
+                        <tr><td class="p-3 border-0"><strong><i class="fas fa-exchange-alt text-warning"></i> Mutation Log</strong></td><td class="p-3 border-0">Directly view the merchant's financial ledger and balance history.</td></tr>
+                        <tr><td class="p-3 border-0"><strong><i class="fas fa-money-check-alt text-success"></i> Cash In Fees</strong></td><td class="p-3 border-0">Configure inbound payment routing and fees specifically for this merchant.</td></tr>
+                        <tr><td class="p-3 border-0"><strong><i class="fas fa-hand-holding-usd text-danger"></i> Cash Out Fees</strong></td><td class="p-3 border-0">Configure outbound disbursement fees specifically for this merchant.</td></tr>
+                        <tr><td class="p-3 border-0"><strong><i class="fas fa-wallet text-primary"></i> Manual Balance</strong></td><td class="p-3 border-0">Add credit or deduct debit balance manually for operational corrections.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
         <!-- Section 1: Architecture -->
         <div class="mb-5">
             <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-project-diagram text-primary mr-2"></i> 1. Architecture: The Merchant Entity</h5>
@@ -183,7 +221,7 @@
                 </a>
                 <div id="faq_en_merchant_3" class="collapse">
                     <div class="text-muted px-4 pb-4 pt-1" style="line-height: 1.7; font-size: 0.9rem;">
-                        <strong>Answer:</strong> Your previous search or status filters are likely still active in your session. Click the <strong>Reset Filter</strong> button above the table to clear all session variables and reload the complete, unfiltered directory.
+                        <strong>Answer:</strong> Your previous search or status filters are likely still active in your session. Click the <strong>Clear All</strong> button in the Advanced Filters panel to clear all session variables and reload the complete, unfiltered directory.
                     </div>
                 </div>
             </div>
@@ -234,6 +272,44 @@
                         <tr><td class="p-3 border-0"><strong>OpenAPI Status</strong></td><td class="p-3 border-0">Mengatur endpoint API. Jika Blocked, semua request transaksi via sistem akan ditolak (walaupun Account Status berstatus Active).</td></tr>
                         <tr><td class="p-3 border-0"><strong>Master Balance</strong></td><td class="p-3 border-0">Saldo penyelesaian (settlement) global secara real-time. Diperbarui seketika seiring terjadinya transaksi.</td></tr>
                         <tr><td class="p-3 border-0"><strong>Menu Aksi (⋮)</strong></td><td class="p-3 border-0">Pintasan langsung untuk Edit Profil, melihat Mutation Log, mengatur Biaya Cashin/Cashout, atau menyesuaikan saldo manual.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Pencarian & Pemfilteran -->
+        <div class="mb-5">
+            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-search text-primary mr-2"></i> Pencarian & Pemfilteran</h5>
+            <p class="text-muted mb-4">Gunakan pencarian bawaan dan filter untuk melacak merchant spesifik.</p>
+
+            <div class="pl-4 border-left border-primary ml-2 mb-4">
+                <ol class="text-muted mb-0">
+                    <li class="mb-3"><strong>Pencarian Cepat:</strong> Ketik di kotak <em>Search by name, ID, email, or Business ID...</em> untuk memfilter tabel secara instan.</li>
+                    <li class="mb-3"><strong>Filter Lanjutan:</strong> Klik tombol <i class="fas fa-sliders-h"></i> <strong>Filters</strong> untuk membuka panel <strong>Advanced Filters</strong>.</li>
+                    <li class="mb-3">Saring parameter Anda: <strong>Registration Date</strong>, <strong>Account Status</strong>, atau <strong>OpenAPI Status</strong>.</li>
+                    <li class="mb-2">Klik area di luar dropdown untuk memuat data. Filter aktif ditandai dengan lencana merah. Klik <strong>Clear All</strong> untuk mengosongkan semua filter.</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- Menu Aksi (Action Menu) -->
+        <div class="mb-5">
+            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-bolt text-primary mr-2"></i> Menu Aksi (Action Menu)</h5>
+            <p class="text-muted mb-4">Klik tiga titik (⋮) pada baris merchant mana pun untuk mengakses alat manajemen ini:</p>
+            <div class="table-responsive shadow-sm" style="border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05);">
+                <table class="table table-borderless table-striped small mb-0" style="background: rgba(255,255,255,0.02);">
+                    <thead style="background: rgba(0,0,0,0.4);">
+                        <tr>
+                            <th class="p-3 border-0" style="width:25%">Menu Aksi</th>
+                            <th class="p-3 border-0">Deskripsi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td class="p-3 border-0"><strong><i class="fas fa-edit text-info"></i> Edit Merchant</strong></td><td class="p-3 border-0">Perbarui profil merchant, URL callback, ubah password mereka, atau alihkan status Account/OpenAPI mereka.</td></tr>
+                        <tr><td class="p-3 border-0"><strong><i class="fas fa-exchange-alt text-warning"></i> Mutation Log</strong></td><td class="p-3 border-0">Lihat langsung buku besar keuangan (ledger) dan riwayat saldo merchant secara detail.</td></tr>
+                        <tr><td class="p-3 border-0"><strong><i class="fas fa-money-check-alt text-success"></i> Cash In Fees</strong></td><td class="p-3 border-0">Konfigurasikan rute pembayaran masuk dan biayanya khusus untuk merchant ini.</td></tr>
+                        <tr><td class="p-3 border-0"><strong><i class="fas fa-hand-holding-usd text-danger"></i> Cash Out Fees</strong></td><td class="p-3 border-0">Konfigurasikan biaya pengeluaran dana (disbursement) khusus untuk merchant ini.</td></tr>
+                        <tr><td class="p-3 border-0"><strong><i class="fas fa-wallet text-primary"></i> Manual Balance</strong></td><td class="p-3 border-0">Tambahkan saldo kredit atau potong saldo debit secara manual untuk koreksi operasional.</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -394,7 +470,7 @@
                 </a>
                 <div id="faq_id_merchant_3" class="collapse">
                     <div class="text-muted px-4 pb-4 pt-1" style="line-height: 1.7; font-size: 0.9rem;">
-                        <strong>Jawaban:</strong> Pencarian (Search) atau filter status dari sesi Anda sebelumnya kemungkinan masih aktif. Klik tombol <strong>Reset Filter</strong> di atas tabel untuk membersihkan sesi dan memuat ulang seluruh direktori.
+                        <strong>Jawaban:</strong> Pencarian (Search) atau filter status dari sesi Anda sebelumnya kemungkinan masih aktif. Klik tombol <strong>Clear All</strong> pada panel Advanced Filters untuk membersihkan sesi dan memuat ulang seluruh direktori.
                     </div>
                 </div>
             </div>
