@@ -2101,7 +2101,7 @@ ul.sidebar {
 
 .dt-search-input {
     height: 42px;
-    padding: 0 14px 0 34px;
+    padding: 0 40px 0 34px;
     border: 1.5px solid var(--border-color);
     border-radius: 50rem;
     font-size: 13.5px;
@@ -7296,4 +7296,76 @@ label:has(textarea[required]):not(:has(.text-danger))::after {
     content: " *";
     color: var(--danger, #e74a3b) !important;
     font-weight: bold !important;
+}
+
+
+.mh-premium {
+    padding: 1.1rem 1.25rem !important;
+    display: flex !important;
+    align-items: center !important;
+    position: relative;
+    border-radius: 0 !important;
+}
+
+.mh-icon-badge {
+    width: 38px !important;
+    height: 38px !important;
+    background: rgba(255, 255, 255, 0.18) !important;
+    border-radius: 12px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin-right: 15px !important;
+    flex-shrink: 0 !important;
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mh-icon-badge i {
+    color: #ffffff !important;
+    font-size: 16px !important;
+}
+
+.mh-icon-badge .mh-avatar-img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    border-radius: 11px !important; /* Slightly less than parent for perfect fit */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mh-title-wrap {
+    min-width: 0;
+    flex: 1;
+}
+
+.mh-title {
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    font-size: 14.5px !important;
+    margin-bottom: 2px !important;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.mh-subtitle {
+    color: rgba(255, 255, 255, 0.75) !important;
+    font-size: 10.5px !important;
+    display: block !important;
+    font-weight: 400 !important;
+}
+
+.mh-premium .close {
+    margin: -1rem -1rem -1rem auto !important;
+    color: #fff !important;
+    text-shadow: none !important;
+    opacity: 0.7 !important;
+    transition: all 0.2s;
+}
+
+.mh-premium .close:hover {
+    opacity: 1 !important;
+    transform: scale(1.1);
 }

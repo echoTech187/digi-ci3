@@ -266,3 +266,61 @@ $(document).ajaxSend(function(event, jqXHR, settings) {
         }
     }
 });
+
+
+/**
+ * Global Clear Button for dt-search-input
+ * Automatically injects an 'X' button to clear search input, remove URL params, and trigger datatables.
+ */
+$(document).ready(function() {
+    // Inject the clear button next to every dt-search-input
+    $('.dt-search-input').each(function() {
+        var $input = $(this);
+        var $wrapper = $input.closest('.dt-search-wrapper');
+        
+        // Only inject if wrapper exists and it doesn't already have a clear button
+        if ($wrapper.length && $wrapper.find('.dt-search-clear-icon').length === 0) {
+            $wrapper.addClass('position-relative');
+            var isVisible = $input.val().length > 0 ? 'block' : 'none';
+            var $clearBtn = $('<span class="dt-search-clear-icon" style="display: ' + isVisible + '; position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #a0aec0; z-index: 1050; font-size: 20px; line-height: 1; padding: 5px;">&times;</span>');
+            $input.after($clearBtn);
+        }
+    });
+
+    // Handle input event to show/hide the clear button
+    $(document).on('input', '.dt-search-input', function() {
+        var $input = $(this);
+        var $wrapper = $input.closest('.dt-search-wrapper');
+        var $clearBtn = $wrapper.find('.dt-search-clear-icon');
+        
+        if ($clearBtn.length) {
+            if ($input.val().length > 0) {
+                $clearBtn.show();
+            } else {
+                $clearBtn.hide();
+                // Remove URL params when input is emptied manually
+                if (window.history.replaceState) {
+                    window.history.replaceState(null, null, window.location.pathname);
+                }
+            }
+        }
+    });
+
+    // Handle clear button click
+    $(document).on('click', '.dt-search-clear-icon', function() {
+        var $btn = $(this);
+        var $wrapper = $btn.closest('.dt-search-wrapper');
+        var $input = $wrapper.find('.dt-search-input');
+        
+        $input.val('');
+        $btn.hide();
+        
+        // Remove URL params without reloading the page
+        if (window.history.replaceState) {
+            window.history.replaceState(null, null, window.location.pathname);
+        }
+        
+        // Trigger input event to let debounce functions (if any) catch it and trigger search
+        $input.trigger('input');
+    });
+});
