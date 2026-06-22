@@ -670,17 +670,181 @@
                 </div>
             </div>
 
-            <div class="hc-sidebar-title" style="margin-top: 0;">Tutorials & User Guide</div>
+            <div class="hc-sidebar-title" style="margin-top: 0;">INTRODUCTION</div>
             <a href="javascript:void(0);" class="hc-nav-item active" data-target="module-welcome">
                 <i class="fas fa-home"></i> Welcome
             </a>
             <a href="javascript:void(0);" class="hc-nav-item" data-target="module-getting-started">
-                <i class="fas fa-rocket"></i> Getting Started
+                <i class="fas fa-rocket"></i> Quick Start Guide
             </a>
 
-            <!-- Dashboards & Analytics -->
+            <div class="hc-sidebar-title">PHASE 1: PLATFORM SETUP</div>
+            <!-- System Administration -->
+            <a href="javascript:void(0);" class="hc-nav-item hc-has-submenu" data-submenu="submenu-system">
+                <i class="fas fa-cogs"></i> <span>System Administration</span>
+                <i class="fas fa-chevron-down hc-submenu-icon" style="width:auto; font-size:10px; opacity:0.5;"></i>
+            </a>
+            <div id="submenu-system" class="hc-submenu-container" style="display: none;">
+                <!-- Security & Access -->
+                <div style="padding: 12px 32px 4px 56px; font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">Security & Access</div>
+                <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-login">
+                    <i class="fas fa-sign-in-alt"></i> Authentication
+                </a>
+                <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-rbac">
+                    <i class="fas fa-user-lock"></i> RBAC & Permissions
+                </a>
+
+                <!-- Platform Config -->
+                <div style="padding: 12px 32px 4px 56px; font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">Platform Config</div>
+                <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-account">
+                    <i class="fas fa-cog"></i> Account Setup
+                </a>
+                <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-channel">
+                    <i class="fas fa-route"></i> Gateway Channel
+                </a>
+            </div>
+
+            <!-- Integrations & Providers -->
+            <a href="javascript:void(0);" class="hc-nav-item hc-has-submenu" data-submenu="submenu-integrations">
+                <i class="fas fa-network-wired"></i> <span>Integrations & Providers</span>
+                <i class="fas fa-chevron-down hc-submenu-icon" style="width:auto; font-size:10px; opacity:0.5;"></i>
+            </a>
+            <div id="submenu-integrations" class="hc-submenu-container" style="display: none;">
+                <div style="padding: 12px 32px 4px 56px; font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">External API Setup</div>
+                <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-external-cashin">
+                    <i class="fas fa-arrow-circle-down text-success"></i> External Cash-In
+                </a>
+                <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-external-cashout">
+                    <i class="fas fa-arrow-circle-up text-danger"></i> External Cash-Out
+                </a>
+                <div style="padding: 12px 32px 4px 56px; font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">Global Providers</div>
+                <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-cashin">
+                    <i class="fas fa-plug"></i> Cash-In Providers
+                </a>
+                <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-cashout">
+                    <i class="fas fa-outdent"></i> Cash-Out Providers
+                </a>
+            </div>
+
+            <div class="hc-sidebar-title">PHASE 2: PRODUCT CONFIGURATION</div>
+            <!-- Payment Services -->
+            <a href="javascript:void(0);" class="hc-nav-item hc-has-submenu" data-submenu="submenu-products">
+                <i class="fas fa-layer-group"></i> <span>Payment Services</span>
+                <i class="fas fa-chevron-down hc-submenu-icon" style="width:auto; font-size:10px; opacity:0.5;"></i>
+            </a>
+            <div id="submenu-products" class="hc-submenu-container" style="display: none;">
+                <!-- Virtual Accounts -->
+                <div style="padding: 12px 32px 4px 56px; font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">Virtual Accounts</div>
+                <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-va-dynamic">
+                    <i class="fas fa-random"></i> VA Dynamic
+                </a>
+                <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-va-recurring">
+                    <i class="fas fa-sync"></i> VA Recurring
+                </a>
+
+                <!-- QRIS & E-Wallet -->
+                <div style="padding: 12px 32px 4px 56px; font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">QRIS & E-Wallet</div>
+                <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-qris-dynamic">
+                    <i class="fas fa-qrcode"></i> QRIS Dynamic
+                </a>
+                <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-qris-recurring">
+                    <i class="fas fa-qrcode"></i> QRIS Recurring
+                </a>
+                <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-ewallet-dynamic">
+                    <i class="fas fa-wallet"></i> E-Wallet Dynamic
+                </a>
+
+                <!-- Digital Goods -->
+                <div style="padding: 12px 32px 4px 56px; font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">Digital Goods</div>
+                <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-prepaid-products">
+                    <i class="fas fa-mobile-alt"></i> Prepaid Products
+                </a>
+            </div>
+
+            <div class="hc-sidebar-title">PHASE 3: MERCHANT ONBOARDING</div>
+            <!-- Merchant Management -->
+            <a href="javascript:void(0);" class="hc-nav-item hc-has-submenu" data-target="module-merchant" data-submenu="submenu-merchant">
+                <i class="fas fa-store"></i> <span>Merchant Management</span>
+                <i class="fas fa-chevron-down hc-submenu-icon" style="width:auto; font-size:10px; opacity:0.5;"></i>
+            </a>
+            <div id="submenu-merchant" class="hc-submenu-container" style="display: none;">
+                <!-- Profile & Access -->
+                <div style="padding: 12px 32px 4px 56px; font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">Profile & Access</div>
+                <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-merchant-detail">
+                    <i class="fas fa-id-card"></i> Detail Merchant
+                </a>
+                <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-merchant-edit">
+                    <i class="fas fa-user-edit"></i> Edit Merchant
+                </a>
+                <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-merchant-supervisor">
+                    <i class="fas fa-user-tie"></i> Merchant Supervisor
+                </a>
+                <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-merchant-subaccount">
+                    <i class="fas fa-users"></i> Sub Accounts
+                </a>
+                <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-merchant-delegate">
+                    <i class="fas fa-sitemap"></i> Delegate
+                </a>
+
+                <!-- Payment Settings -->
+                <div style="padding: 12px 32px 4px 56px; font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">Payment Settings</div>
+                <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-merchant-cashin">
+                    <i class="fas fa-money-bill-wave"></i> Cashin Settings
+                </a>
+                <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-merchant-cashout">
+                    <i class="fas fa-hand-holding-usd"></i> Cashout Settings
+                </a>
+            </div>
+
+            <div class="hc-sidebar-title">PHASE 4: DAILY OPERATIONS</div>
+            <!-- Merchant Financials -->
+            <a href="javascript:void(0);" class="hc-nav-item hc-has-submenu" data-submenu="submenu-merchant-financials">
+                <i class="fas fa-wallet"></i> <span>Merchant Financials</span>
+                <i class="fas fa-chevron-down hc-submenu-icon" style="width:auto; font-size:10px; opacity:0.5;"></i>
+            </a>
+            <div id="submenu-merchant-financials" class="hc-submenu-container" style="display: none;">
+                <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-merchant-mutation">
+                    <i class="fas fa-exchange-alt"></i> Mutation Log
+                </a>
+                <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-merchant-credit">
+                    <i class="fas fa-plus-circle"></i> Add Credit Balance
+                </a>
+                <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-merchant-debit">
+                    <i class="fas fa-minus-circle"></i> Deduct Debit Balance
+                </a>
+            </div>
+
+            <!-- Finance & Treasury -->
+            <a href="javascript:void(0);" class="hc-nav-item hc-has-submenu" data-submenu="submenu-finance">
+                <i class="fas fa-coins"></i> <span>Finance & Treasury</span>
+                <i class="fas fa-chevron-down hc-submenu-icon" style="width:auto; font-size:10px; opacity:0.5;"></i>
+            </a>
+            <div id="submenu-finance" class="hc-submenu-container" style="display: none;">
+                <!-- Treasury Operations -->
+                <div style="padding: 12px 32px 4px 56px; font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">Treasury Operations</div>
+                <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-external-balance-log">
+                    <i class="fas fa-book"></i> External Balance Log
+                </a>
+                <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-bifast">
+                    <i class="fas fa-bolt"></i> Bi-Fast Transfer
+                </a>
+                <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-settlement-holidays">
+                    <i class="fas fa-calendar-times"></i> Settlement Holidays
+                </a>
+
+                <!-- Audit & Reporting -->
+                <div style="padding: 12px 32px 4px 56px; font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">Audit & Reporting</div>
+                <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-financial-exports">
+                    <i class="fas fa-file-export"></i> Financial Exports
+                </a>
+                <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-balance-logs">
+                    <i class="fas fa-clipboard-list"></i> Audit Balance Logs
+                </a>
+            </div>
+
+            <!-- Analytics & Reports -->
             <a href="javascript:void(0);" class="hc-nav-item hc-has-submenu" data-submenu="submenu-analytics">
-                <i class="fas fa-chart-line"></i> <span>Monitoring & Analytics</span>
+                <i class="fas fa-chart-line"></i> <span>Analytics & Reports</span>
                 <i class="fas fa-chevron-down hc-submenu-icon" style="width:auto; font-size:10px; opacity:0.5;"></i>
             </a>
             <div id="submenu-analytics" class="hc-submenu-container" style="display: none;">
@@ -695,149 +859,7 @@
                 </a>
             </div>
 
-            <!-- Merchant Administration -->
-            <a href="javascript:void(0);" class="hc-nav-item hc-has-submenu" data-target="module-merchant" data-submenu="submenu-merchant">
-                <i class="fas fa-store"></i> <span>Merchant Setup</span>
-                <i class="fas fa-chevron-down hc-submenu-icon" style="width:auto; font-size:10px; opacity:0.5;"></i>
-            </a>
-            <div id="submenu-merchant" class="hc-submenu-container" style="display: none;">
-                <!-- Profile & Access -->
-                <div style="padding: 12px 32px 4px 56px; font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">Profile & Access</div>
-                <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-merchant-detail">
-                    Detail Merchant
-                </a>
-                <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-merchant-edit">
-                    Edit Merchant
-                </a>
-                <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-merchant-supervisor">
-                    Merchant Supervisor
-                </a>
-                <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-merchant-subaccount">
-                    Sub Accounts
-                </a>
-                <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-merchant-delegate">
-                    Delegate
-                </a>
-
-                <!-- Financial Balances -->
-                <div style="padding: 12px 32px 4px 56px; font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">Financial Balances</div>
-                <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-merchant-mutation">
-                    Mutation Log
-                </a>
-                <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-merchant-credit">
-                    Add Credit Balance
-                </a>
-                <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-merchant-debit">
-                    Deduct Debit Balance
-                </a>
-
-                <!-- Payment Settings -->
-                <div style="padding: 12px 32px 4px 56px; font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">Payment Settings</div>
-                <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-merchant-cashin">
-                    Cashin Settings
-                </a>
-                <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-merchant-cashout">
-                    Cashout Settings
-                </a>
-            </div>
-
-            <!-- Payment Channels & Products -->
-            <a href="javascript:void(0);" class="hc-nav-item hc-has-submenu" data-submenu="submenu-products">
-                <i class="fas fa-layer-group"></i> <span>Payment & Services</span>
-                <i class="fas fa-chevron-down hc-submenu-icon" style="width:auto; font-size:10px; opacity:0.5;"></i>
-            </a>
-            <div id="submenu-products" class="hc-submenu-container" style="display: none;">
-                <!-- Global Providers -->
-                <div style="padding: 12px 32px 4px 56px; font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">Global Providers</div>
-                <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-cashin">
-                    Cash-In Providers
-                </a>
-                <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-cashout">
-                    Cash-Out Providers
-                </a>
-
-                <!-- Virtual Accounts -->
-                <div style="padding: 12px 32px 4px 56px; font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">Virtual Accounts</div>
-                <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-va-dynamic">
-                    VA Dynamic
-                </a>
-                <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-va-recurring">
-                    VA Recurring
-                </a>
-
-                <!-- QRIS & E-Wallet -->
-                <div style="padding: 12px 32px 4px 56px; font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">QRIS & E-Wallet</div>
-                <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-qris-dynamic">
-                    QRIS Dynamic
-                </a>
-                <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-qris-recurring">
-                    QRIS Recurring
-                </a>
-                <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-ewallet-dynamic">
-                    E-Wallet Dynamic
-                </a>
-
-                <!-- Digital Goods -->
-                <div style="padding: 12px 32px 4px 56px; font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">Digital Goods</div>
-                <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-prepaid-products">
-                    Prepaid Products
-                </a>
-            </div>
-
-            <!-- Finance & Treasury -->
-            <a href="javascript:void(0);" class="hc-nav-item hc-has-submenu" data-submenu="submenu-finance">
-                <i class="fas fa-coins"></i> <span>Finance & Treasury</span>
-                <i class="fas fa-chevron-down hc-submenu-icon" style="width:auto; font-size:10px; opacity:0.5;"></i>
-            </a>
-            <div id="submenu-finance" class="hc-submenu-container" style="display: none;">
-                <!-- Treasury Operations -->
-                <div style="padding: 12px 32px 4px 56px; font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">Treasury Operations</div>
-                <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-external-balance-log">
-                    External Balance Log
-                </a>
-                <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-bifast">
-                    Bi-Fast Transfer
-                </a>
-                <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-settlement-holidays">
-                    Settlement Holidays
-                </a>
-
-                <!-- Audit & Reporting -->
-                <div style="padding: 12px 32px 4px 56px; font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">Audit & Reporting</div>
-                <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-financial-exports">
-                    Financial Exports
-                </a>
-                <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-balance-logs">
-                    Audit Balance Logs
-                </a>
-            </div>
-
-            <!-- System Administration -->
-            <a href="javascript:void(0);" class="hc-nav-item hc-has-submenu" data-submenu="submenu-system">
-                <i class="fas fa-cogs"></i> <span>System Admin</span>
-                <i class="fas fa-chevron-down hc-submenu-icon" style="width:auto; font-size:10px; opacity:0.5;"></i>
-            </a>
-            <div id="submenu-system" class="hc-submenu-container" style="display: none;">
-                <!-- Security & Access -->
-                <div style="padding: 12px 32px 4px 56px; font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">Security & Access</div>
-                <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-login">
-                    Authentication
-                </a>
-                <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-rbac">
-                    RBAC & Permissions
-                </a>
-
-                <!-- Platform Config -->
-                <div style="padding: 12px 32px 4px 56px; font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">Platform Config</div>
-                <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-account">
-                    Account Setup
-                </a>
-                <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-channel">
-                    Gateway Channel
-                </a>
-            </div>
-
-            <div class="hc-sidebar-title">API & Technical Reference</div>
+            <div class="hc-sidebar-title">DEVELOPER & API</div>
             <a href="javascript:void(0);" class="hc-nav-item" data-target="module-secret">
                 <i class="fas fa-key"></i> Managing Secret Keys
             </a>
@@ -907,6 +929,8 @@
                 <?php include APPPATH . 'views/helpcenter/modules/login.php'; ?>
                 <?php include APPPATH . 'views/helpcenter/modules/rbac.php'; ?>
                 <?php include APPPATH . 'views/helpcenter/modules/account.php'; ?>
+                <?php include APPPATH . 'views/helpcenter/modules/ug-external-cashout.php'; ?>
+                <?php include APPPATH . 'views/helpcenter/modules/ug-external-cashin.php'; ?>
                 <?php include APPPATH . 'views/helpcenter/modules/secret.php'; ?>
                 <?php include APPPATH . 'views/helpcenter/modules/api-cashin.php'; ?>
                 <?php include APPPATH . 'views/helpcenter/modules/api-cashout.php'; ?>
