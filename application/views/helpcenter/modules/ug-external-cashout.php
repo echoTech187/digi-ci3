@@ -420,11 +420,8 @@
             </div>
             <div class="col-lg-7 order-1 order-lg-2 mb-4 mb-lg-0">
                 <div class="mac-window">
-                    <div class="mac-header">
-                        <div class="mac-dot dot-red"></div><div class="mac-dot dot-yellow"></div><div class="mac-dot dot-green"></div>
-                    </div>
                     <div class="mac-body">
-                        <img src="<?= base_url('assets/img/helpcenter/actual_dashboard_step1_premium.png') ?>" alt="Navigasi Sidebar" style="width: 100%; display: block; aspect-ratio: 3/2; object-fit: cover; object-position: left top; border-bottom-left-radius: 11px; border-bottom-right-radius: 11px;">
+                        <img src="<?= base_url('assets/img/helpcenter/actual_dashboard_step1_premium.png') ?>" alt="Navigasi Sidebar" style="width: 100%; display: block; object-fit: cover; object-position: left top; border-bottom-left-radius: 11px; border-bottom-right-radius: 11px;">
                     </div>
                 </div>
             </div>
@@ -432,17 +429,7 @@
 
         <!-- Step 2 (Image Left) -->
         <div class="row hc-step-row align-items-center">
-            <div class="col-lg-5 mb-4 mb-lg-0">
-                <div class="mac-window">
-                    <div class="mac-header">
-                        <div class="mac-dot dot-red"></div><div class="mac-dot dot-yellow"></div><div class="mac-dot dot-green"></div>
-                    </div>
-                    <div class="mac-body">
-                        <img src="<?= base_url('assets/img/helpcenter/advanced_filters_matching.png') ?>" alt="Filter Lanjutan" style="width: 100%; display: block; aspect-ratio: 6/4; object-fit: cover; object-position: left top; border-bottom-left-radius: 11px; border-bottom-right-radius: 11px;">
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-7 pl-lg-5">
+            <div class="col-lg-8">
                 <div class="hc-step-number">2</div>
                 <h3 class="hc-step-title">Gunakan Filter Pencarian</h3>
                 <div class="pl-4 border-left border-success ml-2 mt-3">
@@ -457,13 +444,28 @@
                     </ol>
                 </div>
             </div>
+            <div class="col-lg-4">
+                <div class="mac-window">
+                    <div class="mac-body">
+                        <img src="<?= base_url('assets/img/helpcenter/advanced_filters_matching.png') ?>" alt="Filter Lanjutan" style="width: 100%; display: block;  object-fit: cover; object-position: left top; border-bottom-left-radius: 11px; border-bottom-right-radius: 11px;">
+                    </div>
+                </div>
+            </div>
+            
         </div>
 
         <!-- Step 3 (Image Right) -->
         <div class="row hc-step-row align-items-center">
-            <div class="col-lg-6 order-2 order-lg-1">
+            <div class="col-lg-12 order-2 order-xl-1">
                 <div class="hc-step-number">3</div>
                 <h3 class="hc-step-title">Melihat Data Mapping</h3>
+                <div class="col-lg-12 order-1 order-lg-2 mb-4 mb-lg-0 p-0">
+                    <div class="mac-window mb-4">
+                        <div class="mac-body">
+                            <img src="<?= base_url('assets/img/helpcenter/data_table.png') ?>" alt="Tabel Data" style="width: 100%; display: block; border-bottom-left-radius: 11px; border-bottom-right-radius: 11px;">
+                        </div>
+                    </div>
+                </div>
                 <p class="hc-step-desc mb-3">Tabel utama memberikan gambaran komprehensif mengenai seluruh konfigurasi. Berikut penjelasan detail dari fitur dan data yang tersedia:</p>
                 <div class="pl-4 border-left border-success ml-2 mt-3">
                     <ul class="hc-step-desc mb-0 list-unstyled">
@@ -476,16 +478,7 @@
                     </ul>
                 </div>
             </div>
-            <div class="col-lg-6 order-1 order-lg-2 mb-4 mb-lg-0">
-                <div class="mac-window">
-                    <div class="mac-header">
-                        <div class="mac-dot dot-red"></div><div class="mac-dot dot-yellow"></div><div class="mac-dot dot-green"></div>
-                    </div>
-                    <div class="mac-body">
-                        <img src="<?= base_url('assets/img/helpcenter/data_table.png') ?>" alt="Tabel Data" style="width: 100%; display: block; border-bottom-left-radius: 11px; border-bottom-right-radius: 11px;">
-                    </div>
-                </div>
-            </div>
+            
         </div>
 
         <!-- Step 4 -->
@@ -493,11 +486,12 @@
             <div class="col-lg-12">
                 <div class="hc-step-number">4</div>
                 <h3 class="hc-step-title">Mengisi Formulir Mapping</h3>
-                <div class="mac-window">
+                <div class="mac-window mb-4">
                     <div class="mac-body">
                         <img src="<?= base_url('assets/img/helpcenter/add_mapping.png') ?>" alt="Formulir Add Mapping" style="width: 100%; display: block; border-bottom-left-radius: 11px; border-bottom-right-radius: 11px;">
                     </div>
                 </div>
+                <p>Berikut adalah pemetaan *field* yang wajib diisi untuk membuat konfigurasi cash-out eksternal baru:</p>
                 <div class="pl-4 border-left border-success ml-2 mt-3">
                     <ol class="hc-step-desc mb-0">
                         <li class="mb-3"><strong>Pemilihan Merchant:</strong> Pilih merchant spesifik yang ingin Anda konfigurasi. <br><em class="text-danger small"><i class="fas fa-exclamation-triangle"></i> Validasi: Anda tidak dapat memproses form tanpa memilih merchant yang valid.</em></li>
@@ -515,11 +509,12 @@
             <div class="col-lg-12">
                 <div class="hc-step-number">5</div>
                 <h3 class="hc-step-title">Fitur Global Update</h3>
-                <div class="mac-window">
+                <div class="mac-window mb-4">
                     <div class="mac-body">
                         <img src="<?= base_url('assets/img/helpcenter/bulk_update.png') ?>" alt="Formulir Bulk Update" style="width: 100%; display: block; border-bottom-left-radius: 11px; border-bottom-right-radius: 11px;">
                     </div>
                 </div>
+                <p>Fitur Global Update didesain untuk memigrasikan *traffic* secara cepat dari satu provider ke provider lain. Berikut adalah penjelasan detail dari fungsi yang tersedia:</p>
                 <div class="pl-4 border-left border-success ml-2 mt-3">
                     <ol class="hc-step-desc mb-0">
                         <li class="mb-3"><strong>Memulai Update:</strong> Klik tombol <strong>Global Update</strong> di bagian atas tabel utama ketika Anda perlu memigrasikan *traffic* secara cepat (misal saat *provider* sedang *downtime*).</li>
