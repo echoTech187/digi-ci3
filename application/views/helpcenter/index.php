@@ -291,8 +291,8 @@
             font-size: 18px;
             font-weight: 600;
             color: var(--hc-heading);
-            margin-top: 32px;
-            margin-bottom: 16px;
+            margin-top: 0;
+            margin-bottom: 32px;
         }
         .tech-doc-body p, .tech-doc-body li {
             font-size: 15px;
@@ -699,9 +699,6 @@
                 <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-account">
                     <i class="fas fa-cog"></i> Account Setup
                 </a>
-                <a href="javascript:void(0);" class="hc-nav-item hc-nav-subitem" data-target="module-ug-channel">
-                    <i class="fas fa-route"></i> Gateway Channel
-                </a>
             </div>
 
             <!-- Integrations & Providers -->
@@ -937,7 +934,6 @@
                 <?php include APPPATH . 'views/helpcenter/modules/history.php'; ?>
                 <?php include APPPATH . 'views/helpcenter/modules/qris.php'; ?>
                 <?php include APPPATH . 'views/helpcenter/modules/ug-bifast.php'; ?>
-                <?php include APPPATH . 'views/helpcenter/modules/ug-channel.php'; ?>
                 <?php include APPPATH . 'views/helpcenter/modules/ug-report.php'; ?>
                 <?php include APPPATH . 'views/helpcenter/modules/ug-merchant-supervisor.php'; ?>
                 <?php include APPPATH . 'views/helpcenter/modules/ug-settlement-holidays.php'; ?>
@@ -973,7 +969,118 @@
             </div> <!-- End tech-doc-body -->
         </div> <!-- End hc-content-area -->
     </div> <!-- End Main Container Wrapper -->
+    <!-- CSS for Premium Layout -->
+    <style>
+        .hc-premium-overview {
+            background: linear-gradient(135deg, var(--hc-sidebar-bg) 0%, var(--hc-sidebar-bg) 100%);
+            border-left: 4px solid #3b82f6;
+            padding: 24px;
+            border-radius: 8px;
+            margin-bottom: 40px;
+        }
+        
+        .hc-step-row {
+            margin-bottom: 60px;
+        }
+        
+        .hc-step-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: #e0e7ff;
+            color: #4f46e5;
+            font-weight: bold;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+        
+        .hc-step-title {
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 12px;
+            font-size: 20px;
+        }
+        
+        .hc-step-desc {
+            color: #64748b;
+            line-height: 1.7;
+            font-size: 15px;
+        }
 
+        /* Mac Window Styling */
+        .mac-window {
+            /* background: #ffffff; */
+            border-radius: 12px;
+            /* box-shadow: 0 25px 50px -12px rgba(59, 130, 246, 0.25); */
+            /* border: 1px solid rgba(226, 232, 240, 0.8); */
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .mac-window:hover {
+            transform: translateY(-5px);
+            /* box-shadow: 0 30px 60px -12px rgba(59, 130, 246, 0.35); */
+        }
+        .mac-header {
+            /* background: #f8fafc; */
+            padding: 12px 16px;
+            /* border-bottom: 1px solid #e2e8f0; */
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .mac-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+        /* .dot-red { background: #ff5f56; }
+        .dot-yellow { background: #ffbd2e; }
+        .dot-green { background: #27c93f; } */
+        
+        .mac-body img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        /* Table Styling */
+        .hc-ref-table th {
+            background: #f8fafc;
+            color: #334155;
+            font-weight: 600;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        .hc-ref-table td {
+            color: #475569;
+            vertical-align: middle;
+        }
+        
+        /* FAQ Styling */
+        .hc-faq-item {
+            background:var(--hc-bg);
+            border: 1px solid var(--hc-border);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+        .hc-faq-q {
+            font-weight: 600;
+            color: var(--hc-text);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .hc-faq-a {
+            color: var(--hc-text);
+            margin-left: 30px;
+            margin-bottom: 0;
+            line-height: 1.6;
+        }
+    </style>
     <script>
         (function() {
             let currentLang = 'en';

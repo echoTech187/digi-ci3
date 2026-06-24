@@ -1,366 +1,504 @@
 <div id="module-ug-merchant-cashout" class="hc-doc-section">
-    <!-- EN CONTENT -->
-    <div class="lang-content lang-en" style="display:block;">
+    <div class="ug-module-content">
 
-        <p class="doc-lead text-muted" style="line-height: 1.7;">The <strong>Cashout Fee Settings</strong> module controls how much a merchant is charged when they withdraw their available balance to an external bank account or perform outward disbursements via <a href="javascript:void(0);" onclick="document.querySelector('.hc-nav-item[data-target=\'module-ug-bifast\']').click()" class="text-primary font-weight-bold text-decoration-none">BI-FAST Transfer</a>. Like Cashin, this provides a per-merchant override of the global cashout fee structure.</p>
+        <!-- EN CONTENT -->
+        <div class="lang-content lang-en" style="display:block;">
 
-        <hr class="my-4">
-
-        <!-- UI Overview Table -->
-        <div class="mb-5">
-            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-th-list text-primary mr-2"></i> UI Overview — Data Columns</h5>
-            <div class="table-responsive shadow-sm" style="border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05);">
-                <table class="table table-borderless table-striped small mb-0" style="background: rgba(255,255,255,0.02);">
-                    <thead style="background: rgba(0,0,0,0.4);">
-                        <tr>
-                            <th class="p-3 border-0" style="width: 30%;">Column / Field</th>
-                            <th class="p-3 border-0">What It Means</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr><td class="p-3 border-0"><strong>CUSTOM FEE TOGGLE</strong></td><td class="p-3 border-0">A per-channel master switch. When ON, the merchant-specific fee defined here overrides the global rate.</td></tr>
-                        <tr><td class="p-3 border-0"><strong>CASHOUT CHANNEL LIST</strong></td><td class="p-3 border-0">All outbound channels available for this merchant (e.g., `BI-FAST`, `Manual Transfer`). Each has its own fee row.</td></tr>
-                        <tr><td class="p-3 border-0"><strong>FIXED FEE (Rp)</strong></td><td class="p-3 border-0">A flat Rupiah fee charged each time a withdrawal/disbursement is processed (e.g., Rp 5,000).</td></tr>
-                        <tr><td class="p-3 border-0"><strong>PERCENTAGE FEE (%)</strong></td><td class="p-3 border-0">A percentage of the total cashout amount charged as a service fee (e.g., 0.3%).</td></tr>
-                        <tr><td class="p-3 border-0"><strong>MINIMUM FEE (Rp)</strong></td><td class="p-3 border-0">The floor amount for the percentage fee calculation. If the percentage calculation falls below this, this amount is charged instead.</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Searching -->
-        <div class="mb-5">
-            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-search text-primary mr-2"></i> Searching</h5>
-            <p class="text-muted mb-4">Use the built-in search to track down specific fee configurations.</p>
-
-            <div class="pl-4 border-left border-primary ml-2 mb-4">
-                <ol class="text-muted mb-0">
-                    <li class="mb-2"><strong>Quick Search:</strong> Type in the <em>Search setting...</em> box to instantly filter the channel list.</li>
-                </ol>
-            </div>
-        </div>
-
-        <!-- Section 1: Architecture -->
-        <div class="mb-5">
-            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-project-diagram text-primary mr-2"></i> 1. Architecture: Cashout Fee Lifecycle</h5>
-            <p class="text-muted mb-4">The cashout fee is securely deducted from the merchant's <strong>Available Balance</strong> the moment a request is submitted. Here is the flow:</p>
-
-            <div class="mermaid-container mb-4">
-                <div class="mermaid">
-                    flowchart TD
-                        A([Cashout Request]) --> B{Custom Fee<br>Enabled?}
-                        B -- Yes --> C[Calculate % Fee + Fixed Fee]
-                        B -- No --> D[Apply Global Cashout Fee]
-                        C --> E{Calculated Fee<br>< Minimum Fee?}
-                        E -- Yes --> F[Apply Minimum Fee]
-                        E -- No --> G[Apply Calculated Fee]
-                        D --> H[Deduct Principal + Fee<br>Put on HOLD]
-                        F --> H
-                        G --> H
-                        H --> I{Bank Callback}
-                        I -- SUCCESS --> J[(Release Hold, Send Funds)]
-                        I -- FAILED --> K[(Refund Principal + Fee<br>to Balance)]
-                </div>
+            <!-- 1. Conceptual Overview -->
+            <div class="hc-premium-overview mb-4">
+                <h4 class="font-weight-bold mb-3"><i class="fas fa-book text-primary mr-2"></i> Overview</h4>
+                <p class="mb-0">The <strong>Cash-Out Fee Settings</strong> module allows administrators to define custom payment gateway fees and withdrawal size limits exclusively for individual merchants. This robust system overrides global defaults and supports bulk assignments, granting granular control over outbound remittance commercials to accommodate complex B2B agreements.</p>
             </div>
 
-            <div class="pl-4 border-left border-primary ml-2 mb-4">
-                <ol class="text-muted mb-0">
-                    <li class="mb-3">Merchant submits a cashout request (withdrawal to bank / BI-FAST disbursement).</li>
-                    <li class="mb-3">System checks if a <strong>Custom Cashout Fee</strong> is enabled for this specific merchant and channel. If YES, it applies the custom fee; if NO, it falls back to the global platform fee.</li>
-                    <li class="mb-3">Both the principal amount AND the calculated fee are immediately deducted from Available Balance and placed on <strong>Hold</strong> while the bank transfer runs.</li>
-                    <li class="mb-2">Upon final resolution from the banking network, the Hold is released. If SUCCESS, the principal is sent out. If FAILURE, both principal and fee are returned to Available Balance.</li>
-                </ol>
-            </div>
-        </div>
-
-        <!-- Section 2: Step-by-Step -->
-        <div class="mb-5">
-            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-edit text-success mr-2"></i> 2. Configuring a Custom Cashout Fee</h5>
-            <p class="text-muted mb-4">You can set customized outbound fees for high-volume merchants to encourage greater liquidity utilization.</p>
-
-            <div class="pl-4 border-left border-success ml-2 mb-4">
-                <ol class="text-muted mb-0">
-                    <li class="mb-3">Navigate to <strong>Merchant Setup</strong>, find the target merchant, and open their detail page.</li>
-                    <li class="mb-3">In the action menu (⋮), click <strong>Cashout Settings</strong>.</li>
-                    <li class="mb-3">Locate the desired cashout channel row (e.g., <code>BI-FAST</code>) and toggle the <strong>Custom Fee</strong> switch to <strong>ON</strong>.</li>
-                    <li class="mb-3">Enter your negotiated <strong>Fixed Fee</strong> (Rp), <strong>Percentage Fee</strong> (%), and optionally the <strong>Minimum Fee</strong> (Rp).</li>
-                    <li class="mb-2">Click <strong>Save</strong>. The updated fee takes effect instantly for all new cashout requests.</li>
-                </ol>
-            </div>
-
-            <div class="doc-callout callout-info shadow-sm mt-4">
-                <div class="callout-icon"><i class="fas fa-info-circle"></i></div>
-                <div class="callout-content">
-                    <strong class="d-block mb-1 text-body" style="font-size: 16px;">Verifying Fee Deductions</strong>
-                    <p class="mb-0 text-muted small">After a merchant performs a cashout, check their <strong>Mutation Log</strong>. You will see two separate <span class="text-danger font-weight-bold">Debit</span> entries: one for the principal cashout amount, and one labeled <em>Cashout Fee</em> representing the fee deducted.</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- New Section: Form Validations -->
-        <div class="mb-5">
-            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-shield-alt text-primary mr-2"></i> 3. Form Validations & Constraints</h5>
-            <div class="table-responsive shadow-sm mb-4" style="border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05);">
-                <table class="table table-borderless table-striped small mb-0" style="background: rgba(255,255,255,0.02);">
-                    <thead style="background: rgba(0,0,0,0.4);">
-                        <tr>
-                            <th class="p-3 border-0" style="width: 25%;">Constraint Type</th>
-                            <th class="p-3 border-0">System Enforcement Rule</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr><td class="p-3 border-0"><strong>Required Fields</strong></td><td class="p-3 border-0">All fields must be populated (<code>Channel ID</code>, <code>Fee Type</code>, <code>Fee</code>, <code>Percentage</code>, <code>Interval</code>, <code>Min Amount</code>, <code>Max Amount</code>, <code>Status</code>).</td></tr>
-                        <tr><td class="p-3 border-0"><strong>Data Types</strong></td><td class="p-3 border-0">All fee and amount fields must be valid numeric values (integers or decimals).</td></tr>
-                        <tr><td class="p-3 border-0"><strong>Unique Channel Config</strong></td><td class="p-3 border-0">Only one fee configuration per channel is allowed per merchant.</td></tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- New Section: System Notifications -->
-            <h6 class="font-weight-bold mb-3 mt-4 text-dark"><i class="fas fa-bell text-info mr-2"></i> System Notifications</h6>
-            <div class="d-flex flex-column mb-4">
-                <div class="mb-3">
-                    <div class="p-3 rounded border" style="background-color: rgba(22, 163, 74, 0.05); border-color: rgba(22, 163, 74, 0.2) !important;">
-                        <strong class="text-success d-block mb-2"><i class="fas fa-check-circle mr-1"></i> Success Events</strong>
-                        <ul class="small text-muted mb-0 pl-3">
-                            <li class="mb-0"><strong>Configuration Saved:</strong> <code>Data successfully inserted</code> / <code>updated</code></li>
-                        </ul>
+            <!-- 2. Visual Step-by-Step Walkthrough -->
+            <h4 class="font-weight-bold mb-4 border-bottom pb-2">Procedural Walkthrough</h4>
+            
+            <!-- Step 1 (Image Right) -->
+            <div class="row hc-step-row align-items-center mb-5">
+                <div class="col-lg-5 order-2 order-lg-1">
+                    <div class="hc-step-number">1</div>
+                    <h3 class="hc-step-title">Access the Module</h3>
+                    <div class="pl-4 border-left border-success ml-2 mt-3">
+                        <ol class="hc-step-desc mb-0">
+                            <li class="mb-2">From the main dashboard, navigate to the <strong>Merchant Management</strong> menu on the left sidebar.</li>
+                            <li class="mb-2">Locate the specific merchant you wish to configure in the data table.</li>
+                            <li class="mb-2">Click the (<i class="fas fa-ellipsis-v"></i>) on the right side of the row and select <strong>Cashout Fee Settings</strong> to launch the interface.</li>
+                        </ol>
                     </div>
                 </div>
-                <div class="mb-1">
-                    <div class="p-3 rounded border" style="background-color: rgba(220, 38, 38, 0.05); border-color: rgba(220, 38, 38, 0.2) !important;">
-                        <strong class="text-danger d-block mb-2"><i class="fas fa-exclamation-circle mr-1"></i> Error Events & Solutions</strong>
-                        <ul class="small text-muted mb-0 pl-3">
-                            <li class="mb-3">
-                                <strong>Duplicate Entry (1062):</strong> <code>Failed to insert data: A fee configuration for this channel already exists.</code>
-                                <div class="text-dark mt-1"><i class="fas fa-lightbulb text-warning mr-1"></i> <strong>Solution:</strong> You cannot create a second fee rule for the same channel. Edit the existing configuration instead.</div>
-                            </li>
-                            <li class="mb-0">
-                                <strong>Access Denied (1142):</strong> <code>Access Denied. You do not have sufficient database privileges to add cashout fee settings.</code>
-                                <div class="text-dark mt-1"><i class="fas fa-lightbulb text-warning mr-1"></i> <strong>Solution:</strong> The MySQL user lacks INSERT or UPDATE privileges. Contact the Database Administrator.</div>
-                            </li>
+                <div class="col-lg-7 order-1 order-lg-2 mb-4 mb-lg-0">
+                    <div class="mac-window">
+                        <div class="mac-body">
+                            <img src="<?= base_url('assets/img/helpcenter/actual_dashboard_step1_premium.png') ?>" alt="Sidebar Navigation" style="width: 100%; display: block; object-fit: cover; object-position: left top; border-bottom-left-radius: 11px; border-bottom-right-radius: 11px;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2 (Image Left) -->
+            <div class="row hc-step-row align-items-center mb-5">
+                <div class="col-lg-8">
+                    <div class="hc-step-number">2</div>
+                    <h3 class="hc-step-title">Use Advanced Filters</h3>
+                    <div class="pl-4 border-left border-success ml-2 mt-3">
+                        <ol class="hc-step-desc mb-0">
+                            <li class="mb-2">Click the <strong>Filters</strong> button located at the top right of the data table to toggle the advanced filtering panel.</li>
+                            <li class="mb-2"><strong>Channel Group:</strong> Isolate configurations by payment method families (e.g., Bank Transfer, E-Wallet Disbursement).</li>
+                            <li class="mb-2"><strong>Provider / External Default:</strong> View configurations routed through a specific upstream aggregator or payment provider.</li>
+                            <li class="mb-2"><strong>Channel ID:</strong> Pinpoint exact bank endpoints or specific payment channels.</li>
+                            <li class="mb-2"><strong>Status:</strong> Filter to see only Active configurations or those that are currently Inactive.</li>
+                            <li class="mb-2">Click the <strong>Apply Filter</strong> button to refine the data table results dynamically.</li>
+                        </ol>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="mac-window">
+                        <div class="mac-body">
+                            <img src="<?= base_url('assets/img/helpcenter/advanced_filters_matching.png') ?>" alt="Advanced Filters" style="width: 100%; display: block;  object-fit: cover; object-position: left top; border-bottom-left-radius: 11px; border-bottom-right-radius: 11px;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3 (Image Right) -->
+            <div class="row hc-step-row align-items-center mb-5">
+                <div class="col-lg-12 order-2 order-xl-1">
+                    <div class="hc-step-number">3</div>
+                    <h3 class="hc-step-title">View Fee Configuration Data</h3>
+                    <div class="col-lg-12 order-1 order-lg-2 mb-4 mb-lg-0 p-0">
+                        <div class="mac-window mb-4">
+                            <div class="mac-body">
+                                <img src="<?= base_url('assets/img/helpcenter/data_table.png') ?>" alt="Data Table" style="width: 100%; display: block; border-bottom-left-radius: 11px; border-bottom-right-radius: 11px;">
+                            </div>
+                        </div>
+                    </div>
+                    <p class="hc-step-desc mb-3">The main table gives you a comprehensive overview of all custom outbound fee configurations for the selected merchant. Here is a detailed breakdown of the key elements and functionalities:</p>
+                    <div class="pl-4 border-left border-success ml-2 mt-3">
+                        <ul class="hc-step-desc mb-0 list-unstyled">
+                            <li class="mb-3"><i class="fas fa-search text-success mr-2"></i><strong>Global Search:</strong> Use the search bar at the top right of the table. You can instantly filter the view by typing in the Channel Group, specific Channel ID, or Provider Name to locate a particular fee structure without scrolling.</li>
+                            <li class="mb-3"><i class="fas fa-columns text-success mr-2"></i><strong>Data Columns Breakdown:</strong> The table provides a complete anatomy of each fee setup. <strong>Channel Config</strong> displays the routing path, <strong>Fee Details</strong> shows whether the cost is fixed (Flat) or dynamic (Percentage), <strong>Interval</strong> indicates settlement periods, and <strong>Limits (Min/Max)</strong> define the transaction boundaries where the fee applies.</li>
+                            <li class="mb-3"><i class="fas fa-toggle-on text-success mr-2"></i><strong>Visual Status Indicator:</strong> Each row features a status badge. A green <span class="text-success">Active</span> badge means the fee override is actively calculating costs for new transactions, while a <span class="text-danger">Not Active</span> badge means the system ignores this custom setting and defaults back to the global fee.</li>
+                            <li class="mb-3"><i class="fas fa-layer-group text-success mr-2"></i><strong>Bulk Add Functionality:</strong> Click the 'Bulk Add' button to rapidly assign the exact same fee structure and limits to multiple channels within a group (e.g., all Virtual Accounts) in a single operation, saving significant administrative time.</li>
+                            <li class="mb-3"><i class="fas fa-plus text-success mr-2"></i><strong>Add Channel (Individual):</strong> Use the primary green button when you need to configure a highly customized fee rule for one specific payment channel (e.g., exclusively modifying the fee for BCA Virtual Account).</li>
+                            <li class="mb-3"><i class="fas fa-ellipsis-v text-success mr-2 px-1"></i><strong>Row Action Menu:</strong> The three vertical dots (<i class="fas fa-ellipsis-v"></i>) on the far right provide individual row controls. Select <strong>Edit Setting</strong> to modify the existing fee values or limits, or choose <strong>Delete</strong> to permanently remove this custom fee configuration from the merchant.</li>
                         </ul>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- FAQ -->
-        <h5 class="font-weight-bold mb-4 mt-5 d-flex align-items-center"><i class="fas fa-question-circle text-warning mr-3"></i> Common Issues &amp; Troubleshooting</h5>
-        <div class="faq-accordion mb-5">
-            <div class="border-0 mb-3 border-bottom pb-2">
-                <a href="#faq_en_mco_1" data-toggle="collapse" class="d-block text-body text-decoration-none font-weight-bold pb-2">
-                    <i class="fas fa-chevron-right mr-2 text-muted" style="font-size:0.8rem;"></i> Issue 1: What happens to pending disbursements when I change the fee?
-                </a>
-                <div id="faq_en_mco_1" class="collapse">
-                    <div class="text-muted px-4 pb-4 pt-1" style="line-height: 1.7; font-size: 0.9rem;">
-                        <strong>Resolution:</strong> Fees are locked in at the exact moment the cashout request is created. Changing the fee here will only affect brand-new cashout requests generated after you click save. Existing pending requests are untouched.
+            <!-- Step 4 -->
+            <div class="row hc-step-row align-items-center mb-5">
+                <div class="col-lg-12">
+                    <div class="hc-step-number">4</div>
+                    <h3 class="hc-step-title">Add New Fee Configuration</h3>
+                    <div class="mac-window mb-4">
+                        <div class="mac-body">
+                            <img src="<?= base_url('assets/img/helpcenter/add_mapping.png') ?>" alt="Add Mapping Form" style="width: 100%; display: block; border-bottom-left-radius: 11px; border-bottom-right-radius: 11px;">
+                        </div>
+                    </div>
+                    <p>To establish a custom fee for a new outbound/disbursement channel, click "Add Channel" and carefully define the following properties:</p>
+                    <div class="pl-4 border-left border-success ml-2 mt-3">
+                        <ol class="hc-step-desc mb-0">
+                            <li class="mb-3"><strong>Channel Selection:</strong> Select the <strong>Channel Group</strong> and <strong>External ID Default</strong>. This will unlock the <strong>Specific Channel ID</strong> dropdown. Select the exact channel you wish to configure. <br><em class="text-danger small"><i class="fas fa-exclamation-triangle"></i> Validation: The system enforces a strict Unique constraint (Error 1062) to ensure a merchant does not have duplicate active fees for the same Channel ID.</em></li>
+                            <li class="mb-3"><strong>Fee Structure:</strong> Choose a <strong>Fee Type</strong>: <code>Fixed</code> (flat Rupiah deduction), <code>Percentage</code> (dynamic deduction based on volume), or <code>Both</code>. Enter the corresponding nominal values precisely.</li>
+                            <li class="mb-3"><strong>Transaction Limits:</strong> Define the absolute <strong>Amount Min</strong> and <strong>Amount Max</strong>. <br><em class="text-danger small"><i class="fas fa-exclamation-triangle"></i> Validation: Outbound transaction requests that fall outside this designated boundary will be categorically rejected. The Minimum amount cannot exceed the Maximum amount.</em></li>
+                            <li class="mb-3"><strong>Status Configuration:</strong> Set the configuration to <strong>Active</strong> and hit <strong>Save Configuration</strong>. The fee rules take effect immediately for all subsequent transactions.</li>
+                        </ol>
                     </div>
                 </div>
             </div>
-            <div class="border-0 mb-3 border-bottom pb-2">
-                <a href="#faq_en_mco_2" data-toggle="collapse" class="d-block text-body text-decoration-none font-weight-bold pb-2">
-                    <i class="fas fa-chevron-right mr-2 text-muted" style="font-size:0.8rem;"></i> Issue 2: Can I set a cashout fee to zero?
-                </a>
-                <div id="faq_en_mco_2" class="collapse">
-                    <div class="text-muted px-4 pb-4 pt-1" style="line-height: 1.7; font-size: 0.9rem;">
-                        <strong>Answer:</strong> Yes. Set both Fixed and Percentage fees to 0, and ensure Custom Fee is ON. The merchant will not be charged. However, the upstream banking network may still charge the platform for the transfer.
+
+            <!-- Step 5 -->
+            <div class="row hc-step-row align-items-center mb-5">
+                <div class="col-lg-12">
+                    <div class="hc-step-number">5</div>
+                    <h3 class="hc-step-title">Bulk Add Capabilities</h3>
+                    <div class="mac-window mb-4">
+                        <div class="mac-body">
+                            <img src="<?= base_url('assets/img/helpcenter/edit_mapping.png') ?>" alt="Bulk Update Form" style="width: 100%; display: block; border-bottom-left-radius: 11px; border-bottom-right-radius: 11px;">
+                        </div>
+                    </div>
+                    <p>When onboarding a merchant who requires a flat fee structure across an entire category of payment methods (e.g., a flat Rp 5,000 for all Bank Transfers), utilize the Bulk Add modal to save time and prevent manual entry errors.</p>
+                    <div class="pl-4 border-left border-success ml-2 mt-3">
+                        <ol class="hc-step-desc mb-0">
+                            <li class="mb-3"><strong>Triggering the Tool:</strong> Click the <strong>Bulk Add</strong> button located alongside the advanced filters.</li>
+                            <li class="mb-3"><strong>Define Target Scope:</strong> Select the target <strong>Cashout Channel Group</strong> and the target <strong>External ID Default</strong>. The system will prepare to apply identical settings to every single channel within this intersection.</li>
+                            <li class="mb-3"><strong>Uniform Fee & Limits:</strong> Input the universal Fee Type and Transaction Limits that will be replicated across the targeted channels.</li>
+                            <li class="mb-3"><strong>Duplicate Protection Mechanism:</strong> Before execution, the system scans the merchant's current fee configurations. <br><em class="text-primary small"><i class="fas fa-shield-alt"></i> If a channel within the group already possesses a custom fee setting, the Bulk Add operation will silently bypass it to preserve its existing specific rules. It only provisions unconfigured channels.</em></li>
+                            <li class="mb-3"><strong>Execution:</strong> Click <strong>Apply Bulk Settings</strong>. The batch operation is processed securely within a single database transaction.</li>
+                        </ol>
                     </div>
                 </div>
             </div>
-            <div class="border-0 mb-3 border-bottom pb-2">
-                <a href="#faq_en_mco_3" data-toggle="collapse" class="d-block text-body text-decoration-none font-weight-bold pb-2">
-                    <i class="fas fa-chevron-right mr-2 text-muted" style="font-size:0.8rem;"></i> Issue 3: The minimum fee field — when does it exactly apply?
-                </a>
-                <div id="faq_en_mco_3" class="collapse">
-                    <div class="text-muted px-4 pb-4 pt-1" style="line-height: 1.7; font-size: 0.9rem;">
-                        <strong>Answer:</strong> The Minimum Fee acts as a safety floor. For example, if you set the Minimum Fee to Rp 2,500 and the percentage fee on a tiny cashout calculates to only Rp 1,500, the system overrides the percentage calculation and charges the flat Rp 2,500 minimum instead.
+
+            <!-- Step 6 -->
+            <div class="row hc-step-row align-items-center mb-5">
+                <div class="col-lg-12">
+                    <div class="hc-step-number">6</div>
+                    <h3 class="hc-step-title">Edit Fee Configuration</h3>
+                    <div class="mac-window mb-4">
+                        <div class="mac-body">
+                            <img src="<?= base_url('assets/img/helpcenter/edit_mapping.png') ?>" alt="Edit Mapping" style="width: 100%; display: block; border-bottom-left-radius: 11px; border-bottom-right-radius: 11px;">
+                        </div>
+                    </div>
+                    <p>Commercial agreements change over time. You can seamlessly renegotiate and update existing outbound fee structures without interrupting service availability.</p>
+                    <div class="pl-4 border-left border-success ml-2 mt-3">
+                        <ol class="hc-step-desc mb-0">
+                            <li class="mb-3"><strong>Open Action Menu:</strong> Locate the configuration row you wish to modify and click the (<i class="fas fa-ellipsis-v"></i>) on the far right.</li>
+                            <li class="mb-3"><strong>Select Edit:</strong> Choose <strong>Edit Setting</strong> from the dropdown menu to open the modification modal.</li>
+                            <li class="mb-3"><strong>Make Adjustments:</strong> The form will be pre-populated with the current rules. You can alter the Fee Type or widen/restrict the transaction limits. <em class="text-muted small">Note: The target Channel ID itself is locked and cannot be changed during an edit.</em></li>
+                            <li class="mb-3"><strong>Save Updates:</strong> Click <strong>Save Configuration</strong>. The revised logic will apply exclusively to newly generated disbursement requests; old pending transactions retain their historical fee data.</li>
+                        </ol>
                     </div>
                 </div>
             </div>
-        </div>
 
-    </div>
+            <!-- Step 7 -->
+            <div class="row hc-step-row align-items-center mb-5">
+                <div class="col-lg-12">
+                    <div class="hc-step-number">7</div>
+                    <h3 class="hc-step-title">Delete Fee Configuration</h3>
+                    <div class="mac-window mb-4">
+                        <div class="mac-body">
+                            <img src="<?= base_url('assets/img/helpcenter/delete_mapping.png') ?>" alt="Delete Mapping" style="width: 100%; display: block; border-bottom-left-radius: 11px; border-bottom-right-radius: 11px;">
+                        </div>
+                    </div>
+                    <p>If a merchant's custom fee privilege is revoked or was created erroneously, it can be permanently deleted, forcing the merchant to fall back to the system's global default rates.</p>
+                    <div class="pl-4 border-left border-success ml-2 mt-3">
+                        <ol class="hc-step-desc mb-0">
+                            <li class="mb-3"><strong>Open Action Menu:</strong> Click the (<i class="fas fa-ellipsis-v"></i>) on the relevant configuration row.</li>
+                            <li class="mb-3"><strong>Select Delete:</strong> Choose the red <strong>Delete</strong> option from the dropdown menu.</li>
+                            <li class="mb-3"><strong>Confirmation:</strong> A confirmation prompt will appear asking you to verify the removal of the override. <br><em class="text-danger small"><i class="fas fa-exclamation-triangle"></i> Warning: Deletion is permanent and removes the custom commercial agreement from the system.</em></li>
+                            <li class="mb-3"><strong>Fallback Activation:</strong> Click <strong>Confirm Delete</strong>. The merchant will instantly revert to the standard global fee structure for that specific outbound channel.</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
 
-    <!-- ID CONTENT -->
-    <div class="lang-content lang-id" style="display:none;">
-
-        <p class="doc-lead text-muted" style="line-height: 1.7;">Modul <strong>Cashout Fee Settings</strong> mengontrol seberapa besar biaya yang dikenakan ke merchant saat mereka menarik saldo ke bank eksternal atau melakukan pencairan dana (<em>disbursement</em>) via <a href="javascript:void(0);" onclick="document.querySelector('.hc-nav-item[data-target=\'module-ug-bifast\']').click()" class="text-primary font-weight-bold text-decoration-none">BI-FAST Transfer</a>. Seperti modul Cashin, ini mengatur kustomisasi (<em>override</em>) khusus per merchant atas biaya global.</p>
-
-        <hr class="my-4">
-
-        <!-- UI Overview Table -->
-        <div class="mb-5">
-            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-th-list text-primary mr-2"></i> Ikhtisar UI — Kolom Data</h5>
-            <div class="table-responsive shadow-sm" style="border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05);">
-                <table class="table table-borderless table-striped small mb-0" style="background: rgba(255,255,255,0.02);">
-                    <thead style="background: rgba(0,0,0,0.4);">
+            <!-- 3. Technical Reference -->
+            <h4 class="font-weight-bold mt-5 mb-4 border-bottom pb-2">Parameter Reference</h4>
+            <div class="table-responsive mb-5">
+                <table class="table table-bordered hc-ref-table bg-white">
+                    <thead>
                         <tr>
-                            <th class="p-3 border-0" style="width: 30%;">Kolom / Isian</th>
-                            <th class="p-3 border-0">Artinya</th>
+                            <th style="width: 25%;">Parameter</th>
+                            <th>Description & Validation Mechanism</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr><td class="p-3 border-0"><strong>CUSTOM FEE TOGGLE</strong></td><td class="p-3 border-0">Sakelar utama per kanal. Saat ON, tarif khusus merchant akan menggantikan tarif global.</td></tr>
-                        <tr><td class="p-3 border-0"><strong>CASHOUT CHANNEL LIST</strong></td><td class="p-3 border-0">Daftar kanal pencairan (misal: `BI-FAST`, `Manual Transfer`). Setiap baris mengatur satu kanal spesifik.</td></tr>
-                        <tr><td class="p-3 border-0"><strong>FIXED FEE (Rp)</strong></td><td class="p-3 border-0">Potongan tetap dalam Rupiah setiap kali cashout diproses (misal: Rp 5.000).</td></tr>
-                        <tr><td class="p-3 border-0"><strong>PERCENTAGE FEE (%)</strong></td><td class="p-3 border-0">Persentase dari total nilai cashout yang dijadikan biaya layanan (misal: 0.3%).</td></tr>
-                        <tr><td class="p-3 border-0"><strong>MINIMUM FEE (Rp)</strong></td><td class="p-3 border-0">Batas bawah untuk perhitungan biaya persentase. Jika kalkulasi persentase lebih rendah dari ini, sistem memakai angka minimum ini.</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Pencarian -->
-        <div class="mb-5">
-            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-search text-primary mr-2"></i> Pencarian</h5>
-            <p class="text-muted mb-4">Gunakan pencarian bawaan untuk melacak konfigurasi biaya spesifik.</p>
-
-            <div class="pl-4 border-left border-primary ml-2 mb-4">
-                <ol class="text-muted mb-0">
-                    <li class="mb-2"><strong>Pencarian Cepat:</strong> Ketik di kotak <em>Search setting...</em> untuk memfilter daftar kanal secara instan.</li>
-                </ol>
-            </div>
-        </div>
-
-        <!-- Section 1: Architecture -->
-        <div class="mb-5">
-            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-project-diagram text-primary mr-2"></i> 1. Arsitektur: Siklus Biaya Cashout</h5>
-            <p class="text-muted mb-4">Biaya cashout langsung dipotong dari <strong>Available Balance</strong> merchant saat pengajuan (request) dibuat. Berikut alurnya:</p>
-
-            <div class="mermaid-container mb-4">
-                <div class="mermaid">
-                    flowchart TD
-                        A([Permintaan Cashout]) --> B{Custom Fee<br>Aktif?}
-                        B -- Ya --> C[Kalkulasi Fee % + Fee Tetap]
-                        B -- Tidak --> D[Gunakan Tarif Global]
-                        C --> E{Hasil Kalkulasi<br>< Minimum Fee?}
-                        E -- Ya --> F[Terapkan Minimum Fee]
-                        E -- Tidak --> G[Terapkan Fee Kalkulasi]
-                        D --> H[Potong Pokok + Biaya<br>Lalu status HOLD]
-                        F --> H
-                        G --> H
-                        H --> I{Respons Bank}
-                        I -- SUCCESS --> J[(Lepas Hold, Dana Cair)]
-                        I -- FAILED --> K[(Refund Pokok + Biaya<br>ke Saldo)]
-                </div>
-            </div>
-
-            <div class="pl-4 border-left border-primary ml-2 mb-4">
-                <ol class="text-muted mb-0">
-                    <li class="mb-3">Merchant mengajukan permintaan cashout (penarikan atau disbursement BI-FAST).</li>
-                    <li class="mb-3">Sistem mengecek <strong>Custom Cashout Fee</strong>. Jika aktif (YA) pada kanal dan merchant terkait, sistem pakai tarif tersebut. Jika tidak aktif (TIDAK), sistem memakai tarif global platform.</li>
-                    <li class="mb-3">Nilai pokok transfer DAN biaya admin langsung dipotong dari Available Balance dan masuk ke status <strong>Hold</strong> selama bank memproses transaksi.</li>
-                    <li class="mb-2">Setelah bank memberikan status akhir, Hold dilepas. Jika BERHASIL (SUCCESS), dana pokok terkirim ke tujuan. Jika GAGAL (FAILURE), seluruh nilai pokok beserta biayanya dikembalikan utuh ke Available Balance.</li>
-                </ol>
-            </div>
-        </div>
-
-        <!-- Section 2: Step-by-Step -->
-        <div class="mb-5">
-            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-edit text-success mr-2"></i> 2. Mengatur Custom Cashout Fee</h5>
-            <p class="text-muted mb-4">Anda bisa mengatur tarif khusus untuk merchant bervolume tinggi agar lebih kompetitif di sisi pencairan dana.</p>
-
-            <div class="pl-4 border-left border-success ml-2 mb-4">
-                <ol class="text-muted mb-0">
-                    <li class="mb-3">Buka <strong>Merchant Setup</strong>, cari merchant target, lalu masuk ke laman detail merchant tersebut.</li>
-                    <li class="mb-3">Di menu aksi (⋮), klik <strong>Cashout Settings</strong>.</li>
-                    <li class="mb-3">Temukan baris kanal pencairan yang dituju (misal: <code>BI-FAST</code>) lalu geser tombol <strong>Custom Fee</strong> ke posisi <strong>ON</strong>.</li>
-                    <li class="mb-3">Ketikkan <strong>Fixed Fee</strong> (Rp), <strong>Percentage Fee</strong> (%), dan isikan juga <strong>Minimum Fee</strong> (Rp) bila diperlukan.</li>
-                    <li class="mb-2">Klik <strong>Save</strong>. Tarif baru akan aktif seketika untuk semua perintah cashout baru.</li>
-                </ol>
-            </div>
-
-            <div class="doc-callout callout-info shadow-sm mt-4">
-                <div class="callout-icon"><i class="fas fa-info-circle"></i></div>
-                <div class="callout-content">
-                    <strong class="d-block mb-1 text-body" style="font-size: 16px;">Memeriksa Detail Potongan Biaya</strong>
-                    <p class="mb-0 text-muted small">Setelah merchant melakukan cashout, periksa tab <strong>Mutation Log</strong> mereka. Anda akan mendapati dua entri <span class="text-danger font-weight-bold">Debit</span> terpisah: satu untuk dana pokok transfer, dan satu lagi dengan keterangan <em>Cashout Fee</em> sebagai potongan layanan.</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- New Section: Form Validations -->
-        <div class="mb-5">
-            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-shield-alt text-primary mr-2"></i> 3. Validasi Form & Batasan (Constraints)</h5>
-            <div class="table-responsive shadow-sm mb-4" style="border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05);">
-                <table class="table table-borderless table-striped small mb-0" style="background: rgba(255,255,255,0.02);">
-                    <thead style="background: rgba(0,0,0,0.4);">
                         <tr>
-                            <th class="p-3 border-0" style="width: 25%;">Tipe Validasi</th>
-                            <th class="p-3 border-0">Aturan Penegakan Sistem</th>
+                            <td><strong>Fee Type</strong></td>
+                            <td>Determines the core mathematical logic applied to each outbound disbursement request. You can select <code>Fixed</code> to impose a static, flat-rate deduction regardless of the transaction volume, <code>Percentage</code> to calculate a dynamic, volume-dependent fee, or <code>Both</code> to strictly enforce a combination of a base flat rate plus a volumetric deduction.</td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        <tr><td class="p-3 border-0"><strong>Kolom Wajib</strong></td><td class="p-3 border-0">Semua kolom harus diisi (<code>Channel ID</code>, <code>Fee Type</code>, <code>Fee</code>, <code>Percentage</code>, <code>Interval</code>, <code>Min Amount</code>, <code>Max Amount</code>, <code>Status</code>).</td></tr>
-                        <tr><td class="p-3 border-0"><strong>Tipe Data</strong></td><td class="p-3 border-0">Semua isian nilai biaya (fee) dan limit nominal transaksi harus berupa nilai numerik valid.</td></tr>
-                        <tr><td class="p-3 border-0"><strong>Unik per Channel</strong></td><td class="p-3 border-0">Setiap merchant hanya boleh memiliki satu pengaturan fee per layanan.</td></tr>
+                        <tr>
+                            <td><strong>Settlement Interval</strong></td>
+                            <td>Defines the strict latency period (measured in days) during which disbursed funds are deliberately logged before being safely reflected in the Merchant's balance accounting. Injecting a value of <code>0</code> commands the system to execute an instant, real-time clearing process (H+0).</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Amount Min & Max</strong></td>
+                            <td>Establishes the absolute security boundaries for outbound transaction amounts. Any disbursement request that falls outside of this strict volumetric zone will be categorically intercepted and sabotaged by the upstream payment gateway to prevent unauthorized processing.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Duplicate Entry Constraint</strong></td>
+                            <td>A rigid database-level security policy ensuring each merchant can only possess a maximum of one active fee configuration per specific Channel ID. Any attempt to pile up duplicate settings will immediately trigger a strict constraint violation (Error 1062).</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
 
-            <!-- New Section: System Notifications -->
-            <h6 class="font-weight-bold mb-3 mt-4 text-dark"><i class="fas fa-bell text-info mr-2"></i> Notifikasi Sistem</h6>
-            <div class="d-flex flex-column mb-4">
-                <div class="mb-3">
-                    <div class="p-3 rounded border" style="background-color: rgba(22, 163, 74, 0.05); border-color: rgba(22, 163, 74, 0.2) !important;">
-                        <strong class="text-success d-block mb-2"><i class="fas fa-check-circle mr-1"></i> Notifikasi Sukses</strong>
-                        <ul class="small text-muted mb-0 pl-3">
-                            <li class="mb-0"><strong>Pengaturan Disimpan:</strong> <code>Data successfully inserted</code> / <code>updated</code></li>
-                        </ul>
-                    </div>
+            <!-- 4. FAQ / Troubleshooting -->
+            <h4 class="font-weight-bold mb-4 border-bottom pb-2">Troubleshooting & FAQ</h4>
+            
+            <div class="hc-faq-item">
+                <div class="hc-faq-q">
+                    <i class="fas fa-question-circle text-primary"></i> 
+                    <span>What happens to pending transactions when I update a fee?</span>
                 </div>
-                <div class="mb-1">
-                    <div class="p-3 rounded border" style="background-color: rgba(220, 38, 38, 0.05); border-color: rgba(220, 38, 38, 0.2) !important;">
-                        <strong class="text-danger d-block mb-2"><i class="fas fa-exclamation-circle mr-1"></i> Notifikasi Error & Solusinya</strong>
-                        <ul class="small text-muted mb-0 pl-3">
-                            <li class="mb-3">
-                                <strong>Duplikat Konfigurasi (1062):</strong> <code>Failed to insert data: A fee configuration for this channel already exists.</code>
-                                <div class="text-dark mt-1"><i class="fas fa-lightbulb text-warning mr-1"></i> <strong>Solusi:</strong> Anda tidak dapat membuat pengaturan fee baru untuk kanal yang sama. Silakan edit konfigurasi yang sudah ada.</div>
-                            </li>
-                            <li class="mb-0">
-                                <strong>Access Denied (1142):</strong> <code>Access Denied. You do not have sufficient database privileges to add cashout fee settings.</code>
-                                <div class="text-dark mt-1"><i class="fas fa-lightbulb text-warning mr-1"></i> <strong>Solusi:</strong> User MySQL tidak memiliki izin INSERT. Silakan hubungi Database Administrator.</div>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
+                <p class="hc-faq-a">Fees are locked securely at the exact moment a disbursement request is generated. Editing the fee structure in this module will only affect brand-new requests. Old pending transactions will retain their original fee rules regardless of subsequent updates.</p>
             </div>
+
+            <div class="hc-faq-item">
+                <div class="hc-faq-q">
+                    <i class="fas fa-question-circle text-primary"></i> 
+                    <span>Can I configure a channel to have zero fees?</span>
+                </div>
+                <p class="hc-faq-a">Yes. Set the Fee Type to Fixed or Percentage, and enter 0 as the nominal value. The merchant will not be charged anything for outbound transactions. However, standard upstream provider costs may still apply and be billed to your platform's master account.</p>
+            </div>
+            
+            <div class="hc-faq-item">
+                <div class="hc-faq-q">
+                    <i class="fas fa-exclamation-circle text-danger"></i> 
+                    <span>Why do I get a "Duplicate Entry (1062)" error when adding a channel?</span>
+                </div>
+                <p class="hc-faq-a">This database-level error occurs because you are attempting to use "Add Channel" for a channel ID that is already configured for this merchant. If you want to modify the existing channel's fee, you must use the <strong>Edit Setting</strong> button on its specific row instead of creating a new entry.</p>
+            </div>
+
+            <div class="hc-faq-item">
+                <div class="hc-faq-q">
+                    <i class="fas fa-exclamation-circle text-danger"></i> 
+                    <span>Why does the Bulk Add operation skip certain channels?</span>
+                </div>
+                <p class="hc-faq-a">Bulk Add is intentionally designed with <strong>Duplicate Protection</strong>. If you run a Bulk Add on a group of 10 channels, but 8 of them already have their own highly specific custom fees configured, the Bulk Add operation will preserve those 8 and only apply the new settings to the 2 remaining unconfigured channels.</p>
+            </div>
+
+            <div class="hc-faq-item">
+                <div class="hc-faq-q">
+                    <i class="fas fa-info-circle text-primary"></i> 
+                    <span>How do I delete a fee so the merchant returns to the global settings?</span>
+                </div>
+                <p class="hc-faq-a">Locate the specific channel configuration in the table, click the (<i class="fas fa-ellipsis-v"></i>), and select <strong>Delete</strong>. Once the custom fee override is removed, the merchant will instantly fall back to the platform's global default rates for that outbound channel.</p>
+            </div>
+
         </div>
 
-        <!-- FAQ -->
-        <h5 class="font-weight-bold mb-4 mt-5 d-flex align-items-center"><i class="fas fa-question-circle text-warning mr-3"></i> Panduan Pemecahan Masalah (FAQ)</h5>
-        <div class="faq-accordion mb-5">
-            <div class="border-0 mb-3 border-bottom pb-2">
-                <a href="#faq_id_mco_1" data-toggle="collapse" class="d-block text-body text-decoration-none font-weight-bold pb-2">
-                    <i class="fas fa-chevron-right mr-2 text-muted" style="font-size:0.8rem;"></i> Masalah 1: Apa yang terjadi pada pending disbursement saat biaya diubah?
-                </a>
-                <div id="faq_id_mco_1" class="collapse">
-                    <div class="text-muted px-4 pb-4 pt-1" style="line-height: 1.7; font-size: 0.9rem;">
-                        <strong>Resolusi:</strong> Tarif dikunci di detik permintaan dibuat. Merubah fee di sini cuma berpengaruh pada pengajuan (request) baru setelah Anda menekan Save. Pengajuan pending tak akan terpengaruh sama sekali.
+        <!-- ID CONTENT -->
+        <div class="lang-content lang-id" style="display:none;">
+
+            <!-- 1. Conceptual Overview -->
+            <div class="hc-premium-overview mb-4">
+                <h4 class="font-weight-bold mb-3"><i class="fas fa-book text-primary mr-2"></i> Ringkasan Modul (Overview)</h4>
+                <p class="mb-0">Modul <strong>Cash-Out Fee Settings</strong> memungkinkan administrator untuk mendefinisikan biaya layanan pengeluaran (pencairan) serta rentang limit penarikan secara eksklusif untuk tiap merchant. Sistem tangguh ini menimpa pengaturan standar global dan mendukung pengaturan massal (Bulk), memberikan kontrol penuh atas struktur tarif (Fixed, Percentage, Both) untuk memfasilitasi ragam kesepakatan komersial B2B.</p>
+            </div>
+
+            <!-- 2. Visual Step-by-Step Walkthrough -->
+            <h4 class="font-weight-bold mb-4 border-bottom pb-2">Panduan Langkah-demi-Langkah</h4>
+            
+            <!-- Step 1 (Image Right) -->
+            <div class="row hc-step-row align-items-center mb-5">
+                <div class="col-lg-5 order-2 order-lg-1">
+                    <div class="hc-step-number">1</div>
+                    <h3 class="hc-step-title">Mengakses Modul</h3>
+                    <div class="pl-4 border-left border-success ml-2 mt-3">
+                        <ol class="hc-step-desc mb-0">
+                            <li class="mb-2">Dari dasbor utama, navigasikan kursor ke menu <strong>Merchant Management</strong> di bilah sisi kiri.</li>
+                            <li class="mb-2">Cari dan temukan merchant yang dituju pada tabel data utama.</li>
+                            <li class="mb-2">Klik menu aksi (titik tiga <strong>⋮</strong>) di ujung kanan baris merchant tersebut, lalu pilih <strong>Cashout Fee Settings</strong>.</li>
+                        </ol>
+                    </div>
+                </div>
+                <div class="col-lg-7 order-1 order-lg-2 mb-4 mb-lg-0">
+                    <div class="mac-window">
+                        <div class="mac-body">
+                            <img src="<?= base_url('assets/img/helpcenter/actual_dashboard_step1_premium.png') ?>" alt="Navigasi Sidebar" style="width: 100%; display: block; object-fit: cover; object-position: left top; border-bottom-left-radius: 11px; border-bottom-right-radius: 11px;">
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="border-0 mb-3 border-bottom pb-2">
-                <a href="#faq_id_mco_2" data-toggle="collapse" class="d-block text-body text-decoration-none font-weight-bold pb-2">
-                    <i class="fas fa-chevron-right mr-2 text-muted" style="font-size:0.8rem;"></i> Masalah 2: Bolehkah menyetel biaya admin cashout ke 0?
-                </a>
-                <div id="faq_id_mco_2" class="collapse">
-                    <div class="text-muted px-4 pb-4 pt-1" style="line-height: 1.7; font-size: 0.9rem;">
-                        <strong>Jawaban:</strong> Ya. Atur isian Fixed dan Percentage ke angka 0, pastikan sakelar Custom Fee dalam posisi ON. Merchant akan dibebaskan dari biaya. Tetapi perlu diingat, tagihan dari gateway upstream bank tetap menjadi beban platform.
+
+            <!-- Step 2 (Image Left) -->
+            <div class="row hc-step-row align-items-center mb-5">
+                <div class="col-lg-8">
+                    <div class="hc-step-number">2</div>
+                    <h3 class="hc-step-title">Gunakan Filter Tingkat Lanjut</h3>
+                    <div class="pl-4 border-left border-success ml-2 mt-3">
+                        <ol class="hc-step-desc mb-0">
+                            <li class="mb-2">Klik tombol <strong>Filters</strong> yang terletak di pojok kanan atas tabel data untuk memunculkan panel filter lanjutan.</li>
+                            <li class="mb-2"><strong>Channel Group:</strong> Sortir konfigurasi berdasarkan rumpun metode pembayaran (mis. Bank Transfer, Disbursement).</li>
+                            <li class="mb-2"><strong>Provider / External Default:</strong> Tampilkan konfigurasi yang dirutekan melalui penyedia layanan tertentu.</li>
+                            <li class="mb-2"><strong>Channel ID:</strong> Persempit pencarian hingga ke kode bank yang paling spesifik.</li>
+                            <li class="mb-2"><strong>Status:</strong> Filter tabel untuk hanya menampilkan konfigurasi yang Aktif atau Tidak Aktif.</li>
+                            <li class="mb-2">Klik tombol <strong>Apply Filter</strong> untuk menyaring data tabel secara dinamis.</li>
+                        </ol>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="mac-window">
+                        <div class="mac-body">
+                            <img src="<?= base_url('assets/img/helpcenter/advanced_filters_matching.png') ?>" alt="Filter Lanjutan" style="width: 100%; display: block;  object-fit: cover; object-position: left top; border-bottom-left-radius: 11px; border-bottom-right-radius: 11px;">
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="border-0 mb-3 border-bottom pb-2">
-                <a href="#faq_id_mco_3" data-toggle="collapse" class="d-block text-body text-decoration-none font-weight-bold pb-2">
-                    <i class="fas fa-chevron-right mr-2 text-muted" style="font-size:0.8rem;"></i> Masalah 3: Kapan persisnya batas isian "Minimum Fee" ini diaktifkan?
-                </a>
-                <div id="faq_id_mco_3" class="collapse">
-                    <div class="text-muted px-4 pb-4 pt-1" style="line-height: 1.7; font-size: 0.9rem;">
-                        <strong>Jawaban:</strong> Minimum Fee ibarat jaring pengaman pendapatan platform. Contoh: jika Minimum Fee Rp 2.500 dan hasil kalkulasi persentase dari cashout kecil merchant cuma berbuah Rp 1.500, maka sistem akan mengabaikan hitungan persentase dan langsung membebankan biaya tetap Rp 2.500.
+
+            <!-- Step 3 (Image Right) -->
+            <div class="row hc-step-row align-items-center mb-5">
+                <div class="col-lg-12 order-2 order-xl-1">
+                    <div class="hc-step-number">3</div>
+                    <h3 class="hc-step-title">Memahami Tabel Konfigurasi Biaya</h3>
+                    <div class="col-lg-12 order-1 order-lg-2 mb-4 mb-lg-0 p-0">
+                        <div class="mac-window mb-4">
+                            <div class="mac-body">
+                                <img src="<?= base_url('assets/img/helpcenter/data_table.png') ?>" alt="Tabel Data" style="width: 100%; display: block; border-bottom-left-radius: 11px; border-bottom-right-radius: 11px;">
+                            </div>
+                        </div>
+                    </div>
+                    <p class="hc-step-desc mb-3">Tabel utama memberikan gambaran komprehensif mengenai seluruh konfigurasi biaya pengeluaran khusus untuk merchant terpilih. Berikut adalah rincian detail dari elemen dan fungsionalitas utama:</p>
+                    <div class="pl-4 border-left border-success ml-2 mt-3">
+                        <ul class="hc-step-desc mb-0 list-unstyled">
+                            <li class="mb-3"><i class="fas fa-search text-success mr-2"></i><strong>Pencarian Global (Global Search):</strong> Gunakan kotak pencarian di kanan atas tabel. Anda dapat dengan instan menyaring tampilan dengan mengetikkan Channel Group, spesifik Channel ID, atau Nama Provider untuk menemukan struktur biaya tertentu tanpa perlu menggulir halaman.</li>
+                            <li class="mb-3"><i class="fas fa-columns text-success mr-2"></i><strong>Kolom Data Utama:</strong> Tabel ini memberikan anatomi lengkap setiap pengaturan biaya. <strong>Channel Config</strong> menampilkan rute pembayaran, <strong>Fee Details</strong> menunjukkan apakah biayanya bersifat tetap (Flat) atau dinamis (Persentase), <strong>Interval</strong> menandakan periode settlement, dan <strong>Limits (Min/Max)</strong> membatasi nominal transaksi di mana aturan biaya ini berlaku.</li>
+                            <li class="mb-3"><i class="fas fa-toggle-on text-success mr-2"></i><strong>Indikator Status Visual:</strong> Setiap baris memiliki label status visual. Label hijau <span class="text-success">Active</span> berarti biaya kustom ini secara aktif menghitung potongan untuk transaksi baru, sementara label <span class="text-danger">Not Active</span> berarti sistem mengabaikan pengaturan ini dan mengembalikan perhitungan ke biaya global bawaan sistem.</li>
+                            <li class="mb-3"><i class="fas fa-layer-group text-success mr-2"></i><strong>Fungsionalitas Bulk Add:</strong> Klik tombol 'Bulk Add' untuk mengaplikasikan struktur biaya dan limit yang persis sama ke beberapa saluran sekaligus di dalam satu grup (contoh: seluruh metode Virtual Account) dalam satu kali operasi, yang sangat menghemat waktu administrasi.</li>
+                            <li class="mb-3"><i class="fas fa-plus text-success mr-2"></i><strong>Tambah Channel Individual:</strong> Gunakan tombol hijau utama apabila Anda perlu membuat konfigurasi biaya yang sangat khusus hanya untuk satu rute pembayaran tunggal (misal: secara eksklusif memodifikasi biaya untuk Virtual Account BCA).</li>
+                            <li class="mb-3"><i class="fas fa-ellipsis-v text-success mr-2 px-1"></i><strong>Menu Aksi Baris (Action Menu):</strong> Ikon (<i class="fas fa-ellipsis-v"></i>) di ujung kanan baris memberikan kontrol spesifik untuk data tersebut. Pilih <strong>Edit Setting</strong> untuk memodifikasi nilai biaya atau limit yang ada, atau pilih <strong>Delete</strong> untuk menghapus aturan biaya kustom ini secara permanen dari akun merchant.</li>
+                        </ul>
                     </div>
                 </div>
             </div>
+
+            <!-- Step 4 -->
+            <div class="row hc-step-row align-items-center mb-5">
+                <div class="col-lg-12">
+                    <div class="hc-step-number">4</div>
+                    <h3 class="hc-step-title">Menambah Konfigurasi Biaya Baru</h3>
+                    <div class="mac-window mb-4">
+                        <div class="mac-body">
+                            <img src="<?= base_url('assets/img/helpcenter/add_mapping.png') ?>" alt="Formulir Tambah Biaya" style="width: 100%; display: block; border-bottom-left-radius: 11px; border-bottom-right-radius: 11px;">
+                        </div>
+                    </div>
+                    <p>Untuk memberlakukan tarif kustom bagi kanal pengeluaran baru, klik "Add Channel" dan tetapkan parameter berikut dengan seksama:</p>
+                    <div class="pl-4 border-left border-success ml-2 mt-3">
+                        <ol class="hc-step-desc mb-0">
+                            <li class="mb-3"><strong>Pemilihan Kanal:</strong> Pilih <strong>Channel Group</strong> beserta <strong>External ID Default</strong>-nya. Tindakan ini akan membuka kunci opsi <strong>Specific Channel ID</strong>. Pilih kanal yang benar-benar ingin Anda atur. <br><em class="text-danger small"><i class="fas fa-exclamation-triangle"></i> Validasi: Sistem menerapkan konstrain unik (Error 1062) secara ketat untuk memastikan merchant tidak memiliki biaya ganda yang saling bertumpuk pada satu Channel ID.</em></li>
+                            <li class="mb-3"><strong>Struktur Biaya:</strong> Tentukan <strong>Fee Type</strong>: <code>Fixed</code> (potongan Rupiah murni), <code>Percentage</code> (potongan dinamis berbasis volume), atau <code>Both</code> (membebankan keduanya). Masukkan nominalnya secara akurat.</li>
+                            <li class="mb-3"><strong>Limit Transaksi:</strong> Tentukan batas mutlak <strong>Amount Min</strong> dan <strong>Amount Max</strong>. <br><em class="text-danger small"><i class="fas fa-exclamation-triangle"></i> Validasi: Permintaan pencairan bernilai di luar rentang ini akan otomatis ditolak (*rejected*). Batas minimum jelas tidak boleh melebihi batas maksimum.</em></li>
+                            <li class="mb-3"><strong>Konfigurasi Status:</strong> Ubah status menjadi <strong>Active</strong> dan tekan <strong>Save Configuration</strong>. Segala penarikan dana sedetik setelahnya akan langsung tunduk pada aturan baru ini.</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 5 -->
+            <div class="row hc-step-row align-items-center mb-5">
+                <div class="col-lg-12">
+                    <div class="hc-step-number">5</div>
+                    <h3 class="hc-step-title">Fungsionalitas Bulk Add (Massal)</h3>
+                    <div class="mac-window mb-4">
+                        <div class="mac-body">
+                            <img src="<?= base_url('assets/img/helpcenter/edit_mapping.png') ?>" alt="Formulir Bulk Update" style="width: 100%; display: block; border-bottom-left-radius: 11px; border-bottom-right-radius: 11px;">
+                        </div>
+                    </div>
+                    <p>Saat melayani *merchant* yang menghendaki keseragaman struktur biaya pada satu kategori pembayaran utuh (misal: flat Rp 4.500 untuk seluruh Bank Transfer), maksimalkan fungsi Bulk Add guna menghemat waktu dan meminimalisir salah input manual.</p>
+                    <div class="pl-4 border-left border-success ml-2 mt-3">
+                        <ol class="hc-step-desc mb-0">
+                            <li class="mb-3"><strong>Akses Fitur:</strong> Klik tombol <strong>Bulk Add</strong> yang berdampingan dengan fungsi filter tingkat lanjut.</li>
+                            <li class="mb-3"><strong>Tentukan Target Lingkup:</strong> Pilih <strong>Cashout Channel Group</strong> tujuan dan <strong>External ID Default</strong>-nya. Sistem seketika bersiap memproyeksikan pengaturan yang sama rata kepada seluruh kanal di bawahnya.</li>
+                            <li class="mb-3"><strong>Keseragaman Biaya & Limit:</strong> Isikan Tipe Biaya dan Limit Transaksi seragam yang hendak direplikasi ke seluruh kanal target.</li>
+                            <li class="mb-3"><strong>Mekanisme Proteksi Duplikat:</strong> Sebelum eksekusi, sistem memindai konfigurasi biaya *merchant* saat ini. <br><em class="text-primary small"><i class="fas fa-shield-alt"></i> Bila ada satu kanal yang sebelumnya telah memiliki tarif khusus, operasi Bulk Add akan dengan cerdas melewatinya secara diam-diam. Fitur ini hanya mendaftarkan kanal-kanal yang sama sekali belum tersentuh.</em></li>
+                            <li class="mb-3"><strong>Eksekusi:</strong> Tekan <strong>Apply Bulk Settings</strong>. Pemrosesan massal dilakukan secara aman dalam satu bingkai transaksi *database*.</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 6 -->
+            <div class="row hc-step-row align-items-center mb-5">
+                <div class="col-lg-12">
+                    <div class="hc-step-number">6</div>
+                    <h3 class="hc-step-title">Mengedit Konfigurasi Biaya</h3>
+                    <div class="mac-window mb-4">
+                        <div class="mac-body">
+                            <img src="<?= base_url('assets/img/helpcenter/edit_mapping.png') ?>" alt="Edit Konfigurasi" style="width: 100%; display: block; border-bottom-left-radius: 11px; border-bottom-right-radius: 11px;">
+                        </div>
+                    </div>
+                    <p>Perjanjian komersial lumrah berubah seiring waktu. Anda dapat melakukan negosiasi ulang dan memutakhirkan struktur tarif secara mulus tanpa membuat layanan terputus.</p>
+                    <div class="pl-4 border-left border-success ml-2 mt-3">
+                        <ol class="hc-step-desc mb-0">
+                            <li class="mb-3"><strong>Buka Menu Aksi:</strong> Sorot baris konfigurasi yang hendak Anda ubah, lalu klik ikon (<i class="fas fa-ellipsis-v"></i>) di palung sisi kanannya.</li>
+                            <li class="mb-3"><strong>Pilih Edit:</strong> Tekan opsi <strong>Edit Setting</strong> dari *dropdown* guna membuka modal formulir modifikasi.</li>
+                            <li class="mb-3"><strong>Lakukan Penyesuaian:</strong> Formulir akan berisi pedoman biaya terakhir. Anda bebas menukar Tipe Fee atau melonggarkan/menyempitkan batas transaksi. <em class="text-muted small">Catatan: Inti Channel ID sudah terkunci dan tidak bisa ditukar saat proses edit.</em></li>
+                            <li class="mb-3"><strong>Simpan Perubahan:</strong> Klik <strong>Save Configuration</strong>. Logika baru bakal menyasar permohonan penarikan terbitan anyar; sementara *request* lampau yang masih *pending* tetap menggenggam data *fee* historisnya.</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 7 -->
+            <div class="row hc-step-row align-items-center mb-5">
+                <div class="col-lg-12">
+                    <div class="hc-step-number">7</div>
+                    <h3 class="hc-step-title">Menghapus Konfigurasi Biaya</h3>
+                    <div class="mac-window mb-4">
+                        <div class="mac-body">
+                            <img src="<?= base_url('assets/img/helpcenter/delete_mapping.png') ?>" alt="Hapus Konfigurasi" style="width: 100%; display: block; border-bottom-left-radius: 11px; border-bottom-right-radius: 11px;">
+                        </div>
+                    </div>
+                    <p>Apabila hak istimewa *merchant* dicabut atau sewaktu-waktu data keliru diinput, konfigurasi dapat dibongkar total, memaksa *merchant* untuk kembali merujuk ke rasio tarif acuan sistem (*global default*).</p>
+                    <div class="pl-4 border-left border-success ml-2 mt-3">
+                        <ol class="hc-step-desc mb-0">
+                            <li class="mb-3"><strong>Buka Menu Aksi:</strong> Klik ikon (<i class="fas fa-ellipsis-v"></i>) pada deret konfigurasi yang bersangkutan.</li>
+                            <li class="mb-3"><strong>Pilih Delete:</strong> Tekan opsi merah berlabel <strong>Delete</strong> pada menu *dropdown*.</li>
+                            <li class="mb-3"><strong>Konfirmasi:</strong> Notifikasi peringatan akan muncul meminta Anda meyakinkan niat penghapusan pengaturan tersebut. <br><em class="text-danger small"><i class="fas fa-exclamation-triangle"></i> Peringatan: Proses ini bersifat permanen dan memusnahkan kesepakatan spesifik tersebut dari sirkulasi.</em></li>
+                            <li class="mb-3"><strong>Aktivasi Standar Baku (Fallback):</strong> Tekan <strong>Confirm Delete</strong>. Sistem otomatis menyingkirkan tarif tersebut dan seketika menjatuhkan perlindungan *fallback* tarif global kepada *merchant*.</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Technical Reference -->
+            <h4 class="font-weight-bold mt-5 mb-4 border-bottom pb-2">Referensi Parameter</h4>
+            <div class="table-responsive mb-5">
+                <table class="table table-bordered hc-ref-table bg-white">
+                    <thead>
+                        <tr>
+                            <th style="width: 25%;">Parameter</th>
+                            <th>Deskripsi & Validasi Sistem</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Fee Type</strong></td>
+                            <td>Mendikte rincian rumus logika matematis inti yang akan diterapkan pada setiap transaksi pengeluaran dana (disbursement). Anda dapat memilih <code>Fixed</code> untuk membebankan tarif statis murni yang mengabaikan volume transaksi, <code>Percentage</code> untuk menghitung potongan dinamis yang bergantung penuh pada volume, atau <code>Both</code> untuk mengeksekusi kombinasi ketat antara tarif dasar (flat) yang ditambah dengan irisan volumetrik.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Settlement Interval</strong></td>
+                            <td>Menentukan fase latensi ketat (dalam wujud hitungan Hari) di mana rekam jejak siklus pencatatan dana sengaja ditahan sebelum direfleksikan secara aman ke dalam akuntansi saldo Merchant. Menyuntikkan angka <code>0</code> akan memerintahkan sistem untuk mengeksekusi sinkronisasi mutlak secara real-time (Seketika/H+0).</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Amount Min & Max</strong></td>
+                            <td>Menciptakan garis batas mutlak keamanan untuk rentang nominal transaksi keluar. Setiap permohonan penarikan dana dengan jumlah yang melanggar dan berada di luar zona perlindungan tersebut akan langsung dicegat dan disabotase secara sepihak oleh hulu *payment gateway* guna mencegah pengeluaran ilegal.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Duplicate Entry Constraint</strong></td>
+                            <td>Kebijakan keamanan tingkat *database* yang kaku, menjamin bahwa tiap *merchant* hanya berhak memiliki maksimal satu susunan konfigurasi aktif per spesifik Channel ID. Segala bentuk percobaan nekat untuk menambah tumpukan data ganda akan secara instan memicu letupan pelanggaran konstrain sistem (*Error* 1062).</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 4. FAQ / Troubleshooting -->
+            <h4 class="font-weight-bold mb-4 border-bottom pb-2">Troubleshooting & FAQ</h4>
+            
+            <div class="hc-faq-item">
+                <div class="hc-faq-q">
+                    <i class="fas fa-question-circle text-primary"></i> 
+                    <span>Apa imbasnya bagi penarikan pending jika saya mengubah fee?</span>
+                </div>
+                <p class="hc-faq-a">Biaya admin dikunci dengan aman pada sepersekian detik permohonan pencairan (disbursement) diajukan. Penyuntingan tarif di sini murni hanya berdampak pada sirkulasi permohonan mutakhir. Penarikan tertunda di ruang tunggu tetap tunduk pada tarif purbakalanya.</p>
+            </div>
+
+            <div class="hc-faq-item">
+                <div class="hc-faq-q">
+                    <i class="fas fa-question-circle text-primary"></i> 
+                    <span>Apakah mungkin membuat biaya layanan menjadi nol rupiah?</span>
+                </div>
+                <p class="hc-faq-a">Sangat bisa. Anda cukup memilah Fee Type *Fixed* atau *Percentage* lalu menabung angka 0 di kolom nominal. Merchant luput sepenuhnya dari jerat biaya penarikan. Meski demikian, tagihan asli dari hulu *provider* tetap mampir merongrong akun *master* platform Anda.</p>
+            </div>
+            
+            <div class="hc-faq-item">
+                <div class="hc-faq-q">
+                    <i class="fas fa-exclamation-circle text-danger"></i> 
+                    <span>Mengapa muncul notifikasi pesan error "Duplicate Entry (1062)" saat menambah kanal?</span>
+                </div>
+                <p class="hc-faq-a">Letupan *error* tingkat *database* ini menandakan kepanikan sistem saat Anda bersikeras menekan "Add Channel" pada wujud kanal yang sejatinya sudah hadir di dalam pelukan tabel. Jika niat tulus Anda sekadar merevisi, tolong gunakan tombol <strong>Edit Setting</strong> pada jajaran baris bersangkutan alih-alih melempar entri data baru.</p>
+            </div>
+
+            <div class="hc-faq-item">
+                <div class="hc-faq-q">
+                    <i class="fas fa-exclamation-circle text-danger"></i> 
+                    <span>Mengapa sebagian kanal seakan diremehkan (di-skip) sewaktu proses Bulk Add?</span>
+                </div>
+                <p class="hc-faq-a">Jangan panik, sistem Bulk Add memang dianugerahi insting <strong>Duplicate Protection</strong>. Misalkan Anda menyerbu grup berisi 10 kanal, namun ternyata 8 di antaranya sudah berbekal zirah biaya khusus; operasi Bulk Add tak akan menjamah ke-8 kanal itu. Ia hanya sudi memakaikan pengaturan baru pada 2 sisa kanal telanjang yang benar-benar belum dikonfigurasi.</p>
+            </div>
+
+            <div class="hc-faq-item">
+                <div class="hc-faq-q">
+                    <i class="fas fa-info-circle text-primary"></i> 
+                    <span>Bagaimana cara mengakhiri riwayat biaya khusus merujuk merchant kembali ke naungan tarif global?</span>
+                </div>
+                <p class="hc-faq-a">Selidiki baris persembunyian kanal tersebut di dalam tabel, sentuh ikon (<i class="fas fa-ellipsis-v"></i>), dan tekan opsi beringas <strong>Delete</strong>. Sesudah *override* musnah, *merchant* itu takkan lagi menikmati keistimewaan dan seketika membaur (fallback) ke pedoman tarif wajar sedunia (*global default rates*).</p>
+            </div>
+
         </div>
 
     </div>
