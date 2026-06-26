@@ -164,8 +164,9 @@ $download_url = base_url('finance/mutation/download')
                         <th>Position</th>
                         <th>Channel</th>
                         <th>Description</th>
+                        <th class="text-right">Balance Before</th>
                         <th class="text-right">Amount</th>
-                        <th class="text-right">Balance</th>
+                        <th class="text-right">Balance After</th>
                     </tr>
                 </thead>
                 <tbody></tbody>
@@ -253,12 +254,20 @@ $(document).ready(function() {
             className: 'small text-muted'
         },
         { 
+            data: 'c_balance_before_raw', 
+            className: 'text-right font-weight-bold text-secondary', 
+            render: function(data){
+                return 'Rp ' + number_format(data, 0, ',', '.');
+            }
+        },
+        { 
             data: 'c_amount_raw', 
             className: 'text-right font-weight-bold', 
             render: function(data, type, row){
                 var isCredit = (row.c_position_raw || '').toLowerCase() === 'credit';
                 var colorCls = isCredit ? 'text-success' : 'text-danger';
-                return '<span class="' + colorCls + '">Rp ' + number_format(data, 0, ',', '.') + '</span>';
+                var prefix = isCredit ? '+ Rp ' : '- Rp ';
+                return '<span class="' + colorCls + '">' + prefix + number_format(data, 0, ',', '.') + '</span>';
             }
         },
         { 
