@@ -6,9 +6,9 @@
             <p class="dt-page-subtitle">Configure payment channel fees for <strong><?= $merchant_name ?></strong></p>
         </div>
         <div class="d-flex" style="gap:10px;">
-            <button type="button" class="btn-dt-action btn-dt-action-primary toggle-guide-btn" id="toggleGuideBtn">
+            <a href="<?= base_url('helpcenter#cashin-fee-settings') ?>" target="_blank" class="btn-dt-action btn-dt-action-primary toggle-guide-btn">
                 <i class="fas fa-book-open mr-2"></i> Instructions Guide
-            </button>
+            </a>
             <button type="button" class="btn-dt-action btn-dt-action-success add-btn" data-toggle="modal" data-target="#feeModal">
                 <i class="fas fa-plus mr-1 mr-2"></i> Add Channel
             </button>
@@ -45,43 +45,6 @@
             <?php endif; ?>
         });
     </script>
-
-    <!-- ── Toggleable Page Instructional Drawer ── -->
-    <div class="drawer-overlay" id="instructionOverlay"></div>
-    <div class="drawer-right" id="instructionDrawer">
-        <div class="drawer-header">
-            <h6 class="drawer-title"><i class="fas fa-book mr-2"></i> Cashin Management Overview</h6>
-            <button type="button" class="drawer-close" id="closeDrawerBtn">&times;</button>
-        </div>
-        <div class="drawer-body">
-            <p class="drawer-desc">This dashboard allows you to oversee and configure payment gateway deposit fees for <strong><?= $merchant_name ?></strong>. You can establish specific rules per channel or apply bulk configurations across entire channel groups.</p>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-search text-primary mr-2"></i> Live Search</div>
-                <p class="drawer-card-text">Instantly filter table records by channel name, external ID, or fee type using the search bar.</p>
-            </div>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-filter text-primary mr-2"></i> Advanced Filters</div>
-                <p class="drawer-card-text">Use the Filters dropdown to sort records by Channel Group, Channel ID, Provider, or Status.</p>
-            </div>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-plus-circle text-primary mr-2"></i> Add Channel</div>
-                <p class="drawer-card-text">Configure a single specific payment channel with dedicated fee structures and boundaries.</p>
-            </div>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-layer-group text-primary mr-2"></i> Bulk Add</div>
-                <p class="drawer-card-text">Apply uniform fee rates and limits across all channels within a selected group instantly.</p>
-            </div>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-sliders-h text-primary mr-2"></i> Quick Actions</div>
-                <p class="drawer-card-text">Use the action menu (⋮) on any table row to modify or delete existing configurations on the fly.</p>
-            </div>
-        </div>
-    </div>
 
     <!-- ── Main Data Card ── -->
     <div class="card border-0 shadow-sm dt-card">
@@ -548,8 +511,6 @@ $(document).ready(function() {
             });
         });
     });
-
-
 
     var table = initServerDataTable("#cashinTable", window.location.href, [
                 { "data": "no", "className": "ps-4 text-muted small" },
