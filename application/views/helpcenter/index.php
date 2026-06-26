@@ -292,7 +292,7 @@
             font-weight: 600;
             color: var(--hc-heading);
             margin-top: 0;
-            margin-bottom: 32px;
+            margin-bottom: 12px;
         }
         .tech-doc-body p, .tech-doc-body li {
             font-size: 15px;

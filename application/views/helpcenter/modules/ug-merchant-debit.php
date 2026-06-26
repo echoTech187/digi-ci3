@@ -6,31 +6,10 @@
 
         <hr class="my-4">
 
-        <!-- UI Overview Table -->
+        <!-- Architecture -->
+        <h4 class="font-weight-bold mb-4 border-bottom pb-2">Conceptual Architecture</h4>
         <div class="mb-5">
-            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-th-list text-primary mr-2"></i> UI Overview — Data Columns</h5>
-            <div class="table-responsive shadow-sm" style="border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05);">
-                <table class="table table-borderless table-striped small mb-0" style="background: rgba(255,255,255,0.02);">
-                    <thead style="background: rgba(0,0,0,0.4);">
-                        <tr>
-                            <th class="p-3 border-0" style="width: 30%;">Column / Field</th>
-                            <th class="p-3 border-0">What It Means</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr><td class="p-3 border-0"><strong>MERCHANT NAME</strong></td><td class="p-3 border-0">Read-only field confirming the target merchant account for deduction.</td></tr>
-                        <tr><td class="p-3 border-0"><strong>CURRENT AVAILABLE BALANCE</strong></td><td class="p-3 border-0">Displays the balance before deduction. Prevents accidental negative balance situations.</td></tr>
-                        <tr><td class="p-3 border-0"><strong>AMOUNT (Rp)</strong></td><td class="p-3 border-0">The Rupiah amount to deduct from the merchant's Available Balance. Must be positive.</td></tr>
-                        <tr><td class="p-3 border-0"><strong>DESCRIPTION / REASON</strong></td><td class="p-3 border-0">Mandatory text field explaining the reason for the deduction. Required for audit trail.</td></tr>
-                        <tr><td class="p-3 border-0"><strong>SUBMIT BUTTON</strong></td><td class="p-3 border-0">Executes the debit immediately and irreversibly.</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Section 1: Architecture -->
-        <div class="mb-5">
-            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-project-diagram text-primary mr-2"></i> 1. Architecture: Debit Flow</h5>
+            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-project-diagram text-primary mr-2"></i> Architecture: Debit Flow</h5>
             <p class="text-muted mb-4">A manual debit operation directly modifies the merchant's financial ledger as an <strong>atomic transaction</strong>:</p>
 
             <div class="pl-4 border-left border-primary ml-2 mb-4">
@@ -51,103 +30,116 @@
             </div>
         </div>
 
-        <!-- Section 2: Step-by-Step -->
-        <div class="mb-5">
-            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-edit text-success mr-2"></i> 2. Performing a Manual Deduction</h5>
-            <p class="text-muted mb-4">Perform the following steps carefully to deduct funds from a merchant's account.</p>
+        <!-- Procedural Walkthrough -->
+        <h4 class="font-weight-bold mb-4 border-bottom pb-2">Procedural Walkthrough</h4>
+        <div class="row hc-step-row align-items-start mb-5">
+            <div class="col-lg-12">
+                <div class="hc-step-number">1</div>
+                <h3 class="hc-step-title">Performing a Manual Deduction</h3>
+                <p class="text-muted mb-4">Perform the following steps carefully to deduct funds from a merchant's account.</p>
 
-            <div class="pl-4 border-left border-success ml-2 mb-4">
-                <ol class="text-muted mb-0">
-                    <li class="mb-3">Navigate to <strong>Merchant Setup</strong> and locate the target merchant.</li>
-                    <li class="mb-3">Click the action menu (⋮) and select <strong>Deduct Debit Balance</strong>.</li>
-                    <li class="mb-3">Check the <strong>Current Available Balance</strong> to ensure the deduction amount will not cause a negative balance.</li>
-                    <li class="mb-3">Enter the deduction <strong>Amount</strong> in Rupiah.</li>
-                    <li class="mb-3">Fill in the mandatory <strong>Description</strong> field with a clear reason (e.g., <em>"Penalty for TOS violation - ref #123"</em>).</li>
-                    <li class="mb-2">Click <strong>Submit</strong>. The balance updates instantly.</li>
-                </ol>
-            </div>
-        </div>
-
-        <!-- New Section: Form Validations -->
-        <div class="mb-5">
-            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-shield-alt text-primary mr-2"></i> 3. Form Validations & Constraints</h5>
-            <div class="table-responsive shadow-sm mb-4" style="border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05);">
-                <table class="table table-borderless table-striped small mb-0" style="background: rgba(255,255,255,0.02);">
-                    <thead style="background: rgba(0,0,0,0.4);">
-                        <tr>
-                            <th class="p-3 border-0" style="width: 25%;">Constraint Type</th>
-                            <th class="p-3 border-0">System Enforcement Rule</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr><td class="p-3 border-0"><strong>Required Fields</strong></td><td class="p-3 border-0"><code>Amount</code> and <code>Description</code> must be provided.</td></tr>
-                        <tr><td class="p-3 border-0"><strong>Data Types</strong></td><td class="p-3 border-0"><code>Amount</code> must be a valid positive integer greater than zero.</td></tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- New Section: System Notifications -->
-            <h6 class="font-weight-bold mb-3 mt-4 text-dark"><i class="fas fa-bell text-info mr-2"></i> System Notifications</h6>
-            <div class="d-flex flex-column mb-4">
-                <div class="mb-3">
-                    <div class="p-3 rounded border" style="background-color: rgba(22, 163, 74, 0.05); border-color: rgba(22, 163, 74, 0.2) !important;">
-                        <strong class="text-success d-block mb-2"><i class="fas fa-check-circle mr-1"></i> Success Events</strong>
-                        <ul class="small text-muted mb-0 pl-3">
-                            <li class="mb-0"><strong>Balance Deducted:</strong> <code>Balance updated successfully.</code></li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="mb-1">
-                    <div class="p-3 rounded border" style="background-color: rgba(220, 38, 38, 0.05); border-color: rgba(220, 38, 38, 0.2) !important;">
-                        <strong class="text-danger d-block mb-2"><i class="fas fa-exclamation-circle mr-1"></i> Error Events & Solutions</strong>
-                        <ul class="small text-muted mb-0 pl-3">
-                            <li class="mb-3">
-                                <strong>Invalid Amount:</strong> <code>The amount must be greater than zero.</code>
-                                <div class="text-dark mt-1"><i class="fas fa-lightbulb text-warning mr-1"></i> <strong>Solution:</strong> Ensure you input a valid positive number for the debit amount.</div>
-                            </li>
-                            <li class="mb-0">
-                                <strong>Access Denied (1142):</strong> <code>Failed to update balance.</code>
-                                <div class="text-dark mt-1"><i class="fas fa-lightbulb text-warning mr-1"></i> <strong>Solution:</strong> System restriction or the MySQL user lacks INSERT/UPDATE privileges. Contact the Database Administrator.</div>
-                            </li>
-                        </ul>
-                    </div>
+                <div class="pl-4 border-left border-success ml-2 mb-4">
+                    <ol class="text-muted mb-0">
+                        <li class="mb-3">Navigate to <strong>Merchant Setup</strong> and locate the target merchant.</li>
+                        <li class="mb-3">Click the action menu (⋮) and select <strong>Deduct Debit Balance</strong>.</li>
+                        <li class="mb-3">Check the <strong>Current Available Balance</strong> to ensure the deduction amount will not cause a negative balance.</li>
+                        <li class="mb-3">Enter the deduction <strong>Amount</strong> in Rupiah.</li>
+                        <li class="mb-3">Fill in the mandatory <strong>Description</strong> field with a clear reason (e.g., <em>"Penalty for TOS violation - ref #123"</em>).</li>
+                        <li class="mb-2">Click <strong>Submit</strong>. The balance updates instantly.</li>
+                    </ol>
                 </div>
             </div>
         </div>
 
-        <!-- FAQ -->
-        <h5 class="font-weight-bold mb-4 mt-5 d-flex align-items-center"><i class="fas fa-question-circle text-warning mr-3"></i> Common Issues &amp; Troubleshooting</h5>
-        <div class="faq-accordion mb-5">
-            <div class="border-0 mb-3 border-bottom pb-2">
-                <a href="#faq_en_mdb_1" data-toggle="collapse" class="d-block text-body text-decoration-none font-weight-bold pb-2">
-                    <i class="fas fa-chevron-right mr-2 text-muted" style="font-size:0.8rem;"></i> Issue 1: Is there a limit on the deduction amount?
-                </a>
-                <div id="faq_en_mdb_1" class="collapse">
-                    <div class="text-muted px-4 pb-4 pt-1" style="line-height: 1.7; font-size: 0.9rem;">
-                        <strong>Answer:</strong> There is no hard limit, but large deductions should be backed by proper authorization. Also, deducting more than the Available Balance may lead to a negative balance.
-                    </div>
+        <!-- Parameter Reference & Validations -->
+        <h4 class="font-weight-bold mt-5 mb-4 border-bottom pb-2">Parameter Reference</h4>
+        <div class="table-responsive shadow-sm mb-4 mt-3" style="border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05);">
+            <table class="table table-borderless table-striped small mb-0" style="background: rgba(255,255,255,0.02);">
+                <thead style="background: rgba(0,0,0,0.4);">
+                    <tr>
+                        <th class="p-3 border-0" style="width: 25%;">Parameter / Constraint</th>
+                        <th class="p-3 border-0">Description & System Rule</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td class="p-3 border-0"><strong>MERCHANT NAME</strong></td><td class="p-3 border-0">Read-only field confirming the target merchant account for deduction.</td></tr>
+                    <tr><td class="p-3 border-0"><strong>CURRENT AVAILABLE BALANCE</strong></td><td class="p-3 border-0">Displays the balance before deduction. Prevents accidental negative balance situations.</td></tr>
+                    <tr><td class="p-3 border-0"><strong>AMOUNT (Rp)</strong></td><td class="p-3 border-0">The Rupiah amount to deduct from the merchant's Available Balance. Must be a valid positive integer greater than zero. (Required)</td></tr>
+                    <tr><td class="p-3 border-0"><strong>DESCRIPTION / REASON</strong></td><td class="p-3 border-0">Mandatory text field explaining the reason for the deduction. Required for audit trail. (Required)</td></tr>
+                    <tr><td class="p-3 border-0"><strong>SUBMIT BUTTON</strong></td><td class="p-3 border-0">Executes the debit immediately and irreversibly.</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- System Notifications -->
+        <h6 class="font-weight-bold mb-3 mt-4 text-dark"><i class="fas fa-bell text-info mr-2"></i> System Notifications</h6>
+        <div class="d-flex flex-column mb-5">
+            <div class="mb-3">
+                <div class="p-3 rounded border" style="background-color: rgba(22, 163, 74, 0.05); border-color: rgba(22, 163, 74, 0.2) !important;">
+                    <strong class="text-success d-block mb-2"><i class="fas fa-check-circle mr-1"></i> Success Events</strong>
+                    <ul class="small text-muted mb-0 pl-3">
+                        <li class="mb-0"><strong>Balance Deducted:</strong> <code>Balance updated successfully.</code></li>
+                    </ul>
                 </div>
             </div>
-            <div class="border-0 mb-3 border-bottom pb-2">
-                <a href="#faq_en_mdb_2" data-toggle="collapse" class="d-block text-body text-decoration-none font-weight-bold pb-2">
-                    <i class="fas fa-chevron-right mr-2 text-muted" style="font-size:0.8rem;"></i> Issue 2: Can I reverse or delete a manual deduction?
-                </a>
-                <div id="faq_en_mdb_2" class="collapse">
-                    <div class="text-muted px-4 pb-4 pt-1" style="line-height: 1.7; font-size: 0.9rem;">
-                        <strong>Answer:</strong> No, debit mutations are permanent. To fix a mistaken deduction, use the <em>Add Credit Balance</em> feature to inject the incorrectly taken funds back.
-                    </div>
+            <div class="mb-1">
+                <div class="p-3 rounded border" style="background-color: rgba(220, 38, 38, 0.05); border-color: rgba(220, 38, 38, 0.2) !important;">
+                    <strong class="text-danger d-block mb-2"><i class="fas fa-exclamation-circle mr-1"></i> Error Events & Solutions</strong>
+                    <ul class="small text-muted mb-0 pl-3">
+                        <li class="mb-3">
+                            <strong>Invalid Amount:</strong> <code>The amount must be greater than zero.</code>
+                            <div class="text-dark mt-1"><i class="fas fa-lightbulb text-warning mr-1"></i> <strong>Solution:</strong> Ensure you input a valid positive number for the debit amount.</div>
+                        </li>
+                        <li class="mb-0">
+                            <strong>Access Denied (1142):</strong> <code>Failed to update balance.</code>
+                            <div class="text-dark mt-1"><i class="fas fa-lightbulb text-warning mr-1"></i> <strong>Solution:</strong> System restriction or the MySQL user lacks INSERT/UPDATE privileges. Contact the Database Administrator.</div>
+                        </li>
+                    </ul>
                 </div>
             </div>
-            <div class="border-0 mb-3 border-bottom pb-2">
-                <a href="#faq_en_mdb_3" data-toggle="collapse" class="d-block text-body text-decoration-none font-weight-bold pb-2">
-                    <i class="fas fa-chevron-right mr-2 text-muted" style="font-size:0.8rem;"></i> Issue 3: The form is rejected on submission
-                </a>
-                <div id="faq_en_mdb_3" class="collapse">
-                    <div class="text-muted px-4 pb-4 pt-1" style="line-height: 1.7; font-size: 0.9rem;">
-                        <strong>Answer:</strong> The most common causes are an empty <strong>Description</strong> field (which is required) or entering a non-positive amount.
-                    </div>
-                </div>
+        </div>
+
+        <!-- FAQ / Troubleshooting -->
+        <h4 class="font-weight-bold mb-4 border-bottom pb-2">Troubleshooting & FAQ</h4>
+        
+        <div class="hc-faq-item">
+            <div class="hc-faq-q">
+                <i class="fas fa-exclamation-circle text-danger"></i> 
+                <span>Is there a limit on the deduction amount?</span>
             </div>
+            <p class="hc-faq-a">There is no hard limit, but large deductions should be backed by proper authorization. Also, deducting more than the Available Balance may lead to a negative balance.</p>
+        </div>
+
+        <div class="hc-faq-item">
+            <div class="hc-faq-q">
+                <i class="fas fa-question-circle text-warning"></i> 
+                <span>Can I reverse or delete a manual deduction?</span>
+            </div>
+            <p class="hc-faq-a">No, debit mutations are permanent. To fix a mistaken deduction, use the <em>Add Credit Balance</em> feature to inject the incorrectly taken funds back.</p>
+        </div>
+
+        <div class="hc-faq-item">
+            <div class="hc-faq-q">
+                <i class="fas fa-info-circle text-primary"></i> 
+                <span>The form is rejected on submission, why?</span>
+            </div>
+            <p class="hc-faq-a">The most common causes are an empty <strong>Description</strong> field (which is strictly required for auditing) or entering a non-positive amount.</p>
+        </div>
+
+        <div class="hc-faq-item">
+            <div class="hc-faq-q">
+                <i class="fas fa-wallet text-success"></i> 
+                <span>What happens if the deduction creates a negative balance?</span>
+            </div>
+            <p class="hc-faq-a">The system may allow negative balances depending on your core settings. If allowed, the merchant's available balance will drop below zero, preventing them from performing out-going transactions until the deficit is cleared.</p>
+        </div>
+
+        <div class="hc-faq-item">
+            <div class="hc-faq-q">
+                <i class="fas fa-envelope text-secondary"></i> 
+                <span>Will the merchant receive a notification for this deduction?</span>
+            </div>
+            <p class="hc-faq-a">Currently, the system does not automatically dispatch an email alert for manual debit adjustments. You should notify the merchant through an external communication channel to prevent disputes.</p>
         </div>
 
     </div>
@@ -159,31 +151,10 @@
 
         <hr class="my-4">
 
-        <!-- UI Overview Table -->
+        <!-- Architecture -->
+        <h4 class="font-weight-bold mb-4 border-bottom pb-2">Arsitektur Konseptual</h4>
         <div class="mb-5">
-            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-th-list text-primary mr-2"></i> Ikhtisar UI — Kolom Data</h5>
-            <div class="table-responsive shadow-sm" style="border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05);">
-                <table class="table table-borderless table-striped small mb-0" style="background: rgba(255,255,255,0.02);">
-                    <thead style="background: rgba(0,0,0,0.4);">
-                        <tr>
-                            <th class="p-3 border-0" style="width: 30%;">Kolom / Isian</th>
-                            <th class="p-3 border-0">Artinya</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr><td class="p-3 border-0"><strong>MERCHANT NAME</strong></td><td class="p-3 border-0">Nama akun merchant tujuan untuk pemotongan.</td></tr>
-                        <tr><td class="p-3 border-0"><strong>CURRENT AVAILABLE BALANCE</strong></td><td class="p-3 border-0">Menampilkan saldo terkini yang bisa dipotong guna menghindari minus tak terduga.</td></tr>
-                        <tr><td class="p-3 border-0"><strong>AMOUNT (Rp)</strong></td><td class="p-3 border-0">Nominal Rupiah yang akan didebet dari Saldo merchant. Wajib angka positif.</td></tr>
-                        <tr><td class="p-3 border-0"><strong>DESCRIPTION / REASON</strong></td><td class="p-3 border-0">Isian keterangan yang wajib disertakan agar dapat diverifikasi oleh auditor nantinya.</td></tr>
-                        <tr><td class="p-3 border-0"><strong>SUBMIT BUTTON</strong></td><td class="p-3 border-0">Eksekusi pemotongan. Tak bisa dibatalkan / undo.</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Section 1: Architecture -->
-        <div class="mb-5">
-            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-project-diagram text-primary mr-2"></i> 1. Arsitektur: Alur Debit</h5>
+            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-project-diagram text-primary mr-2"></i> Arsitektur: Alur Debit</h5>
             <p class="text-muted mb-4">Transaksi manual ini memodifikasi saldo merchant secara <strong>atomik</strong>:</p>
 
             <div class="pl-4 border-left border-primary ml-2 mb-4">
@@ -204,103 +175,116 @@
             </div>
         </div>
 
-        <!-- Section 2: Step-by-Step -->
-        <div class="mb-5">
-            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-edit text-success mr-2"></i> 2. Melakukan Pemotongan Manual</h5>
-            <p class="text-muted mb-4">Ikuti langkah-langkah ini untuk memotong dana merchant.</p>
+        <!-- Procedural Walkthrough -->
+        <h4 class="font-weight-bold mb-4 border-bottom pb-2">Procedural Walkthrough</h4>
+        <div class="row hc-step-row align-items-start mb-5">
+            <div class="col-lg-12">
+                <div class="hc-step-number">1</div>
+                <h3 class="hc-step-title">Melakukan Pemotongan Manual</h3>
+                <p class="text-muted mb-4">Ikuti langkah-langkah ini untuk memotong dana merchant.</p>
 
-            <div class="pl-4 border-left border-success ml-2 mb-4">
-                <ol class="text-muted mb-0">
-                    <li class="mb-3">Masuk ke <strong>Merchant Setup</strong> lalu cari merchant yang bersangkutan.</li>
-                    <li class="mb-3">Pilih aksi (⋮) dan tekan <strong>Deduct Debit Balance</strong>.</li>
-                    <li class="mb-3">Catat angka di <strong>Current Available Balance</strong>; usahakan nominal pemotongan Anda tidak melewati angka ini.</li>
-                    <li class="mb-3">Masukkan nilai potongan pada field <strong>Amount</strong>.</li>
-                    <li class="mb-3">Wajib isikan <strong>Description</strong>, misalnya <em>"Koreksi kelebihan transfer tanggal 11 Jan"</em>.</li>
-                    <li class="mb-2">Klik <strong>Submit</strong>. Transaksi seketika tercatat di Mutation Log.</li>
-                </ol>
-            </div>
-        </div>
-
-        <!-- New Section: Form Validations -->
-        <div class="mb-5">
-            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-shield-alt text-primary mr-2"></i> 3. Validasi Form & Batasan (Constraints)</h5>
-            <div class="table-responsive shadow-sm mb-4" style="border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05);">
-                <table class="table table-borderless table-striped small mb-0" style="background: rgba(255,255,255,0.02);">
-                    <thead style="background: rgba(0,0,0,0.4);">
-                        <tr>
-                            <th class="p-3 border-0" style="width: 25%;">Tipe Validasi</th>
-                            <th class="p-3 border-0">Aturan Penegakan Sistem</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr><td class="p-3 border-0"><strong>Kolom Wajib</strong></td><td class="p-3 border-0"><code>Amount</code> dan <code>Description</code> wajib diisi penuh.</td></tr>
-                        <tr><td class="p-3 border-0"><strong>Tipe Data</strong></td><td class="p-3 border-0">Isian <code>Amount</code> harus berupa angka positif yang lebih besar dari nol.</td></tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- New Section: System Notifications -->
-            <h6 class="font-weight-bold mb-3 mt-4 text-dark"><i class="fas fa-bell text-info mr-2"></i> Notifikasi Sistem</h6>
-            <div class="d-flex flex-column mb-4">
-                <div class="mb-3">
-                    <div class="p-3 rounded border" style="background-color: rgba(22, 163, 74, 0.05); border-color: rgba(22, 163, 74, 0.2) !important;">
-                        <strong class="text-success d-block mb-2"><i class="fas fa-check-circle mr-1"></i> Notifikasi Sukses</strong>
-                        <ul class="small text-muted mb-0 pl-3">
-                            <li class="mb-0"><strong>Saldo Terpotong:</strong> <code>Balance updated successfully.</code></li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="mb-1">
-                    <div class="p-3 rounded border" style="background-color: rgba(220, 38, 38, 0.05); border-color: rgba(220, 38, 38, 0.2) !important;">
-                        <strong class="text-danger d-block mb-2"><i class="fas fa-exclamation-circle mr-1"></i> Notifikasi Error & Solusinya</strong>
-                        <ul class="small text-muted mb-0 pl-3">
-                            <li class="mb-3">
-                                <strong>Nominal Tidak Valid:</strong> <code>The amount must be greater than zero.</code>
-                                <div class="text-dark mt-1"><i class="fas fa-lightbulb text-warning mr-1"></i> <strong>Solusi:</strong> Pastikan Anda memasukkan angka positif yang valid untuk nilai debit.</div>
-                            </li>
-                            <li class="mb-0">
-                                <strong>Access Denied (1142):</strong> <code>Failed to update balance.</code>
-                                <div class="text-dark mt-1"><i class="fas fa-lightbulb text-warning mr-1"></i> <strong>Solusi:</strong> Terjadi pembatasan sistem atau User MySQL tidak memiliki izin INSERT/UPDATE. Hubungi Database Administrator.</div>
-                            </li>
-                        </ul>
-                    </div>
+                <div class="pl-4 border-left border-success ml-2 mb-4">
+                    <ol class="text-muted mb-0">
+                        <li class="mb-3">Masuk ke <strong>Merchant Setup</strong> lalu cari merchant yang bersangkutan.</li>
+                        <li class="mb-3">Pilih aksi (⋮) dan tekan <strong>Deduct Debit Balance</strong>.</li>
+                        <li class="mb-3">Catat angka di <strong>Current Available Balance</strong>; usahakan nominal pemotongan Anda tidak melewati angka ini.</li>
+                        <li class="mb-3">Masukkan nilai potongan pada field <strong>Amount</strong>.</li>
+                        <li class="mb-3">Wajib isikan <strong>Description</strong>, misalnya <em>"Koreksi kelebihan transfer tanggal 11 Jan"</em>.</li>
+                        <li class="mb-2">Klik <strong>Submit</strong>. Transaksi seketika tercatat di Mutation Log.</li>
+                    </ol>
                 </div>
             </div>
         </div>
 
-        <!-- FAQ -->
-        <h5 class="font-weight-bold mb-4 mt-5 d-flex align-items-center"><i class="fas fa-question-circle text-warning mr-3"></i> Panduan Pemecahan Masalah (FAQ)</h5>
-        <div class="faq-accordion mb-5">
-            <div class="border-0 mb-3 border-bottom pb-2">
-                <a href="#faq_id_mdb_1" data-toggle="collapse" class="d-block text-body text-decoration-none font-weight-bold pb-2">
-                    <i class="fas fa-chevron-right mr-2 text-muted" style="font-size:0.8rem;"></i> Masalah 1: Adakah maksimal dana yang bisa dipotong?
-                </a>
-                <div id="faq_id_mdb_1" class="collapse">
-                    <div class="text-muted px-4 pb-4 pt-1" style="line-height: 1.7; font-size: 0.9rem;">
-                        <strong>Jawaban:</strong> Tak ada batasan sistem yang kaku. Hanya saja, pastikan penarikan besar mematuhi prosedur autorisasi internal Anda agar ketika ada audit tak menjadi persoalan.
-                    </div>
+        <!-- Parameter Reference & Validations -->
+        <h4 class="font-weight-bold mt-5 mb-4 border-bottom pb-2">Referensi Parameter</h4>
+        <div class="table-responsive shadow-sm mb-4 mt-3" style="border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05);">
+            <table class="table table-borderless table-striped small mb-0" style="background: rgba(255,255,255,0.02);">
+                <thead style="background: rgba(0,0,0,0.4);">
+                    <tr>
+                        <th class="p-3 border-0" style="width: 25%;">Parameter / Tipe Validasi</th>
+                        <th class="p-3 border-0">Deskripsi & Aturan Sistem</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td class="p-3 border-0"><strong>MERCHANT NAME</strong></td><td class="p-3 border-0">Nama akun merchant tujuan untuk pemotongan.</td></tr>
+                    <tr><td class="p-3 border-0"><strong>CURRENT AVAILABLE BALANCE</strong></td><td class="p-3 border-0">Menampilkan saldo terkini yang bisa dipotong guna menghindari minus tak terduga.</td></tr>
+                    <tr><td class="p-3 border-0"><strong>AMOUNT (Rp)</strong></td><td class="p-3 border-0">Nominal Rupiah yang akan didebet dari Saldo merchant. Wajib berupa angka positif yang lebih besar dari nol. (Wajib)</td></tr>
+                    <tr><td class="p-3 border-0"><strong>DESCRIPTION / REASON</strong></td><td class="p-3 border-0">Isian wajib untuk menerangkan tujuan/alasan pemotongan saldo ini demi kepatuhan audit. (Wajib)</td></tr>
+                    <tr><td class="p-3 border-0"><strong>SUBMIT BUTTON</strong></td><td class="p-3 border-0">Eksekusi pemotongan. Tak bisa dibatalkan / undo.</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- System Notifications -->
+        <h6 class="font-weight-bold mb-3 mt-4 text-dark"><i class="fas fa-bell text-info mr-2"></i> Notifikasi Sistem</h6>
+        <div class="d-flex flex-column mb-5">
+            <div class="mb-3">
+                <div class="p-3 rounded border" style="background-color: rgba(22, 163, 74, 0.05); border-color: rgba(22, 163, 74, 0.2) !important;">
+                    <strong class="text-success d-block mb-2"><i class="fas fa-check-circle mr-1"></i> Notifikasi Sukses</strong>
+                    <ul class="small text-muted mb-0 pl-3">
+                        <li class="mb-0"><strong>Saldo Terpotong:</strong> <code>Balance updated successfully.</code></li>
+                    </ul>
                 </div>
             </div>
-            <div class="border-0 mb-3 border-bottom pb-2">
-                <a href="#faq_id_mdb_2" data-toggle="collapse" class="d-block text-body text-decoration-none font-weight-bold pb-2">
-                    <i class="fas fa-chevron-right mr-2 text-muted" style="font-size:0.8rem;"></i> Masalah 2: Jika terlanjur salah ketik nominal, bisa di-undo?
-                </a>
-                <div id="faq_id_mdb_2" class="collapse">
-                    <div class="text-muted px-4 pb-4 pt-1" style="line-height: 1.7; font-size: 0.9rem;">
-                        <strong>Jawaban:</strong> Tidak bisa di-undo / delete. Gunakan modul <em>Add Credit Balance</em> untuk menambal kelebihan potongan tersebut agar transparansi mutasinya tetap terjaga.
-                    </div>
+            <div class="mb-1">
+                <div class="p-3 rounded border" style="background-color: rgba(220, 38, 38, 0.05); border-color: rgba(220, 38, 38, 0.2) !important;">
+                    <strong class="text-danger d-block mb-2"><i class="fas fa-exclamation-circle mr-1"></i> Notifikasi Error & Solusinya</strong>
+                    <ul class="small text-muted mb-0 pl-3">
+                        <li class="mb-3">
+                            <strong>Nominal Tidak Valid:</strong> <code>The amount must be greater than zero.</code>
+                            <div class="text-dark mt-1"><i class="fas fa-lightbulb text-warning mr-1"></i> <strong>Solusi:</strong> Pastikan Anda memasukkan angka positif yang valid untuk nilai debit.</div>
+                        </li>
+                        <li class="mb-0">
+                            <strong>Access Denied (1142):</strong> <code>Failed to update balance.</code>
+                            <div class="text-dark mt-1"><i class="fas fa-lightbulb text-warning mr-1"></i> <strong>Solusi:</strong> Terjadi pembatasan sistem atau User MySQL tidak memiliki izin INSERT/UPDATE. Hubungi Database Administrator.</div>
+                        </li>
+                    </ul>
                 </div>
             </div>
-            <div class="border-0 mb-3 border-bottom pb-2">
-                <a href="#faq_id_mdb_3" data-toggle="collapse" class="d-block text-body text-decoration-none font-weight-bold pb-2">
-                    <i class="fas fa-chevron-right mr-2 text-muted" style="font-size:0.8rem;"></i> Masalah 3: Kenapa formulir gagal dikirim (Submit)?
-                </a>
-                <div id="faq_id_mdb_3" class="collapse">
-                    <div class="text-muted px-4 pb-4 pt-1" style="line-height: 1.7; font-size: 0.9rem;">
-                        <strong>Jawaban:</strong> Penyebab utama adalah Anda membiarkan kolom <strong>Description</strong> kosong (ini wajib diisi) atau nominal angka mengandung karakter yang salah / bernilai negatif.
-                    </div>
-                </div>
+        </div>
+
+        <!-- FAQ / Troubleshooting -->
+        <h4 class="font-weight-bold mb-4 border-bottom pb-2">Panduan Pemecahan Masalah (FAQ)</h4>
+        
+        <div class="hc-faq-item">
+            <div class="hc-faq-q">
+                <i class="fas fa-exclamation-circle text-danger"></i> 
+                <span>Adakah maksimal dana yang bisa dipotong?</span>
             </div>
+            <p class="hc-faq-a">Tak ada batasan sistem yang kaku. Hanya saja, pastikan penarikan besar mematuhi prosedur autorisasi internal Anda agar ketika ada audit tak menjadi persoalan.</p>
+        </div>
+
+        <div class="hc-faq-item">
+            <div class="hc-faq-q">
+                <i class="fas fa-question-circle text-warning"></i> 
+                <span>Jika terlanjur salah ketik nominal, bisa di-undo?</span>
+            </div>
+            <p class="hc-faq-a">Tidak bisa di-undo / delete. Gunakan modul <em>Add Credit Balance</em> untuk menambal kelebihan potongan tersebut agar transparansi mutasinya tetap terjaga.</p>
+        </div>
+
+        <div class="hc-faq-item">
+            <div class="hc-faq-q">
+                <i class="fas fa-info-circle text-primary"></i> 
+                <span>Kenapa formulir gagal dikirim (Submit)?</span>
+            </div>
+            <p class="hc-faq-a">Penyebab utama adalah Anda membiarkan kolom <strong>Description</strong> kosong (ini wajib diisi) atau nominal angka mengandung karakter yang salah / bernilai negatif.</p>
+        </div>
+
+        <div class="hc-faq-item">
+            <div class="hc-faq-q">
+                <i class="fas fa-wallet text-success"></i> 
+                <span>Apa yang terjadi bila potongan membuat saldo minus?</span>
+            </div>
+            <p class="hc-faq-a">Sistem mungkin akan mengizinkan saldo menjadi negatif bergantung pada pengaturan inti. Jika diizinkan, saldo *Available* merchant akan turun di bawah nol, sehingga merchant tidak bisa melakukan transaksi keluar (cash-out) hingga defisit dibayarkan kembali.</p>
+        </div>
+
+        <div class="hc-faq-item">
+            <div class="hc-faq-q">
+                <i class="fas fa-envelope text-secondary"></i> 
+                <span>Apakah merchant otomatis mendapat pemberitahuan email?</span>
+            </div>
+            <p class="hc-faq-a">Saat ini sistem tidak mengirim email peringatan secara otomatis untuk aksi potong saldo manual. Sebaiknya Anda menginformasikan kepada merchant bersangkutan (misal via WhatsApp atau Email) untuk menghindari kebingungan (dispute) di kemudian hari.</p>
         </div>
 
     </div>

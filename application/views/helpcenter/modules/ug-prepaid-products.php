@@ -63,89 +63,90 @@
             </div>
         </div>
 
-        <!-- Section 1: Workflow Filtering -->
-        <div class="mb-5">
-            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-search text-primary mr-2"></i> 1. Searching and Filtering Products</h5>
-            <p class="text-muted mb-4">If you have hundreds of products, use the toolbar to find exactly what you need to update.</p>
+        <!-- Procedural Walkthrough -->
+        <h4 class="font-weight-bold mb-4 border-bottom pb-2">Procedural Walkthrough</h4>
+        
+        <div class="row hc-step-row align-items-start mb-4">
+            <div class="col-lg-12">
+                <div class="hc-step-number">1</div>
+                <h3 class="hc-step-title">Searching and Filtering Products</h3>
+                <p class="text-muted mb-4">If you have hundreds of products, use the toolbar to find exactly what you need to update.</p>
 
-            <div class="pl-4 border-left border-primary ml-2 mb-4">
-                <ol class="text-muted mb-0">
-                    <li class="mb-3"><strong>Quick Search:</strong> Type in the <em>Search by name, category, or description...</em> box to instantly filter the table.</li>
-                    <li class="mb-2"><strong>Provider Filter:</strong> Click the <strong>Provider</strong> dropdown in the toolbar to isolate the catalog to a specific network operator (e.g., only showing Telkomsel products).</li>
-                </ol>
+                <div class="pl-4 border-left border-primary ml-2 mb-4">
+                    <ol class="text-muted mb-0">
+                        <li class="mb-3"><strong>Quick Search:</strong> Type in the <em>Search by name, category, or description...</em> box to instantly filter the table.</li>
+                        <li class="mb-2"><strong>Provider Filter:</strong> Click the <strong>Provider</strong> dropdown in the toolbar to isolate the catalog to a specific network operator (e.g., only showing Telkomsel products).</li>
+                    </ol>
+                </div>
             </div>
         </div>
 
-        <!-- Section 2: Add Product -->
-        <div class="mb-5">
-            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-plus-circle text-success mr-2"></i> 2. Adding a New Product</h5>
-            <p class="text-muted mb-4">When a new denomination or package becomes available from the upstream provider, you must register it here so merchants can sell it.</p>
+        <div class="row hc-step-row align-items-start mb-4">
+            <div class="col-lg-12">
+                <div class="hc-step-number">2</div>
+                <h3 class="hc-step-title">Adding a New Product</h3>
+                <p class="text-muted mb-4">When a new denomination or package becomes available from the upstream provider, you must register it here so merchants can sell it.</p>
 
-            <div class="pl-4 border-left border-success ml-2 mb-4">
-                <ol class="text-muted mb-0">
-                    <li class="mb-3">Click the green <strong><i class="fas fa-plus"></i> Add Product</strong> button in the top right toolbar.</li>
-                    <li class="mb-3">In the <em>ADD PRODUCT</em> modal, select the relevant <strong>Provider</strong> from the dropdown.</li>
-                    <li class="mb-3">Enter the <strong>Caption</strong> (customer-facing label, e.g., `Pulsa Telkomsel 50.000`) and an optional <strong>Description</strong>.</li>
-                    <li class="mb-3">Enter the <strong>Price</strong> (base selling price in Rupiah, no currency symbols).</li>
-                    <li class="mb-2">Click <strong>Save Product</strong>. The product goes live immediately.</li>
-                </ol>
+                <div class="pl-4 border-left border-success ml-2 mb-4">
+                    <ol class="text-muted mb-0">
+                        <li class="mb-3">Click the green <strong><i class="fas fa-plus"></i> Add Product</strong> button in the top right toolbar.</li>
+                        <li class="mb-3">In the <em>ADD PRODUCT</em> modal, select the relevant <strong>Provider</strong> from the dropdown.</li>
+                        <li class="mb-3">Enter the <strong>Caption</strong> (customer-facing label, e.g., `Pulsa Telkomsel 50.000`) and an optional <strong>Description</strong>.</li>
+                        <li class="mb-3">Enter the <strong>Price</strong> (base selling price in Rupiah, no currency symbols).</li>
+                        <li class="mb-2">Click <strong>Save Product</strong>. The product goes live immediately.</li>
+                    </ol>
+                </div>
             </div>
         </div>
 
-        <!-- Section 3: Edit/Delete -->
-        <div class="mb-5">
-            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-edit text-info mr-2"></i> 3. Editing or Deleting a Product</h5>
-            <p class="text-muted mb-4">If upstream pricing changes, you must update your catalog to maintain margins.</p>
+        <div class="row hc-step-row align-items-start mb-4">
+            <div class="col-lg-12">
+                <div class="hc-step-number">3</div>
+                <h3 class="hc-step-title">Editing or Deleting a Product</h3>
+                <p class="text-muted mb-4">If upstream pricing changes, you must update your catalog to maintain margins.</p>
 
-            <div class="pl-4 border-left border-info ml-2 mb-4">
-                <ol class="text-muted mb-0">
-                    <li class="mb-3"><strong>Edit:</strong> Click the <i class="fas fa-ellipsis-v"></i> icon in the ACTION column, select <strong>Edit Product</strong>, update the fields, and click Save Changes.</li>
-                    <li class="mb-2"><strong>Delete:</strong> Click the <i class="fas fa-ellipsis-v"></i> icon, select <strong>Delete Product</strong>, and confirm. The product will be hidden from all merchant catalogs.</li>
-                </ol>
-            </div>
-            
-            <div class="doc-callout callout-warning shadow-sm mt-4">
-                <div class="callout-icon"><i class="fas fa-exclamation-triangle text-warning"></i></div>
-                <div class="callout-content">
-                    <strong class="d-block mb-1 text-body" style="font-size: 16px;">Price Updates are Immediate</strong>
-                    <p class="mb-0 text-muted small">Once you save an edited price, all active merchant fee calculations will immediately start using the new price. This does not retroactively affect past transactions.</p>
+                <div class="pl-4 border-left border-info ml-2 mb-4">
+                    <ol class="text-muted mb-0">
+                        <li class="mb-3"><strong>Edit:</strong> Click the <i class="fas fa-ellipsis-v"></i> icon in the ACTION column, select <strong>Edit Product</strong>, update the fields, and click Save Changes.</li>
+                        <li class="mb-2"><strong>Delete:</strong> Click the <i class="fas fa-ellipsis-v"></i> icon, select <strong>Delete Product</strong>, and confirm. The product will be hidden from all merchant catalogs.</li>
+                    </ol>
+                </div>
+                
+                <div class="doc-callout callout-warning shadow-sm mt-4">
+                    <div class="callout-icon"><i class="fas fa-exclamation-triangle text-warning"></i></div>
+                    <div class="callout-content">
+                        <strong class="d-block mb-1 text-body" style="font-size: 16px;">Price Updates are Immediate</strong>
+                        <p class="mb-0 text-muted small">Once you save an edited price, all active merchant fee calculations will immediately start using the new price. This does not retroactively affect past transactions.</p>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- FAQ -->
-        <h5 class="font-weight-bold mb-4 mt-5 d-flex align-items-center"><i class="fas fa-question-circle text-warning mr-3"></i> Common Issues &amp; Troubleshooting</h5>
-        <div class="faq-accordion mb-5">
-            <div class="border-0 mb-3 border-bottom pb-2">
-                <a href="#faq_en_pp_1" data-toggle="collapse" class="d-block text-body text-decoration-none font-weight-bold pb-2">
-                    <i class="fas fa-chevron-right mr-2 text-muted" style="font-size:0.8rem;"></i> Issue 1: I updated the price, but merchants are still seeing the old price.
-                </a>
-                <div id="faq_en_pp_1" class="collapse">
-                    <div class="text-muted px-4 pb-4 pt-1" style="line-height: 1.7; font-size: 0.9rem;">
-                        <strong>Answer:</strong> The merchant dashboard aggressively caches the product catalog for performance. The cache automatically clears every 5 minutes, or merchants can force a refresh from their side.
-                    </div>
-                </div>
+        <h4 class="font-weight-bold mb-4 border-bottom pb-2">Common Issues &amp; Troubleshooting</h4>
+        
+        <div class="hc-faq-item">
+            <div class="hc-faq-q">
+                <i class="fas fa-question-circle text-warning"></i> 
+                <span>Issue 1: I updated the price, but merchants are still seeing the old price.</span>
             </div>
-            <div class="border-0 mb-3 border-bottom pb-2">
-                <a href="#faq_en_pp_2" data-toggle="collapse" class="d-block text-body text-decoration-none font-weight-bold pb-2">
-                    <i class="fas fa-chevron-right mr-2 text-muted" style="font-size:0.8rem;"></i> Issue 2: What happens if I delete a product that was just purchased?
-                </a>
-                <div id="faq_en_pp_2" class="collapse">
-                    <div class="text-muted px-4 pb-4 pt-1" style="line-height: 1.7; font-size: 0.9rem;">
-                        <strong>Answer:</strong> Deleting a product hides it from the catalog. Any pending transactions for that product will still process normally based on the exact price data captured at the moment of checkout.
-                    </div>
-                </div>
+            <p class="hc-faq-a"><strong>Answer:</strong> The merchant dashboard aggressively caches the product catalog for performance. The cache automatically clears every 5 minutes, or merchants can force a refresh from their side.</p>
+        </div>
+
+        <div class="hc-faq-item">
+            <div class="hc-faq-q">
+                <i class="fas fa-question-circle text-warning"></i> 
+                <span>Issue 2: What happens if I delete a product that was just purchased?</span>
             </div>
-            <div class="border-0 mb-3 border-bottom pb-2">
-                <a href="#faq_en_pp_3" data-toggle="collapse" class="d-block text-body text-decoration-none font-weight-bold pb-2">
-                    <i class="fas fa-chevron-right mr-2 text-muted" style="font-size:0.8rem;"></i> Issue 3: Can I set different product prices for different merchants?
-                </a>
-                <div id="faq_en_pp_3" class="collapse">
-                    <div class="text-muted px-4 pb-4 pt-1" style="line-height: 1.7; font-size: 0.9rem;">
-                        <strong>Answer:</strong> No. The product catalog prices are strictly global. If you want to offer discounts to specific merchants, you should adjust their general MDR/Fee settings instead.
-                    </div>
-                </div>
+            <p class="hc-faq-a"><strong>Answer:</strong> Deleting a product hides it from the catalog. Any pending transactions for that product will still process normally based on the exact price data captured at the moment of checkout.</p>
+        </div>
+
+        <div class="hc-faq-item">
+            <div class="hc-faq-q">
+                <i class="fas fa-question-circle text-warning"></i> 
+                <span>Issue 3: Can I set different product prices for different merchants?</span>
             </div>
+            <p class="hc-faq-a"><strong>Answer:</strong> No. The product catalog prices are strictly global. If you want to offer discounts to specific merchants, you should adjust their general MDR/Fee settings instead.</p>
         </div>
 
     </div>
@@ -214,89 +215,90 @@
             </div>
         </div>
 
-        <!-- Section 1: Workflow Filtering -->
-        <div class="mb-5">
-            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-search text-primary mr-2"></i> 1. Mencari dan Memfilter Produk</h5>
-            <p class="text-muted mb-4">Jika Anda memiliki ratusan produk, gunakan toolbar untuk menemukan produk yang perlu Anda perbarui dengan cepat.</p>
+        <!-- Procedural Walkthrough -->
+        <h4 class="font-weight-bold mb-4 border-bottom pb-2">Procedural Walkthrough</h4>
+        
+        <div class="row hc-step-row align-items-start mb-4">
+            <div class="col-lg-12">
+                <div class="hc-step-number">1</div>
+                <h3 class="hc-step-title">Mencari dan Memfilter Produk</h3>
+                <p class="text-muted mb-4">Jika Anda memiliki ratusan produk, gunakan toolbar untuk menemukan produk yang perlu Anda perbarui dengan cepat.</p>
 
-            <div class="pl-4 border-left border-primary ml-2 mb-4">
-                <ol class="text-muted mb-0">
-                    <li class="mb-3"><strong>Pencarian Cepat:</strong> Ketik di kotak <em>Search by name, category, or description...</em> untuk langsung memfilter tabel.</li>
-                    <li class="mb-2"><strong>Filter Provider:</strong> Klik dropdown <strong>Provider</strong> di toolbar untuk membatasi katalog hanya pada satu operator jaringan tertentu (misal: hanya Telkomsel).</li>
-                </ol>
+                <div class="pl-4 border-left border-success ml-2 mb-4">
+                    <ol class="text-muted mb-0">
+                        <li class="mb-3"><strong>Pencarian Cepat:</strong> Ketik di kotak <em>Search by name, category, or description...</em> untuk langsung memfilter tabel.</li>
+                        <li class="mb-2"><strong>Filter Provider:</strong> Klik dropdown <strong>Provider</strong> di toolbar untuk membatasi katalog hanya pada satu operator jaringan tertentu (misal: hanya Telkomsel).</li>
+                    </ol>
+                </div>
             </div>
         </div>
 
-        <!-- Section 2: Add Product -->
-        <div class="mb-5">
-            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-plus-circle text-success mr-2"></i> 2. Menambahkan Produk Baru</h5>
-            <p class="text-muted mb-4">Saat denominasi atau paket baru tersedia dari penyedia hulu, daftarkan di sini agar merchant dapat menjualnya.</p>
+        <div class="row hc-step-row align-items-start mb-4">
+            <div class="col-lg-12">
+                <div class="hc-step-number">2</div>
+                <h3 class="hc-step-title">Menambahkan Produk Baru</h3>
+                <p class="text-muted mb-4">Saat denominasi atau paket baru tersedia dari penyedia hulu, daftarkan di sini agar merchant dapat menjualnya.</p>
 
-            <div class="pl-4 border-left border-success ml-2 mb-4">
-                <ol class="text-muted mb-0">
-                    <li class="mb-3">Klik tombol hijau <strong><i class="fas fa-plus"></i> Add Product</strong> di toolbar kanan atas.</li>
-                    <li class="mb-3">Di modal <em>ADD PRODUCT</em>, pilih <strong>Provider</strong> yang relevan dari dropdown.</li>
-                    <li class="mb-3">Masukkan <strong>Caption</strong> (label untuk pelanggan, misal `Pulsa Telkomsel 50.000`) dan <strong>Description</strong> (opsional).</li>
-                    <li class="mb-3">Masukkan <strong>Price</strong> (harga jual dasar dalam Rupiah, tanpa simbol).</li>
-                    <li class="mb-2">Klik <strong>Save Product</strong>. Produk tersebut akan langsung aktif.</li>
-                </ol>
+                <div class="pl-4 border-left border-success ml-2 mb-4">
+                    <ol class="text-muted mb-0">
+                        <li class="mb-3">Klik tombol hijau <strong><i class="fas fa-plus"></i> Add Product</strong> di toolbar kanan atas.</li>
+                        <li class="mb-3">Di modal <em>ADD PRODUCT</em>, pilih <strong>Provider</strong> yang relevan dari dropdown.</li>
+                        <li class="mb-3">Masukkan <strong>Caption</strong> (label untuk pelanggan, misal `Pulsa Telkomsel 50.000`) dan <strong>Description</strong> (opsional).</li>
+                        <li class="mb-3">Masukkan <strong>Price</strong> (harga jual dasar dalam Rupiah, tanpa simbol).</li>
+                        <li class="mb-2">Klik <strong>Save Product</strong>. Produk tersebut akan langsung aktif.</li>
+                    </ol>
+                </div>
             </div>
         </div>
 
-        <!-- Section 3: Edit/Delete -->
-        <div class="mb-5">
-            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-edit text-info mr-2"></i> 3. Mengedit atau Menghapus Produk</h5>
-            <p class="text-muted mb-4">Jika harga dari hulu berubah, Anda harus memperbarui katalog Anda untuk mempertahankan margin keuntungan.</p>
+        <div class="row hc-step-row align-items-start mb-4">
+            <div class="col-lg-12">
+                <div class="hc-step-number">3</div>
+                <h3 class="hc-step-title">Mengedit atau Menghapus Produk</h3>
+                <p class="text-muted mb-4">Jika harga dari hulu berubah, Anda harus memperbarui katalog Anda untuk mempertahankan margin keuntungan.</p>
 
-            <div class="pl-4 border-left border-info ml-2 mb-4">
-                <ol class="text-muted mb-0">
-                    <li class="mb-3"><strong>Edit:</strong> Klik ikon <i class="fas fa-ellipsis-v"></i> di kolom ACTION, pilih <strong>Edit Product</strong>, perbarui isian yang diperlukan, lalu klik Save Changes.</li>
-                    <li class="mb-2"><strong>Hapus:</strong> Klik ikon <i class="fas fa-ellipsis-v"></i>, pilih <strong>Delete Product</strong>, dan konfirmasi. Produk akan dihapus dari semua katalog.</li>
-                </ol>
-            </div>
-            
-            <div class="doc-callout callout-warning shadow-sm mt-4">
-                <div class="callout-icon"><i class="fas fa-exclamation-triangle text-warning"></i></div>
-                <div class="callout-content">
-                    <strong class="d-block mb-1 text-body" style="font-size: 16px;">Pembaruan Harga Bersifat Instan</strong>
-                    <p class="mb-0 text-muted small">Begitu Anda menyimpan harga baru, seluruh perhitungan biaya merchant yang aktif akan langsung menggunakan harga tersebut. Namun, hal ini tidak berlaku mundur untuk transaksi lama.</p>
+                <div class="pl-4 border-left border-info ml-2 mb-4">
+                    <ol class="text-muted mb-0">
+                        <li class="mb-3"><strong>Edit:</strong> Klik ikon <i class="fas fa-ellipsis-v"></i> di kolom ACTION, pilih <strong>Edit Product</strong>, perbarui isian yang diperlukan, lalu klik Save Changes.</li>
+                        <li class="mb-2"><strong>Hapus:</strong> Klik ikon <i class="fas fa-ellipsis-v"></i>, pilih <strong>Delete Product</strong>, dan konfirmasi. Produk akan dihapus dari semua katalog.</li>
+                    </ol>
+                </div>
+                
+                <div class="doc-callout callout-warning shadow-sm mt-4">
+                    <div class="callout-icon"><i class="fas fa-exclamation-triangle text-warning"></i></div>
+                    <div class="callout-content">
+                        <strong class="d-block mb-1 text-body" style="font-size: 16px;">Pembaruan Harga Bersifat Instan</strong>
+                        <p class="mb-0 text-muted small">Begitu Anda menyimpan harga baru, seluruh perhitungan biaya merchant yang aktif akan langsung menggunakan harga tersebut. Namun, hal ini tidak berlaku mundur untuk transaksi lama.</p>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- FAQ -->
-        <h5 class="font-weight-bold mb-4 mt-5 d-flex align-items-center"><i class="fas fa-question-circle text-warning mr-3"></i> Panduan Pemecahan Masalah (FAQ)</h5>
-        <div class="faq-accordion mb-5">
-            <div class="border-0 mb-3 border-bottom pb-2">
-                <a href="#faq_id_pp_1" data-toggle="collapse" class="d-block text-body text-decoration-none font-weight-bold pb-2">
-                    <i class="fas fa-chevron-right mr-2 text-muted" style="font-size:0.8rem;"></i> Masalah 1: Harga sudah saya update, tapi di merchant masih harga lama.
-                </a>
-                <div id="faq_id_pp_1" class="collapse">
-                    <div class="text-muted px-4 pb-4 pt-1" style="line-height: 1.7; font-size: 0.9rem;">
-                        <strong>Jawaban:</strong> Dasbor merchant melakukan cache pada katalog produk untuk menghemat resource. Cache otomatis dibersihkan setiap 5 menit, atau merchant dapat menekan tombol <em>refresh</em> secara manual di dasbor mereka.
-                    </div>
-                </div>
+        <h4 class="font-weight-bold mb-4 border-bottom pb-2">Panduan Pemecahan Masalah (FAQ)</h4>
+        
+        <div class="hc-faq-item">
+            <div class="hc-faq-q">
+                <i class="fas fa-question-circle text-warning"></i> 
+                <span>Masalah 1: Harga sudah saya update, tapi di merchant masih harga lama.</span>
             </div>
-            <div class="border-0 mb-3 border-bottom pb-2">
-                <a href="#faq_id_pp_2" data-toggle="collapse" class="d-block text-body text-decoration-none font-weight-bold pb-2">
-                    <i class="fas fa-chevron-right mr-2 text-muted" style="font-size:0.8rem;"></i> Masalah 2: Apa yang terjadi jika saya menghapus produk yang baru saja dibeli?
-                </a>
-                <div id="faq_id_pp_2" class="collapse">
-                    <div class="text-muted px-4 pb-4 pt-1" style="line-height: 1.7; font-size: 0.9rem;">
-                        <strong>Jawaban:</strong> Menghapus produk hanya akan menyembunyikannya dari katalog. Transaksi pending untuk produk tersebut akan tetap diproses dengan normal sesuai data harga yang dikunci saat checkout dilakukan.
-                    </div>
-                </div>
+            <p class="hc-faq-a"><strong>Jawaban:</strong> Dasbor merchant melakukan cache pada katalog produk untuk menghemat resource. Cache otomatis dibersihkan setiap 5 menit, atau merchant dapat menekan tombol <em>refresh</em> secara manual di dasbor mereka.</p>
+        </div>
+
+        <div class="hc-faq-item">
+            <div class="hc-faq-q">
+                <i class="fas fa-question-circle text-warning"></i> 
+                <span>Masalah 2: Apa yang terjadi jika saya menghapus produk yang baru saja dibeli?</span>
             </div>
-            <div class="border-0 mb-3 border-bottom pb-2">
-                <a href="#faq_id_pp_3" data-toggle="collapse" class="d-block text-body text-decoration-none font-weight-bold pb-2">
-                    <i class="fas fa-chevron-right mr-2 text-muted" style="font-size:0.8rem;"></i> Masalah 3: Bisakah saya mengatur harga berbeda untuk merchant tertentu?
-                </a>
-                <div id="faq_id_pp_3" class="collapse">
-                    <div class="text-muted px-4 pb-4 pt-1" style="line-height: 1.7; font-size: 0.9rem;">
-                        <strong>Jawaban:</strong> Tidak. Harga katalog produk prabayar bersifat murni global. Jika Anda ingin memberikan diskon khusus pada merchant VIP, silakan kurangi pengaturan persentase MDR/Biaya Transaksi mereka saja.
-                    </div>
-                </div>
+            <p class="hc-faq-a"><strong>Jawaban:</strong> Menghapus produk hanya akan menyembunyikannya dari katalog. Transaksi pending untuk produk tersebut akan tetap diproses dengan normal sesuai data harga yang dikunci saat checkout dilakukan.</p>
+        </div>
+
+        <div class="hc-faq-item">
+            <div class="hc-faq-q">
+                <i class="fas fa-question-circle text-warning"></i> 
+                <span>Masalah 3: Bisakah saya mengatur harga berbeda untuk merchant tertentu?</span>
             </div>
+            <p class="hc-faq-a"><strong>Jawaban:</strong> Tidak. Harga katalog produk prabayar bersifat murni global. Jika Anda ingin memberikan diskon khusus pada merchant VIP, silakan kurangi pengaturan persentase MDR/Biaya Transaksi mereka saja.</p>
         </div>
 
     </div>

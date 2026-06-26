@@ -36,69 +36,74 @@
             </div>
         </div>
 
-        <!-- Section 1: Workflow Filtering -->
-        <div class="mb-5">
-            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-filter text-primary mr-2"></i> 1. Filtering Data</h5>
-            <p class="text-muted mb-4">Slice and dice your transactional history to find exact analytical figures.</p>
+        <!-- Procedural Walkthrough -->
+        <h4 class="font-weight-bold mb-4 border-bottom pb-2">Procedural Walkthrough</h4>
+        
+        <div class="row hc-step-row align-items-start mb-4">
+            <div class="col-lg-12">
+                <div class="hc-step-number">1</div>
+                <h3 class="hc-step-title">Filtering Data</h3>
+                <p class="text-muted mb-4">Slice and dice your transactional history to find exact analytical figures.</p>
 
-            <div class="pl-4 border-left border-primary ml-2 mb-4">
-                <ol class="text-muted mb-0">
-                    <li class="mb-3">Navigate to <strong>DASHBOARD &rarr; Business Intelligence</strong> on the left sidebar.</li>
-                    <li class="mb-3">Click the <strong>Date Picker</strong> input to select a specific Date Range (e.g., Last 7 Days, This Month, or Custom Range).</li>
-                    <li class="mb-3">Use the dropdowns to optionally narrow down the data by a specific <strong>Merchant</strong> or <strong>Payment Channel</strong>.</li>
-                    <li class="mb-2">Click the <strong>Filter</strong> button. The charts and data table will refresh to reflect your selection.</li>
-                </ol>
+                <div class="pl-4 border-left border-primary ml-2 mb-4">
+                    <ol class="text-muted mb-0">
+                        <li class="mb-3">Navigate to <strong>DASHBOARD &rarr; Business Intelligence</strong> on the left sidebar.</li>
+                        <li class="mb-3">Click the <strong>Date Picker</strong> input to select a specific Date Range (e.g., Last 7 Days, This Month, or Custom Range).</li>
+                        <li class="mb-3">Use the dropdowns to optionally narrow down the data by a specific <strong>Merchant</strong> or <strong>Payment Channel</strong>.</li>
+                        <li class="mb-2">Click the <strong>Filter</strong> button. The charts and data table will refresh to reflect your selection.</li>
+                    </ol>
+                </div>
             </div>
         </div>
 
-        <!-- Section 2: Workflow Exporting -->
-        <div class="mb-5">
-            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-file-export text-success mr-2"></i> 2. Exporting Reports</h5>
-            <p class="text-muted mb-4">Download your filtered data for external auditing or accounting software integration.</p>
+        <div class="row hc-step-row align-items-start mb-4">
+            <div class="col-lg-12">
+                <div class="hc-step-number">2</div>
+                <h3 class="hc-step-title">Exporting Reports</h3>
+                <p class="text-muted mb-4">Download your filtered data for external auditing or accounting software integration.</p>
 
-            <div class="pl-4 border-left border-success ml-2">
-                <ol class="text-muted mb-0">
-                    <li class="mb-3">Once your data is filtered, locate the export buttons at the top right of the data table.</li>
-                    <li class="mb-3">Click <strong>Export Excel</strong> for a formatted spreadsheet, or <strong>Export CSV</strong> for fast, raw data processing.</li>
-                    <li class="mb-2"><strong>Background Jobs:</strong> For very large datasets (>10,000 rows), the export will be queued automatically as a background job to prevent browser timeout. You will receive an email/notification when the file is ready to be downloaded.</li>
-                </ol>
+                <div class="pl-4 border-left border-success ml-2">
+                    <ol class="text-muted mb-0">
+                        <li class="mb-3">Once your data is filtered, locate the export buttons at the top right of the data table.</li>
+                        <li class="mb-3">Click <strong>Export Excel</strong> for a formatted spreadsheet, or <strong>Export CSV</strong> for fast, raw data processing.</li>
+                        <li class="mb-2"><strong>Background Jobs:</strong> For very large datasets (>10,000 rows), the export will be queued automatically as a background job to prevent browser timeout. You will receive an email/notification when the file is ready to be downloaded.</li>
+                    </ol>
+                </div>
             </div>
         </div>
 
         <!-- FAQ -->
-        <h5 class="font-weight-bold mb-4 mt-5 d-flex align-items-center"><i class="fas fa-question-circle text-warning mr-3"></i> Common Issues &amp; What To Do</h5>
-        <div class="faq-accordion mb-5">
-            <div class="border-0 mb-3 border-bottom pb-2">
-                <a href="#faq_en_rep_1" data-toggle="collapse" class="d-block text-body text-decoration-none font-weight-bold pb-2">
-                    <i class="fas fa-chevron-right mr-2 text-muted" style="font-size:0.8rem;"></i> Issue 1: Chart data is not matching live transactions
-                </a>
-                <div id="faq_en_rep_1" class="collapse">
-                    <div class="text-muted px-4 pb-4 pt-1" style="line-height: 1.7; font-size: 0.9rem;">
-                        <strong>Symptom:</strong> A major transaction just occurred, but the revenue chart hasn't spiked.<br><br>
-                        <strong>Resolution:</strong> The Business Intelligence module aggregates data in 5-10 minute cached intervals. Wait a few minutes for the cron job to update the aggregates. For absolute real-time tracking, visit the <a href="javascript:void(0);" onclick="document.querySelector('.hc-nav-item[data-target=\'module-history\']').click()" class="font-weight-bold text-info" style="text-decoration: underline;">Transaction History</a> module.
-                    </div>
-                </div>
+        <h4 class="font-weight-bold mb-4 border-bottom pb-2">Common Issues &amp; What To Do</h4>
+        
+        <div class="hc-faq-item">
+            <div class="hc-faq-q">
+                <i class="fas fa-question-circle text-warning"></i> 
+                <span>Issue 1: Chart data is not matching live transactions</span>
             </div>
-            <div class="border-0 mb-3 border-bottom pb-2">
-                <a href="#faq_en_rep_2" data-toggle="collapse" class="d-block text-body text-decoration-none font-weight-bold pb-2">
-                    <i class="fas fa-chevron-right mr-2 text-muted" style="font-size:0.8rem;"></i> Issue 2: The "Export Excel" process is taking too long
-                </a>
-                <div id="faq_en_rep_2" class="collapse">
-                    <div class="text-muted px-4 pb-4 pt-1" style="line-height: 1.7; font-size: 0.9rem;">
-                        <strong>Symptom:</strong> Clicking the Excel button causes the browser tab to spin infinitely.<br><br>
-                        <strong>Resolution:</strong> If you are exporting data spanning multiple months with hundreds of thousands of rows, generating an `.xlsx` file uses massive server RAM. Try narrowing your Date Range filter (e.g., export week by week) or use the <strong>Export CSV</strong> format which processes substantially faster.
-                    </div>
-                </div>
+            <div class="hc-faq-a">
+                <strong>Symptom:</strong> A major transaction just occurred, but the revenue chart hasn't spiked.<br><br>
+                <strong>Resolution:</strong> The Business Intelligence module aggregates data in 5-10 minute cached intervals. Wait a few minutes for the cron job to update the aggregates. For absolute real-time tracking, visit the <a href="javascript:void(0);" onclick="document.querySelector('.hc-nav-item[data-target=\'module-history\']').click()" class="font-weight-bold text-info" style="text-decoration: underline;">Transaction History</a> module.
             </div>
-            <div class="border-0 mb-3 border-bottom pb-2">
-                <a href="#faq_en_rep_3" data-toggle="collapse" class="d-block text-body text-decoration-none font-weight-bold pb-2">
-                    <i class="fas fa-chevron-right mr-2 text-muted" style="font-size:0.8rem;"></i> Issue 3: Where do I download daily settlement reports?
-                </a>
-                <div id="faq_en_rep_3" class="collapse">
-                    <div class="text-muted px-4 pb-4 pt-1" style="line-height: 1.7; font-size: 0.9rem;">
-                        <strong>Answer:</strong> This module provides general Business Intelligence. For official daily settlement statements (mutasi bank equivalents), you must navigate to the <a href="javascript:void(0);" onclick="document.querySelector('.hc-nav-item[data-target=\'module-ug-financial-exports\']').click()" class="font-weight-bold text-info" style="text-decoration: underline;">Financial Exports</a> module instead.
-                    </div>
-                </div>
+        </div>
+
+        <div class="hc-faq-item">
+            <div class="hc-faq-q">
+                <i class="fas fa-question-circle text-warning"></i> 
+                <span>Issue 2: The "Export Excel" process is taking too long</span>
+            </div>
+            <div class="hc-faq-a">
+                <strong>Symptom:</strong> Clicking the Excel button causes the browser tab to spin infinitely.<br><br>
+                <strong>Resolution:</strong> If you are exporting data spanning multiple months with hundreds of thousands of rows, generating an `.xlsx` file uses massive server RAM. Try narrowing your Date Range filter (e.g., export week by week) or use the <strong>Export CSV</strong> format which processes substantially faster.
+            </div>
+        </div>
+
+        <div class="hc-faq-item">
+            <div class="hc-faq-q">
+                <i class="fas fa-question-circle text-warning"></i> 
+                <span>Issue 3: Where do I download daily settlement reports?</span>
+            </div>
+            <div class="hc-faq-a">
+                <strong>Answer:</strong> This module provides general Business Intelligence. For official daily settlement statements (mutasi bank equivalents), you must navigate to the <a href="javascript:void(0);" onclick="document.querySelector('.hc-nav-item[data-target=\'module-ug-financial-exports\']').click()" class="font-weight-bold text-info" style="text-decoration: underline;">Financial Exports</a> module instead.
             </div>
         </div>
 
@@ -141,69 +146,74 @@
             </div>
         </div>
 
-        <!-- Section 1: Workflow Filtering -->
-        <div class="mb-5">
-            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-filter text-primary mr-2"></i> 1. Memfilter Data</h5>
-            <p class="text-muted mb-4">Gunakan alat filter untuk membedah riwayat transaksi demi mendapatkan angka analitis yang pasti.</p>
+        <!-- Procedural Walkthrough -->
+        <h4 class="font-weight-bold mb-4 border-bottom pb-2">Procedural Walkthrough</h4>
+        
+        <div class="row hc-step-row align-items-start mb-4">
+            <div class="col-lg-12">
+                <div class="hc-step-number">1</div>
+                <h3 class="hc-step-title">Memfilter Data</h3>
+                <p class="text-muted mb-4">Gunakan alat filter untuk membedah riwayat transaksi demi mendapatkan angka analitis yang pasti.</p>
 
-            <div class="pl-4 border-left border-primary ml-2 mb-4">
-                <ol class="text-muted mb-0">
-                    <li class="mb-3">Arahkan ke menu <strong>DASHBOARD &rarr; Business Intelligence</strong> di sidebar sebelah kiri.</li>
-                    <li class="mb-3">Klik input <strong>Date Picker</strong> untuk memilih Rentang Tanggal spesifik (mis. 7 Hari Terakhir, Bulan Ini, atau Rentang Kustom).</li>
-                    <li class="mb-3">Gunakan dropdown untuk menyaring data lebih detail berdasarkan <strong>Merchant</strong> atau <strong>Channel Pembayaran</strong> tertentu.</li>
-                    <li class="mb-2">Klik tombol <strong>Filter</strong>. Grafik dan tabel data akan memuat ulang sesuai parameter Anda.</li>
-                </ol>
+                <div class="pl-4 border-left border-primary ml-2 mb-4">
+                    <ol class="text-muted mb-0">
+                        <li class="mb-3">Arahkan ke menu <strong>DASHBOARD &rarr; Business Intelligence</strong> di sidebar sebelah kiri.</li>
+                        <li class="mb-3">Klik input <strong>Date Picker</strong> untuk memilih Rentang Tanggal spesifik (mis. 7 Hari Terakhir, Bulan Ini, atau Rentang Kustom).</li>
+                        <li class="mb-3">Gunakan dropdown untuk menyaring data lebih detail berdasarkan <strong>Merchant</strong> atau <strong>Channel Pembayaran</strong> tertentu.</li>
+                        <li class="mb-2">Klik tombol <strong>Filter</strong>. Grafik dan tabel data akan memuat ulang sesuai parameter Anda.</li>
+                    </ol>
+                </div>
             </div>
         </div>
 
-        <!-- Section 2: Workflow Exporting -->
-        <div class="mb-5">
-            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-file-export text-success mr-2"></i> 2. Mengekspor Laporan</h5>
-            <p class="text-muted mb-4">Unduh data Anda untuk keperluan audit eksternal atau integrasi software akuntansi.</p>
+        <div class="row hc-step-row align-items-start mb-4">
+            <div class="col-lg-12">
+                <div class="hc-step-number">2</div>
+                <h3 class="hc-step-title">Mengekspor Laporan</h3>
+                <p class="text-muted mb-4">Unduh data Anda untuk keperluan audit eksternal atau integrasi software akuntansi.</p>
 
-            <div class="pl-4 border-left border-success ml-2">
-                <ol class="text-muted mb-0">
-                    <li class="mb-3">Setelah data berhasil difilter, temukan deretan tombol ekspor di kanan atas tabel data.</li>
-                    <li class="mb-3">Klik <strong>Export Excel</strong> untuk spreadsheet berformat rapi, atau <strong>Export CSV</strong> untuk pemrosesan data mentah yang lebih cepat.</li>
-                    <li class="mb-2"><strong>Pekerjaan Latar (Background Jobs):</strong> Untuk dataset raksasa (>10.000 baris), pengeksporan diantrekan secara otomatis di latar belakang agar browser tidak terputus (timeout). Anda akan mendapat email/notifikasi saat file siap diunduh.</li>
-                </ol>
+                <div class="pl-4 border-left border-success ml-2">
+                    <ol class="text-muted mb-0">
+                        <li class="mb-3">Setelah data berhasil difilter, temukan deretan tombol ekspor di kanan atas tabel data.</li>
+                        <li class="mb-3">Klik <strong>Export Excel</strong> untuk spreadsheet berformat rapi, atau <strong>Export CSV</strong> untuk pemrosesan data mentah yang lebih cepat.</li>
+                        <li class="mb-2"><strong>Pekerjaan Latar (Background Jobs):</strong> Untuk dataset raksasa (>10.000 baris), pengeksporan diantrekan secara otomatis di latar belakang agar browser tidak terputus (timeout). Anda akan mendapat email/notifikasi saat file siap diunduh.</li>
+                    </ol>
+                </div>
             </div>
         </div>
 
         <!-- FAQ -->
-        <h5 class="font-weight-bold mb-4 mt-5 d-flex align-items-center"><i class="fas fa-question-circle text-warning mr-3"></i> Panduan Pemecahan Masalah (FAQ)</h5>
-        <div class="faq-accordion mb-5">
-            <div class="border-0 mb-3 border-bottom pb-2">
-                <a href="#faq_id_rep_1" data-toggle="collapse" class="d-block text-body text-decoration-none font-weight-bold pb-2">
-                    <i class="fas fa-chevron-right mr-2 text-muted" style="font-size:0.8rem;"></i> Masalah 1: Data di grafik tidak sama persis dengan transaksi live
-                </a>
-                <div id="faq_id_rep_1" class="collapse">
-                    <div class="text-muted px-4 pb-4 pt-1" style="line-height: 1.7; font-size: 0.9rem;">
-                        <strong>Gejala:</strong> Sebuah transaksi besar baru saja sukses, tapi grafik pendapatan belum melonjak.<br><br>
-                        <strong>Resolusi:</strong> Modul BI menggabungkan data ke dalam cache bervolume 5-10 menit. Tunggu beberapa menit agar skrip cron memperbarui agregat. Untuk pelacakan yang real-time seketika itu juga, kunjungi modul <a href="javascript:void(0);" onclick="document.querySelector('.hc-nav-item[data-target=\'module-history\']').click()" class="font-weight-bold text-info" style="text-decoration: underline;">Transaction History</a>.
-                    </div>
-                </div>
+        <h4 class="font-weight-bold mb-4 border-bottom pb-2">Panduan Pemecahan Masalah (FAQ)</h4>
+        
+        <div class="hc-faq-item">
+            <div class="hc-faq-q">
+                <i class="fas fa-question-circle text-warning"></i> 
+                <span>Masalah 1: Data di grafik tidak sama persis dengan transaksi live</span>
             </div>
-            <div class="border-0 mb-3 border-bottom pb-2">
-                <a href="#faq_id_rep_2" data-toggle="collapse" class="d-block text-body text-decoration-none font-weight-bold pb-2">
-                    <i class="fas fa-chevron-right mr-2 text-muted" style="font-size:0.8rem;"></i> Masalah 2: Proses "Export Excel" memakan waktu sangat lama
-                </a>
-                <div id="faq_id_rep_2" class="collapse">
-                    <div class="text-muted px-4 pb-4 pt-1" style="line-height: 1.7; font-size: 0.9rem;">
-                        <strong>Gejala:</strong> Klik tombol Excel menyebabkan tab browser terus-terusan loading.<br><br>
-                        <strong>Resolusi:</strong> Jika mengekspor rentang bulan dengan ratusan ribu baris, pembuatan `.xlsx` sangat memakan RAM server. Persempit filter Anda (mis. ekspor per minggu) atau gunakan format <strong>Export CSV</strong> yang jauh lebih ringan dan gesit.
-                    </div>
-                </div>
+            <div class="hc-faq-a">
+                <strong>Gejala:</strong> Sebuah transaksi besar baru saja sukses, tapi grafik pendapatan belum melonjak.<br><br>
+                <strong>Resolusi:</strong> Modul BI menggabungkan data ke dalam cache bervolume 5-10 menit. Tunggu beberapa menit agar skrip cron memperbarui agregat. Untuk pelacakan yang real-time seketika itu juga, kunjungi modul <a href="javascript:void(0);" onclick="document.querySelector('.hc-nav-item[data-target=\'module-history\']').click()" class="font-weight-bold text-info" style="text-decoration: underline;">Transaction History</a>.
             </div>
-            <div class="border-0 mb-3 border-bottom pb-2">
-                <a href="#faq_id_rep_3" data-toggle="collapse" class="d-block text-body text-decoration-none font-weight-bold pb-2">
-                    <i class="fas fa-chevron-right mr-2 text-muted" style="font-size:0.8rem;"></i> Masalah 3: Di mana saya mengunduh laporan mutasi settlement harian?
-                </a>
-                <div id="faq_id_rep_3" class="collapse">
-                    <div class="text-muted px-4 pb-4 pt-1" style="line-height: 1.7; font-size: 0.9rem;">
-                        <strong>Jawaban:</strong> Modul ini memberikan Laporan Business Intelligence umum. Untuk laporan settlement resmi harian (setara mutasi bank), Anda wajib membuka modul <a href="javascript:void(0);" onclick="document.querySelector('.hc-nav-item[data-target=\'module-ug-financial-exports\']').click()" class="font-weight-bold text-info" style="text-decoration: underline;">Financial Exports</a>.
-                    </div>
-                </div>
+        </div>
+
+        <div class="hc-faq-item">
+            <div class="hc-faq-q">
+                <i class="fas fa-question-circle text-warning"></i> 
+                <span>Masalah 2: Proses "Export Excel" memakan waktu sangat lama</span>
+            </div>
+            <div class="hc-faq-a">
+                <strong>Gejala:</strong> Klik tombol Excel menyebabkan tab browser terus-terusan loading.<br><br>
+                <strong>Resolusi:</strong> Jika mengekspor rentang bulan dengan ratusan ribu baris, pembuatan `.xlsx` sangat memakan RAM server. Persempit filter Anda (mis. ekspor per minggu) atau gunakan format <strong>Export CSV</strong> yang jauh lebih ringan dan gesit.
+            </div>
+        </div>
+
+        <div class="hc-faq-item">
+            <div class="hc-faq-q">
+                <i class="fas fa-question-circle text-warning"></i> 
+                <span>Masalah 3: Di mana saya mengunduh laporan mutasi settlement harian?</span>
+            </div>
+            <div class="hc-faq-a">
+                <strong>Jawaban:</strong> Modul ini memberikan Laporan Business Intelligence umum. Untuk laporan settlement resmi harian (setara mutasi bank), Anda wajib membuka modul <a href="javascript:void(0);" onclick="document.querySelector('.hc-nav-item[data-target=\'module-ug-financial-exports\']').click()" class="font-weight-bold text-info" style="text-decoration: underline;">Financial Exports</a>.
             </div>
         </div>
 

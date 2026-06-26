@@ -177,7 +177,7 @@
 
             <!-- 3. Technical Reference -->
             <h4 class="font-weight-bold mt-5 mb-4 border-bottom pb-2">Parameter Reference</h4>
-            <div class="table-responsive mb-5">
+            <div class="table-responsive">
                 <table class="table table-bordered hc-ref-table bg-white">
                     <thead>
                         <tr>
@@ -428,7 +428,7 @@
 
             <!-- 3. Technical Reference -->
             <h4 class="font-weight-bold mt-5 mb-4 border-bottom pb-2">Referensi Parameter</h4>
-            <div class="table-responsive mb-5">
+            <div class="table-responsive">
                 <table class="table table-bordered hc-ref-table bg-white">
                     <thead>
                         <tr>

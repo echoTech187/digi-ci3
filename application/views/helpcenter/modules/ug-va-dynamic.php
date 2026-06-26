@@ -66,79 +66,76 @@
             </div>
         </div>
 
-        <!-- Section 1: Workflow Filtering -->
-        <div class="mb-5">
-            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-search text-primary mr-2"></i> 1. Search and Filter Transactions</h5>
-            <p class="text-muted mb-4">Use the built-in search and filters to track down specific VA payments.</p>
+        <!-- Procedural Walkthrough -->
+        <h4 class="font-weight-bold mb-4 border-bottom pb-2">Procedural Walkthrough</h4>
+        
+        <div class="row hc-step-row align-items-start mb-4">
+            <div class="col-lg-12">
+                <div class="hc-step-number">1</div>
+                <h3 class="hc-step-title">Searching and Filtering Transactions</h3>
+                <p class="text-muted mb-4">Use the built-in search and filters to track down specific VA payments.</p>
 
-            <div class="pl-4 border-left border-primary ml-2 mb-4">
-                <ol class="text-muted mb-0">
-                    <li class="mb-3"><strong>Quick Search:</strong> Type in the <em>Search by Channel, Merchant, or ID...</em> box to instantly filter the table. If a customer provides a transfer receipt, paste the VA Number here.</li>
-                    <li class="mb-3"><strong>Advanced Filters:</strong> Click the <i class="fas fa-sliders-h"></i> <strong>Filters</strong> button to open the <strong>Advanced Filters</strong> panel.</li>
-                    <li class="mb-3">Configure your parameters: <strong>REQUEST DATE</strong>, <strong>MERCHANT</strong>, <strong>EXTERNAL CHANNEL</strong>, <strong>CHANNEL ID</strong>, or <strong>STATUS</strong>.</li>
-                    <li class="mb-2">Click the area outside the dropdown to load the data. Active filters are indicated by a red badge number. Click <strong>Clear All</strong> to clear all filters.</li>
-                </ol>
+                <div class="pl-4 border-left border-success ml-2 mb-4">
+                    <ol class="text-muted mb-0">
+                        <li class="mb-3"><strong>Quick Search:</strong> Type in the <em>Search by Channel, Merchant, or ID...</em> box to instantly filter the table. If a customer provides a transfer receipt, paste the VA Number here.</li>
+                        <li class="mb-3"><strong>Advanced Filters:</strong> Click the <i class="fas fa-sliders-h"></i> <strong>Filters</strong> button to open the <strong>Advanced Filters</strong> panel.</li>
+                        <li class="mb-3">Configure your parameters: <strong>REQUEST DATE</strong>, <strong>MERCHANT</strong>, <strong>EXTERNAL CHANNEL</strong>, <strong>CHANNEL ID</strong>, or <strong>STATUS</strong>.</li>
+                        <li class="mb-2">Click the area outside the dropdown to load the data. Active filters are indicated by a red badge number. Click <strong>Clear All</strong> to clear all filters.</li>
+                    </ol>
+                </div>
             </div>
         </div>
 
-        <!-- Section 2: Inspecting External Log -->
-        <div class="mb-5">
-            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-satellite-dish text-success mr-2"></i> 2. Inspecting the External Log (API Payloads)</h5>
-            <p class="text-muted mb-4">If a customer has successfully transferred the money but the merchant claims they did not receive the webhook callback, you can inspect the raw API data directly from this table.</p>
+        <div class="row hc-step-row align-items-start mb-4">
+            <div class="col-lg-12">
+                <div class="hc-step-number">2</div>
+                <h3 class="hc-step-title">Inspecting the External Log (API Payloads)</h3>
+                <p class="text-muted mb-4">If a customer has successfully transferred the money but the merchant claims they did not receive the webhook callback, you can inspect the raw API data directly from this table.</p>
 
-            <div class="pl-4 border-left border-success ml-2 mb-4">
-                <ol class="text-muted mb-0">
-                    <li class="mb-3">Find the transaction row you want to inspect.</li>
-                    <li class="mb-3">Look at the <strong>STATUS</strong> column. If the status is <span class="badge badge-success">PAID</span> or <span class="badge badge-success">SUCCESS</span>, the badge itself acts as a clickable link.</li>
-                    <li class="mb-3">Click the <strong>Status Badge</strong>. An <em>External Log Details</em> modal will appear.</li>
-                    <li class="mb-2">Use the <strong>REQUEST Tab</strong> to view the JSON sent to the provider, and the <strong>RESPONSE Tab</strong> to view the callback payload sent back to us upon settlement.</li>
-                </ol>
-            </div>
-
-            <div class="doc-callout callout-info shadow-sm mt-4">
-                <div class="callout-icon"><i class="fas fa-info-circle"></i></div>
-                <div class="callout-content">
-                    <strong class="d-block mb-1 text-body" style="font-size: 16px;">Clickable Badges Restriction</strong>
-                    <p class="mb-0 text-muted small">The external log inspector is only available for successful transactions that have an associated External ID. Badges for PENDING or EXPIRED transactions are not clickable because there is no success callback to display.</p>
+                <div class="pl-4 border-left border-success ml-2 mb-4">
+                    <ol class="text-muted mb-0">
+                        <li class="mb-3">Find the transaction row you want to inspect.</li>
+                        <li class="mb-3">Look at the <strong>STATUS</strong> column. If the status is <span class="badge badge-success">PAID</span> or <span class="badge badge-success">SUCCESS</span>, the badge itself acts as a clickable link.</li>
+                        <li class="mb-3">Click the <strong>Status Badge</strong>. An <em>External Log Details</em> modal will appear.</li>
+                        <li class="mb-2">Use the <strong>REQUEST Tab</strong> to view the JSON sent to the provider, and the <strong>RESPONSE Tab</strong> to view the callback payload sent back to us upon settlement.</li>
+                    </ol>
                 </div>
+            </div>
+        </div>
+
+        <div class="doc-callout callout-info shadow-sm mt-4 mb-5">
+            <div class="callout-icon"><i class="fas fa-info-circle"></i></div>
+            <div class="callout-content">
+                <strong class="d-block mb-1 text-body" style="font-size: 16px;">Clickable Badges Restriction</strong>
+                <p class="mb-0 text-muted small">The external log inspector is only available for successful transactions that have an associated External ID. Badges for PENDING or EXPIRED transactions are not clickable because there is no success callback to display.</p>
             </div>
         </div>
 
         <!-- FAQ -->
-        <h5 class="font-weight-bold mb-4 mt-5 d-flex align-items-center"><i class="fas fa-question-circle text-warning mr-3"></i> Common Issues &amp; Troubleshooting</h5>
-        <div class="faq-accordion mb-5">
-            <div class="border-0 mb-3 border-bottom pb-2">
-                <a href="#faq_en_vad_1" data-toggle="collapse" class="d-block text-body text-decoration-none font-weight-bold pb-2">
-                    <i class="fas fa-chevron-right mr-2 text-muted" style="font-size:0.8rem;"></i> Issue 1: Why is a paid transaction still marked as PENDING?
-                </a>
-                <div id="faq_en_vad_1" class="collapse">
-                    <div class="text-muted px-4 pb-4 pt-1" style="line-height: 1.7; font-size: 0.9rem;">
-                        <strong>Symptom:</strong> Customer provided a receipt, but dashboard shows Pending.<br><br>
-                        <strong>Resolution:</strong> This usually happens if the bank's callback was delayed or failed due to network timeouts. You can check the External Log to see if we ever received the callback payload. If not, wait for the upstream aggregator's cron job to sync it.
-                    </div>
-                </div>
+        <h4 class="font-weight-bold mb-4 border-bottom pb-2">Common Issues &amp; Troubleshooting</h4>
+        
+        <div class="hc-faq-item">
+            <div class="hc-faq-q">
+                <i class="fas fa-question-circle text-warning"></i> 
+                <span>Issue 1: Why is a paid transaction still marked as PENDING?</span>
             </div>
-            <div class="border-0 mb-3 border-bottom pb-2">
-                <a href="#faq_en_vad_2" data-toggle="collapse" class="d-block text-body text-decoration-none font-weight-bold pb-2">
-                    <i class="fas fa-chevron-right mr-2 text-muted" style="font-size:0.8rem;"></i> Issue 2: Can I manually mark a PENDING transaction as PAID?
-                </a>
-                <div id="faq_en_vad_2" class="collapse">
-                    <div class="text-muted px-4 pb-4 pt-1" style="line-height: 1.7; font-size: 0.9rem;">
-                        <strong>Answer:</strong> No. VA Dynamic transactions rely entirely on upstream bank confirmations to ensure financial integrity. Manual overrides are restricted to prevent fraud and settlement discrepancies.
-                    </div>
-                </div>
+            <p class="hc-faq-a"><strong>Symptom:</strong> Customer provided a receipt, but dashboard shows Pending.<br><br><strong>Resolution:</strong> This usually happens if the bank's callback was delayed or failed due to network timeouts. You can check the External Log to see if we ever received the callback payload. If not, wait for the upstream aggregator's cron job to sync it.</p>
+        </div>
+
+        <div class="hc-faq-item">
+            <div class="hc-faq-q">
+                <i class="fas fa-question-circle text-warning"></i> 
+                <span>Issue 2: Can I manually mark a PENDING transaction as PAID?</span>
             </div>
-            <div class="border-0 mb-3 border-bottom pb-2">
-                <a href="#faq_en_vad_3" data-toggle="collapse" class="d-block text-body text-decoration-none font-weight-bold pb-2">
-                    <i class="fas fa-chevron-right mr-2 text-muted" style="font-size:0.8rem;"></i> Issue 3: The customer paid exactly at the expiration minute, but it failed
-                </a>
-                <div id="faq_en_vad_3" class="collapse">
-                    <div class="text-muted px-4 pb-4 pt-1" style="line-height: 1.7; font-size: 0.9rem;">
-                        <strong>Symptom:</strong> Funds were deducted from the customer's account, but the invoice expired.<br><br>
-                        <strong>Resolution:</strong> Bank systems often cut off the VA exactly on the second of expiration. If the customer transfers at the last second, the bank might reject it while the funds briefly float (mengendap). The bank will usually auto-refund the customer within 1x24 hours.
-                    </div>
-                </div>
+            <p class="hc-faq-a"><strong>Answer:</strong> No. VA Dynamic transactions rely entirely on upstream bank confirmations to ensure financial integrity. Manual overrides are restricted to prevent fraud and settlement discrepancies.</p>
+        </div>
+
+        <div class="hc-faq-item">
+            <div class="hc-faq-q">
+                <i class="fas fa-question-circle text-warning"></i> 
+                <span>Issue 3: The customer paid exactly at the expiration minute, but it failed</span>
             </div>
+            <p class="hc-faq-a"><strong>Symptom:</strong> Funds were deducted from the customer's account, but the invoice expired.<br><br><strong>Resolution:</strong> Bank systems often cut off the VA exactly on the second of expiration. If the customer transfers at the last second, the bank might reject it while the funds briefly float (mengendap). The bank will usually auto-refund the customer within 1x24 hours.</p>
         </div>
 
     </div>
@@ -210,79 +207,76 @@
             </div>
         </div>
 
-        <!-- Section 1: Workflow Filtering -->
-        <div class="mb-5">
-            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-search text-primary mr-2"></i> 1. Mencari dan Memfilter Transaksi</h5>
-            <p class="text-muted mb-4">Gunakan pencarian dan filter bawaan untuk melacak pembayaran VA secara spesifik.</p>
+        <!-- Procedural Walkthrough -->
+        <h4 class="font-weight-bold mb-4 border-bottom pb-2">Procedural Walkthrough</h4>
+        
+        <div class="row hc-step-row align-items-start mb-4">
+            <div class="col-lg-12">
+                <div class="hc-step-number">1</div>
+                <h3 class="hc-step-title">Mencari dan Memfilter Transaksi</h3>
+                <p class="text-muted mb-4">Gunakan pencarian dan filter bawaan untuk melacak pembayaran VA secara spesifik.</p>
 
-            <div class="pl-4 border-left border-primary ml-2 mb-4">
-                <ol class="text-muted mb-0">
-                    <li class="mb-3"><strong>Pencarian Cepat:</strong> Ketik di kotak <em>Search by Channel, Merchant, or ID...</em> untuk memfilter tabel secara instan. Jika pelanggan memberikan bukti transfer, tempel Nomor VA di sini.</li>
-                    <li class="mb-3"><strong>Filter Lanjutan:</strong> Klik tombol <i class="fas fa-sliders-h"></i> <strong>Filters</strong> untuk membuka panel <strong>Advanced Filters</strong>.</li>
-                    <li class="mb-3">Saring parameter Anda: <strong>REQUEST DATE</strong>, <strong>MERCHANT</strong>, <strong>EXTERNAL CHANNEL</strong>, <strong>CHANNEL ID</strong>, atau <strong>STATUS</strong>.</li>
-                    <li class="mb-2">Klik area di luar dropdown untuk memuat data. Filter aktif ditandai dengan lencana merah. Klik <strong>Clear All</strong> untuk mengosongkan semua filter.</li>
-                </ol>
+                <div class="pl-4 border-left border-success ml-2 mb-4">
+                    <ol class="text-muted mb-0">
+                        <li class="mb-3"><strong>Pencarian Cepat:</strong> Ketik di kotak <em>Search by Channel, Merchant, or ID...</em> untuk memfilter tabel secara instan. Jika pelanggan memberikan bukti transfer, tempel Nomor VA di sini.</li>
+                        <li class="mb-3"><strong>Filter Lanjutan:</strong> Klik tombol <i class="fas fa-sliders-h"></i> <strong>Filters</strong> untuk membuka panel <strong>Advanced Filters</strong>.</li>
+                        <li class="mb-3">Saring parameter Anda: <strong>REQUEST DATE</strong>, <strong>MERCHANT</strong>, <strong>EXTERNAL CHANNEL</strong>, <strong>CHANNEL ID</strong>, atau <strong>STATUS</strong>.</li>
+                        <li class="mb-2">Klik area di luar dropdown untuk memuat data. Filter aktif ditandai dengan lencana merah. Klik <strong>Clear All</strong> untuk mengosongkan semua filter.</li>
+                    </ol>
+                </div>
             </div>
         </div>
 
-        <!-- Section 2: Inspecting External Log -->
-        <div class="mb-5">
-            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-satellite-dish text-success mr-2"></i> 2. Menginspeksi Log Eksternal (Payload API)</h5>
-            <p class="text-muted mb-4">Jika pelanggan sudah transfer tapi merchant mengaku webhook tidak masuk, Anda dapat menginspeksi data mentah API secara langsung dari tabel ini.</p>
+        <div class="row hc-step-row align-items-start mb-4">
+            <div class="col-lg-12">
+                <div class="hc-step-number">2</div>
+                <h3 class="hc-step-title">Menginspeksi Log Eksternal (Payload API)</h3>
+                <p class="text-muted mb-4">Jika pelanggan sudah transfer tapi merchant mengaku webhook tidak masuk, Anda dapat menginspeksi data mentah API secara langsung dari tabel ini.</p>
 
-            <div class="pl-4 border-left border-success ml-2 mb-4">
-                <ol class="text-muted mb-0">
-                    <li class="mb-3">Temukan baris transaksi yang dituju.</li>
-                    <li class="mb-3">Lihat kolom <strong>STATUS</strong>. Jika statusnya <span class="badge badge-success">PAID</span> atau <span class="badge badge-success">SUCCESS</span>, badge tersebut dapat diklik.</li>
-                    <li class="mb-3">Klik <strong>Badge Status</strong>. Jendela <em>External Log Details</em> akan muncul.</li>
-                    <li class="mb-2">Gunakan <strong>Tab REQUEST</strong> untuk melihat JSON pembuatan VA, dan <strong>Tab RESPONSE</strong> untuk melihat payload callback saat pembayaran sukses.</li>
-                </ol>
-            </div>
-
-            <div class="doc-callout callout-info shadow-sm mt-4">
-                <div class="callout-icon"><i class="fas fa-info-circle"></i></div>
-                <div class="callout-content">
-                    <strong class="d-block mb-1 text-body" style="font-size: 16px;">Restriksi Klik Badge</strong>
-                    <p class="mb-0 text-muted small">Inspektur log eksternal hanya bisa diakses untuk transaksi berhasil yang mempunyai External ID. Badge transaksi PENDING atau EXPIRED tidak dapat diklik karena belum ada callback sukses yang bisa ditampilkan.</p>
+                <div class="pl-4 border-left border-success ml-2 mb-4">
+                    <ol class="text-muted mb-0">
+                        <li class="mb-3">Temukan baris transaksi yang dituju.</li>
+                        <li class="mb-3">Lihat kolom <strong>STATUS</strong>. Jika statusnya <span class="badge badge-success">PAID</span> atau <span class="badge badge-success">SUCCESS</span>, badge tersebut dapat diklik.</li>
+                        <li class="mb-3">Klik <strong>Badge Status</strong>. Jendela <em>External Log Details</em> akan muncul.</li>
+                        <li class="mb-2">Gunakan <strong>Tab REQUEST</strong> untuk melihat JSON pembuatan VA, dan <strong>Tab RESPONSE</strong> untuk melihat payload callback saat pembayaran sukses.</li>
+                    </ol>
                 </div>
+            </div>
+        </div>
+
+        <div class="doc-callout callout-info shadow-sm mt-4 mb-5">
+            <div class="callout-icon"><i class="fas fa-info-circle"></i></div>
+            <div class="callout-content">
+                <strong class="d-block mb-1 text-body" style="font-size: 16px;">Restriksi Klik Badge</strong>
+                <p class="mb-0 text-muted small">Inspektur log eksternal hanya bisa diakses untuk transaksi berhasil yang mempunyai External ID. Badge transaksi PENDING atau EXPIRED tidak dapat diklik karena belum ada callback sukses yang bisa ditampilkan.</p>
             </div>
         </div>
 
         <!-- FAQ -->
-        <h5 class="font-weight-bold mb-4 mt-5 d-flex align-items-center"><i class="fas fa-question-circle text-warning mr-3"></i> Panduan Pemecahan Masalah (FAQ)</h5>
-        <div class="faq-accordion mb-5">
-            <div class="border-0 mb-3 border-bottom pb-2">
-                <a href="#faq_id_vad_1" data-toggle="collapse" class="d-block text-body text-decoration-none font-weight-bold pb-2">
-                    <i class="fas fa-chevron-right mr-2 text-muted" style="font-size:0.8rem;"></i> Masalah 1: Transaksi sudah dibayar tapi masih PENDING?
-                </a>
-                <div id="faq_id_vad_1" class="collapse">
-                    <div class="text-muted px-4 pb-4 pt-1" style="line-height: 1.7; font-size: 0.9rem;">
-                        <strong>Gejala:</strong> Pelanggan mengirimkan bukti struk sah, namun dasbor tetap Pending.<br><br>
-                        <strong>Resolusi:</strong> Hal ini wajar terjadi apabila callback dari bank tertunda atau gagal akibat timeout jaringan. Cek Log Eksternal; jika kosong, tunggu skrip cron dari agregator hulu menyinkronkan data secara otomatis.
-                    </div>
-                </div>
+        <h4 class="font-weight-bold mb-4 border-bottom pb-2">Panduan Pemecahan Masalah (FAQ)</h4>
+        
+        <div class="hc-faq-item">
+            <div class="hc-faq-q">
+                <i class="fas fa-question-circle text-warning"></i> 
+                <span>Masalah 1: Transaksi sudah dibayar tapi masih PENDING?</span>
             </div>
-            <div class="border-0 mb-3 border-bottom pb-2">
-                <a href="#faq_id_vad_2" data-toggle="collapse" class="d-block text-body text-decoration-none font-weight-bold pb-2">
-                    <i class="fas fa-chevron-right mr-2 text-muted" style="font-size:0.8rem;"></i> Masalah 2: Bisakah saya mengubah status PENDING jadi PAID manual?
-                </a>
-                <div id="faq_id_vad_2" class="collapse">
-                    <div class="text-muted px-4 pb-4 pt-1" style="line-height: 1.7; font-size: 0.9rem;">
-                        <strong>Jawaban:</strong> Tidak. Transaksi VA Dynamic murni bergantung pada konfirmasi sistem perbankan hulu. Akses manual dimatikan untuk menghindari penipuan (fraud) dan mencegah selisih uang masuk (settlement).
-                    </div>
-                </div>
+            <p class="hc-faq-a"><strong>Gejala:</strong> Pelanggan mengirimkan bukti struk sah, namun dasbor tetap Pending.<br><br><strong>Resolusi:</strong> Hal ini wajar terjadi apabila callback dari bank tertunda atau gagal akibat timeout jaringan. Cek Log Eksternal; jika kosong, tunggu skrip cron dari agregator hulu menyinkronkan data secara otomatis.</p>
+        </div>
+
+        <div class="hc-faq-item">
+            <div class="hc-faq-q">
+                <i class="fas fa-question-circle text-warning"></i> 
+                <span>Masalah 2: Bisakah saya mengubah status PENDING jadi PAID manual?</span>
             </div>
-            <div class="border-0 mb-3 border-bottom pb-2">
-                <a href="#faq_id_vad_3" data-toggle="collapse" class="d-block text-body text-decoration-none font-weight-bold pb-2">
-                    <i class="fas fa-chevron-right mr-2 text-muted" style="font-size:0.8rem;"></i> Masalah 3: Pelanggan bayar pas di menit kedaluwarsa tapi gagal
-                </a>
-                <div id="faq_id_vad_3" class="collapse">
-                    <div class="text-muted px-4 pb-4 pt-1" style="line-height: 1.7; font-size: 0.9rem;">
-                        <strong>Gejala:</strong> Saldo rekening pelanggan terpotong, tapi invoice malah expired.<br><br>
-                        <strong>Resolusi:</strong> Sistem bank seringkali memutus akses VA tepat di detik jatuh tempo. Jika nasabah transfer di detik terakhir, uang tersebut terlanjur masuk namun VA ditolak bank (mengendap sementara). Bank umumnya akan mengembalikan (auto-refund) dana tersebut dalam 1x24 jam.
-                    </div>
-                </div>
+            <p class="hc-faq-a"><strong>Jawaban:</strong> Tidak. Transaksi VA Dynamic murni bergantung pada konfirmasi sistem perbankan hulu. Akses manual dimatikan untuk menghindari penipuan (fraud) dan mencegah selisih uang masuk (settlement).</p>
+        </div>
+
+        <div class="hc-faq-item">
+            <div class="hc-faq-q">
+                <i class="fas fa-question-circle text-warning"></i> 
+                <span>Masalah 3: Pelanggan bayar pas di menit kedaluwarsa tapi gagal</span>
             </div>
+            <p class="hc-faq-a"><strong>Gejala:</strong> Saldo rekening pelanggan terpotong, tapi invoice malah expired.<br><br><strong>Resolusi:</strong> Sistem bank seringkali memutus akses VA tepat di detik jatuh tempo. Jika nasabah transfer di detik terakhir, uang tersebut terlanjur masuk namun VA ditolak bank (mengendap sementara). Bank umumnya akan mengembalikan (auto-refund) dana tersebut dalam 1x24 jam.</p>
         </div>
 
     </div>

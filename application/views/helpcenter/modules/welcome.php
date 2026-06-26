@@ -147,53 +147,46 @@
             </div>
         </div>
 
-        <h5 class="font-weight-bold mb-4 mt-5 d-flex align-items-center">
-            <i class="fas fa-question-circle text-warning mr-3"></i> Frequently Asked Questions
-        </h5>
+        <!-- FAQ -->
+        <h4 class="font-weight-bold mb-4 mt-5 border-bottom pb-2">Frequently Asked Questions</h4>
         
-        <div class="faq-accordion mb-5">
-            <div class="border-0 mb-3 border-bottom pb-2">
-                <a href="#faq_en_wel_1" data-toggle="collapse" class="d-block text-body text-decoration-none font-weight-bold pb-2">
-                    <i class="fas fa-chevron-right mr-2 text-muted" style="font-size:0.8rem;"></i> Why can't I see some menus in the sidebar?
-                </a>
-                <div id="faq_en_wel_1" class="collapse">
-                    <div class="text-muted px-4 pb-4 pt-1" style="line-height: 1.7; font-size: 0.9rem;">
-                        This platform uses a strict <strong>Role-Based Access Control (RBAC)</strong>. If you are assigned as a Finance Admin, you will only see menus relevant to transaction auditing. If you believe you are missing a menu, please contact your Super Admin to adjust your role access.
-                    </div>
-                </div>
+        <div class="hc-faq-item">
+            <div class="hc-faq-q">
+                <i class="fas fa-question-circle text-warning"></i> 
+                <span>Why can't I see some menus in the sidebar?</span>
             </div>
-            
-            <div class="border-0 mb-3 border-bottom pb-2">
-                <a href="#faq_en_wel_2" data-toggle="collapse" class="d-block text-body text-decoration-none font-weight-bold pb-2">
-                    <i class="fas fa-chevron-right mr-2 text-muted" style="font-size:0.8rem;"></i> How do I switch the theme (Dark/Light Mode)?
-                </a>
-                <div id="faq_en_wel_2" class="collapse">
-                    <div class="text-muted px-4 pb-4 pt-1" style="line-height: 1.7; font-size: 0.9rem;">
-                        You can toggle the aesthetic of the entire admin panel by clicking the <strong><i class="fas fa-sun"></i> / <i class="fas fa-moon"></i></strong> icon located in the top-right corner of the top navigation bar.
-                    </div>
-                </div>
+            <div class="hc-faq-a">
+                This platform uses a strict <strong>Role-Based Access Control (RBAC)</strong>. If you are assigned as a Finance Admin, you will only see menus relevant to transaction auditing. If you believe you are missing a menu, please contact your Super Admin to adjust your role access.
             </div>
-            
-            <div class="border-0 mb-3 border-bottom pb-2">
-                <a href="#faq_en_wel_3" data-toggle="collapse" class="d-block text-body text-decoration-none font-weight-bold pb-2">
-                    <i class="fas fa-chevron-right mr-2 text-muted" style="font-size:0.8rem;"></i> I forgot my password or am locked out of my account?
-                </a>
-                <div id="faq_en_wel_3" class="collapse">
-                    <div class="text-muted px-4 pb-4 pt-1" style="line-height: 1.7; font-size: 0.9rem;">
-                        For security reasons, password resets must be initiated through the <strong>Administrative Accounts</strong> menu by a Super Admin. Please contact your internal IT support or Super Admin to generate a temporary password.
-                    </div>
-                </div>
+        </div>
+
+        <div class="hc-faq-item">
+            <div class="hc-faq-q">
+                <i class="fas fa-question-circle text-warning"></i> 
+                <span>How do I switch the theme (Dark/Light Mode)?</span>
             </div>
-            
-            <div class="border-0 mb-3 border-bottom pb-2">
-                <a href="#faq_en_wel_4" data-toggle="collapse" class="d-block text-body text-decoration-none font-weight-bold pb-2">
-                    <i class="fas fa-chevron-right mr-2 text-muted" style="font-size:0.8rem;"></i> Why is my Dashboard data (charts) not updating instantly?
-                </a>
-                <div id="faq_en_wel_4" class="collapse">
-                    <div class="text-muted px-4 pb-4 pt-1" style="line-height: 1.7; font-size: 0.9rem;">
-                        To maintain system performance during high transaction volumes, aggregate data on the main Dashboard and charts is <strong>cached for 5-10 minutes</strong>. For real-time data, please check the Transaction History directly.
-                    </div>
-                </div>
+            <div class="hc-faq-a">
+                You can toggle the aesthetic of the entire admin panel by clicking the <strong><i class="fas fa-sun"></i> / <i class="fas fa-moon"></i></strong> icon located in the top-right corner of the top navigation bar.
+            </div>
+        </div>
+
+        <div class="hc-faq-item">
+            <div class="hc-faq-q">
+                <i class="fas fa-question-circle text-warning"></i> 
+                <span>I forgot my password or am locked out of my account?</span>
+            </div>
+            <div class="hc-faq-a">
+                For security reasons, password resets must be initiated through the <strong>Administrative Accounts</strong> menu by a Super Admin. Please contact your internal IT support or Super Admin to generate a temporary password.
+            </div>
+        </div>
+
+        <div class="hc-faq-item">
+            <div class="hc-faq-q">
+                <i class="fas fa-question-circle text-warning"></i> 
+                <span>Why is my Dashboard data (charts) not updating instantly?</span>
+            </div>
+            <div class="hc-faq-a">
+                To maintain system performance during high transaction volumes, aggregate data on the main Dashboard and charts is <strong>cached for 5-10 minutes</strong>. For real-time data, please check the Transaction History directly.
             </div>
         </div>
 
@@ -346,53 +339,46 @@
             </div>
         </div>
 
-        <h5 class="font-weight-bold mb-4 mt-5 d-flex align-items-center">
-            <i class="fas fa-question-circle text-warning mr-3"></i> Pertanyaan yang Sering Diajukan (FAQ)
-        </h5>
+        <!-- FAQ -->
+        <h4 class="font-weight-bold mb-4 mt-5 border-bottom pb-2">Pertanyaan yang Sering Diajukan (FAQ)</h4>
         
-        <div class="faq-accordion mb-5">
-            <div class="border-0 mb-3 border-bottom pb-2">
-                <a href="#faq_id_wel_1" data-toggle="collapse" class="d-block text-body text-decoration-none font-weight-bold pb-2">
-                    <i class="fas fa-chevron-right mr-2 text-muted" style="font-size:0.8rem;"></i> Mengapa saya tidak bisa melihat beberapa menu di sidebar?
-                </a>
-                <div id="faq_id_wel_1" class="collapse">
-                    <div class="text-muted px-4 pb-4 pt-1" style="line-height: 1.7; font-size: 0.9rem;">
-                        Platform ini menggunakan sistem <strong>Role-Based Access Control (RBAC)</strong> yang ketat. Jika Anda ditugaskan sebagai Finance Admin, Anda hanya akan melihat menu yang relevan dengan audit transaksi. Jika Anda merasa kehilangan sebuah menu, silakan hubungi Super Admin untuk menyesuaikan akses peran Anda.
-                    </div>
-                </div>
+        <div class="hc-faq-item">
+            <div class="hc-faq-q">
+                <i class="fas fa-question-circle text-warning"></i> 
+                <span>Mengapa saya tidak bisa melihat beberapa menu di sidebar?</span>
             </div>
-            
-            <div class="border-0 mb-3 border-bottom pb-2">
-                <a href="#faq_id_wel_2" data-toggle="collapse" class="d-block text-body text-decoration-none font-weight-bold pb-2">
-                    <i class="fas fa-chevron-right mr-2 text-muted" style="font-size:0.8rem;"></i> Bagaimana cara mengubah tema (Mode Gelap/Terang)?
-                </a>
-                <div id="faq_id_wel_2" class="collapse">
-                    <div class="text-muted px-4 pb-4 pt-1" style="line-height: 1.7; font-size: 0.9rem;">
-                        Anda dapat mengubah estetika seluruh panel admin dengan mengeklik ikon <strong><i class="fas fa-sun"></i> / <i class="fas fa-moon"></i></strong> yang terletak di sudut kanan atas pada bilah navigasi.
-                    </div>
-                </div>
+            <div class="hc-faq-a">
+                Platform ini menggunakan sistem <strong>Role-Based Access Control (RBAC)</strong> yang ketat. Jika Anda ditugaskan sebagai Finance Admin, Anda hanya akan melihat menu yang relevan dengan audit transaksi. Jika Anda merasa kehilangan sebuah menu, silakan hubungi Super Admin untuk menyesuaikan akses peran Anda.
             </div>
-            
-            <div class="border-0 mb-3 border-bottom pb-2">
-                <a href="#faq_id_wel_3" data-toggle="collapse" class="d-block text-body text-decoration-none font-weight-bold pb-2">
-                    <i class="fas fa-chevron-right mr-2 text-muted" style="font-size:0.8rem;"></i> Saya lupa kata sandi atau terkunci dari akun saya?
-                </a>
-                <div id="faq_id_wel_3" class="collapse">
-                    <div class="text-muted px-4 pb-4 pt-1" style="line-height: 1.7; font-size: 0.9rem;">
-                        Demi alasan keamanan, pengaturan ulang kata sandi (reset password) harus dilakukan melalui menu <strong>Administrative Accounts</strong> oleh Super Admin. Harap hubungi dukungan IT atau Super Admin Anda untuk membuat kata sandi sementara.
-                    </div>
-                </div>
+        </div>
+
+        <div class="hc-faq-item">
+            <div class="hc-faq-q">
+                <i class="fas fa-question-circle text-warning"></i> 
+                <span>Bagaimana cara mengubah tema (Mode Gelap/Terang)?</span>
             </div>
-            
-            <div class="border-0 mb-3 border-bottom pb-2">
-                <a href="#faq_id_wel_4" data-toggle="collapse" class="d-block text-body text-decoration-none font-weight-bold pb-2">
-                    <i class="fas fa-chevron-right mr-2 text-muted" style="font-size:0.8rem;"></i> Mengapa data grafik/chart di Dasbor saya tidak update langsung?
-                </a>
-                <div id="faq_id_wel_4" class="collapse">
-                    <div class="text-muted px-4 pb-4 pt-1" style="line-height: 1.7; font-size: 0.9rem;">
-                        Untuk menjaga performa sistem saat volume transaksi sedang tinggi, data agregat di Dasbor utama dan grafik <strong>disimpan di cache selama 5-10 menit</strong>. Jika Anda membutuhkan data real-time detik ini juga, silakan cek langsung di menu Transaction History.
-                    </div>
-                </div>
+            <div class="hc-faq-a">
+                Anda dapat mengubah estetika seluruh panel admin dengan mengeklik ikon <strong><i class="fas fa-sun"></i> / <i class="fas fa-moon"></i></strong> yang terletak di sudut kanan atas pada bilah navigasi.
+            </div>
+        </div>
+
+        <div class="hc-faq-item">
+            <div class="hc-faq-q">
+                <i class="fas fa-question-circle text-warning"></i> 
+                <span>Saya lupa kata sandi atau terkunci dari akun saya?</span>
+            </div>
+            <div class="hc-faq-a">
+                Demi alasan keamanan, pengaturan ulang kata sandi (reset password) harus dilakukan melalui menu <strong>Administrative Accounts</strong> oleh Super Admin. Harap hubungi dukungan IT atau Super Admin Anda untuk membuat kata sandi sementara.
+            </div>
+        </div>
+
+        <div class="hc-faq-item">
+            <div class="hc-faq-q">
+                <i class="fas fa-question-circle text-warning"></i> 
+                <span>Mengapa data grafik/chart di Dasbor saya tidak update langsung?</span>
+            </div>
+            <div class="hc-faq-a">
+                Untuk menjaga performa sistem saat volume transaksi sedang tinggi, data agregat di Dasbor utama dan grafik <strong>disimpan di cache selama 5-10 menit</strong>. Jika Anda membutuhkan data real-time detik ini juga, silakan cek langsung di menu Transaction History.
             </div>
         </div>
 

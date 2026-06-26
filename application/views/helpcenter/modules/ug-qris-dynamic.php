@@ -66,76 +66,75 @@
             </div>
         </div>
 
-        <!-- Section 1: Workflow Filtering -->
-        <div class="mb-5">
-            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-search text-primary mr-2"></i> 1. Search and Filter Transactions</h5>
-            <p class="text-muted mb-4">Because dynamic QR codes are generated for every single checkout session, this table grows rapidly. Use the built-in tools to locate specific data.</p>
+        <!-- Procedural Walkthrough -->
+        <h4 class="font-weight-bold mb-4 border-bottom pb-2">Procedural Walkthrough</h4>
+        
+        <div class="row hc-step-row align-items-start mb-4">
+            <div class="col-lg-12">
+                <div class="hc-step-number">1</div>
+                <h3 class="hc-step-title">Searching and Filtering Transactions</h3>
+                <p class="text-muted mb-4">Because dynamic QR codes are generated for every single checkout session, this table grows rapidly. Use the built-in tools to locate specific data.</p>
 
-            <div class="pl-4 border-left border-primary ml-2 mb-4">
-                <ol class="text-muted mb-0">
-                    <li class="mb-3"><strong>Quick Search:</strong> Type in the <em>Search by Channel, Merchant, or ID...</em> box to instantly filter the table. Extremely useful if a merchant gives you their `Merchant Trans ID`.</li>
-                    <li class="mb-3"><strong>Advanced Filters:</strong> Click the <i class="fas fa-sliders-h"></i> <strong>Filters</strong> button to open the <strong>Advanced Filters</strong> panel.</li>
-                    <li class="mb-3">Configure your parameters: <strong>REQUEST DATE</strong>, <strong>MERCHANT</strong>, <strong>EXTERNAL CHANNEL</strong>, <strong>CHANNEL ID</strong>, or <strong>STATUS</strong>.</li>
-                    <li class="mb-2">Click the area outside the dropdown to load the data. Active filters are indicated by a red badge number. Click <strong>Clear All</strong> to clear all filters.</li>
-                </ol>
+                <div class="pl-4 border-left border-success ml-2 mb-4">
+                    <ol class="text-muted mb-0">
+                        <li class="mb-3"><strong>Quick Search:</strong> Type in the <em>Search by Channel, Merchant, or ID...</em> box to instantly filter the table. Extremely useful if a merchant gives you their `Merchant Trans ID`.</li>
+                        <li class="mb-3"><strong>Advanced Filters:</strong> Click the <i class="fas fa-sliders-h"></i> <strong>Filters</strong> button to open the <strong>Advanced Filters</strong> panel.</li>
+                        <li class="mb-3">Configure your parameters: <strong>REQUEST DATE</strong>, <strong>MERCHANT</strong>, <strong>EXTERNAL CHANNEL</strong>, <strong>CHANNEL ID</strong>, or <strong>STATUS</strong>.</li>
+                        <li class="mb-2">Click the area outside the dropdown to load the data. Active filters are indicated by a red badge number. Click <strong>Clear All</strong> to clear all filters.</li>
+                    </ol>
+                </div>
             </div>
         </div>
 
-        <!-- Section 2: Inspecting External Log -->
-        <div class="mb-5">
-            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-satellite-dish text-success mr-2"></i> 2. Inspecting the External Log (API Payloads)</h5>
-            <p class="text-muted mb-4">If a transaction succeeds but the merchant claims their webhook callback failed, you can inspect the raw API data directly from this table.</p>
+        <div class="row hc-step-row align-items-start mb-4">
+            <div class="col-lg-12">
+                <div class="hc-step-number">2</div>
+                <h3 class="hc-step-title">Inspecting the External Log (API Payloads)</h3>
+                <p class="text-muted mb-4">If a transaction succeeds but the merchant claims their webhook callback failed, you can inspect the raw API data directly from this table.</p>
 
-            <div class="pl-4 border-left border-success ml-2 mb-4">
-                <ol class="text-muted mb-0">
-                    <li class="mb-3">Find the transaction row you want to inspect.</li>
-                    <li class="mb-3">Look at the <strong>STATUS</strong> column. If it shows <span class="badge badge-success">PAID</span> or <span class="badge badge-success">SUCCESS</span>, click the badge.</li>
-                    <li class="mb-2">In the <em>External Log Details</em> modal, use the <strong>REQUEST Tab</strong> to view the JSON sent to generate the QR, and the <strong>RESPONSE Tab</strong> for the settlement callback.</li>
-                </ol>
-            </div>
-
-            <div class="doc-callout callout-info shadow-sm mt-4">
-                <div class="callout-icon"><i class="fas fa-info-circle"></i></div>
-                <div class="callout-content">
-                    <strong class="d-block mb-1 text-body" style="font-size: 16px;">Clickable Badges Restriction</strong>
-                    <p class="mb-0 text-muted small">The external log inspector is only available for successful transactions that have an associated External ID. Badges for PENDING or EXPIRED transactions are not clickable because there is no success callback to display.</p>
+                <div class="pl-4 border-left border-success ml-2 mb-4">
+                    <ol class="text-muted mb-0">
+                        <li class="mb-3">Find the transaction row you want to inspect.</li>
+                        <li class="mb-3">Look at the <strong>STATUS</strong> column. If it shows <span class="badge badge-success">PAID</span> or <span class="badge badge-success">SUCCESS</span>, click the badge.</li>
+                        <li class="mb-2">In the <em>External Log Details</em> modal, use the <strong>REQUEST Tab</strong> to view the JSON sent to generate the QR, and the <strong>RESPONSE Tab</strong> for the settlement callback.</li>
+                    </ol>
                 </div>
+            </div>
+        </div>
+
+        <div class="doc-callout callout-info shadow-sm mt-4 mb-5">
+            <div class="callout-icon"><i class="fas fa-info-circle"></i></div>
+            <div class="callout-content">
+                <strong class="d-block mb-1 text-body" style="font-size: 16px;">Clickable Badges Restriction</strong>
+                <p class="mb-0 text-muted small">The external log inspector is only available for successful transactions that have an associated External ID. Badges for PENDING or EXPIRED transactions are not clickable because there is no success callback to display.</p>
             </div>
         </div>
 
         <!-- FAQ -->
-        <h5 class="font-weight-bold mb-4 mt-5 d-flex align-items-center"><i class="fas fa-question-circle text-warning mr-3"></i> Common Issues &amp; Troubleshooting</h5>
-        <div class="faq-accordion mb-5">
-            <div class="border-0 mb-3 border-bottom pb-2">
-                <a href="#faq_en_qrd_1" data-toggle="collapse" class="d-block text-body text-decoration-none font-weight-bold pb-2">
-                    <i class="fas fa-chevron-right mr-2 text-muted" style="font-size:0.8rem;"></i> Issue 1: Customer scanned the QRIS but it says "Invalid QR"
-                </a>
-                <div id="faq_en_qrd_1" class="collapse">
-                    <div class="text-muted px-4 pb-4 pt-1" style="line-height: 1.7; font-size: 0.9rem;">
-                        <strong>Resolution:</strong> Dynamic QRIS codes have a hard expiration time. If the customer attempts to scan an expired QR code, their banking or e-wallet app will reject it immediately. They must go back to the merchant and generate a new checkout session.
-                    </div>
-                </div>
+        <h4 class="font-weight-bold mb-4 border-bottom pb-2">Common Issues &amp; Troubleshooting</h4>
+        
+        <div class="hc-faq-item">
+            <div class="hc-faq-q">
+                <i class="fas fa-question-circle text-warning"></i> 
+                <span>Issue 1: Customer scanned the QRIS but it says "Invalid QR"</span>
             </div>
-            <div class="border-0 mb-3 border-bottom pb-2">
-                <a href="#faq_en_qrd_2" data-toggle="collapse" class="d-block text-body text-decoration-none font-weight-bold pb-2">
-                    <i class="fas fa-chevron-right mr-2 text-muted" style="font-size:0.8rem;"></i> Issue 2: Can a customer edit the payment amount?
-                </a>
-                <div id="faq_en_qrd_2" class="collapse">
-                    <div class="text-muted px-4 pb-4 pt-1" style="line-height: 1.7; font-size: 0.9rem;">
-                        <strong>Answer:</strong> No. Dynamic QRIS has the exact invoice amount securely embedded into the QR string. When scanned, the customer's e-wallet will lock the input field to that specific amount, preventing underpayments or overpayments.
-                    </div>
-                </div>
+            <p class="hc-faq-a"><strong>Resolution:</strong> Dynamic QRIS codes have a hard expiration time. If the customer attempts to scan an expired QR code, their banking or e-wallet app will reject it immediately. They must go back to the merchant and generate a new checkout session.</p>
+        </div>
+
+        <div class="hc-faq-item">
+            <div class="hc-faq-q">
+                <i class="fas fa-question-circle text-warning"></i> 
+                <span>Issue 2: Can a customer edit the payment amount?</span>
             </div>
-            <div class="border-0 mb-3 border-bottom pb-2">
-                <a href="#faq_en_qrd_3" data-toggle="collapse" class="d-block text-body text-decoration-none font-weight-bold pb-2">
-                    <i class="fas fa-chevron-right mr-2 text-muted" style="font-size:0.8rem;"></i> Issue 3: Is the MDR fee deducted instantly?
-                </a>
-                <div id="faq_en_qrd_3" class="collapse">
-                    <div class="text-muted px-4 pb-4 pt-1" style="line-height: 1.7; font-size: 0.9rem;">
-                        <strong>Answer:</strong> Yes. QRIS transactions use a nett-settlement model. The moment a transaction is marked PAID, the merchant's Available Balance will be credited with the gross amount minus the applicable MDR and any fixed platform fees.
-                    </div>
-                </div>
+            <p class="hc-faq-a"><strong>Answer:</strong> No. Dynamic QRIS has the exact invoice amount securely embedded into the QR string. When scanned, the customer's e-wallet will lock the input field to that specific amount, preventing underpayments or overpayments.</p>
+        </div>
+
+        <div class="hc-faq-item">
+            <div class="hc-faq-q">
+                <i class="fas fa-question-circle text-warning"></i> 
+                <span>Issue 3: Is the MDR fee deducted instantly?</span>
             </div>
+            <p class="hc-faq-a"><strong>Answer:</strong> Yes. QRIS transactions use a nett-settlement model. The moment a transaction is marked PAID, the merchant's Available Balance will be credited with the gross amount minus the applicable MDR and any fixed platform fees.</p>
         </div>
 
     </div>
@@ -207,76 +206,75 @@
             </div>
         </div>
 
-        <!-- Section 1: Workflow Filtering -->
-        <div class="mb-5">
-            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-search text-primary mr-2"></i> 1. Mencari dan Memfilter Transaksi</h5>
-            <p class="text-muted mb-4">Karena kode QR dinamis dibuat untuk setiap sesi checkout satuan, tabel ini akan berkembang dengan cepat. Gunakan alat bawaan untuk menemukan data dengan akurat.</p>
+        <!-- Procedural Walkthrough -->
+        <h4 class="font-weight-bold mb-4 border-bottom pb-2">Procedural Walkthrough</h4>
+        
+        <div class="row hc-step-row align-items-start mb-4">
+            <div class="col-lg-12">
+                <div class="hc-step-number">1</div>
+                <h3 class="hc-step-title">Mencari dan Memfilter Transaksi</h3>
+                <p class="text-muted mb-4">Karena kode QR dinamis dibuat untuk setiap sesi checkout satuan, tabel ini akan berkembang dengan cepat. Gunakan alat bawaan untuk menemukan data dengan akurat.</p>
 
-            <div class="pl-4 border-left border-primary ml-2 mb-4">
-                <ol class="text-muted mb-0">
-                    <li class="mb-3"><strong>Pencarian Cepat:</strong> Ketik di kotak <em>Search by Channel, Merchant, or ID...</em> untuk memfilter tabel secara instan. Sangat berguna bila merchant memberi Anda `Merchant Trans ID` mereka.</li>
-                    <li class="mb-3"><strong>Filter Lanjutan:</strong> Klik tombol <i class="fas fa-sliders-h"></i> <strong>Filters</strong> untuk membuka panel <strong>Advanced Filters</strong>.</li>
-                    <li class="mb-3">Saring parameter Anda: <strong>REQUEST DATE</strong>, <strong>MERCHANT</strong>, <strong>EXTERNAL CHANNEL</strong>, <strong>CHANNEL ID</strong>, atau <strong>STATUS</strong>.</li>
-                    <li class="mb-2">Klik area di luar dropdown untuk memuat data. Filter aktif ditandai dengan lencana merah. Klik <strong>Clear All</strong> untuk mengosongkan semua filter.</li>
-                </ol>
+                <div class="pl-4 border-left border-success ml-2 mb-4">
+                    <ol class="text-muted mb-0">
+                        <li class="mb-3"><strong>Pencarian Cepat:</strong> Ketik di kotak <em>Search by Channel, Merchant, or ID...</em> untuk memfilter tabel secara instan. Sangat berguna bila merchant memberi Anda `Merchant Trans ID` mereka.</li>
+                        <li class="mb-3"><strong>Filter Lanjutan:</strong> Klik tombol <i class="fas fa-sliders-h"></i> <strong>Filters</strong> untuk membuka panel <strong>Advanced Filters</strong>.</li>
+                        <li class="mb-3">Saring parameter Anda: <strong>REQUEST DATE</strong>, <strong>MERCHANT</strong>, <strong>EXTERNAL CHANNEL</strong>, <strong>CHANNEL ID</strong>, atau <strong>STATUS</strong>.</li>
+                        <li class="mb-2">Klik area di luar dropdown untuk memuat data. Filter aktif ditandai dengan lencana merah. Klik <strong>Clear All</strong> untuk mengosongkan semua filter.</li>
+                    </ol>
+                </div>
             </div>
         </div>
 
-        <!-- Section 2: Inspecting External Log -->
-        <div class="mb-5">
-            <h5 class="font-weight-bold mb-4 d-flex align-items-center"><i class="fas fa-satellite-dish text-success mr-2"></i> 2. Menginspeksi Log Eksternal (Payload API)</h5>
-            <p class="text-muted mb-4">Jika transaksi sukses namun merchant komplain webhook mereka gagal, Anda dapat menginspeksi data mentah API secara langsung untuk verifikasi.</p>
+        <div class="row hc-step-row align-items-start mb-4">
+            <div class="col-lg-12">
+                <div class="hc-step-number">2</div>
+                <h3 class="hc-step-title">Menginspeksi Log Eksternal (Payload API)</h3>
+                <p class="text-muted mb-4">Jika transaksi sukses namun merchant komplain webhook mereka gagal, Anda dapat menginspeksi data mentah API secara langsung untuk verifikasi.</p>
 
-            <div class="pl-4 border-left border-success ml-2 mb-4">
-                <ol class="text-muted mb-0">
-                    <li class="mb-3">Cari baris transaksi yang dituju.</li>
-                    <li class="mb-3">Cek kolom <strong>STATUS</strong>. Jika terbaca <span class="badge badge-success">PAID</span> atau <span class="badge badge-success">SUCCESS</span>, klik badge tersebut.</li>
-                    <li class="mb-2">Pada modal <em>External Log Details</em>, pakai <strong>Tab REQUEST</strong> untuk melihat JSON pembuatan QR, dan <strong>Tab RESPONSE</strong> untuk melihat payload callback saat dibayar.</li>
-                </ol>
-            </div>
-
-            <div class="doc-callout callout-info shadow-sm mt-4">
-                <div class="callout-icon"><i class="fas fa-info-circle"></i></div>
-                <div class="callout-content">
-                    <strong class="d-block mb-1 text-body" style="font-size: 16px;">Restriksi Klik Badge</strong>
-                    <p class="mb-0 text-muted small">Inspektur log eksternal murni ditujukan untuk transaksi berhasil yang mempunyai External ID. Badge untuk transaksi PENDING/EXPIRED dimatikan karena belum ada callback sukses yang dicatat.</p>
+                <div class="pl-4 border-left border-success ml-2 mb-4">
+                    <ol class="text-muted mb-0">
+                        <li class="mb-3">Cari baris transaksi yang dituju.</li>
+                        <li class="mb-3">Cek kolom <strong>STATUS</strong>. Jika terbaca <span class="badge badge-success">PAID</span> atau <span class="badge badge-success">SUCCESS</span>, klik badge tersebut.</li>
+                        <li class="mb-2">Pada modal <em>External Log Details</em>, pakai <strong>Tab REQUEST</strong> untuk melihat JSON pembuatan QR, dan <strong>Tab RESPONSE</strong> untuk melihat payload callback saat dibayar.</li>
+                    </ol>
                 </div>
+            </div>
+        </div>
+
+        <div class="doc-callout callout-info shadow-sm mt-4 mb-5">
+            <div class="callout-icon"><i class="fas fa-info-circle"></i></div>
+            <div class="callout-content">
+                <strong class="d-block mb-1 text-body" style="font-size: 16px;">Restriksi Klik Badge</strong>
+                <p class="mb-0 text-muted small">Inspektur log eksternal murni ditujukan untuk transaksi berhasil yang mempunyai External ID. Badge untuk transaksi PENDING/EXPIRED dimatikan karena belum ada callback sukses yang dicatat.</p>
             </div>
         </div>
 
         <!-- FAQ -->
-        <h5 class="font-weight-bold mb-4 mt-5 d-flex align-items-center"><i class="fas fa-question-circle text-warning mr-3"></i> Panduan Pemecahan Masalah (FAQ)</h5>
-        <div class="faq-accordion mb-5">
-            <div class="border-0 mb-3 border-bottom pb-2">
-                <a href="#faq_id_qrd_1" data-toggle="collapse" class="d-block text-body text-decoration-none font-weight-bold pb-2">
-                    <i class="fas fa-chevron-right mr-2 text-muted" style="font-size:0.8rem;"></i> Masalah 1: Pelanggan scan QRIS tapi muncul "QR Tidak Valid"
-                </a>
-                <div id="faq_id_qrd_1" class="collapse">
-                    <div class="text-muted px-4 pb-4 pt-1" style="line-height: 1.7; font-size: 0.9rem;">
-                        <strong>Resolusi:</strong> Kode QRIS Dinamis memiliki batas waktu yang ketat. Jika pelanggan mencoba scan kode QR yang sudah expired, aplikasi perbankan mereka otomatis akan menolaknya. Pelanggan wajib mengulang checkout di website merchant.
-                    </div>
-                </div>
+        <h4 class="font-weight-bold mb-4 border-bottom pb-2">Panduan Pemecahan Masalah (FAQ)</h4>
+        
+        <div class="hc-faq-item">
+            <div class="hc-faq-q">
+                <i class="fas fa-question-circle text-warning"></i> 
+                <span>Masalah 1: Pelanggan scan QRIS tapi muncul "QR Tidak Valid"</span>
             </div>
-            <div class="border-0 mb-3 border-bottom pb-2">
-                <a href="#faq_id_qrd_2" data-toggle="collapse" class="d-block text-body text-decoration-none font-weight-bold pb-2">
-                    <i class="fas fa-chevron-right mr-2 text-muted" style="font-size:0.8rem;"></i> Masalah 2: Bisakah pelanggan mengedit nominal bayar?
-                </a>
-                <div id="faq_id_qrd_2" class="collapse">
-                    <div class="text-muted px-4 pb-4 pt-1" style="line-height: 1.7; font-size: 0.9rem;">
-                        <strong>Jawaban:</strong> Tidak. QRIS Dinamis memiliki jumlah tagihan yang tertanam permanen di dalam string QR tersebut. Saat di-scan, aplikasi e-wallet pelanggan akan mengunci nominal tersebut, mencegah kurang bayar atau lebih bayar.
-                    </div>
-                </div>
+            <p class="hc-faq-a"><strong>Resolusi:</strong> Kode QRIS Dinamis memiliki batas waktu yang ketat. Jika pelanggan mencoba scan kode QR yang sudah expired, aplikasi perbankan mereka otomatis akan menolaknya. Pelanggan wajib mengulang checkout di website merchant.</p>
+        </div>
+
+        <div class="hc-faq-item">
+            <div class="hc-faq-q">
+                <i class="fas fa-question-circle text-warning"></i> 
+                <span>Masalah 2: Bisakah pelanggan mengedit nominal bayar?</span>
             </div>
-            <div class="border-0 mb-3 border-bottom pb-2">
-                <a href="#faq_id_qrd_3" data-toggle="collapse" class="d-block text-body text-decoration-none font-weight-bold pb-2">
-                    <i class="fas fa-chevron-right mr-2 text-muted" style="font-size:0.8rem;"></i> Masalah 3: Apakah biaya MDR langsung dipotong (nett-settled)?
-                </a>
-                <div id="faq_id_qrd_3" class="collapse">
-                    <div class="text-muted px-4 pb-4 pt-1" style="line-height: 1.7; font-size: 0.9rem;">
-                        <strong>Jawaban:</strong> Ya. Seluruh transaksi QRIS kita menggunakan model nett-settlement. Saat transaksi berstatus PAID, Saldo Aktif merchant otomatis bertambah sebesar nominal kotor dikurangi biaya MDR dan biaya layanan sistem.
-                    </div>
-                </div>
+            <p class="hc-faq-a"><strong>Jawaban:</strong> Tidak. QRIS Dinamis memiliki jumlah tagihan yang tertanam permanen di dalam string QR tersebut. Saat di-scan, aplikasi e-wallet pelanggan akan mengunci nominal tersebut, mencegah kurang bayar atau lebih bayar.</p>
+        </div>
+
+        <div class="hc-faq-item">
+            <div class="hc-faq-q">
+                <i class="fas fa-question-circle text-warning"></i> 
+                <span>Masalah 3: Apakah biaya MDR langsung dipotong (nett-settled)?</span>
             </div>
+            <p class="hc-faq-a"><strong>Jawaban:</strong> Ya. Seluruh transaksi QRIS kita menggunakan model nett-settlement. Saat transaksi berstatus PAID, Saldo Aktif merchant otomatis bertambah sebesar nominal kotor dikurangi biaya MDR dan biaya layanan sistem.</p>
         </div>
 
     </div>
