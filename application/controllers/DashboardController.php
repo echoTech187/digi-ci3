@@ -11,6 +11,7 @@ class DashboardController extends CI_Controller
       $this->load->model('Model_user');
       $this->load->model('Model_menu');
       $this->load->model('Mutation_model');
+      $this->load->model('NotificationModel');
 
       is_logged_in();
    }
@@ -310,6 +311,20 @@ class DashboardController extends CI_Controller
          else { $this->Merchant->setActiveMerchantsOpenApiStatus('Active'); $this->Merchant->setMaintenanceStatus('Active'); $message = 'Maintenance OFF'; $action = 'Maintenance OFF'; }
          $email = $this->session->userdata('c_email') ?: 'Unknown';
          $this->db->insert('maintenance_log', ['username' => $email, 'action' => $action, 'status_set' => $status, 'timestamp' => date('Y-m-d H:i:s')]);
+
+         // ── Notifikasi Maintenance ───────────────────────────────────
+         $notif_title   = $status === 'Not Active' ? 'Maintenance Mode Aktif' : 'Maintenance Mode Dinonaktifkan';
+         $notif_message = $status === 'Not Active'
+             ? 'Maintenance mode diaktifkan oleh ' . $email . '. Semua transaksi merchant dinonaktifkan sementara.'
+             : 'Maintenance mode dinonaktifkan oleh ' . $email . '. Transaksi merchant kembali aktif.';
+         $this->NotificationModel->insert_notification(
+             'maintenance',
+             $notif_title,
+             $notif_message,
+             ['admin_email' => $email, 'status' => $status, 'action' => $action]
+         );
+         // ───────────────────────────────────────────────
+
          echo json_encode(['message' => $message]);
       } else show_404();
    }

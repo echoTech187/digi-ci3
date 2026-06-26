@@ -190,7 +190,45 @@
                     </button>
                 </li>
 
+                <!-- ── Bell Notification ─────────────────────────── -->
+                <li class="nav-item dropdown no-arrow mx-1" id="notificationNavItem">
+                    <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button"
+                       data-toggle="dropdown" data-boundary="viewport" aria-haspopup="true" aria-expanded="false"
+                       style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-bell fa-fw text-gray-500"></i>
+                        <!-- Badge merah: disembunyikan jika 0 -->
+                        <span class="badge badge-danger badge-counter" id="notifBadge" style="display:none;">0</span>
+                    </a>
+                    <!-- Dropdown -->
+                    <div class="dropdown-list dropdown-menu dropdown-menu-right shadow-lg border-0 animated--grow-in p-0 overflow-hidden notif-dropdown-menu"
+                         aria-labelledby="alertsDropdown"
+                         style="border-radius: 16px; width: 360px; max-height: 480px;">
+
+                        <!-- Header -->
+                        <div class="d-flex align-items-center justify-content-between px-4 py-3 border-bottom"
+                             style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                            <h6 class="m-0 font-weight-bold text-white">
+                                <i class="fas fa-bell mr-2"></i>Notifikasi
+                            </h6>
+                            <button id="notifMarkAllBtn" class="btn btn-sm btn-link text-white p-0"
+                                    style="font-size: 11px; opacity: 0.85; text-decoration: none;" title="Tandai semua sudah dibaca">
+                                <i class="fas fa-check-double mr-1"></i>Semua Dibaca
+                            </button>
+                        </div>
+
+                        <!-- List notifikasi (di-render JS) -->
+                        <div id="notifList" style="overflow-y: auto; flex: 1;">
+                            <div class="text-center py-4 text-muted" id="notifEmpty">
+                                <i class="fas fa-bell-slash fa-2x mb-2 d-block opacity-50"></i>
+                                <span style="font-size: 13px;">Tidak ada notifikasi</span>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <!-- ────────────────────────────────────────────────── -->
+
                 <div class="topbar-divider d-none d-sm-block" style="height: 24px; border-left: 1px solid rgba(0,0,0,0.08);"></div>
+
 
                 <!-- Nav Item - User Information -->
                 <li class="nav-item dropdown no-arrow ">
@@ -691,7 +729,121 @@
                             // If dismissed/cancelled, toggle stays reverted (originalState)
                         });
                     });
-                }
+                // ── Notification Bell System ─────────────────────────────────
+                (function () {
+                    const BASE = '<?= base_url() ?>';
+                    const badge    = document.getElementById('notifBadge');
+                    const listEl   = document.getElementById('notifList');
+                    const emptyEl  = document.getElementById('notifEmpty');
+                    const markBtn  = document.getElementById('notifMarkAllBtn');
+                    const bellDrop = document.getElementById('alertsDropdown');
+
+                    // ── Render satu item notifikasi ──────────────────────────
+                    function renderItem(n) {
+                        const colorMap = { maintenance: '#0ea5e9', login_new_ip: '#f59e0b', dlq_failed: '#ef4444' };
+                        const bgMap    = { maintenance: 'rgba(14,165,233,.08)', login_new_ip: 'rgba(245,158,11,.08)', dlq_failed: 'rgba(239,68,68,.08)' };
+                        const color    = colorMap[n.type]  || '#6b7280';
+                        const bg       = bgMap[n.type]     || 'rgba(107,114,128,.06)';
+                        const unreadDot = n.is_read ? '' : '<span style="width:7px;height:7px;border-radius:50%;background:#ef4444;flex-shrink:0;margin-top:4px;"></span>';
+
+                        return `
+                        <div class="notif-item d-flex align-items-start px-4 py-3 border-bottom"
+                             data-id="${n.id}" style="cursor:pointer; gap:12px; transition:background .15s;
+                             background:${n.is_read ? 'transparent' : bg};"
+                             onmouseenter="this.style.background='rgba(0,0,0,.04)'"
+                             onmouseleave="this.style.background='${n.is_read ? 'transparent' : bg}'"
+                             onclick="notifMarkRead(${n.id}, this)">
+                            <div style="width:36px;height:36px;border-radius:10px;background:${bg};border:1px solid ${color}22;
+                                        display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                <i class="${n.icon}" style="color:${color};font-size:14px;"></i>
+                            </div>
+                            <div style="flex:1;min-width:0;">
+                                <p class="font-weight-bold mb-0 text-truncate" style="font-size:13px;">${n.title}</p>
+                                <p class="text-muted mb-0" style="font-size:11px;line-height:1.4;white-space:normal;">${n.message}</p>
+                                <span class="text-muted" style="font-size:10px;"><i class="fas fa-clock mr-1"></i>${n.time_ago}</span>
+                            </div>
+                            ${unreadDot}
+                        </div>`;
+                    }
+
+                    // ── Update badge ─────────────────────────────────────────
+                    function updateBadge(count) {
+                        if (count > 0) {
+                            badge.textContent = count > 99 ? '99+' : count;
+                            badge.style.display = '';
+                        } else {
+                            badge.style.display = 'none';
+                        }
+                    }
+
+                    // ── Poll: hanya ambil count (ringan, setiap 30 detik) ────
+                    function pollCount() {
+                        fetch(BASE + 'notifications/count', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                            .then(r => r.json())
+                            .then(d => updateBadge(d.unread || 0))
+                            .catch(() => {}); // silent fail
+                    }
+
+                    // ── Fetch list saat dropdown dibuka ──────────────────────
+                    function fetchList() {
+                        listEl.innerHTML = '<div class="text-center py-4"><i class="fas fa-spinner fa-spin text-muted"></i></div>';
+                        fetch(BASE + 'notifications/list', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                            .then(r => r.json())
+                            .then(d => {
+                                updateBadge(d.unread || 0);
+                                if (!d.items || d.items.length === 0) {
+                                    listEl.innerHTML = '<div class="text-center py-4 text-muted"><i class="fas fa-bell-slash fa-2x mb-2 d-block opacity-50"></i><span style="font-size:13px;">Tidak ada notifikasi</span></div>';
+                                } else {
+                                    listEl.innerHTML = d.items.map(renderItem).join('');
+                                }
+                            })
+                            .catch(() => {
+                                listEl.innerHTML = '<div class="text-center py-3 text-danger" style="font-size:12px;"><i class="fas fa-exclamation-circle mr-1"></i>Gagal memuat notifikasi</div>';
+                            });
+                    }
+
+                    // ── Mark single as read ──────────────────────────────────
+                    window.notifMarkRead = function(id, el) {
+                        fetch(BASE + 'notifications/read/' + id, {
+                            method: 'POST',
+                            headers: { 'X-Requested-With': 'XMLHttpRequest', 'Content-Type': 'application/x-www-form-urlencoded' },
+                            body: 'id=' + id
+                        }).then(r => r.json()).then(d => {
+                            updateBadge(d.unread || 0);
+                            // Hapus unread dot & reset background
+                            const dot = el.querySelector('span[style*="border-radius:50%"]');
+                            if (dot) dot.remove();
+                            el.style.background = 'transparent';
+                            el.onmouseleave = function() { this.style.background = 'transparent'; };
+                        }).catch(() => {});
+                    };
+
+                    // ── Mark all as read ─────────────────────────────────────
+                    if (markBtn) {
+                        markBtn.addEventListener('click', function (e) {
+                            e.stopPropagation();
+                            fetch(BASE + 'notifications/read-all', {
+                                method: 'POST',
+                                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                            }).then(r => r.json()).then(() => {
+                                updateBadge(0);
+                                fetchList();
+                            }).catch(() => {});
+                        });
+                    }
+
+                    // ── Buka dropdown → fetch list ────────────────────────────
+                    if (bellDrop) {
+                        bellDrop.addEventListener('click', function () {
+                            setTimeout(fetchList, 50); // setelah dropdown animasi
+                        });
+                    }
+
+                    // ── Jalankan polling ─────────────────────────────────────
+                    pollCount();                      // langsung saat load
+                    setInterval(pollCount, 30000);    // setiap 30 detik
+                })();
+                // ─────────────────────────────────────────────────────────────
             });
             </script>
 

@@ -283,5 +283,12 @@ $route['product/create'] = 'ServiceController/createProduk';
 $route['product/update'] = 'ServiceController/updateProduct';
 $route['product/delete/(:any)'] = 'ServiceController/deleteProduct/$1';
 
+// ── NotificationController ─────────────────────────────────────────────
+$route['notifications/count']        = 'NotificationController/count';
+$route['notifications/list']         = 'NotificationController/list';
+$route['notifications/read/(:num)']  = 'NotificationController/read/$1';
+$route['notifications/read-all']     = 'NotificationController/read_all';
+$route['notifications/push-dlq']     = 'NotificationController/push_dlq';
+
 // ── HealthCheck ─────────────────────────────────────────────
 $route['health/db-check'] = 'HealthController/dbCheck';

@@ -6,6 +6,7 @@ class AuthController extends CI_Controller
     {
         parent::__construct();
         $this->config->load('secrets', TRUE, TRUE);
+        $this->load->model('NotificationModel');
     }
 
     public function index()
@@ -95,7 +96,27 @@ class AuthController extends CI_Controller
                     // Clear any stale RBAC cache for this session
                     $this->load->library('rbac');
                     $this->rbac->clear_menu_cache();
-                    
+
+                    // ── Deteksi Login dari IP Baru ────────────────────────────
+                    $login_ip = $this->input->ip_address();
+                    $is_new_ip = !$this->NotificationModel->is_known_ip($admin['id'], $login_ip);
+                    // Daftarkan IP (insert baru atau update last_seen)
+                    $this->NotificationModel->register_ip($admin['id'], $login_ip);
+                    if ($is_new_ip) {
+                        $this->NotificationModel->insert_notification(
+                            'login_new_ip',
+                            'Login dari IP Baru',
+                            'Admin ' . $admin['c_name'] . ' (' . $admin['c_email'] . ') login dari IP yang belum pernah digunakan sebelumnya: ' . $login_ip,
+                            [
+                                'admin_id'    => $admin['id'],
+                                'admin_name'  => $admin['c_name'],
+                                'admin_email' => $admin['c_email'],
+                                'ip_address'  => $login_ip,
+                            ]
+                        );
+                    }
+                    // ─────────────────────────────────────────────────────────
+
                     $this->_redirect_based_on_access($admin['role_id']);
                 } else {
                    
