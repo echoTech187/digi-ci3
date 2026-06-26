@@ -61,12 +61,12 @@ class ServiceController extends CI_Controller {
     }
 
     public function pulsa_reguler() {
-        $where = array('cc.c_cashoutGroup' => 'ppob', "cc.c_cashoutGroup2 LIKE '%pulsa%' ESCAPE '!'" => NULL);
+        $where = array('cc.c_channelGroup' => 'ppob', "cc.c_channelGroup2 LIKE '%pulsa%' ESCAPE '!'" => NULL);
         $this->_render_product_datatable($where, 'pulsa_reguler', 'Pulsa Reguler', true);
     }
 
     public function paket_data() {
-        $where = array('cc.c_cashoutGroup' => 'ppob', "cc.c_channelGroup2 LIKE '%paket_data%' ESCAPE '!'" => NULL);
+        $where = array('cc.c_channelGroup' => 'ppob', "cc.c_channelGroup2 LIKE '%paket_data%' ESCAPE '!'" => NULL);
         $this->_render_product_datatable($where, 'paket_data', 'Paket Data', true);
     }
 
