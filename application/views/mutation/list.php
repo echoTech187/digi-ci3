@@ -164,9 +164,8 @@ $download_url = base_url('finance/mutation/download')
                         <th>Position</th>
                         <th>Channel</th>
                         <th>Description</th>
-                        <th class="text-right">Balance Before</th>
                         <th class="text-right">Amount</th>
-                        <th class="text-right">Balance After</th>
+                        <th class="text-right">Balance</th>
                     </tr>
                 </thead>
                 <tbody></tbody>
@@ -252,13 +251,6 @@ $(document).ready(function() {
         { 
             data: 'description',
             className: 'small text-muted'
-        },
-        { 
-            data: 'c_balance_before_raw', 
-            className: 'text-right font-weight-bold text-secondary', 
-            render: function(data){
-                return 'Rp ' + number_format(data, 0, ',', '.');
-            }
         },
         { 
             data: 'c_amount_raw', 
