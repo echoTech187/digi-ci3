@@ -273,10 +273,18 @@
                                     <?php endforeach; ?>
                                 </select>
                             </div>
-                            <div class="mb-0">
+                            <div class="mb-3">
                                 <label class="form-label smaller fw-bold text-muted mb-1">Specific Channel ID (Optional)</label>
                                 <select class="form-control select2" name="current_cashinChannelId" id="global_current_channel" disabled>
                                     <option value="">All Channel IDs</option>
+                                </select>
+                            </div>
+                            <div class="mb-0">
+                                <label class="form-label smaller fw-bold text-muted mb-1">Current Status (Optional)</label>
+                                <select class="form-control select2" name="current_status" id="global_current_status">
+                                    <option value="">All Statuses</option>
+                                    <option value="Active">Active</option>
+                                    <option value="Not Active">Not Active</option>
                                 </select>
                             </div>
                         </div>
@@ -305,10 +313,18 @@
                                     <?php endforeach; ?>
                                 </select>
                             </div>
-                            <div class="mb-0">
+                            <div class="mb-3">
                                 <label class="form-label smaller fw-bold text-muted mb-1">New Specific Channel ID (Optional)</label>
                                 <select class="form-control select2" name="new_cashinChannelId" id="global_new_channel" disabled>
                                     <option value="">Don't Update (Keep Original)</option>
+                                </select>
+                            </div>
+                            <div class="mb-0">
+                                <label class="form-label smaller fw-bold text-muted mb-1">New Status (Optional)</label>
+                                <select class="form-control select2" name="new_status" id="global_new_status">
+                                    <option value="">Don't Update (Keep Original)</option>
+                                    <option value="Active">Active</option>
+                                    <option value="Not Active">Not Active</option>
                                 </select>
                             </div>
                         </div>
@@ -483,6 +499,8 @@ $(document).ready(function() {
         $('#global_new_group').val('').trigger('change.select2');
         $('#global_new_external').val('').trigger('change.select2');
         $('#global_new_channel').val('').trigger('change.select2');
+        $('#global_new_status').val('').trigger('change.select2');
+        $('#global_current_status').val('').trigger('change.select2');
     });
 
     $('#global_merchant').on('change', function() {
@@ -661,6 +679,7 @@ $(document).ready(function() {
         const newGroup = $('#global_new_group').val();
         const newExt = $('#global_new_external').val();
         const newChan = $('#global_new_channel').val();
+        const newStatus = $('#global_new_status').val();
 
         // Validation: Group is always required
         if (!curGroup || !newGroup) {
@@ -685,7 +704,7 @@ $(document).ready(function() {
             return false;
         }
 
-        if (curGroup === newGroup && !newExt && !newChan) {
+        if (curGroup === newGroup && !newExt && !newChan && !newStatus) {
             Swal.fire({
                 icon: 'info',
                 title: 'No Changes',

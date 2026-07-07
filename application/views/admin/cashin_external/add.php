@@ -107,7 +107,7 @@
                             </div>
                             <div class="col-md-6 mb-4">
                                 <label class="font-weight-bold text-gray-700 small">Settlement Interval (Days)</label>
-                                <input type="number" name="c_settlementInterval" class="form-control" placeholder="0" required>
+                                <input type="number" name="c_settlementInterval" class="input-rupiah form-control" placeholder="0" required>
                             </div>
                             <div class="col-md-6 mb-4">
                                 <label class="font-weight-bold text-gray-700 small">Fixed Fee (IDR)</label>

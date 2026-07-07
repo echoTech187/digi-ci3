@@ -281,7 +281,7 @@
                                             <div class="col-md-6">
                                                 <label class="form-label small fw-bold text-muted">Settlement (Days)</label>
                                                 <div class="input-group">
-                                                    <input type="number" class="form-control border-1 rounded-right-0" id="c_settlementInterval" required name="c_settlementInterval">
+                                                    <input type="number" class="form-control border-1 rounded-right-0 input-rupiah" id="c_settlementInterval" required name="c_settlementInterval">
                                                     <span class="input-group-text border-1 small rounded-left-0">Days</span>
                                                 </div>
                                             </div>

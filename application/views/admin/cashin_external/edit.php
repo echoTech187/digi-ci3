@@ -114,7 +114,7 @@
                             </div>
                             <div class="col-md-6 mb-4">
                                 <label class="font-weight-bold text-gray-700 small">Settlement Interval (Days)</label>
-                                <input type="number" name="c_settlementInterval" class="form-control" value="<?= floor(floatval($mapping['c_settlementInterval'])) ?>" required>
+                                <input type="number" name="c_settlementInterval" class="input-rupiah form-control" value="<?= floor(floatval($mapping['c_settlementInterval'])) ?>" required>
                             </div>
                             <div class="col-md-6 mb-4">
                                 <label class="font-weight-bold text-gray-700 small">Fixed Fee (IDR)</label>

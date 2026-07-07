@@ -173,7 +173,7 @@
                         <div class="col-md-6">
                             <div class="form-group mb-4">
                                 <label class="text-uppercase small font-weight-bold text-muted mb-2">Sort Order</label>
-                                <input type="number" name="c_sortOrder" id="m_sortOrder" class="dt-more-input" value="0">
+                                <input type="number" name="c_sortOrder" id="m_sortOrder" class="dt-more-input input-rupiah" value="0">
                             </div>
                         </div>
                     </div>

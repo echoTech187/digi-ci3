@@ -285,7 +285,7 @@
                                 <div class="col-md-4">
                                     <div class="form-group mb-3">
                                         <label class="dt-more-label mb-2">Order</label>
-                                        <input type="number" class="dt-more-input" name="menu_order" value="0" required>
+                                        <input type="number" class="dt-more-input input-rupiah" name="menu_order" value="0" required>
                                     </div>
                                 </div>
                             </div>
@@ -401,7 +401,7 @@
                                 <div class="col-md-4">
                                     <div class="form-group mb-3">
                                         <label class="dt-more-label mb-2">Order</label>
-                                        <input type="number" class="dt-more-input" name="menu_order" id="edit_menu_order" required>
+                                        <input type="number" class="dt-more-input input-rupiah" name="menu_order" id="edit_menu_order" required>
                                     </div>
                                 </div>
                             </div>

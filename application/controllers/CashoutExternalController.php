@@ -172,9 +172,11 @@ class CashoutExternalController extends CI_Controller {
         $currentGroup    = $this->input->post('current_group');
         $currentExternal = $this->input->post('current_externalId');
         $currentChannel  = $this->input->post('current_cashoutChannelId');
+        $currentStatus   = $this->input->post('current_status');
         $newGroup        = $this->input->post('new_group');
         $newExternal     = $this->input->post('new_externalId');
         $newChannel      = $this->input->post('new_cashoutChannelId');
+        $newStatus       = $this->input->post('new_status');
 
         // Validation: Group is always required
         if (empty($updateType) || empty($currentGroup) || empty($newGroup)) {
@@ -204,7 +206,7 @@ class CashoutExternalController extends CI_Controller {
         }
 
         // Check if anything is actually changing
-        if ($currentGroup === $newGroup && empty($newExternal) && empty($newChannel)) {
+        if ($currentGroup === $newGroup && empty($newExternal) && empty($newChannel) && empty($newStatus)) {
             if ($this->input->is_ajax_request()) {
                 return $this->output
                     ->set_content_type('application/json')
@@ -218,14 +220,16 @@ class CashoutExternalController extends CI_Controller {
         }
 
         $data = [
-            'update_type'     => $updateType,
-            'merchant_id'     => $merchantId,
+            'update_type'      => $updateType,
+            'merchant_id'      => $merchantId,
             'current_group'    => $currentGroup,
             'current_external' => $currentExternal,
             'current_channel'  => $currentChannel,
+            'current_status'   => $currentStatus,
             'new_group'        => $newGroup,
             'new_external'     => $newExternal,
-            'new_channel'      => $newChannel
+            'new_channel'      => $newChannel,
+            'new_status'       => $newStatus
         ];
 
         $result = $this->Chanel->updateCashoutChannelGlobal($data);

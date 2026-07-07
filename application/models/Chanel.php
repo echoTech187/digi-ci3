@@ -393,9 +393,11 @@ class Chanel extends CI_Model {
         $currentGroup    = $data['current_group'];
         $currentExternal = $data['current_external'] ?? null;
         $currentChannel  = $data['current_channel'] ?? null;
+        $currentStatus   = $data['current_status'] ?? null;
         $newGroup        = $data['new_group'];
         $newExternal     = $data['new_external'] ?? null;
         $newChannel      = $data['new_channel'] ?? null;
+        $newStatus       = $data['new_status'] ?? null;
 
         // Where Clauses
         if ($updateType === 'merchant' && !empty($merchantId)) {
@@ -412,6 +414,10 @@ class Chanel extends CI_Model {
             $this->db->where('ref_cashinChannelId', $currentChannel);
         }
 
+        if (!empty($currentStatus)) {
+            $this->db->where('c_status', $currentStatus);
+        }
+
         // Update Data
         $update = [
             'c_cashinChannelGroup' => $newGroup
@@ -423,6 +429,10 @@ class Chanel extends CI_Model {
 
         if (!empty($newChannel)) {
             $update['ref_cashinChannelId'] = $newChannel;
+        }
+
+        if (!empty($newStatus)) {
+            $update['c_status'] = $newStatus;
         }
 
         $success = $this->db->update('cashin_channel_x_merchant', $update);
@@ -440,9 +450,11 @@ class Chanel extends CI_Model {
         $currentGroup    = $data['current_group'];
         $currentExternal = $data['current_external'] ?? null;
         $currentChannel  = $data['current_channel'] ?? null;
+        $currentStatus   = $data['current_status'] ?? null;
         $newGroup        = $data['new_group'];
         $newExternal     = $data['new_external'] ?? null;
         $newChannel      = $data['new_channel'] ?? null;
+        $newStatus       = $data['new_status'] ?? null;
 
         // Where Clauses
         if ($updateType === 'merchant' && !empty($merchantId)) {
@@ -459,6 +471,10 @@ class Chanel extends CI_Model {
             $this->db->where('ref_cashoutChannelId', $currentChannel);
         }
 
+        if (!empty($currentStatus)) {
+            $this->db->where('c_status', $currentStatus);
+        }
+
         // Update Data
         $update = [
             'c_cashoutChannelGroup' => $newGroup
@@ -470,6 +486,10 @@ class Chanel extends CI_Model {
 
         if (!empty($newChannel)) {
             $update['ref_cashoutChannelId'] = $newChannel;
+        }
+
+        if (!empty($newStatus)) {
+            $update['c_status'] = $newStatus;
         }
 
         $success = $this->db->update('cashout_channel_x_merchant', $update);

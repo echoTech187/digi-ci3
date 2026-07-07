@@ -158,6 +158,7 @@
                         <th>EXTERNAL ID DEFAULT</th>
                         <th>FEE TYPE</th>
                         <th>FEE</th>
+                        <th>FEE PERCENTAGE</th>
                         <th class="text-center">ACTION</th>
                     </tr>
                 </thead>
@@ -331,6 +332,9 @@
                 }},
                 {data: 'c_fee', className: 'font-weight-bold text-dark text-nowrap', render: function(data, type, row) {
                     return 'Rp ' + number_format(data, 0, ',', '.');
+                }},
+                {data: 'c_feePercetange', className: 'font-weight-bold text-dark text-nowrap', render: function(data, type, row) {
+                    return  number_format(data, 0, ',', '.') + '%';
                 }},
                 {
                     data: null, 

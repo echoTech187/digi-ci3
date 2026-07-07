@@ -159,6 +159,7 @@
                         <th>EXTERNAL ID DEFAULT</th>
                         <th>FEE TYPE</th>
                         <th>FEE</th>
+                        <th>FEE PERCENTAGE</th>
                         <th class="text-center">ACTION</th>
                     </tr>
                 </thead>
@@ -279,7 +280,7 @@
 
                             <div class="mb-0">
                                 <label class="dt-more-label mb-2">Settlement Interval (Days)</label>
-                                <input type="number" class="dt-more-input" required name="settlementinterval" value="1">
+                                <input type="number" class="dt-more-input input-rupiah" required name="settlementinterval" value="1">
                             </div>
                         </div>
                     </div>
@@ -394,7 +395,7 @@
 
                             <div class="mb-0">
                                 <label class="dt-more-label mb-2">Settlement Interval (Days)</label>
-                                <input type="number" class="dt-more-input" required name="settlementinterval" id="edit_settlementinterval">
+                                <input type="number" class="dt-more-input input-rupiah" required name="settlementinterval" id="edit_settlementinterval">
                             </div>
                         </div>
                     </div>
@@ -440,6 +441,9 @@
                 }},
                 {data: 'c_fee', className: 'font-weight-bold text-dark text-nowrap', render: function(data, type, row) {
                     return 'Rp ' + number_format(data, 0, ',', '.');
+                }},
+                {data: 'c_feePercetange', className: 'font-weight-bold text-dark text-nowrap', render: function(data, type, row) {
+                    return  number_format(data, 0, ',', '.') + '%';
                 }},
                 {
                     data: null, 
