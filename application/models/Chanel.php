@@ -399,7 +399,50 @@ class Chanel extends CI_Model {
         $newChannel      = $data['new_channel'] ?? null;
         $newStatus       = $data['new_status'] ?? null;
 
-        // Where Clauses
+        // Fetch targeted rows for validation
+        if ($updateType === 'merchant' && !empty($merchantId)) {
+            $this->db->where('ref_merchantId', $merchantId);
+        }
+        $this->db->where('c_cashinChannelGroup', $currentGroup);
+        if (!empty($currentExternal)) {
+            $this->db->where('c_externalIdDefault', $currentExternal);
+        }
+        if (!empty($currentChannel)) {
+            $this->db->where('ref_cashinChannelId', $currentChannel);
+        }
+        if (!empty($currentStatus)) {
+            $this->db->where('c_status', $currentStatus);
+        }
+        
+        $this->db->select('ref_cashinChannelId, c_externalIdDefault');
+        $this->db->from('cashin_channel_x_merchant');
+        $targetedRows = $this->db->get()->result_array();
+
+        if (empty($targetedRows)) {
+            return true; // Nothing to update
+        }
+
+        // Fetch valid master combinations
+        $masterRows = $this->db->get_where('cashin_external_x_channel', [
+            'c_cashinChannelGroup' => $newGroup
+        ])->result_array();
+
+        $validCombinations = [];
+        foreach ($masterRows as $mr) {
+            $validCombinations[] = $mr['c_cashinExternalId'] . '|' . $mr['ref_cashinChannelId'];
+        }
+
+        // Validate targeted rows against new configuration
+        foreach ($targetedRows as $row) {
+            $finalExternal = !empty($newExternal) ? $newExternal : $row['c_externalIdDefault'];
+            $finalChannel = !empty($newChannel) ? $newChannel : $row['ref_cashinChannelId'];
+            
+            if (!in_array($finalExternal . '|' . $finalChannel, $validCombinations)) {
+                return ['code' => 400, 'message' => "Update failed: Provider '{$finalExternal}' does not support Channel ID '{$finalChannel}' in the master configuration."];
+            }
+        }
+
+        // Where Clauses for Update
         if ($updateType === 'merchant' && !empty($merchantId)) {
             $this->db->where('ref_merchantId', $merchantId);
         }
@@ -456,7 +499,50 @@ class Chanel extends CI_Model {
         $newChannel      = $data['new_channel'] ?? null;
         $newStatus       = $data['new_status'] ?? null;
 
-        // Where Clauses
+        // Fetch targeted rows for validation
+        if ($updateType === 'merchant' && !empty($merchantId)) {
+            $this->db->where('ref_merchantId', $merchantId);
+        }
+        $this->db->where('c_cashoutChannelGroup', $currentGroup);
+        if (!empty($currentExternal)) {
+            $this->db->where('c_externalIdDefault', $currentExternal);
+        }
+        if (!empty($currentChannel)) {
+            $this->db->where('ref_cashoutChannelId', $currentChannel);
+        }
+        if (!empty($currentStatus)) {
+            $this->db->where('c_status', $currentStatus);
+        }
+        
+        $this->db->select('ref_cashoutChannelId, c_externalIdDefault');
+        $this->db->from('cashout_channel_x_merchant');
+        $targetedRows = $this->db->get()->result_array();
+
+        if (empty($targetedRows)) {
+            return true; // Nothing to update
+        }
+
+        // Fetch valid master combinations
+        $masterRows = $this->db->get_where('cashout_external_x_channel', [
+            'c_cashoutChannelGroup' => $newGroup
+        ])->result_array();
+
+        $validCombinations = [];
+        foreach ($masterRows as $mr) {
+            $validCombinations[] = $mr['c_cashoutExternalId'] . '|' . $mr['ref_cashoutChannelId'];
+        }
+
+        // Validate targeted rows against new configuration
+        foreach ($targetedRows as $row) {
+            $finalExternal = !empty($newExternal) ? $newExternal : $row['c_externalIdDefault'];
+            $finalChannel = !empty($newChannel) ? $newChannel : $row['ref_cashoutChannelId'];
+            
+            if (!in_array($finalExternal . '|' . $finalChannel, $validCombinations)) {
+                return ['code' => 400, 'message' => "Update failed: Provider '{$finalExternal}' does not support Channel ID '{$finalChannel}' in the master configuration."];
+            }
+        }
+
+        // Where Clauses for Update
         if ($updateType === 'merchant' && !empty($merchantId)) {
             $this->db->where('ref_merchantId', $merchantId);
         }

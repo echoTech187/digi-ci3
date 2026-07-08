@@ -208,7 +208,12 @@ class CashinExternalController extends CI_Controller {
         }
 
         // Check if anything is actually changing
-        if ($currentGroup === $newGroup && empty($newExternal) && empty($newChannel) && empty($newStatus)) {
+        $isGroupChanged = ($newGroup !== $currentGroup);
+        $isExtChanged = (!empty($newExternal) && $newExternal !== $currentExternal);
+        $isChanChanged = (!empty($newChannel) && $newChannel !== $currentChannel);
+        $isStatusChanged = (!empty($newStatus) && $newStatus !== $currentStatus);
+
+        if (!$isGroupChanged && !$isExtChanged && !$isChanChanged && !$isStatusChanged) {
             if ($this->input->is_ajax_request()) {
                 return $this->output
                     ->set_content_type('application/json')
@@ -248,7 +253,9 @@ class CashinExternalController extends CI_Controller {
             $this->session->set_flashdata('success', $msg);
         } else {
             $code = isset($result['code']) ? $result['code'] : 0;
-            if ($code == 1142) {
+            if ($code == 400) {
+                $errMsg = isset($result['message']) ? $result['message'] : 'Invalid configuration combination.';
+            } elseif ($code == 1142) {
                 $errMsg = 'Access Denied. You do not have sufficient database privileges to perform bulk channel updates.';
             } else {
                 $errMsg = 'Unable to perform bulk channel update due to a system constraint. Please contact technical support.';
@@ -351,15 +358,15 @@ class CashinExternalController extends CI_Controller {
         $merchantId = $this->input->post('merchant_id');
 
         $this->db->select('c_cashinChannelGroup as group');
-        $this->db->from('cashin_external_x_channel');
+        $this->db->from('cashin_channel_x_merchant');
         $this->db->where('ref_merchantId', $merchantId);
         $this->db->group_by('c_cashinChannelGroup');
         $groups = $this->db->get()->result_array();
 
-        $this->db->select('c_cashinExternalId as provider');
-        $this->db->from('cashin_external_x_channel');
+        $this->db->select('c_externalIdDefault as provider');
+        $this->db->from('cashin_channel_x_merchant');
         $this->db->where('ref_merchantId', $merchantId);
-        $this->db->group_by('c_cashinExternalId');
+        $this->db->group_by('c_externalIdDefault');
         $providers = $this->db->get()->result_array();
 
         return $this->output

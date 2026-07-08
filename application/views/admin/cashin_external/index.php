@@ -676,6 +676,7 @@ $(document).ready(function() {
         const curGroup = $('#global_current_group').val();
         const curExt = $('#global_current_external').val();
         const curChan = $('#global_current_channel').val();
+        const curStatus = $('#global_current_status').val();
         const newGroup = $('#global_new_group').val();
         const newExt = $('#global_new_external').val();
         const newChan = $('#global_new_channel').val();
@@ -704,7 +705,12 @@ $(document).ready(function() {
             return false;
         }
 
-        if (curGroup === newGroup && !newExt && !newChan && !newStatus) {
+        const isGroupChanged = (newGroup !== curGroup);
+        const isExtChanged = (newExt && newExt !== curExt);
+        const isChanChanged = (newChan && newChan !== curChan);
+        const isStatusChanged = (newStatus && newStatus !== curStatus);
+
+        if (!isGroupChanged && !isExtChanged && !isChanChanged && !isStatusChanged) {
             Swal.fire({
                 icon: 'info',
                 title: 'No Changes',
@@ -715,12 +721,60 @@ $(document).ready(function() {
             return false;
         }
 
+        const updateTypeText = updateType === 'group' ? 'Edit Mapping (All in Group)' : 'Specific Merchant';
+        const merchantText = updateType === 'merchant' ? $('#global_merchant option:selected').text() : 'N/A';
+        
+        const curGroupText = curGroup ? $('#global_current_group option:selected').text() : '-';
+        const curExtText = curExt ? $('#global_current_external option:selected').text() : 'All External IDs';
+        const curChanText = curChan ? $('#global_current_channel option:selected').text() : 'All Channel IDs';
+        const curStatusText = curStatus ? $('#global_current_status option:selected').text() : 'All Statuses';
+
+        const newGroupText = newGroup ? $('#global_new_group option:selected').text() : '-';
+        const newExtText = newExt ? $('#global_new_external option:selected').text() : 'Keep Original';
+        const newChanText = newChan ? $('#global_new_channel option:selected').text() : 'Keep Original';
+        const newStatusText = newStatus ? $('#global_new_status option:selected').text() : 'Keep Original';
+
+        let confirmHtml = `
+            <style>
+                .swal2-popup.bulk-update-popup {
+                    width: 650px !important;
+                    max-width: 95% !important;
+                }
+            </style>
+            <div class="text-left small mb-3" style="font-size:13px; overflow-x: hidden;">
+                <div class="fw-bold text-primary mb-2 border-bottom pb-1">Update Scope</div>
+                <div class="mb-1"><span class="text-muted">Type:</span> <strong>${updateTypeText}</strong></div>
+                ${updateType === 'merchant' ? `<div class="mb-3"><span class="text-muted">Merchant:</span> <strong>${merchantText}</strong></div>` : ''}
+                
+                <div class="row mt-3 mx-0">
+                    <div class="col-6 border-right px-1" style="border-right: 1px solid #e3e6f0;">
+                        <div class="fw-bold text-danger mb-2 border-bottom pb-1">Current (Filter)</div>
+                        <div class="mb-1"><span class="text-muted">Group:</span> <br><strong>${curGroupText}</strong></div>
+                        <div class="mb-1"><span class="text-muted">External ID:</span> <br><strong>${curExtText}</strong></div>
+                        <div class="mb-1"><span class="text-muted">Channel ID:</span> <br><strong>${curChanText}</strong></div>
+                        <div class="mb-1"><span class="text-muted">Status:</span> <br><strong>${curStatusText}</strong></div>
+                    </div>
+                    <div class="col-6 px-1">
+                        <div class="fw-bold text-success mb-2 border-bottom pb-1">New (Target)</div>
+                        <div class="mb-1"><span class="text-muted">Group:</span> <br><strong>${newGroupText}</strong></div>
+                        <div class="mb-1"><span class="text-muted">External ID:</span> <br><strong>${newExtText}</strong></div>
+                        <div class="mb-1"><span class="text-muted">Channel ID:</span> <br><strong>${newChanText}</strong></div>
+                        <div class="mb-1"><span class="text-muted">Status:</span> <br><strong>${newStatusText}</strong></div>
+                    </div>
+                </div>
+            </div>
+            <div class="alert alert-warning py-2 mb-0 small text-left">
+                <i class="fas fa-exclamation-triangle mr-1"></i> This will affect all matching channel mappings!
+            </div>
+        `;
+
         Swal.fire({
             title: 'Confirm Bulk Update?',
-            text: "This will affect all matching channel mappings!",
+            html: confirmHtml,
             icon: 'warning',
+            width: '650px',
             showCancelButton: true,
-            customClass: { popup: 'swal2-premium-popup', confirmButton: 'swal2-premium-confirm', cancelButton: 'swal2-premium-cancel', actions: 'swal2-premium-actions' },
+            customClass: { popup: 'swal2-premium-popup bulk-update-popup', confirmButton: 'swal2-premium-confirm', cancelButton: 'swal2-premium-cancel', actions: 'swal2-premium-actions' },
             buttonsStyling: false,
             confirmButtonText: 'Yes, update all!'
         }).then((result) => {
