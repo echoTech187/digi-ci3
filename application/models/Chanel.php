@@ -419,7 +419,7 @@ class Chanel extends CI_Model {
         $targetedRows = $this->db->get()->result_array();
 
         if (empty($targetedRows)) {
-            return true; // Nothing to update
+            return ['code' => 400, 'message' => "Update failed: No matching configurations found for the selected merchant and filter criteria."];
         }
 
         // Fetch valid master combinations
@@ -519,7 +519,7 @@ class Chanel extends CI_Model {
         $targetedRows = $this->db->get()->result_array();
 
         if (empty($targetedRows)) {
-            return true; // Nothing to update
+            return ['code' => 400, 'message' => "Update failed: No matching configurations found for the selected merchant and filter criteria."];
         }
 
         // Fetch valid master combinations
