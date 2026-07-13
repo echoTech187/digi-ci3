@@ -257,7 +257,7 @@
         if (monthlyEvents.length === 0) {
             listContainer.innerHTML = `
                 <div class="text-center py-5">
-                    <div class="mb-3"><i class="fas fa-calendar-day fa-3x text-light"></i></div>
+                    <div class="mb-3"><i class="fas fa-calendar-day fa-3x"></i></div>
                     <p class="text-muted small fw-bold">No holidays found for this month.</p>
                 </div>`;
             return;
