@@ -186,7 +186,7 @@
                             <div class="mb-4">
                                 <div class="mb-3">
                                     <div class="small text-uppercase font-weight-bold text-muted mb-1">Provider</div>
-                                    <div class="h6 font-weight-bold text-light mb-0 text-uppercase"><?= $data['ref_cashinExternalId']; ?></div>
+                                    <div class="h6 font-weight-bold mb-0 text-uppercase"><?= $data['ref_cashinExternalId']; ?></div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-6 mb-3 mb-md-0">
