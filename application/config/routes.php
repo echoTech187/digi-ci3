@@ -67,6 +67,7 @@ $route['dashboard/recent-mutations/json'] = 'DashboardController/recent_mutation
 $route['dashboard/today-stats/json'] = 'DashboardController/ajax_today_stats_json';
 $route['dashboard/monthly-stats/json'] = 'DashboardController/ajax_monthly_stats_json';
 $route['dashboard/metadata/json'] = 'DashboardController/ajax_dashboard_metadata_json';
+$route['dashboard/dlq-health/json'] = 'DashboardController/ajax_dlq_health_json';
 $route['dashboard/analytics-data/json'] = 'DashboardController/ajax_analytics_data_json';
 
 // ── GlobalSearchController ─────────────────────────────────────────────
@@ -292,3 +293,6 @@ $route['notifications/push-dlq']     = 'NotificationController/push_dlq';
 
 // ── HealthCheck ─────────────────────────────────────────────
 $route['health/db-check'] = 'HealthController/dbCheck';
+
+// ── Notifications DLQ ─────────────────────────────────────────────
+$route['notifications'] = 'DlqController/index';

@@ -178,4 +178,50 @@ class Dashboard_model extends CI_Model
             ->limit($limit)
             ->get()->result();
     }
+
+    public function get_dlq_stats()
+    {
+        $today = date('Y-m-d');
+        
+        $total_unresolved = $this->db->count_all('log_failed_notification_dlq');
+        
+        $this->db->where('created_at >=', $today . ' 00:00:00');
+        $this->db->where('created_at <=', $today . ' 23:59:59');
+        $this->db->from('log_failed_notification_dlq');
+        $today_errors = $this->db->count_all_results();
+        
+        $top_merchant = "All Systems Nominal";
+        $top_merchant_result = $this->db->select('merchant.c_name, COUNT(log_failed_notification_dlq.id) as error_count, MAX(log_failed_notification_dlq.created_at) as last_error_time')
+            ->from('log_failed_notification_dlq')
+            ->join('merchant', 'merchant.id = log_failed_notification_dlq.ref_merchantId', 'left')
+            ->where('log_failed_notification_dlq.created_at >=', $today . ' 00:00:00')
+            ->where('log_failed_notification_dlq.created_at <=', $today . ' 23:59:59')
+            ->group_by('log_failed_notification_dlq.ref_merchantId')
+            ->order_by('error_count', 'DESC')
+            ->order_by('last_error_time', 'DESC')
+            ->limit(1)
+            ->get()->row();
+        
+        if ($top_merchant_result && $top_merchant_result->error_count > 0) {
+            $top_merchant = ($top_merchant_result->c_name ? $top_merchant_result->c_name : 'Unknown') . ' (' . $top_merchant_result->error_count . ')';
+        }
+
+        $last_error_time = "-";
+        $last_error_result = $this->db->select('created_at')
+            ->from('log_failed_notification_dlq')
+            ->order_by('id', 'DESC')
+            ->limit(1)
+            ->get()->row();
+            
+        if ($last_error_result) {
+            $last_error_time = date('d M Y, H:i:s', strtotime($last_error_result->created_at));
+        }
+
+        return [
+            'total_unresolved' => $total_unresolved,
+            'today_errors' => $today_errors,
+            'top_merchant' => $top_merchant,
+            'last_error_time' => $last_error_time
+        ];
+    }
 }

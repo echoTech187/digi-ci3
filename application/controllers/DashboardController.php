@@ -58,6 +58,24 @@ class DashboardController extends CI_Controller
       return $this->output->set_content_type('application/json')->set_output(json_encode($data));
    }
 
+   public function ajax_dlq_health_json()
+   {
+      if (!$this->input->is_ajax_request()) return;
+      session_write_close();
+      
+      $this->load->driver('cache', array('adapter' => 'file'));
+      $cache_key = 'dashboard_dlq_health_v1';
+      $data = $this->cache->get($cache_key);
+      
+      if ($data === FALSE) {
+          $this->load->model('Dashboard_model');
+          $data = $this->Dashboard_model->get_dlq_stats();
+          $this->cache->save($cache_key, $data, 30); // Cache for 30 seconds
+      }
+      
+      return $this->output->set_content_type('application/json')->set_output(json_encode($data));
+   }
+
    public function ajax_today_stats_json()
    {
       if (!$this->input->is_ajax_request()) return;

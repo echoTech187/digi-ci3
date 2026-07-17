@@ -123,6 +123,80 @@
 
     </div>
 
+    <!-- ── System Health & DLQ Monitoring ── -->
+    <div class="d-flex align-items-center mb-3 mt-5">
+        <h6 class="font-weight-bold text-gray-800 mb-0" style="font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;">
+            <i class="fas fa-shield-alt text-primary mr-2"></i> System Health & Operations
+        </h6>
+        <div class="ml-4 flex-grow-1" style="height: 1px; background: #e5e7eb;"></div>
+        <a href="<?= base_url('notifications') ?>" class="btn btn-sm btn-light shadow-sm ml-4 font-weight-bold" style="border-radius: 8px; font-size: 11px;">
+            Manage DLQ <i class="fas fa-arrow-right ml-1"></i>
+        </a>
+    </div>
+
+    <div class="row mb-5">
+        <!-- Unresolved DLQ -->
+        <div class="col-xl-4 col-md-4 mb-4 mb-xl-0">
+            <div class="card border-0 shadow-sm dt-card h-100 w-100" style="border-radius: 20px;">
+                <div class="card-body p-4 d-flex flex-column h-100">
+                    <div class="d-flex justify-content-between mb-3 text-muted small font-weight-bold uppercase" style="letter-spacing: 1px;">
+                        <span>UNRESOLVED DLQ</span>
+                        <div class="dash-kpi-icon-wrap" style="background: rgba(239,68,68,0.1); border-radius: 8px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-exclamation-triangle" style="color: #ef4444;"></i>
+                        </div>
+                    </div>
+                    <h3 class="font-weight-bold mb-3 d-flex align-items-baseline text-gray-900" style="font-size: 1.6rem; white-space: nowrap; gap: 8px;"><span id="stat_dlq_unresolved"><span class="skeleton-box" style="width: 80px;"></span></span></h3>
+                    <div class="mt-auto d-flex align-items-center gap-2">
+                        <span class="badge rounded-pill px-2 py-1" style="background: rgba(239,68,68,0.1); font-size: 10px; color: #ef4444;">
+                            <i class="fas fa-calendar-day mr-1"></i> <span id="stat_dlq_today">...</span> Today
+                        </span>
+                        <span class="small text-muted" style="white-space: nowrap;">Errors captured</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Outage Merchant -->
+        <div class="col-xl-4 col-md-4 mb-4 mb-xl-0">
+            <div class="card border-0 shadow-sm dt-card h-100 w-100" style="border-radius: 20px;">
+                <div class="card-body p-4 d-flex flex-column h-100">
+                    <div class="d-flex justify-content-between mb-3 text-muted small font-weight-bold uppercase" style="letter-spacing: 1px;">
+                        <span>TOP OUTAGE SOURCE</span>
+                        <div class="dash-kpi-icon-wrap" style="background: rgba(245,158,11,0.1); border-radius: 8px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-server" style="color: #f59e0b;"></i>
+                        </div>
+                    </div>
+                    <h3 class="font-weight-bold mb-3 text-gray-900" style="font-size: 1.3rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><span id="stat_dlq_merchant"><span class="skeleton-box" style="width: 150px;"></span></span></h3>
+                    <div class="mt-auto d-flex align-items-center gap-2">
+                        <span class="badge rounded-pill px-2 py-1" style="background: rgba(245,158,11,0.1); font-size: 10px; color: #f59e0b;">
+                            Highest Contributor
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Last Error Occurred -->
+        <div class="col-xl-4 col-md-4 mb-4 mb-xl-0">
+            <div class="card border-0 shadow-sm dt-card h-100 w-100" style="border-radius: 20px;">
+                <div class="card-body p-4 d-flex flex-column h-100">
+                    <div class="d-flex justify-content-between mb-3 text-muted small font-weight-bold uppercase" style="letter-spacing: 1px;">
+                        <span>LATEST INCIDENT</span>
+                        <div class="dash-kpi-icon-wrap" style="background: rgba(59,130,246,0.1); border-radius: 8px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-clock" style="color: #3b82f6;"></i>
+                        </div>
+                    </div>
+                    <h3 class="font-weight-bold mb-3 d-flex align-items-baseline text-gray-900" style="font-size: 1.3rem; white-space: nowrap; gap: 8px;"><span id="stat_dlq_time"><span class="skeleton-box" style="width: 100px;"></span></span></h3>
+                    <div class="mt-auto d-flex align-items-center gap-2">
+                        <span class="badge rounded-pill px-2 py-1" style="background: rgba(59,130,246,0.1); font-size: 10px; color: #3b82f6;">
+                            Timestamp Logged
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- ── Analysis Depth Sections ── -->
     <div class="row mb-5 d-flex align-items-stretch">
 
@@ -454,8 +528,29 @@
         });
     }
 
+    function loadDlqHealth() {
+        $.ajax({
+            url: "<?= base_url('dashboard/dlq-health/json'); ?>",
+            type: "GET",
+            dataType: "json",
+            success: function(resp) {
+                var unresolved = parseInt(resp.total_unresolved);
+                $("#stat_dlq_unresolved").text(number_format(unresolved));
+                $("#stat_dlq_today").text(number_format(resp.today_errors));
+                $("#stat_dlq_merchant").text(resp.top_merchant);
+                $("#stat_dlq_time").text(resp.last_error_time);
+                
+                if (unresolved == 0) {
+                    $("#stat_dlq_unresolved").closest('.dash-kpi-card').css('background', 'linear-gradient(135deg, #059669 0%, #047857 100%)');
+                    $("#stat_dlq_unresolved").closest('.dash-kpi-card').find('i.fa-exclamation-triangle').removeClass('fa-exclamation-triangle text-danger').addClass('fa-check-circle text-white');
+                }
+            }
+        });
+    }
+
     $(document).ready(function() {
         loadAnalyticsData();
+        loadDlqHealth();
 
         // Instructions Guide Drawer Toggle logic
         $('#toggleGuideBtn').on('click', function() {
