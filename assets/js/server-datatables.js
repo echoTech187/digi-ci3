@@ -13,6 +13,7 @@ function initServerDataTable(tableId, ajaxUrl, columns, additionalOptions = {}) 
         "ajax": {
             "url": ajaxUrl,
             "type": "POST",
+            "timeout": 3000,
             "data": function (d) {
                 // Automatically append CSRF token if present
                 var csrfName = $('meta[name="csrf-token-name"]').attr('content');
@@ -23,6 +24,32 @@ function initServerDataTable(tableId, ajaxUrl, columns, additionalOptions = {}) 
             },
             "error": function (xhr, error, thrown) {
                 console.error("DataTables Error:", error, thrown);
+                // Remove custom processing state
+                var target = $(tableId).closest('.table-responsive');
+                if (!target.length) target = $(".table-responsive").first();
+                target.removeClass("dt-processing-active");
+                
+                // Hide DataTables built-in processing indicator
+                $(tableId + '_processing').hide();
+                
+                // Show empty data state manually without triggering .draw() (which causes infinite loop in serverSide mode)
+                if ($.fn.DataTable.isDataTable(tableId)) {
+                    var api = $(tableId).DataTable();
+                    var colspan = api.columns(':visible').count();
+                    var emptyStateHtml = '<div class="py-5 text-center"><div class="mb-3"><svg width="100" height="100" viewBox="0 0 24 24" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path><circle cx="9" cy="13" r="1.5" fill="#cbd5e1" stroke="none"></circle><circle cx="15" cy="13" r="1.5" fill="#cbd5e1" stroke="none"></circle><path d="M11 16h2" stroke="#cbd5e1" stroke-width="1.5"></path></svg></div><h5 style="color: #1e293b; font-weight: 700; font-size: 16px;" class="mb-2">Nothing to display yet</h5><p class="text-muted small mx-auto mb-0" style="max-width: 300px; color: #64748b !important; font-size: 13px;">As information is registered, it will be displayed here.</p></div>';
+                    $(api.table().body()).html('<tr><td colspan="' + colspan + '">' + emptyStateHtml + '</td></tr>');
+                    // Reset pagination info
+                    var $info = $(api.table().container()).find('.dt-footer-info');
+                    if ($info.length) $info.html('Showing <strong>0</strong> of <strong>0</strong> results');
+                    // Reset pager with disabled prev/next buttons
+                    var $pager = $(api.table().container()).find('.dt-footer-pager');
+                    if ($pager.length) {
+                        $pager.html('<div class="dt-pager-nav">' + 
+                            '<button class="dt-pager-btn dt-prev-btn" disabled><i class="fas fa-chevron-left mr-md-2"></i><span class="dt-pager-btn-txt">Previous</span></button>' +
+                            '<button class="dt-pager-btn dt-next-btn" disabled><span class="dt-pager-btn-txt">Next</span><i class="fas fa-chevron-right ml-md-2"></i></button>' +
+                        '</div>');
+                    }
+                }
             }
         },
         "columns": columns,
@@ -32,7 +59,7 @@ function initServerDataTable(tableId, ajaxUrl, columns, additionalOptions = {}) 
             "info": "Showing _START_ – _END_ of _TOTAL_ results",
             "infoEmpty": "No results to show",
             "infoFiltered": "",
-            "zeroRecords": '<div class="text-center py-4 text-muted"><i class="fas fa-inbox fa-2x mb-2 d-block"></i>No data available.</div>'
+            "zeroRecords": '<div class="py-5 text-center"><div class="mb-3"><svg width="100" height="100" viewBox="0 0 24 24" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path><circle cx="9" cy="13" r="1.5" fill="#cbd5e1" stroke="none"></circle><circle cx="15" cy="13" r="1.5" fill="#cbd5e1" stroke="none"></circle><path d="M11 16h2" stroke="#cbd5e1" stroke-width="1.5"></path></svg></div><h5 style="color: #1e293b; font-weight: 700; font-size: 16px;" class="mb-2">Nothing to display yet</h5><p class="text-muted small mx-auto mb-0" style="max-width: 300px; color: #64748b !important; font-size: 13px;">As information is registered, it will be displayed here.</p></div>'
         },
         "dom": 'rt<"dt-footer"<"dt-footer-info"i><"dt-footer-pager">>',
         "createdRow": function(row, data, dataIndex) {
