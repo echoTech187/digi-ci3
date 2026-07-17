@@ -49,3 +49,5 @@ update_user_menu_urls.sql
 *.jpg
 *.pdf
 *.xlsx
+*.html
+*- Copy.*
