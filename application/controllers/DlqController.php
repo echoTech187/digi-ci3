@@ -101,7 +101,7 @@ class DlqController extends CI_Controller {
             $ref_col = 'ref_cashinPaymentQrisMpmId';
             $msgType = 'consumer_notification_qris_mpm';
         } else if ($dlq['type'] == 'transfer') {
-            $ref_col = 'ref_cashoutTransferBifastId';
+            $ref_col = 'ref_cashoutPaymentBifastId';
             $msgType = 'consumer_notification_transfer';
         }
 
@@ -109,12 +109,21 @@ class DlqController extends CI_Controller {
             return ['status' => false, 'message' => 'Unknown transaction type'];
         }
 
+        $msgInfo = [
+            'merchantId' => $dlq['ref_merchantId'],
+            $ref_col => $dlq['ref_transactionId']
+        ];
+
+        // Ensure consumer transfer delete logic finds the ID
+        if ($dlq['type'] == 'transfer') {
+            $msgInfo['ref_cashoutPaymentId'] = $dlq['ref_transactionId'];
+        } else if ($dlq['type'] == 'qris-mpm') {
+            $msgInfo['ref_qrisMpmId'] = $dlq['ref_transactionId'];
+        }
+
         $payload = [
             'msgType' => $msgType,
-            'msgInfo' => [
-                'merchantId' => $dlq['ref_merchantId'],
-                $ref_col => $dlq['ref_transactionId']
-            ],
+            'msgInfo' => $msgInfo,
             'is_manual_retry' => true
         ];
 
