@@ -659,11 +659,14 @@ class Qris extends CI_Model {
             'external_quantum_qris_mpm_calback_payment'
         ];
 
-        // Disable db_debug to prevent HTML error output on missing columns/tables breaking JSON
-        $db_debug = $this->db->db_debug;
-        $this->db->db_debug = FALSE;
+        // Query information_schema once to safely determine which callback tables exist
+        $db_name = $this->db->database;
+        $info_query = $this->db->query("SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA = '$db_name' AND TABLE_NAME LIKE 'external_%'")->result_array();
+        $valid_tables = array_column($info_query, 'TABLE_NAME');
 
         foreach ($tables as $t) {
+            if (!in_array($t, $valid_tables)) continue; // Skip non-existent tables safely
+            
             $col = ($t == 'external_quantum_qris_mpm_calback_payment') ? 'c_transactionId' : 'c_issuerRrn';
             $q = $this->db->query("SELECT ref_cashinPaymentQrisMpmId FROM $t WHERE $col LIKE '$safeRrn%' LIMIT 50");
             if ($q) {
@@ -672,8 +675,6 @@ class Qris extends CI_Model {
                 }
             }
         }
-
-        $this->db->db_debug = $db_debug;
         return array_unique($ids);
     }
 

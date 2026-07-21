@@ -159,11 +159,14 @@ class GlobalSearchController extends CI_Controller
                             'external_yukk_qris_mpm_callback' => 'c_issuerRrn'
                         ];
                         
-                        $qris_db_debug = $this->db->db_debug;
-                        $this->db->db_debug = FALSE; // Prevent query crash if a callback table is missing
+                        $db_name = $this->db->database;
+                        $info_query = $this->db->query("SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA = '$db_name' AND TABLE_NAME LIKE 'external_%'")->result_array();
+                        $valid_tables = array_column($info_query, 'TABLE_NAME');
                         
                         $found_rrn_ids = [];
                         foreach ($rrn_tables as $t => $col) {
+                            if (!in_array($t, $valid_tables)) continue; // Skip non-existent tables safely
+                            
                             $q = $this->db->query("SELECT ref_cashinPaymentQrisMpmId FROM $t WHERE $col $op $val LIMIT 5");
                             if ($q) {
                                 foreach ($q->result() as $r) {
@@ -171,7 +174,6 @@ class GlobalSearchController extends CI_Controller
                                 }
                             }
                         }
-                        $this->db->db_debug = $qris_db_debug;
                         
                         if ($found_rrn_ids) {
                             $id_str = implode(',', array_unique($found_rrn_ids));
