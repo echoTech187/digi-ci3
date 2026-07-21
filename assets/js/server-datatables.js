@@ -192,6 +192,31 @@ function initServerDataTable(tableId, ajaxUrl, columns, additionalOptions = {}) 
     table.on('xhr.dt', function (e, settings, json) {
         target.removeClass("dt-processing-active");
     });
+    
+    // Prevent default DataTables error alert and render inline empty state error
+    $.fn.dataTable.ext.errMode = 'none';
+    table.on('error.dt', function (e, settings, techNote, message) {
+        target.removeClass("dt-processing-active");
+        if ($.fn.DataTable.isDataTable(tableId)) {
+            var api = $(tableId).DataTable();
+            var colspan = api.columns(':visible').count();
+            var errorStateHtml = '<div class="py-5 text-center"><div class="mb-3"><svg width="100" height="100" viewBox="0 0 24 24" fill="#f8fafc" stroke="#ef4444" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg></div><h5 style="color: #ef4444; font-weight: 700; font-size: 16px;" class="mb-2">Gangguan Koneksi</h5><p class="text-muted small mx-auto mb-0" style="max-width: 300px; color: #64748b !important; font-size: 13px;">Sistem terlalu lama merespons atau server sedang sibuk. Silakan coba lagi.</p></div>';
+            $(api.table().body()).html('<tr><td colspan="' + colspan + '">' + errorStateHtml + '</td></tr>');
+            
+            // Reset pagination info
+            var $info = $(api.table().container()).find('.dt-footer-info');
+            if ($info.length) $info.html('Showing <strong>0</strong> of <strong>0</strong> results');
+            // Reset pager
+            var $pager = $(api.table().container()).find('.dt-footer-pager');
+            if ($pager.length) {
+                $pager.html('<div class="dt-pager-nav">' + 
+                    '<button class="dt-pager-btn dt-prev-btn" disabled><i class="fas fa-chevron-left mr-md-2"></i><span class="dt-pager-btn-txt">Previous</span></button>' +
+                    '<button class="dt-pager-btn dt-next-btn" disabled><span class="dt-pager-btn-txt">Next</span><i class="fas fa-chevron-right ml-md-2"></i></button>' +
+                '</div>');
+            }
+        }
+    });
+
     // Initialize and return the DataTable instance
     return table;
 
@@ -290,6 +315,24 @@ $(document).ajaxSend(function(event, jqXHR, settings) {
             else if (typeof settings.data === 'object' && !(settings.data instanceof FormData)) {
                 settings.data[csrfName] = csrfHash;
             }
+        }
+    }
+});
+
+/**
+ * Global AJAX Error Handling for Session Timeouts and Permissions
+ * Catches 401 Unauthorized and 403 Forbidden responses across all AJAX calls
+ */
+$(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError) {
+    if (jqXHR.status === 401 || jqXHR.status === 403) {
+        try {
+            var response = JSON.parse(jqXHR.responseText);
+            if (response.redirect) {
+                window.location.href = response.redirect;
+            }
+        } catch (e) {
+            // Fallback if parsing fails
+            window.location.href = '/auth/logout';
         }
     }
 });
