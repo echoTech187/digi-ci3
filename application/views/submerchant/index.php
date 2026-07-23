@@ -59,7 +59,7 @@ $id = $this->uri->segment(3);
             <div class="dt-toolbar-filters">
                 <?php if ($merchant_level < 3): ?>
                     <button type="button" class="btn-dt-action btn-dt-action-success add-sub-btn border-0 d-flex align-items-center shadow-sm" data-toggle="modal" data-target="#subMerchantModal" style="height: 38px; border-radius: 8px; padding: 0 16px; font-weight: 600; font-size: 13px;">
-                        <i class="fas fa-plus mr-2"></i> Add Sub Account
+                        <i class="fas fa-plus"></i> Add Sub Account
                     </button>
                 <?php else: ?>
                     <span class="badge badge-sm badge-danger">Maximum of 4 Sub Accounts reached</span>
