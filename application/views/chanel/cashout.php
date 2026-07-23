@@ -107,7 +107,7 @@
                 </div>
 
                 <button type="button" class="btn-dt-action btn-dt-action-success border-0 text-decoration-none d-flex align-items-center" data-toggle="modal" data-target=".bd-example-modal-lg" >
-                    <i class="fas fa-plus mr-2"></i> <span class="d-none d-md-block">New Cash Out Channel</span>
+                    <i class="fas fa-plus"></i> <span class="d-none d-md-block">New Cash Out Channel</span>
                 </button>
             </div>
         </div>
