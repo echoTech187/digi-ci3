@@ -251,7 +251,7 @@
                                                     <option value="<?= $gm['group_modules'] ?>"><?= $gm['group_modules'] ?></option>
                                                 <?php endforeach; ?>
                                             </select>
-                                            <button class="btn btn-primary add-group-btn m-0" type="button" style="border-top-left-radius: 0 !important; border-bottom-left-radius: 0 !important; font-size: 13px; font-weight: 600; padding: 0 15px; white-space: nowrap;"><i class="fas fa-plus mr-2"></i> Add</button>
+                                            <button class="btn btn-primary add-group-btn m-0" type="button" style="border-top-left-radius: 0 !important; border-bottom-left-radius: 0 !important; font-size: 13px; font-weight: 600; padding: 0 15px; white-space: nowrap;"><i class="fas fa-plus"></i> Add</button>
                                         </div>
                                     </div>
                                 </div>
@@ -367,7 +367,7 @@
                                                     <option value="<?= $gm['group_modules'] ?>"><?= $gm['group_modules'] ?></option>
                                                 <?php endforeach; ?>
                                             </select>
-                                            <button class="btn btn-primary add-group-btn m-0" type="button" style="border-top-left-radius: 0 !important; border-bottom-left-radius: 0 !important; font-size: 13px; font-weight: 600; padding: 0 15px; white-space: nowrap;"><i class="fas fa-plus mr-2"></i> Add</button>
+                                            <button class="btn btn-primary add-group-btn m-0" type="button" style="border-top-left-radius: 0 !important; border-bottom-left-radius: 0 !important; font-size: 13px; font-weight: 600; padding: 0 15px; white-space: nowrap;"><i class="fas fa-plus"></i> Add</button>
                                         </div>
                                     </div>
                                 </div>
