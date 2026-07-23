@@ -296,3 +296,15 @@ $route['health/db-check'] = 'HealthController/dbCheck';
 
 // ── Notifications DLQ ─────────────────────────────────────────────
 $route['notifications'] = 'DlqController/index';
+
+// ── Merchant Access Control (RBAC Portal Management) ──────────
+$route['merchant/access-control/roles']                             = 'MerchantManagementController/roles';
+$route['merchant/access-control/roles/reset']                       = 'MerchantManagementController/resetRoles';
+$route['merchant/access-control/roles/save']                        = 'MerchantManagementController/save_role';
+$route['merchant/access-control/roles/permissions/(:num)']          = 'MerchantManagementController/get_role_permissions_json/$1';
+$route['merchant/access-control/save_role']                         = 'MerchantManagementController/save_role';
+$route['merchant/access-control/get_role_permissions_json/(:num)'] = 'MerchantManagementController/get_role_permissions_json/$1';
+$route['merchant/access-control/menus']                             = 'MerchantManagementController/menus';
+$route['merchant/access-control/menus/save']                        = 'MerchantManagementController/save_menu';
+$route['merchant/access-control/save_menu']                         = 'MerchantManagementController/save_menu';
+
