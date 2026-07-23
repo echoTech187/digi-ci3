@@ -57,7 +57,7 @@
         <div class="col-xl-3 col-md-6 mb-4 mb-xl-0">
             <div class="card border-0 shadow-sm dash-kpi-card h-100 w-100" style="background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%); color: white; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1);">
                 <div class="card-body p-4 d-flex flex-column h-100">
-                    <div class="d-flex justify-content-between mb-3 text-white-50 small font-weight-bold uppercase" style="letter-spacing: 1px;">
+                    <div class="d-flex justify-content-between mb-3  small font-weight-bold uppercase" style="letter-spacing: 1px;">
                         <span>QRIS GROWTH</span>
                         <i class="fas fa-qrcode"></i>
                     </div>
@@ -74,7 +74,7 @@
         <div class="col-xl-3 col-md-6 mb-4 mb-xl-0">
             <div class="card border-0 shadow-sm dash-kpi-card h-100 w-100" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1);">
                 <div class="card-body p-4 d-flex flex-column h-100">
-                    <div class="d-flex justify-content-between mb-3 text-white-50 small font-weight-bold uppercase" style="letter-spacing: 1px;">
+                    <div class="d-flex justify-content-between mb-3  small font-weight-bold uppercase" style="letter-spacing: 1px;">
                         <span>PLATFORM YIELD</span>
                         <i class="fas fa-hand-holding-usd"></i>
                     </div>
@@ -91,7 +91,7 @@
         <div class="col-xl-3 col-md-6 mb-4 mb-xl-0">
             <div class="card border-0 shadow-sm dash-kpi-card h-100 w-100" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1);">
                 <div class="card-body p-4 d-flex flex-column h-100">
-                    <div class="d-flex justify-content-between mb-3 text-white-50 small font-weight-bold uppercase" style="letter-spacing: 1px;">
+                    <div class="d-flex justify-content-between mb-3  small font-weight-bold uppercase" style="letter-spacing: 1px;">
                         <span>DISBURSE VOL.</span>
                         <i class="fas fa-exchange-alt"></i>
                     </div>
@@ -108,7 +108,7 @@
         <div class="col-xl-3 col-md-6 mb-4 mb-xl-0">
             <div class="card border-0 shadow-sm dash-kpi-card h-100 w-100" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1);">
                 <div class="card-body p-4 d-flex flex-column h-100">
-                    <div class="d-flex justify-content-between mb-3 text-white-50 small font-weight-bold uppercase" style="letter-spacing: 1px;">
+                    <div class="d-flex justify-content-between mb-3  small font-weight-bold uppercase" style="letter-spacing: 1px;">
                         <span>CHANNEL STABILITY</span>
                         <i class="fas fa-vial"></i>
                     </div>
@@ -257,7 +257,7 @@
                         <div class="col-lg-8">
                             <div class="badge bg-primary px-3 py-2 mb-4 rounded-pill font-weight-bold" style="font-size: 10px; letter-spacing: 1px;">INTELLIGENCE REPORT</div>
                             <h2 class="font-weight-bold mb-3" style="letter-spacing: -1px;">Strategic Growth Directives</h2>
-                            <p class="mb-5 text-white-50" style="line-height: 1.8; font-size: 15px; max-width: 600px;">Our BI engine has analyzed the data for the selected period. These actionable insights are designed to maximize ecosystem efficiency and partner profitability.</p>
+                            <p class="mb-5 " style="line-height: 1.8; font-size: 15px; max-width: 600px;">Our BI engine has analyzed the data for the selected period. These actionable insights are designed to maximize ecosystem efficiency and partner profitability.</p>
                             
                             <div class="row g-4">
                                 <div class="col-12 col-xl-6 mb-4">
@@ -268,7 +268,7 @@
                                             </div>
                                             <h6 class="font-weight-bold m-0">Optimize Peak Performance</h6>
                                         </div>
-                                        <p class="small m-0 text-white-50" style="line-height: 1.6;">Volume peaks between 7PM - 10PM. Schedule intense background operations after 1AM to ensure zero-latency periods during high traffic.</p>
+                                        <p class="small m-0 " style="line-height: 1.6;">Volume peaks between 7PM - 10PM. Schedule intense background operations after 1AM to ensure zero-latency periods during high traffic.</p>
                                     </div>
                                 </div>
                                 <div class="col-12 col-xl-6 mb-4">
@@ -279,7 +279,7 @@
                                             </div>
                                             <h6 class="font-weight-bold m-0">Expansion Opportunity</h6>
                                         </div>
-                                        <p class="small m-0 text-white-50" style="line-height: 1.6;">QRIS yield accounts for <span id="stat_qris_contribution"><span class="skeleton-box" style="width: 30px;"></span></span>% of net income. Accelerate onboarding for street-level retail partners.</p>
+                                        <p class="small m-0 " style="line-height: 1.6;">QRIS yield accounts for <span id="stat_qris_contribution"><span class="skeleton-box" style="width: 30px;"></span></span>% of net income. Accelerate onboarding for street-level retail partners.</p>
                                     </div>
                                 </div>
                             </div>
