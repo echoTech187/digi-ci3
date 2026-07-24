@@ -51,3 +51,4 @@ update_user_menu_urls.sql
 *.xlsx
 *.html
 *- Copy.*
+*.sql
