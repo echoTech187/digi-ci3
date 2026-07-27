@@ -8,9 +8,7 @@
             <p class="dt-page-subtitle text-muted">Monitoring and auditing merchant balance configurations and hold adjustments.</p>
         </div>
         <div class="d-flex" style="gap:10px;">
-            <button type="button" class="btn-dt-action btn-dt-action-primary border-0 d-flex align-items-center shadow-sm" id="toggleGuideBtn" >
-                <i class="fas fa-book-open mr-2"></i> <span class="d-none d-md-block">Instructions Guide</span>
-            </button>
+            
         </div>
     </div>
 

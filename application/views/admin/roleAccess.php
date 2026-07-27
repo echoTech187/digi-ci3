@@ -8,9 +8,7 @@
             <p class="dt-page-subtitle">Configure menu permissions for the <strong><?= $role['role']; ?></strong> role.</p>
         </div>
         <div class="d-flex align-items-center gap-2">
-            <button type="button" class="btn-dt-action btn-dt-action-primary border-0 d-flex align-items-center shadow-sm" id="toggleGuideBtn" >
-                <i class="fas fa-book-open mr-2"></i> <span class="d-none d-md-block">Instructions Guide</span>
-            </button>
+            
         </div>
     </div>
 
@@ -111,18 +109,7 @@
 
 <script>
 $(document).ready(function() {
-    // Instructions Guide drawer handlers
-    $('#toggleGuideBtn').on('click', function() {
-        $('#instructionDrawer').addClass('open');
-        $('#instructionOverlay').addClass('open');
-        $('body').css('overflow', 'hidden'); // Lock background scroll
-    });
-
-    $('#closeDrawerBtn, #instructionOverlay').on('click', function() {
-        $('#instructionDrawer').removeClass('open');
-        $('#instructionOverlay').removeClass('open');
-        $('body').css('overflow', ''); // Unlock scroll
-    });
+    
 });
 </script>
 

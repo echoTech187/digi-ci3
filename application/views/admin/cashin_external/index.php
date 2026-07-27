@@ -6,9 +6,7 @@
             <p class="dt-page-subtitle">Centralized configuration for all merchant cashin channels</p>
         </div>
         <div class="d-flex" style="gap:10px;">
-            <button type="button" class="btn-dt-action btn-dt-action-primary border-0 d-flex align-items-center shadow-sm" id="toggleGuideBtn" >
-                <i class="fas fa-book-open mr-2"></i> <span class="d-none d-md-block">Instructions Guide</span>
-            </button>
+            
             <button type="button" class="btn-dt-action btn-dt-action-success" data-toggle="modal" data-target="#globalUpdateModal">
                 <i class="fas fa-globe mr-1 mr-2"></i> Edit Mapping
             </button>

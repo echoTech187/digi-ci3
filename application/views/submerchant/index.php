@@ -9,9 +9,7 @@ $id = $this->uri->segment(3);
             <h4 class="dt-page-title">Sub Accounts Management</h4>
             <p class="dt-page-subtitle">Managing sub accounts for <strong><?= $merchant[0]->c_name ?></strong></p>
         </div>
-        <button type="button" class="btn-dt-action btn-dt-action-primary border-0 d-flex align-items-center shadow-sm" id="toggleGuideBtn" >
-            <i class="fas fa-book-open mr-2"></i> <span class="d-none d-md-block">Instructions Guide</span>
-        </button>
+        
     </div>
 
     <!-- ── Toggleable Page Instructional Drawer ── -->
