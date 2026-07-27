@@ -31,7 +31,7 @@
 	<link href="<?= base_url('assets/'); ?>css/sb-admin-2.min.css" rel="stylesheet">
 	<link href="<?= base_url('assets/'); ?>css/theme-1.css" rel="stylesheet">
 	<!-- Premium Auth Override -->
-	<link href="<?= base_url('assets/'); ?>css/premium-auth.css" rel="stylesheet">
+	<link href="<?= base_url('assets/'); ?>css/premium-auth.css?v=<?= time(); ?>" rel="stylesheet">
 </head>
 
 <body>
