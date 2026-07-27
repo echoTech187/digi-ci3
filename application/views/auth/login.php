@@ -8,7 +8,32 @@
                 <img src="<?= base_url('public/image/icon-white--300.png'); ?>" alt="Digi Logo" class="img-fluid" style="width: 42px; height: 42px;z-index: 99;">
                 <span class="m-0 font-weight-bold h3">Admin</span>
             </div>
-            
+            <div class="login-left-content mt-auto text-white">
+                <!-- Clock & Version -->
+                <div class="d-flex align-items-center mb-4" style="gap: 15px;">
+                    <div class="clock-display font-weight-bold" style="font-size: 2.2rem; letter-spacing: 1px; color: #f8fafc; text-shadow: 0 2px 10px rgba(0,0,0,0.3);" id="liveClock">
+                        00:00
+                    </div>
+                    <div style="border-left: 2px solid rgba(255,255,255,0.15); height: 35px;"></div>
+                    <div>
+                        <div style="font-size: 0.85rem; color: #a5b4fc; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px;">Digi Core Admin</div>
+                        <div style="font-size: 0.8rem; color: #94a3b8;">v2.1.0 &mdash; &copy; <?= date('Y'); ?></div>
+                    </div>
+                </div>
+
+                <!-- IT Support -->
+                <div class="support-info p-3" style="background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; transition: all 0.3s ease;">
+                    <div class="d-flex align-items-start">
+                        <i class="fas fa-headset mt-1 mr-3" style="color: #818cf8; font-size: 1.4rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));"></i>
+                        <div>
+                            <div style="font-size: 0.85rem; color: #cbd5e1; margin-bottom: 5px; line-height: 1.4;">Butuh bantuan akses atau lupa kredensial login?</div>
+                            <div style="font-size: 0.95rem; font-weight: 600; color: #f8fafc;">
+                                <i class="fas fa-envelope mr-1" style="color: #94a3b8; font-size: 0.85rem;"></i> support@gidi.co.id
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         
         <!-- Right Side -->
@@ -61,3 +86,14 @@
         </div>
     </div>
 </section>
+
+<script>
+    function updateLiveClock() {
+        const now = new Date();
+        const timeString = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+        const clockEl = document.getElementById('liveClock');
+        if(clockEl) clockEl.textContent = timeString;
+    }
+    setInterval(updateLiveClock, 1000);
+    updateLiveClock(); // Initialize immediately
+</script>
