@@ -5,7 +5,8 @@ function is_logged_in()
     $ci = get_instance();
     $segment1 = strtolower($ci->uri->segment(1));
     $segment2 = strtolower($ci->uri->segment(2));
-    $email = $ci->session->userdata('c_email') ?: $ci->session->userdata('email');
+    // SECURITY PATCH: Strictly enforce admin session, drop legacy 'email' fallback to prevent leakage
+    $email = $ci->session->userdata('c_email');
 
     if (!$email) {
         // If no session and not on auth page, redirect to login
@@ -23,7 +24,8 @@ function is_logged_in()
         $last_verify = $ci->session->userdata($user_verify_key);
         if (!$last_verify || (time() - $last_verify) > 300) {
             $user = $ci->db->get_where('admin', ['c_email' => $email])->row_array();
-            if (!$user) {
+            // SECURITY PATCH: Enforce 'Active' status check to kill zombie sessions instantly
+            if (!$user || $user['c_status'] !== 'Active') {
                 redirect('auth/logout');
             }
             $ci->session->set_userdata($user_verify_key, time());
