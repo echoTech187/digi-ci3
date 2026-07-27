@@ -400,7 +400,8 @@ $(document).ready(function () {
 				var $target = $toolbar.find(".dt-more-panel-body");
 				var $filtersToMigrate = $toolbar
 					.find(".dt-toolbar-filters .dt-filter-group")
-					.not(".ported-filter");
+					.not(".ported-filter")
+					.not(".dt-more-filters-wrapper");
 
 				if ($filtersToMigrate.length > 0 && $target.length > 0) {
 					var hasMovedAnything = false;
