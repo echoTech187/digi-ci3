@@ -145,16 +145,16 @@ $route['finance/mutation/(:num)'] = 'TransactionMutationController/mutation/$1';
 // ── MerchantManagementController ─────────────────────────────────────────────
 $route['merchant/manage'] = 'MerchantManagementController/merchant';
 $route['merchant/manage/reset'] = 'MerchantManagementController/resetMerchant';
-$route['merchant/supervisor'] = 'MerchantManagementController/merchant_spv';
-$route['merchant/supervisor/reset'] = 'MerchantManagementController/resetMerchantSpv';
-$route['merchant/supervisor/delete/(:num)'] = 'MerchantManagementController/deleteMerchantSpv/$1';
+$route['merchant/supervisor'] = 'MerchantSupervisorController/merchant_spv';
+$route['merchant/supervisor/reset'] = 'MerchantSupervisorController/resetMerchantSpv';
+$route['merchant/supervisor/delete/(:num)'] = 'MerchantSupervisorController/deleteMerchantSpv/$1';
 $route['merchant/manage/register'] = 'MerchantManagementController/registerMerchant';
-$route['merchant/supervisor/register'] = 'MerchantManagementController/registerMerchantSpv';
-$route['merchant/supervisor/get/(:num)'] = 'MerchantManagementController/getSupervisorJson/$1';
-$route['merchant/supervisor/update/(:num)'] = 'MerchantManagementController/updateMerchantSpv/$1';
+$route['merchant/supervisor/register'] = 'MerchantSupervisorController/registerMerchantSpv';
+$route['merchant/supervisor/get/(:num)'] = 'MerchantSupervisorController/getSupervisorJson/$1';
+$route['merchant/supervisor/update/(:num)'] = 'MerchantSupervisorController/updateMerchantSpv/$1';
 $route['merchant/supervisor/search'] = 'MerchantManagementController/searchMerchants';
-$route['merchant/manage/list/reset/(:num)'] = 'MerchantManagementController/resetListMerchants/$1';
-$route['merchant/manage/list/(:num)'] = 'MerchantManagementController/listMerchants/$1';
+$route['merchant/manage/list/reset/(:num)'] = 'MerchantSupervisorController/resetListMerchants/$1';
+$route['merchant/manage/list/(:num)'] = 'MerchantSupervisorController/listMerchants/$1';
 $route['merchant/manage/edit/(:num)'] = 'MerchantManagementController/editMerchant/$1';
 $route['merchant/manage/update/(:num)'] = 'MerchantManagementController/updateMerchant/$1';
 $route['merchant/manage/search'] = 'MerchantManagementController/searchMerchants';
@@ -182,10 +182,10 @@ $route['merchant/setting-cashout-fee/edit/(:num)/(:num)'] = 'MerchantFeeControll
 $route['merchant/setting-cashout-fee/delete/(:num)/(:num)'] = 'MerchantFeeController/deleteSettingCashoutFee/$1/$2';
 $route['merchant/setting-cashout-fee/groups'] = 'MerchantFeeController/getCashoutChannelGroups';
 
-$route['merchant/balance/credit'] = 'MerchantManagementController/createCreditBalance';
-$route['merchant/balance/debit'] = 'MerchantManagementController/createDebitBalance';
-$route['merchant/permissions/(:any)'] = 'MerchantManagementController/fetchMerchantPermissions/$1';
-$route['merchant/permissions/(:any)/save'] = 'MerchantManagementController/saveDelegation/$1';
+$route['merchant/balance/credit'] = 'MerchantBalanceController/createCreditBalance';
+$route['merchant/balance/debit'] = 'MerchantBalanceController/createDebitBalance';
+$route['merchant/permissions/(:any)'] = 'MerchantSupervisorController/fetchMerchantPermissions/$1';
+$route['merchant/permissions/(:any)/save'] = 'MerchantSupervisorController/saveDelegation/$1';
 
 // ── MerchantSubAccountController ─────────────────────────────────────────────
 $route['merchant/sub-account'] = 'MerchantSubAccountController/Submerchant';
