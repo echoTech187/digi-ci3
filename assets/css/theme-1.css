@@ -5497,7 +5497,7 @@ div.dataTables_processing[style*="display: block"] {
 /* Smooth Modal Entrance */
 .modal.fade .modal-dialog {
     transform: scale(0.95);
-    transition: transform 0.2s ease-out, opacity 0.2s ease-out;
+    transition: transform 0.2s ease-out;
 }
 
 .modal.show .modal-dialog {
