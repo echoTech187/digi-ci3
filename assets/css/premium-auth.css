@@ -20,16 +20,16 @@ body {
     margin: 0 !important;
     color: #E2E8F0 !important;
     display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
+    flex-direction: column !important;
     position: relative !important;
-    overflow: hidden !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
 }
 
 /* Animated Glowing Background Blobs */
 body::before, body::after {
     content: '' !important;
-    position: absolute !important;
+    position: fixed !important; /* Fixed so they don't scroll */
     width: 600px !important;
     height: 600px !important;
     border-radius: 50% !important;
@@ -39,13 +39,13 @@ body::before, body::after {
 }
 
 body::before {
-    background: rgba(99, 102, 241, 0.3) !important; /* Indigo glow */
+    background: rgba(99, 102, 241, 0.25) !important; 
     top: -10% !important;
     left: -10% !important;
 }
 
 body::after {
-    background: rgba(168, 85, 247, 0.25) !important; /* Purple glow */
+    background: rgba(168, 85, 247, 0.2) !important;
     bottom: -10% !important;
     right: -10% !important;
     animation-delay: -10s !important;
@@ -59,10 +59,12 @@ body::after {
 
 .container {
     max-width: 1200px !important;
+    flex: 1 !important;
     display: flex !important;
+    flex-direction: column !important;
     justify-content: center !important;
     align-items: center !important;
-    min-height: 100vh !important;
+    padding: 2rem 1rem !important; /* Safe area so card never touches edges */
     position: relative !important;
     z-index: 10 !important;
 }
@@ -71,7 +73,7 @@ body::after {
 @keyframes cardEntrance {
     from {
         opacity: 0;
-        transform: translateY(40px) scale(0.95);
+        transform: translateY(30px) scale(0.98);
     }
     to {
         opacity: 1;
@@ -82,10 +84,10 @@ body::after {
 /* Glassmorphism Login Card */
 .login-wrapper {
     width: 100% !important;
+    margin: auto !important; /* Prevents flexbox clipping bug when taller than screen */
     display: flex !important;
     justify-content: center !important;
     align-items: center !important;
-    padding: 1rem !important;
     background: transparent !important;
 }
 
@@ -102,8 +104,7 @@ body::after {
     width: 100% !important;
     max-width: 960px !important;
     min-height: 520px !important;
-    margin: 0 auto !important;
-    animation: cardEntrance 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+    animation: cardEntrance 1s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
 }
 
 /* Left side branding area */
@@ -201,7 +202,7 @@ body::after {
 
 /* Form Controls with Micro-interactions */
 .form-group-custom {
-    margin-bottom: 2rem !important;
+    margin-bottom: 1.5rem !important;
     position: relative !important;
     transition: transform 0.3s ease !important;
 }
@@ -215,7 +216,7 @@ body::after {
     position: static !important;
     font-weight: 500 !important;
     color: #94a3b8 !important;
-    margin: 0 0 10px 4px !important;
+    margin: 0 0 8px 4px !important;
     padding: 0 !important;
     font-size: 0.95rem !important;
     line-height: 1 !important;
@@ -232,18 +233,19 @@ body::after {
 
 .form-control-custom {
     width: 100% !important;
-    padding: 1.2rem 1.25rem !important;
+    padding: 0.8rem 1rem !important; /* Fixed padding so text is vertically centered */
     margin: 0 !important;
     position: relative !important;
     z-index: 2 !important;
     background: rgba(15, 23, 42, 0.4) !important;
     border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    border-radius: 14px !important;
+    border-radius: 12px !important;
     color: #F8FAFC !important;
     font-family: inherit !important;
     font-size: 1rem !important;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
     line-height: 1.5 !important;
+    height: auto !important;
 }
 
 .form-control-custom:-webkit-autofill,
@@ -270,25 +272,26 @@ body::after {
 .g-recaptcha {
     display: flex !important;
     justify-content: center !important;
-    margin-top: 1rem !important;
-    margin-bottom: 2rem !important;
+    margin-top: 0.5rem !important;
+    margin-bottom: 1.5rem !important;
     width: 100% !important;
+    overflow: hidden !important; /* Prevent it from breaking the layout */
 }
 
 /* Premium Animated Button */
 .btn-login {
     width: 100% !important;
-    padding: 1.1rem !important;
+    padding: 1rem !important;
     background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%) !important;
     color: white !important;
     border: none !important;
-    border-radius: 14px !important;
+    border-radius: 12px !important;
     font-size: 1.05rem !important;
     font-weight: 600 !important;
     letter-spacing: 0.5px !important;
     cursor: pointer !important;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    margin-top: 0.5rem !important;
+    margin-top: 0 !important;
     position: relative !important;
     overflow: hidden !important;
     box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4), inset 0 1px 0 rgba(255,255,255,0.2) !important;
@@ -307,7 +310,7 @@ body::after {
 }
 
 .btn-login:hover {
-    transform: translateY(-3px) !important;
+    transform: translateY(-2px) !important;
     box-shadow: 0 8px 25px rgba(99, 102, 241, 0.6), inset 0 1px 0 rgba(255,255,255,0.2) !important;
 }
 
@@ -338,18 +341,16 @@ body::after {
     }
     .container {
         padding: 1rem !important;
-        align-items: flex-start !important; /* Allow scrolling if it overflows */
+        align-items: center !important; 
     }
     .login-wrapper {
         padding: 0 !important;
-        margin: 2rem 0 !important;
-        height: auto !important;
     }
     .login-card {
         flex-direction: column !important;
         min-height: auto !important;
         max-width: 100% !important;
-        border-radius: 20px !important;
+        border-radius: 24px !important;
         box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.5) !important;
     }
     .login-left {
@@ -357,14 +358,16 @@ body::after {
     }
     .login-right {
         width: 100% !important;
-        padding: 2.5rem 1.5rem !important; /* Reduce padding significantly for mobile */
+        padding: 2.5rem 1.5rem !important;
     }
     .login-title {
         font-size: 1.8rem !important;
+        text-align: center !important;
     }
     .login-subtitle {
         font-size: 0.9rem !important;
         margin-bottom: 1.5rem !important;
+        text-align: center !important;
     }
     .login-mobile-logo {
         display: flex !important;
@@ -374,15 +377,18 @@ body::after {
     .login-mobile-logo img {
         width: 64px !important;
         height: 64px !important;
+        filter: drop-shadow(0 4px 6px rgba(0,0,0,0.4)) !important;
     }
+}
+
+/* Extra small devices (prevent recaptcha overflow) */
+@media (max-width: 380px) {
     .g-recaptcha {
-        justify-content: center !important;
-        transform: scale(0.9); /* Scale down ReCaptcha to prevent horizontal overflow */
-        transform-origin: center;
-        margin-top: 0.5rem !important;
-        margin-bottom: 1rem !important;
+        transform: scale(0.85) !important;
+        transform-origin: center center !important;
+        margin: 0 !important;
     }
-    .form-control-custom {
-        padding: 1rem !important;
+    .login-right {
+        padding: 2rem 1rem !important;
     }
 }
