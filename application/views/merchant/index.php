@@ -6,9 +6,7 @@
             <h1 class="dt-page-title">Merchant Management</h1>
             <p class="dt-page-subtitle">View and manage all registered merchants and their balances.</p>
         </div>
-        <a href="<?= base_url('helpcenter#merchant') ?>" target="_blank" class="btn-dt-action btn-dt-action-primary border-0 text-white d-flex align-items-center shadow-sm text-decoration-none">
-            <i class="fas fa-book-open mr-2"></i> <span class="d-none d-md-block">Instructions Guide</span>
-        </a>
+        
     </div>
 
     <!-- Data Table Card -->
