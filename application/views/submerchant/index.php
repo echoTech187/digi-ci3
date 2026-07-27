@@ -78,31 +78,8 @@ $id = $this->uri->segment(3);
                 
                 <div class="modal-body p-0 bg-light">
                     <div class="d-flex g-0 w-100 flex-column flex-lg-row">
-                        <!-- Left Information Sidebar -->
-                        <div class="col-lg-4 p-4 d-flex flex-column justify-content-between mb-0" style="">
-                            <div>
-                                <div class="d-flex align-items-center mb-3">
-                                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mr-3 shadow-sm" style="width: 40px; height: 40px; background-color: rgba(0, 123, 255, 0.2) !important;">
-                                        <i class="fas fa-info-circle fa-lg text-primary"></i>
-                                    </div>
-                                    <h6 class="fw-bold text-primary mb-0" style="font-size: 15px;">Configuration Guide</h6>
-                                </div>
-                                <p class="text-muted small mb-4" style="font-size: 12px; line-height: 1.5;">Follow the instructions below to configure sub-account details, GVConnect credentials, and Virtual Accounts accurately.</p>
-                                
-                                <div class="d-flex flex-column gap-3">
-                                    <div class="bg-white p-3 rounded-4 shadow-sm border-0 mb-3" style="background-color: rgba(255, 255, 255, 0.03) !important; border: 1px solid rgba(255, 255, 255, 0.08) !important;">
-                                        <h6 class="fw-bold mb-1 d-flex align-items-center" style="font-size: 12.5px;"><i class="fas fa-sitemap text-warning mr-2"></i> 1. Hierarchy Integrity</h6>
-                                        <p class="text-muted mb-0" style="font-size: 11px; line-height: 1.5;">Sub-accounts operate as branch entities under the parent merchant's clearance and financial settlement umbrella.</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="bg-white p-3 rounded-4 shadow-sm border-0 mt-3 d-flex align-items-center" style="background-color: rgba(255, 255, 255, 0.03) !important; border: 1px solid rgba(255, 255, 255, 0.08) !important;">
-                                <i class="fas fa-lightbulb text-warning fa-2x mr-3"></i>
-                                <span class="text-muted" style="font-size: 11px; line-height: 1.4;">Need help? Contact system administrator for advanced routing configurations.</span>
-                            </div>
-                        </div>
                         <!-- Right Form Area -->
-                        <div class="col-lg-8 p-4 bg-light mb-0">
+                        <div class="col-lg-12 p-4 bg-light mb-0">
                             <div class="row g-4 mb-4">
                                 <div class="col-md-12 mb-4">
                                     <div class="card h-100 border-0 shadow-none p-4 rounded-4">

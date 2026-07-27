@@ -164,32 +164,8 @@
                 <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>">
                 <div class="modal-body p-0 bg-light">
                     <div class="d-flex g-0 w-100 flex-column flex-lg-row">
-                        <!-- Left Information Sidebar -->
-                        <div class="col-lg-4 p-4 d-flex flex-column justify-content-between mb-0" style="background: var(--bg-body); border-right: 1px solid rgba(255,255,255,0.05);">
-                            <div>
-                                <div class="d-flex align-items-center mb-3">
-                                    <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center mr-3 shadow-sm" style="width: 40px; height: 40px;">
-                                        <i class="fas fa-arrow-alt-circle-down fa-lg"></i>
-                                    </div>
-                                    <h6 class="fw-bold text-success mb-0" style="font-size: 15px;">Cash In Guide</h6>
-                                </div>
-                                <p class="text-muted small mb-4" style="font-size: 12px; line-height: 1.5;">Establish entry channels for customer deposits, Va dynamic routes, or static qris.</p>
-                                
-                                <div class="d-flex flex-column gap-3">
-                                    <div class="p-3 rounded-4 shadow-sm border-0 mb-3" style="background-color: rgba(255, 255, 255, 0.03) !important; border: 1px solid rgba(255, 255, 255, 0.08) !important; border-radius: 12px;">
-                                        <h6 class="fw-bold mb-1 d-flex align-items-center" style="font-size: 12px;"><i class="fas fa-money-bill-wave text-warning mr-2"></i> 1. Fees Setup</h6>
-                                        <p class="text-muted mb-0" style="font-size: 11px; line-height: 1.4;">Percentage fee represents dynamic slice, while Fixed represents flat fee rate.</p>
-                                    </div>
-                                    <div class="p-3 rounded-4 shadow-sm border-0 mb-3" style="background-color: rgba(255, 255, 255, 0.03) !important; border: 1px solid rgba(255, 255, 255, 0.08) !important; border-radius: 12px;">
-                                        <h6 class="fw-bold mb-1 d-flex align-items-center" style="font-size: 12px;"><i class="fas fa-calendar-alt text-info mr-2"></i> 2. Settlement</h6>
-                                        <p class="text-muted mb-0" style="font-size: 11px; line-height: 1.4;">Number of days wait time before balance converts to merchant clearable funds (e.g. 1 day).</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
                         <!-- Right Form Area -->
-                        <div class="col-lg-8 p-4 bg-light mb-0 text-dark">
+                        <div class="col-lg-12 p-4 bg-light mb-0 text-dark">
                             <?php if(validation_errors()): ?>
                                 <div class="alert alert-danger mb-4 shadow-sm border-0 small">
                                     <i class="fas fa-exclamation-triangle "></i> <?= validation_errors(); ?>
@@ -288,28 +264,8 @@
                 <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>">
                 <div class="modal-body p-0 bg-light">
                     <div class="d-flex g-0 w-100 flex-column flex-lg-row">
-                        <!-- Left Information Sidebar -->
-                        <div class="col-lg-4 p-4 d-flex flex-column justify-content-between mb-0" style="background: var(--bg-body); border-right: 1px solid rgba(255,255,255,0.05);">
-                            <div>
-                                <div class="d-flex align-items-center mb-3">
-                                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mr-3 shadow-sm" style="width: 40px; height: 40px;">
-                                        <i class="fas fa-info-circle fa-lg"></i>
-                                    </div>
-                                    <h6 class="fw-bold text-primary mb-0" style="font-size: 15px;">Modification Guide</h6>
-                                </div>
-                                <p class="text-muted small mb-4" style="font-size: 12px; line-height: 1.5;">Update payment channels. Please double check values before committing changes.</p>
-                                
-                                <div class="d-flex flex-column gap-3">
-                                    <div class="p-3 rounded-4 shadow-sm border-0 mb-3" style="background-color: rgba(255, 255, 255, 0.03) !important; border: 1px solid rgba(255, 255, 255, 0.08) !important; border-radius: 12px;">
-                                        <h6 class="fw-bold mb-1 d-flex align-items-center" style="font-size: 12px;"><i class="fas fa-exclamation-circle text-warning mr-2"></i> Channel ID</h6>
-                                        <p class="text-muted mb-0" style="font-size: 11px; line-height: 1.4;">Channel IDs are read-only to maintain relational integrity in operational ledgers.</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
                         <!-- Right Form Area -->
-                        <div class="col-lg-8 p-4 bg-light mb-0 text-dark">
+                        <div class="col-lg-12 p-4 bg-light mb-0 text-dark">
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label class="dt-more-label mb-2">Channel ID</label>

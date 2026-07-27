@@ -142,36 +142,8 @@
                     </div>
                     <div class="modal-body p-0">
                         <div class="d-flex g-0 w-100 flex-column flex-lg-row">
-                            <!-- Left Column: Instructions Guide -->
-                            <div class="col-lg-5 p-4 d-flex flex-column justify-content-between mb-0" style="">
-                                <div>
-                                    <div class="d-flex align-items-center mb-3">
-                                        <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center mr-3 shadow-sm" style="width: 36px; height: 36px; background-color: rgba(40, 167, 69, 0.2) !important;">
-                                            <i class="fas fa-book-open text-success"></i>
-                                        </div>
-                                        <h6 class="fw-bold text-success mb-0" style="font-size: 14px;">Credit Guide</h6>
-                                    </div>
-                                    <p class="text-muted small mb-4" style="font-size: 12px; line-height: 1.5;">Guide for manual balance adjustments:</p>
-                                    
-                                    <div class="d-flex flex-column gap-3">
-                                        <div class="p-3 rounded-4 shadow-sm border-0 mb-3" style="background-color: rgba(255, 255, 255, 0.03) !important; border: 1px solid rgba(255, 255, 255, 0.08) !important; border-radius: 12px;">
-                                            <h6 class="fw-bold mb-1 d-flex align-items-center" style="font-size: 12px;"><i class="fas fa-user-check text-warning mr-2"></i> 1. Merchant Identity</h6>
-                                            <p class="text-muted mb-0" style="font-size: 11px; line-height: 1.4;">Verify the merchant's business name and ID carefully before executing any balance adjustment.</p>
-                                        </div>
-                                        <div class="p-3 rounded-4 shadow-sm border-0 mb-3" style="background-color: rgba(255, 255, 255, 0.03) !important; border: 1px solid rgba(255, 255, 255, 0.08) !important; border-radius: 12px;">
-                                            <h6 class="fw-bold mb-1 d-flex align-items-center" style="font-size: 12px;"><i class="fas fa-file-invoice text-info mr-2"></i> 2. Precise Auditing</h6>
-                                            <p class="text-muted mb-0" style="font-size: 11px; line-height: 1.4;">Manual transactions require clear descriptions. Explain why you are crediting the merchant's balance.</p>
-                                        </div>
-                                        <div class="p-3 rounded-4 shadow-sm border-0 mb-3" style="background-color: rgba(255, 255, 255, 0.03) !important; border: 1px solid rgba(255, 255, 255, 0.08) !important; border-radius: 12px;">
-                                            <h6 class="fw-bold mb-1 d-flex align-items-center" style="font-size: 12px;"><i class="fas fa-bolt text-success mr-2"></i> 3. Instant Execution</h6>
-                                            <p class="text-muted mb-0" style="font-size: 11px; line-height: 1.4;">Credits are applied to the active wallet instantly. This operation is recorded and cannot be automatically undone.</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
                             <!-- Right Column: The Form -->
-                            <div class="col-lg-7 p-4 bg-light mb-0">
+                            <div class="col-lg-12 p-4 bg-light mb-0">
                                 <form id="creditBalanceForm">
                                     <div class="mb-4">
                                         <label class="form-label text-muted small fw-bold">Merchant Name</label>
@@ -233,36 +205,8 @@
                     </div>
                     <div class="modal-body p-0">
                         <div class="d-flex g-0 w-100 flex-column flex-lg-row">
-                            <!-- Left Column: Instructions Guide -->
-                            <div class="col-lg-5 p-4 d-flex flex-column justify-content-between mb-0" style="">
-                                <div>
-                                    <div class="d-flex align-items-center mb-3">
-                                        <div class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center mr-3 shadow-sm" style="width: 36px; height: 36px; background-color: rgba(220, 53, 69, 0.2) !important;">
-                                            <i class="fas fa-book-open text-danger"></i>
-                                        </div>
-                                        <h6 class="fw-bold text-danger mb-0" style="font-size: 14px;">Debit Guide</h6>
-                                    </div>
-                                    <p class="text-muted small mb-4" style="font-size: 12px; line-height: 1.5;">Guide for manual balance deductions:</p>
-                                    
-                                    <div class="d-flex flex-column gap-3">
-                                        <div class="p-3 rounded-4 shadow-sm border-0 mb-3" style="background-color: rgba(255, 255, 255, 0.03) !important; border: 1px solid rgba(255, 255, 255, 0.08) !important; border-radius: 12px;">
-                                            <h6 class="fw-bold mb-1 d-flex align-items-center" style="font-size: 12px;"><i class="fas fa-info-circle text-warning mr-2"></i> 1. Balance Availability</h6>
-                                            <p class="text-muted mb-0" style="font-size: 11px; line-height: 1.4;">Ensure the merchant's available balance is sufficient to cover the debit adjustment to avoid a negative balance.</p>
-                                        </div>
-                                        <div class="p-3 rounded-4 shadow-sm border-0 mb-3" style="background-color: rgba(255, 255, 255, 0.03) !important; border: 1px solid rgba(255, 255, 255, 0.08) !important; border-radius: 12px;">
-                                            <h6 class="fw-bold mb-1 d-flex align-items-center" style="font-size: 12px;"><i class="fas fa-file-contract text-info mr-2"></i> 2. Audit Trail</h6>
-                                            <p class="text-muted mb-0" style="font-size: 11px; line-height: 1.4;">Enter a detailed explanation for the balance deduction (e.g. system correction, penalty, fee recovery).</p>
-                                        </div>
-                                        <div class="p-3 rounded-4 shadow-sm border-0 mb-3" style="background-color: rgba(255, 255, 255, 0.03) !important; border: 1px solid rgba(255, 255, 255, 0.08) !important; border-radius: 12px;">
-                                            <h6 class="fw-bold mb-1 d-flex align-items-center" style="font-size: 12px;"><i class="fas fa-minus-square text-danger mr-2"></i> 3. Immediate Effect</h6>
-                                            <p class="text-muted mb-0" style="font-size: 11px; line-height: 1.4;">Funds are deducted from the merchant's balance in real-time. This action is permanently logged and audited.</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
                             <!-- Right Column: The Form -->
-                            <div class="col-lg-7 p-4 bg-light mb-0">
+                            <div class="col-lg-12 p-4 bg-light mb-0">
                                 <form id="debitBalanceForm">
                                     <div class="mb-4">
                                         <label class="form-label text-muted small fw-bold">Merchant Name</label>
@@ -326,36 +270,8 @@
                         <form id="delegateForm" class="mb-0 w-100">
                             <input type="hidden" id="delegateMerchantId" name="merchantId">
                             <div class="d-flex g-0 w-100 flex-column flex-lg-row">
-                                <!-- Left Column: Instructions Guide -->
-                                <div class="col-lg-5 p-4 d-flex flex-column justify-content-between mb-0" style="">
-                                    <div>
-                                        <div class="d-flex align-items-center mb-3">
-                                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mr-3 shadow-sm" style="width: 36px; height: 36px;">
-                                                <i class="fas fa-book-open"></i>
-                                            </div>
-                                            <h6 class="fw-bold text-primary mb-0" style="font-size: 14px;">Delegation Guide</h6>
-                                        </div>
-                                        <p class="text-muted small mb-4" style="font-size: 12px; line-height: 1.5;">Guide for managing merchant permission ceilings:</p>
-                                        
-                                        <div class="d-flex flex-column gap-3">
-                                            <div class="p-3 rounded-4 shadow-sm border-0 mb-3" style="background-color: rgba(255, 255, 255, 0.03) !important; border: 1px solid rgba(255, 255, 255, 0.08) !important; border-radius: 12px;">
-                                                <h6 class="fw-bold mb-1 d-flex align-items-center" style="font-size: 12px;"><i class="fas fa-shield-alt text-warning mr-2"></i> 1. Permission Ceiling</h6>
-                                                <p class="text-muted mb-0" style="font-size: 11px; line-height: 1.4;">You can only delegate permissions that you personally possess. You cannot grant access beyond your clearance.</p>
-                                            </div>
-                                            <div class="p-3 rounded-4 shadow-sm border-0 mb-3" style="background-color: rgba(255, 255, 255, 0.03) !important; border: 1px solid rgba(255, 255, 255, 0.08) !important; border-radius: 12px;">
-                                                <h6 class="fw-bold mb-1 d-flex align-items-center" style="font-size: 12px;"><i class="fas fa-sitemap text-info mr-2"></i> 2. Inheritance &amp; Flow</h6>
-                                                <p class="text-muted mb-0" style="font-size: 11px; line-height: 1.4;">Granting a permission allows the merchant to use the feature and further delegate it down their hierarchy.</p>
-                                            </div>
-                                            <div class="p-3 rounded-4 shadow-sm border-0 mb-3" style="background-color: rgba(255, 255, 255, 0.03) !important; border: 1px solid rgba(255, 255, 255, 0.08) !important; border-radius: 12px;">
-                                                <h6 class="fw-bold mb-1 d-flex align-items-center" style="font-size: 12px;"><i class="fas fa-sliders-h text-success mr-2"></i> 3. Granular Controls</h6>
-                                                <p class="text-muted mb-0" style="font-size: 11px; line-height: 1.4;">Toggle between Grant (Allow) and Deny (Block) to override default role permissions instantly.</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
                                 <!-- Right Column: Permissions List -->
-                                <div class="col-lg-7 p-4 bg-light mb-0">
+                                <div class="col-lg-12 p-4 bg-light mb-0">
                                     <div class="d-flex align-items-center gap-2 mb-4">
                                         <div class="avatar-sm bg-warning-soft text-warning rounded-circle p-2 me-3" style="background-color: rgba(255, 193, 7, 0.1); width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
                                             <i class="fas fa-store text-warning"></i>

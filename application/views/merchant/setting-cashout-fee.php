@@ -194,40 +194,8 @@
                 <input type="hidden" name="ref_merchantId" id="ref_merchantId" value="<?= $merchant_id ?>">
                 <div class="modal-body p-0 bg-light">
                     <div class="d-flex g-0 w-100">
-                        <!-- Left Information Sidebar -->
-                        <div class="col-lg-4 p-4 d-flex flex-column justify-content-between mb-0 bg-dark-subtle" >
-                            <div>
-                                <div class="d-flex align-items-center mb-3">
-                                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mr-3 shadow-sm" style="width: 40px; height: 40px;">
-                                        <i class="fas fa-info-circle fa-lg"></i>
-                                    </div>
-                                    <h6 class="fw-bold text-primary mb-0" style="font-size: 15px;">Configuration Guide</h6>
-                                </div>
-                                <p class="text-muted small mb-4" style="font-size: 12px; line-height: 1.5;">Follow the instructions below to configure disbursement channels, fee structures, and transaction limits accurately.</p>
-                                
-                                <div class="d-flex flex-column gap-3">
-                                    <div class="bg-white p-3 rounded-4 shadow-sm border-0 mb-3">
-                                        <h6 class="fw-bold text-dark mb-1 d-flex align-items-center" style="font-size: 12.5px;"><i class="fas fa-network-wired text-primary mr-2"></i> 1. Channel Selection</h6>
-                                        <p class="text-muted mb-0" style="font-size: 11px; line-height: 1.5;">Select a Channel Group and External ID Default to populate and enable Specific Channel ID options.</p>
-                                    </div>
-                                    <div class="bg-white p-3 rounded-4 shadow-sm border-0 mb-3">
-                                        <h6 class="fw-bold text-dark mb-1 d-flex align-items-center" style="font-size: 12.5px;"><i class="fas fa-calculator text-primary mr-2"></i> 2. Fee Structure</h6>
-                                        <p class="text-muted mb-0" style="font-size: 11px; line-height: 1.5;">Choose Fixed for a flat rate, Percentage for a percentage deduction, or Both to apply both charges.</p>
-                                    </div>
-                                    <div class="bg-white p-3 rounded-4 shadow-sm border-0 mb-3">
-                                        <h6 class="fw-bold text-dark mb-1 d-flex align-items-center" style="font-size: 12.5px;"><i class="fas fa-shield-alt text-primary mr-2"></i> 3. Limits & Status</h6>
-                                        <p class="text-muted mb-0" style="font-size: 11px; line-height: 1.5;">Set the minimum and maximum allowable transaction boundaries and set operational status.</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="bg-white p-3 rounded-4 shadow-sm border-0 mt-3 d-flex align-items-center">
-                                <i class="fas fa-lightbulb text-warning fa-2x mr-3"></i>
-                                <span class="text-muted" style="font-size: 11px; line-height: 1.4;">Need help? Contact system administrator for advanced routing configurations.</span>
-                            </div>
-                        </div>
-                        
                         <!-- Right Form Area -->
-                        <div class="col-lg-8 p-4 bg-light mb-0">
+                        <div class="col-lg-12 p-4 bg-light mb-0">
                             <div class="row g-4 mb-4">
                                 <div class="col-md-6">
                                     <div class="card h-100 border-0 shadow-none bg-white p-0 rounded-4">
@@ -355,40 +323,8 @@
             <form method="post" action="<?= base_url('merchant/setting-cashout-fee/bulk-create/' . $merchant_id); ?>">
                 <div class="modal-body p-0 bg-light">
                     <div class="d-flex g-0 w-100">
-                        <!-- Left Information Sidebar -->
-                        <div class="col-lg-4 p-4 d-flex flex-column justify-content-between mb-0 bg-dark-subtle" >
-                            <div>
-                                <div class="d-flex align-items-center mb-3">
-                                    <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center mr-3 shadow-sm" style="width: 40px; height: 40px;">
-                                        <i class="fas fa-bullhorn fa-lg"></i>
-                                    </div>
-                                    <h6 class="fw-bold text-success mb-0" style="font-size: 15px;">Bulk Settings Guide</h6>
-                                </div>
-                                <p class="text-muted small mb-4" style="font-size: 12px; line-height: 1.5;">Apply uniform fee configurations across multiple channels simultaneously with duplicate protection.</p>
-                                
-                                <div class="d-flex flex-column gap-3">
-                                    <div class="bg-white p-3 rounded-4 shadow-sm border-0 mb-3">
-                                        <h6 class="fw-bold text-dark mb-1 d-flex align-items-center" style="font-size: 12.5px;"><i class="fas fa-bullseye text-success mr-2"></i> 1. Target Scope</h6>
-                                        <p class="text-muted mb-0" style="font-size: 11px; line-height: 1.5;">Configurations apply uniformly to ALL channels in the selected Group and External ID Default.</p>
-                                    </div>
-                                    <div class="bg-white p-3 rounded-4 shadow-sm border-0 mb-3">
-                                        <h6 class="fw-bold text-dark mb-1 d-flex align-items-center" style="font-size: 12.5px;"><i class="fas fa-shield-alt text-success mr-2"></i> 2. Duplicate Protection</h6>
-                                        <p class="text-muted mb-0" style="font-size: 11px; line-height: 1.5;">Channels with existing fee configurations will be automatically skipped to prevent overwriting.</p>
-                                    </div>
-                                    <div class="bg-white p-3 rounded-4 shadow-sm border-0 mb-3">
-                                        <h6 class="fw-bold text-dark mb-1 d-flex align-items-center" style="font-size: 12.5px;"><i class="fas fa-coins text-success mr-2"></i> 3. Fee & Limits</h6>
-                                        <p class="text-muted mb-0" style="font-size: 11px; line-height: 1.5;">Configure uniform fee types, flat rates, percentage deductions, and transaction limits.</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="bg-white p-3 rounded-4 shadow-sm border-0 mt-3 d-flex align-items-center">
-                                <i class="fas fa-check-circle text-success fa-2x mr-3"></i>
-                                <span class="text-muted" style="font-size: 11px; line-height: 1.4;">Batch operations are processed securely within a single database transaction.</span>
-                            </div>
-                        </div>
-                        
                         <!-- Right Form Area -->
-                        <div class="col-lg-8 p-4 bg-light mb-0">
+                        <div class="col-lg-12 p-4 bg-light mb-0">
                             <div class="row g-4 mb-4">
                                 <div class="col-md-6">
                                     <div class="card h-100 border-0 shadow-none bg-white p-0 rounded-4">

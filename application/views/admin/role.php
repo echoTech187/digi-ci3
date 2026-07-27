@@ -91,32 +91,8 @@
             <form action="<?= base_url('access-control/roles'); ?>" method="post">
                 <div class="modal-body p-0 bg-light">
                     <div class="d-flex g-0 w-100 flex-column flex-lg-row">
-                        <!-- Left Information Sidebar -->
-                        <div class="col-lg-4 p-4 d-flex flex-column justify-content-between mb-0" style="background: var(--bg-body); border-right: 1px solid rgba(255,255,255,0.05);">
-                            <div>
-                                <div class="d-flex align-items-center mb-3">
-                                    <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center mr-3 shadow-sm" style="width: 40px; height: 40px;">
-                                        <i class="fas fa-user-shield fa-lg"></i>
-                                    </div>
-                                    <h6 class="fw-bold text-success mb-0" style="font-size: 15px;">Role Security Guide</h6>
-                                </div>
-                                <p class="text-muted small mb-4" style="font-size: 12px; line-height: 1.5;">Establish role parameters for fine-grained system access controls.</p>
-                                
-                                <div class="d-flex flex-column gap-3">
-                                    <div class="p-3 rounded-4 shadow-sm border-0 mb-3" style="background-color: rgba(255, 255, 255, 0.03) !important; border: 1px solid rgba(255, 255, 255, 0.08) !important; border-radius: 12px;">
-                                        <h6 class="fw-bold mb-1 d-flex align-items-center" style="font-size: 12px;"><i class="fas fa-tag text-warning mr-2"></i> 1. Role Name</h6>
-                                        <p class="text-muted mb-0" style="font-size: 11px; line-height: 1.4;">Enter a logical title mapping to organizational tasks (e.g., Finance Admin).</p>
-                                    </div>
-                                    <div class="p-3 rounded-4 shadow-sm border-0 mb-3" style="background-color: rgba(255, 255, 255, 0.03) !important; border: 1px solid rgba(255, 255, 255, 0.08) !important; border-radius: 12px;">
-                                        <h6 class="fw-bold mb-1 d-flex align-items-center" style="font-size: 12px;"><i class="fas fa-key text-info mr-2"></i> 2. Authorization</h6>
-                                        <p class="text-muted mb-0" style="font-size: 11px; line-height: 1.4;">After creating the role, assign specific system endpoints inside the role Access Rights matrix.</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
                         <!-- Right Form Area -->
-                        <div class="col-lg-8 p-4 bg-light mb-0">
+                        <div class="col-lg-12 p-4 bg-light mb-0">
                             <div class="form-group mb-0">
                                 <label class="dt-more-label mb-2">Role Name</label>
                                 <input type="text" class="dt-more-input" id="role" name="role" placeholder="e.g. Finance Admin" required>
