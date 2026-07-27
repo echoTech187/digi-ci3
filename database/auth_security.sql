@@ -19,5 +19,5 @@ CREATE TABLE IF NOT EXISTS `admin_known_ips` (
   `last_seen` DATETIME NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uq_admin_ip` (`admin_id`, `ip_address`),
-  INDEX `idx_admin_id` (`admin_id`)
+  INDEX `idx_admin_last_seen` (`admin_id`, `last_seen`) -- Optimized for get_known_ips ORDER BY last_seen
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
