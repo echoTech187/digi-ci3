@@ -1,0 +1,200 @@
+/* 
+ * ========================================================
+ * DIGI-CI3 PREMIUM THEME OVERRIDE
+ * Modern Fintech UI/UX Aesthetics
+ * ========================================================
+ */
+
+/* 1. TYPOGRAPHY: Inter Font */
+body, h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6, .btn, .table, p, a, span {
+    font-family: 'Inter', sans-serif !important;
+}
+
+/* 2. BACKGROUND & SURFACES */
+body#page-top {
+    background-color: #f8fafc !important; /* Soft slate background */
+}
+
+/* 3. SIDEBAR (Midnight Indigo) */
+.sidebar {
+    background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%) !important;
+    box-shadow: 4px 0 15px rgba(0, 0, 0, 0.05);
+}
+.sidebar .nav-item .nav-link {
+    color: #cbd5e1 !important;
+    transition: all 0.3s ease;
+    border-left: 3px solid transparent;
+}
+.sidebar .nav-item.active .nav-link {
+    color: #ffffff !important;
+    font-weight: 600;
+    background: rgba(255,255,255,0.05);
+    border-left: 3px solid #6366f1; /* Indigo accent */
+}
+.sidebar .nav-item .nav-link:hover {
+    color: #ffffff !important;
+    background: rgba(255,255,255,0.08);
+    transform: translateX(4px); /* Micro-interaction */
+}
+.sidebar-brand-text {
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
+/* 4. TOPBAR (Glassmorphism) */
+.topbar {
+    background: rgba(255, 255, 255, 0.85) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03) !important;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+/* 5. CARDS (Soft Depth & Rounded) */
+.card {
+    border: none !important;
+    border-radius: 12px !important;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025) !important;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.card:hover {
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+    transform: translateY(-2px);
+}
+.card-header {
+    background-color: transparent !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+    padding-top: 1.25rem !important;
+    padding-bottom: 1.25rem !important;
+}
+.card-header h6 {
+    font-weight: 700 !important;
+    color: #1e293b !important;
+}
+
+/* 6. BUTTONS (Micro-animations) */
+.btn {
+    border-radius: 8px !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.3px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+}
+.btn:active {
+    transform: translateY(1px);
+    box-shadow: none !important;
+}
+
+/* Customizing Primary Button */
+.btn-primary {
+    background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%) !important;
+    border: none !important;
+}
+.btn-primary:hover {
+    background: linear-gradient(135deg, #4338ca 0%, #3730a3 100%) !important;
+}
+
+/* 7. DATATABLES (Elegant Tables) */
+.table {
+    color: #334155;
+}
+.table thead th {
+    border-top: none !important;
+    border-bottom: 2px solid #e2e8f0 !important;
+    background-color: #f8fafc;
+    color: #64748b;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+    padding: 1rem;
+}
+.table tbody td {
+    border-bottom: 1px solid #f1f5f9;
+    padding: 1rem;
+    vertical-align: middle;
+}
+.table-bordered {
+    border: none !important;
+}
+.table-bordered td, .table-bordered th {
+    border: none !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+}
+.table-hover tbody tr:hover {
+    background-color: #f1f5f9 !important;
+    transition: background-color 0.2s ease;
+}
+
+/* Highlight / Badges inside Tables */
+.badge {
+    padding: 0.4em 0.8em;
+    border-radius: 6px;
+    font-weight: 600;
+}
+.badge-success {
+    background-color: #dcfce7 !important;
+    color: #166534 !important;
+}
+.badge-danger {
+    background-color: #fee2e2 !important;
+    color: #991b1b !important;
+}
+.badge-warning {
+    background-color: #fef3c7 !important;
+    color: #92400e !important;
+}
+.badge-info {
+    background-color: #dbeafe !important;
+    color: #1e40af !important;
+}
+
+/* DataTables Controls (Pagination & Search) */
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    border-radius: 6px !important;
+    padding: 0.3em 0.8em !important;
+    margin-left: 2px;
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button.current {
+    background: #4f46e5 !important;
+    color: white !important;
+    border: none !important;
+}
+.dataTables_wrapper .dataTables_filter input {
+    border-radius: 20px;
+    padding: 0.4rem 1rem;
+    border: 1px solid #cbd5e1;
+}
+.dataTables_wrapper .dataTables_filter input:focus {
+    outline: none;
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+}
+
+/* 8. FORMS & INPUTS */
+.form-control {
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    transition: all 0.2s ease;
+}
+.form-control:focus {
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15) !important;
+}
+
+/* Modal Customization */
+.modal-content {
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+.modal-header {
+    border-bottom: 1px solid #f1f5f9;
+}
+.modal-footer {
+    border-top: 1px solid #f1f5f9;
+}
