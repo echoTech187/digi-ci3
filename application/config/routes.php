@@ -167,20 +167,20 @@ $route['merchant/manage/submerchant-ajax/(:num)'] = 'MerchantManagementControlle
 $route['merchant/manage/overview-ajax/(:num)'] = 'MerchantManagementController/detailOverviewAjax/$1';
 
 // Cashin Fee Setting Routes
-$route['merchant/setting-cashin-fee/(:num)'] = 'MerchantManagementController/settingcashinfee/$1';
-$route['merchant/setting-cashin-fee/create'] = 'MerchantManagementController/createSettingCashinFee';
-$route['merchant/setting-cashin-fee/bulk-create/(:num)'] = 'MerchantManagementController/bulkCreateSettingCashinFee/$1';
-$route['merchant/setting-cashin-fee/edit/(:num)/(:num)'] = 'MerchantManagementController/editSettingCashinFee/$1/$2';
-$route['merchant/setting-cashin-fee/delete/(:num)/(:num)'] = 'MerchantManagementController/deleteSettingCashinFee/$1/$2';
-$route['merchant/setting-cashin-fee/groups'] = 'MerchantManagementController/getCashinChannelGroups';
+$route['merchant/setting-cashin-fee/(:num)'] = 'MerchantFeeController/settingcashinfee/$1';
+$route['merchant/setting-cashin-fee/create'] = 'MerchantFeeController/createSettingCashinFee';
+$route['merchant/setting-cashin-fee/bulk-create/(:num)'] = 'MerchantFeeController/bulkCreateSettingCashinFee/$1';
+$route['merchant/setting-cashin-fee/edit/(:num)/(:num)'] = 'MerchantFeeController/editSettingCashinFee/$1/$2';
+$route['merchant/setting-cashin-fee/delete/(:num)/(:num)'] = 'MerchantFeeController/deleteSettingCashinFee/$1/$2';
+$route['merchant/setting-cashin-fee/groups'] = 'MerchantFeeController/getCashinChannelGroups';
 
 // Cashout Fee Setting Routes
-$route['merchant/setting-cashout-fee/(:num)'] = 'MerchantManagementController/settingcashoutfee/$1';
-$route['merchant/setting-cashout-fee/create'] = 'MerchantManagementController/createSettingCashoutFee';
-$route['merchant/setting-cashout-fee/bulk-create/(:num)'] = 'MerchantManagementController/bulkCreateSettingCashoutFee/$1';
-$route['merchant/setting-cashout-fee/edit/(:num)/(:num)'] = 'MerchantManagementController/editSettingCashoutFee/$1/$2';
-$route['merchant/setting-cashout-fee/delete/(:num)/(:num)'] = 'MerchantManagementController/deleteSettingCashoutFee/$1/$2';
-$route['merchant/setting-cashout-fee/groups'] = 'MerchantManagementController/getCashoutChannelGroups';
+$route['merchant/setting-cashout-fee/(:num)'] = 'MerchantFeeController/settingcashoutfee/$1';
+$route['merchant/setting-cashout-fee/create'] = 'MerchantFeeController/createSettingCashoutFee';
+$route['merchant/setting-cashout-fee/bulk-create/(:num)'] = 'MerchantFeeController/bulkCreateSettingCashoutFee/$1';
+$route['merchant/setting-cashout-fee/edit/(:num)/(:num)'] = 'MerchantFeeController/editSettingCashoutFee/$1/$2';
+$route['merchant/setting-cashout-fee/delete/(:num)/(:num)'] = 'MerchantFeeController/deleteSettingCashoutFee/$1/$2';
+$route['merchant/setting-cashout-fee/groups'] = 'MerchantFeeController/getCashoutChannelGroups';
 
 $route['merchant/balance/credit'] = 'MerchantManagementController/createCreditBalance';
 $route['merchant/balance/debit'] = 'MerchantManagementController/createDebitBalance';
@@ -298,13 +298,13 @@ $route['health/db-check'] = 'HealthController/dbCheck';
 $route['notifications'] = 'DlqController/index';
 
 // ── Merchant Access Control (RBAC Portal Management) ──────────
-$route['merchant/access-control/roles']                             = 'MerchantManagementController/roles';
-$route['merchant/access-control/roles/reset']                       = 'MerchantManagementController/resetRoles';
-$route['merchant/access-control/roles/save']                        = 'MerchantManagementController/save_role';
-$route['merchant/access-control/roles/permissions/(:num)']          = 'MerchantManagementController/get_role_permissions_json/$1';
-$route['merchant/access-control/save_role']                         = 'MerchantManagementController/save_role';
-$route['merchant/access-control/get_role_permissions_json/(:num)'] = 'MerchantManagementController/get_role_permissions_json/$1';
-$route['merchant/access-control/menus']                             = 'MerchantManagementController/menus';
-$route['merchant/access-control/menus/save']                        = 'MerchantManagementController/save_menu';
-$route['merchant/access-control/save_menu']                         = 'MerchantManagementController/save_menu';
+$route['merchant/access-control/roles']                             = 'MerchantRbacController/roles';
+$route['merchant/access-control/roles/reset']                       = 'MerchantRbacController/resetRoles';
+$route['merchant/access-control/roles/save']                        = 'MerchantRbacController/save_role';
+$route['merchant/access-control/roles/permissions/(:num)']          = 'MerchantRbacController/get_role_permissions_json/$1';
+$route['merchant/access-control/save_role']                         = 'MerchantRbacController/save_role';
+$route['merchant/access-control/get_role_permissions_json/(:num)'] = 'MerchantRbacController/get_role_permissions_json/$1';
+$route['merchant/access-control/menus']                             = 'MerchantRbacController/menus';
+$route['merchant/access-control/menus/save']                        = 'MerchantRbacController/save_menu';
+$route['merchant/access-control/save_menu']                         = 'MerchantRbacController/save_menu';
 
