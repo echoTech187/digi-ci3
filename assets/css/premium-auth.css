@@ -110,7 +110,8 @@ body::after {
 
 /* Left side branding area */
 .login-left {
-    background: linear-gradient(145deg, rgba(30, 41, 59, 0.3) 0%, rgba(15, 23, 42, 0.6) 100%) !important;
+    background: linear-gradient(145deg, rgba(15, 23, 42, 0.75) 0%, rgba(11, 14, 20, 0.95) 100%),
+                url('../img/auth-illustration.png') center center/cover no-repeat !important;
     width: 50% !important;
     padding: 4rem !important;
     display: flex !important;
@@ -118,6 +119,7 @@ body::after {
     justify-content: space-between !important;
     position: relative !important;
     border-right: 1px solid rgba(255, 255, 255, 0.03) !important;
+    overflow: hidden !important;
 }
 
 .login-left::before, .login-left::after, .login-animation {
