@@ -10,7 +10,32 @@
             <button type="button" class="btn-dt-action btn-dt-action-success shadow-sm" data-toggle="modal" data-target="#newRoleModal" >
                 <i class="fas fa-plus mr-2"></i> Add New Role
             </button>
+            <button type="button" class="btn-dt-action btn-dt-action-primary border-0 d-flex align-items-center shadow-sm" id="toggleGuideBtn" >
+                <i class="fas fa-book-open mr-2"></i> <span class="d-none d-md-block">Instructions Guide</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ── Toggleable Page Instructional Drawer ── -->
+    <div class="drawer-overlay" id="instructionOverlay"></div>
+    <div class="drawer-right" id="instructionDrawer">
+        <div class="drawer-header">
+            <h6 class="drawer-title"><i class="fas fa-book mr-2"></i> Security Roles Guide</h6>
+            <button type="button" class="drawer-close" id="closeDrawerBtn">&times;</button>
+        </div>
+        <div class="drawer-body">
+            <p class="drawer-desc">This page allows administrators to define, create, and manage back-office security roles and their granular access profiles.</p>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-user-tag text-primary mr-2"></i> Security Roles</div>
+                <p class="drawer-card-text">Establish role classifications (e.g. Administrator, Supervisor, Finance Admin) to map to organizational duties.</p>
             </div>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-key text-primary mr-2"></i> Permission Management</div>
+                <p class="drawer-card-text">Click the Actions dropdown next to a role and select 'Access Rights' to toggle specific dashboard menu accesses.</p>
+            </div>
+        </div>
     </div>
 
     <?= form_error('role', '<div class="alert alert-danger border-0 shadow-sm mb-4"><i class="fas fa-exclamation-circle "></i>', '</div>'); ?>
@@ -137,7 +162,43 @@
 
 <script>
 $(document).ready(function() {
-    </script>
+    // Instructions Guide drawer handlers
+    $('#toggleGuideBtn').on('click', function() {
+        $('#instructionDrawer').addClass('open');
+        $('#instructionOverlay').addClass('open');
+        $('body').css('overflow', 'hidden'); // Lock background scroll
+    });
+
+    $('#closeDrawerBtn, #instructionOverlay').on('click', function() {
+        $('#instructionDrawer').removeClass('open');
+        $('#instructionOverlay').removeClass('open');
+        $('body').css('overflow', ''); // Unlock scroll
+    });
+
+    $('.delete-role-btn').on('click', function(e) {
+        e.preventDefault();
+        var href = $(this).data('href');
+        var roleName = $(this).data('role');
+        Swal.fire({
+            title: 'Delete Role',
+            text: 'Are you sure you want to delete the role "' + roleName + '"? This action cannot be undone.',
+            icon: 'warning',
+            showCancelButton: true,
+            customClass: {
+                popup: 'swal2-premium-popup',
+                confirmButton: 'swal2-premium-confirm',
+                cancelButton: 'swal2-premium-cancel'
+            },
+            buttonsStyling: false,
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = href;
+            }
+        });
+    });
+});
+</script>
 
 
 

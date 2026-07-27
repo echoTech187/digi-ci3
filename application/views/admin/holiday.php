@@ -3,6 +3,32 @@
 
 <!-- Begin Page Content -->
 <div class=" w-100">
+    <!-- ── Toggleable Page Instructional Drawer ── -->
+    <div class="drawer-overlay" id="instructionOverlay"></div>
+    <div class="drawer-right" id="instructionDrawer">
+        <div class="drawer-header">
+            <h6 class="drawer-title"><i class="fas fa-book mr-2"></i> Holiday Calendar Guide</h6>
+            <button type="button" class="drawer-close" id="closeDrawerBtn">&times;</button>
+        </div>
+        <div class="drawer-body">
+            <p class="drawer-desc">Configure public holidays that affect settlement delays and payout clearing schedules.</p>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-calendar-alt text-primary mr-2"></i> Holiday Setting</div>
+                <p class="drawer-card-text">Add national holidays to postpone settlement payouts automatically.</p>
+            </div>
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-calendar-day text-primary mr-2"></i> Calendar View</div>
+                <p class="drawer-card-text">Interactive FullCalendar representation to visually check upcoming non-working days.</p>
+            </div>
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-sync text-primary mr-2"></i> System Sync</div>
+                <p class="drawer-card-text">Automated calculation adjustments for T+1 / T+2 settlement schedules based on holiday dates.</p>
+            </div>
+        </div>
+    </div>
+
+
     <!-- ── Page Header ── -->
     <div class="dt-page-header d-flex align-items-center justify-content-between">
         <div>
@@ -10,7 +36,10 @@
             <p class="dt-page-subtitle">Manage and visualize public holidays across the system.</p>
         </div>
         <div class="d-flex align-items-center gap-2">
-            </div>
+            <button type="button" class="btn btn-light border shadow-sm mr-2 d-flex align-items-center" id="toggleGuideBtn">
+                <i class="fas fa-book-open text-primary mr-2"></i> <span class="d-none d-md-block">Instructions Guide</span>
+            </button>
+        </div>
     </div>
 
     <!-- Alerts Standardized to Swal2 Premium -->

@@ -26,13 +26,46 @@ $download_url = base_url('finance/virtual-account/download')
 
 <!-- ── Page Header ── -->
 <div>
+    <!-- ── Toggleable Page Instructional Drawer ── -->
+    <div class="drawer-overlay" id="instructionOverlay"></div>
+    <div class="drawer-right" id="instructionDrawer">
+        <div class="drawer-header">
+            <h6 class="drawer-title"><i class="fas fa-book mr-2"></i> Virtual Account Transactions Guide</h6>
+            <button type="button" class="drawer-close" id="closeDrawerBtn">&times;</button>
+        </div>
+        <div class="drawer-body">
+            <p class="drawer-desc">Overview of all Virtual Account (VA) transactions generated across all integrated banks.</p>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-search text-primary mr-2"></i> Global Search</div>
+                <p class="drawer-card-text">Look up by VA number, invoice number, or merchant transaction ID using the toolbar search.</p>
+            </div>
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-filter text-primary mr-2"></i> Date Filters</div>
+                <p class="drawer-card-text">Restrict queries by creation date range or settlement date range to isolate specific payment windows.</p>
+            </div>
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-bell text-primary mr-2"></i> Resend Notification</div>
+                <p class="drawer-card-text">Trigger webhook payload callbacks manually if the merchant server missed the original paid notification.</p>
+            </div>
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-calendar-check text-primary mr-2"></i> Settlement Info</div>
+                <p class="drawer-card-text">Check the date and time when the funds were settled into the merchant's available balance.</p>
+            </div>
+        </div>
+    </div>
+
+
     <div class="dt-page-header d-flex justify-content-between align-items-center mb-4">
         <div>
             <h4 class="dt-page-title mb-1">Virtual Account Transactions</h4>
             <p class="dt-page-subtitle mb-0">Track and manage all Virtual Account (VA) payment movements.</p>
         </div>
         <div class="d-flex align-items-center gap-2">
-            </div>
+            <button type="button" class="btn btn-light border shadow-sm mr-2 d-flex align-items-center" id="toggleGuideBtn">
+                <i class="fas fa-book-open text-primary mr-2"></i> <span class="d-none d-md-block">Instructions Guide</span>
+            </button>
+        </div>
     </div>
 
     <?php if ($this->session->flashdata('success')): ?>

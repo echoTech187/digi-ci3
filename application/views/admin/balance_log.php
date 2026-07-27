@@ -8,7 +8,37 @@
             <p class="dt-page-subtitle text-muted">Monitoring and auditing merchant balance configurations and hold adjustments.</p>
         </div>
         <div class="d-flex" style="gap:10px;">
+            <button type="button" class="btn-dt-action btn-dt-action-primary border-0 d-flex align-items-center shadow-sm" id="toggleGuideBtn" >
+                <i class="fas fa-book-open mr-2"></i> <span class="d-none d-md-block">Instructions Guide</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ── Toggleable Page Instructional Drawer ── -->
+    <div class="drawer-overlay" id="instructionOverlay"></div>
+    <div class="drawer-right" id="instructionDrawer">
+        <div class="drawer-header">
+            <h6 class="drawer-title"><i class="fas fa-book mr-2"></i> Balance Log Guide</h6>
+            <button type="button" class="drawer-close" id="closeDrawerBtn">&times;</button>
+        </div>
+        <div class="drawer-body">
+            <p class="drawer-desc">This ledger monitors and audits changes or settlements to merchant balance configurations.</p>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-clipboard-list text-primary mr-2"></i> Audit Trails</div>
+                <p class="drawer-card-text">Track the exact timestamp and merchant detail of when adjustments or balance settlements occurred.</p>
             </div>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-search text-primary mr-2"></i> Search Filter</div>
+                <p class="drawer-card-text">Search adjustment records instantly by entering the Merchant Name, ID, or other keywords into the search box.</p>
+            </div>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-coins text-primary mr-2"></i> Balance Settled</div>
+                <p class="drawer-card-text">Displays the exact amount added to the merchant's available balance in Rupiah (IDR) during the transaction or adjustment event.</p>
+            </div>
+        </div>
     </div>
 
     <!-- ── KPI Summary Cards ── -->

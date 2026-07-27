@@ -9,7 +9,42 @@ $id = $this->uri->segment(3);
             <h4 class="dt-page-title">Sub Accounts Management</h4>
             <p class="dt-page-subtitle">Managing sub accounts for <strong><?= $merchant[0]->c_name ?></strong></p>
         </div>
+        <button type="button" class="btn-dt-action btn-dt-action-primary border-0 d-flex align-items-center shadow-sm" id="toggleGuideBtn" >
+            <i class="fas fa-book-open mr-2"></i> <span class="d-none d-md-block">Instructions Guide</span>
+        </button>
+    </div>
+
+    <!-- ── Toggleable Page Instructional Drawer ── -->
+    <div class="drawer-overlay" id="instructionOverlay"></div>
+    <div class="drawer-right" id="instructionDrawer">
+        <div class="drawer-header">
+            <h6 class="drawer-title"><i class="fas fa-book mr-2"></i> Sub Accounts Guide</h6>
+            <button type="button" class="drawer-close" id="closeDrawerBtn">&times;</button>
         </div>
+        <div class="drawer-body">
+            <p class="drawer-desc">This dashboard allows you to manage the sub-merchant accounts hierarchy under <strong><?= $merchant[0]->c_name ?></strong>. You can register new branch accounts, modify configurations, or drill down into further sub-levels.</p>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-sitemap text-primary mr-2"></i> Hierarchy Management</div>
+                <p class="drawer-card-text">Create multi-level sub-accounts to represent branches or business units. Each sub-account operates under the parent's permission ceiling.</p>
+            </div>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-plus-circle text-primary mr-2"></i> Add Sub Account</div>
+                <p class="drawer-card-text">Click 'Add Sub Account' to register a new branch with dedicated credentials, GVConnect keys, and Static Virtual Accounts.</p>
+            </div>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-edit text-primary mr-2"></i> Edit Details</div>
+                <p class="drawer-card-text">Use the Action menu (⋮) to update an existing sub-account's profile, API keys, or Virtual Account numbers instantly.</p>
+            </div>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-exchange-alt text-primary mr-2"></i> Mutation Logs</div>
+                <p class="drawer-card-text">Directly access financial transaction and mutation records specific to any sub-account from the action menu.</p>
+            </div>
+        </div>
+    </div>
 
     <!-- ── Main Data Card ── -->
     <div class="card border-0 shadow-sm dt-card">

@@ -65,7 +65,9 @@
         <div class="col-lg-4">
             <!-- Instructions Guide -->
             <div class="card border-0 shadow-sm dt-card">
-                
+                <div class="card-header bg-white py-3 border-0 d-flex align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-book-open mr-2"></i> Instructions Guide</h6>
+                </div>
                 <div class="card-body p-4 pt-0">
                     <p class="text-muted small mb-4">Manage your personal profile and account credentials.</p>
                     <div class="p-3 mb-3" style="background:rgba(0,0,0,0.02); border:1px solid rgba(0,0,0,0.05); border-radius:12px;">

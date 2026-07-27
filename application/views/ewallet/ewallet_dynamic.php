@@ -8,7 +8,37 @@
             <p class="dt-page-subtitle">Track and analyze dynamic e-wallet payment activities in real-time.</p>
         </div>
         <div class="d-flex" style="gap:10px;">
+            <button type="button" class="btn-dt-action btn-dt-action-primary border-0 d-flex align-items-center shadow-sm" id="toggleGuideBtn" >
+                <i class="fas fa-book-open mr-2"></i> <span class="d-none d-md-block">Instructions Guide</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ── Toggleable Page Instructional Drawer ── -->
+    <div class="drawer-overlay" id="instructionOverlay"></div>
+    <div class="drawer-right" id="instructionDrawer">
+        <div class="drawer-header">
+            <h6 class="drawer-title"><i class="fas fa-book mr-2"></i> E-Wallet Dynamic Guide</h6>
+            <button type="button" class="drawer-close" id="closeDrawerBtn">&times;</button>
+        </div>
+        <div class="drawer-body">
+            <p class="drawer-desc">This ledger displays dynamically generated E-Wallet transactions and payment activities in real-time.</p>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-mobile-alt text-primary mr-2"></i> E-Wallet Transactions</div>
+                <p class="drawer-card-text">Monitor real-time dynamic wallet payments including OVO, DANA, LinkAja, and other active e-wallet channels.</p>
             </div>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-filter text-primary mr-2"></i> Filters & Statuses</div>
+                <p class="drawer-card-text">Filter transactions by date range, merchant, or statuses (Created, Paid, Pending, Failed, Expired).</p>
+            </div>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-vial text-primary mr-2"></i> Simulation & Actions</div>
+                <p class="drawer-card-text">Use the Action column to trigger or test dynamic channel callbacks directly in sandbox environments.</p>
+            </div>
+        </div>
     </div>
 
     <!-- ── KPI Summary Cards ── -->

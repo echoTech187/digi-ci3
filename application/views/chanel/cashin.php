@@ -8,7 +8,37 @@
             <p class="dt-page-subtitle">Manage and configure available cash-in payment channels and fee structures.</p>
         </div>
         <div class="d-flex align-items-center gap-2">
+            <button type="button" class="btn-dt-action btn-dt-action-primary border-0 d-flex align-items-center shadow-sm" id="toggleGuideBtn" >
+                <i class="fas fa-book-open mr-2"></i> <span class="d-none d-md-block">Instructions Guide</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ── Toggleable Page Instructional Drawer ── -->
+    <div class="drawer-overlay" id="instructionOverlay"></div>
+    <div class="drawer-right" id="instructionDrawer">
+        <div class="drawer-header">
+            <h6 class="drawer-title"><i class="fas fa-book mr-2"></i> Cash In Channels Guide</h6>
+            <button type="button" class="drawer-close" id="closeDrawerBtn">&times;</button>
+        </div>
+        <div class="drawer-body">
+            <p class="drawer-desc">This page allows administrators to manage and configure entry routes for customer deposits, including VA, E-Wallet, and QRIS.</p>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-arrow-alt-circle-down text-primary mr-2"></i> Deposit Setup</div>
+                <p class="drawer-card-text">Configure cash-in channels such as Virtual Accounts, QRIS, and E-Wallets. Define min/max amount constraints per transaction.</p>
             </div>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-server text-primary mr-2"></i> External ID Default</div>
+                <p class="drawer-card-text">Set the default external provider (routing/upstream provider key) for incoming transactions of each channel.</p>
+            </div>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-percentage text-primary mr-2"></i> Fees & Costs</div>
+                <p class="drawer-card-text">Configure either Fixed (flat rate) or Percentage-based fees applied to incoming transactions, along with settlement intervals.</p>
+            </div>
+        </div>
     </div>
 
     <!-- ── KPI Summary Cards ── -->
@@ -383,7 +413,239 @@
 
 <script>
     $(document).ready(function() {
-        </script>
+        // Instructions Guide drawer handlers
+        $('#toggleGuideBtn').on('click', function() {
+            $('#instructionDrawer').addClass('open');
+            $('#instructionOverlay').addClass('open');
+            $('body').css('overflow', 'hidden'); // Lock background scroll
+        });
+
+        $('#closeDrawerBtn, #instructionOverlay').on('click', function() {
+            $('#instructionDrawer').removeClass('open');
+            $('#instructionOverlay').removeClass('open');
+            $('body').css('overflow', ''); // Unlock scroll
+        });
+
+        // Standardize DataTables for premium look
+        var table = initServerDataTable('#cashinTable', "<?= base_url('channel/cashin') ?>", [
+                {data: 'no', orderable: false, className: 'text-center'},
+                {data: 'ref_cashinChannelId', className: 'font-weight-bold text-primary dt-id-column'},
+                {data: 'c_channelGroup', render: function(data){
+                    return '<span class="badge badge-light text-dark border px-2 py-1 text-uppercase" style="font-size:10px; letter-spacing:0.5px; border-radius:4px;">'+data+'</span>';
+                }},
+                {data: 'c_description', className: 'small text-muted'},
+                {data: 'c_externalIdDefault', className: 'text-dark'},
+                {data: 'c_feeType', render: function(data){
+                    var cls = (data.toLowerCase() === 'fixed') ? 'text-info' : 'text-primary';
+                    return '<span class="'+cls+' font-weight-bold" style="font-size:11px;">'+data.toUpperCase()+'</span>';
+                }},
+                {data: 'c_fee', className: 'font-weight-bold text-dark text-nowrap', render: function(data, type, row) {
+                    return 'Rp ' + number_format(data, 0, ',', '.');
+                }},
+                {data: 'c_feePercetange', className: 'font-weight-bold text-dark text-nowrap', render: function(data, type, row) {
+                    return  number_format(data, 0, ',', '.') + '%';
+                }},
+                {
+                    data: null, 
+                    orderable: false, 
+                    className: 'text-center',
+                    render: function(data, type, row) {
+                        return `
+                            <div class="dropdown">
+                                <button class="btn btn-sm rounded-circle p-2 border-0 bg-transparent" type="button" data-toggle="dropdown" data-boundary="viewport" aria-expanded="false">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-right shadow border-0 py-2">
+                                    <li>
+                                        <button type="button" class="dropdown-item edit-cashin" 
+                                            data-toggle="modal" data-target="#editChanelModal" 
+                                            data-id="${row.id}" 
+                                            data-channelid="${row.ref_cashinChannelId}"
+                                            data-group="${row.c_channelGroup}"
+                                            data-desc="${row.c_description || ''}"
+                                            data-ext="${row.c_externalIdDefault || ''}"
+                                            data-feetype="${row.c_feeType || ''}"
+                                            data-fee="${row.c_fee || 0}"
+                                            data-min="${row.c_amountMin || 10000}"
+                                            data-max="${row.c_amountMax || 10000000}"
+                                            data-interval="${row.c_settlementInterval || 1}">
+                                            <i class="fas fa-edit text-primary mr-2"></i> Edit Channel
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button type="button" class="dropdown-item delete-cashin text-danger" data-id="${row.id}">
+                                            <i class="fas fa-trash-alt mr-2"></i> Delete Channel
+                                        </button>
+                                    </li>
+                                </ul>
+                            </div>
+                        `;
+                    }
+                }
+            ], {
+                ajax: {
+                    url: "<?= base_url('channel/cashin') ?>",
+                    type: "POST",
+                    data: function (d) {
+                        var csrfName = $('meta[name="csrf-token-name"]').attr('content');
+                        var csrfHash = $('meta[name="csrf-token-hash"]').attr('content');
+                        if (csrfName && csrfHash) {
+                            d[csrfName] = csrfHash;
+                        }
+                        d.channel_group = $('#filter_channel_group').val();
+                        d.external_id = $('#filter_external_id').val();
+                        d.search_channel = $('#cashinGlobalSearch').val() || '';
+                    }
+                }
+            });
+
+        // Global Search mapping
+        $('#cashinGlobalSearch').on('input', debounce(function() { table.search(this.value).draw(); }, 400));
+
+        // Edit button mapping
+        $(document).on('click', '.edit-cashin', function() {
+            $('#edit_pk_id').val($(this).data('id'));
+            $('#edit_id').val($(this).data('channelid'));
+            $('#edit_chanelgroup').val($(this).data('group'));
+            $('#edit_description').val($(this).data('desc'));
+            $('#edit_externaldefault').val($(this).data('ext'));
+            
+            var ft = ($(this).data('feetype') || '').toLowerCase();
+            if (ft === 'fixed') {
+                $('#edit_feetype').val('Fixed');
+            } else if (ft === 'percentage' || ft === 'percetange') {
+                $('#edit_feetype').val('Percetange');
+            } else if (ft === 'both') {
+                $('#edit_feetype').val('Both');
+            } else {
+                $('#edit_feetype').val('');
+            }
+            $('#edit_feetype').trigger('change');
+            $('#edit_fee').val(Math.floor(parseFloat($(this).data('fee'))));
+            $('#edit_amountmin').val(Math.floor(parseFloat($(this).data('min'))));
+            $('#edit_amountmax').val(Math.floor(parseFloat($(this).data('max'))));
+            $('#edit_settlementinterval').val(Math.floor(parseFloat($(this).data('interval'))));
+        });
+
+        // Delete button mapping
+        $(document).on('click', '.delete-cashin', function() {
+            var id = $(this).data('id');
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You are about to delete cash-in channel " + id + ". This action cannot be undone!",
+                icon: 'warning',
+                showCancelButton: true,
+                customClass: {
+                    popup: 'swal2-premium-popup',
+                    confirmButton: 'swal2-premium-confirm bg-danger border-danger',
+                    cancelButton: 'swal2-premium-cancel'
+                },
+                buttonsStyling: false,
+                confirmButtonText: '<i class="fas fa-trash-alt mr-2"></i> Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = "<?= base_url('channel/cashin/delete/') ?>" + id;
+                }
+            });
+        });
+
+        // ── More Filters dropdown ──
+        var $moreBtn   = $('#cashinMoreFiltersBtn');
+        var $morePanel = $('#cashinMoreFiltersPanel');
+        var $moreClose = $('#cashinMoreFiltersClose');
+        var $moreApply = $('#cashinMoreApply');
+        var $moreClear = $('#cashinMoreClear');
+
+        $moreBtn.on('click', function(e) {
+            e.stopPropagation();
+            var isOpen = $morePanel.hasClass('dt-panel-open');
+            $morePanel.toggleClass('dt-panel-open', !isOpen);
+            $moreBtn.toggleClass('dt-open', !isOpen);
+        });
+
+        $moreClose.on('click', function() {
+            $morePanel.removeClass('dt-panel-open');
+            $moreBtn.removeClass('dt-open');
+        });
+
+        $(document).on('click', function(e) {
+            if (!$(e.target).closest('.dt-more-filters-wrapper').length) {
+                $morePanel.removeClass('dt-panel-open');
+                $moreBtn.removeClass('dt-open');
+            }
+        });
+
+        $('#cashinMoreFiltersPanel select').not('.select2-hidden-accessible').each(function () {
+            $(this).select2({
+                width: '100%',
+                dropdownAutoWidth: true,
+                dropdownParent: $('body'),
+                minimumResultsForSearch: 0
+            });
+        });
+
+        function updateFilterBadge() {
+            let count = 0;
+            $('.filter-select').each(function() {
+                if ($(this).val()) count++;
+            });
+            const $badge = $('#cashinFilterBadge');
+            if (count > 0) {
+                $badge.text(count).show();
+                $moreBtn.addClass('dt-more-filters-active');
+            } else {
+                $badge.hide();
+                $moreBtn.removeClass('dt-more-filters-active');
+            }
+        }
+
+        $moreApply.on('click', function() {
+            updateFilterBadge();
+            table.ajax.reload(null, false);
+            $morePanel.removeClass('dt-panel-open');
+            $moreBtn.removeClass('dt-open');
+        });
+
+        $moreClear.on('click', function() {
+            $('.filter-select').val('').trigger('change.select2');
+            fetchMasterFilterOptions('');
+            updateFilterBadge();
+            table.ajax.reload(null, false);
+        });
+
+        // Cascading logic for Master Channel Filters
+        $('#filter_channel_group').on('change', function() {
+            const group = $(this).val();
+            $('#filter_external_id').val('').trigger('change.select2');
+            fetchMasterFilterOptions(group);
+        });
+
+        function fetchMasterFilterOptions(group) {
+            var csrfName = $('meta[name="csrf-token-name"]').attr('content') || '<?= $this->security->get_csrf_token_name(); ?>';
+            var csrfHash = $('meta[name="csrf-token-hash"]').attr('content') || '<?= $this->security->get_csrf_hash(); ?>';
+            
+            $('#filter_external_id').prop('disabled', true).html('<option value="">Loading...</option>').trigger('change.select2');
+
+            $.ajax({
+                url: "<?= base_url('channel/get-master-filter-options') ?>",
+                type: "POST",
+                data: { type: 'cashin', group: group, [csrfName]: csrfHash },
+                dataType: "json",
+                success: function(data) {
+                    let providerOptions = '<option value="">All External IDs</option>';
+                    const currentProvider = $('#filter_external_id').val();
+                    data.providers.forEach(function(item) {
+                        providerOptions += `<option value="${item}">${item}</option>`;
+                    });
+                    $('#filter_external_id').html(providerOptions).prop('disabled', false).trigger('change.select2');
+                },
+                error: function() {
+                    $('#filter_external_id').prop('disabled', false).html('<option value="">All External IDs</option>').trigger('change.select2');
+                }
+            });
+        }
+    });
+</script>
 
 
 

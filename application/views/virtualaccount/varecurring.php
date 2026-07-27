@@ -19,9 +19,38 @@ $download_url = base_url('finance/virtual-account/download_recurring') // Assumi
             <p class="dt-page-subtitle">Manage and track automated recurring Virtual Account payments.</p>
         </div>
         <div class="d-flex" style="gap:10px;">
-            </div>
+            <button type="button" class="btn-dt-action btn-dt-action-primary border-0 d-flex align-items-center shadow-sm" id="toggleGuideBtn" >
+                <i class="fas fa-book-open mr-2"></i> <span class="d-none d-md-block">Instructions Guide</span>
+            </button>
+        </div>
     </div>
 
+    <!-- ── Toggleable Page Instructional Drawer ── -->
+    <div class="drawer-overlay" id="instructionOverlay"></div>
+    <div class="drawer-right" id="instructionDrawer">
+        <div class="drawer-header">
+            <h6 class="drawer-title"><i class="fas fa-book mr-2"></i> VA Recurring Guide</h6>
+            <button type="button" class="drawer-close" id="closeDrawerBtn">&times;</button>
+        </div>
+        <div class="drawer-body">
+            <p class="drawer-desc">This register allows tracking of automated subscription billing paid via Virtual Accounts.</p>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-sync text-primary mr-2"></i> Recurring Payments</div>
+                <p class="drawer-card-text">Track multi-cycle subscription payments, statuses, and routing across sub-merchants.</p>
+            </div>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-search text-primary mr-2"></i> Filtering & Search</div>
+                <p class="drawer-card-text">Search by VA Number, Merchant name/ID, or specific reference parameters. Use the advanced filter to filter by request dates.</p>
+            </div>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-info-circle text-primary mr-2"></i> Channel Logs</div>
+                <p class="drawer-card-text">Click the External ID links in the transaction table to open the API request/response logs modal from the provider.</p>
+            </div>
+        </div>
+    </div>
     <!-- ── KPI Summary Cards ── -->
     
     <!-- ── Main Data Card ── -->
