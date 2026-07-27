@@ -201,7 +201,7 @@ body::after {
 
 /* Form Controls with Micro-interactions */
 .form-group-custom {
-    margin-bottom: 1.8rem !important;
+    margin-bottom: 2rem !important;
     position: relative !important;
     transition: transform 0.3s ease !important;
 }
@@ -212,11 +212,18 @@ body::after {
 
 .form-label-custom {
     display: block !important;
+    position: static !important;
     font-weight: 500 !important;
     color: #94a3b8 !important;
-    margin-bottom: 0.6rem !important;
-    font-size: 0.9rem !important;
+    margin: 0 0 10px 4px !important;
+    padding: 0 !important;
+    font-size: 0.95rem !important;
+    line-height: 1 !important;
+    height: auto !important;
     transition: color 0.3s ease !important;
+    transform: none !important;
+    text-align: left !important;
+    pointer-events: auto !important;
 }
 
 .form-group-custom:focus-within .form-label-custom {
@@ -225,7 +232,10 @@ body::after {
 
 .form-control-custom {
     width: 100% !important;
-    padding: 1rem 1.25rem !important;
+    padding: 1.2rem 1.25rem !important;
+    margin: 0 !important;
+    position: relative !important;
+    z-index: 2 !important;
     background: rgba(15, 23, 42, 0.4) !important;
     border: 1px solid rgba(255, 255, 255, 0.08) !important;
     border-radius: 14px !important;
@@ -233,6 +243,7 @@ body::after {
     font-family: inherit !important;
     font-size: 1rem !important;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    line-height: 1.5 !important;
 }
 
 .form-control-custom:-webkit-autofill,
@@ -258,8 +269,10 @@ body::after {
 /* Recaptcha Centering */
 .g-recaptcha {
     display: flex !important;
-    justify-content: flex-start !important;
-    margin-bottom: 1.5rem !important;
+    justify-content: center !important;
+    margin-top: 1rem !important;
+    margin-bottom: 2rem !important;
+    width: 100% !important;
 }
 
 /* Premium Animated Button */
