@@ -121,6 +121,7 @@ class AuthController extends CI_Controller
                     // $this->db->where('ip_address', $ip_address)->update('login_attempts', ['cleared' => 1]); // Disabled
 
                     // ── Deteksi Login dari IP Baru ─────
+                    /* [TEMPORARILY DISABLED: Database table not created yet]
                     $login_ip = $this->input->ip_address();
                     $is_new_ip = !$this->NotificationModel->is_known_ip($admin['id'], $login_ip);
                     // Daftarkan IP (insert baru atau update last_seen)
@@ -138,6 +139,7 @@ class AuthController extends CI_Controller
                             ]
                         );
                     }
+                    */
                     // ─────────────────────────────────────────────────────────
 
                     $this->_redirect_based_on_access($admin['role_id']);
