@@ -58,8 +58,8 @@ body {
     border-right: 1px solid rgba(255, 255, 255, 0.05) !important;
 }
 
-.login-left::before, .login-animation {
-    display: none !important; /* Hide the old purple illustration */
+.login-left::before, .login-left::after, .login-animation {
+    display: none !important; /* Hide the old purple illustration and slant */
 }
 
 .brand-logo {
@@ -160,6 +160,16 @@ body {
     font-size: 1rem !important;
     transition: all 0.3s ease !important;
     height: auto !important; /* Overrides conflicting heights */
+}
+
+/* Fix browser autofill jarring white background */
+.form-control-custom:-webkit-autofill,
+.form-control-custom:-webkit-autofill:hover, 
+.form-control-custom:-webkit-autofill:focus, 
+.form-control-custom:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px #0f172a inset !important;
+    -webkit-text-fill-color: #F8FAFC !important;
+    transition: background-color 5000s ease-in-out 0s !important;
 }
 
 .form-control-custom:focus {

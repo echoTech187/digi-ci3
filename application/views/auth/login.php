@@ -9,7 +9,7 @@
                 <span class="m-0 font-weight-bold h3">Admin</span>
             </div>
             
-            <div class="login-left-content mt-auto d-none">
+            <div class="login-left-content mt-auto">
                 <div class="quote-text">
                     "Sistem lengkap yang<br>saya dan tim butuhkan."
                 </div>
