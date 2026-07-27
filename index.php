@@ -3,11 +3,18 @@
  * Load Environment Variables
  */
 if (file_exists(__DIR__ . '/.env')) {
-    $env = parse_ini_file(__DIR__ . '/.env');
-    if ($env) {
-        foreach ($env as $key => $value) {
-            $_ENV[$key] = $value;
-            $_SERVER[$key] = $value;
+    $lines = file(__DIR__ . '/.env', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    foreach ($lines as $line) {
+        $line = trim($line);
+        if (strpos($line, '#') === 0) continue; // Skip comments
+        if (strpos($line, '=') !== false) {
+            list($name, $value) = explode('=', $line, 2);
+            $name = trim($name);
+            $value = trim($value, " \t\n\r\0\x0B\"'");
+            if (!empty($name)) {
+                $_ENV[$name] = $value;
+                $_SERVER[$name] = $value;
+            }
         }
     }
 }
