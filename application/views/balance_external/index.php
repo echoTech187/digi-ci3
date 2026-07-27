@@ -12,33 +12,6 @@
         </div>
     </div>
 
-    <!-- ── Toggleable Page Instructional Drawer ── -->
-    <div class="drawer-overlay" id="instructionOverlay"></div>
-    <div class="drawer-right" id="instructionDrawer">
-        <div class="drawer-header">
-            <h6 class="drawer-title"><i class="fas fa-book mr-2"></i> External Balance Log Guide</h6>
-            <button type="button" class="drawer-close" id="closeDrawerBtn">&times;</button>
-        </div>
-        <div class="drawer-body">
-            <p class="drawer-desc">This page provides daily snapshots comparing total ledger balances across external payment providers.</p>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-history text-primary mr-2"></i> Daily Snapshots</div>
-                <p class="drawer-card-text">Compare actual recorded totals between Gidi, Paylabs, GV, and Paydgn for date-based verification.</p>
-            </div>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-search-dollar text-primary mr-2"></i> Discrepancy Audits</div>
-                <p class="drawer-card-text">Quickly inspect any balance gaps to perform manual matching or trigger re-syncing actions if necessary.</p>
-            </div>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-sort-amount-down text-primary mr-2"></i> Default Ordering</div>
-                <p class="drawer-card-text">By default, log records are listed in descending order starting from the most recent snapshot date.</p>
-            </div>
-        </div>
-    </div>
-
     <!-- ── Main Data Card ── -->
     <div class="card border-0 shadow-sm dt-card">
         
@@ -107,7 +80,6 @@
 
 <script>
 $(document).ready(function() {
-    
 
     const table = $('#balanceTable').DataTable({
         dom: 'rt<"dt-footer"<"dt-footer-info"i><"dt-footer-pager">>',

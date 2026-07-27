@@ -11,28 +11,6 @@
         </div>
     </div>
 
-    <!-- ── Toggleable Page Instructional Drawer ── -->
-    <div class="drawer-overlay" id="instructionOverlay"></div>
-    <div class="drawer-right" id="instructionDrawer">
-        <div class="drawer-header">
-            <h6 class="drawer-title"><i class="fas fa-book mr-2"></i> Product Guide</h6>
-            <button type="button" class="drawer-close" id="closeDrawerBtn">&times;</button>
-        </div>
-        <div class="drawer-body">
-            <p class="drawer-desc">This product catalog allows administrators to manage top-up products, denominations, and pricing.</p>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-gamepad text-primary mr-2"></i> Product List</div>
-                <p class="drawer-card-text">Audit PPOB/Game denomination catalog settings, including display caption, internal description, and pricing details.</p>
-            </div>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-tag text-primary mr-2"></i> Pricing Setup</div>
-                <p class="drawer-card-text">Configure product sale prices. Pricing updates affect merchant fee calculations and payment checkout rates instantly.</p>
-            </div>
-        </div>
-    </div>
-
     <div class="card border-0 shadow-sm dt-card">
         <!-- ── Toolbar ── -->
         <form id="hago_form" onsubmit="return false;">

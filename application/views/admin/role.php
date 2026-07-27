@@ -14,28 +14,6 @@
         </div>
     </div>
 
-    <!-- ── Toggleable Page Instructional Drawer ── -->
-    <div class="drawer-overlay" id="instructionOverlay"></div>
-    <div class="drawer-right" id="instructionDrawer">
-        <div class="drawer-header">
-            <h6 class="drawer-title"><i class="fas fa-book mr-2"></i> Security Roles Guide</h6>
-            <button type="button" class="drawer-close" id="closeDrawerBtn">&times;</button>
-        </div>
-        <div class="drawer-body">
-            <p class="drawer-desc">This page allows administrators to define, create, and manage back-office security roles and their granular access profiles.</p>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-user-tag text-primary mr-2"></i> Security Roles</div>
-                <p class="drawer-card-text">Establish role classifications (e.g. Administrator, Supervisor, Finance Admin) to map to organizational duties.</p>
-            </div>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-key text-primary mr-2"></i> Permission Management</div>
-                <p class="drawer-card-text">Click the Actions dropdown next to a role and select 'Access Rights' to toggle specific dashboard menu accesses.</p>
-            </div>
-        </div>
-    </div>
-
     <?= form_error('role', '<div class="alert alert-danger border-0 shadow-sm mb-4"><i class="fas fa-exclamation-circle "></i>', '</div>'); ?>
     <?= $this->session->flashdata('message'); ?>
 
@@ -90,7 +68,6 @@
     </div>
 </div>
 <!-- /.container-fluid -->
-
 
 <!-- Modal Input -->
 <div class="modal fade" data-backdrop="static" data-keyboard="false" id="newRoleModal" tabindex="-1" role="dialog" aria-labelledby="newRoleModalLabel" aria-hidden="true">
@@ -160,7 +137,6 @@
 
 <script>
 $(document).ready(function() {
-    
 
     $('.delete-role-btn').on('click', function(e) {
         e.preventDefault();
@@ -186,6 +162,4 @@ $(document).ready(function() {
     });
 });
 </script>
-
-
 

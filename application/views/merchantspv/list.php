@@ -20,33 +20,6 @@
         </div>
     </div>
 
-    <!-- ── Toggleable Page Instructional Drawer ── -->
-    <div class="drawer-overlay" id="instructionOverlay"></div>
-    <div class="drawer-right" id="instructionDrawer">
-        <div class="drawer-header">
-            <h6 class="drawer-title"><i class="fas fa-book mr-2"></i> Supervisor Merchants Guide</h6>
-            <button type="button" class="drawer-close" id="closeDrawerBtn">&times;</button>
-        </div>
-        <div class="drawer-body">
-            <p class="drawer-desc">This page displays all merchant accounts currently assigned to and supervised by this specific supervisor agent.</p>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-user-shield text-primary mr-2"></i> Supervisor Merchants</div>
-                <p class="drawer-card-text">Monitor assigned merchant stores and view details by clicking on the merchant name link.</p>
-            </div>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-wallet text-primary mr-2"></i> Balance Audit</div>
-                <p class="drawer-card-text">Audit the merchant's Total Balance versus Hold Balance (funds locked or reserved due to pending disputes/verification).</p>
-            </div>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-key text-primary mr-2"></i> OpenAPI & Account Status</div>
-                <p class="drawer-card-text">Track status for both overall account registration and OpenAPI credentials (Active, Pending, Blocked, or Frozen).</p>
-            </div>
-        </div>
-    </div>
-
     <!-- ── Main Data Card ── -->
     <div class="card border-0 shadow-sm dt-card">
 
@@ -165,7 +138,6 @@
 
 <script>
 $(document).ready(function() {
-    
 
     const supervisorId = "<?= $supervisor_id ?>";
     const table = initServerDataTable("#supervisorMerchantTable", "<?= base_url('merchant/manage/list/') ?>" + supervisorId, [
@@ -292,6 +264,4 @@ $(document).ready(function() {
     });
 });
 </script>
-
-
 

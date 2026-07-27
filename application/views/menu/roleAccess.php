@@ -17,28 +17,6 @@
         </div>
     </div>
 
-    <!-- ── Toggleable Page Instructional Drawer ── -->
-    <div class="drawer-overlay" id="instructionOverlay"></div>
-    <div class="drawer-right" id="instructionDrawer">
-        <div class="drawer-header">
-            <h6 class="drawer-title"><i class="fas fa-book mr-2"></i> Menu Permissions Guide</h6>
-            <button type="button" class="drawer-close" id="closeDrawerBtn">&times;</button>
-        </div>
-        <div class="drawer-body">
-            <p class="drawer-desc">This matrix page allows administrators to manage deep hierarchical menu configurations and toggle granular access rights for the selected role.</p>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-sitemap text-primary mr-2"></i> Parent & Submenus</div>
-                <p class="drawer-card-text">Distinguish main parent module tabs from nested sub-menus (indicated by 'ㄴ'). Modifying parent nodes shifts child navigation paths.</p>
-            </div>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-toggle-on text-primary mr-2"></i> Access Granted</div>
-                <p class="drawer-card-text">Toggle switches in the table column to instantly register or revoke access to paths for users holding this role.</p>
-            </div>
-        </div>
-    </div>
-
     <!-- Alerts Standardized to Swal2 Premium -->
     <script>
         $(document).ready(function() {
@@ -415,7 +393,6 @@
     </div>
 </div>
 
-
 <!-- Add Group Module Modal -->
 <div class="modal fade" data-backdrop="static" data-keyboard="false" id="addGroupModal" tabindex="-1" role="dialog" aria-hidden="true" style="z-index: 1060;">
     <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
@@ -452,7 +429,6 @@
 <!-- ── AJAX Logic ── -->
 <script>
 $(document).ready(function() {
-    
 
     const CSRF_NAME = "<?php echo $this->security->get_csrf_token_name(); ?>";
     const CSRF_HASH = "<?php echo $this->security->get_csrf_hash(); ?>";
@@ -680,6 +656,4 @@ $(document).ready(function() {
 
 });
 </script>
-
-
 

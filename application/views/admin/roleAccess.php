@@ -12,28 +12,6 @@
         </div>
     </div>
 
-    <!-- ── Toggleable Page Instructional Drawer ── -->
-    <div class="drawer-overlay" id="instructionOverlay"></div>
-    <div class="drawer-right" id="instructionDrawer">
-        <div class="drawer-header">
-            <h6 class="drawer-title"><i class="fas fa-book mr-2"></i> Role Access Rights Guide</h6>
-            <button type="button" class="drawer-close" id="closeDrawerBtn">&times;</button>
-        </div>
-        <div class="drawer-body">
-            <p class="drawer-desc">This matrix interface allows administrators to toggle high-level module permission sets for the selected security role.</p>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-toggle-on text-primary mr-2"></i> Interactive Switch</div>
-                <p class="drawer-card-text">Toggle switches in the 'Grant Access' column. Checked items grant access to the corresponding menu module, while unchecked items revoke it.</p>
-            </div>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-save text-primary mr-2"></i> Real-time Persist</div>
-                <p class="drawer-card-text">Changes made via toggles are processed asynchronously and saved immediately to database permission records.</p>
-            </div>
-        </div>
-    </div>
-
     <!-- Alerts Standardized to Swal2 Premium -->
     <script>
         $(document).ready(function() {

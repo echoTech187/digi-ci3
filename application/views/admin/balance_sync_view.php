@@ -14,33 +14,6 @@
         </div>
     </div>
 
-    <!-- ── Toggleable Page Instructional Drawer ── -->
-    <div class="drawer-overlay" id="instructionOverlay"></div>
-    <div class="drawer-right" id="instructionDrawer">
-        <div class="drawer-header">
-            <h6 class="drawer-title"><i class="fas fa-book mr-2"></i> Balance Sync Guide</h6>
-            <button type="button" class="drawer-close" id="closeDrawerBtn">&times;</button>
-        </div>
-        <div class="drawer-body">
-            <p class="drawer-desc">This report provides real-time comparison auditing between the database ledger (actual) balances and the system cached total balances.</p>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-balance-scale text-primary mr-2"></i> Ledger Sync</div>
-                <p class="drawer-card-text">Compare recorded journal entry transactions (actual) against the active system cached totals to flag inconsistencies.</p>
-            </div>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-exclamation-triangle text-primary mr-2"></i> Status Coding</div>
-                <p class="drawer-card-text">Red rows denote ledger total discrepancies. Yellow rows denote hold/lock mismatches. Regular rows are fully aligned.</p>
-            </div>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-sync-alt text-primary mr-2"></i> Re-Sync Action</div>
-                <p class="drawer-card-text">Use the Re-Sync button to recalculate and refresh the comparing ledger counts to match active merchant records.</p>
-            </div>
-        </div>
-    </div>
-
     <!-- ── Main Data Card ── -->
     <div class="card border-0 shadow-sm dt-card">
         <div class="card-body p-0">
@@ -122,5 +95,4 @@ $(document).ready(function() {
     
 });
 </script>
-
 

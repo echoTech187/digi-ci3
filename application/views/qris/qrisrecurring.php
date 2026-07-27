@@ -11,32 +11,6 @@
         </div>
     </div>
 
-    <!-- ── Toggleable Page Instructional Drawer ── -->
-    <div class="drawer-overlay" id="instructionOverlay"></div>
-    <div class="drawer-right" id="instructionDrawer">
-        <div class="drawer-header">
-            <h6 class="drawer-title"><i class="fas fa-book mr-2"></i> QRIS Recurring Guide</h6>
-            <button type="button" class="drawer-close" id="closeDrawerBtn">&times;</button>
-        </div>
-        <div class="drawer-body">
-            <p class="drawer-desc">This ledger monitors recurring subscription payments made via QRIS dynamic billing cycles.</p>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-redo text-primary mr-2"></i> Subscription Payments</div>
-                <p class="drawer-card-text">Track scheduled transaction payments dynamically triggered for subscriber merchant accounts.</p>
-            </div>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-info-circle text-primary mr-2"></i> Status Indicators</div>
-                <p class="drawer-card-text">Check the status of each billing attempt, such as PENDING/CREATED, PAID/SUCCESS, or FAILED/EXPIRED.</p>
-            </div>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-code text-primary mr-2"></i> JSON Log Viewer</div>
-                <p class="drawer-card-text">Click the External ID link in the transaction table to open a popup panel with complete API requests and responses.</p>
-            </div>
-        </div>
-    </div>
     <!-- ── KPI Summary Cards ── -->
     
     <!-- ── Main Data Card ── -->
@@ -158,8 +132,7 @@
                             </div>
                         </div>
                     </div>
-                    
-                
+
                 </div><!-- /.dt-toolbar-filters -->
             </div><!-- /.dt-toolbar -->
         </form>
@@ -459,5 +432,4 @@
         });
     });
 </script>
-
 

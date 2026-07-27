@@ -12,28 +12,6 @@
         </div>
     </div>
 
-    <!-- ── Toggleable Page Instructional Drawer ── -->
-    <div class="drawer-overlay" id="instructionOverlay"></div>
-    <div class="drawer-right" id="instructionDrawer">
-        <div class="drawer-header">
-            <h6 class="drawer-title"><i class="fas fa-book mr-2"></i> Admin Accounts Guide</h6>
-            <button type="button" class="drawer-close" id="closeDrawerBtn">&times;</button>
-        </div>
-        <div class="drawer-body">
-            <p class="drawer-desc">This page allows supervisors to manage administrative accounts, assign operational roles, and set clearance levels.</p>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-user-shield text-primary mr-2"></i> Admin Accounts</div>
-                <p class="drawer-card-text">Audit back-office administrator credentials, role access mappings, and profile status updates.</p>
-            </div>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-info-circle text-primary mr-2"></i> Active States</div>
-                <p class="drawer-card-text">Account statuses (Active, Pending, Blocked, Freeze) control immediate login clearance. Blocked or frozen states terminate backend sessions instantly.</p>
-            </div>
-        </div>
-    </div>
-
     <!-- ── Main Data Card ── -->
     <div class="card border-0 shadow-sm dt-card">
 
@@ -46,7 +24,6 @@
 
             <!-- RIGHT: Filters & Actions -->
             <div class="dt-toolbar-filters d-flex align-items-center gap-2">
-                
 
                 <!-- More Filters Trigger -->
                 <div class="dt-filter-group dt-more-filters-wrapper">
@@ -245,7 +222,6 @@
         </div>
     </div>
 </div>
-
 
 <script type="text/javascript">
     

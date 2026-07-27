@@ -85,7 +85,6 @@
         });
     </script>
 
-
     <script>
         $(document).ready(function() {
             <?php if ($this->session->flashdata('success')) : ?>

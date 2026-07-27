@@ -229,7 +229,6 @@
 
                 <div class="topbar-divider d-none d-sm-block" style="height: 24px; border-left: 1px solid rgba(0,0,0,0.08);"></div>
 
-
                 <!-- Nav Item - User Information -->
                 <li class="nav-item dropdown no-arrow ">
                     <a class="nav-link dropdown-toggle navbar-user-info pr-0 rounded-circle" href="#" id="userDropdown" role="button" data-toggle="dropdown" data-boundary="viewport" aria-haspopup="true" aria-expanded="false">
@@ -849,6 +848,4 @@
 
         </nav>
         <!-- End of Topbar -->
-
-
 

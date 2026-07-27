@@ -67,7 +67,6 @@
                     <?= form_error('password', '<small class="text-danger mt-1 d-block font-weight-bold">', '</small>'); ?>
                 </div>
 
-                
                 <!-- <div class="d-flex justify-content-between align-items-center mb-4">
                     <div style="font-size: 15px; color: #6B7280; font-weight: 500;">Remember Password</div>
                     <div class="custom-control custom-switch">

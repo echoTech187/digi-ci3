@@ -427,7 +427,6 @@
         .badge-optional { background: rgba(156, 163, 175, 0.1); color: #9ca3af; border: 1px solid rgba(156, 163, 175, 0.2); }
         .badge-conditional { background: rgba(245, 158, 11, 0.1); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.2); }
 
-
         /* Premium Callouts */
         /* Glossary Tooltips */
         .hc-tooltip {
@@ -878,7 +877,6 @@
         
         <!-- Content Area -->
         <div class="hc-content-area">
-
 
             <div class="hc-header" style="align-items: flex-end; display: flex; justify-content: space-between;">
                 <div style="flex-shrink: 0; padding-right: 20px;">

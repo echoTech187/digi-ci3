@@ -20,7 +20,6 @@
             <!-- RIGHT: Filters & Actions -->
             <div class="dt-toolbar-filters d-flex align-items-center gap-2">
 
-
                 <!-- More Filters Trigger -->
                 <div class="dt-filter-group dt-more-filters-wrapper">
                     <button type="button" id="dlqMoreFiltersBtn" class="dt-more-filters-btn">
@@ -329,8 +328,6 @@ $(document).ready(function() {
             }
         })
     });
-
-
 
 });
 </script>

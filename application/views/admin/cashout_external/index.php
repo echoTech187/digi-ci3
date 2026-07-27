@@ -16,39 +16,6 @@
         </div>
     </div>
 
-    <!-- ── Toggleable Page Instructional Drawer ── -->
-    <div class="drawer-overlay" id="instructionOverlay"></div>
-    <div class="drawer-right" id="instructionDrawer">
-        <div class="drawer-header">
-            <h6 class="drawer-title"><i class="fas fa-book mr-2"></i> Cashout Mapping Guide</h6>
-            <button type="button" class="drawer-close" id="closeDrawerBtn">&times;</button>
-        </div>
-        <div class="drawer-body">
-            <p class="drawer-desc">This dashboard allows you to manage external cashout (withdrawal) channel configurations for all merchants.</p>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-globe text-primary mr-2"></i> Edit Mapping (Bulk Update)</div>
-                <p class="drawer-card-text">Update the cashout provider for multiple merchants at once. Choose to update a channel group globally or for a specific merchant.</p>
-            </div>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-sliders-h text-primary mr-2"></i> Filtering & Search</div>
-                <p class="drawer-card-text">Quickly locate configuration rows using global search, or narrow them down by Channel Group, Channel ID, Provider, or Status.</p>
-            </div>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-percent text-primary mr-2"></i> Fee Structures</div>
-                <p class="drawer-card-text">View active fee types (Fixed, Percentage, or Both) as well as the exact fee value applied to transactions.</p>
-            </div>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-wallet text-primary mr-2"></i> Transaction Limits</div>
-                <p class="drawer-card-text">Check the minimum and maximum transactional limits configured for each mapping.</p>
-            </div>
-        </div>
-    </div>
-
-
     <!-- ── Main Data Card ── -->
     <div class="card border-0 shadow-sm dt-card">
         <!-- ── Toolbar ── -->
@@ -336,7 +303,6 @@
         </div>
     </div>
 </div>
-
 
 <script>
 $(document).ready(function() {

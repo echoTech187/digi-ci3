@@ -46,8 +46,6 @@
         });
     </script>
 
-    
-
     <!-- ── Main Data Card ── -->
     <div class="card border-0 shadow-sm dt-card">
         <!-- ── Toolbar ── -->
@@ -86,8 +84,6 @@
                                     <?php endforeach; ?>
                                 </select>
                             </div>
-
-                            
 
                             <!-- Provider -->
                             <div class="dt-more-field">

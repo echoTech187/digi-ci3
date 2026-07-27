@@ -21,9 +21,7 @@
                 <a href="<?= base_url('dashboard/analytics?period=last_7_days'); ?>" class="btn btn-sm <?= ($current_period == 'last_7_days' ? 'btn-primary' : 'btn-link text-muted'); ?> px-4 py-2 font-weight-bold shadow-none" style="border-radius: 10px; font-size: 11px; text-decoration: none;">Last 7 Days</a>
                 <a href="<?= base_url('dashboard/analytics?period=last_month'); ?>" class="btn btn-sm <?= ($current_period == 'last_month' ? 'btn-primary' : 'btn-link text-muted'); ?> px-4 py-2 font-weight-bold shadow-none" style="border-radius: 10px; font-size: 11px; text-decoration: none;">Last Month</a>
             </div>
-            <button id="toggleGuideBtn" class="btn btn-sm btn-outline-primary px-4 py-2 font-weight-bold shadow-none" style="border-radius: 10px; font-size: 11px;">
-                <i class="fas fa-info-circle mr-1"></i> Instructions Guide
-            </button>
+            
         </div>
     </div>
 
@@ -339,7 +337,6 @@
     </div>
 
 </div>
-
 
 <script src="<?= base_url('assets/'); ?>vendor/chart.js/Chart.min.js"></script>
 <script>

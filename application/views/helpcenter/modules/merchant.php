@@ -148,7 +148,6 @@
                 </div>
             </div>
 
-            
             <!-- Step 5 (Edit Merchant) -->
             <div class="row hc-step-row align-items-center mb-5">
                 <div class="col-lg-12">
@@ -183,9 +182,6 @@
                     </div>
                 </div>
             </div>
-
-
-
 
             <!-- Parameter Reference & Validations -->
             <h4 class="font-weight-bold mt-5 mb-4 border-bottom pb-2">Parameter Reference</h4>
@@ -308,7 +304,6 @@
                 <p class="hc-faq-a">The system enforces a strict non-negative balance policy. You cannot manually deduct a debit amount that exceeds the merchant's current Master Balance.</p>
             </div>
 
-            
 <!-- What's Next -->
             <div class="mt-5 pt-4 border-top" style="border-color: var(--hc-border) !important;">
                 <h6 class="font-weight-bold mb-3 text-muted">What's Next?</h6>
@@ -478,7 +473,6 @@
                 </div>
             </div>
 
-            
             <!-- Step 5 (Edit Merchant) -->
             <div class="row hc-step-row align-items-center mb-5">
                 <div class="col-lg-12">
@@ -513,9 +507,6 @@
                     </div>
                 </div>
             </div>
-
-
-
 
             <!-- Parameter Reference & Validations -->
             <h4 class="font-weight-bold mt-5 mb-4 border-bottom pb-2">Referensi Parameter</h4>
@@ -638,7 +629,6 @@
                 <p class="hc-faq-a">Sistem menerapkan kebijakan ketat agar saldo tidak boleh minus (non-negative balance). Anda tidak dapat memotong saldo dengan jumlah yang melebihi Master Balance merchant saat ini.</p>
             </div>
 
-            
 <!-- What's Next -->
             
             <div class="hc-faq-item">

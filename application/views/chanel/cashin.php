@@ -12,35 +12,7 @@
         </div>
     </div>
 
-    <!-- ── Toggleable Page Instructional Drawer ── -->
-    <div class="drawer-overlay" id="instructionOverlay"></div>
-    <div class="drawer-right" id="instructionDrawer">
-        <div class="drawer-header">
-            <h6 class="drawer-title"><i class="fas fa-book mr-2"></i> Cash In Channels Guide</h6>
-            <button type="button" class="drawer-close" id="closeDrawerBtn">&times;</button>
-        </div>
-        <div class="drawer-body">
-            <p class="drawer-desc">This page allows administrators to manage and configure entry routes for customer deposits, including VA, E-Wallet, and QRIS.</p>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-arrow-alt-circle-down text-primary mr-2"></i> Deposit Setup</div>
-                <p class="drawer-card-text">Configure cash-in channels such as Virtual Accounts, QRIS, and E-Wallets. Define min/max amount constraints per transaction.</p>
-            </div>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-server text-primary mr-2"></i> External ID Default</div>
-                <p class="drawer-card-text">Set the default external provider (routing/upstream provider key) for incoming transactions of each channel.</p>
-            </div>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-percentage text-primary mr-2"></i> Fees & Costs</div>
-                <p class="drawer-card-text">Configure either Fixed (flat rate) or Percentage-based fees applied to incoming transactions, along with settlement intervals.</p>
-            </div>
-        </div>
-    </div>
-
     <!-- ── KPI Summary Cards ── -->
-    
 
     <!-- ── Main Data Card ── -->
     <div class="card border-0 shadow-sm dt-card">
@@ -411,7 +383,6 @@
 
 <script>
     $(document).ready(function() {
-        
 
         // Standardize DataTables for premium look
         var table = initServerDataTable('#cashinTable', "<?= base_url('channel/cashin') ?>", [
@@ -633,6 +604,4 @@
         }
     });
 </script>
-
-
 

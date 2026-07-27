@@ -306,7 +306,6 @@
             </div>
         </div>
 
-
         <!-- Modal: Delegate Access -->
         <div class="modal fade" data-backdrop="static" data-keyboard="false" id="delegateModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-xl modal-dialog-centered">

@@ -12,40 +12,7 @@
         </div>
     </div>
 
-    <!-- ── Toggleable Page Instructional Drawer ── -->
-    <div class="drawer-overlay" id="instructionOverlay"></div>
-    <div class="drawer-right" id="instructionDrawer">
-        <div class="drawer-header">
-            <h6 class="drawer-title"><i class="fas fa-book mr-2"></i> QRIS Dynamic Guide</h6>
-            <button type="button" class="drawer-close" id="closeDrawerBtn">&times;</button>
-        </div>
-        <div class="drawer-body">
-            <p class="drawer-desc">This register allows you to monitor dynamically generated QRIS transactions in real-time.</p>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-qrcode text-primary mr-2"></i> Real-Time Monitor</div>
-                <p class="drawer-card-text">Monitor generated QR codes and check transaction status, including Pending, Paid, Expired, or Failed states.</p>
-            </div>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-search text-primary mr-2"></i> Quick Search</div>
-                <p class="drawer-card-text">Filter dynamic QRIS records instantly by typing the Merchant Name, ID, or Merchant Transaction ID in the search field.</p>
-            </div>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-filter text-primary mr-2"></i> Advanced Filters</div>
-                <p class="drawer-card-text">Click the Filters button to restrict records by Date Range, Merchant, Status, or Provider Reference Label.</p>
-            </div>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-code text-primary mr-2"></i> External Log Inspector</div>
-                <p class="drawer-card-text">Click on the External ID column to open the JSON request/response logs from the provider API for tracing.</p>
-            </div>
-        </div>
-    </div>
-
     <!-- ── KPI Summary Cards ── -->
-    
 
     <!-- ── Main Data Card ── -->
     <div class="card border-0 shadow-sm dt-card">
@@ -75,8 +42,6 @@
 
                 <!-- RIGHT: Filters -->
                 <div class="dt-toolbar-filters">
-                    
-                    
 
                     <!-- More Filters Trigger -->
                     <div class="dt-filter-group dt-more-filters-wrapper">
@@ -152,7 +117,6 @@
                                      </div>
                                  </div>
 
-                                 
                                  <!-- Status -->
                                 <div class="dt-more-field">
                                     <label class="dt-more-label"><i class="fas fa-info-circle mr-1 mr-2"></i> Status</label>
@@ -179,7 +143,6 @@
                         </div>
                     </div>
 
-                    
                 </div><!-- /.dt-toolbar-filters -->
             </div><!-- /.dt-toolbar -->
         </form>
@@ -502,5 +465,4 @@
         });
     });
 </script>
-
 

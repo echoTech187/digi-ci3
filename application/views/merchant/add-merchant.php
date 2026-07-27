@@ -183,8 +183,6 @@
             </div>
         </div>
 
-
-        
         <div class="col-lg-4">
             <div class="card border-0 shadow-sm dt-card h-100">
                 <div class="card-header bg-white py-3 border-0 d-flex align-items-center">

@@ -12,35 +12,7 @@
         </div>
     </div>
 
-    <!-- ── Toggleable Page Instructional Drawer ── -->
-    <div class="drawer-overlay" id="instructionOverlay"></div>
-    <div class="drawer-right" id="instructionDrawer">
-        <div class="drawer-header">
-            <h6 class="drawer-title"><i class="fas fa-book mr-2"></i> Cash Out Channels Guide</h6>
-            <button type="button" class="drawer-close" id="closeDrawerBtn">&times;</button>
-        </div>
-        <div class="drawer-body">
-            <p class="drawer-desc">This page allows administrators to manage and configure outbound payout channels for external bank transfer or provider endpoints.</p>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-arrow-alt-circle-up text-primary mr-2"></i> Disbursement Setup</div>
-                <p class="drawer-card-text">Configure outbound routes such as BI-FAST, online bank transfer, and e-wallet transfers, along with transaction limits.</p>
-            </div>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-server text-primary mr-2"></i> Provider Routing</div>
-                <p class="drawer-card-text">Define default external provider codes and identifiers responsible for executing payouts upstream.</p>
-            </div>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-coins text-primary mr-2"></i> Limits & Fees</div>
-                <p class="drawer-card-text">Audit fixed/percetange processing fees and the ceiling/floor transaction amounts permitted per cash-out request.</p>
-            </div>
-        </div>
-    </div>
-
     <!-- ── KPI Summary Cards ── -->
-    
 
     <!-- ── Main Data Card ── -->
     <div class="card border-0 shadow-sm dt-card">
@@ -302,7 +274,6 @@
 
 <script>
     $(document).ready(function() {
-        
 
         // Standardize DataTables for premium look
         var table = initServerDataTable('#cashoutTable', "<?= base_url('channel/cashout') ?>", [
@@ -522,6 +493,4 @@
         }
     });
 </script>
-
-
 

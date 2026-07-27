@@ -221,7 +221,6 @@ $(document).ready(function() {
         table.search(this.value).draw();
     }, 400));
 
-
     // Handle Edit Action
     $(document).on('click', '.btn-edit-role', function() {
         const id = $(this).data('id');

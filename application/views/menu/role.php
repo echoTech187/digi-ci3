@@ -12,28 +12,6 @@
         </div>
     </div>
 
-    <!-- ── Toggleable Page Instructional Drawer ── -->
-    <div class="drawer-overlay" id="instructionOverlay"></div>
-    <div class="drawer-right" id="instructionDrawer">
-        <div class="drawer-header">
-            <h6 class="drawer-title"><i class="fas fa-book mr-2"></i> Menu Role Guide</h6>
-            <button type="button" class="drawer-close" id="closeDrawerBtn">&times;</button>
-        </div>
-        <div class="drawer-body">
-            <p class="drawer-desc">This page displays all registered security roles within the system. You can configure the dashboard menu permissions for each role.</p>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-user-tag text-primary mr-2"></i> Menu Role Setup</div>
-                <p class="drawer-card-text">View role classifications (e.g. Administrator, Member). Each card represents a distinct access group.</p>
-            </div>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-cog text-primary mr-2"></i> Configuration Action</div>
-                <p class="drawer-card-text">Click the <strong>Configure</strong> button on any card to view and manage specific parent and submenu access parameters for that role.</p>
-            </div>
-        </div>
-    </div>
-
     <!-- ── Alert Messages ── -->
     <?php if ($this->session->flashdata('message')) : ?>
         <div class="alert alert-success border-0 shadow-sm animate__animated animate__fadeIn mb-4">
@@ -83,6 +61,4 @@ $(document).ready(function() {
     
 });
 </script>
-
-
 

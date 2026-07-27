@@ -11,32 +11,6 @@
         </div>
     </div>
 
-    <!-- ── Toggleable Page Instructional Drawer ── -->
-    <div class="drawer-overlay" id="instructionOverlay"></div>
-    <div class="drawer-right" id="instructionDrawer">
-        <div class="drawer-header">
-            <h6 class="drawer-title"><i class="fas fa-book mr-2"></i> VA Dynamic Guide</h6>
-            <button type="button" class="drawer-close" id="closeDrawerBtn">&times;</button>
-        </div>
-        <div class="drawer-body">
-            <p class="drawer-desc">This ledger displays dynamically generated Virtual Accounts and transaction statuses in real-time.</p>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-university text-primary mr-2"></i> Virtual Account Payments</div>
-                <p class="drawer-card-text">Monitor virtual account statuses, payment channels, amounts, and transaction expiry states.</p>
-            </div>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-search text-primary mr-2"></i> Search Filter</div>
-                <p class="drawer-card-text">Quickly search through transactions by VA Number, Merchant ID, or Channel ID in the search input.</p>
-            </div>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-code text-primary mr-2"></i> Log Inspector</div>
-                <p class="drawer-card-text">Click any transaction's External ID to inspect API headers, request payloads, and response bodies from the provider.</p>
-            </div>
-        </div>
-    </div>
     <!-- ── KPI Summary Cards ── -->
     
     <!-- ── Main Data Card ── -->
@@ -63,8 +37,7 @@
                 </div>
                 <!-- RIGHT: Filters -->
                 <div class="dt-toolbar-filters">
-                    
-                    
+
                     <!-- More Filters Trigger -->
                     <div class="dt-filter-group dt-more-filters-wrapper">
                         <label class="dt-filter-label">&nbsp;</label>
@@ -470,5 +443,4 @@
         });
     });
 </script>
-
 
