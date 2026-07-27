@@ -251,11 +251,8 @@
                 </div>
             </div>
 
-            <!-- Instructions Guide Card -->
             <div class="card border-0 shadow-sm dt-card">
-                <div class="card-header bg-white py-3 border-0">
-                    <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-book-open mr-2"></i> Instructions Guide</h6>
-                </div>
+                
                 <div class="card-body p-4 pt-0">
                     <div class="p-3 mb-3" >
                         <div class="font-weight-bold mb-1 text-dark" style="font-size: 13px;"><i class="fas fa-plug text-primary mr-2"></i> Integration Tips</div>

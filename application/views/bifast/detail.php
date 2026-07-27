@@ -1,30 +1,5 @@
 <!-- Begin Page Content -->
 <div >
-    <!-- ── Toggleable Page Instructional Drawer ── -->
-    <div class="drawer-overlay" id="instructionOverlay"></div>
-    <div class="drawer-right" id="instructionDrawer">
-        <div class="drawer-header">
-            <h6 class="drawer-title"><i class="fas fa-book mr-2"></i> BI-FAST Transaction Details Guide</h6>
-            <button type="button" class="drawer-close" id="closeDrawerBtn">&times;</button>
-        </div>
-        <div class="drawer-body">
-            <p class="drawer-desc">Granular routing, status, and banking logs for a BI-FAST disbursement.</p>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-university text-primary mr-2"></i> Bank Codes</div>
-                <p class="drawer-card-text">BIC (Bank Identifier Code) and precise destination account validations.</p>
-            </div>
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-exclamation-triangle text-primary mr-2"></i> Error Details</div>
-                <p class="drawer-card-text">In case of failure, check raw bank reject codes and descriptive reasons.</p>
-            </div>
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-undo text-primary mr-2"></i> Balance Reversion</div>
-                <p class="drawer-card-text">If failed, confirm that the principal amount and transfer fee were successfully returned to the merchant's balance.</p>
-            </div>
-        </div>
-    </div>
-
     <!-- ── Page Header ── -->
     <div class="dt-page-header d-flex justify-content-between align-items-center mb-4">
         <div>
@@ -32,10 +7,7 @@
             <p class="dt-page-subtitle mb-0">Detailed audit trail and technical parameters for the BI-FAST disbursement.</p>
         </div>
         <div class="d-flex align-items-center gap-2">
-            <button type="button" class="btn btn-light border shadow-sm mr-2 d-flex align-items-center" id="toggleGuideBtn">
-                <i class="fas fa-book-open text-primary mr-2"></i> <span class="d-none d-md-block">Instructions Guide</span>
-            </button>
-        </div>
+            </div>
     </div>
 
     <div class="card border-0 shadow-sm dt-card">

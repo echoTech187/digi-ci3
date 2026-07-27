@@ -8,32 +8,7 @@
             <p class="dt-page-subtitle">Manage system roles and configure their menu access permissions.</p>
         </div>
         <div class="d-flex align-items-center gap-2">
-            <button type="button" class="btn-dt-action btn-dt-action-primary border-0 d-flex align-items-center shadow-sm" id="toggleGuideBtn" >
-                <i class="fas fa-book-open mr-2"></i> <span class="d-none d-md-block">Instructions Guide</span>
-            </button>
-        </div>
-    </div>
-
-    <!-- ── Toggleable Page Instructional Drawer ── -->
-    <div class="drawer-overlay" id="instructionOverlay"></div>
-    <div class="drawer-right" id="instructionDrawer">
-        <div class="drawer-header">
-            <h6 class="drawer-title"><i class="fas fa-book mr-2"></i> Menu Role Guide</h6>
-            <button type="button" class="drawer-close" id="closeDrawerBtn">&times;</button>
-        </div>
-        <div class="drawer-body">
-            <p class="drawer-desc">This page displays all registered security roles within the system. You can configure the dashboard menu permissions for each role.</p>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-user-tag text-primary mr-2"></i> Menu Role Setup</div>
-                <p class="drawer-card-text">View role classifications (e.g. Administrator, Member). Each card represents a distinct access group.</p>
             </div>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-cog text-primary mr-2"></i> Configuration Action</div>
-                <p class="drawer-card-text">Click the <strong>Configure</strong> button on any card to view and manage specific parent and submenu access parameters for that role.</p>
-            </div>
-        </div>
     </div>
 
     <!-- ── Alert Messages ── -->
@@ -69,12 +44,7 @@
 
         <?php if (empty($role)): ?>
         <div class="col-12">
-            <div class="card border-0 shadow-sm text-center py-5">
-                <div class="text-muted">
-                    <i class="fas fa-user-shield fa-3x mb-3 d-block"></i>
-                    <p>No roles found.</p>
-                </div>
-            </div>
+            
         </div>
         <?php endif; ?>
     </div>
@@ -82,20 +52,7 @@
 
 <script>
 $(document).ready(function() {
-    // Instructions Guide drawer handlers
-    $('#toggleGuideBtn').on('click', function() {
-        $('#instructionDrawer').addClass('open');
-        $('#instructionOverlay').addClass('open');
-        $('body').css('overflow', 'hidden'); // Lock background scroll
-    });
-
-    $('#closeDrawerBtn, #instructionOverlay').on('click', function() {
-        $('#instructionDrawer').removeClass('open');
-        $('#instructionOverlay').removeClass('open');
-        $('body').css('overflow', ''); // Unlock scroll
-    });
-});
-</script>
+    </script>
 
 
 

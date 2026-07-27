@@ -144,7 +144,6 @@
                     </div>
                     <div class="modal-body p-0">
                         <div class="d-flex g-0 w-100 flex-column flex-lg-row">
-                            <!-- Left Column: Instructions Guide -->
                             <div class="col-lg-5 p-4 d-flex flex-column justify-content-between mb-0" style="">
                                 <div>
                                     <div class="d-flex align-items-center mb-3">
@@ -235,7 +234,6 @@
                     </div>
                     <div class="modal-body p-0">
                         <div class="d-flex g-0 w-100 flex-column flex-lg-row">
-                            <!-- Left Column: Instructions Guide -->
                             <div class="col-lg-5 p-4 d-flex flex-column justify-content-between mb-0" style="">
                                 <div>
                                     <div class="d-flex align-items-center mb-3">
@@ -329,7 +327,6 @@
                         <form id="delegateForm" class="mb-0 w-100">
                             <input type="hidden" id="delegateMerchantId" name="merchantId">
                             <div class="d-flex g-0 w-100 flex-column flex-lg-row">
-                                <!-- Left Column: Instructions Guide -->
                                 <div class="col-lg-5 p-4 d-flex flex-column justify-content-between mb-0" style="">
                                     <div>
                                         <div class="d-flex align-items-center mb-3">

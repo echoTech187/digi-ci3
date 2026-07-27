@@ -3,43 +3,6 @@
     <div class="glass-aurora-2"></div>
     <div class="glass-aurora-3"></div>
 
-    <!-- ── Toggleable Page Instructional Drawer ── -->
-    <div class="drawer-overlay" id="instructionOverlay"></div>
-    <div class="drawer-right" id="instructionDrawer">
-        <div class="drawer-header">
-            <h6 class="drawer-title"><i class="fas fa-book mr-2"></i> Merchant Detail Dashboard Guide</h6>
-            <button type="button" class="drawer-close" id="closeDrawerBtn">&times;</button>
-        </div>
-        <div class="drawer-body">
-            <p class="drawer-desc">This dashboard provides a comprehensive 360-degree overview of the selected merchant's account details, financials, and OpenAPI credentials.</p>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-wallet text-primary mr-2"></i> Balance Summary</div>
-                <p class="drawer-card-text">Shows Total Balance, Hold Balance (escrowed/reserved), and Available Balance (Total minus Hold) for instant payout operations.</p>
-            </div>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-chart-line text-primary mr-2"></i> Audit Overview</div>
-                <p class="drawer-card-text">Monitor transaction volume trends, conversion success rates, and total charged fees. Includes a real-time recent activity stream of transactions across all payment channels.</p>
-            </div>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-id-card text-primary mr-2"></i> Merchant Information</div>
-                <p class="drawer-card-text">View the merchant's profile, contact details, status, and OpenAPI settings such as API callback URLs and IP address restrict options.</p>
-            </div>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-shopping-cart text-primary mr-2"></i> Transaction History & Mutation</div>
-                <p class="drawer-card-text">Browse the history table to trace individual payments, or inspect the Mutation Log to audit balance movements with precise debits and credits.</p>
-            </div>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-users text-primary mr-2"></i> Sub Accounts</div>
-                <p class="drawer-card-text">Manage child sub-merchants underneath this parent account. Sub-accounts inherit the fee configurations and limits defined by the parent.</p>
-            </div>
-        </div>
-    </div>
-
     <!-- ── Page Header ── -->
     <div class="dt-page-header d-flex justify-content-between align-items-center mb-4">
         <div>
@@ -54,9 +17,6 @@
             </div>
         </div>
         <div class="d-flex align-items-center gap-2">
-            <button type="button" class="btn btn-light border shadow-sm mr-2 d-flex align-items-center" id="toggleGuideBtn">
-                <i class="fas fa-book-open text-primary mr-2"></i> <span class="d-none d-md-block">Instructions Guide</span>
-            </button>
             <a href="<?= base_url('merchant/manage/edit/' . $merchant['id']); ?>" class="btn-dt-apply btn-dt-action-primary shadow-sm mr-2 action-confirm-link" data-title="Edit Merchant Profile?" data-text="You will be redirected to the merchant configuration page. Do you wish to continue?" data-confirm-btn="Yes, Edit Merchant" data-icon="info">
                 <i class="fas fa-edit mr-2"></i> Edit Merchant
             </a>

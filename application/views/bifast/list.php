@@ -1,33 +1,5 @@
 <!-- Begin Page Content -->
 <div>
-    <!-- ── Toggleable Page Instructional Drawer ── -->
-    <div class="drawer-overlay" id="instructionOverlay"></div>
-    <div class="drawer-right" id="instructionDrawer">
-        <div class="drawer-header">
-            <h6 class="drawer-title"><i class="fas fa-book mr-2"></i> BI-FAST Transactions Guide</h6>
-            <button type="button" class="drawer-close" id="closeDrawerBtn">&times;</button>
-        </div>
-        <div class="drawer-body">
-            <p class="drawer-desc">Track outbound real-time bank transfers and disbursements through the BI-FAST network.</p>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-university text-primary mr-2"></i> Destination Details</div>
-                <p class="drawer-card-text">Shows recipient bank, account number, account holder name, and transfer amount.</p>
-            </div>
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-exchange-alt text-primary mr-2"></i> Status Flow</div>
-                <p class="drawer-card-text">Track state transitions from Pending/In Process to Success, Failed, or Reversed.</p>
-            </div>
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-search-plus text-primary mr-2"></i> Re-inquiry</div>
-                <p class="drawer-card-text">Perform status checks directly against the bank gateway to resolve hanging transactions.</p>
-            </div>
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-ban text-primary mr-2"></i> Daily Limits</div>
-                <p class="drawer-card-text">Ensure disbursement volumes fit within per-transaction and cumulative daily limits.</p>
-            </div>
-        </div>
-    </div>
     <!-- ── Page Header ── -->
     <div class="dt-page-header">
         <div>
@@ -35,9 +7,6 @@
             <p class="dt-page-subtitle">Monitor and manage all disbursement activities through BI-FAST.</p>
         </div>
         <div class="d-flex align-items-center gap-2">
-            <button type="button" class="btn btn-light border shadow-sm mr-2 d-flex align-items-center" id="toggleGuideBtn">
-                <i class="fas fa-book-open text-primary mr-2"></i> <span class="d-none d-md-block">Instructions Guide</span>
-            </button>
             <?php
                 $download_url = base_url('finance/bi-fast/download') 
                     . "?search_bifast_date1=" . ($this->session->userdata('search_bifast_date1') ?: '')

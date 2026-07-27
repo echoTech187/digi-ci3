@@ -391,13 +391,3 @@ html[data-theme="light"] .sb-toggle-btn:hover {
     color: #0f172a !important;
 }
 
-/* 
- * ========================================================
- * HIDE INSTRUCTIONS GUIDE GLOBALLY (Per User Request)
- * ========================================================
- */
-#toggleGuideBtn,
-#instructionOverlay,
-#instructionDrawer {
-    display: none !important;
-}

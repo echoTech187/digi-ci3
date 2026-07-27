@@ -19,31 +19,6 @@ $download_url = base_url('finance/mutation/download')
 ?>
 
 <div>
-    <!-- ── Toggleable Page Instructional Drawer ── -->
-    <div class="drawer-overlay" id="instructionOverlay"></div>
-    <div class="drawer-right" id="instructionDrawer">
-        <div class="drawer-header">
-            <h6 class="drawer-title"><i class="fas fa-book mr-2"></i> Mutation Log Guide</h6>
-            <button type="button" class="drawer-close" id="closeDrawerBtn">&times;</button>
-        </div>
-        <div class="drawer-body">
-            <p class="drawer-desc">Audit trail tracking every single balance change (credits, debits, holds, releases) for the merchant.</p>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-exchange-alt text-primary mr-2"></i> Transaction Types</div>
-                <p class="drawer-card-text">Track debits (disbursements, fees) and credits (incoming VA, QRIS, e-wallet settlements).</p>
-            </div>
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-wallet text-primary mr-2"></i> Running Balance</div>
-                <p class="drawer-card-text">View the precise available balance snapshot at the exact moment of mutation.</p>
-            </div>
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-receipt text-primary mr-2"></i> Double-Entry Auditing</div>
-                <p class="drawer-card-text">Reconcile mutation records against transaction invoices to maintain ledger integrity.</p>
-            </div>
-        </div>
-    </div>
-
     <!-- ── Page Header ── -->
     <div class="dt-page-header">
         <div>
@@ -51,10 +26,7 @@ $download_url = base_url('finance/mutation/download')
             <p class="dt-page-subtitle">Tracking financial movements for <strong><?= $merchant[0]->c_name ?></strong></p>
         
         <div class="d-flex align-items-center gap-2">
-            <button type="button" class="btn btn-light border shadow-sm mr-2 d-flex align-items-center" id="toggleGuideBtn">
-                <i class="fas fa-book-open text-primary mr-2"></i> <span class="d-none d-md-block">Instructions Guide</span>
-            </button>
-        </div>
+            </div>
     </div>
     </div>
 

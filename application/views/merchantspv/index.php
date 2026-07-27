@@ -8,42 +8,7 @@
             <p class="dt-page-subtitle text-muted">Manage and organize merchant supervisors and their assigned merchants.</p>
         </div>
         <div class="d-flex" style="gap:10px;">
-            <button type="button" class="btn-dt-action btn-dt-action-primary toggle-guide-btn" id="toggleGuideBtn" style="background-color: #6f42c1; border-color: #6f42c1; color: #fff;">
-                <i class="fas fa-book-open mr-2"></i> Instructions Guide
-            </button>
-        </div>
-    </div>
-
-    <!-- ── Toggleable Page Instructional Drawer ── -->
-    <div class="drawer-overlay" id="instructionOverlay"></div>
-    <div class="drawer-right" id="instructionDrawer">
-        <div class="drawer-header">
-            <h6 class="drawer-title"><i class="fas fa-book mr-2"></i> Supervisor Management Overview</h6>
-            <button type="button" class="drawer-close" id="closeDrawerBtn">&times;</button>
-        </div>
-        <div class="drawer-body">
-            <p class="drawer-desc">This dashboard allows you to oversee and configure merchant supervisors. You can register new supervisors, manage their profile credentials, and dynamically assign or reassign merchants under their coordination.</p>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-search text-primary mr-2"></i> Live Search</div>
-                <p class="drawer-card-text">Instantly filter supervisor records by name, username, or email using the search bar.</p>
             </div>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-filter text-primary mr-2"></i> Advanced Filters</div>
-                <p class="drawer-card-text">Use the Filters dropdown to filter records by status (Active, Pending, Blocked, Freeze) or registration date range.</p>
-            </div>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-plus-circle text-primary mr-2"></i> Add Supervisor</div>
-                <p class="drawer-card-text">Create new supervisor credentials and immediately select the merchants they will supervise.</p>
-            </div>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-user-edit text-primary mr-2"></i> Edit Supervisor</div>
-                <p class="drawer-card-text">Use the Actions dropdown (⋮) on any table row to modify credentials, change status, or reassign merchants dynamically.</p>
-            </div>
-        </div>
     </div>
 
     <!-- ── Main Data Card ── -->

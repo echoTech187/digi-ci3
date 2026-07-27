@@ -24,46 +24,13 @@ $download_url = base_url('finance/qris/download')
 
 <!-- ── Page Header ── -->
 <div>
-    <!-- ── Toggleable Page Instructional Drawer ── -->
-    <div class="drawer-overlay" id="instructionOverlay"></div>
-    <div class="drawer-right" id="instructionDrawer">
-        <div class="drawer-header">
-            <h6 class="drawer-title"><i class="fas fa-book mr-2"></i> QRIS Transactions Guide</h6>
-            <button type="button" class="drawer-close" id="closeDrawerBtn">&times;</button>
-        </div>
-        <div class="drawer-body">
-            <p class="drawer-desc">Track and audit payments received via QRIS MPM (Merchant Presented Mode) dynamic codes.</p>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-qrcode text-primary mr-2"></i> Dynamic Generation</div>
-                <p class="drawer-card-text">Dynamic QR codes are generated for each transaction with a pre-configured expiry time.</p>
-            </div>
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-key text-primary mr-2"></i> Retrieval & RRN</div>
-                <p class="drawer-card-text">Use the Reference Retrieval Number (RRN) from the acquiring bank to trace credit settlements.</p>
-            </div>
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-bell text-primary mr-2"></i> Resend Callbacks</div>
-                <p class="drawer-card-text">Push status updates back to the merchant's callback URL in case of transport timeouts.</p>
-            </div>
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-sliders-h text-primary mr-2"></i> Advanced Querying</div>
-                <p class="drawer-card-text">Filter by specific merchant names, RRNs, invoice numbers, or payment status.</p>
-            </div>
-        </div>
-    </div>
-
-
     <div class="dt-page-header d-flex justify-content-between align-items-center mb-4">
         <div>
             <h4 class="dt-page-title mb-1">QRIS Transactions</h4>
             <p class="dt-page-subtitle mb-0">Manage and monitor all QRIS payment activity.</p>
         </div>
         <div class="d-flex align-items-center gap-2">
-            <button type="button" class="btn btn-light border shadow-sm mr-2 d-flex align-items-center" id="toggleGuideBtn">
-                <i class="fas fa-book-open text-primary mr-2"></i> <span class="d-none d-md-block">Instructions Guide</span>
-            </button>
-        </div>
+            </div>
     </div>
     <!-- ── Main Data Card ── -->
     <div class="card border-0 shadow-sm dt-card">

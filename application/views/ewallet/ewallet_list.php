@@ -1,35 +1,5 @@
 <!-- Begin Page Content -->
 <div >
-    <!-- ── Toggleable Page Instructional Drawer ── -->
-    <div class="drawer-overlay" id="instructionOverlay"></div>
-    <div class="drawer-right" id="instructionDrawer">
-        <div class="drawer-header">
-            <h6 class="drawer-title"><i class="fas fa-book mr-2"></i> E-Wallet Transactions Guide</h6>
-            <button type="button" class="drawer-close" id="closeDrawerBtn">&times;</button>
-        </div>
-        <div class="drawer-body">
-            <p class="drawer-desc">Monitor inbound payments from popular digital wallets (OVO, DANA, LinkAja, ShopeePay, Gopay).</p>
-            
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-wallet text-primary mr-2"></i> Channel Routing</div>
-                <p class="drawer-card-text">Differentiate traffic flowing through various e-wallet providers easily.</p>
-            </div>
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-sync text-primary mr-2"></i> Real-Time Querying</div>
-                <p class="drawer-card-text">Get immediate verification of wallet balance changes directly from the acquirer interface.</p>
-            </div>
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-bell text-primary mr-2"></i> Re-notify Merchants</div>
-                <p class="drawer-card-text">Manually fire failed webhooks to ensure systems remain synchronized.</p>
-            </div>
-            <div class="drawer-card">
-                <div class="drawer-card-title"><i class="fas fa-check-double text-primary mr-2"></i> Settlement Validation</div>
-                <p class="drawer-card-text">Confirm status shifts from pending/processing to settled/failed.</p>
-            </div>
-        </div>
-    </div>
-
-
     <!-- Page Header -->
     <div class="dt-page-header">
         <div>
@@ -37,9 +7,6 @@
             <p class="dt-page-subtitle">Manage and monitor all e-wallet payment activity.</p>
         </div>
         <div class="d-flex align-items-center gap-2">
-            <button type="button" class="btn btn-light border shadow-sm mr-2 d-flex align-items-center" id="toggleGuideBtn">
-                <i class="fas fa-book-open text-primary mr-2"></i> <span class="d-none d-md-block">Instructions Guide</span>
-            </button>
             <?php
                 $download_url = base_url('finance/e-wallet/download')
                     . "?search_ewallet_date1=" . ($this->session->userdata('search_ewallet_date1') ?: '')

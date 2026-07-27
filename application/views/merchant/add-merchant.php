@@ -187,9 +187,7 @@
         
         <div class="col-lg-4">
             <div class="card border-0 shadow-sm dt-card h-100">
-                <div class="card-header bg-white py-3 border-0 d-flex align-items-center">
-                    <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-book-open mr-2"></i> Instructions Guide</h6>
-                </div>
+                
                 <div class="card-body p-4 pt-0">
                     <p class="text-muted small mb-4">Fill out the form to create a new merchant. All account credentials will be generated and emailed to the merchant upon activation.</p>
                     
