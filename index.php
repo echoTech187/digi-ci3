@@ -1,5 +1,18 @@
 <?php
 /**
+ * Load Environment Variables
+ */
+if (file_exists(__DIR__ . '/.env')) {
+    $env = parse_ini_file(__DIR__ . '/.env');
+    if ($env) {
+        foreach ($env as $key => $value) {
+            $_ENV[$key] = $value;
+            $_SERVER[$key] = $value;
+        }
+    }
+}
+
+/**
  * CodeIgniter
  *
  * An open source application development framework for PHP

@@ -2,7 +2,7 @@
 defined('BASEPATH') or exit('No direct script access allowed');
 
 /* |-------------------------------------------------------------------------- | Base Site URL |-------------------------------------------------------------------------- | | URL to your CodeIgniter root. Typically this will be your base URL, | WITH a trailing slash: | |	http://example.com/ | | WARNING: You MUST set this value! | | If it is not set, then CodeIgniter will try guess the protocol and path | your installation, but due to security concerns the hostname will be set | to $_SERVER['SERVER_ADDR'] if available, or localhost otherwise. | The auto-detection mechanism exists only for convenience during | development and MUST NOT be used in production! | | If you need to allow multiple domains, remember that this file is still | a PHP script and you can easily do that on your own. | */
-$config['base_url'] = 'http://' . $_SERVER['HTTP_HOST'] . '/digi-ci3/';
+$config['base_url'] = $_ENV['BASE_URL'] ?? 'http://' . $_SERVER['HTTP_HOST'] . '/digi-ci3/';
 
 /* |-------------------------------------------------------------------------- | Index File |-------------------------------------------------------------------------- | | Typically this will be your index.php file, unless you've renamed it to | something else. If you are using mod_rewrite to remove the page set this | variable so that it is blank. | */
 $config['index_page'] = '';
@@ -65,7 +65,7 @@ $config['cache_path'] = '';
 $config['cache_query_string'] = FALSE;
 
 /* |-------------------------------------------------------------------------- | Encryption Key |-------------------------------------------------------------------------- | | If you use the Encryption class, you must set an encryption key. | See the user guide for more info. | | https://codeigniter.com/user_guide/libraries/encryption.html | */
-$config['encryption_key'] = '';
+$config['encryption_key'] = $_ENV['ENCRYPTION_KEY'] ?? '';
 
 /* |-------------------------------------------------------------------------- | Session Variables |-------------------------------------------------------------------------- | | 'sess_driver' | |	The storage driver to use: files, database, redis, memcached | | 'sess_cookie_name' | |	The session cookie name, must contain only [0-9a-z_-] characters | | 'sess_expiration' | |	The number of SECONDS you want the session to last. |	Setting to 0 (zero) means expire when the browser is closed. | | 'sess_save_path' | |	The location to save sessions to, driver dependent. | |	For the 'files' driver, it's a path to a writable directory. |	WARNING: Only absolute paths are supported! | |	For the 'database' driver, it's a table name. |	Please read up the manual for the format with other session drivers. | |	IMPORTANT: You are REQUIRED to set a valid save path! | | 'sess_match_ip' | |	Whether to match the user's IP address when reading the session data. | |	WARNING: If you're using the database driver, don't forget to update |	         your session table's PRIMARY KEY when changing this setting. | | 'sess_time_to_update' | |	How many seconds between CI regenerating the session ID. | | 'sess_regenerate_destroy' | |	Whether to destroy session data associated with the old session ID |	when auto-regenerating the session ID. When set to FALSE, the data |	will be later deleted by the garbage collector. | | Other session cookie settings are shared with the rest of the application, | except for 'cookie_prefix' and 'cookie_httponly', which are ignored here. | */
 $config['sess_driver'] = 'files';
@@ -114,16 +114,16 @@ global $whitelistIp;
 $whitelistIp = ['127.0.0.1', '::1'];
 
 global $internalUrlHit;
-$internalUrlHit = 'http://127.0.0.1/gatewayinternal';
+$internalUrlHit = $_ENV['INTERNAL_URL_HIT'] ?? 'http://127.0.0.1/gatewayinternal';
 
 global $externalUrlHit;
-$externalUrlHit = 'http://127.0.0.1/gatewayexternal';
+$externalUrlHit = $_ENV['EXTERNAL_URL_HIT'] ?? 'http://127.0.0.1/gatewayexternal';
 
 global $openUrlHit;
-$openUrlHit = 'http://127.0.0.1/openapi';
+$openUrlHit = $_ENV['OPEN_URL_HIT'] ?? 'http://127.0.0.1/openapi';
 
 global $stateProgram;
-$stateProgram = 'Development';
+$stateProgram = $_ENV['APP_ENV'] ?? 'Development';
 
 global $base_url;
-$base_url = 'http://127.0.0.1/digi-ci3';
+$base_url = $_ENV['BASE_URL'] ?? 'http://127.0.0.1/digi-ci3/';

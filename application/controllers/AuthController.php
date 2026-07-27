@@ -72,14 +72,13 @@ class AuthController extends CI_Controller
             return; // Stop further execution
         }
 
-        // ── BRUTE-FORCE PROTECTION (DISABLED TEMPORARILY) ──────────────
-        /*
+        // ── BRUTE-FORCE PROTECTION ──────────────
         $ip_address = $this->input->ip_address();
         $lockout_time = 15 * 60; // 15 minutes
         $max_attempts = 5;
 
         // Check current active attempts within the time window
-        $attempts = @$this->db->where('ip_address', $ip_address)
+        $attempts = $this->db->where('ip_address', $ip_address)
                               ->where('time >=', time() - $lockout_time)
                               ->where('cleared', 0)
                               ->count_all_results('login_attempts');
@@ -89,7 +88,6 @@ class AuthController extends CI_Controller
             redirect('auth');
             return;
         }
-        */
         // ─────────────────────────────────────────────────────────────
 
         $this->db->select('admin.*, roles.role_name');
@@ -118,10 +116,9 @@ class AuthController extends CI_Controller
                     $this->rbac->clear_menu_cache();
 
                     // Reset login attempts on successful login (mark as cleared instead of deleting)
-                    // @$this->db->where('ip_address', $ip_address)->update('login_attempts', ['cleared' => 1]);
+                    $this->db->where('ip_address', $ip_address)->update('login_attempts', ['cleared' => 1]);
 
-                    // ── Deteksi Login dari IP Baru (DISABLED TEMPORARILY) ─────
-                    /*
+                    // ── Deteksi Login dari IP Baru ─────
                     $login_ip = $this->input->ip_address();
                     $is_new_ip = !$this->NotificationModel->is_known_ip($admin['id'], $login_ip);
                     // Daftarkan IP (insert baru atau update last_seen)
@@ -139,26 +136,25 @@ class AuthController extends CI_Controller
                             ]
                         );
                     }
-                    */
                     // ─────────────────────────────────────────────────────────
 
                     $this->_redirect_based_on_access($admin['role_id']);
                 } else {
                    
                     $this->session->set_flashdata('message', '<div class="alert alert-danger" role="alert">Wrong password!</div>');
-                    // @$this->db->insert('login_attempts', ['ip_address' => $ip_address, 'email' => $c_email, 'time' => time()]);
+                    $this->db->insert('login_attempts', ['ip_address' => $ip_address, 'email' => $c_email, 'time' => time()]);
                     redirect('auth');
                 }
             } else {
                 
                 $this->session->set_flashdata('message', '<div class="alert alert-danger" role="alert">This email has not been activated!</div>');
-                // @$this->db->insert('login_attempts', ['ip_address' => $ip_address, 'email' => $c_email, 'time' => time()]);
+                $this->db->insert('login_attempts', ['ip_address' => $ip_address, 'email' => $c_email, 'time' => time()]);
                 redirect('auth');
             }
             
         } else {
             $this->session->set_flashdata('message', '<div class="alert alert-danger" role="alert">This email is not registered!</div>');
-            // @$this->db->insert('login_attempts', ['ip_address' => $ip_address, 'email' => $c_email, 'time' => time()]);
+            $this->db->insert('login_attempts', ['ip_address' => $ip_address, 'email' => $c_email, 'time' => time()]);
             redirect('auth');
         }
     }
