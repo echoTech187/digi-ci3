@@ -250,7 +250,7 @@
 
  <!-- Modal: Delegate Access -->
  <div class="modal fade" data-backdrop="static" data-keyboard="false" id="delegateModal" tabindex="-1" aria-hidden="true">
- <div class="modal-dialog modal-lg modal-dialog-centered">
+ <div class="modal-dialog modal-dialog-centered">
  <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
  <div class="modal-header modal-header-primary border-0 mh-premium">
  <div class="d-flex align-items-center">
