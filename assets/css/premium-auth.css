@@ -366,7 +366,7 @@ body::after {
 /* Mobile Responsive */
 @media (max-width: 767px) {
     html, body {
-        background-color: var(--bg-dark) !important;
+        /* background-color: var(--bg-dark) !important; */
         min-height: 100vh !important;
         height: 100% !important;
     }
@@ -514,9 +514,10 @@ html[data-theme="light"] .btn-login:hover {
     box-shadow: 0 6px 20px rgba(99, 102, 241, 0.3) !important;
 }
 
-/* Keep left side dark */
+/* Keep left side dark with illustration */
 html[data-theme="light"] .login-left {
-    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%) !important;
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.85) 0%, rgba(30, 27, 75, 0.95) 100%),
+                url('../img/auth-illustration.png') center center/cover no-repeat !important;
 }
 
 /* Specific Mobile Fixes for Light Mode */
