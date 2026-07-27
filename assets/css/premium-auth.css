@@ -462,47 +462,51 @@ html[data-theme="light"] body::after {
 }
 
 html[data-theme="light"] .login-card {
-    background: rgba(255, 255, 255, 0.95);
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    box-shadow: 0 20px 40px rgba(0,0,0,0.05);
+    background: rgba(255, 255, 255, 0.95) !important;
+    border: 1px solid rgba(255, 255, 255, 0.5) !important;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.05) !important;
 }
 
 html[data-theme="light"] .login-title {
-    color: #0f172a;
+    color: #0f172a !important;
 }
 
 html[data-theme="light"] .login-subtitle {
-    color: #64748b;
+    color: #64748b !important;
 }
 
 html[data-theme="light"] .form-label-custom {
-    color: #475569;
+    color: #475569 !important;
 }
 
 html[data-theme="light"] .form-control-custom {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    color: #0f172a;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    color: #0f172a !important;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.02) !important;
 }
 
 html[data-theme="light"] .form-control-custom:focus {
-    background: #ffffff;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+    background: #ffffff !important;
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1) !important;
 }
 
 html[data-theme="light"] .btn-login {
-    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.2);
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.2) !important;
 }
 
 html[data-theme="light"] .btn-login:hover {
-    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.3) !important;
 }
 
-/* Let the left-side panel inherit dark elements so it stays striking, 
-   but we must ensure its container ignores the general right-side bg override if any. 
-   Since we applied background to .login-card, we must make left-side stay dark. */
+/* Keep left side dark */
 html[data-theme="light"] .login-left {
-    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%) !important;
+}
+
+/* Fix toggle button */
+html[data-theme="light"] #authThemeBtn {
+    color: #f59e0b !important; /* Sun color */
+    border-color: rgba(0,0,0,0.1) !important;
 }
