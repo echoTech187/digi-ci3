@@ -37,10 +37,12 @@
         </div>
         
         <!-- Right Side -->
-        <div class="login-right">
+        <div class="login-right" style="position: relative;">
             
-            
-
+            <!-- Theme Toggle -->
+            <button type="button" id="authThemeBtn" class="btn" style="position: absolute; top: 20px; right: 20px; background: transparent; border: 1px solid rgba(255,255,255,0.1); color: #94a3b8; border-radius: 50%; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; z-index: 10;">
+                <i class="fas fa-moon"></i>
+            </button>
             <div class="login-mobile-logo">
                 <img src="<?= base_url('public/image/icon-300.png'); ?>" alt="Logo">
             </div>
@@ -96,4 +98,33 @@
     }
     setInterval(updateLiveClock, 1000);
     updateLiveClock(); // Initialize immediately
+
+    // Theme Toggle Logic
+    const themeBtn = document.getElementById('authThemeBtn');
+    const themeIcon = themeBtn.querySelector('i');
+    
+    function updateIcon(theme) {
+        if(theme === 'light') {
+            themeIcon.className = 'fas fa-sun';
+            themeBtn.style.color = '#f59e0b'; // Amber for sun
+            themeBtn.style.borderColor = 'rgba(0,0,0,0.1)';
+        } else {
+            themeIcon.className = 'fas fa-moon';
+            themeBtn.style.color = '#94a3b8';
+            themeBtn.style.borderColor = 'rgba(255,255,255,0.1)';
+        }
+    }
+
+    // Init icon based on current theme
+    const initialTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+    updateIcon(initialTheme);
+
+    themeBtn.addEventListener('click', () => {
+        let currentTheme = document.documentElement.getAttribute('data-theme');
+        let newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        updateIcon(newTheme);
+    });
 </script>

@@ -15,6 +15,14 @@
 	<meta name="csrf-token-name" content="<?= $this->security->get_csrf_token_name(); ?>">
 	<meta name="csrf-token-hash" content="<?= $this->security->get_csrf_hash(); ?>">
 
+	<!-- Theme Initialization -->
+	<script>
+		(function() {
+			const savedTheme = localStorage.getItem('theme') || 'dark'; // default to dark for auth
+			document.documentElement.setAttribute('data-theme', savedTheme);
+		})();
+	</script>
+
 	<!-- Custom fonts for this template-->
 	<link href="<?= base_url('assets/'); ?>vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
 	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
