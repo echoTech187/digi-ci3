@@ -5494,15 +5494,6 @@ div.dataTables_processing[style*="display: block"] {
     border-radius: 8px !important;
 }
 
-/* Smooth Modal Entrance */
-.modal.fade .modal-dialog {
-    transform: scale(0.95);
-    transition: transform 0.2s ease-out;
-}
-
-.modal.show .modal-dialog {
-    transform: scale(1);
-}
 
 /* Enhanced Table Hover Experience */
 .table-hover tbody tr {
