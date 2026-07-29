@@ -1,13 +1,5 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
-
-/* Clear any previous output buffer to ensure this is the only page shown.
- * We use ob_clean() instead of ob_end_clean() to avoid breaking the 
- * buffer level managed by CI_Exceptions::show_error().
- */
-for ($i = 0; $i < ob_get_level(); $i++) {
-    @ob_clean();
-}
 ?><!DOCTYPE html>
 <html lang="en">
 <head>
@@ -15,79 +7,125 @@ for ($i = 0; $i < ob_get_level(); $i++) {
     <link rel="icon" href="<?php echo config_item('base_url'); ?>/public/icon/favicon.ico" type="image/x-icon">
     <title>404 Page Not Found</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600&family=Montserrat:wght@800;900&display=swap" rel="stylesheet">
     <style type="text/css">
+        :root {
+            --bg-color: #ffdd00;
+            --text-dark: #00214d;
+            --text-white: #ffffff;
+        }
         body {
-            background-color: #f8fafc;
-            color: #1e293b;
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-color);
             margin: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            padding: 0;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
             min-height: 100vh;
-            padding: 20px;
-        }
-        .container {
-            max-width: 500px;
-            width: 100%;
-            background: #fff;
-            padding: 40px;
-            border-radius: 24px;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
-            text-align: center;
-        }
-        .icon-circle {
-            width: 80px;
-            height: 80px;
-            background-color: #f1f5f9;
-            color: #64748b;
-            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 24px;
-            font-size: 32px;
+            overflow-x: hidden;
         }
-        h1 {
-            font-size: 24px;
-            font-weight: 700;
-            margin: 0 0 12px;
-            color: #0f172a;
+        .error-wrapper {
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 40px;
+            box-sizing: border-box;
+            gap: 60px;
         }
-        p {
+        .content-section {
+            flex: 1;
+            max-width: 480px;
+        }
+        .image-section {
+            flex: 1.2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .image-section img {
+            max-width: 100%;
+            height: auto;
+            mix-blend-mode: multiply;
+        }
+        .error-code {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 160px;
+            font-weight: 900;
+            color: var(--text-dark);
+            margin: 0;
+            line-height: 0.9;
+            letter-spacing: -6px;
+        }
+        .error-title {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 48px;
+            font-weight: 800;
+            color: var(--text-white);
+            margin: 0 0 40px 0;
+            line-height: 1.1;
+            letter-spacing: -1.5px;
+        }
+        .error-message {
             font-size: 16px;
             line-height: 1.6;
-            color: #64748b;
-            margin: 0 0 32px;
+            color: var(--text-dark);
+            font-weight: 500;
+            margin-bottom: 40px;
         }
         .btn {
             display: inline-block;
-            background-color: #4f46e5;
-            color: #ffffff;
-            padding: 12px 32px;
-            border-radius: 12px;
+            background-color: var(--text-dark);
+            color: var(--text-white);
+            padding: 16px 32px;
             text-decoration: none;
-            font-weight: 600;
-            font-size: 15px;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2);
+            font-weight: 700;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-radius: 4px;
+            transition: transform 0.2s, background-color 0.2s;
         }
         .btn:hover {
-            background-color: #4338ca;
-            transform: translateY(-1px);
-            box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3);
+            background-color: #00122e;
+            transform: translateY(-2px);
+        }
+        @media (max-width: 900px) {
+            .error-wrapper {
+                flex-direction: column-reverse;
+                text-align: center;
+                padding: 20px;
+            }
+            .content-section {
+                max-width: 100%;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+            .error-code { font-size: 120px; letter-spacing: -4px; }
+            .error-title { font-size: 36px; }
+            .image-section { margin-bottom: 20px; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="icon-circle">
-            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+    <div class="error-wrapper">
+        <div class="image-section">
+            <img src="<?php echo config_item('base_url'); ?>/public/img/ufo_404.png" alt="UFO 404 Illustration">
         </div>
-        <h1>Page Not Found</h1>
-        <p>The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.</p>
-        <a href="<?php echo config_item('base_url'); ?>" class="btn">Return to Dashboard</a>
+        <div class="content-section">
+            <h1 class="error-code">404</h1>
+            <h2 class="error-title">Page not found</h2>
+            <p class="error-message">
+                Our gateway integrates with multiple channels to make your transactions a breeze, but it seems we can't find the page you are looking for. It might have been abducted by aliens!
+            </p>
+            <a href="<?php echo config_item('base_url'); ?>" class="btn">BACK TO HOMEPAGE</a>
+        </div>
     </div>
 </body>
 </html>

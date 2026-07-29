@@ -1,10 +1,5 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
-
-/* Clear any previous output (like PHP warnings) so only this error page shows.
- * We use ob_clean() instead of ob_end_clean() to avoid breaking the 
- * buffer level managed by CI_Exceptions::show_error().
- */
 for ($i = 0; $i < ob_get_level(); $i++) {
     @ob_clean();
 }
@@ -13,116 +8,129 @@ for ($i = 0; $i < ob_get_level(); $i++) {
 <head>
     <meta charset="utf-8">
     <link rel="icon" href="<?php echo config_item('base_url'); ?>/public/icon/favicon.ico" type="image/x-icon">
-    <title>Database Error</title>
+    <title>Database Issue - 503</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Google Fonts for exactly matching the typography style -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600&family=Montserrat:wght@800;900&display=swap" rel="stylesheet">
     <style type="text/css">
+        :root {
+            --bg-color: #ffdd00;
+            --text-dark: #00214d;
+            --text-white: #ffffff;
+        }
         body {
-            background-color: #f8fafc;
-            color: #1e293b;
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-color);
             margin: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            padding: 0;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
             min-height: 100vh;
-            padding: 20px;
-        }
-        .container {
-            max-width: 500px;
-            width: 100%;
-            background: #fff;
-            padding: 40px 24px;
-            border-radius: 24px;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
-            text-align: center;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-        }
-        .icon-circle {
-            width: 80px;
-            height: 80px;
-            background-color: #fee2e2;
-            color: #ef4444;
-            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 24px;
-            font-size: 32px;
+            overflow-x: hidden;
         }
-        h1 {
-            font-size: 24px;
-            font-weight: 700;
-            margin: 0 0 12px;
-            color: #0f172a;
+        .error-wrapper {
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 40px;
+            box-sizing: border-box;
+            gap: 60px;
         }
-        p {
+        .content-section {
+            flex: 1;
+            max-width: 480px;
+        }
+        .image-section {
+            flex: 1.2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .image-section img {
+            max-width: 100%;
+            height: auto;
+            /* mix-blend-mode multiply blends the white/yellow edges perfectly into the yellow background */
+            mix-blend-mode: multiply; 
+        }
+        .error-code {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 160px;
+            font-weight: 900;
+            color: var(--text-dark);
+            margin: 0;
+            line-height: 0.9;
+            letter-spacing: -6px;
+        }
+        .error-title {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 48px;
+            font-weight: 800;
+            color: var(--text-white);
+            margin: 0 0 40px 0;
+            line-height: 1.1;
+            letter-spacing: -1.5px;
+        }
+        .error-message {
             font-size: 16px;
             line-height: 1.6;
-            color: #64748b;
-            margin: 0 0 32px;
-        }
-        .debug-info {
-            text-align: left;
-            background-color: #f1f5f9;
-            padding: 16px;
-            border-radius: 12px;
-            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-            font-size: 13px;
-            color: #475569;
-            margin-bottom: 32px;
-            overflow-x: auto;
-            border: 1px solid #e2e8f0;
-            word-break: break-all;
-            white-space: pre-wrap;
+            color: var(--text-dark);
+            font-weight: 500;
+            margin-bottom: 40px;
         }
         .btn {
             display: inline-block;
-            background-color: #4f46e5;
-            color: #ffffff;
-            padding: 12px 32px;
-            border-radius: 12px;
+            background-color: var(--text-dark);
+            color: var(--text-white);
+            padding: 16px 32px;
             text-decoration: none;
-            font-weight: 600;
-            font-size: 15px;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2);
+            font-weight: 700;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-radius: 4px;
+            transition: transform 0.2s, background-color 0.2s;
         }
         .btn:hover {
-            background-color: #4338ca;
-            transform: translateY(-1px);
-            box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3);
+            background-color: #00122e;
+            transform: translateY(-2px);
         }
-        .btn:active {
-            transform: translateY(0);
+        @media (max-width: 900px) {
+            .error-wrapper {
+                flex-direction: column-reverse;
+                text-align: center;
+                padding: 20px;
+            }
+            .content-section {
+                max-width: 100%;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+            .error-code { font-size: 120px; letter-spacing: -4px; }
+            .error-title { font-size: 36px; }
+            .image-section { margin-bottom: 20px; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="icon-circle">
-            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z"></path><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+    <div class="error-wrapper">
+        <div class="image-section">
+            <img src="<?php echo config_item('base_url'); ?>/public/img/db_error_server.png" alt="Database Error Illustration">
         </div>
-        <h1>Data Connection Issue</h1>
-        <p>
-            <?php 
-                if (ENVIRONMENT === 'development') {
-                    echo "We encountered a database error during your request.";
-                } else {
-                    echo "We're having trouble connecting to our data service. Please try again in a few moments or contact support if the problem persists.";
-                }
-            ?>
-        </p>
-
-        <?php if (ENVIRONMENT === 'development'): ?>
-            <div class="debug-info">
-                <strong>Debug Details:</strong><br>
-                <?php echo $message; ?>
-            </div>
-        <?php endif; ?>
-
-        <a href="<?php echo config_item('base_url'); ?>" class="btn">Return to Dashboard</a>
+        <div class="content-section">
+            <h1 class="error-code">503</h1>
+            <h2 class="error-title">Database Issue</h2>
+            <p class="error-message">
+                Our gateway integrates with multiple channels to make your transactions a breeze. But right now, we encountered a database connection error. Our team has been notified.
+            </p>
+            <a href="javascript:window.location.reload();" class="btn">TRY AGAIN</a>
+        </div>
     </div>
 </body>
 </html>
