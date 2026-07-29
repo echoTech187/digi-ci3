@@ -77,7 +77,7 @@
 
                 <!-- Recaptcha if active -->
                 <div class="form-group mb-0">
-                    <div class="g-recaptcha" data-sitekey="<?= $recaptcha_site_key; ?>"></div>
+                    <div class="g-recaptcha" data-sitekey="<?= $recaptcha_site_key; ?>" data-theme="dark"></div>
                 </div>
 
                 <button type="submit" class="btn-login">
