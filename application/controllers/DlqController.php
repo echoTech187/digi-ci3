@@ -140,6 +140,9 @@ class DlqController extends CI_Controller {
         curl_close($ch);
 
         if ($httpcode == 200) {
+            // Update status ke 0 (On-Process Retry) agar hilang dari tabel Failed
+            $this->db->where('id', $id)->update('log_failed_notification_dlq', ['c_status' => 0]);
+            
             // Note: We don't delete here. The Python consumer will delete it via DeleteDlq_post if it truly succeeds.
             return ['status' => true, 'message' => 'Transaction pushed to queue successfully. Waiting for consumer to process.'];
         } else {

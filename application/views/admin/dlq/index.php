@@ -71,7 +71,7 @@
                 
                 <!-- Export Dropdown -->
                 <div class="dropdown">
-                    <button class="dt-more-filters-btn dropdown-toggle" type="button" id="exportDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="background: white; border: 1px solid #d0d7de;">
+                    <button class="dt-more-filters-btn dropdown-toggle" type="button" id="exportDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         <i class="fas fa-download mr-1"></i> Export
                     </button>
                     <div class="dropdown-menu dropdown-menu-right shadow-sm border-0" aria-labelledby="exportDropdown" style="border-radius: 8px; font-size: 14px; min-width: 150px; padding: 8px;">
@@ -130,7 +130,7 @@ $(document).ready(function() {
         { 
             "data": "merchant_name",
             "render": function(data, type, row) {
-                var name = data ? data : 'Unknown';
+                var name = data ? data : row.ref_merchantId;
                 return '<div class="fw-bold text-dark">' + name + '</div>';
             }
         },
