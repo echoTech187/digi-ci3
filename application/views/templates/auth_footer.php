@@ -9,7 +9,7 @@
 
 <!-- Custom scripts for all pages-->
 <script src="<?= base_url('assets/'); ?>js/sb-admin-2.min.js"></script>
-<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+<script src="https://www.google.com/recaptcha/api.js?onload=onloadRecaptchaCallback&render=explicit" async defer></script>
 <script>
     $(document).on('submit', 'form', function() {
         let $btn = $(this).find('button[type="submit"]');

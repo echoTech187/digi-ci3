@@ -88,3 +88,4 @@ update_user_menu_urls.sql
 
 # Security Credentials
 .env
+download_report/*

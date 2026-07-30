@@ -76,8 +76,8 @@
                 </div> -->
 
                 <!-- Recaptcha if active -->
-                <div class="form-group mb-0">
-                    <div class="g-recaptcha" data-sitekey="<?= $recaptcha_site_key; ?>" data-theme="dark"></div>
+                <div class="form-group mb-0" id="recaptcha-wrapper">
+                    <div class="g-recaptcha" id="recaptcha-container"></div>
                 </div>
 
                 <button type="submit" class="btn-login">
@@ -98,9 +98,10 @@
     setInterval(updateLiveClock, 1000);
     updateLiveClock(); // Initialize immediately
 
-    // Theme Toggle Logic
+    // Theme Toggle & reCAPTCHA Dynamic Theme Logic
     const themeBtn = document.getElementById('authThemeBtn');
     const themeIcon = themeBtn.querySelector('i');
+    const recaptchaSiteKey = "<?= $recaptcha_site_key; ?>";
     
     function updateIcon(theme) {
         if(theme === 'light') {
@@ -114,6 +115,39 @@
         }
     }
 
+    window.renderRecaptcha = function(theme) {
+        const wrapper = document.getElementById('recaptcha-wrapper');
+        if (!wrapper || typeof grecaptcha === 'undefined' || typeof grecaptcha.render !== 'function') {
+            return;
+        }
+        if (!recaptchaSiteKey) return;
+
+        const currentTheme = theme || document.documentElement.getAttribute('data-theme') || 'dark';
+        
+        // Re-create container DOM element to clear Google reCAPTCHA internal node registration
+        wrapper.innerHTML = '<div class="g-recaptcha" id="recaptcha-container"></div>';
+
+        try {
+            grecaptcha.render('recaptcha-container', {
+                'sitekey': recaptchaSiteKey,
+                'theme': currentTheme
+            });
+        } catch(e) {
+            console.error('reCAPTCHA render error:', e);
+        }
+    };
+
+    window.onloadRecaptchaCallback = function() {
+        window.isRecaptchaLoaded = true;
+        if (typeof window.renderRecaptcha === 'function') {
+            window.renderRecaptcha();
+        }
+    };
+
+    if (window.isRecaptchaLoaded && typeof grecaptcha !== 'undefined') {
+        window.renderRecaptcha();
+    }
+
     // Init icon based on current theme
     const initialTheme = document.documentElement.getAttribute('data-theme') || 'dark';
     updateIcon(initialTheme);
@@ -125,5 +159,9 @@
         document.documentElement.setAttribute('data-theme', newTheme);
         localStorage.setItem('theme', newTheme);
         updateIcon(newTheme);
+
+        if (window.isRecaptchaLoaded && typeof grecaptcha !== 'undefined') {
+            window.renderRecaptcha(newTheme);
+        }
     });
 </script>

@@ -90,7 +90,7 @@
             <?php if ($this->session->flashdata('success')) : ?>
                 Swal.fire({
                     title: 'Success!',
-                    text: '<?= addslashes(trim(str_replace(["\r", "\n"], '', $this->session->flashdata('success')))); ?>',
+                    html: '<?= addslashes(trim(str_replace(["\r", "\n"], '', $this->session->flashdata('success')))); ?>',
                     icon: 'success',
                     customClass: {
                         popup: 'swal2-premium-popup',

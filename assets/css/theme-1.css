@@ -962,7 +962,7 @@ body {
     width: 100%;
     display: flex;
     flex-direction: row;
-    min-height: 700px;
+    min-height: auto;
 }
 
 .login-left {
@@ -4706,7 +4706,7 @@ tr.saved {
     }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 575px) {
     .login-wrapper {
         padding: 0 !important;
         height: 100vh;
