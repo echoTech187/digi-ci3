@@ -69,20 +69,10 @@
                     </div>
                 </div>
                 
-                <!-- Export Dropdown -->
-                <div class="dropdown">
-                    <button class="dt-more-filters-btn dropdown-toggle" type="button" id="exportDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <i class="fas fa-download mr-1"></i> Export
-                    </button>
-                    <div class="dropdown-menu dropdown-menu-right shadow-sm border-0" aria-labelledby="exportDropdown" style="border-radius: 8px; font-size: 14px; min-width: 150px; padding: 8px;">
-                        <a class="dropdown-item d-flex align-items-center py-2" href="javascript:void(0)" id="btn-export-excel" style="border-radius: 4px;">
-                            <i class="fas fa-file-excel text-success mr-2"></i> as Excel
-                        </a>
-                        <a class="dropdown-item d-flex align-items-center py-2" href="javascript:void(0)" id="btn-export-csv" style="border-radius: 4px;">
-                            <i class="fas fa-file-csv text-primary mr-2"></i> as CSV
-                        </a>
-                    </div>
-                </div>
+                <!-- Single Download Button (CSV only) -->
+                <button type="button" id="btn-export-csv" class="btn-dt-chip-action btn-dt-action-success">
+                    <i class="fas fa-download"></i> <span class="d-none d-md-inline-block ml-1">Download</span>
+                </button>
 
             </div>
         </div>
@@ -240,45 +230,15 @@ $(document).ready(function() {
     }
 
     // Export Logic
-    function checkFiltersBeforeExport() {
-        var merchant = $('#filter-merchant').val();
-        var startDate = $('#filter-start-date').val();
-        var endDate = $('#filter-end-date').val();
-        
-        if (!merchant && !startDate && !endDate) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'No Filters Applied',
-                text: 'Please select at least a Merchant or a Date Range before exporting to prevent downloading massive data.',
-                confirmButtonColor: '#3085d6'
-            });
-            return false;
-        }
-        return true;
-    }
-
     $('#btn-export-csv').on('click', function(e) {
         e.preventDefault();
-        if (!checkFiltersBeforeExport()) return;
 
         var params = $.param({
             merchant_id: $('#filter-merchant').val(),
             start_date: $('#filter-start-date').val(),
             end_date: $('#filter-end-date').val()
         });
-        window.location.href = "<?= base_url('DlqController/export_csv') ?>?" + params;
-    });
-
-    $('#btn-export-excel').on('click', function(e) {
-        e.preventDefault();
-        if (!checkFiltersBeforeExport()) return;
-
-        var params = $.param({
-            merchant_id: $('#filter-merchant').val(),
-            start_date: $('#filter-start-date').val(),
-            end_date: $('#filter-end-date').val()
-        });
-        window.location.href = "<?= base_url('DlqController/export_excel') ?>?" + params;
+        window.location.href = "<?= base_url('DlqController/download') ?>?" + params;
     });
 
     // Initialize the badge if there are pre-filled filters from session

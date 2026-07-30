@@ -83,15 +83,22 @@ class ReportController extends CI_Controller {
       is_logged_in();
 
       if (!$this->input->is_ajax_request()) {
-         $search_date = $this->input->post('search_date') !== null ? $this->input->post('search_date') : $this->session->userdata('search_date');
-         $search_date_to = $this->input->post('search_date_to') !== null ? $this->input->post('search_date_to') : $this->session->userdata('search_date_to');
-         $search_type = $this->input->post('search_type') !== null ? $this->input->post('search_type') : $this->session->userdata('search_type');
-         $search_status = $this->input->post('search_status') !== null ? $this->input->post('search_status') : $this->session->userdata('search_status');
+         if (empty($this->input->get()) && !$this->input->post()) {
+            $this->session->unset_userdata('search_date');
+            $this->session->unset_userdata('search_date_to');
+            $this->session->unset_userdata('search_type');
+            $this->session->unset_userdata('search_status');
+         }
 
-         $this->session->set_userdata('search_date', $search_date);
-         $this->session->set_userdata('search_date_to', $search_date_to);
-         $this->session->set_userdata('search_type', $search_type);
-         $this->session->set_userdata('search_status', $search_status);
+         $search_date = $this->input->post('search_date') !== null ? $this->input->post('search_date') : ($this->input->get('search_date') !== null ? $this->input->get('search_date') : $this->session->userdata('search_date'));
+         $search_date_to = $this->input->post('search_date_to') !== null ? $this->input->post('search_date_to') : ($this->input->get('search_date_to') !== null ? $this->input->get('search_date_to') : $this->session->userdata('search_date_to'));
+         $search_type = $this->input->post('search_type') !== null ? $this->input->post('search_type') : ($this->input->get('search_type') !== null ? $this->input->get('search_type') : $this->session->userdata('search_type'));
+         $search_status = $this->input->post('search_status') !== null ? $this->input->post('search_status') : ($this->input->get('search_status') !== null ? $this->input->get('search_status') : $this->session->userdata('search_status'));
+
+         if ($search_date !== null) $this->session->set_userdata('search_date', $search_date);
+         if ($search_date_to !== null) $this->session->set_userdata('search_date_to', $search_date_to);
+         if ($search_type !== null) $this->session->set_userdata('search_type', $search_type);
+         if ($search_status !== null) $this->session->set_userdata('search_status', $search_status);
       }
 
       if ($this->input->is_ajax_request()) {
@@ -142,8 +149,23 @@ class ReportController extends CI_Controller {
       $filename = $this->input->get('filename');
 
       if (!empty($filename)) {
-         // Standard report download path
-         $filepath = '/var/www/download_report/' . $filename;
+          // Standard report download path with candidate paths check
+          $candidate_paths = [
+              FCPATH . 'download_report/' . $filename,
+              'C:/xampp74/htdocs/digi-ci3/download_report/' . $filename,
+              'C:/xampp74/htdocs/gatewayservice/download_report/' . $filename,
+              '/var/www/download_report/' . $filename,
+              'C:/var/www/download_report/' . $filename,
+              '/home/admin/public_html/download_report/' . $filename
+          ];
+
+          $filepath = null;
+          foreach ($candidate_paths as $path) {
+              if (file_exists($path)) {
+                  $filepath = $path;
+                  break;
+              }
+          }
 
          if (file_exists($filepath)) {
             header('Content-Description: File Transfer');

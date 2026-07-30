@@ -139,9 +139,18 @@
                 {
                     data: 'c_filename',
                     className: 'text-nowrap',
-                    render: function(data) {
+                    render: function(data, type, row) {
+                        if (!data || data === 'null' || data.trim() === '') {
+                            var status = (row.c_status || '').toUpperCase();
+                            if (status === 'PENDING') {
+                                return '<span class="text-warning small font-italic"><i class="fas fa-spinner fa-spin mr-1"></i> Waiting Generating...</span>';
+                            } else if (status === 'FAILED') {
+                                return '<span class="text-danger small font-italic"><i class="fas fa-exclamation-circle mr-1"></i> Failed Generating</span>';
+                            }
+                            return '<span class="text-muted small font-italic">File Not Available</span>';
+                        }
                         var baseUrl = "<?= base_url() ?>";
-                        return '<a href="' + baseUrl + 'report/download/export?filename=' + encodeURIComponent(data) + '" class="text-primary font-weight-bold">' + data + '</a>';
+                        return '<a href="' + baseUrl + 'report/download/export?filename=' + encodeURIComponent(data) + '" class="text-primary font-weight-bold"><i class="fas fa-file-csv text-success mr-1"></i> ' + data + '</a>';
                     }
                 },
                 {data: 'c_status', render: function(data) {

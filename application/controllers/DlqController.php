@@ -7,6 +7,9 @@ class DlqController extends CI_Controller {
         $this->load->library('rbac');
         $this->load->model('Model_user');
         $this->load->model('DlqModel');
+
+        global $internalUrlHit;
+        $this->internalUrlHit = $internalUrlHit;    
         is_logged_in(); // Assumes this helper exists globally
     }
 
@@ -114,13 +117,6 @@ class DlqController extends CI_Controller {
             $ref_col => $dlq['ref_transactionId']
         ];
 
-        // Ensure consumer transfer delete logic finds the ID
-        if ($dlq['type'] == 'transfer') {
-            $msgInfo['ref_cashoutPaymentId'] = $dlq['ref_transactionId'];
-        } else if ($dlq['type'] == 'qris-mpm') {
-            $msgInfo['ref_qrisMpmId'] = $dlq['ref_transactionId'];
-        }
-
         $payload = [
             'msgType' => $msgType,
             'msgInfo' => $msgInfo,
@@ -129,7 +125,7 @@ class DlqController extends CI_Controller {
 
         // Push to internal rabbitmq creator
         // In local/production, adjust the base URL of internal gateway
-        $internal_url = "http://localhost/gatewayinternal/Rabbitmq/createQueue";
+        $internal_url = $this->internalUrlHit."/Rabbitmq/createQueue";
 
         $ch = curl_init($internal_url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -139,76 +135,50 @@ class DlqController extends CI_Controller {
         $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
 
-        if ($httpcode == 200) {
+        $resData = json_decode($response, true);
+
+        if ($httpcode == 200 && isset($resData['responseCode']) && $resData['responseCode'] === 'SUCCESS') {
             // Update status ke 0 (On-Process Retry) agar hilang dari tabel Failed
             $this->db->where('id', $id)->update('log_failed_notification_dlq', ['c_status' => 0]);
             
             // Note: We don't delete here. The Python consumer will delete it via DeleteDlq_post if it truly succeeds.
             return ['status' => true, 'message' => 'Transaction pushed to queue successfully. Waiting for consumer to process.'];
         } else {
-            return ['status' => false, 'message' => 'Failed to push to queue. HTTP Code: ' . $httpcode];
+            $errDetail = isset($resData['responseCode']) ? $resData['responseCode'] : ('HTTP Code ' . $httpcode);
+            return ['status' => false, 'message' => 'Failed to push to queue. Error: ' . $errDetail];
         }
     }
 
-    public function export_csv() {
+    public function download() {
         $merchant_id = $this->input->get('merchant_id');
         $start_date = $this->input->get('start_date');
         $end_date = $this->input->get('end_date');
-        
-        $data = $this->DlqModel->getExportData($merchant_id, $start_date, $end_date);
-        
-        $filename = 'dlq_export_' . date('YmdHis') . '.csv';
-        
-        header("Content-Description: File Transfer");
-        header("Content-Disposition: attachment; filename=$filename");
-        header("Content-Type: application/csv; "); 
-        
-        $file = fopen('php://output', 'w');
-        
-        $header = array("Failed Time", "Merchant", "Type", "Transaction ID");
-        fputcsv($file, $header);
-        
-        foreach ($data as $row) {
-            fputcsv($file, array(
-                $row['created_at'], 
-                $row['merchant_name'], 
-                $row['type'], 
-                $row['ref_transactionId']
-            ));
-        }
-        fclose($file);
-        exit;
-    }
 
-    public function export_excel() {
-        $merchant_id = $this->input->get('merchant_id');
-        $start_date = $this->input->get('start_date');
-        $end_date = $this->input->get('end_date');
-        
-        $data = $this->DlqModel->getExportData($merchant_id, $start_date, $end_date);
-        
-        $filename = 'dlq_export_' . date('YmdHis') . '.xls';
-        
-        header("Content-Type: application/vnd.ms-excel");
-        header("Content-Disposition: attachment; filename=\"$filename\"");
-        
-        echo '<table border="1">';
-        echo '<tr>';
-        echo '<th>Failed Time</th>';
-        echo '<th>Merchant</th>';
-        echo '<th>Type</th>';
-        echo '<th>Transaction ID</th>';
-        echo '</tr>';
-        
-        foreach ($data as $row) {
-            echo '<tr>';
-            echo '<td>' . htmlspecialchars($row['created_at'] ?? '') . '</td>';
-            echo '<td>' . htmlspecialchars($row['merchant_name'] ?? '') . '</td>';
-            echo '<td>' . htmlspecialchars($row['type'] ?? '') . '</td>';
-            echo '<td>' . htmlspecialchars($row['ref_transactionId'] ?? '') . '</td>';
-            echo '</tr>';
+        $user = $this->Model_user->view_user()->row_array();
+        $adminID = isset($user['id']) ? $user['id'] : 0;
+        $additionalFilter = "";
+        if($merchant_id){
+            $additionalFilter .= $merchant_id . "|";
         }
-        echo '</table>';
-        exit;
+        if($start_date){
+            $additionalFilter .= $start_date . "|";
+        }
+        if($end_date){
+            $additionalFilter .= $end_date;
+        }
+        $data = array(
+           'ref_adminId' => $adminID,
+           'c_datetime' => date('Y-m-d H:i:s'),
+           'c_additionalFilter' => $additionalFilter,
+           'c_type' => 'Notification',
+        );
+
+        if ($this->db->insert('admin_download', $data)) {
+           $this->session->set_flashdata('success', 'Your download request is being processed. Please go to <a href="' . base_url('report/download') . '" class="font-weight-bold alert-link" style="text-decoration:underline;">Financial Exports</a> menu to retrieve the file.');
+        } else {
+           $this->session->set_flashdata('error', 'Failed to request download.');
+        }
+
+        redirect('notifications');
     }
 }
