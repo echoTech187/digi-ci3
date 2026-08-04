@@ -278,10 +278,20 @@ class History extends CI_Model {
     /**
      * Get all transaction history (PPOB, VA, QRIS, E-Wallet, BI-FAST) for a specific merchant.
      */
-    public function get_merchant_all_history_datatables_handler($merchant_id)
+    public function get_merchant_all_history_datatables_handler($merchant_id, $start_date = null, $end_date = null)
     {
         $this->load->library('datatables');
         $merchant_id = intval($merchant_id);
+
+        if (!$start_date) {
+            $start_date = date('Y-m-d', strtotime('-30 days'));
+        }
+        if (!$end_date) {
+            $end_date = date('Y-m-d');
+        }
+
+        $date_start_sql = $this->db->escape($start_date . ' 00:00:00');
+        $date_end_sql = $this->db->escape($end_date . ' 23:59:59');
 
         $union_sql = "
             SELECT 
@@ -295,7 +305,7 @@ class History extends CI_Model {
             FROM cashout_payment_ppob cpp
             LEFT JOIN cashout c ON cpp.ref_cashoutId = c.id
             LEFT JOIN merchant m ON cpp.ref_merchantId = m.id
-            WHERE cpp.ref_merchantId = {$merchant_id}
+            WHERE cpp.ref_merchantId = {$merchant_id} AND cpp.c_datetime >= {$date_start_sql} AND cpp.c_datetime <= {$date_end_sql}
             
             UNION ALL
             
@@ -310,7 +320,7 @@ class History extends CI_Model {
             FROM cashin_payment_va cpv
             LEFT JOIN cashin c ON cpv.ref_cashinId = c.id
             LEFT JOIN merchant m ON cpv.ref_merchantId = m.id
-            WHERE cpv.ref_merchantId = {$merchant_id}
+            WHERE cpv.ref_merchantId = {$merchant_id} AND cpv.c_datetime >= {$date_start_sql} AND cpv.c_datetime <= {$date_end_sql}
 
             UNION ALL
 
@@ -325,7 +335,7 @@ class History extends CI_Model {
             FROM cashin_payment_qris_mpm cpq
             LEFT JOIN cashin c ON cpq.ref_cashinId = c.id
             LEFT JOIN merchant m ON cpq.ref_merchantId = m.id
-            WHERE cpq.ref_merchantId = {$merchant_id}
+            WHERE cpq.ref_merchantId = {$merchant_id} AND cpq.c_datetime >= {$date_start_sql} AND cpq.c_datetime <= {$date_end_sql}
 
             UNION ALL
 
@@ -340,7 +350,7 @@ class History extends CI_Model {
             FROM cashin_payment_ewallet cpe
             LEFT JOIN cashin c ON cpe.ref_cashinId = c.id
             LEFT JOIN merchant m ON cpe.ref_merchantId = m.id
-            WHERE cpe.ref_merchantId = {$merchant_id}
+            WHERE cpe.ref_merchantId = {$merchant_id} AND cpe.c_datetime >= {$date_start_sql} AND cpe.c_datetime <= {$date_end_sql}
 
             UNION ALL
 
@@ -355,7 +365,7 @@ class History extends CI_Model {
             FROM cashout_payment_bifast cpb
             LEFT JOIN cashout c ON cpb.ref_cashoutId = c.id
             LEFT JOIN merchant m ON cpb.ref_merchantId = m.id
-            WHERE cpb.ref_merchantId = {$merchant_id}
+            WHERE cpb.ref_merchantId = {$merchant_id} AND cpb.c_datetime >= {$date_start_sql} AND cpb.c_datetime <= {$date_end_sql}
         ";
 
         // Calculate counts

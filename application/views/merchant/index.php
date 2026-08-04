@@ -1,32 +1,31 @@
 <div>
 
  <!-- Page Header -->
- <div class="dt-page-header d-flex align-items-center justify-content-between">
+ <div class="dt-page-header mb-4 d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3">
  <div>
- <h1 class="dt-page-title">Merchant Management</h1>
- <p class="dt-page-subtitle">View and manage all registered merchants and their balances.</p>
+ <h1 class="dt-page-title mb-1" style="font-size: clamp(1.2rem, 3.5vw, 1.5rem); font-weight: 800; letter-spacing: -0.5px;">Merchant Management</h1>
+ <p class="dt-page-subtitle text-muted mb-0 small" style="font-size: 12px;">View and manage all registered merchants and their balances.</p>
  </div>
- 
  </div>
 
  <!-- Data Table Card -->
- <div class="card dt-card border-0 shadow-sm">
+ <div class="card dt-card border-0 shadow-sm" style="border-radius: 20px; overflow: hidden;">
  <!-- Toolbar -->
  <form id="merchant_search_form" method="post" action="<?= base_url('merchant/manage'); ?>">
  <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>" value="<?= $this->security->get_csrf_hash(); ?>">
  <div class="dt-toolbar">
  <!-- LEFT: Global Search -->
- <div class="dt-search-wrapper flex-grow-1 mb-2 mb-md-0" style="min-width: 280px;">
+ <div class="dt-search-wrapper">
  <i class="fas fa-search dt-search-icon"></i>
- <input type="text" id="merchantGlobalSearch" class="dt-search-input" placeholder="Search by name, ID, email, or Business ID..." value="<?= $this->session->userdata('search_merchant'); ?>">
+ <input type="text" id="merchantGlobalSearch" class="dt-search-input" placeholder="Search merchant..." value="<?= $this->session->userdata('search_merchant'); ?>">
  </div>
 
  <!-- RIGHT: Filters & Actions -->
- <div class="dt-toolbar-filters d-flex align-items-center gap-2">
+ <div class="dt-toolbar-filters">
  <!-- More Filters Trigger -->
  <div class="dt-filter-group dt-more-filters-wrapper">
  <button type="button" id="merchantMoreFiltersBtn" class="dt-more-filters-btn <?= (!empty($this->session->userdata('search_merchant_status')) || !empty($this->session->userdata('search_merchant_openapi_status')) || !empty($this->session->userdata('search_merchant_date_from')) || !empty($this->session->userdata('search_merchant_date_to'))) ? 'dt-more-filters-active' : ''; ?>">
- <i class="fas fa-sliders-h mr-1 mr-2"></i> Filters
+ <i class="fas fa-sliders-h mr-1"></i> <span class="d-none d-lg-inline">Filters</span>
  <?php 
  $extra_active = 0;
  if (!empty($this->session->userdata('search_merchant_status'))) $extra_active++;
@@ -42,14 +41,14 @@
  <!-- Dropdown Panel -->
  <div class="dt-more-panel" id="merchantMoreFiltersPanel">
  <div class="dt-more-panel-header">
- <span class="dt-more-panel-title"><i class="fas fa-filter mr-1 mr-2"></i> Advanced Filters</span>
+ <span class="dt-more-panel-title"><i class="fas fa-filter mr-1"></i> Advanced Filters</span>
  <a href="<?= base_url('merchant/manage/reset'); ?>" class="dt-more-clear">Clear All</a>
  </div>
 
  <div class="dt-more-panel-body">
  <!-- Registration Date Range -->
  <div class="dt-more-field">
- <label class="dt-more-label"><i class="fas fa-calendar-alt mr-1 mr-2"></i> Registration Date</label>
+ <label class="dt-more-label"><i class="fas fa-calendar-alt mr-1"></i> Registration Date</label>
  <div class="premium-picker">
  <input type="date" name="search_merchant_date_from" class="dt-chip-input" value="<?= $this->session->userdata('search_merchant_date_from'); ?>" title="Date From">
  <span class="text-muted mx-1" style="font-size:11px;">→</span>
@@ -59,7 +58,7 @@
 
  <!-- Status -->
  <div class="dt-more-field">
- <label class="dt-more-label"><i class="fas fa-info-circle mr-1 mr-2"></i> Account Status</label>
+ <label class="dt-more-label"><i class="fas fa-info-circle mr-1"></i> Account Status</label>
  <select name="search_merchant_status" class="dt-more-select">
  <option value="">All Account Statuses</option>
  <option value="Pending" <?= ($this->session->userdata('search_merchant_status') == 'Pending') ? 'selected' : ''; ?>>Pending Approval</option>
@@ -71,7 +70,7 @@
  
  <!-- OpenAPI Status -->
  <div class="dt-more-field">
- <label class="dt-more-label"><i class="fas fa-plug mr-1 mr-2"></i> OpenAPI Status</label>
+ <label class="dt-more-label"><i class="fas fa-plug mr-1"></i> OpenAPI Status</label>
  <select name="search_merchant_openapi_status" class="dt-more-select">
  <option value="">All OpenAPI Statuses</option>
  <option value="Pending" <?= ($this->session->userdata('search_merchant_openapi_status') == 'Pending') ? 'selected' : ''; ?>>Pending Approval</option>
@@ -85,7 +84,7 @@
 
  <div class="dt-more-panel-footer">
  <button type="submit" name="submit" class="btn-dt-apply btn-dt-action-primary shadow-sm">
- <i class="fas fa-check mr-1 mr-2"></i> APPLY FILTER
+ <i class="fas fa-check mr-1"></i> APPLY FILTER
  </button>
  <button type="button" id="merchantMoreFiltersClose" class="btn-dt-cancel btn-dt-secondary">
  CANCEL
@@ -94,8 +93,8 @@
  </div>
  </div>
 
- <a href="<?= base_url('merchant/manage/add'); ?>" class="btn-dt-action btn-dt-action-success border-0 text-decoration-none d-flex align-items-center" >
- <i class="fas fa-plus mr-2"></i> <span class="d-none d-md-block">Add Merchant</span>
+ <a href="<?= base_url('merchant/manage/add'); ?>" class="btn-dt-action btn-dt-action-success border-0 text-decoration-none d-flex align-items-center">
+ <i class="fas fa-plus mr-1"></i> <span class="d-none d-sm-inline">Add Merchant</span>
  </a>
  </div>
  </div>
@@ -308,27 +307,30 @@
  $(document).ready(function() {
  var ajaxUrl = "<?= base_url('merchant/manage') ?>";
  var columns = [
- { "data": "no", "orderable": false, "className": "ps-4 text-muted small" },
+ { "data": "no", "orderable": false, "className": "ps-4 text-muted small dt-col-no" },
  { 
  "data": "id",
- "className": "text-left text-nowrap",
+ "className": "text-left text-nowrap dt-col-id",
  "render": function(data, type, row) {
  return '<span class="fw-bold text-dark">#' + data + '</span>';
  }
  },
  { 
- "data": "c_name",
- "className": "text-left text-nowrap",
+ "data": "c_name", "className": "text-left text-nowrap dt-col-info",
  "render": function(data, type, row) {
  return '<div class="d-flex flex-column">' +
- ' <a href="<?= base_url('merchant/manage/detail/') ?>' + row.id + '" class="fw-bold text-primary text-decoration-none">' + data + '</a>' +
- ' <span class="text-muted small">' + row.c_email + '</span>' +
+ ' <a href="<?= base_url('merchant/manage/detail/') ?>' + row.id + '" class="fw-bold text-dark text-decoration-none font-weight-bold" style="font-size: 13.5px;">' + data + '</a>' +
+ ' <div class="small text-muted d-flex align-items-center gap-1 mt-1">' +
+ ' <span class="badge bg-light text-dark border font-weight-bold px-1.5 py-0.5" style="font-size: 10px;">#' + row.id + '</span>' +
+ ' <span>' + row.c_email + '</span>' +
+ ' </div>' +
  '</div>';
  }
  },
  { 
  "data": "c_balanceTotal",
  "orderable": false,
+ "className": "dt-col-balance",
  "render": function(data, type, row) {
  var total = parseFloat(data);
  var hold = parseFloat(row.c_balanceHold);
@@ -352,21 +354,34 @@
  { 
  "data": "c_dateCreated", 
  "orderable": true,
- "className": "text-center text-nowrap",
+ "className": "text-center text-nowrap dt-col-date",
  "render": function(data, type, row) {
  if (!data) return '-';
  var d = new Date(data);
- if (isNaN(d)) return data;
+ var formattedDate = data;
+ if (!isNaN(d)) {
  var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
  var day = ('0' + d.getDate()).slice(-2);
  var month = months[d.getMonth()];
  var year = d.getFullYear();
- return '<span class="fw-bold text-dark">' + day + ' ' + month + ' ' + year + '</span>';
+ formattedDate = day + ' ' + month + ' ' + year;
+ }
+ var openapi_class = 'text-muted';
+ if (row.c_openapiStatus == 'Active') openapi_class = 'text-success';
+ else if (row.c_openapiStatus == 'Pending') openapi_class = 'text-warning';
+ else if (row.c_openapiStatus == 'Blocked') openapi_class = 'text-danger';
+ else if (row.c_openapiStatus == 'Freeze') openapi_class = 'text-info';
+
+ return '<div class="d-flex flex-column align-items-lg-center">' +
+ ' <span class="fw-bold text-dark">' + formattedDate + '</span>' +
+ ' <span class="small ' + openapi_class + ' mt-1.5 d-lg-none font-weight-bold"><i class="fas fa-plug mr-1"></i>OpenAPI: ' + row.c_openapiStatus + '</span>' +
+ '</div>';
  }
  },
  { 
  "data": "c_status",
  "orderable": false,
+ "className": "dt-col-status",
  "render": function(data, type, row) {
  var status_bg = 'bg-secondary-soft';
  var status_text = 'text-secondary';
@@ -396,10 +411,10 @@
  }
 
  return '<div class="d-flex flex-column">' +
- ' <span class="mb-2 badge ' + status_bg + ' ' + status_text + ' rounded-pill px-3 py-1" style="width: fit-content;">' +
+ ' <span class="badge ' + status_bg + ' ' + status_text + ' rounded-pill px-2.5 px-sm-3 py-1 font-weight-bold" style="width: fit-content;">' +
  ' ' + data +
  ' </span>' +
- ' <span class="small ' + openapi_class + ' d-flex align-items-center gap-1">' +
+ ' <span class="small ' + openapi_class + ' align-items-center gap-1 d-none d-lg-flex mt-1">' +
  ' <i class="fas fa-plug me-1"></i>OpenAPI: ' + row.c_openapiStatus +
  ' </span>' +
  '</div>';
@@ -409,7 +424,7 @@
  { 
  "data": "action",
  "orderable": false,
- "className": "text-center pe-4",
+ "className": "text-center pe-4 dt-col-actions",
  "render": function(data, type, row) {
  var baseUrl = "<?= base_url(); ?>"; 
  return `

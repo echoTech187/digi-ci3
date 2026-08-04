@@ -28,8 +28,6 @@
 
 	<!-- Custom styles for this template-->
 	<link href="<?= base_url('assets/'); ?>css/sb-admin-2.min.css" rel="stylesheet">
-	<!-- Premium UI/UX Override -->
-	<link href="<?= base_url('assets/'); ?>css/premium-theme.css" rel="stylesheet">
 
 	<!-- Select2 CSS -->
 	<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
@@ -53,6 +51,8 @@
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 	<link href="<?= base_url('assets/'); ?>css/theme-1.css?v=<?= time(); ?>" rel="stylesheet">
+	<!-- Premium UI/UX Override (Loaded last for highest precedence) -->
+	<link href="<?= base_url('assets/'); ?>css/premium-theme.css?v=<?= time(); ?>" rel="stylesheet">
 </head>
 
 <body id="page-top">

@@ -182,62 +182,37 @@
             <!-- Topbar Navbar -->
             <ul class="navbar-nav ml-auto align-items-center">
 
-                <!-- Theme Toggle -->
-                <li class="nav-item">
+                <!-- Theme Toggle (Desktop Only) -->
+                <li class="nav-item d-none d-lg-block">
                     <button id="themeToggle" class="btn btn-link rounded-circle text-gray-500" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; text-decoration: none; outline: none !important; flex-shrink: 0;">
                         <i class="fas fa-moon theme-icon-dark"></i>
                         <i class="fas fa-sun theme-icon-light d-none"></i>
                     </button>
                 </li>
 
-                <!-- ── Bell Notification ─────────────────────────── -->
-                <!-- <li class="nav-item dropdown no-arrow mx-1" id="notificationNavItem">
-                    <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button"
-                       data-toggle="dropdown" data-boundary="viewport" aria-haspopup="true" aria-expanded="false"
-                       style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
-                        <i class="fas fa-bell fa-fw text-gray-500"></i> -->
-                        <!-- Badge merah: disembunyikan jika 0 -->
-                        <!--<span class="badge badge-danger badge-counter" id="notifBadge" style="display:none;">0</span>
-                    </a>-->
-                    <!-- Dropdown -->
-                    <!-- <div class="dropdown-list dropdown-menu dropdown-menu-right shadow-lg border-0 animated--grow-in p-0 overflow-hidden notif-dropdown-menu"
-                         aria-labelledby="alertsDropdown"
-                         style="border-radius: 16px; width: 360px; max-height: 480px;"> -->
-
-                        <!-- Header -->
-                        <!-- <div class="d-flex align-items-center justify-content-between px-4 py-3 border-bottom"
-                             style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                            <h6 class="m-0 font-weight-bold text-white">
-                                <i class="fas fa-bell mr-2"></i>Notifikasi
-                            </h6>
-                            <button id="notifMarkAllBtn" class="btn btn-sm btn-link text-white p-0"
-                                    style="font-size: 11px; opacity: 0.85; text-decoration: none;" title="Tandai semua sudah dibaca">
-                                <i class="fas fa-check-double mr-1"></i>Semua Dibaca
-                            </button>
-                        </div>-->
-
-                        <!-- List notifikasi (di-render JS) -->
-                        <!--<div id="notifList" style="overflow-y: auto; flex: 1;">
-                            <div class="text-center py-4 text-muted" id="notifEmpty">
-                                <i class="fas fa-bell-slash fa-2x mb-2 d-block opacity-50"></i>
-                                <span style="font-size: 13px;">Tidak ada notifikasi</span>
-                            </div>
-                        </div>
-                    </div>
-                </li> -->
-                <!-- ────────────────────────────────────────────────── -->
-
                 <div class="topbar-divider d-none d-sm-block" style="height: 24px; border-left: 1px solid rgba(0,0,0,0.08);"></div>
 
                 <!-- Nav Item - User Information -->
                 <li class="nav-item dropdown no-arrow ">
                     <a class="nav-link dropdown-toggle navbar-user-info pr-0 rounded-circle" href="#" id="userDropdown" role="button" data-toggle="dropdown" data-boundary="viewport" aria-haspopup="true" aria-expanded="false">
-                        
                         <img class="navbar-avatar" src="<?= base_url('assets/img/profile/default.jpg') ?>">
                     </a>
 
-                    <!-- Dropdown - User Information -->
-                    <div class="dropdown-menu dropdown-menu-right shadow-lg border-0 animated--grow-in mt-3 p-0 overflow-hidden" aria-labelledby="userDropdown" style="border-radius: 20px; width: 280px; backdrop-filter: blur(10px);">
+                    <!-- Dropdown - User Information (Converts to Right Drawer on Mobile/Tablet <= 991px) -->
+                    <div class="dropdown-menu dropdown-menu-right shadow-lg border-0 animated--grow-in mt-3 p-0 overflow-hidden user-profile-drawer" aria-labelledby="userDropdown" style="border-radius: 20px; width: 280px; backdrop-filter: blur(10px);">
+                        <!-- Drawer Mobile Header -->
+                        <div class="d-flex align-items-center justify-content-between px-4 pt-3 pb-2 d-lg-none border-bottom">
+                            <span class="text-xs font-weight-bold text-uppercase text-muted" style="letter-spacing: 1px;">Account Menu</span>
+                            <div class="d-flex align-items-center gap-2">
+                                <button type="button" class="btn btn-sm btn-light rounded-circle themeToggleMobile mr-2" style="width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center; outline: none !important;" title="Toggle Theme">
+                                    <i class="fas fa-moon theme-icon-dark text-gray-600"></i>
+                                    <i class="fas fa-sun theme-icon-light d-none text-warning"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-light rounded-circle user-drawer-close" aria-label="Close drawer" style="width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-times text-muted"></i>
+                                </button>
+                            </div>
+                        </div>
                         <!-- Header Section -->
                         <div class="px-4 py-4 border-bottom bg-light-subtle d-flex align-items-center">
                             <div class="mr-3">
@@ -335,38 +310,74 @@
 
             <script>
             document.addEventListener('DOMContentLoaded', function () {
-                const themeToggle = document.getElementById('themeToggle');
-                const darkIcon = themeToggle.querySelector('.theme-icon-dark');
-                const lightIcon = themeToggle.querySelector('.theme-icon-light');
                 const html = document.documentElement;
 
-                // Function to update icon visibility
+                // Function to update icon visibility for both desktop & mobile drawer theme buttons
                 function updateThemeIcon(theme) {
-                    if (theme === 'dark') {
-                        darkIcon.classList.add('d-none');
-                        lightIcon.classList.remove('d-none');
-                        themeToggle.classList.remove('text-gray-500');
-                        themeToggle.classList.add('text-warning');
-                    } else {
-                        darkIcon.classList.remove('d-none');
-                        lightIcon.classList.add('d-none');
-                        themeToggle.classList.remove('text-warning');
-                        themeToggle.classList.add('text-gray-500');
-                    }
+                    document.querySelectorAll('#themeToggle, .themeToggleMobile').forEach(function(btn) {
+                        const darkIcon = btn.querySelector('.theme-icon-dark');
+                        const lightIcon = btn.querySelector('.theme-icon-light');
+                        if (!darkIcon || !lightIcon) return;
+                        if (theme === 'dark') {
+                            darkIcon.classList.add('d-none');
+                            lightIcon.classList.remove('d-none');
+                            btn.classList.remove('text-gray-500', 'text-gray-600');
+                            btn.classList.add('text-warning');
+                        } else {
+                            darkIcon.classList.remove('d-none');
+                            lightIcon.classList.add('d-none');
+                            btn.classList.remove('text-warning');
+                            btn.classList.add('text-gray-500');
+                        }
+                    });
                 }
+
                 // Initial setup
                 const currentTheme = localStorage.getItem('theme') || 'light';
                 updateThemeIcon(currentTheme);
 
-                // Handle toggle click
-                themeToggle.addEventListener('click', function() {
-                    let theme = html.getAttribute('data-theme');
-                    let newTheme = (theme === 'dark') ? 'light' : 'dark';
+                // Handle theme toggle clicks (Desktop & Mobile Drawer)
+                document.addEventListener('click', function(e) {
+                    const btn = e.target.closest('#themeToggle, .themeToggleMobile');
+                    if (btn) {
+                        e.preventDefault();
+                        let theme = html.getAttribute('data-theme');
+                        let newTheme = (theme === 'dark') ? 'light' : 'dark';
 
-                    html.setAttribute('data-theme', newTheme);
-                    localStorage.setItem('theme', newTheme);
-                    updateThemeIcon(newTheme);
+                        html.setAttribute('data-theme', newTheme);
+                        localStorage.setItem('theme', newTheme);
+                        updateThemeIcon(newTheme);
+                    }
                 });
+
+                // User Profile Right Drawer Backdrop & Close Handler (< 992px)
+                if (typeof jQuery !== 'undefined') {
+                    let $backdrop = $('.user-drawer-backdrop');
+                    if ($backdrop.length === 0) {
+                        $backdrop = $('<div class="user-drawer-backdrop"></div>').appendTo('body');
+                    }
+
+                    $('.nav-item.dropdown').on('show.bs.dropdown', function(e) {
+                        if (window.innerWidth < 992 && $(this).find('#userDropdown').length > 0) {
+                            $backdrop.addClass('active');
+                        }
+                    });
+
+                    $('.nav-item.dropdown').on('hide.bs.dropdown', function(e) {
+                        if ($(this).find('#userDropdown').length > 0) {
+                            $backdrop.removeClass('active');
+                        }
+                    });
+
+                    $(document).on('click', '.user-drawer-backdrop, .user-drawer-close', function(e) {
+                        if (window.innerWidth < 992) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            $('#userDropdown').dropdown('hide');
+                            $backdrop.removeClass('active');
+                        }
+                    });
+                }
 
                 // Global Search Keyboard Shortcut
                 document.addEventListener('keydown', function(e) {

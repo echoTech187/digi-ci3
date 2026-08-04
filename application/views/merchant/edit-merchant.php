@@ -1,19 +1,29 @@
 <div>
-    <!-- ── Page Header ── -->
-    <div class="dt-page-header">
-        <div>
-            <h4 class="dt-page-title"><?= $title; ?></h4>
-            <p class="dt-page-subtitle">Manage merchant account details, callback configurations and system status</p>
+    <!-- ── Page Header with Back Button ── -->
+    <div class="dt-page-header mb-4">
+        <div class="d-flex align-items-center mb-2">
+            <a href="<?= base_url('merchant/manage'); ?>" class="btn-dt-action btn-dt-action-outline-secondary border-0 mr-3 text-decoration-none d-inline-flex align-items-center justify-content-center flex-shrink-0 shadow-sm" style="width: 40px; height: 40px; border-radius: 12px;" title="Back to Merchants">
+                <i class="fas fa-arrow-left" style="font-size: 16px;"></i>
+            </a>
+            <div>
+                <h4 class="dt-page-title mb-0" style="font-size: 1.35rem; font-weight: 800; letter-spacing: -0.3px;"><?= $title; ?></h4>
+            </div>
         </div>
+        <p class="dt-page-subtitle mb-0 text-muted pl-md-5 ml-md-2" style="font-size: 13px;">Manage merchant account details, callback configurations and system status</p>
     </div>
 
     <div class="row">
-        <div class="col-lg-8">
-            <div class="card border-0 shadow-sm dt-card">
-                <div class="card-header bg-white py-3 border-0">
-                    <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-edit mr-2"></i> Merchant Configuration Form</h6>
+        <div class="col-lg-8 mb-4">
+            <div class="card border-0 shadow-sm dt-form-card">
+                <div class="card-header py-3.5 px-4 border-0 d-flex align-items-center justify-content-between flex-wrap gap-2" style="background: transparent; border-bottom: 1px solid var(--border-color, rgba(226, 232, 240, 0.6)) !important;">
+                    <div class="d-flex align-items-center">
+                        <div class="mr-3 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; border-radius: 10px; background: rgba(99, 102, 241, 0.12); color: #6366f1;">
+                            <i class="fas fa-edit" style="font-size: 16px;"></i>
+                        </div>
+                        <h6 class="m-0 font-weight-bold text-dark" style="font-size: 15px;">Merchant Configuration Form</h6>
+                    </div>
                 </div>
-                <div class="card-body p-4 pt-0">
+                <div class="card-body p-4">
                     <!-- Alerts Standardized to Swal2 Premium -->
                     <script>
                         $(document).ready(function() {
@@ -226,7 +236,7 @@
             </div>
         </div>
 
-        <div class="col-lg-4">
+        <div class="col-lg-4 col-12 mb-4 d-none d-lg-block">
             <!-- Merchant Profile Card -->
             <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px; overflow: hidden; background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%); color: white;">
                 <div class="card-body p-4">
@@ -252,8 +262,8 @@
             </div>
 
             <!-- Instructions Guide Card -->
-            <div class="card border-0 shadow-sm dt-card">
-                <div class="card-header bg-white py-3 border-0">
+            <div class="card border-0 shadow-sm dt-form-card">
+                <div class="card-header py-3.5 px-4 border-0 d-flex align-items-center" style="background: transparent; border-bottom: 1px solid var(--border-color, rgba(226, 232, 240, 0.6)) !important;">
                     <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-book-open mr-2"></i> Instructions Guide</h6>
                 </div>
                 <div class="card-body p-4 pt-0">

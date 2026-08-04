@@ -2,26 +2,25 @@
 <div>
 
     <!-- ── Strategic Header ── -->
-    <div class="dt-page-header mb-4">
+    <div class="dt-page-header mb-4 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
         <div>
-            <div class="d-flex align-items-center mb-1">
-                <h4 class="dt-page-title mb-0 mr-3">Strategic Analytics & Insights</h4>
-                <div class="badge bg-primary-soft text-primary rounded-pill px-3 py-1 font-weight-bold" style="font-size: 10px; letter-spacing: 0.5px;">
+            <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+                <h4 class="dt-page-title mb-0 font-weight-bold text-gray-900" style="font-size: clamp(1.15rem, 2.5vw, 1.4rem); letter-spacing: -0.5px;">Strategic Analytics & Insights</h4>
+                <div class="badge bg-primary-soft text-primary rounded-pill px-2.5 py-1 font-weight-bold" style="font-size: 10px; letter-spacing: 0.5px; flex-shrink: 0;">
                     <i class="fas fa-brain mr-1"></i> BI-ENGINE ACTIVE
                 </div>
             </div>
-            <p class="dt-page-subtitle text-muted">
-                Data Coverage: <span class="badge bg-white shadow-sm text-dark px-3 py-1 font-weight-bold" style="border-radius: 8px; font-size: 11px;"><?= $date_range_label; ?></span>
+            <p class="dt-page-subtitle text-muted mb-0 small" style="font-size: 12px;">
+                Data Coverage: <span class="badge bg-white border shadow-xs text-dark px-2.5 py-1 font-weight-bold" style="border-radius: 8px; font-size: 10.5px;"><?= $date_range_label; ?></span>
             </p>
         </div>
-        <div class="d-flex align-items-center gap-3">
+        <div class="d-flex align-items-center">
             <!-- Period Selector -->
-            <div class="d-flex p-1 gap-1" style="border-radius: 14px;">
-                <a href="<?= base_url('dashboard/analytics?period=yesterday'); ?>" class="btn btn-sm <?= ($current_period == 'yesterday' ? 'btn-primary' : 'btn-link text-muted'); ?> px-4 py-2 font-weight-bold shadow-none" style="border-radius: 10px; font-size: 11px; text-decoration: none;">Yesterday</a>
-                <a href="<?= base_url('dashboard/analytics?period=last_7_days'); ?>" class="btn btn-sm <?= ($current_period == 'last_7_days' ? 'btn-primary' : 'btn-link text-muted'); ?> px-4 py-2 font-weight-bold shadow-none" style="border-radius: 10px; font-size: 11px; text-decoration: none;">Last 7 Days</a>
-                <a href="<?= base_url('dashboard/analytics?period=last_month'); ?>" class="btn btn-sm <?= ($current_period == 'last_month' ? 'btn-primary' : 'btn-link text-muted'); ?> px-4 py-2 font-weight-bold shadow-none" style="border-radius: 10px; font-size: 11px; text-decoration: none;">Last Month</a>
+            <div class="dash-period-selector">
+                <a href="<?= base_url('dashboard/analytics?period=yesterday'); ?>" class="dash-period-btn <?= ($current_period == 'yesterday' ? 'btn-primary text-white' : 'btn-link text-muted'); ?>">Yesterday</a>
+                <a href="<?= base_url('dashboard/analytics?period=last_7_days'); ?>" class="dash-period-btn <?= ($current_period == 'last_7_days' ? 'btn-primary text-white' : 'btn-link text-muted'); ?>">Last 7 Days</a>
+                <a href="<?= base_url('dashboard/analytics?period=last_month'); ?>" class="dash-period-btn <?= ($current_period == 'last_month' ? 'btn-primary text-white' : 'btn-link text-muted'); ?>">Last Month</a>
             </div>
-            
         </div>
     </div>
 
@@ -49,18 +48,18 @@
     ?>
 
     <!-- ── Growth KPI Cards (Glassmorphism Transform) ── -->
-    <div class="row mb-5">
+    <div class="row mb-4 mb-md-5">
         
         <!-- QRIS Growth -->
-        <div class="col-xl-3 col-md-6 mb-4 mb-xl-0">
+        <div class="col-12 col-sm-6 col-xl-3 mb-4 mb-xl-0">
             <div class="card border-0 shadow-sm dash-kpi-card h-100 w-100" style="background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%); color: white; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1);">
                 <div class="card-body p-4 d-flex flex-column h-100">
-                    <div class="d-flex justify-content-between mb-3  small font-weight-bold uppercase" style="letter-spacing: 1px;">
+                    <div class="d-flex justify-content-between mb-3 small font-weight-bold uppercase" style="letter-spacing: 1px;">
                         <span>QRIS GROWTH</span>
                         <i class="fas fa-qrcode"></i>
                     </div>
-                    <h3 class="font-weight-bold mb-3 d-flex align-items-baseline" style="font-size: 1.4rem; white-space: nowrap; gap: 8px;"><span style="margin-right: 2px;">Rp</span><span id="stat_qris_current"><span class="skeleton-box" style="width: 100px;"></span></span></h3>
-                    <div class="mt-auto d-flex align-items-center gap-2" id="qris_growth_container">
+                    <h3 class="font-weight-bold mb-3 d-flex align-items-baseline text-truncate" style="font-size: clamp(1.2rem, 3.5vw, 1.4rem); gap: 6px;"><span style="margin-right: 2px;">Rp</span><span id="stat_qris_current"><span class="skeleton-box" style="width: 100px;"></span></span></h3>
+                    <div class="mt-auto d-flex align-items-center gap-2 flex-wrap" id="qris_growth_container">
                         <span class="skeleton-box" style="width: 60px;"></span>
                         <span class="small" style="opacity: 0.8; white-space: nowrap;">vs&nbsp;<?= $comparison_label ?></span>
                     </div>
@@ -69,15 +68,15 @@
         </div>
 
         <!-- Profitability Metric -->
-        <div class="col-xl-3 col-md-6 mb-4 mb-xl-0">
+        <div class="col-12 col-sm-6 col-xl-3 mb-4 mb-xl-0">
             <div class="card border-0 shadow-sm dash-kpi-card h-100 w-100" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1);">
                 <div class="card-body p-4 d-flex flex-column h-100">
-                    <div class="d-flex justify-content-between mb-3  small font-weight-bold uppercase" style="letter-spacing: 1px;">
+                    <div class="d-flex justify-content-between mb-3 small font-weight-bold uppercase" style="letter-spacing: 1px;">
                         <span>PLATFORM YIELD</span>
                         <i class="fas fa-hand-holding-usd"></i>
                     </div>
-                    <h3 class="font-weight-bold mb-3 d-flex align-items-baseline" style="font-size: 1.4rem; white-space: nowrap; gap: 8px;"><span style="margin-right: 2px;">Rp</span><span id="stat_profit_current"><span class="skeleton-box" style="width: 100px;"></span></span></h3>
-                    <div class="mt-auto d-flex align-items-center gap-2" id="profit_growth_container">
+                    <h3 class="font-weight-bold mb-3 d-flex align-items-baseline text-truncate" style="font-size: clamp(1.2rem, 3.5vw, 1.4rem); gap: 6px;"><span style="margin-right: 2px;">Rp</span><span id="stat_profit_current"><span class="skeleton-box" style="width: 100px;"></span></span></h3>
+                    <div class="mt-auto d-flex align-items-center gap-2 flex-wrap" id="profit_growth_container">
                         <span class="skeleton-box" style="width: 60px;"></span>
                         <span class="small" style="opacity: 0.8; white-space: nowrap;">net vs&nbsp;<?= $comparison_label ?></span>
                     </div>
@@ -86,15 +85,15 @@
         </div>
 
         <!-- Disburse Efficiency -->
-        <div class="col-xl-3 col-md-6 mb-4 mb-xl-0">
+        <div class="col-12 col-sm-6 col-xl-3 mb-4 mb-xl-0">
             <div class="card border-0 shadow-sm dash-kpi-card h-100 w-100" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1);">
                 <div class="card-body p-4 d-flex flex-column h-100">
-                    <div class="d-flex justify-content-between mb-3  small font-weight-bold uppercase" style="letter-spacing: 1px;">
+                    <div class="d-flex justify-content-between mb-3 small font-weight-bold uppercase" style="letter-spacing: 1px;">
                         <span>DISBURSE VOL.</span>
                         <i class="fas fa-exchange-alt"></i>
                     </div>
-                    <h3 class="font-weight-bold mb-3 d-flex align-items-baseline" style="font-size: 1.4rem; white-space: nowrap; gap: 12px;"><span style="margin-right: 2px;">Rp</span><span id="stat_disburse_current"><span class="skeleton-box" style="width: 100px;"></span></span></h3>
-                    <div class="mt-auto d-flex align-items-center gap-2" id="disburse_growth_container">
+                    <h3 class="font-weight-bold mb-3 d-flex align-items-baseline text-truncate" style="font-size: clamp(1.2rem, 3.5vw, 1.4rem); gap: 6px;"><span style="margin-right: 2px;">Rp</span><span id="stat_disburse_current"><span class="skeleton-box" style="width: 100px;"></span></span></h3>
+                    <div class="mt-auto d-flex align-items-center gap-2 flex-wrap" id="disburse_growth_container">
                         <span class="skeleton-box" style="width: 60px;"></span>
                         <span class="small" style="opacity: 0.8; white-space: nowrap;">vs&nbsp;<?= $comparison_label ?></span>
                     </div>
@@ -103,15 +102,15 @@
         </div>
 
         <!-- Success Rate -->
-        <div class="col-xl-3 col-md-6 mb-4 mb-xl-0">
+        <div class="col-12 col-sm-6 col-xl-3 mb-4 mb-xl-0">
             <div class="card border-0 shadow-sm dash-kpi-card h-100 w-100" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1);">
                 <div class="card-body p-4 d-flex flex-column h-100">
-                    <div class="d-flex justify-content-between mb-3  small font-weight-bold uppercase" style="letter-spacing: 1px;">
+                    <div class="d-flex justify-content-between mb-3 small font-weight-bold uppercase" style="letter-spacing: 1px;">
                         <span>CHANNEL STABILITY</span>
                         <i class="fas fa-vial"></i>
                     </div>
-                    <h3 class="font-weight-bold mb-3" style="font-size: 1.2rem;"><span id="stat_success_rate"><span class="skeleton-box" style="width: 60px;"></span></span>%</h3>
-                    <div class="mt-auto d-flex align-items-center gap-2">
+                    <h3 class="font-weight-bold mb-3" style="font-size: clamp(1.2rem, 3.5vw, 1.4rem);"><span id="stat_success_rate"><span class="skeleton-box" style="width: 60px;"></span></span>%</h3>
+                    <div class="mt-auto d-flex align-items-center gap-2 flex-wrap">
                         <span id="success_rate_badge"><span class="skeleton-box" style="width: 80px;"></span></span>
                         <span class="small" style="opacity: 0.8; white-space: nowrap;">integrity score</span>
                     </div>
@@ -122,19 +121,19 @@
     </div>
 
     <!-- ── System Health & DLQ Monitoring ── -->
-    <div class="d-flex align-items-center mb-3 mt-5">
-        <h6 class="font-weight-bold text-gray-800 mb-0" style="font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;">
-            <i class="fas fa-shield-alt text-primary mr-2"></i> System Health & Operations
+    <div class="d-flex align-items-center justify-content-between mb-3 mt-4 mt-md-5 gap-2">
+        <h6 class="font-weight-bold text-gray-800 mb-0" style="font-size: clamp(0.72rem, 2.5vw, 0.9rem); text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap;">
+            <i class="fas fa-shield-alt text-primary mr-1"></i> System Health & Operations
         </h6>
-        <div class="ml-4 flex-grow-1" style="height: 1px; background: #e5e7eb;"></div>
-        <a href="<?= base_url('notifications') ?>" class="btn btn-sm btn-light shadow-sm ml-4 font-weight-bold" style="border-radius: 8px; font-size: 11px;">
+        <div class="mx-3 flex-grow-1 d-none d-md-block" style="height: 1px; background: #e5e7eb;"></div>
+        <a href="<?= base_url('notifications') ?>" class="btn btn-sm btn-light shadow-xs border font-weight-bold px-2.5 py-1" style="border-radius: 8px; font-size: 10.5px; white-space: nowrap; flex-shrink: 0;">
             Manage DLQ <i class="fas fa-arrow-right ml-1"></i>
         </a>
     </div>
 
-    <div class="row mb-5">
+    <div class="row mb-4 mb-md-5">
         <!-- Unresolved DLQ -->
-        <div class="col-xl-4 col-md-4 mb-4 mb-xl-0">
+        <div class="col-12 col-md-4 mb-4 mb-md-0">
             <div class="card border-0 shadow-sm dt-card h-100 w-100" style="border-radius: 20px;">
                 <div class="card-body p-4 d-flex flex-column h-100">
                     <div class="d-flex justify-content-between mb-3 text-muted small font-weight-bold uppercase" style="letter-spacing: 1px;">
@@ -144,7 +143,7 @@
                         </div>
                     </div>
                     <h3 class="font-weight-bold mb-3 d-flex align-items-baseline text-gray-900" style="font-size: 1.6rem; white-space: nowrap; gap: 8px;"><span id="stat_dlq_unresolved"><span class="skeleton-box" style="width: 80px;"></span></span></h3>
-                    <div class="mt-auto d-flex align-items-center gap-2">
+                    <div class="mt-auto d-flex align-items-center gap-2 flex-wrap">
                         <span class="badge rounded-pill px-2 py-1" style="background: rgba(239,68,68,0.1); font-size: 10px; color: #ef4444;">
                             <i class="fas fa-calendar-day mr-1"></i> <span id="stat_dlq_today">...</span> Today
                         </span>
@@ -155,7 +154,7 @@
         </div>
 
         <!-- Top Outage Merchant -->
-        <div class="col-xl-4 col-md-4 mb-4 mb-xl-0">
+        <div class="col-12 col-md-4 mb-4 mb-md-0">
             <div class="card border-0 shadow-sm dt-card h-100 w-100" style="border-radius: 20px;">
                 <div class="card-body p-4 d-flex flex-column h-100">
                     <div class="d-flex justify-content-between mb-3 text-muted small font-weight-bold uppercase" style="letter-spacing: 1px;">
@@ -164,7 +163,7 @@
                             <i class="fas fa-server" style="color: #f59e0b;"></i>
                         </div>
                     </div>
-                    <h3 class="font-weight-bold mb-3 text-gray-900" style="font-size: 1.3rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><span id="stat_dlq_merchant"><span class="skeleton-box" style="width: 150px;"></span></span></h3>
+                    <h3 class="font-weight-bold mb-3 text-gray-900 text-truncate" style="font-size: 1.3rem;"><span id="stat_dlq_merchant"><span class="skeleton-box" style="width: 150px;"></span></span></h3>
                     <div class="mt-auto d-flex align-items-center gap-2">
                         <span class="badge rounded-pill px-2 py-1" style="background: rgba(245,158,11,0.1); font-size: 10px; color: #f59e0b;">
                             Highest Contributor
@@ -175,7 +174,7 @@
         </div>
 
         <!-- Last Error Occurred -->
-        <div class="col-xl-4 col-md-4 mb-4 mb-xl-0">
+        <div class="col-12 col-md-4 mb-4 mb-md-0">
             <div class="card border-0 shadow-sm dt-card h-100 w-100" style="border-radius: 20px;">
                 <div class="card-body p-4 d-flex flex-column h-100">
                     <div class="d-flex justify-content-between mb-3 text-muted small font-weight-bold uppercase" style="letter-spacing: 1px;">
@@ -184,7 +183,7 @@
                             <i class="fas fa-clock" style="color: #3b82f6;"></i>
                         </div>
                     </div>
-                    <h3 class="font-weight-bold mb-3 d-flex align-items-baseline text-gray-900" style="font-size: 1.3rem; white-space: nowrap; gap: 8px;"><span id="stat_dlq_time"><span class="skeleton-box" style="width: 100px;"></span></span></h3>
+                    <h3 class="font-weight-bold mb-3 d-flex align-items-baseline text-gray-900 text-truncate" style="font-size: 1.3rem; gap: 8px;"><span id="stat_dlq_time"><span class="skeleton-box" style="width: 100px;"></span></span></h3>
                     <div class="mt-auto d-flex align-items-center gap-2">
                         <span class="badge rounded-pill px-2 py-1" style="background: rgba(59,130,246,0.1); font-size: 10px; color: #3b82f6;">
                             Timestamp Logged
@@ -196,19 +195,19 @@
     </div>
 
     <!-- ── Analysis Depth Sections ── -->
-    <div class="row mb-5 d-flex align-items-stretch">
+    <div class="row mb-4 mb-md-5 d-flex align-items-stretch">
 
         <!-- Area Chart -->
-        <div class="col-12 col-xl-8 d-flex flex-column">
-            <div class="card border-0 shadow-sm dt-card h-100 d-flex flex-column" style="border-radius: 24px; min-height: 520px;">
-                <div class="card-header border-0 bg-transparent py-4 px-4 d-flex align-items-center justify-content-between">
+        <div class="col-12 col-xl-8 mb-4 mb-xl-0 d-flex flex-column">
+            <div class="card border-0 shadow-sm dt-card h-100 d-flex flex-column dash-chart-card" style="border-radius: 24px;">
+                <div class="card-header border-0 bg-transparent py-3 py-sm-4 px-3 px-sm-4 d-flex align-items-center justify-content-between">
                     <div>
-                        <h6 class="font-weight-bold text-gray-900" style="font-size: 1rem;">Yield Analysis Trend</h6>
+                        <h6 class="font-weight-bold text-gray-900 mb-0" style="font-size: 1rem;">Yield Analysis Trend</h6>
                         <p class="m-0 text-muted small mt-1">Growth progression in total platform volume over selected period</p>
                     </div>
                 </div>
-                <div class="card-body px-4 pb-4 flex-grow-1">
-                    <div class="chart-area" style="height: 380px;">
+                <div class="card-body px-3 px-sm-4 pb-4 flex-grow-1 d-flex flex-column justify-content-center">
+                    <div class="chart-area dash-chart-area" style="position: relative;">
                         <canvas id="myAreaChart"></canvas>
                     </div>
                 </div>
@@ -217,13 +216,13 @@
 
         <!-- Pie Chart -->
         <div class="col-12 col-xl-4 d-flex flex-column">
-            <div class="card border-0 shadow-sm dt-card h-100 d-flex flex-column" style="border-radius: 24px; min-height: 520px;">
-                <div class="card-header border-0 bg-transparent py-4 px-4">
-                    <h6 class="font-weight-bold text-gray-900" style="font-size: 1rem;">Net Contribution Mix</h6>
+            <div class="card border-0 shadow-sm dt-card h-100 d-flex flex-column dash-chart-card" style="border-radius: 24px;">
+                <div class="card-header border-0 bg-transparent py-3 py-sm-4 px-3 px-sm-4">
+                    <h6 class="font-weight-bold text-gray-900 mb-0" style="font-size: 1rem;">Net Contribution Mix</h6>
                     <p class="m-0 text-muted small mt-1">Direct profit distribution (Fee - Cost)</p>
                 </div>
-                <div class="card-body px-4 pb-4 flex-grow-1">
-                    <div class="chart-pie pt-4 mb-4" style="height: 280px; position: relative;">
+                <div class="card-body px-3 px-sm-4 pb-4 flex-grow-1 d-flex flex-column justify-content-center">
+                    <div class="chart-pie pt-2 mb-3 dash-donut-area" style="position: relative;">
                         <canvas id="channelPieChart"></canvas>
                         <div style="position: absolute; top: 55%; left: 50%; transform: translate(-50%, -50%); text-align: center; pointer-events: none;">
                             <span class="d-block text-muted" style="font-size: 10px; text-transform: uppercase; font-weight: 800;">Yield</span>
@@ -250,34 +249,34 @@
     <div class="row">
         <div class="col-12">
             <div class="card border-0 shadow-lg text-white" style="border-radius: 28px; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); overflow: hidden; position: relative;">
-                <div class="card-body p-5 position-relative" style="z-index: 2;">
+                <div class="card-body p-3.5 p-sm-4 p-md-5 position-relative" style="z-index: 2;">
                     <div class="row align-items-center">
                         <div class="col-lg-8">
-                            <div class="badge bg-primary px-3 py-2 mb-4 rounded-pill font-weight-bold" style="font-size: 10px; letter-spacing: 1px;">INTELLIGENCE REPORT</div>
-                            <h2 class="font-weight-bold mb-3" style="letter-spacing: -1px;">Strategic Growth Directives</h2>
-                            <p class="mb-5 " style="line-height: 1.8; font-size: 15px; max-width: 600px;">Our BI engine has analyzed the data for the selected period. These actionable insights are designed to maximize ecosystem efficiency and partner profitability.</p>
+                            <div class="badge bg-primary px-3 py-2 mb-3 mb-sm-4 rounded-pill font-weight-bold" style="font-size: 10px; letter-spacing: 1px;">INTELLIGENCE REPORT</div>
+                            <h2 class="font-weight-bold mb-3" style="letter-spacing: -1px; font-size: clamp(1.4rem, 4vw, 2rem);">Strategic Growth Directives</h2>
+                            <p class="mb-4 mb-sm-5" style="line-height: 1.8; font-size: 14px; max-width: 600px; opacity: 0.9;">Our BI engine has analyzed the data for the selected period. These actionable insights are designed to maximize ecosystem efficiency and partner profitability.</p>
                             
                             <div class="row g-4">
-                                <div class="col-12 col-xl-6 mb-4">
-                                    <div class="p-4 h-100 d-flex flex-column" style="background: rgba(255,255,255,0.05); border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px);">
+                                <div class="col-12 col-xl-6 mb-3 mb-xl-0">
+                                    <div class="p-3.5 p-sm-4 h-100 d-flex flex-column" style="background: rgba(255,255,255,0.05); border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px);">
                                         <div class="d-flex align-items-center mb-3">
                                             <div class="bg-primary rounded-lg d-flex align-items-center justify-content-center mr-3" style="width: 38px; height: 38px; min-width: 38px;">
                                                 <i class="fas fa-lightbulb"></i>
                                             </div>
-                                            <h6 class="font-weight-bold m-0">Optimize Peak Performance</h6>
+                                            <h6 class="font-weight-bold m-0" style="font-size: 0.95rem;">Optimize Peak Performance</h6>
                                         </div>
-                                        <p class="small m-0 " style="line-height: 1.6;">Volume peaks between 7PM - 10PM. Schedule intense background operations after 1AM to ensure zero-latency periods during high traffic.</p>
+                                        <p class="small m-0" style="line-height: 1.6; opacity: 0.85;">Volume peaks between 7PM - 10PM. Schedule intense background operations after 1AM to ensure zero-latency periods during high traffic.</p>
                                     </div>
                                 </div>
-                                <div class="col-12 col-xl-6 mb-4">
-                                    <div class="p-4 h-100 d-flex flex-column" style="background: rgba(255,255,255,0.05); border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px);">
+                                <div class="col-12 col-xl-6 mb-3 mb-xl-0">
+                                    <div class="p-3.5 p-sm-4 h-100 d-flex flex-column" style="background: rgba(255,255,255,0.05); border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px);">
                                         <div class="d-flex align-items-center mb-3">
                                             <div class="bg-emerald rounded-lg d-flex align-items-center justify-content-center mr-3" style="width: 38px; height: 38px; min-width: 38px; background: #10b981;">
                                                 <i class="fas fa-rocket"></i>
                                             </div>
-                                            <h6 class="font-weight-bold m-0">Expansion Opportunity</h6>
+                                            <h6 class="font-weight-bold m-0" style="font-size: 0.95rem;">Expansion Opportunity</h6>
                                         </div>
-                                        <p class="small m-0 " style="line-height: 1.6;">QRIS yield accounts for <span id="stat_qris_contribution"><span class="skeleton-box" style="width: 30px;"></span></span>% of net income. Accelerate onboarding for street-level retail partners.</p>
+                                        <p class="small m-0" style="line-height: 1.6; opacity: 0.85;">QRIS yield accounts for <span id="stat_qris_contribution"><span class="skeleton-box" style="width: 30px;"></span></span>% of net income. Accelerate onboarding for street-level retail partners.</p>
                                     </div>
                                 </div>
                             </div>
@@ -560,6 +559,4 @@
             $('body').removeClass('drawer-open');
         });
     });
-</script>
-
 </script>

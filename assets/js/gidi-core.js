@@ -10,30 +10,49 @@ $(document).ready(function () {
 	}
 	var $overlay = $(".sb-mobile-overlay");
 
-	// Desktop toggle: collapse/expand sidebar
-	$(document).on("click", "#sidebarToggle", function () {
-		if (window.innerWidth >= 768) {
+	// Desktop toggle: collapse/expand sidebar (Notebook/Desktop >= 992px only)
+	$(document).on("click", "#sidebarToggle", function (e) {
+		if (window.innerWidth >= 992) {
 			$sidebar.toggleClass("toggled");
 			$wrapper.toggleClass("sb-toggled");
-			// Persist state
+			// Persist state for desktop
 			try {
 				localStorage.setItem(
 					"sb_collapsed",
 					$sidebar.hasClass("toggled") ? "1" : "0",
 				);
 			} catch (e) {}
+		} else if (window.innerWidth >= 768) {
+			e.preventDefault();
+			$sidebar.addClass("toggled");
+			$wrapper.addClass("sb-toggled");
 		}
 	});
 
-	// Restore desktop collapse state
-	if (window.innerWidth >= 768) {
-		try {
-			if (localStorage.getItem("sb_collapsed") === "1") {
-				$sidebar.addClass("toggled");
-				$wrapper.addClass("sb-toggled");
-			}
-		} catch (e) {}
+	// Restore/Initialize sidebar collapse state
+	function initSidebarState() {
+		var w = window.innerWidth;
+		if (w >= 768 && w < 992) {
+			// Tablet Viewport (768px - 991px): ALWAYS MINIMIZED (Icon-only)
+			$sidebar.addClass("toggled");
+			$wrapper.addClass("sb-toggled");
+			$body.addClass("sidebar-toggled");
+		} else if (w >= 992) {
+			// Notebook / Desktop Viewport (>= 992px): Restore saved preference or default expanded
+			try {
+				var saved = localStorage.getItem("sb_collapsed");
+				if (saved === "1") {
+					$sidebar.addClass("toggled");
+					$wrapper.addClass("sb-toggled");
+				} else {
+					$sidebar.removeClass("toggled");
+					$wrapper.removeClass("sb-toggled");
+				}
+			} catch (e) {}
+		}
 	}
+
+	initSidebarState();
 
 	// Mobile toggle: slide in/out
 	function openMobileSidebar() {
@@ -254,80 +273,108 @@ $(document).ready(function () {
 
 	$(window).on("resize", initMobileTableLabels);
 
-	/* Mobile Bottom Drawer & Backdrop Logic */
-	$(document).on("show.bs.dropdown", ".dt-table .dropdown", function () {
-		if (window.innerWidth <= 768) {
-			$("body").addClass("drawer-open");
+	// ── Expandable Table Row Toggle (Mobile & Tablet < 992px) ──
+	$(document).on("click", ".dt-table tbody tr", function (e) {
+		if (window.innerWidth < 992) {
+			if ($(e.target).closest(".dropdown, .dropdown-menu, button, a, input, select").length > 0) {
+				return;
+			}
+			$(this).toggleClass("dt-row-expanded");
+		}
+	});
 
-			// Close on backdrop click (simulated by body::after)
-			// Since it's CSS-based, we just need to ensure clicking outside or on links works.
+	/* ── Action Dropdown Manager (Tablet/Desktop Engine >= 576px & Mobile Bottom Sheet < 576px) ── */
+	$(document).on("show.bs.dropdown", ".dt-table .dropdown", function () {
+		var $toggle = $(this).find('[data-toggle="dropdown"]');
+		var $dropdown = $(this).find(".dropdown-menu");
+		$dropdown.data("original-parent", $(this));
+
+		if (window.innerWidth >= 576) {
+			// TABLET & DESKTOP ENGINE (>= 576px): Port to body with absolute positioning like Notebook/Desktop
+			$dropdown.detach().appendTo("body").addClass("dt-desktop-dropdown-ported");
+			var offset = $toggle.offset();
+			var dropdownWidth = $dropdown.outerWidth();
+			var toggleWidth = $toggle.outerWidth();
+			var leftPos = offset.left - (dropdownWidth - toggleWidth);
+
+			$dropdown.css({
+				display: "block",
+				position: "absolute",
+				top: offset.top + $toggle.outerHeight() + 4,
+				left: leftPos > 10 ? leftPos : 10,
+				"z-index": 10050,
+				opacity: "0"
+			}).animate({ opacity: "1" }, 120);
+		} else {
+			// MOBILE PHONE ENGINE (< 576px): Native Bottom Sheet Modal with Backdrop
+			$dropdown.detach().appendTo("body").addClass("dt-mobile-bottom-sheet");
+			$("body").addClass("dt-actions-sheet-open");
+			setTimeout(function () {
+				$dropdown.addClass("show");
+			}, 10);
 		}
 	});
 
 	$(document).on("hide.bs.dropdown", ".dt-table .dropdown", function () {
-		if (window.innerWidth <= 768) {
-			$("body").removeClass("drawer-open");
+		if (window.innerWidth >= 576) {
+			closeDesktopDropdown();
+		} else {
+			closeMobileBottomSheet();
 		}
 	});
 
-	// Ensure drawer closes when an item is clicked
-	$(document).on("click", ".dt-table .dropdown-item", function () {
-		if (window.innerWidth <= 768) {
-			$(this).closest(".dropdown-menu").dropdown("hide");
-		}
-	});
-
-	/* ── GLOBAL FIX: Prevent DataTables Dropdown Clipping (Desktop) ── */
-	// This 'ports' the dropdown to the body when opened to escape any .table-responsive or .card clipping.
-	$(document).on(
-		"show.bs.dropdown",
-		".table-responsive .dropdown",
-		function () {
-			if (window.innerWidth > 768) {
-				var $dropdown = $(this).find(".dropdown-menu");
-				var $toggle = $(this).find('[data-toggle="dropdown"]');
-
-				// Mark and move to body
-				$dropdown.data("original-parent", $(this));
-				$dropdown.detach().appendTo("body");
-
-				var offset = $toggle.offset();
-				$dropdown
-					.css({
-						display: "block",
-						position: "absolute",
-						top: offset.top + $toggle.outerHeight() + 2,
-						left: offset.left - ($dropdown.outerWidth() - $toggle.outerWidth()),
-						"z-index": 9999,
-						opacity: "0", // Start hidden for animation
-					})
-					.animate({ opacity: "1" }, 150);
+	function closeDesktopDropdown() {
+		var $ported = $("body > .dt-desktop-dropdown-ported");
+		if ($ported.length) {
+			var $parent = $ported.data("original-parent");
+			if ($parent && $parent.length) {
+				$ported.detach().appendTo($parent).removeClass("dt-desktop-dropdown-ported").css({
+					display: "",
+					position: "",
+					top: "",
+					left: "",
+					"z-index": "",
+					opacity: ""
+				});
 			}
-		},
-	);
+		}
+	}
 
-	$(document).on(
-		"hide.bs.dropdown",
-		".table-responsive .dropdown",
-		function () {
-			if (window.innerWidth > 768) {
-				var $dropdown = $("body > .dropdown-menu");
-				if ($dropdown.length) {
-					var $parent = $dropdown.data("original-parent");
-					if ($parent) {
-						$dropdown.detach().appendTo($parent).css({
-							display: "",
-							position: "",
-							top: "",
-							left: "",
-							"z-index": "",
-							opacity: "",
-						});
-					}
+	function closeMobileBottomSheet() {
+		var $sheet = $("body > .dt-mobile-bottom-sheet");
+		if ($sheet.length) {
+			$sheet.removeClass("show");
+			$("body").removeClass("dt-actions-sheet-open");
+			setTimeout(function () {
+				var $parent = $sheet.data("original-parent");
+				if ($parent && $parent.length) {
+					$sheet.detach().appendTo($parent).removeClass("dt-mobile-bottom-sheet");
 				}
+			}, 250);
+		}
+	}
+
+	$(document).on("click", ".dt-mobile-bottom-sheet .dropdown-item", function () {
+		closeMobileBottomSheet();
+	});
+
+	$(document).on("click", ".dt-desktop-dropdown-ported .dropdown-item", function () {
+		closeDesktopDropdown();
+	});
+
+	$(document).on("click", function (e) {
+		if (window.innerWidth < 576 && $("body").hasClass("dt-actions-sheet-open")) {
+			if (!$(e.target).closest(".dt-mobile-bottom-sheet").length && !$(e.target).closest('[data-toggle="dropdown"]').length) {
+				closeMobileBottomSheet();
 			}
-		},
-	);
+		} else if (window.innerWidth >= 576 && $("body > .dt-desktop-dropdown-ported").length) {
+			if (!$(e.target).closest(".dt-desktop-dropdown-ported").length && !$(e.target).closest('[data-toggle="dropdown"]').length) {
+				closeDesktopDropdown();
+			}
+		}
+	});
+
+
 
 	/* ── Universal Filter Porter (Mobile) ── */
 	function portFiltersToDrawer() {

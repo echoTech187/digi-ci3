@@ -584,7 +584,6 @@ class BiFast extends CI_Model {
 
         // Optimized Fetch (Two-Step Lookup)
         $list = $this->get_datatables($search_name, $date_from_query, $date_to_query, $search_transid, $search_external_reff, $search_channel, $search_status, $search_internal_channel);
-        
         $searchValue = $this->input->post('search')['value'];
         $is_filtered = $search_name || $date_from || $date_to || $search_transid || $search_external_reff || $search_channel || $search_status || $search_internal_channel || (!empty($searchValue));
 

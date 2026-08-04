@@ -57,22 +57,4 @@ class DlqModel extends CI_Model {
     public function get_dlq_by_id($id) {
         return $this->db->get_where('log_failed_notification_dlq', ['id' => $id])->row_array();
     }
-
-    public function getExportData($merchant_id = null, $start_date = null, $end_date = null) {
-        $this->db->select('dm.created_at, dm.type, dm.ref_transactionId, m.c_name as merchant_name');
-        $this->db->from('log_failed_notification_dlq dm');
-        $this->db->join('merchant m', 'm.id = dm.ref_merchantId', 'left');
-        $this->db->where('dm.c_status', 1);
-        
-        if (!empty($merchant_id)) {
-            $this->db->where('dm.ref_merchantId', $merchant_id);
-        }
-        if (!empty($start_date) && !empty($end_date)) {
-            $this->db->where('dm.created_at >=', $start_date . ' 00:00:00');
-            $this->db->where('dm.created_at <=', $end_date . ' 23:59:59');
-        }
-        
-        $this->db->order_by('dm.created_at', 'DESC');
-        return $this->db->get()->result_array();
-    }
 }

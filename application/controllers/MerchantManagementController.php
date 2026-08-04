@@ -66,6 +66,8 @@ class MerchantManagementController extends CI_Controller
             
             $search_merchant = $this->session->userdata('search_merchant');
 
+            session_write_close();
+
             return $this->Merchant->getMerchantDataTable($where, $hasBalancePermission, $search_merchant);
          } catch (Throwable $e) {
             log_message('error', 'Merchant AJAX error: ' . $e->getMessage());
@@ -348,7 +350,9 @@ class MerchantManagementController extends CI_Controller
       if ($this->input->is_ajax_request()) {
          try {
             $this->load->model('History');
-            return $this->History->get_merchant_all_history_datatables_handler($merchant_id);
+            $start_date = $this->input->get('start_date') ?: date('Y-m-d', strtotime('-30 days'));
+            $end_date = $this->input->get('end_date') ?: date('Y-m-d');
+            return $this->History->get_merchant_all_history_datatables_handler($merchant_id, $start_date, $end_date);
          } catch (Throwable $e) {
             log_message('error', 'Detail History AJAX error: ' . $e->getMessage());
             echo json_encode([
@@ -793,7 +797,13 @@ class MerchantManagementController extends CI_Controller
       if ($this->input->is_ajax_request()) {
          try {
             $this->load->model('Mutation_model');
-            return $this->Mutation_model->get_datatables_handler($merchant_id, []);
+            $start_date = $this->input->get('start_date') ?: date('Y-m-d', strtotime('-30 days'));
+            $end_date = $this->input->get('end_date') ?: date('Y-m-d');
+            $filters = [
+               'date' => $start_date,
+               'date_to' => $end_date
+            ];
+            return $this->Mutation_model->get_datatables_handler($merchant_id, $filters);
          } catch (Throwable $e) {
             log_message('error', 'Detail Mutation AJAX error: ' . $e->getMessage());
             echo json_encode([
