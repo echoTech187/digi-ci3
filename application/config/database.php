@@ -97,10 +97,10 @@ $query_builder = TRUE;
 
 $db['default'] = array(
 	'dsn'	=> '',
-	'hostname' => $_ENV['DB_HOST'] ?? 'localhost',
-	'username' => $_ENV['DB_USER'] ?? 'root',
-	'password' => $_ENV['DB_PASS'] ?? '',
-	'database' => $_ENV['DB_NAME'] ?? '',
+	'hostname' => '110.239.84.14:3306',
+	'username' => 'eko',
+	'password' => 'PasswordBaru123!',
+	'database' => 'db_stagging',
 	'dbdriver' => 'mysqli',
 	'dbprefix' => '',
 	'pconnect' => FALSE,
