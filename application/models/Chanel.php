@@ -401,7 +401,11 @@ class Chanel extends CI_Model {
 
         // Fetch targeted rows for validation
         if ($updateType === 'merchant' && !empty($merchantId)) {
-            $this->db->where('ref_merchantId', $merchantId);
+            if (is_array($merchantId)) {
+                $this->db->where_in('ref_merchantId', $merchantId);
+            } else {
+                $this->db->where('ref_merchantId', $merchantId);
+            }
         }
         $this->db->where('c_cashinChannelGroup', $currentGroup);
         if (!empty($currentExternal)) {
@@ -414,12 +418,25 @@ class Chanel extends CI_Model {
             $this->db->where('c_status', $currentStatus);
         }
         
-        $this->db->select('ref_cashinChannelId, c_externalIdDefault');
+        $this->db->select('ref_merchantId, ref_cashinChannelId, c_externalIdDefault');
         $this->db->from('cashin_channel_x_merchant');
         $targetedRows = $this->db->get()->result_array();
 
         if (empty($targetedRows)) {
             return ['code' => 400, 'message' => "Update failed: No matching configurations found for the selected merchant and filter criteria."];
+        }
+
+        // All-or-Nothing check for merchant update type
+        if ($updateType === 'merchant' && is_array($merchantId) && count($merchantId) > 0) {
+            $foundMerchantIds = array_unique(array_column($targetedRows, 'ref_merchantId'));
+            $missingMerchantIds = array_diff($merchantId, $foundMerchantIds);
+            if (!empty($missingMerchantIds)) {
+                $missingList = implode(', ', $missingMerchantIds);
+                return [
+                    'code' => 400, 
+                    'message' => "Update cancelled (All-or-Nothing): Merchant ID [{$missingList}] does not have matching channel configuration for the selected filter criteria."
+                ];
+            }
         }
 
         // Fetch valid master combinations
@@ -442,9 +459,15 @@ class Chanel extends CI_Model {
             }
         }
 
-        // Where Clauses for Update
+        // Execute Update in DB Transaction
+        $this->db->trans_start();
+
         if ($updateType === 'merchant' && !empty($merchantId)) {
-            $this->db->where('ref_merchantId', $merchantId);
+            if (is_array($merchantId)) {
+                $this->db->where_in('ref_merchantId', $merchantId);
+            } else {
+                $this->db->where('ref_merchantId', $merchantId);
+            }
         }
         
         $this->db->where('c_cashinChannelGroup', $currentGroup);
@@ -478,12 +501,13 @@ class Chanel extends CI_Model {
             $update['c_status'] = $newStatus;
         }
 
-        $success = $this->db->update('cashin_channel_x_merchant', $update);
-        $error = $this->db->error();
-        if ($success) {
-            return true;
+        $this->db->update('cashin_channel_x_merchant', $update);
+        $this->db->trans_complete();
+
+        if ($this->db->trans_status() === FALSE) {
+            return $this->db->error();
         } else {
-            return $error;
+            return true;
         }
     }
 
@@ -501,7 +525,11 @@ class Chanel extends CI_Model {
 
         // Fetch targeted rows for validation
         if ($updateType === 'merchant' && !empty($merchantId)) {
-            $this->db->where('ref_merchantId', $merchantId);
+            if (is_array($merchantId)) {
+                $this->db->where_in('ref_merchantId', $merchantId);
+            } else {
+                $this->db->where('ref_merchantId', $merchantId);
+            }
         }
         $this->db->where('c_cashoutChannelGroup', $currentGroup);
         if (!empty($currentExternal)) {
@@ -514,12 +542,25 @@ class Chanel extends CI_Model {
             $this->db->where('c_status', $currentStatus);
         }
         
-        $this->db->select('ref_cashoutChannelId, c_externalIdDefault');
+        $this->db->select('ref_merchantId, ref_cashoutChannelId, c_externalIdDefault');
         $this->db->from('cashout_channel_x_merchant');
         $targetedRows = $this->db->get()->result_array();
 
         if (empty($targetedRows)) {
             return ['code' => 400, 'message' => "Update failed: No matching configurations found for the selected merchant and filter criteria."];
+        }
+
+        // All-or-Nothing check for merchant update type
+        if ($updateType === 'merchant' && is_array($merchantId) && count($merchantId) > 0) {
+            $foundMerchantIds = array_unique(array_column($targetedRows, 'ref_merchantId'));
+            $missingMerchantIds = array_diff($merchantId, $foundMerchantIds);
+            if (!empty($missingMerchantIds)) {
+                $missingList = implode(', ', $missingMerchantIds);
+                return [
+                    'code' => 400, 
+                    'message' => "Update cancelled (All-or-Nothing): Merchant ID [{$missingList}] does not have matching channel configuration for the selected filter criteria."
+                ];
+            }
         }
 
         // Fetch valid master combinations
@@ -542,9 +583,15 @@ class Chanel extends CI_Model {
             }
         }
 
-        // Where Clauses for Update
+        // Execute Update in DB Transaction
+        $this->db->trans_start();
+
         if ($updateType === 'merchant' && !empty($merchantId)) {
-            $this->db->where('ref_merchantId', $merchantId);
+            if (is_array($merchantId)) {
+                $this->db->where_in('ref_merchantId', $merchantId);
+            } else {
+                $this->db->where('ref_merchantId', $merchantId);
+            }
         }
         
         $this->db->where('c_cashoutChannelGroup', $currentGroup);
@@ -578,12 +625,13 @@ class Chanel extends CI_Model {
             $update['c_status'] = $newStatus;
         }
 
-        $success = $this->db->update('cashout_channel_x_merchant', $update);
-        $error = $this->db->error();
-        if ($success) {
-            return true;
+        $this->db->update('cashout_channel_x_merchant', $update);
+        $this->db->trans_complete();
+
+        if ($this->db->trans_status() === FALSE) {
+            return $this->db->error();
         } else {
-            return $error;
+            return true;
         }
     }
     public function get_datatables_handler($table, $column_order, $column_search, $order, $where = [])

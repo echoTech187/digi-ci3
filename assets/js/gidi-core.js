@@ -628,15 +628,68 @@ $(document).ready(function () {
 	};
 
 	window.restoreBtn = function($form) {
-		let $btn = $form.find('button[type="submit"]');
-		if ($btn.length && $btn.data("original-html")) {
-			$btn.html($btn.data("original-html")).prop("disabled", false);
-		}
+		let $formObj = $form ? ($form instanceof jQuery ? $form : $($form)) : $('form');
+		let $btn = $formObj.find('button[type="submit"]');
+		$btn.each(function() {
+			let $b = $(this);
+			if ($b.data("original-html")) {
+				$b.html($b.data("original-html")).prop("disabled", false);
+			} else {
+				$b.prop("disabled", false);
+			}
+		});
 	};
 
 	$(document).on("submit", "form", function () {
 		let $btn = $(this).find('button[type="submit"]');
 		window.loadingBtn($btn);
+	});
+
+	// 4. Global Auto-Reset Modal Forms on Close
+	$(document).on("hidden.bs.modal", ".modal", function () {
+		let $modal = $(this);
+		let $forms = $modal.find("form");
+		if ($forms.length) {
+			$forms.each(function () {
+				let $form = $(this);
+				if (!$form.hasClass("no-auto-reset")) {
+					// Restore submit button loading state
+					window.restoreBtn($form);
+					
+					// Native HTML form reset
+					this.reset();
+
+					// Reset Select2 dropdowns if present inside modal
+					$form.find("select.select2, select.select2-hidden-accessible").each(function () {
+						let $select = $(this);
+						if ($select.prop("multiple")) {
+							$select.val([]).trigger("change.select2");
+						} else {
+							let defaultVal = $select.find("option[selected]").val() || "";
+							$select.val(defaultVal).trigger("change.select2");
+						}
+					});
+
+					// Reset radio inputs and trigger change for UI toggles
+					$form.find("input[type='radio']").each(function () {
+						if (this.defaultChecked) {
+							$(this).prop("checked", true).trigger("change");
+						}
+					});
+				}
+			});
+		}
+	});
+
+	// 5. Global AJAX Complete Hook (Restores submit buttons if disabled)
+	$(document).ajaxComplete(function () {
+		$("form").each(function () {
+			let $form = $(this);
+			let $btn = $form.find('button[type="submit"]');
+			if ($btn.length && $btn.prop("disabled") && $btn.data("original-html")) {
+				window.restoreBtn($form);
+			}
+		});
 	});
 });
 $(document).ready(function () {

@@ -193,7 +193,7 @@
                                         </div>
                                         <div class="choice-text">
                                             <div class="fw-bold small mb-1">Specific Merchant</div>
-                                            <div class="smaller text-muted">Update channels for one specific merchant only</div>
+                                            <div class="smaller text-muted">Update channels for specific merchant(s)</div>
                                         </div>
                                         <div class="choice-check position-absolute" style="top: 10px; right: 10px;">
                                             <div class="check-circle"></div>
@@ -204,10 +204,27 @@
                         </div>
                     </div>
 
+                    <style>
+                        .select2-container--default .select2-selection--multiple {
+                            max-height: 110px !important;
+                            overflow-y: auto !important;
+                            border-radius: 8px !important;
+                        }
+                        .select2-container--default .select2-selection--multiple .select2-selection__choice {
+                            font-size: 11px;
+                            padding: 2px 8px;
+                            margin-top: 4px;
+                            margin-right: 4px;
+                            background-color: #eaecf4;
+                            border: 1px solid #d1d3e2;
+                            color: #4e73df;
+                            font-weight: 600;
+                        }
+                    </style>
+
                     <div id="merchantSelectGroup" class="mb-3" style="display: none;">
-                        <label class="form-label small fw-bold text-muted">Select Merchant</label>
-                        <select class="form-control select2" name="ref_merchantId" id="global_merchant">
-                            <option value="">Select merchant</option>
+                        <label class="form-label small fw-bold text-muted">Select Merchant(s)</label>
+                        <select class="form-control select2" name="ref_merchantId[]" id="global_merchant" multiple="multiple" style="width: 100%;">
                             <?php foreach ($merchants as $m): ?>
                                 <option value="<?= $m->id ?>"><?= $m->c_name ?> (ID: <?= $m->id ?>)</option>
                             <?php endforeach; ?>
@@ -469,7 +486,14 @@ $(document).ready(function() {
 
     $('#global_merchant').on('change', function() {
         const merchantId = $(this).val();
-        if (!merchantId) return;
+        if (!merchantId || (Array.isArray(merchantId) && merchantId.length === 0)) {
+            let groupOptions = '<option value="">Select group</option>';
+            $('#global_current_group').html(groupOptions).trigger('change');
+
+            let extOptions = '<option value="" selected>All External IDs</option>';
+            $('#global_current_external').html(extOptions).trigger('change');
+            return;
+        }
         const tokenVal = $('input[name="' + csrfName + '"]').val() || csrfHash;
 
         $.ajax({
@@ -483,17 +507,24 @@ $(document).ready(function() {
             success: function(data) {
                 // Update current group
                 let groupOptions = '<option value="">Select group</option>';
-                data.groups.forEach(function(item) {
-                    groupOptions += `<option value="${item}">${item}</option>`;
-                });
+                if (data.groups && data.groups.length > 0) {
+                    data.groups.forEach(function(item) {
+                        groupOptions += `<option value="${item}">${item}</option>`;
+                    });
+                }
                 $('#global_current_group').html(groupOptions).trigger('change');
 
                 // Update current external
                 let extOptions = '<option value="" selected>All External IDs</option>';
-                data.providers.forEach(function(item) {
-                    extOptions += `<option value="${item}">${item}</option>`;
-                });
+                if (data.providers && data.providers.length > 0) {
+                    data.providers.forEach(function(item) {
+                        extOptions += `<option value="${item}">${item}</option>`;
+                    });
+                }
                 $('#global_current_external').html(extOptions).trigger('change');
+            },
+            error: function(xhr, status, error) {
+                console.error("Failed to fetch merchant mappings:", error);
             }
         });
     });
@@ -633,7 +664,17 @@ $(document).ready(function() {
     $('#globalUpdateForm').on('submit', function(e) {
         e.preventDefault();
         const form = this;
-        const $btn = $(form).find('button[type="submit"]');
+        const $form = $(form);
+        const $btn = $form.find('button[type="submit"]');
+
+        function resetSubmitBtn() {
+            if (typeof restoreBtn === 'function') {
+                restoreBtn($form);
+            } else {
+                const orig = $btn.data('original-html') || 'UPDATE ALL MERCHANTS';
+                $btn.html(orig).prop('disabled', false);
+            }
+        }
         
         const updateType = $('input[name="update_type"]:checked').val();
         const merchant = $('#global_merchant').val();
@@ -648,6 +689,7 @@ $(document).ready(function() {
 
         // Validation: Group is always required
         if (!curGroup || !newGroup) {
+            resetSubmitBtn();
             Swal.fire({
                 icon: 'error',
                 title: 'Missing Information',
@@ -658,11 +700,12 @@ $(document).ready(function() {
             return false;
         }
 
-        if (updateType === 'merchant' && !merchant) {
+        if (updateType === 'merchant' && (!merchant || (Array.isArray(merchant) && merchant.length === 0))) {
+            resetSubmitBtn();
             Swal.fire({
                 icon: 'error',
                 title: 'Merchant Required',
-                text: 'Please select a merchant for this update type!',
+                text: 'Please select at least one merchant for this update type!',
                 customClass: { popup: 'swal2-premium-popup', confirmButton: 'swal2-premium-confirm', actions: 'swal2-premium-actions' },
                 buttonsStyling: false
             });
@@ -675,6 +718,7 @@ $(document).ready(function() {
         const isStatusChanged = (newStatus && newStatus !== curStatus);
 
         if (!isGroupChanged && !isExtChanged && !isChanChanged && !isStatusChanged) {
+            resetSubmitBtn();
             Swal.fire({
                 icon: 'info',
                 title: 'No Changes',
@@ -686,7 +730,20 @@ $(document).ready(function() {
         }
 
         const updateTypeText = updateType === 'group' ? 'Edit Mapping (All in Group)' : 'Specific Merchant';
-        const merchantText = updateType === 'merchant' ? $('#global_merchant option:selected').text() : 'N/A';
+        let merchantText = 'N/A';
+        if (updateType === 'merchant') {
+            const selectedOps = $('#global_merchant option:selected');
+            const count = selectedOps.length;
+            if (count > 0) {
+                const names = [];
+                selectedOps.each(function() { names.push($(this).text().split(' (ID:')[0]); });
+                if (count <= 3) {
+                    merchantText = names.join(', ');
+                } else {
+                    merchantText = `${count} Merchants Selected (${names.slice(0, 2).join(', ')}, +${count - 2} more)`;
+                }
+            }
+        }
         
         const curGroupText = curGroup ? $('#global_current_group option:selected').text() : '-';
         const curExtText = curExt ? $('#global_current_external option:selected').text() : 'All External IDs';
@@ -743,8 +800,60 @@ $(document).ready(function() {
             confirmButtonText: 'Yes, update all!'
         }).then((result) => {
             if (result.isConfirmed) {
-                $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i> UPDATING...');
-                form.submit();
+                if (typeof loadingBtn === 'function') {
+                    loadingBtn($btn, 'Updating...');
+                } else {
+                    $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i> UPDATING...');
+                }
+                
+                $.ajax({
+                    url: $form.attr('action'),
+                    type: 'POST',
+                    data: $form.serialize(),
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    dataType: 'json',
+                    success: function(response) {
+                        resetSubmitBtn();
+                        if (response && response.status === true) {
+                            $('#globalUpdateModal').modal('hide');
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success!',
+                                text: response.message || 'Channel update successful',
+                                customClass: { popup: 'swal2-premium-popup', confirmButton: 'swal2-premium-confirm', actions: 'swal2-premium-actions' },
+                                buttonsStyling: false
+                            }).then(() => {
+                                location.reload();
+                            });
+                        } else {
+                            // KEEP MODAL OPEN ON ERROR
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error!',
+                                text: (response && response.message) ? response.message : 'Update failed. Please try again.',
+                                customClass: { popup: 'swal2-premium-popup', confirmButton: 'swal2-premium-confirm', actions: 'swal2-premium-actions' },
+                                buttonsStyling: false
+                            });
+                        }
+                    },
+                    error: function(xhr) {
+                        resetSubmitBtn();
+                        let errText = 'An unexpected error occurred.';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errText = xhr.responseJSON.message;
+                        }
+                        // KEEP MODAL OPEN ON ERROR
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error!',
+                            text: errText,
+                            customClass: { popup: 'swal2-premium-popup', confirmButton: 'swal2-premium-confirm', actions: 'swal2-premium-actions' },
+                            buttonsStyling: false
+                        });
+                    }
+                });
+            } else {
+                resetSubmitBtn();
             }
         });
     });
@@ -761,6 +870,7 @@ $(document).ready(function() {
     <?php endif; ?>
 
     <?php if ($this->session->flashdata('error')): ?>
+        $('#globalUpdateModal').modal('show');
         Swal.fire({
             icon: 'error',
             title: 'Error!',

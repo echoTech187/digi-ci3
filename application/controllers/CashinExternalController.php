@@ -194,16 +194,16 @@ class CashinExternalController extends CI_Controller {
             redirect('external/cashin');
         }
 
-        if ($updateType === 'merchant' && empty($merchantId)) {
+        if ($updateType === 'merchant' && (empty($merchantId) || (is_array($merchantId) && count($merchantId) === 0))) {
             if ($this->input->is_ajax_request()) {
                 return $this->output
                     ->set_content_type('application/json')
                     ->set_output(json_encode([
                         'status' => false,
-                        'message' => 'Merchant must be selected for Merchant update type'
+                        'message' => 'At least one merchant must be selected for Merchant update type'
                     ]));
             }
-            $this->session->set_flashdata('error', 'Merchant must be selected for Merchant update type');
+            $this->session->set_flashdata('error', 'At least one merchant must be selected for Merchant update type');
             redirect('external/cashin');
         }
 
@@ -357,23 +357,40 @@ class CashinExternalController extends CI_Controller {
         if (!$this->input->is_ajax_request()) return;
         $merchantId = $this->input->post('merchant_id');
 
+        if (empty($merchantId)) {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_output(json_encode([
+                    'groups' => [],
+                    'providers' => []
+                ]));
+        }
+
         $this->db->select('c_cashinChannelGroup as group');
         $this->db->from('cashin_channel_x_merchant');
-        $this->db->where('ref_merchantId', $merchantId);
+        if (is_array($merchantId)) {
+            $this->db->where_in('ref_merchantId', $merchantId);
+        } else {
+            $this->db->where('ref_merchantId', $merchantId);
+        }
         $this->db->group_by('c_cashinChannelGroup');
         $groups = $this->db->get()->result_array();
 
         $this->db->select('c_externalIdDefault as provider');
         $this->db->from('cashin_channel_x_merchant');
-        $this->db->where('ref_merchantId', $merchantId);
+        if (is_array($merchantId)) {
+            $this->db->where_in('ref_merchantId', $merchantId);
+        } else {
+            $this->db->where('ref_merchantId', $merchantId);
+        }
         $this->db->group_by('c_externalIdDefault');
         $providers = $this->db->get()->result_array();
 
         return $this->output
             ->set_content_type('application/json')
             ->set_output(json_encode([
-                'groups' => array_column($groups, 'group'),
-                'providers' => array_column($providers, 'provider')
+                'groups' => array_values(array_filter(array_column($groups, 'group'))),
+                'providers' => array_values(array_filter(array_column($providers, 'provider')))
             ]));
     }
 }
