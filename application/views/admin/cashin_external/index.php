@@ -226,7 +226,7 @@
                         <label class="form-label small fw-bold text-muted">Select Merchant(s)</label>
                         <select class="form-control select2" name="ref_merchantId[]" id="global_merchant" multiple="multiple" style="width: 100%;">
                             <?php foreach ($merchants as $m): ?>
-                                <option value="<?= $m->id ?>"><?= $m->c_name ?> (ID: <?= $m->id ?>)</option>
+                                <option value="<?= $m->id ?>"><?= $m->id ?> | <?= $m->c_name ?> | <?= $m->c_email ?></option>
                             <?php endforeach; ?>
                         </select>
                     </div>
