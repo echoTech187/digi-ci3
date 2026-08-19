@@ -215,9 +215,10 @@ class MerchantRegistrationService
         $merchantId = rand(1111, 4444);
         $data['id'] = $merchantId;
 
-        // Generate Credential Key
+        // Generate Credential Key (Server Key) & Client Key
         $this->CI->load->helper('cstring');
         $data['c_openapiCredentialKey'] = generateCredentialKey();
+        $data['c_openapiClientKey']     = generateClientKey();
 
         // Security Type
         $securityType = 'Not Both';

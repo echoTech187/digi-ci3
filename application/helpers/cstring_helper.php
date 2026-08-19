@@ -10,3 +10,7 @@ function generateCredentialKey($length = 30) {
     }
     return $key;
 }
+
+function generateClientKey() {
+    return 'GP-CLIENT-' . strtoupper(bin2hex(random_bytes(10)));
+}
