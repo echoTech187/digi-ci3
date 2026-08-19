@@ -263,6 +263,8 @@ class Mutation_model extends CI_Model
 
     /**
      * Standardized DataTables handler for Mutation list.
+     * Default: Show today's mutations only.
+     * Filtered/Searched: Search across all historical data without date restriction (unless explicit date range is selected).
      */
     public function get_datatables_handler($id, $filters = [])
     {
@@ -271,10 +273,19 @@ class Mutation_model extends CI_Model
         // Safeguard
         $this->db->query("SET SESSION max_execution_time = 30000");
 
-        $search_date = $filters['date'] ?? null;
-        $search_date_to = $filters['date_to'] ?? null;
-        $position = $filters['position'] ?? null;
-        $channel = $filters['channel'] ?? null;
+        $search_date = !empty($filters['date']) ? trim($filters['date']) : null;
+        $search_date_to = !empty($filters['date_to']) ? trim($filters['date_to']) : null;
+        $position = !empty($filters['position']) ? trim($filters['position']) : null;
+        $channel = !empty($filters['channel']) ? trim($filters['channel']) : null;
+        $transid = !empty($filters['transid']) ? trim($filters['transid']) : null;
+
+        $dtSearch = isset($_POST['search']['value']) ? trim($_POST['search']['value']) : '';
+        if (empty($dtSearch) && !empty($transid)) {
+            $dtSearch = $transid;
+        }
+
+        // Check if admin performed any search or filter
+        $is_filtered = ($dtSearch !== '') || ($search_date !== null) || ($search_date_to !== null) || ($position !== null) || ($channel !== null);
 
         $dt = $this->datatables->of('mutation')
             ->select("
@@ -282,53 +293,82 @@ class Mutation_model extends CI_Model
                 mutation.ref_merchantId, 
                 mutation.c_datetime, 
                 mutation.c_potition,
-                IF(mutation.c_potition = 'Credit', 
-                    (SELECT ref_cashinChannelId FROM cashin WHERE cashin.id = mutation.ref_cashinId), 
-                    (SELECT ref_cashoutChannelId FROM cashout WHERE cashout.id = mutation.ref_cashoutId)
-                ) AS channelName,
+                COALESCE(cashin.ref_cashinChannelId, cashout.ref_cashoutChannelId) AS channelName,
                 IF(mutation.c_potition = 'Credit', mutation.ref_cashinId, mutation.ref_cashoutId) AS refLog,
-                IF(mutation.c_potition = 'Credit', 
-                    (SELECT c_datetime FROM cashin WHERE cashin.id = mutation.ref_cashinId), 
-                    (SELECT c_datetime FROM cashout WHERE cashout.id = mutation.ref_cashoutId)
-                ) AS timeRefLog,
-                IF(mutation.c_potition = 'Credit', 
-                    (SELECT c_description FROM cashin WHERE cashin.id = mutation.ref_cashinId), 
-                    (SELECT c_description FROM cashout WHERE cashout.id = mutation.ref_cashoutId)
-                ) AS description,
-                IF(mutation.c_potition = 'Credit', 
-                    (SELECT c_invoiceNo FROM cashin WHERE cashin.id = mutation.ref_cashinId), 
-                    (SELECT c_invoiceNo FROM cashout WHERE cashout.id = mutation.ref_cashoutId)
-                ) AS refNoLog,
+                COALESCE(cashin.c_datetime, cashout.c_datetime) AS timeRefLog,
+                COALESCE(cashin.c_description, cashout.c_description) AS description,
+                COALESCE(cashin.c_invoiceNo, cashout.c_invoiceNo) AS refNoLog,
                 mutation.c_amount,
                 mutation.c_balanceAfter
             ", FALSE)
+            ->join('cashin', 'cashin.id = mutation.ref_cashinId', 'left')
+            ->join('cashout', 'cashout.id = mutation.ref_cashoutId', 'left')
             ->where('mutation.ref_merchantId', $id);
 
-        if ($search_date && $search_date_to) {
-            $dt->where('mutation.c_datetime >=', date('Y-m-d', strtotime($search_date)) . ' 00:00:00');
-            $dt->where('mutation.c_datetime <=', date('Y-m-d', strtotime($search_date_to)) . ' 23:59:59');
-        } elseif ($search_date) {
-            $formatted_date = date('Y-m-d', strtotime($search_date));
-            $dt->where('mutation.c_datetime >=', $formatted_date . ' 00:00:00');
-            $dt->where('mutation.c_datetime <=', $formatted_date . ' 23:59:59');
+        if (!$is_filtered) {
+            // Default: Hari ini saja (Today's data only)
+            $today = date('Y-m-d');
+            $dt->where('mutation.c_datetime >=', $today . ' 00:00:00');
+            $dt->where('mutation.c_datetime <=', $today . ' 23:59:59');
+        } else {
+            // If filtered/searched:
+            // Apply date filter if explicitly provided by user
+            if ($search_date && $search_date_to) {
+                $dt->where('mutation.c_datetime >=', date('Y-m-d', strtotime($search_date)) . ' 00:00:00');
+                $dt->where('mutation.c_datetime <=', date('Y-m-d', strtotime($search_date_to)) . ' 23:59:59');
+            } elseif ($search_date) {
+                $formatted_date = date('Y-m-d', strtotime($search_date));
+                $dt->where('mutation.c_datetime >=', $formatted_date . ' 00:00:00');
+                $dt->where('mutation.c_datetime <=', $formatted_date . ' 23:59:59');
+            } elseif ($search_date_to) {
+                $formatted_date = date('Y-m-d', strtotime($search_date_to));
+                $dt->where('mutation.c_datetime <=', $formatted_date . ' 23:59:59');
+            }
+            // If no date was provided, DO NOT add date constraint (searches across all data)
         }
 
         if (!empty($position)) {
             $dt->where('mutation.c_potition', $position);
         }
 
-        if (!empty($channel) && !empty($position)) {
+        if (!empty($channel)) {
             if ($position === 'Credit') {
-                $dt->join('cashin', 'cashin.ref_merchantId = mutation.ref_merchantId AND cashin.id = mutation.ref_cashinId', 'inner');
                 $dt->where('cashin.ref_cashinChannelId', $channel);
             } elseif ($position === 'Debit') {
-                $dt->join('cashout', 'cashout.ref_merchantId = mutation.ref_merchantId AND cashout.id = mutation.ref_cashoutId', 'inner');
                 $dt->where('cashout.ref_cashoutChannelId', $channel);
+            } else {
+                $safeChan = $this->db->escape($channel);
+                $dt->where("(cashin.ref_cashinChannelId = $safeChan OR cashout.ref_cashoutChannelId = $safeChan)", NULL, FALSE);
             }
         }
 
+        // Global search handling across all fields
+        if ($dtSearch !== '') {
+            $safe = $this->db->escape_like_str($dtSearch);
+            $cleanAmount = str_replace(['.', ','], '', $dtSearch);
+
+            $searchConds = [
+                "mutation.id LIKE '%$safe%'",
+                "mutation.c_potition LIKE '%$safe%'",
+                "mutation.c_datetime LIKE '%$safe%'",
+                "cashin.c_invoiceNo LIKE '%$safe%'",
+                "cashin.c_description LIKE '%$safe%'",
+                "cashin.ref_cashinChannelId LIKE '%$safe%'",
+                "cashout.c_invoiceNo LIKE '%$safe%'",
+                "cashout.c_description LIKE '%$safe%'",
+                "cashout.ref_cashoutChannelId LIKE '%$safe%'"
+            ];
+            if (is_numeric($cleanAmount) && strlen($cleanAmount) > 0 && strlen($cleanAmount) < 15) {
+                $searchConds[] = "mutation.c_amount = " . (float)$cleanAmount;
+                $searchConds[] = "mutation.c_balanceAfter = " . (float)$cleanAmount;
+            }
+
+            $dt->where('(' . implode(' OR ', $searchConds) . ')', NULL, FALSE);
+        }
+
+        $dt->set_column_search([]);
+
         return $dt->set_column_order([null, 'mutation.id', 'mutation.c_datetime', 'mutation.c_potition', 'channelName', 'description', 'mutation.c_amount', 'mutation.c_balanceAfter'])
-            ->set_column_search(['mutation.id', 'mutation.c_potition'])
             ->set_default_order(['mutation.id' => 'desc'])
             ->addColumn('no', function($row) {
                 static $no = null;

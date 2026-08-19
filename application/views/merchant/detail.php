@@ -600,6 +600,17 @@
 
                 <!-- ── TAB 3: MUTATION LOG ── -->
                 <div class="tab-pane fade p-3 p-md-4" id="nav-mutation" role="tabpanel" aria-labelledby="mutation-tab">
+                    <!-- Global Search Bar -->
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+                        <div class="dt-search-wrapper flex-grow-1" style="max-width: 420px; position: relative;">
+                            <i class="fas fa-search dt-search-icon" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 13px;"></i>
+                            <input type="text" id="mutation-dt-search" class="dt-search-input form-control form-control-sm border-0 shadow-sm" placeholder="Search by ID, invoice, description, channel, position..." style="border-radius: 10px; padding-left: 36px; height: 38px; font-size: 12.5px; background: rgba(248, 250, 252, 0.95); border: 1px solid rgba(226, 232, 240, 0.8) !important;">
+                        </div>
+                        <small id="mutation-filter-status" class="text-muted" style="font-size: 11px;">
+                            <i class="fas fa-info-circle text-primary mr-1"></i> Default showing <strong>today's mutations</strong>. Type to search all history.
+                        </small>
+                    </div>
+
                     <div class="table-responsive">
                         <table class="table dt-table mb-0" id="detailMutationTable" style="width:100%">
                             <thead>
@@ -1106,7 +1117,7 @@ $(document).ready(function() {
         // Init Mutation Table
         if (target === "#nav-mutation" && !mutationTableInit) {
             mutationTableInit = true;
-            initServerDataTable("#detailMutationTable", "<?= base_url('merchant/manage/mutation-ajax/') ?>" + merchantId, [
+            var mutationTable = initServerDataTable("#detailMutationTable", "<?= base_url('merchant/manage/mutation-ajax/') ?>" + merchantId, [
                 { data: 'no', orderable: false, className: 'text-center' },
                 { data: 'c_datetime', render: function(data){ return '<i class="far fa-clock mr-1 text-muted"></i>' + (data ? data : '-'); } },
                 { data: 'c_position_raw', render: function(data) {
@@ -1124,6 +1135,22 @@ $(document).ready(function() {
                 }},
                 { data: 'c_balance_raw', className: 'text-right font-weight-bold text-dark', render: function(data){ return 'Rp ' + number_format(data, 0, ',', '.'); } }
             ]);
+
+            function updateMutationStatusText() {
+                var searchVal = $('#mutation-dt-search').val();
+                if (searchVal && searchVal.trim() !== '') {
+                    $('#mutation-filter-status').html('<i class="fas fa-filter text-success mr-1"></i> Showing <strong>search results</strong> across all history.');
+                } else {
+                    $('#mutation-filter-status').html('<i class="fas fa-info-circle text-primary mr-1"></i> Default showing <strong>today\'s mutations</strong>. Type to search all history.');
+                }
+            }
+
+            $(document).on('input keyup', '#mutation-dt-search', debounce(function() {
+                if (mutationTable) {
+                    mutationTable.search(this.value).draw();
+                    updateMutationStatusText();
+                }
+            }, 400));
         }
 
         // Init Submerchant Table

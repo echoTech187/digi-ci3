@@ -797,13 +797,7 @@ class MerchantManagementController extends CI_Controller
       if ($this->input->is_ajax_request()) {
          try {
             $this->load->model('Mutation_model');
-            $start_date = $this->input->get('start_date') ?: date('Y-m-d', strtotime('-30 days'));
-            $end_date = $this->input->get('end_date') ?: date('Y-m-d');
-            $filters = [
-               'date' => $start_date,
-               'date_to' => $end_date
-            ];
-            return $this->Mutation_model->get_datatables_handler($merchant_id, $filters);
+            return $this->Mutation_model->get_datatables_handler($merchant_id);
          } catch (Throwable $e) {
             log_message('error', 'Detail Mutation AJAX error: ' . $e->getMessage());
             echo json_encode([

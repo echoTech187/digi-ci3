@@ -15,6 +15,7 @@ class Datatables
     protected $column_search = [];
     protected $order = [];
     protected $where = [];
+    protected $where_in = [];
     protected $add_columns = [];
     protected $edit_columns = [];
     protected $joins = [];
@@ -51,14 +52,30 @@ class Datatables
     /**
      * Add WHERE clause
      */
-    public function where($key, $value = NULL)
+    public function where($key, $value = NULL, $escape = NULL)
     {
+        $esc = ($escape !== NULL) ? $escape : TRUE;
         if (is_array($key)) {
             foreach ($key as $k => $v) {
-                $this->where[] = ['key' => $k, 'value' => $v, 'escape' => TRUE];
+                $this->where[] = ['key' => $k, 'value' => $v, 'escape' => $esc];
             }
         } else {
-            $this->where[] = ['key' => $key, 'value' => $value, 'escape' => TRUE];
+            $this->where[] = ['key' => $key, 'value' => $value, 'escape' => $esc];
+        }
+        return $this;
+    }
+
+    /**
+     * Add WHERE IN clause
+     */
+    public function where_in($key, $values = NULL)
+    {
+        if (is_array($key) && $values === NULL) {
+            foreach ($key as $k => $v) {
+                $this->where_in[] = ['key' => $k, 'values' => $v];
+            }
+        } else {
+            $this->where_in[] = ['key' => $key, 'values' => $values];
         }
         return $this;
     }
@@ -245,6 +262,10 @@ class Datatables
         foreach ($this->where as $w) {
             $db->where($w['key'], $w['value'], $w['escape']);
         }
+
+        foreach ($this->where_in as $wi) {
+            $db->where_in($wi['key'], $wi['values']);
+        }
     }
 
     protected function apply_search($db = NULL)
@@ -292,6 +313,7 @@ class Datatables
         $this->column_search = [];
         $this->order = [];
         $this->where = [];
+        $this->where_in = [];
         $this->add_columns = [];
         $this->edit_columns = [];
         $this->joins = [];
