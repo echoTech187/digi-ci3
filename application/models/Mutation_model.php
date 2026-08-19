@@ -24,8 +24,8 @@ class Mutation_model extends CI_Model
         ", FALSE);
         $this->db->from('mutation');
         // Optimized: Only join cashin/cashout if we actually need the columns for display
-        $this->db->join('cashin', 'cashin.ref_merchantId = mutation.ref_merchantId AND cashin.id = mutation.ref_cashinId', 'left');
-        $this->db->join('cashout', 'cashout.ref_merchantId = mutation.ref_merchantId AND cashout.id = mutation.ref_cashoutId', 'left');
+        $this->db->join('cashin', 'cashin.id = mutation.ref_cashinId', 'left');
+        $this->db->join('cashout', 'cashout.id = mutation.ref_cashoutId', 'left');
         $this->db->where('mutation.ref_merchantId', $id);
 
         if ($search_date_mutation && $search_date_mutation_to) {
@@ -131,10 +131,10 @@ class Mutation_model extends CI_Model
         if (!empty($channel) && !empty($position)) {
             // Only join if we filter by channel
             if ($position === 'Credit') {
-                $this->db->join('cashin', 'cashin.ref_merchantId = mutation.ref_merchantId AND cashin.id = mutation.ref_cashinId');
+                $this->db->join('cashin', 'cashin.id = mutation.ref_cashinId');
                 $this->db->where('cashin.ref_cashinChannelId', $channel);
             } elseif ($position === 'Debit') {
-                $this->db->join('cashout', 'cashout.ref_merchantId = mutation.ref_merchantId AND cashout.Id = mutation.ref_cashoutId');
+                $this->db->join('cashout', 'cashout.id = mutation.ref_cashoutId');
                 $this->db->where('cashout.ref_cashoutChannelId', $channel);
             }
         }
@@ -273,6 +273,13 @@ class Mutation_model extends CI_Model
         // Safeguard
         $this->db->query("SET SESSION max_execution_time = 30000");
 
+        if (empty($id)) {
+            return $this->datatables->of('mutation')->set_recordsTotal(0)->set_recordsFiltered(0)->set_data([])->make(true);
+        }
+
+        $start = (int) ($this->input->post('start') ?? 0);
+        $length = (int) ($this->input->post('length') ?? 10);
+
         $search_date = !empty($filters['date']) ? trim($filters['date']) : null;
         $search_date_to = !empty($filters['date_to']) ? trim($filters['date_to']) : null;
         $position = !empty($filters['position']) ? trim($filters['position']) : null;
@@ -284,95 +291,119 @@ class Mutation_model extends CI_Model
             $dtSearch = $transid;
         }
 
-        // Check if admin performed any search or filter
+        // STEP 1: Fast Count Records
+        $recordsTotal = $this->count_all_dt($id);
+        $recordsFiltered = $this->count_filtered($id, $search_date, $position, $channel, $search_date_to);
+
+        if ($recordsFiltered === 0) {
+            return $this->datatables->of('mutation')->set_recordsTotal($recordsTotal)->set_recordsFiltered(0)->set_data([])->make(true);
+        }
+
+        // STEP 2: Build Subquery for Paginated Mutation Records (Ultra Fast via Index)
         $is_filtered = ($dtSearch !== '') || ($search_date !== null) || ($search_date_to !== null) || ($position !== null) || ($channel !== null);
 
-        $dt = $this->datatables->of('mutation')
-            ->select("
-                mutation.id, 
-                mutation.ref_merchantId, 
-                mutation.c_datetime, 
-                mutation.c_potition,
-                COALESCE(cashin.ref_cashinChannelId, cashout.ref_cashoutChannelId) AS channelName,
-                IF(mutation.c_potition = 'Credit', mutation.ref_cashinId, mutation.ref_cashoutId) AS refLog,
-                COALESCE(cashin.c_datetime, cashout.c_datetime) AS timeRefLog,
-                COALESCE(cashin.c_description, cashout.c_description) AS description,
-                COALESCE(cashin.c_invoiceNo, cashout.c_invoiceNo) AS refNoLog,
-                mutation.c_amount,
-                mutation.c_balanceAfter
-            ", FALSE)
-            ->join('cashin', 'cashin.id = mutation.ref_cashinId', 'left')
-            ->join('cashout', 'cashout.id = mutation.ref_cashoutId', 'left')
-            ->where('mutation.ref_merchantId', $id);
+        $this->db->reset_query();
+        $this->db->select("
+            mutation.id, 
+            mutation.ref_merchantId, 
+            mutation.c_datetime, 
+            mutation.c_potition, 
+            mutation.ref_cashinId, 
+            mutation.ref_cashoutId, 
+            mutation.c_amount, 
+            mutation.c_balanceAfter
+        ");
+        $this->db->from('mutation');
+        $this->db->where('mutation.ref_merchantId', (int)$id);
 
-        if (!$is_filtered) {
-            // Default: Hari ini saja (Today's data only)
-            $today = date('Y-m-d');
-            $dt->where('mutation.c_datetime >=', $today . ' 00:00:00');
-            $dt->where('mutation.c_datetime <=', $today . ' 23:59:59');
-        } else {
-            // If filtered/searched:
-            // Apply date filter if explicitly provided by user
-            if ($search_date && $search_date_to) {
-                $dt->where('mutation.c_datetime >=', date('Y-m-d', strtotime($search_date)) . ' 00:00:00');
-                $dt->where('mutation.c_datetime <=', date('Y-m-d', strtotime($search_date_to)) . ' 23:59:59');
-            } elseif ($search_date) {
-                $formatted_date = date('Y-m-d', strtotime($search_date));
-                $dt->where('mutation.c_datetime >=', $formatted_date . ' 00:00:00');
-                $dt->where('mutation.c_datetime <=', $formatted_date . ' 23:59:59');
-            } elseif ($search_date_to) {
-                $formatted_date = date('Y-m-d', strtotime($search_date_to));
-                $dt->where('mutation.c_datetime <=', $formatted_date . ' 23:59:59');
-            }
-            // If no date was provided, DO NOT add date constraint (searches across all data)
+        // Date Filters (Only if explicitly selected by user)
+        if ($search_date && $search_date_to) {
+            $this->db->where('mutation.c_datetime >=', date('Y-m-d', strtotime($search_date)) . ' 00:00:00');
+            $this->db->where('mutation.c_datetime <=', date('Y-m-d', strtotime($search_date_to)) . ' 23:59:59');
+        } elseif ($search_date) {
+            $formatted_date = date('Y-m-d', strtotime($search_date));
+            $this->db->where('mutation.c_datetime >=', $formatted_date . ' 00:00:00');
+            $this->db->where('mutation.c_datetime <=', $formatted_date . ' 23:59:59');
+        } elseif ($search_date_to) {
+            $formatted_date = date('Y-m-d', strtotime($search_date_to));
+            $this->db->where('mutation.c_datetime <=', $formatted_date . ' 23:59:59');
         }
 
         if (!empty($position)) {
-            $dt->where('mutation.c_potition', $position);
+            $this->db->where('mutation.c_potition', $position);
         }
 
-        if (!empty($channel)) {
+        if (!empty($channel) && !empty($position)) {
             if ($position === 'Credit') {
-                $dt->where('cashin.ref_cashinChannelId', $channel);
+                $this->db->join('cashin', 'cashin.id = mutation.ref_cashinId', 'inner');
+                $this->db->where('cashin.ref_cashinChannelId', $channel);
             } elseif ($position === 'Debit') {
-                $dt->where('cashout.ref_cashoutChannelId', $channel);
-            } else {
-                $safeChan = $this->db->escape($channel);
-                $dt->where("(cashin.ref_cashinChannelId = $safeChan OR cashout.ref_cashoutChannelId = $safeChan)", NULL, FALSE);
+                $this->db->join('cashout', 'cashout.id = mutation.ref_cashoutId', 'inner');
+                $this->db->where('cashout.ref_cashoutChannelId', $channel);
             }
         }
 
-        // Global search handling across all fields
         if ($dtSearch !== '') {
-            $safe = $this->db->escape_like_str($dtSearch);
-            $cleanAmount = str_replace(['.', ','], '', $dtSearch);
+            $safeSearch = $this->db->escape_str($dtSearch);
+            $matching_ids = [-1];
+            if (is_numeric($dtSearch) && strlen($dtSearch) < 15) $matching_ids[] = (int)$dtSearch;
 
-            $searchConds = [
-                "mutation.id LIKE '%$safe%'",
-                "mutation.c_potition LIKE '%$safe%'",
-                "mutation.c_datetime LIKE '%$safe%'",
-                "cashin.c_invoiceNo LIKE '%$safe%'",
-                "cashin.c_description LIKE '%$safe%'",
-                "cashin.ref_cashinChannelId LIKE '%$safe%'",
-                "cashout.c_invoiceNo LIKE '%$safe%'",
-                "cashout.c_description LIKE '%$safe%'",
-                "cashout.ref_cashoutChannelId LIKE '%$safe%'"
-            ];
-            if (is_numeric($cleanAmount) && strlen($cleanAmount) > 0 && strlen($cleanAmount) < 15) {
-                $searchConds[] = "mutation.c_amount = " . (float)$cleanAmount;
-                $searchConds[] = "mutation.c_balanceAfter = " . (float)$cleanAmount;
+            $inv_res_in = $this->db->query("SELECT id FROM cashin WHERE c_invoiceNo LIKE '$safeSearch%' LIMIT 50")->result();
+            if (!empty($inv_res_in)) {
+                $ids_in = array_column($inv_res_in, 'id');
+                $mut_res = $this->db->query("SELECT id FROM mutation WHERE ref_cashinId IN (".implode(',', $ids_in).") LIMIT 50")->result();
+                if (!empty($mut_res)) $matching_ids = array_merge($matching_ids, array_column($mut_res, 'id'));
             }
 
-            $dt->where('(' . implode(' OR ', $searchConds) . ')', NULL, FALSE);
+            $inv_res_out = $this->db->query("SELECT id FROM cashout WHERE c_invoiceNo LIKE '$safeSearch%' LIMIT 50")->result();
+            if (!empty($inv_res_out)) {
+                $ids_out = array_column($inv_res_out, 'id');
+                $mut_res = $this->db->query("SELECT id FROM mutation WHERE ref_cashoutId IN (".implode(',', $ids_out).") LIMIT 50")->result();
+                if (!empty($mut_res)) $matching_ids = array_merge($matching_ids, array_column($mut_res, 'id'));
+            }
+
+            $matching_ids = array_unique($matching_ids);
+            if (count($matching_ids) > 1) {
+                $this->db->where_in('mutation.id', $matching_ids);
+            } else {
+                $this->db->like('mutation.c_potition', $dtSearch);
+            }
         }
 
-        $dt->set_column_search([]);
+        $this->db->order_by('mutation.c_datetime', 'DESC');
+        $this->db->order_by('mutation.id', 'DESC');
+        if ($length != -1) $this->db->limit($length, $start);
+        $subquery = $this->db->get_compiled_select();
 
-        return $dt->set_column_order([null, 'mutation.id', 'mutation.c_datetime', 'mutation.c_potition', 'channelName', 'description', 'mutation.c_amount', 'mutation.c_balanceAfter'])
-            ->set_default_order(['mutation.id' => 'desc'])
-            ->addColumn('no', function($row) {
+        // STEP 3: Outer Query (JOIN to cashin & cashout ONLY for the derived table)
+        $sql = "
+            SELECT 
+                m.id, 
+                m.ref_merchantId, 
+                m.c_datetime, 
+                m.c_potition,
+                IF(m.c_potition = 'Credit', c.ref_cashinChannelId, co.ref_cashoutChannelId) AS channelName,
+                IF(m.c_potition = 'Credit', m.ref_cashinId, m.ref_cashoutId) AS refLog,
+                IF(m.c_potition = 'Credit', c.c_datetime, co.c_datetime) AS timeRefLog,
+                IF(m.c_potition = 'Credit', c.c_description, co.c_description) AS description,
+                IF(m.c_potition = 'Credit', c.c_invoiceNo, co.c_invoiceNo) AS refNoLog,
+                m.c_amount,
+                m.c_balanceAfter as c_balanceAfter
+            FROM ($subquery) m
+            LEFT JOIN cashin c ON c.id = m.ref_cashinId
+            LEFT JOIN cashout co ON co.id = m.ref_cashoutId
+            ORDER BY m.c_datetime DESC, m.id DESC
+        ";
+
+        $list = $this->db->query($sql)->result();
+
+        return $this->datatables->of('mutation')
+            ->set_recordsTotal($recordsTotal)
+            ->set_recordsFiltered($recordsFiltered)
+            ->set_data($list)
+            ->addColumn('no', function($row) use ($start) {
                 static $no = null;
-                if ($no === null) $no = intval($this->input->post('start'));
+                if ($no === null) $no = $start;
                 return ++$no;
             })
             ->editColumn('channelName', function($row) {

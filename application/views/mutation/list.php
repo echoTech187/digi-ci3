@@ -129,14 +129,10 @@ $download_url = base_url('finance/mutation/download')
 
         <?php if ($extra_active > 0 || !empty($active_mutation_search)): ?>
             <div class="px-3 py-2 bg-light border-bottom d-flex align-items-center justify-content-between">
-                <small class="text-muted"><i class="fas fa-filter text-success mr-1"></i> Showing <strong>filtered results</strong> across history.</small>
+                <small class="text-muted"><i class="fas fa-filter text-success mr-1"></i> Showing <strong>filtered results</strong>.</small>
                 <a href="<?= base_url('finance/mutation/reset/' . $id); ?>" class="badge badge-pill badge-light border text-primary px-2 py-1 text-decoration-none">
-                    <i class="fas fa-undo mr-1"></i> Reset to Today
+                    <i class="fas fa-undo mr-1"></i> Reset Filters
                 </a>
-            </div>
-        <?php else: ?>
-            <div class="px-3 py-2 bg-light border-bottom">
-                <small class="text-muted"><i class="fas fa-info-circle text-primary mr-1"></i> Default showing <strong>today's mutations</strong>. Use search or filters to view all history.</small>
             </div>
         <?php endif; ?>
 
