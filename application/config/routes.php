@@ -298,13 +298,10 @@ $route['health/db-check'] = 'HealthController/dbCheck';
 $route['notifications'] = 'DlqController/index';
 
 // ── Merchant Access Control (RBAC Portal Management) ──────────
-$route['merchant/access-control/roles']                             = 'MerchantRbacController/roles';
-$route['merchant/access-control/roles/reset']                       = 'MerchantRbacController/resetRoles';
-$route['merchant/access-control/roles/save']                        = 'MerchantRbacController/save_role';
-$route['merchant/access-control/roles/permissions/(:num)']          = 'MerchantRbacController/get_role_permissions_json/$1';
-$route['merchant/access-control/save_role']                         = 'MerchantRbacController/save_role';
-$route['merchant/access-control/get_role_permissions_json/(:num)'] = 'MerchantRbacController/get_role_permissions_json/$1';
-$route['merchant/access-control/menus']                             = 'MerchantRbacController/menus';
-$route['merchant/access-control/menus/save']                        = 'MerchantRbacController/save_menu';
-$route['merchant/access-control/save_menu']                         = 'MerchantRbacController/save_menu';
+$route['merchant/access-control/roles']                    = 'MerchantRbacController/roles';
+$route['merchant/access-control/roles/reset']              = 'MerchantRbacController/resetRoles';
+$route['merchant/access-control/roles/save']               = 'MerchantRbacController/save_role';
+$route['merchant/access-control/roles/permissions/(:num)'] = 'MerchantRbacController/get_role_permissions_json/$1';
+$route['merchant/access-control/menus']                    = 'MerchantRbacController/menus';
+$route['merchant/access-control/menus/save']               = 'MerchantRbacController/save_menu';
 
