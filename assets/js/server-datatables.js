@@ -19,7 +19,7 @@ function initServerDataTable(tableId, ajaxUrl, columns, additionalOptions = {}) 
         "ajax": {
             "url": ajaxUrl,
             "type": "POST",
-            "timeout": 3000,
+            "timeout": 10000,
             "data": function (d) {
                 // Automatically append CSRF token if present
                 var csrfName = $('meta[name="csrf-token-name"]').attr('content');

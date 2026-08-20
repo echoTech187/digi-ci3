@@ -322,4 +322,32 @@ class Datatables
         $this->manual_recordsFiltered = NULL;
         $this->manual_data = NULL;
     }
+
+    /**
+     * Helper method to calculate Bidirectional Reverse Scanning params for deep pagination.
+     */
+    public static function get_reverse_scan_params($total, $start = null, $length = null, $threshold = 5000)
+    {
+        $start = ($start !== null) ? (int)$start : (isset($_POST['start']) ? (int)$_POST['start'] : 0);
+        $length = ($length !== null) ? (int)$length : (isset($_POST['length']) ? (int)$_POST['length'] : 10);
+
+        $force_reverse = false;
+        $fetch_start = $start;
+        $fetch_length = $length;
+
+        if ($total > $threshold && $start > ($total / 2)) {
+            $force_reverse = true;
+            $fetch_start = $total - $start - $length;
+            if ($fetch_start < 0) {
+                $fetch_length = $length + $fetch_start;
+                $fetch_start = 0;
+            }
+        }
+
+        return [
+            'force_reverse' => $force_reverse,
+            'fetch_start'   => $fetch_start,
+            'fetch_length'  => $fetch_length
+        ];
+    }
 }

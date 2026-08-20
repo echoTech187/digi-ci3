@@ -176,11 +176,22 @@ class Mutation_model extends CI_Model
     {
         if (self::$cached_total !== null) return self::$cached_total;
 
-        // Use table status estimates if no filters beyond merchant ID are needed 
-        // (Mutation is always filtered by merchantId, so we still do a count but optimized)
+        // Instant Metadata Estimation (SHOW TABLE STATUS) for global / unfiltered scope
+        if (empty($id) || $id === '*') {
+            $q = $this->db->query("SHOW TABLE STATUS LIKE 'mutation'");
+            $res = $q->row();
+            if ($res && isset($res->Rows) && $res->Rows > 10000) {
+                self::$cached_total = (int)$res->Rows;
+                return self::$cached_total;
+            }
+        }
+
+        // Specific Merchant Scope (Fast Indexed Count via Merchant Index)
         $this->db->select('count(id) as total');
         $this->db->from('mutation');
-        $this->db->where('ref_merchantId', $id);
+        if (!empty($id) && $id !== '*') {
+            $this->db->where('ref_merchantId', $id);
+        }
         $query = $this->db->get();
         self::$cached_total = $query->row() ? (int)$query->row()->total : 0;
         return self::$cached_total;
@@ -370,9 +381,13 @@ class Mutation_model extends CI_Model
             }
         }
 
-        $this->db->order_by('mutation.c_datetime', 'DESC');
-        $this->db->order_by('mutation.id', 'DESC');
-        if ($length != -1) $this->db->limit($length, $start);
+        // STEP 2: Build Subquery for Paginated Mutation Records (Ultra Fast via Index with Reverse Scan Optimization)
+        $scan = self::get_reverse_scan_params($recordsFiltered, $start, $length, 5000);
+        $order_dir = $scan['force_reverse'] ? 'ASC' : 'DESC';
+
+        $this->db->order_by('mutation.c_datetime', $order_dir);
+        $this->db->order_by('mutation.id', $order_dir);
+        if ($scan['fetch_length'] != -1) $this->db->limit($scan['fetch_length'], $scan['fetch_start']);
         $subquery = $this->db->get_compiled_select();
 
         // STEP 3: Outer Query (JOIN to cashin & cashout ONLY for the derived table)
@@ -392,10 +407,14 @@ class Mutation_model extends CI_Model
             FROM ($subquery) m
             LEFT JOIN cashin c ON c.id = m.ref_cashinId
             LEFT JOIN cashout co ON co.id = m.ref_cashoutId
-            ORDER BY m.c_datetime DESC, m.id DESC
+            ORDER BY m.c_datetime $order_dir, m.id $order_dir
         ";
 
         $list = $this->db->query($sql)->result();
+
+        if ($scan['force_reverse'] && !empty($list)) {
+            $list = array_reverse($list);
+        }
 
         return $this->datatables->of('mutation')
             ->set_recordsTotal($recordsTotal)
