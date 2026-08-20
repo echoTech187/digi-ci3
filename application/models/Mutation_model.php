@@ -382,7 +382,7 @@ class Mutation_model extends CI_Model
         }
 
         // STEP 2: Build Subquery for Paginated Mutation Records (Ultra Fast via Index with Reverse Scan Optimization)
-        $scan = self::get_reverse_scan_params($recordsFiltered, $start, $length, 5000);
+        $scan = DataTables::get_reverse_scan_params($recordsFiltered, $start, $length, 5000);
         $order_dir = $scan['force_reverse'] ? 'ASC' : 'DESC';
 
         $this->db->order_by('mutation.c_datetime', $order_dir);
