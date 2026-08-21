@@ -298,7 +298,7 @@
             {data: 'c_datetimeRequest',className: 'text-nowrap', render: function(data){
                 return moment(data).format('DD-MM-YYYY HH:mm:ss');
             }},
-            {data: 'name_submerchant',className: 'text-nowrap'},
+            {data: 'sub_account_name',className: 'text-nowrap'},
             {
                 data: 'ref_cashinChannelId',
                 className: 'text-nowrap',

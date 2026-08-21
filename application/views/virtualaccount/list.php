@@ -191,7 +191,7 @@ $download_url = base_url('finance/virtual-account/download')
                 }
             },
             {
-                data: 'submerchant_name',
+                data: 'sub_account_name',
                 className: 'text-nowrap',
                 render: function(data, type, row) {
                     return ' [' + row.ref_subMerchantId + '] - ' + data;

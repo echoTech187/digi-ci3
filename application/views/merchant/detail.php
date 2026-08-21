@@ -1098,7 +1098,7 @@ $(document).ready(function() {
             historyTableInit = true;
             initServerDataTable("#detailHistoryTable", "<?= base_url('merchant/manage/history-ajax/') ?>" + merchantId, [
                 { data: 'no' },
-                { data: 'name_merchant' },
+                { data: 'merchant_name' },
                 { data: 'c_datetime', render: function(data){ return moment(data).format('DD-MM-YYYY HH:mm:ss'); } },
                 { data: 'ref_cashoutChannelId' },
                 { data: 'c_invoiceNo' },

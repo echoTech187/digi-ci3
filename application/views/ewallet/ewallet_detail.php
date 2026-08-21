@@ -1,6 +1,27 @@
-<!-- Begin Page Content -->
-<div >
-    <div class="card-body">
+<!-- ── Page Header ── -->
+<div class="dt-page-header d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="dt-page-title mb-1">Transaction Details</h4>
+        <p class="dt-page-subtitle mb-0">Detailed audit trail and technical parameters for the E-Wallet transaction.</p>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+        
+    </div>
+</div>
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="modal-header modal-header-primary border-0 py-3 mh-premium">
+        <div class="d-flex align-items-center">
+            <div class="mh-icon-badge">
+                <i class="fas fa-wallet"></i>
+            </div>
+            <div class="mh-title-wrap">
+                <h6 class="mh-title">E-WALLET TRANSACTION INFO</h6>
+                <small class="mh-subtitle">Lihat detail informasi lengkap</small>
+            </div>
+        </div>
+    </div>
+    <div class="card-body p-4">
             <!-- <?php
                 // echo "<pre>";
                 // print_r($ewallet_data); // or var_dump($data);
@@ -34,12 +55,12 @@
                                 <div class="row">
                                     <div class="col-6 mb-2">
                                         <small class="text-muted d-block">Merchant</small>
-                                        <span class="font-weight-bold text-dark"><?= $data['name_merchant']; ?></span>
-                                        <code class="small text-muted">[<?= $data['ref_merchantId']; ?>]</code>
+                                        <span class="font-weight-bold text-dark"><?= $data['merchant_name'] ?? $data['name_merchant']; ?></span>
+                                        <code class="small text-muted">[<?= $data['ref_merchantId'] ?? $data['id_merchant']; ?>]</code>
                                     </div>
                                     <div class="col-6 mb-2">
                                         <small class="text-muted d-block">Sub-Merchant</small>
-                                        <span class="font-weight-bold text-dark"><?= $data['name_submerchant']; ?></span>
+                                        <span class="font-weight-bold text-dark"><?= $data['sub_account_name'] ?? $data['name_submerchant']; ?></span>
                                         <code class="small text-muted">[<?= $data['ref_subMerchantId']; ?>]</code>
                                     </div>
                                 </div>
@@ -96,12 +117,8 @@
                     </div>
                 <?php endforeach; ?>
             </div>
-            
-        </div>
     </div>
-
 </div>
-<!-- /.container-fluid -->
 
 <script>
 $(document).ready(function() {

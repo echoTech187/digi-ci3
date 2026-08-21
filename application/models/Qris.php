@@ -9,351 +9,7 @@ class Qris extends CI_Model {
     var $order = array('cpq.id' => 'desc');
     private static $cached_total = null;
 
-    private function _get_datatables_query($search_name = null, $date_from = null, $date_to = null, $search_settlement = null, $search_rrn = null, $search_invoice = null, $search_transid = null, $only_ids = false, $count_only = false, $force_reverse = false)
-    {
-        $this->db->query("SET SESSION max_execution_time = 30000");
-        $searchValue = isset($_POST['search']['value']) ? $_POST['search']['value'] : '';
 
-        if ($count_only) {
-            $this->db->select("count(*) as total");
-        } else if ($only_ids) {
-            $this->db->select("cpq.id");
-        } else {
-            $this->db->select("cpq.id, cpq.c_datetime, cpq.c_type, cpq.c_amount, cpq.c_mdr, cpq.c_fee, cpq.c_isSettlementRealtime, cpq.c_datetimeSettlement, cpq.ref_merchantId, cpq.ref_subMerchantId, cpq.ref_cashinId, cpq.ref_cashinDynamicQrisMpmId, cpq.ref_cashinRecurringQrisMpmId, m.c_name as name_merchant, s.c_name as name_submerchant, c.c_invoiceNo, 
-                               IF(cpq.c_type='Dynamic', cdq.c_merchantTransactionId, crq.c_merchantTransactionId) AS Merchant_Transaction_Id");
-        }
-        $this->db->from($this->table);
-        
-        // Essential joins
-        $isInvoiceSearch = (preg_match('/^(INV|EWALLET|QRIS|VA|BIF|BIFAST)/i', $searchValue));
-        $isTechnicalId = preg_match('/^([0-9]{2,30}|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-.*|(GD|GR|EWALLET|QRIS|VA|BIF|INV|BIFAST|UT)[0-9a-zA-Z_-]+|0000[0-9a-fA-F]+|[a-zA-Z0-9_-]{10,})$/i', $searchValue);
-        $sort_col = isset($_POST['order']['0']['column']) ? $this->column_order[$_POST['order']['0']['column']] : '';
-
-        // Optimization: Use joins only if global search is active...
-        $isExternalSort = !empty($sort_col) && !preg_match('/^cpq\./', $sort_col) && $sort_col != 'Merchant_Transaction_Id';
-        
-        // When fetching ONLY IDs, we DO NOT need full joins for global search anymore because we use subqueries!
-        $needFullJoins = (!$only_ids && !$count_only) || $isExternalSort;
-
-        // Join cashin only if searching for invoice via global search, sorting by it, or getting full data
-        if ($needFullJoins || $isInvoiceSearch || $isTechnicalId) {
-            $this->db->join('cashin c', 'c.id = cpq.ref_cashinId');
-        }
-        
-        // Join merchant and submerchant only if needed for global search or sorting or full data
-        $isTextSearch = $searchValue && !preg_match('/^[0-9]{5,25}$/', $searchValue) && !$isInvoiceSearch;
-        $joined_merchant_submerchant = false;
-        if ($needFullJoins || $search_name || $isTextSearch) {
-            $this->db->join('merchant m', 'cpq.ref_merchantId = m.id');
-            $this->db->join('submerchant s', 'cpq.ref_subMerchantId = s.id');
-            $joined_merchant_submerchant = true;
-        }
-
-        // Transactions ID joins (Only if full data, NEVER during ID fetch to prevent timeouts)
-        if ($needFullJoins) {
-            $this->db->join('cashin_dynamic_qris_mpm cdq', 'cdq.id = cpq.ref_cashinDynamicQrisMpmId', 'left');
-            $this->db->join('cashin_recurring_qris_mpm crq', 'crq.id = cpq.ref_cashinRecurringQrisMpmId', 'left');
-        }
-
-        if ($search_name) {
-            $this->db->where('cpq.ref_merchantId', $search_name);
-        }
-        if ($date_from && $date_to) {
-            $this->db->where('cpq.c_datetime >=', $date_from);
-            $this->db->where('cpq.c_datetime <=', $date_to);
-        }
-        if ($search_rrn && !$searchValue) {
-            $matching_rrn_ids = $this->_get_ids_by_rrn($search_rrn);
-            if (!empty($matching_rrn_ids)) {
-                $this->db->where_in('cpq.id', $matching_rrn_ids);
-            } else {
-                $this->db->where('1=0', NULL, FALSE);
-            }
-        }
-        if ($search_settlement) {
-            $formatted_date = date('Y-m-d', strtotime($search_settlement));
-            $this->db->where('cpq.c_datetimeSettlement >=', $formatted_date . " 00:00:00");
-            $this->db->where('cpq.c_datetimeSettlement <=', $formatted_date . " 23:59:59");
-        }
-        if ($search_transid && !$searchValue) {
-            $safeTransId = $this->db->escape_str($search_transid);
-            $matching_ids = [-1]; // Defaults to -1 to force empty result if not found
-            
-            $cdq_res = $this->db->query("
-                SELECT id FROM cashin_dynamic_qris_mpm WHERE c_merchantTransactionId = '$safeTransId'
-                LIMIT 20
-            ")->result();
-            if (!empty($cdq_res)) {
-                $cdq_ids = array_column($cdq_res, 'id');
-                $cpq_res = $this->db->query("SELECT id FROM cashin_payment_qris_mpm WHERE ref_cashinDynamicQrisMpmId IN (".implode(',', $cdq_ids).") LIMIT 20")->result();
-                $matching_ids = array_merge($matching_ids, array_column($cpq_res, 'id'));
-            }
-            
-            $crq_res = $this->db->query("
-                SELECT id FROM cashin_recurring_qris_mpm WHERE c_merchantTransactionId = '$safeTransId'
-                LIMIT 20
-            ")->result();
-            if (!empty($crq_res)) {
-                $crq_ids = array_column($crq_res, 'id');
-                $cpq_res = $this->db->query("SELECT id FROM cashin_payment_qris_mpm WHERE ref_cashinRecurringQrisMpmId IN (".implode(',', $crq_ids).") LIMIT 20")->result();
-                $matching_ids = array_merge($matching_ids, array_column($cpq_res, 'id'));
-            }
-            
-            $this->db->where_in('cpq.id', array_unique($matching_ids));
-        }
-        if ($search_invoice && !$searchValue) {
-            // Fast invoice lookup via subquery
-            $this->db->where("cpq.ref_cashinId IN (SELECT id FROM cashin WHERE c_invoiceNo = '".$this->db->escape_str($search_invoice)."')", NULL, FALSE);
-        }
-
-        if ($searchValue) {
-            $safeSearchValue = $this->db->escape_str($searchValue);
-            
-            // CACHING LOGIC: Prevent redundant scans across multiple calls (count + fetch)
-            static $cached_ids = null;
-            static $cached_inv_ids = null;
-            static $last_query = null;
-
-            if ($cached_ids === null || $last_query !== $searchValue) {
-                $last_query = $searchValue;
-                $matching_ids = [-1];
-                $matching_inv_ids = [-1];
-
-                $op = (strlen($searchValue) >= 15) ? '=' : 'LIKE';
-                $val = (strlen($searchValue) >= 15) ? "'$safeSearchValue'" : "'$safeSearchValue%'";
-
-                // 1. Priority: Check Transaction ID from Dynamic/Recurring (Often specific and indexed)
-                $cdq_res = $this->db->query("SELECT id FROM cashin_dynamic_qris_mpm WHERE c_merchantTransactionId $op $val LIMIT 20")->result();
-                if (!empty($cdq_res)) {
-                    $cdq_ids = array_column($cdq_res, 'id');
-                    $cpq_res = $this->db->query("SELECT id FROM cashin_payment_qris_mpm WHERE ref_cashinDynamicQrisMpmId IN (".implode(',', $cdq_ids).") LIMIT 50")->result();
-                    if (!empty($cpq_res)) $matching_ids = array_merge($matching_ids, array_column($cpq_res, 'id'));
-                }
-                
-                $crq_res = $this->db->query("SELECT id FROM cashin_recurring_qris_mpm WHERE c_merchantTransactionId $op $val LIMIT 20")->result();
-                if (!empty($crq_res)) {
-                    $crq_ids = array_column($crq_res, 'id');
-                    $cpq_res = $this->db->query("SELECT id FROM cashin_payment_qris_mpm WHERE ref_cashinRecurringQrisMpmId IN (".implode(',', $crq_ids).") LIMIT 50")->result();
-                    if (!empty($cpq_res)) $matching_ids = array_merge($matching_ids, array_column($cpq_res, 'id'));
-                }
-                
-                // Ext Ref IDs removed (columns don't exist on dynamic/recurring tables)
-
-                // 2. Check Invoice Number (Only if specific ID not found OR query is short)
-                // CRITICAL: Removed leading % to prevent full table scan on 80M+ rows
-                if (count($matching_ids) <= 1 || strlen($searchValue) < 15) {
-                    if (strlen($searchValue) >= 4) {
-                        $inv_q = "SELECT id FROM cashin WHERE c_invoiceNo $op $val ";
-                        $inv_res = $this->db->query($inv_q . " LIMIT 50")->result();
-                        if (!empty($inv_res)) $matching_inv_ids = array_merge($matching_inv_ids, array_column($inv_res, 'id'));
-                    }
-                }
-
-                // 3. Check RRN via helper
-                if (count($matching_ids) <= 1) {
-                    $cpq_rrn_ids = $this->_get_ids_by_rrn($safeSearchValue);
-                    if (!empty($cpq_rrn_ids)) {
-                        $matching_ids = array_merge($matching_ids, $cpq_rrn_ids);
-                    }
-                }
-
-                // 4. Check Direct PK
-                if (is_numeric($searchValue) && strlen($searchValue) < 15) {
-                    $matching_ids[] = (int)$searchValue;
-                }
-
-                $cached_ids = array_unique($matching_ids);
-                $cached_inv_ids = array_unique($matching_inv_ids);
-            }
-
-            // 2. Decide strategy
-            if (count($cached_ids) > 1 || count($cached_inv_ids) > 1) {
-                $this->db->group_start();
-                if (count($cached_ids) > 1) $this->db->where_in('cpq.id', $cached_ids);
-                if (count($cached_inv_ids) > 1) {
-                    if (count($cached_ids) > 1) $this->db->or_where_in('cpq.ref_cashinId', $cached_inv_ids);
-                    else $this->db->where_in('cpq.ref_cashinId', $cached_inv_ids);
-                }
-                $this->db->group_end();
-            } else {
-                // FALLBACK: Name search if no specific ID matched (min 3 chars)
-                if (strlen($searchValue) >= 3) {
-                    // Ensure joins for name search
-                    if (!$joined_merchant_submerchant) {
-                        $this->db->join('merchant m', 'cpq.ref_merchantId = m.id', 'left');
-                        $this->db->join('submerchant s', 'cpq.ref_subMerchantId = s.id', 'left');
-                        $joined_merchant_submerchant = true;
-                    }
-
-                    $this->db->group_start();
-                    $this->db->like('s.c_name', $searchValue, 'both');
-                    $this->db->or_like('m.c_name', $searchValue, 'both');
-                    $this->db->group_end();
-                } else {
-                    $this->db->where('1=0', NULL, FALSE);
-                }
-            }
-        }
-        if (!$count_only) {
-            // No grouping needed as ref_cashinId is unique
-            
-            if (isset($_POST['order'])) {
-                $sort_idx = $_POST['order']['0']['column'];
-                $sort_col = $this->column_order[$sort_idx];
-                $dir = $_POST['order']['0']['dir'];
-                
-                if ($sort_col == 'Merchant_Transaction_Id') {
-                    if ($force_reverse) $dir = ($dir == 'asc' ? 'desc' : 'asc');
-                    $this->db->order_by("IF(cpq.c_type='Dynamic', cdq.c_merchantTransactionId, crq.c_merchantTransactionId)", $dir);
-                } else if ($only_ids && ($sort_col == 'cpq.id' || $sort_col == 'id')) {
-                    $this->db->order_by('id', $dir, FALSE);
-                } else if ($sort_col) {
-                    if ($force_reverse) $dir = ($dir == 'asc' ? 'desc' : 'asc');
-                    $this->db->order_by($sort_col, $dir);
-                }
-            } else if (isset($this->order)) {
-                $order = $this->order;
-                $key = key($order);
-                $dir = $order[$key];
-                if ($force_reverse) $dir = ($dir == 'asc' ? 'desc' : 'asc');
-                
-                if ($only_ids && ($key == 'cpq.id' || $key == 'id')) {
-                    $this->db->order_by('id', $dir, FALSE);
-                } else {
-                    $this->db->order_by($key, $dir);
-                }
-            }
-        }
-    }
-
-    public function get_datatables($search_name = null, $date_from = null, $date_to = null, $search_settlement = null, $search_rrn = null, $search_invoice = null, $search_transid = null)
-    {
-        $start = (int) $_POST['start'];
-        $length = (int) $_POST['length'];
-        
-        // 1. Get filtered count to see if we are in the "deep half"
-        $total = $this->count_filtered($search_name, $date_from, $date_to, $search_settlement, $search_rrn, $search_invoice, $search_transid);
-        
-        $force_reverse = false;
-        $fetch_start = $start;
-        $fetch_length = $length;
-
-        // Optimization: If we are deep into the table (>50%), scan from the other end.
-        // This makes "Last Page" as fast as "First Page".
-        if ($total > 5000 && $start > ($total / 2)) {
-            $force_reverse = true;
-            $fetch_start = $total - $start - $length;
-            if ($fetch_start < 0) {
-                $fetch_length = $length + $fetch_start;
-                $fetch_start = 0;
-            }
-        }
-
-        // STEP 1: Get only IDs matching filters/pagination (Fast)
-        $this->_get_datatables_query($search_name, $date_from, $date_to, $search_settlement, $search_rrn, $search_invoice, $search_transid, true, false, $force_reverse);
-        if ($length != -1)
-            $this->db->limit($fetch_length, $fetch_start);
-            
-        $query = $this->db->get();
-        if (!is_object($query)) return array();
-        $id_results = $query->result();
-        
-        if (empty($id_results)) return array();
-        
-        $ids = array_column($id_results, 'id');
-        
-        // STEP 2: Fetch full records for only these specific IDs
-        $this->db->select("cpq.*, m.c_name as name_merchant, s.c_name as name_submerchant, c.c_invoiceNo, 
-                           IF(cpq.c_type='Dynamic', cdq.c_merchantTransactionId, crq.c_merchantTransactionId) AS Merchant_Transaction_Id,
-                           IF(cpq.c_type='Dynamic', cdq.ref_cashinExternalId, crq.ref_cashinExternalId) AS ref_cashinExternalId");
-        $this->db->from($this->table);
-        $this->db->join('cashin c', 'c.id = cpq.ref_cashinId', 'left');
-        $this->db->join('submerchant s', 'cpq.ref_subMerchantId = s.id', 'left');
-        $this->db->join('merchant m', 'cpq.ref_merchantId = m.id', 'left');
-        $this->db->join('cashin_dynamic_qris_mpm cdq', 'cdq.id = cpq.ref_cashinDynamicQrisMpmId', 'left');
-        $this->db->join('cashin_recurring_qris_mpm crq', 'crq.id = cpq.ref_cashinRecurringQrisMpmId', 'left');
-        
-        $this->db->where_in('cpq.id', $ids);
-        
-        // Re-apply sorting to maintain order during fetch
-        if (isset($_POST['order'])) {
-            $sort_idx = $_POST['order']['0']['column'];
-            $sort_col = $this->column_order[$sort_idx];
-            $dir = $_POST['order']['0']['dir'];
-            if ($force_reverse) $dir = ($dir == 'asc' ? 'desc' : 'asc');
-
-            if ($sort_col == 'Merchant_Transaction_Id') {
-                $this->db->order_by("IF(cpq.c_type='Dynamic', cdq.c_merchantTransactionId, crq.c_merchantTransactionId)", $dir);
-            } else if ($sort_col) {
-                $this->db->order_by($sort_col, $dir);
-            }
-        } else if (isset($this->order)) {
-            $order = $this->order;
-            $key = key($order);
-            $dir = $order[$key];
-            if ($force_reverse) $dir = ($dir == 'asc' ? 'desc' : 'asc');
-            $this->db->order_by($key, $dir);
-        }
-        
-        $query = $this->db->get();
-        $final_results = is_object($query) ? $query->result() : array();
-
-        // If we used a reverse scan, we must flip the results back to the original intended order
-        if ($force_reverse && !empty($final_results)) {
-            $final_results = array_reverse($final_results);
-        }
-
-        if (!empty($final_results)) {
-            $final_results = $this->_enrich_with_rrns($final_results);
-        }
-
-        return $final_results;
-    }
-
-    public function count_filtered($search_name = null, $date_from = null, $date_to = null, $search_settlement = null, $search_rrn = null, $search_invoice = null, $search_transid = null)
-    {
-        $searchValue = $this->input->post('search')['value'];
-        $is_filtered = $search_name || $date_from || $date_to || $search_settlement || $search_rrn || $search_invoice || $search_transid || (!empty($searchValue));
-
-        if (!$is_filtered) {
-            return $this->count_all_dt();
-        }
-
-        $this->_get_datatables_query($search_name, $date_from, $date_to, $search_settlement, $search_rrn, $search_invoice, $search_transid, false, true);
-        $query = $this->db->get();
-        if (!is_object($query) || $query->num_rows() == 0) return 0;
-        return $query->row()->total;
-    }
-
-    /**
-     * Optimized total count for large datasets (23M+ rows).
-     * Uses table metadata instead of real-time count to prevent timeouts.
-     */
-    public function count_all_dt($search_name = null, $date_from = null, $date_to = null)
-    {
-        if (self::$cached_total !== null) return self::$cached_total;
-
-        // If no filters, use the fastest possible estimate from metadata (Instant)
-        if (!$search_name && !$date_from && !$date_to) {
-            $q = $this->db->query("SHOW TABLE STATUS LIKE 'cashin_payment_qris_mpm'");
-            $res = $q->row();
-            if ($res && isset($res->Rows) && $res->Rows > 10000) {
-                self::$cached_total = (int)$res->Rows;
-                return self::$cached_total;
-            }
-        }
-
-        $this->db->select("count(*) as total");
-        $this->db->from($this->table);
-        if ($search_name) $this->db->where('cpq.ref_merchantId', $search_name);
-        if ($date_from && $date_to) {
-            $this->db->where('cpq.c_datetime >=', $date_from);
-            $this->db->where('cpq.c_datetime <=', $date_to);
-        }
-        $query = $this->db->get();
-        self::$cached_total = $query->row() ? (int)$query->row()->total : 0;
-        return self::$cached_total;
-    }
 
 
     public function get_qris($limit, $start, $search_date_qris = null, $search_date_qris_to = null, $search_name_qris = null, $search_date_qris_settlement = null, $search_rrn = null, $search_transactionid_ht = null)
@@ -558,44 +214,40 @@ class Qris extends CI_Model {
         $search_invoice = $filters['invoice'] ?? null;
         $search_transid = $filters['transid'] ?? null;
 
-        // Format dates for query
-        $date_from_query = null;
-        $date_to_query = null;
-        if (!empty($date_from) && !empty($date_to)) {
-            $date_from_query = date('Ymd', strtotime($date_from)) . "000001";
-            $date_to_query = date('Ymd', strtotime($date_to)) . "235959";
+        $dt = $this->datatables->of('cashin_payment_qris_mpm cpq')
+            ->select("cpq.id, cpq.c_datetime, cpq.c_type, cpq.c_amount, cpq.c_mdr, cpq.c_fee, cpq.c_isSettlementRealtime, cpq.c_datetimeSettlement, cpq.ref_merchantId, cpq.ref_subMerchantId, cpq.ref_cashinId, m.c_name as merchant_name, s.c_name as sub_account_name, c.c_invoiceNo, IF(cpq.c_type='Dynamic', cdq.c_merchantTransactionId, crq.c_merchantTransactionId) AS Merchant_Transaction_Id, IF(cpq.c_type='Dynamic', cdq.ref_cashinExternalId, crq.ref_cashinExternalId) AS ref_cashinExternalId, IF(cpq.c_type='Dynamic', cdq.ref_cashinExternalLogQrisMpmIdCreate, crq.ref_cashinExternalLogQrisMpmIdCreate) AS ref_cashinExternalLogQrisMpmIdCreate", false)
+            ->join('merchant m', 'm.id = cpq.ref_merchantId', 'left')
+            ->join('submerchant s', 's.id = cpq.ref_subMerchantId', 'left')
+            ->join('cashin c', 'c.id = cpq.ref_cashinId', 'left')
+            ->join('cashin_dynamic_qris_mpm cdq', 'cdq.id = cpq.ref_cashinDynamicQrisMpmId', 'left')
+            ->join('cashin_recurring_qris_mpm crq', 'crq.id = cpq.ref_cashinRecurringQrisMpmId', 'left')
+            ->set_column_order([null, 'cpq.c_datetime', 's.c_name', 'Merchant_Transaction_Id', 'c.c_invoiceNo', 'cpq.c_type', 'cpq.c_amount', 'cpq.c_fee', 'cpq.c_datetimeSettlement', null])
+            ->set_column_search(['cpq.id', 'c.c_invoiceNo', 's.c_name', 'm.c_name'])
+            ->set_default_order(['cpq.id' => 'desc']);
+
+        if ($search_name) $dt->where('cpq.ref_merchantId', $search_name);
+        if ($date_from && $date_to) {
+            $dt->where('cpq.c_datetime >=', date('Y-m-d', strtotime($date_from)) . ' 00:00:00')
+               ->where('cpq.c_datetime <=', date('Y-m-d', strtotime($date_to)) . ' 23:59:59');
+        }
+        if ($search_settlement) {
+            $dt->where('cpq.c_datetimeSettlement >=', date('Y-m-d', strtotime($search_settlement)) . ' 00:00:00')
+               ->where('cpq.c_datetimeSettlement <=', date('Y-m-d', strtotime($search_settlement)) . ' 23:59:59');
+        }
+        if ($search_invoice) $dt->where('c.c_invoiceNo', $search_invoice);
+        if ($search_transid) {
+            $dt->group_start()
+               ->where('cdq.c_merchantTransactionId', $search_transid)
+               ->or_where('crq.c_merchantTransactionId', $search_transid)
+               ->group_end();
         }
 
-        // Optimized Fetch (Two-Step Lookup)
-        $list = $this->get_datatables($search_name, $date_from_query, $date_to_query, $search_settlement, $search_rrn, $search_invoice, $search_transid);
-
-
-        $is_filtered = $search_name || $date_from || $date_to || $search_settlement || $search_rrn || $search_invoice || $search_transid || $this->input->post('search')['value'];
-        $recordsTotal = $this->count_all_dt($search_name, $date_from_query, $date_to_query);
-        $recordsFiltered = $is_filtered ? $this->count_filtered($search_name, $date_from_query, $date_to_query, $search_settlement, $search_rrn, $search_invoice, $search_transid) : $recordsTotal;
-
-        // Trick the library to NOT re-slice our already-paginated $list
-        $original_start = $_POST['start'];
-        $_POST['start'] = 0; 
-
-        $output = $this->datatables->of($this->table)
-            ->set_recordsTotal($recordsTotal)
-            ->set_recordsFiltered($recordsFiltered)
-            ->set_data($list)
-            ->addColumn('no', function($row) use ($original_start) {
+        return $dt->addColumn('no', function($row) {
                 static $no = null;
-                if ($no === null) $no = intval($original_start);
+                if ($no === null) $no = intval($this->input->post('start'));
                 return ++$no;
             })
-            ->make(false);
-            
-        // Restore original start and output JSON
-        $_POST['start'] = $original_start;
-        $output['draw'] = intval($this->input->post('draw'));
-        
-        $this->output
-            ->set_content_type('application/json')
-            ->set_output(json_encode($output));
+            ->make(true);
     }
 
 

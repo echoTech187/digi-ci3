@@ -17,7 +17,7 @@ class DlqModel extends CI_Model {
 
         // 2. Setup DataTables
         $dt = $this->datatables->of('log_failed_notification_dlq dm')
-            ->select('dm.id, dm.created_at, dm.type, dm.ref_transactionId, m.c_name as merchant_name, dm.ref_merchantId', false)
+            ->select('dm.id, dm.created_at, dm.type, dm.ref_transactionId, m.c_name as merchant_name, "-" as sub_account_name, dm.ref_merchantId', false)
             ->join('merchant m', 'm.id = dm.ref_merchantId', 'left')
             ->set_column_order([null, 'dm.created_at', 'm.c_name', 'dm.type', 'dm.ref_transactionId', null])
             ->set_column_search(['m.c_name', 'dm.type', 'dm.ref_transactionId'])

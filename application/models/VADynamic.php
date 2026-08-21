@@ -11,186 +11,7 @@ class VADynamic extends CI_Model {
     private static $cached_total = null;
     private static $cached_inv_ids = null;
 
-    private function _get_datatables_query($search_name = null, $search_date = null, $search_va = null, $search_trxid = null, $search_date_to = null, $only_ids = false, $count_only = false, $search_status = null, $search_channel = null, $search_external_channel = null)
-    {
-        // Emergency 30-second safeguard
-        $this->db->query("SET SESSION max_execution_time = 30000");
-        
-        if ($count_only) {
-            $this->db->select("count(cdv.id) as total");
-        } else if ($only_ids) {
-            $this->db->select("cdv.id");
-        } else {
-            $this->db->select("cdv.id, cdv.c_datetimeRequest, cdv.c_merchantTransactionId, cdv.c_vaNumber, cdv.ref_cashinChannelId, cdv.ref_cashinExternalId, cdv.c_amount, cdv.c_datetimeExpired, cdv.c_status, cdv.ref_merchantId, cdv.ref_subMerchantId, s.c_name as name_submerchant, m.c_name as name_merchant");
-        }
-        $this->db->from($this->table);
-        
-        $searchValue = isset($_POST['search']['value']) ? trim($_POST['search']['value']) : '';
-        $sort_col = isset($_POST['order']['0']['column']) ? $this->column_order[$_POST['order']['0']['column']] : '';
 
-        // Join only if needed
-        $isTextSearch = $searchValue && !preg_match('/^([0-9]{8,}|(GD|INV|QRIS|VA|EWALLET|BIF)[0-9a-zA-Z_-]+)/i', $searchValue);
-        $joined_merchant_submerchant = false;
-        if (!$only_ids && !$count_only || $search_name || $isTextSearch || strpos($sort_col, 's.') !== false || strpos($sort_col, 'm.') !== false) {
-            $this->db->join('submerchant s', 's.id = cdv.ref_subMerchantId', 'left');
-            $this->db->join('merchant m', 'm.id = cdv.ref_merchantId', 'left');
-            $joined_merchant_submerchant = true;
-        }
-
-        if ($search_name) {
-            $this->db->where('cdv.ref_merchantId', $search_name);
-        }
-        if ($search_channel) {
-            $this->db->where('cdv.ref_cashinChannelId', $search_channel);
-        }
-        if ($search_external_channel) {
-            $this->db->where('cdv.ref_cashinExternalId', $search_external_channel);
-        }
-        if ($search_date) {
-            $formatted_date = date('Y-m-d', strtotime($search_date));
-            if (!empty($search_date_to)) {
-                $formatted_date_to = date('Y-m-d', strtotime($search_date_to));
-                $this->db->where("cdv.c_datetimeRequest >= '$formatted_date 00:00:00' AND cdv.c_datetimeRequest <= '$formatted_date_to 23:59:59'");
-            } else {
-                $this->db->where("cdv.c_datetimeRequest >= '$formatted_date 00:00:00' AND cdv.c_datetimeRequest <= '$formatted_date 23:59:59'");
-            }
-        }
-        if ($search_va) {
-            $this->db->group_start();
-            $this->db->where('cdv.c_vaNumber', $search_va);
-            $this->db->or_where('cdv.c_merchantTransactionId', $search_va);
-            $this->db->group_end();
-        }
-        if ($search_trxid) {
-            $this->db->group_start();
-            $this->db->where('cdv.c_merchantTransactionId', $search_trxid);
-            $this->db->or_where('cdv.c_vaNumber', $search_trxid);
-            $this->db->group_end();
-        }
-        if ($search_status) {
-            $this->db->where('cdv.c_status', $search_status);
-        }
-
-        if ($searchValue) {
-            $safeSearch = $this->db->escape_str($searchValue);
-            
-            if (self::$cached_ids === null) {
-                // 1. Always try finding ID matches first (Fast Indexed Lookup)
-                $matching_ids = [-1];
-                
-                // Check in technical ID columns
-                $res_va = $this->db->query("SELECT id FROM cashin_dynamic_va WHERE c_vaNumber LIKE '$safeSearch%' LIMIT 50")->result();
-                if (!empty($res_va)) $matching_ids = array_merge($matching_ids, array_column($res_va, 'id'));
-                
-                $res_trx = $this->db->query("SELECT id FROM cashin_dynamic_va WHERE c_merchantTransactionId LIKE '$safeSearch%' LIMIT 50")->result();
-                if (!empty($res_trx)) $matching_ids = array_merge($matching_ids, array_column($res_trx, 'id'));
-
-                if (is_numeric($searchValue) && strlen($searchValue) < 15) {
-                    $matching_ids[] = (int)$searchValue;
-                }
-
-                self::$cached_ids = array_unique($matching_ids);
-            }
-            $matching_ids = self::$cached_ids;
-
-            // 2. Decide strategy: If IDs found, use them. If not, search by Name.
-            if (count($matching_ids) > 1) {
-                $this->db->where_in('cdv.id', $matching_ids);
-            } else {
-                // FALLBACK: Name search if no specific ID matched
-                if (strlen($searchValue) >= 3) {
-                    // Ensure joins are present for name search fallback
-                    if (!$joined_merchant_submerchant) {
-                        $this->db->join('submerchant s', 'cdv.ref_subMerchantId = s.id', 'left');
-                        $this->db->join('merchant m', 'cdv.ref_merchantId = m.id', 'left');
-                        $joined_merchant_submerchant = true;
-                    }
-                    
-                    $this->db->group_start();
-                    $this->db->like('s.c_name', $searchValue, 'both');
-                    $this->db->or_like('m.c_name', $searchValue, 'both');
-                    $this->db->group_end();
-                } else {
-                    $this->db->where('1=0', NULL, FALSE);
-                }
-            }
-        }
-
-        if (!$count_only) {
-            if (isset($_POST['order'])) {
-                $this->db->order_by($this->column_order[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);
-            } else if (isset($this->order)) {
-                $order = $this->order;
-                $this->db->order_by(key($order), $order[key($order)]);
-            }
-        }
-    }
-
-    public function get_datatables($search_name = null, $search_date = null, $search_va = null, $search_trxid = null, $search_date_to = null, $search_status = null, $search_channel = null, $search_external_channel = null)
-    {
-        // STEP 1: Get matching IDs only
-        $this->_get_datatables_query($search_name, $search_date, $search_va, $search_trxid, $search_date_to, true, false, $search_status, $search_channel, $search_external_channel);
-        if (isset($_POST['length']) && $_POST['length'] != -1)
-            $this->db->limit($_POST['length'], $_POST['start']);
-        $query = $this->db->get();
-        $id_results = $query->result();
-        
-        if (empty($id_results)) return array();
-        
-        $ids = array_column($id_results, 'id');
-        
-        // STEP 2: Fetch full records for only these specific IDs
-        $this->db->select("cdv.*, s.c_name as name_submerchant, m.c_name as name_merchant, m.c_merchantLevel, cc.id AS channel_description", FALSE);
-        $this->db->from($this->table);
-        $this->db->join('submerchant s', 's.id = cdv.ref_subMerchantId', 'left');
-        $this->db->join('merchant m', 'm.id = cdv.ref_merchantId', 'left');
-        $this->db->join('cashin_external_x_channel cc', 'cc.id = cdv.ref_cashinChannelId', 'left');
-        
-        $this->db->where_in('cdv.id', $ids);
-        
-        // Order must be re-applied
-        if (isset($_POST['order'])) {
-            $this->db->order_by($this->column_order[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);
-        } else if (isset($this->order)) {
-            $order = $this->order;
-            $this->db->order_by(key($order), $order[key($order)]);
-        }
-        
-        $query = $this->db->get();
-        return $query->result();
-    }
-
-    public function count_filtered($search_name = null, $search_date = null, $search_va = null, $search_trxid = null, $search_date_to = null, $search_status = null, $search_channel = null, $search_external_channel = null)
-    {
-        $searchValue = isset($_POST['search']['value']) ? $_POST['search']['value'] : null;
-        $is_filtered = ($search_name || $search_date || $search_date_to || $search_va || $search_trxid || $search_status || $search_channel || $search_external_channel || (isset($searchValue) && !empty($searchValue)));
-        if (!$is_filtered) {
-            return $this->count_all_dt();
-        }
-
-        $this->_get_datatables_query($search_name, $search_date, $search_va, $search_trxid, $search_date_to, false, true, $search_status, $search_channel, $search_external_channel);
-        $query = $this->db->get();
-        return $query->row()->total;
-    }
-
-    public function count_all_dt($search_name = null, $search_date = null, $search_date_to = null)
-    {
-        if (self::$cached_total !== null) return self::$cached_total;
-
-        // ULTRA-FAST: Use table status estimates for recordsTotal
-        $q = $this->db->query("SHOW TABLE STATUS LIKE 'cashin_dynamic_va'");
-        $res = $q->row();
-        if ($res && isset($res->Rows) && $res->Rows > 10000) {
-            self::$cached_total = (int)$res->Rows;
-            return self::$cached_total;
-        }
-
-        $this->db->select("count(id) as total");
-        $this->db->from($this->table);
-        $query = $this->db->get();
-        self::$cached_total = $query->row() ? (int)$query->row()->total : 0;
-        return self::$cached_total;
-    }
 
     public function get_summary($search_name = null, $search_date = null, $search_date_to = null, $search_va = null, $search_trxid = null)
     {
@@ -386,21 +207,29 @@ class VADynamic extends CI_Model {
         $search_channel = $filters['channel'] ?? null;
         $search_external_channel = $filters['external_channel'] ?? null;
 
-        // Optimized Fetch (Two-Step Lookup)
-        $list = $this->get_datatables($search_name, $search_date, $search_va, $search_trxid, $search_date_to, $search_status, $search_channel, $search_external_channel);
-        
-        $searchValue = $this->input->post('search')['value'];
-        $is_filtered = $search_name || $search_date || $search_va || $search_trxid || $search_status || $search_channel || $search_external_channel || (!empty($searchValue));
-        
-        $recordsTotal = $this->count_all_dt($search_name, $search_date);
-        $recordsFiltered = $is_filtered ? $this->count_filtered($search_name, $search_date, $search_va, $search_trxid, $search_date_to, $search_status, $search_channel, $search_external_channel) : $recordsTotal;
+        $dt = $this->datatables->of('cashin_dynamic_va cdv')
+            ->select('cdv.id, cdv.c_datetimeRequest, cdv.c_merchantTransactionId, cdv.c_vaNumber, cdv.ref_cashinChannelId, cdv.ref_cashinExternalId, cdv.ref_cashinExternalLogVaIdCreate, cdv.c_amount, cdv.c_datetimeExpired, cdv.c_status, cdv.ref_merchantId, cdv.ref_subMerchantId, m.c_name as merchant_name, s.c_name as sub_account_name', FALSE)
+            ->join('merchant m', 'm.id = cdv.ref_merchantId', 'left')
+            ->join('submerchant s', 's.id = cdv.ref_subMerchantId', 'left')
+            ->set_column_order([null, 'cdv.c_datetimeRequest', 'm.c_name', 's.c_name', 'cdv.c_merchantTransactionId', 'cdv.c_vaNumber', 'cdv.ref_cashinChannelId', 'cdv.ref_cashinExternalId', 'cdv.c_amount', 'cdv.c_datetimeExpired', 'cdv.c_status'])
+            ->set_column_search(['cdv.c_vaNumber', 'cdv.c_merchantTransactionId', 's.c_name', 'm.c_name'])
+            ->set_default_order(['cdv.id' => 'desc']);
 
-        // Use Datatables Library for final processing and JSON output
-        return $this->datatables->of($this->table)
-            ->set_recordsTotal($recordsTotal)
-            ->set_recordsFiltered($recordsFiltered)
-            ->set_data($list)
-            ->addColumn('no', function($row) {
+        if ($search_name) $dt->where('cdv.ref_merchantId', $search_name);
+        if ($search_channel) $dt->where('cdv.ref_cashinChannelId', $search_channel);
+        if ($search_external_channel) $dt->where('cdv.ref_cashinExternalId', $search_external_channel);
+        if ($search_status) $dt->where('cdv.c_status', $search_status);
+        if ($search_va) $dt->where('cdv.c_vaNumber', $search_va);
+        if ($search_trxid) $dt->where('cdv.c_merchantTransactionId', $search_trxid);
+        if ($search_date && $search_date_to) {
+            $dt->where('cdv.c_datetimeRequest >=', date('Y-m-d', strtotime($search_date)) . ' 00:00:00')
+               ->where('cdv.c_datetimeRequest <=', date('Y-m-d', strtotime($search_date_to)) . ' 23:59:59');
+        } elseif ($search_date) {
+            $dt->where('cdv.c_datetimeRequest >=', date('Y-m-d', strtotime($search_date)) . ' 00:00:00')
+               ->where('cdv.c_datetimeRequest <=', date('Y-m-d', strtotime($search_date)) . ' 23:59:59');
+        }
+
+        return $dt->addColumn('no', function($row) {
                 static $no = null;
                 if ($no === null) $no = intval($this->input->post('start'));
                 return ++$no;
