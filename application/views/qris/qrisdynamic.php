@@ -301,14 +301,14 @@
                 return moment(data).format('DD-MM-YYYY HH:mm:ss');
             }},
            {
-                data: 'name_merchant',
+                data: 'merchant_name',
                 className: 'text-nowrap',
                 render: function(data, type, row) {
-                    return ' [' + row.ref_merchantId + '] - ' + data;
+                    return '[' + row.ref_merchantId + '] - ' + data;
                 }
             },
             {
-                data: 'name_submerchant',
+                data: 'sub_account_name',
                 className: 'text-nowrap',
                 render: function(data, type, row) {
                     return ' [' + row.ref_subMerchantId + '] - ' + data;

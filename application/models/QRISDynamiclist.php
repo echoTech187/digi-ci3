@@ -2,72 +2,50 @@
 
 class QRISDynamiclist extends CI_Model
 {
-    public function get_qris_dynamic_data($start, $length, $search = null, $orderColumn = null, $orderDir = 'DESC')
+    var $table = 'cashin_dynamic_qris_mpm cdq';
+    var $column_order = array(null, 'cdq.c_datetimeRequest', 'm.c_name', 's.c_name', 'cdq.c_merchantTransactionId', 'cdq.c_referenceNo', 'cdq.ref_cashinExternalId', 'cdq.c_amount', 'cdq.c_datetimeExpired', 'cdq.c_status');
+    var $column_search = array('cdq.c_datetimeRequest', 'cdq.c_merchantTransactionId', 's.c_name', 'm.c_name', 'cdq.c_referenceNo', 'cdq.c_status', 'cdq.c_amount');
+    var $order = array('cdq.id' => 'desc');
+
+    /**
+     * DataTables v2 Handler utilizing $this->datatables->of(...)
+     */
+    public function get_datatables_handler($filters = [])
     {
-        // Emergency 3-second safeguard
-        $this->db->query("SET SESSION max_execution_time = 10000");
-        
-        $this->db->select('cashin_dynamic_qris_mpm.*, submerchant.c_name as name_submerchant, merchant.c_name as name_merchant');
-        $this->db->from('cashin_dynamic_qris_mpm');
-        $this->db->join('submerchant', 'cashin_dynamic_qris_mpm.ref_subMerchantId = submerchant.id', 'left');
-        $this->db->join('merchant', 'cashin_dynamic_qris_mpm.ref_merchantId = merchant.id', 'left');
+        $this->load->library('datatables');
 
-        if (!empty($search)) {
-            $this->db->group_start();
-            $this->db->like('cashin_dynamic_qris_mpm.c_datetimeRequest', $search);
-            $this->db->or_like('cashin_dynamic_qris_mpm.c_merchantTransactionId', $search);
-            $this->db->or_like('submerchant.c_name', $search);
-            $this->db->or_like('merchant.c_name', $search);
-            $this->db->or_like('cashin_dynamic_qris_mpm.c_referenceNo', $search);
-            $this->db->or_like('cashin_dynamic_qris_mpm.c_status', $search);
-            $this->db->or_like('cashin_dynamic_qris_mpm.c_amount', $search);
-            $this->db->group_end();
+        $search_name = $filters['merchant'] ?? null;
+        $search_date = $filters['date'] ?? null;
+        $search_date_to = $filters['date_to'] ?? null;
+        $search_transid = $filters['transid'] ?? null;
+        $search_status = $filters['status'] ?? null;
+        $search_external_channel = $filters['external_channel'] ?? null;
+
+        $dt = $this->datatables->of('cashin_dynamic_qris_mpm cdq')
+            ->select("cdq.id, cdq.c_datetimeRequest, cdq.c_merchantTransactionId, cdq.c_referenceNo, 'qris_mpm' AS ref_cashinChannelId, cdq.ref_cashinExternalId, cdq.ref_cashinExternalLogQrisMpmIdCreate, cdq.c_amount, cdq.c_datetimeExpired, cdq.c_status, cdq.ref_merchantId, cdq.ref_subMerchantId, m.c_name as merchant_name, s.c_name as sub_account_name, m.c_name as name_merchant, s.c_name as name_submerchant", false)
+            ->join('merchant m', 'm.id = cdq.ref_merchantId', 'left')
+            ->join('submerchant s', 's.id = cdq.ref_subMerchantId', 'left')
+            ->set_column_order([null, 'cdq.c_datetimeRequest', 'm.c_name', 's.c_name', 'cdq.c_merchantTransactionId', 'cdq.c_referenceNo', 'cdq.ref_cashinExternalId', 'cdq.c_amount', 'cdq.c_datetimeExpired', 'cdq.c_status'])
+            ->set_column_search(['cdq.c_datetimeRequest', 'cdq.c_merchantTransactionId', 's.c_name', 'm.c_name', 'cdq.c_referenceNo', 'cdq.c_status', 'cdq.c_amount'])
+            ->set_default_order(['cdq.id' => 'desc']);
+
+        if ($search_name) $dt->where('cdq.ref_merchantId', $search_name);
+        if ($search_external_channel) $dt->where('cdq.ref_cashinExternalId', $search_external_channel);
+        if ($search_status) $dt->where('cdq.c_status', $search_status);
+        if ($search_transid) $dt->where('cdq.c_merchantTransactionId', $search_transid);
+        if ($search_date && $search_date_to) {
+            $dt->where('cdq.c_datetimeRequest >=', date('Y-m-d', strtotime($search_date)) . ' 00:00:00')
+               ->where('cdq.c_datetimeRequest <=', date('Y-m-d', strtotime($search_date_to)) . ' 23:59:59');
+        } elseif ($search_date) {
+            $dt->where('cdq.c_datetimeRequest >=', date('Y-m-d', strtotime($search_date)) . ' 00:00:00')
+               ->where('cdq.c_datetimeRequest <=', date('Y-m-d', strtotime($search_date)) . ' 23:59:59');
         }
 
-        if (!empty($orderColumn)) {
-            $columns = ['cashin_dynamic_qris_mpm.id', 'cashin_dynamic_qris_mpm.c_datetimeRequest', 'merchant.c_name', 'submerchant.c_name', 'cashin_dynamic_qris_mpm.c_merchantTransactionId','cashin_dynamic_qris_mpm.c_referenceNo', 'cashin_dynamic_qris_mpm.ref_cashinExternalId', 'cashin_dynamic_qris_mpm.c_amount', 'cashin_dynamic_qris_mpm.c_datetimeExpired', 'cashin_dynamic_qris_mpm.c_status'];
-            $this->db->order_by($columns[$orderColumn], $orderDir);
-        } else {
-            $this->db->order_by('cashin_dynamic_qris_mpm.id', 'DESC');
-        }
-
-        $this->db->limit($length, $start);
-        return $this->db->get()->result();
-    }
-
-    public function count_all_qris_dynamic()
-    {
-        $query = $this->db->query("SELECT TABLE_ROWS FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'cashin_dynamic_qris_mpm'");
-        $result = $query->row();
-        return $result ? (int)$result->TABLE_ROWS : 0;
-    }
-
-    public function count_filtered_qris_dynamic($search = null)
-    {
-        $is_filtered = !empty($search);
-        if (!$is_filtered) {
-            return $this->count_all_qris_dynamic();
-        }
-
-        $this->db->select('count(cashin_dynamic_qris_mpm.id) as total');
-        $this->db->from('cashin_dynamic_qris_mpm');
-        
-        if (!empty($search)) {
-            $this->db->join('submerchant', 'cashin_dynamic_qris_mpm.ref_subMerchantId = submerchant.id', 'left');
-            $this->db->join('merchant', 'cashin_dynamic_qris_mpm.ref_merchantId = merchant.id', 'left');
-
-            $this->db->group_start();
-            $this->db->like('cashin_dynamic_qris_mpm.c_datetimeRequest', $search);
-            $this->db->or_like('cashin_dynamic_qris_mpm.c_merchantTransactionId', $search);
-            $this->db->or_like('submerchant.c_name', $search);
-            $this->db->or_like('merchant.c_name', $search);
-            $this->db->or_like('cashin_dynamic_qris_mpm.c_referenceNo', $search);
-            $this->db->or_like('cashin_dynamic_qris_mpm.c_status', $search);
-            $this->db->or_like('cashin_dynamic_qris_mpm.c_amount', $search);
-            $this->db->group_end();
-        }
-        
-        $query = $this->db->get();
-        return $query->row()->total;
+        return $dt->addColumn('no', function($row) {
+                static $no = null;
+                if ($no === null) $no = intval($this->input->post('start'));
+                return ++$no;
+            })
+            ->make(true);
     }
 }

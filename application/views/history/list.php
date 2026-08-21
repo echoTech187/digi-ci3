@@ -138,7 +138,7 @@ $download_url = base_url('finance/history/download')
         // Init Server-Side DataTable
         var table = initServerDataTable("#historyTable", "<?= base_url('finance/history') ?>", [
             {data: 'no'},
-            {data: 'name_merchant'},
+            {data: 'merchant_name'},
             {data: 'c_datetime', render: function(data){
                 return moment(data).format('DD-MM-YYYY HH:mm:ss');
             }},

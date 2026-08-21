@@ -391,7 +391,7 @@
                 return moment(data).format('DD-MM-YYYY HH:mm:ss');
             }},
             {
-                data: 'name_merchant',
+                data: 'merchant_name',
                 className: 'text-nowrap',
                 render: function(data, type, row) {
                     return ' [' + row.ref_merchantId + '] - ' + data;
