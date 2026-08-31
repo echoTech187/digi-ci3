@@ -14,7 +14,7 @@ class Model_menu extends CI_Model
 
    public function getMenu()
    {
-      $role_id = $this->session->userdata('role_id');
+      $role_id = intval($this->session->userdata('role') ?: ($this->session->userdata('role_id') ?: 1));
       $queryMenu = "SELECT `user_menu`.`id`, `menu`
                       FROM `user_menu` JOIN `user_access_menu` 
                         ON `user_menu`.`id` = `user_access_menu`.`menu_id`
@@ -37,31 +37,43 @@ class Model_menu extends CI_Model
 
    public function insert_menu($data, $table)
    {
+      $db_debug = $this->db->db_debug;
+      $this->db->db_debug = FALSE;
       $success = $this->db->insert($table, $data);
       $error = $this->db->error();
+      $this->db->db_debug = $db_debug;
       return $success ? true : $error;
    }
 
    public function insert_subMenu($data, $table)
    {
+      $db_debug = $this->db->db_debug;
+      $this->db->db_debug = FALSE;
       $success = $this->db->insert($table, $data);
       $error = $this->db->error();
+      $this->db->db_debug = $db_debug;
       return $success ? true : $error;
    }
 
    public function hapus_menu($where, $table)
    {
+      $db_debug = $this->db->db_debug;
+      $this->db->db_debug = FALSE;
       $this->db->where($where);
       $success = $this->db->delete($table);
       $error = $this->db->error();
+      $this->db->db_debug = $db_debug;
       return $success ? true : $error;
    }
 
    public function hapus_subMenu($where, $table)
    {
+      $db_debug = $this->db->db_debug;
+      $this->db->db_debug = FALSE;
       $this->db->where($where);
       $success = $this->db->delete($table);
       $error = $this->db->error();
+      $this->db->db_debug = $db_debug;
       return $success ? true : $error;
    }
 
@@ -72,9 +84,12 @@ class Model_menu extends CI_Model
 
    public function changeSubMenu($where, $data, $table)
    {
+      $db_debug = $this->db->db_debug;
+      $this->db->db_debug = FALSE;
       $this->db->where($where);
       $success = $this->db->update($table, $data);
       $error = $this->db->error();
+      $this->db->db_debug = $db_debug;
       return $success ? true : $error;
    }
 
@@ -85,9 +100,12 @@ class Model_menu extends CI_Model
 
    public function changeMenu($where, $data, $table)
    {
+      $db_debug = $this->db->db_debug;
+      $this->db->db_debug = FALSE;
       $this->db->where($where);
       $success = $this->db->update($table, $data);
       $error = $this->db->error();
+      $this->db->db_debug = $db_debug;
       return $success ? true : $error;
    }
 

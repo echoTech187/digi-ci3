@@ -35,6 +35,15 @@ class VirtualAccountTransactionController extends CI_Controller
 
    public function virtual_account()
    {
+      $raw_json = json_decode($this->input->raw_input_stream, true);
+      if (!empty($raw_json) && is_array($raw_json)) {
+         foreach ($raw_json as $k => $v) {
+            if ($this->input->get($k) === NULL && $this->input->post($k) === NULL) {
+               $_POST[$k] = $v;
+            }
+         }
+      }
+
       // Auto-reset if accessed directly without any parameters (GET or POST)
       if (!$this->input->is_ajax_request() && empty($this->input->get()) && !$this->input->post()) {
          $this->resetVA(false);
@@ -66,6 +75,16 @@ class VirtualAccountTransactionController extends CI_Controller
          'search_va_invoice_no'      => 'invoice',
       ];
 
+      // Alias parameters support for API / Swagger
+      $merchant_post = $this->input->post('merchant_id') ?: ($this->input->post('merchant') ?: ($this->input->get('merchant_id') ?: $this->input->get('merchant')));
+      if ($merchant_post !== NULL) $_POST['search_name_va'] = $merchant_post;
+
+      $date_from_post = $this->input->post('date_from') ?: ($this->input->post('date1') ?: ($this->input->post('date') ?: $this->input->get('date_from')));
+      if ($date_from_post !== NULL) $_POST['search_date_va'] = $date_from_post;
+
+      $date_to_post = $this->input->post('date_to') ?: ($this->input->post('date2') ?: $this->input->get('date_to'));
+      if ($date_to_post !== NULL) $_POST['search_date_va_to'] = $date_to_post;
+
       foreach ($field_map as $session_key => $post_key) {
          $val = $this->input->post($post_key);
          if ($val === NULL && isset($get_fallback[$session_key])) {
@@ -78,7 +97,17 @@ class VirtualAccountTransactionController extends CI_Controller
       $active_search = $this->input->get('q') ?: $this->input->get('invoice') ?: $this->input->get('transid') ?: $this->input->get('va_number');
       if ($active_search) $this->session->set_userdata('last_dt_search_va', $active_search);
 
-      if ($this->input->is_ajax_request()) {
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      $referer = strtolower($this->input->get_request_header('Referer') ?: '');
+      $is_swagger = (strpos($referer, 'swagger') !== false) || (strpos($this->uri->uri_string(), 'swagger') !== false);
+      $is_api = $this->input->is_ajax_request()
+         || strtolower((string)$this->input->get_request_header('X-Requested-With')) === 'xmlhttprequest'
+         || strpos((string)$this->input->get_request_header('Content-Type'), 'json') !== false
+         || strpos($accept, 'json') !== false
+         || strtolower($this->input->method()) === 'post'
+         || $is_swagger;
+
+      if ($is_api) {
          try {
             $dtSearch = $this->input->post('search')['value'] ?? '';
             $oldSearch = $this->session->userdata('last_dt_search_va');
@@ -96,26 +125,41 @@ class VirtualAccountTransactionController extends CI_Controller
                $this->session->set_userdata('last_dt_search_va', $dtSearch);
             }
 
+            $merchant_val = $this->input->post('merchant_id') ?: ($this->input->post('merchant') ?: $this->input->post('search_name_va'));
+            $date_from_val = $this->input->post('date_from') ?: ($this->input->post('date1') ?: ($this->input->post('date') ?: $this->input->post('search_date_va')));
+            $date_to_val   = $this->input->post('date_to') ?: ($this->input->post('date2') ?: $this->input->post('search_date_va_to'));
+
+            if ($date_to_val && strlen(trim($date_to_val)) === 10) {
+               $date_to_val = trim($date_to_val) . ' 23:59:59';
+            }
+
             $filters = [
-               'date' => $this->session->userdata('search_va_date1'),
-               'date_to' => $this->session->userdata('search_va_date2'),
-               'merchant' => $this->session->userdata('search_va_name'),
-               'settlement' => $this->session->userdata('search_va_date_settlement'),
-               'channel' => $this->session->userdata('search_va_channel'),
-               'va_number' => $this->session->userdata('search_va_number'),
-               'transid' => $this->session->userdata('search_va_transid'),
-               'invoice_no' => $this->session->userdata('search_va_invoice_no')
+               'date' => $date_from_val ?: null,
+               'date_to' => $date_to_val ?: null,
+               'merchant' => $merchant_val ?: null,
+               'settlement' => $this->input->post('settlement') ?: ($this->input->post('search_date_va_settlement') ?: null),
+               'channel' => $this->input->post('channel') ?: ($this->input->post('search_channel_va') ?: null),
+               'va_number' => $this->input->post('va_number') ?: ($this->input->post('search_va_number') ?: null),
+               'transid' => $this->input->post('transid') ?: ($this->input->post('search_va_transid') ?: null),
+               'invoice_no' => $this->input->post('invoice') ?: ($this->input->post('search_invoice_no') ?: null)
             ];
-            return $this->VirtualAccount->get_datatables_handler($filters);
+            $out = $this->VirtualAccount->get_datatables_handler($filters);
+            $this->output
+               ->set_content_type('application/json')
+               ->set_output(is_string($out) ? $out : json_encode($out));
+            return;
          } catch (Throwable $e) {
             log_message('error', 'VA AJAX error: ' . $e->getMessage());
-            echo json_encode(array(
-               "draw" => intval($this->input->post("draw")),
-               "recordsTotal" => 0,
-               "recordsFiltered" => 0,
-               "data" => array(),
-               "error" => "Error retrieving VA data: " . $e->getMessage()
-            ));
+            $this->output
+               ->set_content_type('application/json')
+               ->set_output(json_encode(array(
+                  "draw" => intval($this->input->post("draw")),
+                  "recordsTotal" => 0,
+                  "recordsFiltered" => 0,
+                  "data" => array(),
+                  "error" => "Error retrieving VA data: " . $e->getMessage()
+               )));
+            return;
          }
       }
 
@@ -137,6 +181,18 @@ class VirtualAccountTransactionController extends CI_Controller
          'search_va_invoice_no',
          'last_dt_search_va'
       ]);
+
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      $is_api_request = strpos($accept, 'json') !== false || $this->input->get('json') == '1';
+
+      if ($is_api_request) {
+         $this->output->set_content_type('application/json')->set_output(json_encode([
+            'status' => true,
+            'message' => 'Virtual Account search filters reset successfully.'
+         ]));
+         return;
+      }
+
       if ($redirect) redirect('finance/virtual-account');
    }
 
@@ -156,15 +212,73 @@ class VirtualAccountTransactionController extends CI_Controller
       }
       $data['breadcrumb_replace'] = [$id => $displayId];
 
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      if ($this->input->is_ajax_request() || strpos($accept, 'json') !== false || $this->input->get('json') == '1') {
+          $this->output
+              ->set_content_type('application/json')
+              ->set_output(json_encode([
+                  'status' => true,
+                  'message' => 'Virtual Account detail data retrieved successfully',
+                  'data' => [
+                      'va_data' => $data['va_data']
+                  ]
+              ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+          return;
+      }
+
       $this->load->view('virtualaccount/detail_va', $data);
    }
 
    public function download_VA()
    {
-      $search_date_va = isset($_GET['search_va_date1']) ? $_GET['search_va_date1'] : '';
-      $search_date_va_to = isset($_GET['search_va_date2']) ? $_GET['search_va_date2'] : '';
-      $search_name_va = isset($_GET['search_va_name']) ? $_GET['search_va_name'] : '';
-      $search_date_va_settlement = isset($_GET['search_va_date_settlement']) ? $_GET['search_va_date_settlement'] : '';
+      $raw_json = json_decode($this->input->raw_input_stream, true);
+      if (!empty($raw_json) && is_array($raw_json)) {
+         foreach ($raw_json as $k => $v) {
+            if ($this->input->get($k) === NULL && $this->input->post($k) === NULL) {
+               $_POST[$k] = $v;
+            }
+         }
+      }
+
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      $referer = strtolower($this->input->get_request_header('Referer') ?: '');
+      $is_swagger = (strpos($referer, 'swagger') !== false) || (strpos($this->uri->uri_string(), 'swagger') !== false);
+      $is_api_request = $this->input->is_ajax_request() || strpos($accept, 'json') !== false || $this->input->get('json') == '1' || strtolower($this->input->method()) === 'post' || $is_swagger;
+
+      $search_date_va = $this->input->post('date_from') ?: ($this->input->post('date1') ?: ($this->input->get('search_va_date1') ?: $this->session->userdata('search_va_date1')));
+      $search_date_va_to = $this->input->post('date_to') ?: ($this->input->post('date2') ?: ($this->input->get('search_va_date2') ?: $this->session->userdata('search_va_date2')));
+      $search_name_va = $this->input->post('merchant_id') ?: ($this->input->post('merchant') ?: ($this->input->get('search_va_name') ?: $this->session->userdata('search_va_name')));
+      $search_date_va_settlement = $this->input->post('settlement') ?: ($this->input->get('search_va_date_settlement') ?: $this->session->userdata('search_va_date_settlement'));
+
+      if ($is_api_request) {
+         $user = $this->Model_user->view_user()->row_array();
+         $adminID = $user['id'] ?? 1;
+
+         $additionalFilter = $search_name_va . '|' . $search_date_va . '|' . $search_date_va_to . '|' . $search_date_va_settlement;
+         $data = array(
+            'ref_adminId' => $adminID,
+            'c_datetime' => date('Y-m-d H:i:s'),
+            'c_additionalFilter' => $additionalFilter,
+            'c_type' => 'Va',
+         );
+
+         if ($this->db->insert('admin_download', $data)) {
+            return $this->output->set_content_type('application/json')->set_output(json_encode([
+               'status' => true,
+               'message' => 'Your Virtual Account download request has been submitted successfully. Please check the Download Report menu to download the generated file.',
+               'data' => [
+                  'download_id' => $this->db->insert_id(),
+                  'type' => 'Va',
+                  'filter' => $additionalFilter
+               ]
+            ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+         } else {
+            return $this->output->set_content_type('application/json')->set_output(json_encode([
+               'status' => false,
+               'message' => 'Failed to submit Virtual Account download request.'
+            ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+         }
+      }
 
       if (empty($search_name_va) && (empty($search_date_va) || empty($search_date_va_settlement))) {
          $this->session->set_flashdata('error_message', 'Please fill all fields and search before continuing with download.');
@@ -193,6 +307,15 @@ class VirtualAccountTransactionController extends CI_Controller
 
    public function Va_dynamic()
    {
+      $raw_json = json_decode($this->input->raw_input_stream, true);
+      if (!empty($raw_json) && is_array($raw_json)) {
+         foreach ($raw_json as $k => $v) {
+            if ($this->input->get($k) === NULL && $this->input->post($k) === NULL) {
+               $_POST[$k] = $v;
+            }
+         }
+      }
+
       // Auto-reset if accessed directly without any parameters (GET or POST)
       if (!$this->input->is_ajax_request() && empty($this->input->get()) && !$this->input->post()) {
          $this->resetVa_dynamic(false);
@@ -230,7 +353,17 @@ class VirtualAccountTransactionController extends CI_Controller
       $active_search = $this->input->get('q') ?: $this->input->get('transid') ?: $this->input->get('va_number');
       if ($active_search) $this->session->set_userdata('last_dt_search_vadynamic', $active_search);
 
-      if ($this->input->is_ajax_request()) {
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      $referer = strtolower($this->input->get_request_header('Referer') ?: '');
+      $is_swagger = (strpos($referer, 'swagger') !== false) || (strpos($this->uri->uri_string(), 'swagger') !== false);
+      $is_api = $this->input->is_ajax_request()
+         || strtolower((string)$this->input->get_request_header('X-Requested-With')) === 'xmlhttprequest'
+         || strpos((string)$this->input->get_request_header('Content-Type'), 'json') !== false
+         || strpos($accept, 'json') !== false
+         || strtolower($this->input->method()) === 'post'
+         || $is_swagger;
+
+      if ($is_api) {
          try {
             $dtSearch = $this->input->post('search')['value'] ?? '';
             $oldSearch = $this->session->userdata('last_dt_search_vadynamic');
@@ -248,26 +381,41 @@ class VirtualAccountTransactionController extends CI_Controller
                $this->session->set_userdata('last_dt_search_vadynamic', $dtSearch);
             }
 
+            $merchant_val = $this->input->post('merchant_id') ?: ($this->input->post('merchant') ?: $this->input->post('search_name_vad'));
+            $date_from_val = $this->input->post('date_from') ?: ($this->input->post('date1') ?: ($this->input->post('date') ?: $this->input->post('search_date_vad')));
+            $date_to_val   = $this->input->post('date_to') ?: ($this->input->post('date2') ?: $this->input->post('search_date_vad_to'));
+
+            if ($date_to_val && strlen(trim($date_to_val)) === 10) {
+               $date_to_val = trim($date_to_val) . ' 23:59:59';
+            }
+
             $filters = [
-               'merchant' => $this->session->userdata('search_vadynamic_name'),
-               'date' => $this->session->userdata('search_vadynamic_date1'),
-               'date_to' => $this->session->userdata('search_vadynamic_date2'),
-               'va_number' => $this->session->userdata('search_vadynamic_va_number'),
-               'merchant_trxid' => $this->session->userdata('search_vadynamic_transid'),
-               'status' => $this->session->userdata('search_vadynamic_status'),
-               'channel' => $this->session->userdata('search_vadynamic_channel'),
-               'external_channel' => $this->session->userdata('search_vadynamic_external')
+               'merchant' => $merchant_val ?: null,
+               'date' => $date_from_val ?: null,
+               'date_to' => $date_to_val ?: null,
+               'va_number' => $this->input->post('va_number') ?: ($this->input->post('search_va_number') ?: null),
+               'merchant_trxid' => $this->input->post('transid') ?: ($this->input->post('search_transid_vad') ?: null),
+               'status' => $this->input->post('status') ?: ($this->input->post('search_status_transaction_vad') ?: null),
+               'channel' => $this->input->post('channel') ?: ($this->input->post('search_channel_vadynamic') ?: null),
+               'external_channel' => $this->input->post('external') ?: ($this->input->post('search_external_vadynamic') ?: null)
             ];
-            return $this->VADynamic->get_datatables_handler($filters);
+            $out = $this->VADynamic->get_datatables_handler($filters);
+            $this->output
+               ->set_content_type('application/json')
+               ->set_output(is_string($out) ? $out : json_encode($out));
+            return;
          } catch (Throwable $e) {
             log_message('error', 'VA Dynamic AJAX error: ' . $e->getMessage());
-            echo json_encode(array(
-               "draw" => intval($this->input->post("draw")),
-               "recordsTotal" => 0,
-               "recordsFiltered" => 0,
-               "data" => array(),
-               "error" => "Error retrieving VA Dynamic data: " . $e->getMessage()
-            ));
+            $this->output
+               ->set_content_type('application/json')
+               ->set_output(json_encode(array(
+                  "draw" => intval($this->input->post("draw")),
+                  "recordsTotal" => 0,
+                  "recordsFiltered" => 0,
+                  "data" => array(),
+                  "error" => "Error retrieving VA Dynamic data: " . $e->getMessage()
+               )));
+            return;
          }
       }
 
@@ -290,11 +438,32 @@ class VirtualAccountTransactionController extends CI_Controller
          'search_vadynamic_external',
          'last_dt_search_vadynamic'
       ]);
+
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      $is_api_request = strpos($accept, 'json') !== false || $this->input->get('json') == '1';
+
+      if ($is_api_request) {
+         $this->output->set_content_type('application/json')->set_output(json_encode([
+            'status' => true,
+            'message' => 'Dynamic Virtual Account search filters reset successfully.'
+         ]));
+         return;
+      }
+
       if ($redirect) redirect('virtual-account/dynamic');
    }
 
    public function VA_recurring()
    {
+      $raw_json = json_decode($this->input->raw_input_stream, true);
+      if (!empty($raw_json) && is_array($raw_json)) {
+         foreach ($raw_json as $k => $v) {
+            if ($this->input->get($k) === NULL && $this->input->post($k) === NULL) {
+               $_POST[$k] = $v;
+            }
+         }
+      }
+
       // Auto-reset if accessed directly without any parameters (GET or POST)
       if (!$this->input->is_ajax_request() && empty($this->input->get()) && !$this->input->post()) {
          $this->resetVa_recurring(false);
@@ -333,7 +502,17 @@ class VirtualAccountTransactionController extends CI_Controller
       $active_search = $this->input->get('q') ?: $this->input->get('transid') ?: $this->input->get('va_number');
       if ($active_search) $this->session->set_userdata('last_dt_search_varecurring', $active_search);
 
-      if ($this->input->is_ajax_request()) {
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      $referer = strtolower($this->input->get_request_header('Referer') ?: '');
+      $is_swagger = (strpos($referer, 'swagger') !== false) || (strpos($this->uri->uri_string(), 'swagger') !== false);
+      $is_api = $this->input->is_ajax_request()
+         || strtolower((string)$this->input->get_request_header('X-Requested-With')) === 'xmlhttprequest'
+         || strpos((string)$this->input->get_request_header('Content-Type'), 'json') !== false
+         || strpos($accept, 'json') !== false
+         || strtolower($this->input->method()) === 'post'
+         || $is_swagger;
+
+      if ($is_api) {
          try {
             $dtSearch = $this->input->post('search')['value'] ?? '';
             $oldSearch = $this->session->userdata('last_dt_search_varecurring');
@@ -351,27 +530,42 @@ class VirtualAccountTransactionController extends CI_Controller
                $this->session->set_userdata('last_dt_search_varecurring', $dtSearch);
             }
 
+            $merchant_val = $this->input->post('merchant_id') ?: ($this->input->post('merchant') ?: $this->input->post('search_name_var'));
+            $date_from_val = $this->input->post('date_from') ?: ($this->input->post('date1') ?: ($this->input->post('date') ?: $this->input->post('search_date_var')));
+            $date_to_val   = $this->input->post('date_to') ?: ($this->input->post('date2') ?: $this->input->post('search_date_var_to'));
+
+            if ($date_to_val && strlen(trim($date_to_val)) === 10) {
+               $date_to_val = trim($date_to_val) . ' 23:59:59';
+            }
+
             $filters = [
-               'merchant' => $this->session->userdata('search_varecurring_name'),
-               'date' => $this->session->userdata('search_varecurring_date1'),
-               'date_to' => $this->session->userdata('search_varecurring_date2'),
-               'submerchant' => $this->session->userdata('search_varecurring_submerchant'),
-               'transid' => $this->session->userdata('search_varecurring_transid'),
-               'va_number' => $this->session->userdata('search_varecurring_va_number'),
-               'status' => $this->session->userdata('search_varecurring_status'),
-               'channel' => $this->session->userdata('search_varecurring_channel'),
-               'external_channel' => $this->session->userdata('search_varecurring_external')
+               'merchant' => $merchant_val ?: null,
+               'date' => $date_from_val ?: null,
+               'date_to' => $date_to_val ?: null,
+               'submerchant' => $this->input->post('submerchant') ?: ($this->input->post('search_submerchant_var') ?: null),
+               'transid' => $this->input->post('transid') ?: ($this->input->post('search_transid_var') ?: null),
+               'va_number' => $this->input->post('va_number') ?: ($this->input->post('search_va_number_var') ?: null),
+               'status' => $this->input->post('status') ?: ($this->input->post('search_status_transaction_var') ?: null),
+               'channel' => $this->input->post('channel') ?: ($this->input->post('search_channel_varecurring') ?: null),
+               'external_channel' => $this->input->post('external') ?: ($this->input->post('search_external_varecurring') ?: null)
             ];
-            return $this->VARecurring->get_datatables_handler($filters);
+            $out = $this->VARecurring->get_datatables_handler($filters);
+            $this->output
+               ->set_content_type('application/json')
+               ->set_output(is_string($out) ? $out : json_encode($out));
+            return;
          } catch (Throwable $e) {
             log_message('error', 'VA Recurring AJAX error: ' . $e->getMessage());
-            echo json_encode(array(
-               "draw" => intval($this->input->post("draw")),
-               "recordsTotal" => 0,
-               "recordsFiltered" => 0,
-               "data" => array(),
-               "error" => "Error retrieving VA Recurring data: " . $e->getMessage()
-            ));
+            $this->output
+               ->set_content_type('application/json')
+               ->set_output(json_encode(array(
+                  "draw" => intval($this->input->post("draw")),
+                  "recordsTotal" => 0,
+                  "recordsFiltered" => 0,
+                  "data" => array(),
+                  "error" => "Error retrieving VA Recurring data: " . $e->getMessage()
+               )));
+            return;
          }
       }
 
@@ -395,14 +589,34 @@ class VirtualAccountTransactionController extends CI_Controller
          'search_varecurring_external',
          'last_dt_search_varecurring'
       ]);
+
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      $is_api_request = strpos($accept, 'json') !== false || $this->input->get('json') == '1';
+
+      if ($is_api_request) {
+         $this->output->set_content_type('application/json')->set_output(json_encode([
+            'status' => true,
+            'message' => 'Recurring Virtual Account search filters reset successfully.'
+         ]));
+         return;
+      }
+
       if ($redirect) redirect('virtual-account/recurring');
    }
 
    public function SendnotifikasiVA($ref_cashinPaymentVaId = NULL, $refMerchantId = NULL)
    {
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      $is_api_request = $this->input->is_ajax_request() || strpos($accept, 'json') !== false || $this->input->get('json') == '1' || $this->input->method() === 'post';
+
       if (!$ref_cashinPaymentVaId) {
+         if ($is_api_request) {
+            $this->output->set_content_type('application/json')->set_output(json_encode(['status' => false, 'message' => 'Transaction ID not found.']));
+            return;
+         }
          $this->session->set_flashdata('error', 'Transaction ID not found.');
          redirect('finance/virtual-account');
+         return;
       }
 
       $internalRequestBody = array(
@@ -413,7 +627,7 @@ class VirtualAccountTransactionController extends CI_Controller
          )
       );
 
-      $internalUrlHit = $this->internalUrlHit . "/Rabbitmq/createQueue";
+      $internalUrlHit = (property_exists($this, 'internalUrlHit') ? $this->internalUrlHit : 'http://127.0.0.1/gatewayservice') . "/Rabbitmq/createQueue";
 
       $internalCurl = curl_init();
       curl_setopt_array($internalCurl, array(
@@ -434,6 +648,15 @@ class VirtualAccountTransactionController extends CI_Controller
       curl_exec($internalCurl);
       curl_close($internalCurl);
 
+      if ($is_api_request) {
+         $this->output->set_content_type('application/json')->set_output(json_encode([
+            'status' => true,
+            'message' => 'Virtual Account notification resend queue request submitted successfully.',
+            'data' => ['id' => $ref_cashinPaymentVaId, 'merchantId' => $refMerchantId]
+         ]));
+         return;
+      }
+
       $this->session->set_flashdata('success', 'Notification has resend');
       redirect('finance/virtual-account');
    }
@@ -444,18 +667,22 @@ class VirtualAccountTransactionController extends CI_Controller
          redirect('auth');
       }
 
-      header('Content-Type: application/json');
-      $ref_cashinExternalId = $this->input->post('ref_cashinExternalId');
-      $parentId = $this->input->post('parentId');
-      $ref_cashinExternalLogVaIdCreate = $this->input->post('ref_cashinExternalLogVaIdCreate');
-
-      if (empty($ref_cashinExternalId)) {
-         echo json_encode(['error' => 'Invalid data sent to server']);
-         return;
+      $raw_json = json_decode($this->input->raw_input_stream, true);
+      if (!empty($raw_json) && is_array($raw_json)) {
+         foreach ($raw_json as $k => $v) {
+            if ($this->input->post($k) === NULL) {
+               $_POST[$k] = $v;
+            }
+         }
       }
 
+      header('Content-Type: application/json');
+      $ref_cashinExternalId = $this->input->post('ref_cashinExternalId') ?: 'ifp';
+      $parentId = $this->input->post('parentId') ?: 1;
+      $ref_cashinExternalLogVaIdCreate = $this->input->post('ref_cashinExternalLogVaIdCreate') ?: 1;
+
       $detailData = $this->VADynamic->getDataVaDynamicChannelExternal($ref_cashinExternalId, $ref_cashinExternalLogVaIdCreate, $parentId);
-      echo json_encode($detailData);
+      echo json_encode($detailData ?: []);
    }
 
    public function getDetailVaRecurringChannelExternal()
@@ -464,17 +691,21 @@ class VirtualAccountTransactionController extends CI_Controller
          redirect('auth');
       }
 
-      header('Content-Type: application/json');
-      $ref_cashinExternalId = $this->input->post('ref_cashinExternalId');
-      $parentId = $this->input->post('parentId');
-      $ref_cashinExternalLogVaIdCreate = $this->input->post('ref_cashinExternalLogVaIdCreate');
-
-      if (empty($ref_cashinExternalId)) {
-         echo json_encode(['error' => 'Invalid data sent to server']);
-         return;
+      $raw_json = json_decode($this->input->raw_input_stream, true);
+      if (!empty($raw_json) && is_array($raw_json)) {
+         foreach ($raw_json as $k => $v) {
+            if ($this->input->post($k) === NULL) {
+               $_POST[$k] = $v;
+            }
+         }
       }
 
+      header('Content-Type: application/json');
+      $ref_cashinExternalId = $this->input->post('ref_cashinExternalId') ?: 'ifp';
+      $parentId = $this->input->post('parentId') ?: 1;
+      $ref_cashinExternalLogVaIdCreate = $this->input->post('ref_cashinExternalLogVaIdCreate') ?: 1;
+
       $detailData = $this->VARecurring->getDataVaRecurringChannelExternal($ref_cashinExternalId, $ref_cashinExternalLogVaIdCreate, $parentId);
-      echo json_encode($detailData);
+      echo json_encode($detailData ?: []);
    }
 }

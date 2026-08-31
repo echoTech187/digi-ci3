@@ -150,6 +150,20 @@ class ChannelController extends CI_Controller {
 
    public function createCashinChanel()
    {
+      $raw_json = json_decode($this->input->raw_input_stream, true);
+      if (!empty($raw_json) && is_array($raw_json)) {
+         foreach ($raw_json as $k => $v) {
+            if ($this->input->get($k) === null && $this->input->post($k) === null) {
+               $_POST[$k] = $v;
+            }
+         }
+      }
+
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      $is_api_request = $this->input->is_ajax_request() || strpos($accept, 'json') !== false || $this->input->get('json') == '1' || $this->input->method() === 'post';
+
+
+
       $this->form_validation->set_rules('id', 'Id', 'required');
       $this->form_validation->set_rules('chanelgroup', 'Chanel Group', 'required');
       $this->form_validation->set_rules('description', 'Description', 'trim|xss_clean');
@@ -161,8 +175,14 @@ class ChannelController extends CI_Controller {
       $this->form_validation->set_rules('amountmax', 'Amount Max', 'required|numeric');
 
       if ($this->form_validation->run() == FALSE) {
+         $clean_error = trim(preg_replace('/\s+/', ' ', strip_tags(validation_errors())));
+         if ($is_api_request) {
+            $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'error', 'message' => $clean_error ?: 'Validation failed.']));
+            return;
+         }
          $this->session->set_flashdata('error', validation_errors());
          redirect('channel/cashin');
+         return;
       } else {
          $data = array(
             'ref_cashinChannelId' => $this->input->post('id'),
@@ -177,17 +197,25 @@ class ChannelController extends CI_Controller {
 
          $result = $this->Chanel->createCashinChannel($data);
          if ($result === true) {
+            if ($is_api_request) {
+               $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'success', 'message' => 'Data successfully inserted']));
+               return;
+            }
             $this->session->set_flashdata('success', 'Data successfully inserted');
             redirect('channel/cashin');
          } else {
             $code = isset($result['code']) ? $result['code'] : 0;
+            $msg = 'Unable to insert channel due to a system constraint.';
             if ($code == 1142) {
-               $this->session->set_flashdata('error', 'Access Denied. You do not have sufficient database privileges to create cashin channels.');
+               $msg = 'Access Denied. You do not have sufficient database privileges to create cashin channels.';
             } elseif ($code == 1062) {
-               $this->session->set_flashdata('error', 'Failed to insert data: A channel with this ID or configuration already exists.');
-            } else {
-               $this->session->set_flashdata('error', 'Unable to insert channel due to a system constraint. Please verify your input or contact technical support.');
+               $msg = 'Failed to insert data: A channel with this ID or configuration already exists.';
             }
+            if ($is_api_request) {
+               $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'error', 'message' => $msg]));
+               return;
+            }
+            $this->session->set_flashdata('error', $msg);
             redirect('channel/cashin');
          }
       }
@@ -195,6 +223,20 @@ class ChannelController extends CI_Controller {
 
    public function createCashOutChanel()
    {
+      $raw_json = json_decode($this->input->raw_input_stream, true);
+      if (!empty($raw_json) && is_array($raw_json)) {
+         foreach ($raw_json as $k => $v) {
+            if ($this->input->get($k) === null && $this->input->post($k) === null) {
+               $_POST[$k] = $v;
+            }
+         }
+      }
+
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      $is_api_request = $this->input->is_ajax_request() || strpos($accept, 'json') !== false || $this->input->get('json') == '1' || $this->input->method() === 'post';
+
+
+
       $this->form_validation->set_rules('id', 'Id', 'required');
       $this->form_validation->set_rules('chanelgroup', 'Chanel Group', 'required');
       $this->form_validation->set_rules('description', 'Description', 'trim|xss_clean');
@@ -205,8 +247,14 @@ class ChannelController extends CI_Controller {
       $this->form_validation->set_rules('amountmax', 'Amount Max', 'required|numeric');
 
       if ($this->form_validation->run() == FALSE) {
+         $clean_error = trim(preg_replace('/\s+/', ' ', strip_tags(validation_errors())));
+         if ($is_api_request) {
+            $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'error', 'message' => $clean_error ?: 'Validation failed.']));
+            return;
+         }
          $this->session->set_flashdata('error', validation_errors());
          redirect('channel/cashout');
+         return;
       } else {
          $data = array(
             'ref_cashoutChannelId' => $this->input->post('id'),
@@ -221,17 +269,25 @@ class ChannelController extends CI_Controller {
 
          $result = $this->Chanel->createCashoutChannel($data);
          if ($result === true) {
+            if ($is_api_request) {
+               $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'success', 'message' => 'Data successfully inserted']));
+               return;
+            }
             $this->session->set_flashdata('success', 'Data successfully inserted');
             redirect('channel/cashout');
          } else {
             $code = isset($result['code']) ? $result['code'] : 0;
+            $msg = 'Unable to insert channel due to a system constraint.';
             if ($code == 1142) {
-               $this->session->set_flashdata('error', 'Access Denied. You do not have sufficient database privileges to create cashout channels.');
+               $msg = 'Access Denied. You do not have sufficient database privileges to create cashout channels.';
             } elseif ($code == 1062) {
-               $this->session->set_flashdata('error', 'Failed to insert data: A channel with this ID or configuration already exists.');
-            } else {
-               $this->session->set_flashdata('error', 'Unable to insert channel due to a system constraint. Please verify your input or contact technical support.');
+               $msg = 'Failed to insert data: A channel with this ID or configuration already exists.';
             }
+            if ($is_api_request) {
+               $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'error', 'message' => $msg]));
+               return;
+            }
+            $this->session->set_flashdata('error', $msg);
             redirect('channel/cashout');
          }
       }
@@ -239,6 +295,23 @@ class ChannelController extends CI_Controller {
 
    public function updateCashinChanel()
    {
+      $raw_json = json_decode($this->input->raw_input_stream, true);
+      if (!empty($raw_json) && is_array($raw_json)) {
+         foreach ($raw_json as $k => $v) {
+            if ($this->input->get($k) === null && $this->input->post($k) === null) {
+               $_POST[$k] = $v;
+            }
+         }
+      }
+
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      $is_api_request = $this->input->is_ajax_request() || strpos($accept, 'json') !== false || $this->input->get('json') == '1' || $this->input->method() === 'post';
+
+      $id = $this->input->post('id') ?: $this->uri->segment(4);
+      $existing = $id ? $this->db->get_where('cashin_external_x_channel', ['id' => $id])->row_array() : null;
+
+
+
       $this->form_validation->set_rules('id', 'Id', 'required');
       $this->form_validation->set_rules('chanelgroup', 'Chanel Group', 'required');
       $this->form_validation->set_rules('description', 'Description', 'trim|xss_clean');
@@ -250,10 +323,15 @@ class ChannelController extends CI_Controller {
       $this->form_validation->set_rules('amountmax', 'Amount Max', 'required|numeric');
 
       if ($this->form_validation->run() == FALSE) {
+         $clean_error = trim(preg_replace('/\s+/', ' ', strip_tags(validation_errors())));
+         if ($is_api_request) {
+            $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'error', 'message' => $clean_error ?: 'Validation failed.']));
+            return;
+         }
          $this->session->set_flashdata('error', validation_errors());
          redirect('channel/cashin');
+         return;
       } else {
-         $id = $this->input->post('pk_id');
          $data = array(
             'ref_cashinChannelId' => $this->input->post('id'),
             'c_cashinChannelGroup' => $this->input->post('chanelgroup'),
@@ -267,17 +345,25 @@ class ChannelController extends CI_Controller {
 
          $result = $this->Chanel->updateCashinChannel($id, $data);
          if ($result === true) {
+            if ($is_api_request) {
+               $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'success', 'message' => 'Data successfully updated']));
+               return;
+            }
             $this->session->set_flashdata('success', 'Data successfully updated');
             redirect('channel/cashin');
          } else {
             $code = isset($result['code']) ? $result['code'] : 0;
+            $msg = 'Unable to update channel due to a system constraint.';
             if ($code == 1142) {
-               $this->session->set_flashdata('error', 'Access Denied. You do not have sufficient database privileges to update cashin channels.');
+               $msg = 'Access Denied. You do not have sufficient database privileges to update cashin channels.';
             } elseif ($code == 1062) {
-               $this->session->set_flashdata('error', 'Failed to update data: A channel with this configuration already exists.');
-            } else {
-               $this->session->set_flashdata('error', 'Unable to update channel due to a system constraint. Please verify your input or contact technical support.');
+               $msg = 'Failed to update data: A channel with this configuration already exists.';
             }
+            if ($is_api_request) {
+               $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'error', 'message' => $msg]));
+               return;
+            }
+            $this->session->set_flashdata('error', $msg);
             redirect('channel/cashin');
          }
       }
@@ -285,6 +371,23 @@ class ChannelController extends CI_Controller {
 
    public function updateCashOutChanel()
    {
+      $raw_json = json_decode($this->input->raw_input_stream, true);
+      if (!empty($raw_json) && is_array($raw_json)) {
+         foreach ($raw_json as $k => $v) {
+            if ($this->input->get($k) === null && $this->input->post($k) === null) {
+               $_POST[$k] = $v;
+            }
+         }
+      }
+
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      $is_api_request = $this->input->is_ajax_request() || strpos($accept, 'json') !== false || $this->input->get('json') == '1' || $this->input->method() === 'post';
+
+      $id = $this->input->post('id') ?: $this->uri->segment(4);
+      $existing = $id ? $this->db->get_where('cashout_external_x_channel', ['id' => $id])->row_array() : null;
+
+
+
       $this->form_validation->set_rules('id', 'Id', 'required');
       $this->form_validation->set_rules('chanelgroup', 'Chanel Group', 'required');
       $this->form_validation->set_rules('description', 'Description', 'trim|xss_clean');
@@ -295,10 +398,15 @@ class ChannelController extends CI_Controller {
       $this->form_validation->set_rules('amountmax', 'Amount Max', 'required|numeric');
 
       if ($this->form_validation->run() == FALSE) {
+         $clean_error = trim(preg_replace('/\s+/', ' ', strip_tags(validation_errors())));
+         if ($is_api_request) {
+            $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'error', 'message' => $clean_error ?: 'Validation failed.']));
+            return;
+         }
          $this->session->set_flashdata('error', validation_errors());
          redirect('channel/cashout');
+         return;
       } else {
-         $id = $this->input->post('pk_id');
          $data = array(
             'ref_cashoutChannelId' => $this->input->post('id'),
             'c_cashoutChannelGroup' => $this->input->post('chanelgroup'),
@@ -312,17 +420,25 @@ class ChannelController extends CI_Controller {
 
          $result = $this->Chanel->updateCashoutChannel($id, $data);
          if ($result === true) {
+            if ($is_api_request) {
+               $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'success', 'message' => 'Data successfully updated']));
+               return;
+            }
             $this->session->set_flashdata('success', 'Data successfully updated');
             redirect('channel/cashout');
          } else {
             $code = isset($result['code']) ? $result['code'] : 0;
+            $msg = 'Unable to update channel due to a system constraint.';
             if ($code == 1142) {
-               $this->session->set_flashdata('error', 'Access Denied. You do not have sufficient database privileges to update cashout channels.');
+               $msg = 'Access Denied. You do not have sufficient database privileges to update cashout channels.';
             } elseif ($code == 1062) {
-               $this->session->set_flashdata('error', 'Failed to update data: A channel with this configuration already exists.');
-            } else {
-               $this->session->set_flashdata('error', 'Unable to update channel due to a system constraint. Please verify your input or contact technical support.');
+               $msg = 'Failed to update data: A channel with this configuration already exists.';
             }
+            if ($is_api_request) {
+               $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'error', 'message' => $msg]));
+               return;
+            }
+            $this->session->set_flashdata('error', $msg);
             redirect('channel/cashout');
          }
       }
@@ -331,23 +447,39 @@ class ChannelController extends CI_Controller {
    public function deleteCashInChanel($id = null)
    {
       is_logged_in();
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      $is_api_request = $this->input->is_ajax_request() || strpos($accept, 'json') !== false || $this->input->get('json') == '1' || $this->input->method() === 'post';
+
       if (!$id) {
+         if ($is_api_request) {
+            $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'error', 'message' => 'Invalid ID']));
+            return;
+         }
          $this->session->set_flashdata('error', 'Invalid ID');
          redirect('channel/cashin');
+         return;
       }
 
       $result = $this->Chanel->deleteCashinChannel($id);
       if ($result === true) {
+         if ($is_api_request) {
+            $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'success', 'message' => 'Channel successfully deleted']));
+            return;
+         }
          $this->session->set_flashdata('success', 'Channel successfully deleted');
       } else {
          $code = isset($result['code']) ? $result['code'] : 0;
+         $msg = 'Unable to delete channel due to a system constraint.';
          if ($code == 1142) {
-            $this->session->set_flashdata('error', 'Access Denied. You do not have sufficient database privileges to delete cashin channels.');
+            $msg = 'Access Denied. You do not have sufficient database privileges to delete cashin channels.';
          } elseif ($code == 1451) {
-            $this->session->set_flashdata('error', 'Cannot delete this channel because it is currently linked to existing merchant fee configurations or transactions.');
-         } else {
-            $this->session->set_flashdata('error', 'Unable to delete channel due to a system constraint. Please contact technical support.');
+            $msg = 'Cannot delete this channel because it is currently linked to existing merchant fee configurations or transactions.';
          }
+         if ($is_api_request) {
+            $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'error', 'message' => $msg]));
+            return;
+         }
+         $this->session->set_flashdata('error', $msg);
       }
       redirect('channel/cashin');
    }
@@ -355,23 +487,39 @@ class ChannelController extends CI_Controller {
    public function deleteCashOutChanel($id = null)
    {
       is_logged_in();
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      $is_api_request = $this->input->is_ajax_request() || strpos($accept, 'json') !== false || $this->input->get('json') == '1' || $this->input->method() === 'post';
+
       if (!$id) {
+         if ($is_api_request) {
+            $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'error', 'message' => 'Invalid ID']));
+            return;
+         }
          $this->session->set_flashdata('error', 'Invalid ID');
          redirect('channel/cashout');
+         return;
       }
 
       $result = $this->Chanel->deleteCashoutChannel($id);
       if ($result === true) {
+         if ($is_api_request) {
+            $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'success', 'message' => 'Channel successfully deleted']));
+            return;
+         }
          $this->session->set_flashdata('success', 'Channel successfully deleted');
       } else {
          $code = isset($result['code']) ? $result['code'] : 0;
+         $msg = 'Unable to delete channel due to a system constraint.';
          if ($code == 1142) {
-            $this->session->set_flashdata('error', 'Access Denied. You do not have sufficient database privileges to delete cashout channels.');
+            $msg = 'Access Denied. You do not have sufficient database privileges to delete cashout channels.';
          } elseif ($code == 1451) {
-            $this->session->set_flashdata('error', 'Cannot delete this channel because it is currently linked to existing merchant fee configurations or transactions.');
-         } else {
-            $this->session->set_flashdata('error', 'Unable to delete channel due to a system constraint. Please contact technical support.');
+            $msg = 'Cannot delete this channel because it is currently linked to existing merchant fee configurations or transactions.';
          }
+         if ($is_api_request) {
+            $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'error', 'message' => $msg]));
+            return;
+         }
+         $this->session->set_flashdata('error', $msg);
       }
       redirect('channel/cashout');
    }

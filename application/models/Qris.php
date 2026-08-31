@@ -570,7 +570,9 @@ class Qris extends CI_Model {
         $list = $this->get_datatables($search_name, $date_from_query, $date_to_query, $search_settlement, $search_rrn, $search_invoice, $search_transid);
 
 
-        $is_filtered = $search_name || $date_from || $date_to || $search_settlement || $search_rrn || $search_invoice || $search_transid || $this->input->post('search')['value'];
+        $searchPost = $this->input->post('search');
+        $searchValue = (is_array($searchPost) && isset($searchPost['value'])) ? $searchPost['value'] : '';
+        $is_filtered = $search_name || $date_from || $date_to || $search_settlement || $search_rrn || $search_invoice || $search_transid || (!empty($searchValue));
         $recordsTotal = $this->count_all_dt($search_name, $date_from_query, $date_to_query);
         $recordsFiltered = $is_filtered ? $this->count_filtered($search_name, $date_from_query, $date_to_query, $search_settlement, $search_rrn, $search_invoice, $search_transid) : $recordsTotal;
 
@@ -596,6 +598,8 @@ class Qris extends CI_Model {
         $this->output
             ->set_content_type('application/json')
             ->set_output(json_encode($output));
+
+        return $output;
     }
 
 

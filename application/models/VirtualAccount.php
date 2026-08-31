@@ -525,7 +525,8 @@ class VirtualAccount extends CI_Model {
         // Optimized Fetch (Two-Step Lookup)
         $list = $this->get_datatables($search_date, $search_date_to, $search_merchant, $search_settlement, $search_va, $search_transid, $search_invoice, $search_channel);
 
-        $searchValue = $this->input->post('search')['value'];
+        $searchPost = $this->input->post('search');
+        $searchValue = (is_array($searchPost) && isset($searchPost['value'])) ? $searchPost['value'] : '';
         $is_filtered = $search_date || $search_date_to || $search_merchant || $search_settlement || $search_va || $search_transid || $search_invoice || $search_channel || (!empty($searchValue));
         
         $recordsTotal = $this->count_all_dt($search_date, $search_date_to, $search_merchant);
@@ -553,6 +554,8 @@ class VirtualAccount extends CI_Model {
         $this->output
             ->set_content_type('application/json')
             ->set_output(json_encode($output));
+
+        return $output;
     }
 }
 ?>

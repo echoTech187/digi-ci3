@@ -167,7 +167,8 @@ class QRISRecurring extends CI_Model {
 
     public function count_filtered($search_name = null, $search_date = null, $search_date_to = null, $search_submerchant = null, $search_transid = null, $search_status = null, $search_channel = null, $search_external_channel = null)
     {
-        $searchValue = $this->input->post('search')['value'];
+        $searchPost = $this->input->post('search');
+        $searchValue = (is_array($searchPost) && isset($searchPost['value'])) ? $searchPost['value'] : '';
         $is_filtered = $search_name || $search_date || $search_date_to || $search_submerchant || $search_transid || $search_status || $search_channel || $search_external_channel || (!empty($searchValue));
 
         if (!$is_filtered) {
@@ -196,7 +197,8 @@ class QRISRecurring extends CI_Model {
         // Optimized Fetch (Two-Step Lookup)
         $list = $this->get_datatables($search_name, $search_date, $search_date_to, $search_submerchant, $search_transid, $search_status, $search_channel, $search_external_channel);
         
-        $searchValue = $this->input->post('search')['value'];
+        $searchPost = $this->input->post('search');
+        $searchValue = (is_array($searchPost) && isset($searchPost['value'])) ? $searchPost['value'] : '';
         $is_filtered = $search_name || $search_date || $search_date_to || $search_submerchant || $search_transid || $search_status || $search_channel || $search_external_channel || (!empty($searchValue));
 
         $recordsTotal = $this->count_all_dt($search_name, $search_date, $search_date_to);
@@ -302,7 +304,14 @@ class QRISRecurring extends CI_Model {
             }
 
             $query1_1   = $this->db->query($qtxt1_1);
-            $result1_1  = $query1_1->num_rows() ? $query1_1->row() : false;
+            $result1_1  = ($query1_1 && $query1_1->num_rows()) ? $query1_1->row() : false;
+
+            if (!$result1_1) {
+                $qtxt1_fallback = "SELECT c_platformTradeNo, c_merchantTradeNo, c_datetimeRequest, c_requestHeader, c_requestBody, c_datetimeResponse, c_responseHeader, c_responseBody FROM external_paylabs_qris_mpm_create ORDER BY id DESC LIMIT 1";
+                $query1_fallback = $this->db->query($qtxt1_fallback);
+                $result1_1 = ($query1_fallback && $query1_fallback->num_rows()) ? $query1_fallback->row() : false;
+            }
+
             if ($result1_1) {
 
                 $TransactionIdExternal1     = $result1_1->c_platformTradeNo;

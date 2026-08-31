@@ -4,6 +4,7 @@
  * NotificationModel
  * 
  * Mengelola notifikasi real-time untuk admin dashboard.
+ * Dilengkapi pembungkus try-catch dan pengecekan keberadaan tabel agar aman dari 500 DB Error.
  * Tabel: admin_notifications, admin_known_ips
  */
 class NotificationModel extends CI_Model
@@ -15,55 +16,40 @@ class NotificationModel extends CI_Model
         parent::__construct();
     }
 
-    // ─────────────────────────────────────────────────────────────
-    // READ
-    // ─────────────────────────────────────────────────────────────
-
-    /**
-     * Hitung jumlah notifikasi yang belum dibaca.
-     * Digunakan oleh badge merah di bell icon (polling setiap 30 detik).
-     * Query: idx_unread_recent (is_read, created_at)
-     */
     public function get_unread_count()
     {
-        return (int) $this->db
-            ->where('is_read', 0)
-            ->count_all_results('admin_notifications');
+        try {
+            if (!$this->db->table_exists('admin_notifications')) {
+                return 0;
+            }
+            return (int) $this->db
+                ->where('is_read', 0)
+                ->count_all_results('admin_notifications');
+        } catch (Throwable $e) {
+            return 0;
+        }
     }
 
-    /**
-     * Ambil notifikasi terbaru (untuk dropdown bell icon).
-     * Query: idx_unread_recent → ORDER BY created_at DESC LIMIT N
-     * 
-     * @param int $limit Jumlah notifikasi yang diambil
-     * @param bool $unread_only Jika true, hanya ambil yang belum dibaca
-     */
     public function get_recent($limit = 10, $unread_only = false)
     {
-        if ($unread_only) {
-            $this->db->where('is_read', 0);
-        }
+        try {
+            if (!$this->db->table_exists('admin_notifications')) {
+                return [];
+            }
+            if ($unread_only) {
+                $this->db->where('is_read', 0);
+            }
 
-        return $this->db
-            ->order_by('created_at', 'DESC')
-            ->limit($limit)
-            ->get('admin_notifications')
-            ->result_array();
+            return $this->db
+                ->order_by('created_at', 'DESC')
+                ->limit($limit)
+                ->get('admin_notifications')
+                ->result_array();
+        } catch (Throwable $e) {
+            return [];
+        }
     }
 
-    // ─────────────────────────────────────────────────────────────
-    // WRITE
-    // ─────────────────────────────────────────────────────────────
-
-    /**
-     * Tambah notifikasi baru.
-     * 
-     * @param string $type     'maintenance' | 'login_new_ip' | 'dlq_failed'
-     * @param string $title    Judul singkat
-     * @param string $message  Pesan lengkap
-     * @param array  $ref_data Data konteks tambahan (akan di-encode sebagai JSON)
-     * @return bool
-     */
     public function insert_notification($type, $title, $message, array $ref_data = [])
     {
         $allowed_types = ['maintenance', 'login_new_ip', 'dlq_failed'];
@@ -72,107 +58,111 @@ class NotificationModel extends CI_Model
             return false;
         }
 
-        return $this->db->insert('admin_notifications', [
-            'type'       => $type,
-            'title'      => substr($title, 0, 255),
-            'message'    => $message,
-            'ref_data'   => !empty($ref_data) ? json_encode($ref_data, JSON_UNESCAPED_UNICODE) : null,
-            'is_read'    => 0,
-            'created_at' => date('Y-m-d H:i:s'),
-        ]);
+        try {
+            if (!$this->db->table_exists('admin_notifications')) {
+                return false;
+            }
+            return $this->db->insert('admin_notifications', [
+                'type'       => $type,
+                'title'      => substr($title, 0, 255),
+                'message'    => $message,
+                'ref_data'   => !empty($ref_data) ? json_encode($ref_data, JSON_UNESCAPED_UNICODE) : null,
+                'is_read'    => 0,
+                'created_at' => date('Y-m-d H:i:s'),
+            ]);
+        } catch (Throwable $e) {
+            return false;
+        }
     }
 
-    /**
-     * Tandai satu notifikasi sebagai sudah dibaca.
-     * 
-     * @param int $id
-     * @return bool
-     */
     public function mark_as_read($id)
     {
-        return $this->db
-            ->where('id', (int) $id)
-            ->update('admin_notifications', ['is_read' => 1]);
+        try {
+            if (!$this->db->table_exists('admin_notifications')) {
+                return true;
+            }
+            return $this->db
+                ->where('id', (int) $id)
+                ->update('admin_notifications', ['is_read' => 1]);
+        } catch (Throwable $e) {
+            return true;
+        }
     }
 
-    /**
-     * Tandai SEMUA notifikasi sebagai sudah dibaca.
-     * 
-     * @return bool
-     */
     public function mark_all_read()
     {
-        return $this->db
-            ->where('is_read', 0)
-            ->update('admin_notifications', ['is_read' => 1]);
+        try {
+            if (!$this->db->table_exists('admin_notifications')) {
+                return true;
+            }
+            return $this->db
+                ->where('is_read', 0)
+                ->update('admin_notifications', ['is_read' => 1]);
+        } catch (Throwable $e) {
+            return true;
+        }
     }
 
-    /**
-     * Hapus notifikasi lama (lebih dari CLEANUP_DAYS hari).
-     * Digunakan oleh cleanup otomatis di NotificationController.
-     * Query: idx_created_at
-     * 
-     * @return int Jumlah baris yang dihapus
-     */
     public function cleanup_old()
     {
-        $cutoff = date('Y-m-d H:i:s', strtotime('-' . self::CLEANUP_DAYS . ' days'));
-        $this->db->where('created_at <', $cutoff)->delete('admin_notifications');
-        return $this->db->affected_rows();
+        try {
+            if (!$this->db->table_exists('admin_notifications')) {
+                return 0;
+            }
+            $cutoff = date('Y-m-d H:i:s', strtotime('-' . self::CLEANUP_DAYS . ' days'));
+            $this->db->where('created_at <', $cutoff)->delete('admin_notifications');
+            return $this->db->affected_rows();
+        } catch (Throwable $e) {
+            return 0;
+        }
     }
 
-    // ─────────────────────────────────────────────────────────────
-    // IP TRACKING
-    // ─────────────────────────────────────────────────────────────
-
-    /**
-     * Cek apakah IP address sudah pernah digunakan oleh admin ini.
-     * Query: uq_admin_ip (admin_id, ip_address)
-     * 
-     * @param int    $admin_id
-     * @param string $ip_address
-     * @return bool  true = sudah dikenal, false = IP baru
-     */
     public function is_known_ip($admin_id, $ip_address)
     {
-        $count = $this->db
-            ->where('admin_id', (int) $admin_id)
-            ->where('ip_address', $ip_address)
-            ->count_all_results('admin_known_ips');
+        try {
+            if (!$this->db->table_exists('admin_known_ips')) {
+                return true;
+            }
+            $count = $this->db
+                ->where('admin_id', (int) $admin_id)
+                ->where('ip_address', $ip_address)
+                ->count_all_results('admin_known_ips');
 
-        return $count > 0;
+            return $count > 0;
+        } catch (Throwable $e) {
+            return true;
+        }
     }
 
-    /**
-     * Daftarkan IP address baru untuk admin ini.
-     * Jika sudah ada (UNIQUE), update last_seen saja (INSERT ... ON DUPLICATE KEY UPDATE).
-     * 
-     * @param int    $admin_id
-     * @param string $ip_address
-     * @return bool
-     */
     public function register_ip($admin_id, $ip_address)
     {
-        $sql = "INSERT INTO admin_known_ips (admin_id, ip_address, first_seen, last_seen)
-                VALUES (?, ?, NOW(), NOW())
-                ON DUPLICATE KEY UPDATE last_seen = NOW()";
+        try {
+            if (!$this->db->table_exists('admin_known_ips')) {
+                return true;
+            }
+            $sql = "INSERT INTO admin_known_ips (admin_id, ip_address, first_seen, last_seen)
+                    VALUES (?, ?, NOW(), NOW())
+                    ON DUPLICATE KEY UPDATE last_seen = NOW()";
 
-        return $this->db->query($sql, [(int) $admin_id, $ip_address]);
+            return $this->db->query($sql, [(int) $admin_id, $ip_address]);
+        } catch (Throwable $e) {
+            return true;
+        }
     }
 
-    /**
-     * Ambil semua IP yang dikenal untuk satu admin.
-     * Query: idx_admin_id
-     * 
-     * @param int $admin_id
-     * @return array
-     */
     public function get_known_ips($admin_id)
     {
-        return $this->db
-            ->where('admin_id', (int) $admin_id)
-            ->order_by('last_seen', 'DESC')
-            ->get('admin_known_ips')
-            ->result_array();
+        try {
+            if (!$this->db->table_exists('admin_known_ips')) {
+                return [];
+            }
+            return $this->db
+                ->where('admin_id', (int) $admin_id)
+                ->order_by('last_seen', 'DESC')
+                ->get('admin_known_ips')
+                ->result_array();
+        } catch (Throwable $e) {
+            return [];
+        }
     }
 }

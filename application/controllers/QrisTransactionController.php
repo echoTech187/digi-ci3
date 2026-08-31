@@ -35,6 +35,15 @@ class QrisTransactionController extends CI_Controller
 
    public function qris()
    {
+      $raw_json = json_decode($this->input->raw_input_stream, true);
+      if (!empty($raw_json) && is_array($raw_json)) {
+         foreach ($raw_json as $k => $v) {
+            if ($this->input->get($k) === NULL && $this->input->post($k) === NULL) {
+               $_POST[$k] = $v;
+            }
+         }
+      }
+
       // Auto-reset if accessed directly without any parameters (GET or POST)
       if (!$this->input->is_ajax_request() && empty($this->input->get()) && !$this->input->post()) {
          $this->resetqris(false);
@@ -65,6 +74,16 @@ class QrisTransactionController extends CI_Controller
          'search_qris_transid'         => 'transid',
       ];
 
+      // Alias parameters support for API / Swagger
+      $merchant_post = $this->input->post('merchant_id') ?: ($this->input->post('merchant') ?: ($this->input->get('merchant_id') ?: $this->input->get('merchant')));
+      if ($merchant_post !== NULL) $_POST['search_name_qris'] = $merchant_post;
+
+      $date_from_post = $this->input->post('date_from') ?: ($this->input->post('date1') ?: $this->input->get('date_from'));
+      if ($date_from_post !== NULL) $_POST['search_date_qris'] = $date_from_post;
+
+      $date_to_post = $this->input->post('date_to') ?: ($this->input->post('date2') ?: $this->input->get('date_to'));
+      if ($date_to_post !== NULL) $_POST['search_date_qris_to'] = $date_to_post;
+
       foreach ($field_map as $session_key => $post_key) {
          $val = $this->input->post($post_key);
          if ($val === NULL && isset($get_fallback[$session_key])) {
@@ -77,7 +96,17 @@ class QrisTransactionController extends CI_Controller
       $active_search = $this->input->get('q') ?: $this->input->get('invoice') ?: $this->input->get('transid') ?: $this->input->get('rrn');
       if ($active_search) $this->session->set_userdata('last_dt_search_qris', $active_search);
 
-      if ($this->input->is_ajax_request()) {
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      $referer = strtolower($this->input->get_request_header('Referer') ?: '');
+      $is_swagger = (strpos($referer, 'swagger') !== false) || (strpos($this->uri->uri_string(), 'swagger') !== false);
+      $is_api = $this->input->is_ajax_request()
+         || strtolower((string)$this->input->get_request_header('X-Requested-With')) === 'xmlhttprequest'
+         || strpos((string)$this->input->get_request_header('Content-Type'), 'json') !== false
+         || strpos($accept, 'json') !== false
+         || strtolower($this->input->method()) === 'post'
+         || $is_swagger;
+
+      if ($is_api) {
          try {
             $dtSearch = $this->input->post('search')['value'] ?? '';
             $oldSearch = $this->session->userdata('last_dt_search_qris');
@@ -91,25 +120,40 @@ class QrisTransactionController extends CI_Controller
                $this->session->set_userdata('last_dt_search_qris', $dtSearch);
             }
 
+            $merchant_val = $this->input->post('merchant_id') ?: ($this->input->post('merchant') ?: $this->input->post('search_name_qris'));
+            $date_from_val = $this->input->post('date_from') ?: ($this->input->post('date1') ?: $this->input->post('search_date_qris'));
+            $date_to_val   = $this->input->post('date_to') ?: ($this->input->post('date2') ?: $this->input->post('search_date_qris_to'));
+
+            if ($date_to_val && strlen(trim($date_to_val)) === 10) {
+               $date_to_val = trim($date_to_val) . ' 23:59:59';
+            }
+
             $filters = [
-               'merchant' => $this->session->userdata('search_qris_name'),
-               'date_from' => $this->session->userdata('search_qris_date1'),
-               'date_to' => $this->session->userdata('search_qris_date2'),
-               'settlement' => $this->session->userdata('search_qris_date_settlement'),
-               'rrn' => $this->session->userdata('search_qris_rrn'),
-               'invoice' => $this->session->userdata('search_qris_invoice_no'),
-               'transid' => $this->session->userdata('search_qris_transid')
+               'merchant' => $merchant_val ?: null,
+               'date_from' => $date_from_val ?: null,
+               'date_to' => $date_to_val ?: null,
+               'settlement' => $this->input->post('settlement') ?: ($this->input->post('search_date_qris_settlement') ?: null),
+               'rrn' => $this->input->post('rrn') ?: ($this->input->post('search_rrn') ?: null),
+               'invoice' => $this->input->post('invoice') ?: ($this->input->post('search_invoice_no') ?: null),
+               'transid' => $this->input->post('transid') ?: ($this->input->post('search_transactionid_ht') ?: null)
             ];
-            return $this->Qris->get_datatables_handler($filters);
+            $out = $this->Qris->get_datatables_handler($filters);
+            $this->output
+               ->set_content_type('application/json')
+               ->set_output(is_string($out) ? $out : json_encode($out));
+            return;
          } catch (Throwable $e) {
             log_message('error', 'QRIS AJAX error: ' . $e->getMessage());
-            echo json_encode(array(
-               "draw" => intval($this->input->post("draw")),
-               "recordsTotal" => 0,
-               "recordsFiltered" => 0,
-               "data" => array(),
-               "error" => "Error retrieving QRIS data: " . $e->getMessage()
-            ));
+            $this->output
+               ->set_content_type('application/json')
+               ->set_output(json_encode(array(
+                  "draw" => intval($this->input->post("draw")),
+                  "recordsTotal" => 0,
+                  "recordsFiltered" => 0,
+                  "data" => array(),
+                  "error" => "Error retrieving QRIS data: " . $e->getMessage()
+               )));
+            return;
          }
       }
 
@@ -133,6 +177,18 @@ class QrisTransactionController extends CI_Controller
          'search_qris_transid',
          'last_dt_search_qris'
       ]);
+
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      $is_api_request = strpos($accept, 'json') !== false || $this->input->get('json') == '1';
+
+      if ($is_api_request) {
+         $this->output->set_content_type('application/json')->set_output(json_encode([
+            'status' => true,
+            'message' => 'QRIS search filters reset successfully.'
+         ]));
+         return;
+      }
+
       if ($redirect) redirect('finance/qris');
    }
 
@@ -164,15 +220,77 @@ class QrisTransactionController extends CI_Controller
       }
       $data['breadcrumb_replace'] = [$id => $displayId];
 
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      if ($this->input->is_ajax_request() || strpos($accept, 'json') !== false || $this->input->get('json') == '1') {
+          $this->output
+              ->set_content_type('application/json')
+              ->set_output(json_encode([
+                  'status' => true,
+                  'message' => 'QRIS detail data retrieved successfully',
+                  'data' => [
+                      'qris_data' => $data['qris_data'],
+                      'external_log' => isset($data['external_log']) ? $data['external_log'] : null,
+                      'create_log' => isset($data['create_log']) ? $data['create_log'] : null
+                  ]
+              ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+          return;
+      }
+
       $this->load->view('qris/detail_qris', $data);
    }
 
    public function download_qris()
    {
-      $search_date_qris = isset($_GET['search_qris_date1']) ? $_GET['search_qris_date1'] : '';
-      $search_name_qris = isset($_GET['search_qris_name']) ? $_GET['search_qris_name'] : '';
-      $search_date_qris_to = isset($_GET['search_qris_date2']) ? $_GET['search_qris_date2'] : '';
-      $search_date_qris_settlement = isset($_GET['search_qris_date_settlement']) ? $_GET['search_qris_date_settlement'] : '';
+      $raw_json = json_decode($this->input->raw_input_stream, true);
+      if (!empty($raw_json) && is_array($raw_json)) {
+         foreach ($raw_json as $k => $v) {
+            if ($this->input->get($k) === NULL && $this->input->post($k) === NULL) {
+               $_POST[$k] = $v;
+            }
+         }
+      }
+
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      $referer = strtolower($this->input->get_request_header('Referer') ?: '');
+      $is_swagger = (strpos($referer, 'swagger') !== false) || (strpos($this->uri->uri_string(), 'swagger') !== false);
+      $is_api_request = $this->input->is_ajax_request() || strpos($accept, 'json') !== false || $this->input->get('json') == '1' || strtolower($this->input->method()) === 'post' || $is_swagger;
+
+      $search_date_qris = $this->input->post('date_from') ?: ($this->input->post('date1') ?: ($this->input->get('search_qris_date1') ?: $this->session->userdata('search_qris_date1')));
+      $search_name_qris = $this->input->post('merchant_id') ?: ($this->input->post('merchant') ?: ($this->input->get('search_qris_name') ?: $this->session->userdata('search_qris_name')));
+      $search_date_qris_to = $this->input->post('date_to') ?: ($this->input->post('date2') ?: ($this->input->get('search_qris_date2') ?: $this->session->userdata('search_qris_date2')));
+      $search_date_qris_settlement = $this->input->post('settlement') ?: ($this->input->get('search_qris_date_settlement') ?: $this->session->userdata('search_qris_date_settlement'));
+
+      if ($is_api_request) {
+         $user = $this->Model_user->view_user()->row_array();
+         $adminID = $user['id'] ?? 1;
+
+         $additionalFilter = $search_name_qris . '|' . $search_date_qris . '|' . $search_date_qris_settlement;
+         $data = array(
+            'ref_adminId' => $adminID,
+            'c_datetime' => date('Y-m-d H:i:s'),
+            'c_additionalFilter' => $additionalFilter,
+            'c_type' => 'Qris',
+            'c_status' => 'Pending',
+            'c_filename' => '',
+         );
+
+         if ($this->db->insert('admin_download', $data)) {
+            return $this->output->set_content_type('application/json')->set_output(json_encode([
+               'status' => true,
+               'message' => 'Your QRIS download request has been submitted successfully. Please check the Download Report menu to download the generated file.',
+               'data' => [
+                  'download_id' => $this->db->insert_id(),
+                  'type' => 'Qris',
+                  'filter' => $additionalFilter
+               ]
+            ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+         } else {
+            return $this->output->set_content_type('application/json')->set_output(json_encode([
+               'status' => false,
+               'message' => 'Failed to submit QRIS download request.'
+            ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+         }
+      }
 
       if (empty($search_name_qris) && (empty($search_date_qris) && empty($search_date_qris_settlement))) {
          $this->session->set_flashdata('error_message', 'Please fill all fields and search before continuing with download.');
@@ -203,24 +321,45 @@ class QrisTransactionController extends CI_Controller
 
    public function qris_dynamic_list()
    {
-      if ($this->input->is_ajax_request()) {
-         try {
-            return $this->QRISDynamic->get_datatables_handler();
-         } catch (Throwable $e) {
-            log_message('error', 'QRIS Dynamic List AJAX error: ' . $e->getMessage());
-            echo json_encode(array(
+      $raw_json = json_decode($this->input->raw_input_stream, true);
+      if (!empty($raw_json) && is_array($raw_json)) {
+         foreach ($raw_json as $k => $v) {
+            if ($this->input->post($k) === NULL) {
+               $_POST[$k] = $v;
+            }
+         }
+      }
+
+      try {
+         $out = $this->QRISDynamic->get_datatables_handler();
+         $this->output
+            ->set_content_type('application/json')
+            ->set_output(is_string($out) ? $out : json_encode($out));
+      } catch (Throwable $e) {
+         log_message('error', 'QRIS Dynamic List AJAX error: ' . $e->getMessage());
+         $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode(array(
                "draw" => intval($this->input->post("draw")),
                "recordsTotal" => 0,
                "recordsFiltered" => 0,
                "data" => array(),
                "error" => "Error retrieving QRIS dynamic data: " . $e->getMessage()
-            ));
-         }
+            )));
       }
    }
 
    public function qris_dynamic()
    {
+      $raw_json = json_decode($this->input->raw_input_stream, true);
+      if (!empty($raw_json) && is_array($raw_json)) {
+         foreach ($raw_json as $k => $v) {
+            if ($this->input->get($k) === NULL && $this->input->post($k) === NULL) {
+               $_POST[$k] = $v;
+            }
+         }
+      }
+
       // Auto-reset if accessed directly without any parameters (GET or POST)
       if (!$this->input->is_ajax_request() && empty($this->input->get()) && !$this->input->post()) {
          $this->resetqris_dynamic(false);
@@ -259,7 +398,17 @@ class QrisTransactionController extends CI_Controller
       $active_search = $this->input->get('q') ?: $this->input->get('transid');
       if ($active_search) $this->session->set_userdata('last_dt_search_qrisdynamic', $active_search);
 
-      if ($this->input->is_ajax_request()) {
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      $referer = strtolower($this->input->get_request_header('Referer') ?: '');
+      $is_swagger = (strpos($referer, 'swagger') !== false) || (strpos($this->uri->uri_string(), 'swagger') !== false);
+      $is_api = $this->input->is_ajax_request()
+         || strtolower((string)$this->input->get_request_header('X-Requested-With')) === 'xmlhttprequest'
+         || strpos((string)$this->input->get_request_header('Content-Type'), 'json') !== false
+         || strpos($accept, 'json') !== false
+         || strtolower($this->input->method()) === 'post'
+         || $is_swagger;
+
+      if ($is_api) {
          try {
             $dtSearch = $this->input->post('search')['value'] ?? '';
             $oldSearch = $this->session->userdata('last_dt_search_qrisdynamic');
@@ -273,26 +422,41 @@ class QrisTransactionController extends CI_Controller
                $this->session->set_userdata('last_dt_search_qrisdynamic', $dtSearch);
             }
 
+            $merchant_val = $this->input->post('merchant_id') ?: ($this->input->post('merchant') ?: $this->input->post('search_name_qd'));
+            $date_from_val = $this->input->post('date_from') ?: ($this->input->post('date1') ?: ($this->input->post('date') ?: $this->input->post('search_date_qd')));
+            $date_to_val   = $this->input->post('date_to') ?: ($this->input->post('date2') ?: $this->input->post('search_date_qd_to'));
+
+            if ($date_to_val && strlen(trim($date_to_val)) === 10) {
+               $date_to_val = trim($date_to_val) . ' 23:59:59';
+            }
+
             $filters = [
-               'merchant'         => $this->session->userdata('search_qrisdynamic_name'),
-               'date'             => $this->session->userdata('search_qrisdynamic_date1'),
-               'date_to'          => $this->session->userdata('search_qrisdynamic_date2'),
-               'transid'          => $this->session->userdata('search_qrisdynamic_transid'),
-               'status'           => $this->session->userdata('search_qrisdynamic_status'),
-               'reff'             => $this->session->userdata('search_qrisdynamic_reff'),
-               'channel'          => $this->session->userdata('search_qrisdynamic_channel'),
-               'external_channel' => $this->session->userdata('search_qrisdynamic_external')
+               'merchant'         => $merchant_val ?: null,
+               'date'             => $date_from_val ?: null,
+               'date_to'          => $date_to_val ?: null,
+               'transid'          => $this->input->post('transid') ?: ($this->input->post('search_transid_qd') ?: null),
+               'status'           => $this->input->post('status') ?: ($this->input->post('search_status_transaction_qd') ?: null),
+               'reff'             => $this->input->post('reff') ?: ($this->input->post('search_reff_label') ?: null),
+               'channel'          => $this->input->post('channel') ?: ($this->input->post('search_channel_qrisdynamic') ?: null),
+               'external_channel' => $this->input->post('external') ?: ($this->input->post('search_external_qrisdynamic') ?: null)
             ];
-            return $this->QRISDynamic->get_datatables_handler($filters);
+            $out = $this->QRISDynamic->get_datatables_handler($filters);
+            $this->output
+               ->set_content_type('application/json')
+               ->set_output(is_string($out) ? $out : json_encode($out));
+            return;
          } catch (Throwable $e) {
             log_message('error', 'QRIS Dynamic AJAX error: ' . $e->getMessage());
-            echo json_encode(array(
-               "draw" => intval($this->input->post("draw")),
-               "recordsTotal" => 0,
-               "recordsFiltered" => 0,
-               "data" => array(),
-               "error" => "Error retrieving QRIS Dynamic data: " . $e->getMessage()
-            ));
+            $this->output
+               ->set_content_type('application/json')
+               ->set_output(json_encode(array(
+                  "draw" => intval($this->input->post("draw")),
+                  "recordsTotal" => 0,
+                  "recordsFiltered" => 0,
+                  "data" => array(),
+                  "error" => "Error retrieving QRIS Dynamic data: " . $e->getMessage()
+               )));
+            return;
          }
       }
 
@@ -316,11 +480,32 @@ class QrisTransactionController extends CI_Controller
          'search_qrisdynamic_external',
          'last_dt_search_qrisdynamic'
       ]);
+
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      $is_api_request = strpos($accept, 'json') !== false || $this->input->get('json') == '1';
+
+      if ($is_api_request) {
+         $this->output->set_content_type('application/json')->set_output(json_encode([
+            'status' => true,
+            'message' => 'Dynamic QRIS search filters reset successfully.'
+         ]));
+         return;
+      }
+
       if ($redirect) redirect('qris/dynamic');
    }
 
    public function qris_recurring()
    {
+      $raw_json = json_decode($this->input->raw_input_stream, true);
+      if (!empty($raw_json) && is_array($raw_json)) {
+         foreach ($raw_json as $k => $v) {
+            if ($this->input->get($k) === NULL && $this->input->post($k) === NULL) {
+               $_POST[$k] = $v;
+            }
+         }
+      }
+
       // Auto-reset if accessed directly without any parameters (GET or POST)
       if (!$this->input->is_ajax_request() && empty($this->input->get()) && !$this->input->post()) {
          $this->resetqris_recurring(false);
@@ -359,7 +544,17 @@ class QrisTransactionController extends CI_Controller
       $active_search = $this->input->get('q') ?: $this->input->get('transid');
       if ($active_search) $this->session->set_userdata('last_dt_search_qrisrecurring', $active_search);
 
-      if ($this->input->is_ajax_request()) {
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      $referer = strtolower($this->input->get_request_header('Referer') ?: '');
+      $is_swagger = (strpos($referer, 'swagger') !== false) || (strpos($this->uri->uri_string(), 'swagger') !== false);
+      $is_api = $this->input->is_ajax_request()
+         || strtolower((string)$this->input->get_request_header('X-Requested-With')) === 'xmlhttprequest'
+         || strpos((string)$this->input->get_request_header('Content-Type'), 'json') !== false
+         || strpos($accept, 'json') !== false
+         || strtolower($this->input->method()) === 'post'
+         || $is_swagger;
+
+      if ($is_api) {
          try {
             $dtSearch = $this->input->post('search')['value'] ?? '';
             $oldSearch = $this->session->userdata('last_dt_search_qrisrecurring');
@@ -373,26 +568,41 @@ class QrisTransactionController extends CI_Controller
                $this->session->set_userdata('last_dt_search_qrisrecurring', $dtSearch);
             }
 
+            $merchant_val = $this->input->post('merchant_id') ?: ($this->input->post('merchant') ?: $this->input->post('search_name_qr'));
+            $date_from_val = $this->input->post('date_from') ?: ($this->input->post('date1') ?: ($this->input->post('date') ?: $this->input->post('search_date_qr')));
+            $date_to_val   = $this->input->post('date_to') ?: ($this->input->post('date2') ?: $this->input->post('search_date_qr_to'));
+
+            if ($date_to_val && strlen(trim($date_to_val)) === 10) {
+               $date_to_val = trim($date_to_val) . ' 23:59:59';
+            }
+
             $filters = [
-               'merchant'         => $this->session->userdata('search_qrisrecurring_name'),
-               'date'             => $this->session->userdata('search_qrisrecurring_date1'),
-               'date_to'          => $this->session->userdata('search_qrisrecurring_date2'),
-               'transid'          => $this->session->userdata('search_qrisrecurring_transid'),
-               'submerchant'      => $this->session->userdata('search_qrisrecurring_submerchant'),
-               'status'           => $this->session->userdata('search_qrisrecurring_status'),
-               'channel'          => $this->session->userdata('search_qrisrecurring_channel'),
-               'external_channel' => $this->session->userdata('search_qrisrecurring_external')
+               'merchant'         => $merchant_val ?: null,
+               'date'             => $date_from_val ?: null,
+               'date_to'          => $date_to_val ?: null,
+               'transid'          => $this->input->post('transid') ?: ($this->input->post('search_transid_qr') ?: null),
+               'submerchant'      => $this->input->post('submerchant') ?: ($this->input->post('search_submerchant_qr') ?: null),
+               'status'           => $this->input->post('status') ?: ($this->input->post('search_status_transaction_qr') ?: null),
+               'channel'          => $this->input->post('channel') ?: ($this->input->post('search_channel_qrisrecurring') ?: null),
+               'external_channel' => $this->input->post('external') ?: ($this->input->post('search_external_qrisrecurring') ?: null)
             ];
-            return $this->QRISRecurring->get_datatables_handler($filters);
+            $out = $this->QRISRecurring->get_datatables_handler($filters);
+            $this->output
+               ->set_content_type('application/json')
+               ->set_output(is_string($out) ? $out : json_encode($out));
+            return;
          } catch (Throwable $e) {
             log_message('error', 'QRIS Recurring AJAX error: ' . $e->getMessage());
-            echo json_encode(array(
-               "draw" => intval($this->input->post("draw")),
-               "recordsTotal" => 0,
-               "recordsFiltered" => 0,
-               "data" => array(),
-               "error" => "Error retrieving QRIS Recurring data: " . $e->getMessage()
-            ));
+            $this->output
+               ->set_content_type('application/json')
+               ->set_output(json_encode(array(
+                  "draw" => intval($this->input->post("draw")),
+                  "recordsTotal" => 0,
+                  "recordsFiltered" => 0,
+                  "data" => array(),
+                  "error" => "Error retrieving QRIS Recurring data: " . $e->getMessage()
+               )));
+            return;
          }
       }
 
@@ -415,25 +625,45 @@ class QrisTransactionController extends CI_Controller
          'search_qrisrecurring_external',
          'last_dt_search_qrisrecurring'
       ]);
+
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      $is_api_request = strpos($accept, 'json') !== false || $this->input->get('json') == '1';
+
+      if ($is_api_request) {
+         $this->output->set_content_type('application/json')->set_output(json_encode([
+            'status' => true,
+            'message' => 'Recurring QRIS search filters reset successfully.'
+         ]));
+         return;
+      }
+
       if ($redirect) redirect('qris/recurring');
    }
 
    public function SendnotifikasiQRIS($ref_cashinPaymentQrisMpmId=NULL, $refMerchantId=NULL)
    {
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      $is_api_request = $this->input->is_ajax_request() || strpos($accept, 'json') !== false || $this->input->get('json') == '1' || $this->input->method() === 'post';
+
       if (!$ref_cashinPaymentQrisMpmId) {
+         if ($is_api_request) {
+            $this->output->set_content_type('application/json')->set_output(json_encode(['status' => false, 'message' => 'Transaction ID not found.']));
+            return;
+         }
          $this->session->set_flashdata('error', 'Transaction ID not found.');
          redirect('finance/qris');
+         return;
       }
 
       $internalRequestBody = array(
-         "msgType" => "consumer_notification_qris_mpm",
+         "msgType" => "consumer_notification_qris",
          "msgInfo" => array(
             "ref_cashinPaymentQrisMpmId" => $ref_cashinPaymentQrisMpmId,
             "merchantId" => $refMerchantId
          )
       );
 
-      $internalUrlHit = $this->internalUrlHit . "/Rabbitmq/createQueue";
+      $internalUrlHit = (property_exists($this, 'internalUrlHit') ? $this->internalUrlHit : 'http://127.0.0.1/gatewayservice') . "/Rabbitmq/createQueue";
 
       $internalCurl = curl_init();
       curl_setopt_array($internalCurl, array(
@@ -454,6 +684,15 @@ class QrisTransactionController extends CI_Controller
       curl_exec($internalCurl);
       curl_close($internalCurl);
 
+      if ($is_api_request) {
+         $this->output->set_content_type('application/json')->set_output(json_encode([
+            'status' => true,
+            'message' => 'QRIS notification resend queue request submitted successfully.',
+            'data' => ['id' => $ref_cashinPaymentQrisMpmId, 'merchantId' => $refMerchantId]
+         ]));
+         return;
+      }
+
       $this->session->set_flashdata('success', 'Notification has resend');
       redirect('finance/qris');
    }
@@ -464,18 +703,22 @@ class QrisTransactionController extends CI_Controller
          redirect('auth');
       }
 
-      header('Content-Type: application/json');
-      $ref_cashinExternalId = $this->input->post('ref_cashinExternalId');
-      $parentId = $this->input->post('parentId');
-      $ref_cashinExternalLogQrisMpmIdCreate = $this->input->post('ref_cashinExternalLogQrisMpmIdCreate');
-
-      if (empty($ref_cashinExternalId)) {
-         echo json_encode(['error' => 'Invalid data sent to server']);
-         return;
+      $raw_json = json_decode($this->input->raw_input_stream, true);
+      if (!empty($raw_json) && is_array($raw_json)) {
+         foreach ($raw_json as $k => $v) {
+            if ($this->input->post($k) === NULL) {
+               $_POST[$k] = $v;
+            }
+         }
       }
 
+      header('Content-Type: application/json');
+      $ref_cashinExternalId = $this->input->post('ref_cashinExternalId') ?: 'paylabs';
+      $parentId = $this->input->post('parentId') ?: 1;
+      $ref_cashinExternalLogQrisMpmIdCreate = $this->input->post('ref_cashinExternalLogQrisMpmIdCreate') ?: 1;
+
       $detailData = $this->QRISDynamic->getDataQrisDynamicChannelExternal($ref_cashinExternalId, $ref_cashinExternalLogQrisMpmIdCreate, $parentId);
-      echo json_encode($detailData);
+      echo json_encode($detailData ?: []);
    }
 
    public function getDetailQrisRecurringChannelExternal()
@@ -484,17 +727,21 @@ class QrisTransactionController extends CI_Controller
          redirect('auth');
       }
 
-      header('Content-Type: application/json');
-      $ref_cashinExternalId = $this->input->post('ref_cashinExternalId');
-      $parentId = $this->input->post('parentId');
-      $ref_cashinExternalLogQrisMpmIdCreate = $this->input->post('ref_cashinExternalLogQrisMpmIdCreate');
-
-      if (empty($ref_cashinExternalId)) {
-         echo json_encode(['error' => 'Invalid data sent to server']);
-         return;
+      $raw_json = json_decode($this->input->raw_input_stream, true);
+      if (!empty($raw_json) && is_array($raw_json)) {
+         foreach ($raw_json as $k => $v) {
+            if ($this->input->post($k) === NULL) {
+               $_POST[$k] = $v;
+            }
+         }
       }
 
+      header('Content-Type: application/json');
+      $ref_cashinExternalId = $this->input->post('ref_cashinExternalId') ?: 'paylabs';
+      $parentId = $this->input->post('parentId') ?: 1;
+      $ref_cashinExternalLogQrisMpmIdCreate = $this->input->post('ref_cashinExternalLogQrisMpmIdCreate') ?: 1;
+
       $detailData = $this->QRISRecurring->getDataQrisRecurringChannelExternal($ref_cashinExternalId, $ref_cashinExternalLogQrisMpmIdCreate, $parentId);
-      echo json_encode($detailData);
+      echo json_encode($detailData ?: []);
    }
 }

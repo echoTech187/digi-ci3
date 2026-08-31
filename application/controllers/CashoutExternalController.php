@@ -40,7 +40,14 @@ class CashoutExternalController extends CI_Controller {
     }
 
     public function ajax_list() {
-        if (!$this->input->is_ajax_request()) return;
+        $raw_json = json_decode($this->input->raw_input_stream, true);
+        if (!empty($raw_json) && is_array($raw_json)) {
+            foreach ($raw_json as $k => $v) {
+                if ($this->input->post($k) === NULL) {
+                    $_POST[$k] = $v;
+                }
+            }
+        }
 
         $search_channel = $this->input->get('search_channel') ?: $this->input->post('search_channel');
         if ($search_channel !== null) {
@@ -49,7 +56,10 @@ class CashoutExternalController extends CI_Controller {
             $search_channel = $this->session->userdata('search_external_cashout');
         }
 
-        return $this->Chanel->getCashoutExternalDataTable($search_channel);
+        $out = $this->Chanel->getCashoutExternalDataTable($search_channel);
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(is_string($out) ? $out : json_encode($out));
     }
 
     public function add_view() {
@@ -85,6 +95,20 @@ class CashoutExternalController extends CI_Controller {
     }
 
     public function add() {
+        $raw_json = json_decode($this->input->raw_input_stream, true);
+        if (!empty($raw_json) && is_array($raw_json)) {
+            foreach ($raw_json as $k => $v) {
+                if ($this->input->get($k) === null && $this->input->post($k) === null) {
+                    $_POST[$k] = $v;
+                }
+            }
+        }
+
+        $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+        $is_api_request = $this->input->is_ajax_request() || strpos($accept, 'json') !== false || $this->input->get('json') == '1' || $this->input->method() === 'post';
+
+
+
         $this->_validate('add');
 
         $data = [
@@ -102,22 +126,50 @@ class CashoutExternalController extends CI_Controller {
 
         $result = $this->Chanel->createCashoutChannelXMerchant($data);
         if ($result === true) {
+            if ($is_api_request) {
+                return $this->output->set_content_type('application/json')->set_output(json_encode([
+                    'status' => true,
+                    'message' => 'Configuration added successfully'
+                ]));
+            }
             $this->session->set_flashdata('success', 'Configuration added successfully');
         } else {
             $code = isset($result['code']) ? $result['code'] : 0;
+            $msg = 'Unable to add configuration due to a system constraint.';
             if ($code == 1142) {
-                $this->session->set_flashdata('error', 'Access Denied. You do not have sufficient database privileges to add external channel configurations.');
+                $msg = 'Access Denied. You do not have sufficient database privileges to add external channel configurations.';
             } elseif ($code == 1062) {
-                $this->session->set_flashdata('warning', 'Failed to add configuration: This merchant already has a configuration for the selected Channel ID.');
-            } else {
-                $this->session->set_flashdata('error', 'Unable to add configuration due to a system constraint. Please verify your input or contact technical support.');
+                $msg = 'Failed to add configuration: This merchant already has a configuration for the selected Channel ID.';
             }
+            if ($is_api_request) {
+                return $this->output->set_content_type('application/json')->set_output(json_encode([
+                    'status' => false,
+                    'message' => $msg
+                ]));
+            }
+            $this->session->set_flashdata('error', $msg);
         }
         redirect('external/cashout');
     }
 
     public function update() {
-        $id = $this->input->post('id');
+        $raw_json = json_decode($this->input->raw_input_stream, true);
+        if (!empty($raw_json) && is_array($raw_json)) {
+            foreach ($raw_json as $k => $v) {
+                if ($this->input->get($k) === null && $this->input->post($k) === null) {
+                    $_POST[$k] = $v;
+                }
+            }
+        }
+
+        $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+        $is_api_request = $this->input->is_ajax_request() || strpos($accept, 'json') !== false || $this->input->get('json') == '1' || $this->input->method() === 'post';
+
+        $id = $this->input->post('id') ?: $this->uri->segment(4);
+        $existing = $id ? $this->db->get_where('cashout_channel_x_merchant', ['id' => $id])->row_array() : null;
+
+
+
         $this->_validate('edit', $id);
 
         $data = [
@@ -135,52 +187,91 @@ class CashoutExternalController extends CI_Controller {
 
         $result = $this->Chanel->updateCashoutChannelXMerchant($id, $data);
         if ($result === true) {
+            if ($is_api_request) {
+                return $this->output->set_content_type('application/json')->set_output(json_encode([
+                    'status' => true,
+                    'message' => 'Configuration updated successfully'
+                ]));
+            }
             $this->session->set_flashdata('success', 'Configuration updated successfully');
         } else {
             $code = isset($result['code']) ? $result['code'] : 0;
+            $msg = 'Unable to update configuration due to a system constraint.';
             if ($code == 1142) {
-                $this->session->set_flashdata('error', 'Access Denied. You do not have sufficient database privileges to modify external channel configurations.');
+                $msg = 'Access Denied. You do not have sufficient database privileges to modify external channel configurations.';
             } elseif ($code == 1062) {
-                $this->session->set_flashdata('warning', 'Failed to update configuration: This merchant already has a configuration for the selected Channel ID.');
-            } else {
-                $this->session->set_flashdata('error', 'Unable to update configuration due to a system constraint. Please verify your input or contact technical support.');
+                $msg = 'Failed to update configuration: This merchant already has a configuration for the selected Channel ID.';
             }
+            if ($is_api_request) {
+                return $this->output->set_content_type('application/json')->set_output(json_encode([
+                    'status' => false,
+                    'message' => $msg
+                ]));
+            }
+            $this->session->set_flashdata('error', $msg);
         }
         redirect('external/cashout');
     }
 
     public function delete($id) {
+        $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+        $is_api_request = $this->input->is_ajax_request() || strpos($accept, 'json') !== false || $this->input->get('json') == '1' || $this->input->method() === 'post';
+
         $result = $this->Chanel->deleteCashoutChannelXMerchant($id);
         if ($result === true) {
+            if ($is_api_request) {
+                return $this->output->set_content_type('application/json')->set_output(json_encode([
+                    'status' => true,
+                    'message' => 'Configuration deleted successfully'
+                ]));
+            }
             $this->session->set_flashdata('success', 'Configuration deleted successfully');
         } else {
             $code = isset($result['code']) ? $result['code'] : 0;
+            $msg = 'Unable to delete configuration due to a system constraint.';
             if ($code == 1142) {
-                $this->session->set_flashdata('error', 'Access Denied. You do not have sufficient database privileges to delete external channel configurations.');
+                $msg = 'Access Denied. You do not have sufficient database privileges to delete external channel configurations.';
             } elseif ($code == 1451) {
-                $this->session->set_flashdata('error', 'Cannot delete this configuration because it is currently linked to existing transaction records.');
-            } else {
-                $this->session->set_flashdata('error', 'Unable to delete configuration due to a system constraint. Please contact technical support.');
+                $msg = 'Cannot delete this configuration because it is currently linked to existing transaction records.';
             }
+            if ($is_api_request) {
+                return $this->output->set_content_type('application/json')->set_output(json_encode([
+                    'status' => false,
+                    'message' => $msg
+                ]));
+            }
+            $this->session->set_flashdata('error', $msg);
         }
         redirect('external/cashout');
     }
 
     public function bulk_update() {
+        $raw_json = json_decode($this->input->raw_input_stream, true);
+        if (!empty($raw_json) && is_array($raw_json)) {
+            foreach ($raw_json as $k => $v) {
+                if ($this->input->get($k) === null && $this->input->post($k) === null) {
+                    $_POST[$k] = $v;
+                }
+            }
+        }
+
+        $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+        $is_api_request = $this->input->is_ajax_request() || strpos($accept, 'json') !== false || $this->input->get('json') == '1' || $this->input->method() === 'post';
+
         $updateType      = $this->input->post('update_type');
-        $merchantId      = $this->input->post('ref_merchantId');
+        $merchantId      = $this->input->post('ref_merchantId') ?: $this->input->post('merchant_id');
         $currentGroup    = $this->input->post('current_group');
-        $currentExternal = $this->input->post('current_externalId');
-        $currentChannel  = $this->input->post('current_cashoutChannelId');
+        $currentExternal = $this->input->post('current_externalId') ?: $this->input->post('current_external_id');
+        $currentChannel  = $this->input->post('current_cashoutChannelId') ?: $this->input->post('current_cashout_channel_id');
         $currentStatus   = $this->input->post('current_status');
         $newGroup        = $this->input->post('new_group');
-        $newExternal     = $this->input->post('new_externalId');
-        $newChannel      = $this->input->post('new_cashoutChannelId');
+        $newExternal     = $this->input->post('new_externalId') ?: $this->input->post('new_external_id');
+        $newChannel      = $this->input->post('new_cashoutChannelId') ?: $this->input->post('new_cashout_channel_id');
         $newStatus       = $this->input->post('new_status');
 
         // Validation: Group is always required
         if (empty($updateType) || empty($currentGroup) || empty($newGroup)) {
-            if ($this->input->is_ajax_request()) {
+            if ($is_api_request) {
                 return $this->output
                     ->set_content_type('application/json')
                     ->set_output(json_encode([
@@ -190,10 +281,11 @@ class CashoutExternalController extends CI_Controller {
             }
             $this->session->set_flashdata('error', 'Update Type, Current Group, and New Group are required');
             redirect('external/cashout');
+            return;
         }
 
         if ($updateType === 'merchant' && (empty($merchantId) || (is_array($merchantId) && count($merchantId) === 0))) {
-            if ($this->input->is_ajax_request()) {
+            if ($is_api_request) {
                 return $this->output
                     ->set_content_type('application/json')
                     ->set_output(json_encode([
@@ -203,6 +295,7 @@ class CashoutExternalController extends CI_Controller {
             }
             $this->session->set_flashdata('error', 'At least one merchant must be selected for Merchant update type');
             redirect('external/cashout');
+            return;
         }
 
         // Check if anything is actually changing
@@ -212,7 +305,7 @@ class CashoutExternalController extends CI_Controller {
         $isStatusChanged = (!empty($newStatus) && $newStatus !== $currentStatus);
 
         if (!$isGroupChanged && !$isExtChanged && !$isChanChanged && !$isStatusChanged) {
-            if ($this->input->is_ajax_request()) {
+            if ($is_api_request) {
                 return $this->output
                     ->set_content_type('application/json')
                     ->set_output(json_encode([
@@ -222,6 +315,7 @@ class CashoutExternalController extends CI_Controller {
             }
             $this->session->set_flashdata('error', 'No changes detected in configuration');
             redirect('external/cashout');
+            return;
         }
 
         $data = [
@@ -240,7 +334,7 @@ class CashoutExternalController extends CI_Controller {
         $result = $this->Chanel->updateCashoutChannelGlobal($data);
         if ($result === true) {
             $msg = ($updateType === 'merchant') ? 'Channel update successful for selected merchant' : 'Global channel group update successful';
-            if ($this->input->is_ajax_request()) {
+            if ($is_api_request) {
                 return $this->output
                     ->set_content_type('application/json')
                     ->set_output(json_encode([
@@ -258,7 +352,7 @@ class CashoutExternalController extends CI_Controller {
             } else {
                 $errMsg = 'Unable to perform bulk channel update due to a system constraint. Please contact technical support.';
             }
-            if ($this->input->is_ajax_request()) {
+            if ($is_api_request) {
                 return $this->output
                     ->set_content_type('application/json')
                     ->set_output(json_encode([
@@ -286,12 +380,29 @@ class CashoutExternalController extends CI_Controller {
         ];
         $this->form_validation->set_rules($rules);
         if ($this->form_validation->run() == FALSE) {
+            $accept = strtolower((string)$this->input->get_request_header('Accept') ?: '');
+            $is_api = $this->input->is_ajax_request() 
+                || strpos($accept, 'json') !== false
+                || strpos(strtolower((string)$this->input->get_request_header('Content-Type')), 'json') !== false
+                || $this->input->get('json') == '1'
+                || $this->input->method() === 'post';
+
+            if ($is_api) {
+                $this->output
+                    ->set_content_type('application/json')
+                    ->set_output(json_encode([
+                        'status' => false,
+                        'message' => trim(strip_tags(validation_errors())) ?: 'Validation error: Missing required fields.'
+                    ]))->_display();
+                exit;
+            }
+
             $this->session->set_flashdata('error', validation_errors());
             if ($mode == 'add') {
                 redirect('external/cashout/create');
-            } else if($mode == 'edit') {
+            } else if($mode == 'edit' && !empty($id)) {
                 redirect('external/cashout/edit/' . $id);
-            }else{
+            } else {
                 redirect('external/cashout');
             }
         }

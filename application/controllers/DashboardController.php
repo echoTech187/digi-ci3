@@ -1,5 +1,11 @@
 <?php defined('BASEPATH') or exit('No direct script access allowed');
 
+/**
+ * @OA\Tag(
+ *     name="Dashboard",
+ *     description="Endpoints untuk statistik dashboard admin, mutasi real-time, metadata, dan status pemeliharaan sistem."
+ * )
+ */
 class DashboardController extends CI_Controller
 {
    public function __construct()
@@ -16,6 +22,16 @@ class DashboardController extends CI_Controller
       is_logged_in();
    }
 
+   /**
+    * @OA\Get(
+    *     path="/dashboard",
+    *     summary="Halaman Utama Dashboard Admin",
+    *     description="Merender tampilan utama dashboard admin beserta komponen statistik agregasi.",
+    *     tags={"Dashboard"},
+    *     @OA\Response(response=200, description="Halaman HTML Dashboard Admin"),
+    *     @OA\Response(response=302, description="Redirect ke /welcome jika tidak berhak akses")
+    * )
+    */
    public function index()
    {
       $role_id = $this->session->userdata('role') ?: $this->session->userdata('role_id');
@@ -78,7 +94,14 @@ class DashboardController extends CI_Controller
 
    public function ajax_today_stats_json()
    {
-      if (!$this->input->is_ajax_request()) return;
+      $raw_json = json_decode($this->input->raw_input_stream, true);
+      if (!empty($raw_json) && is_array($raw_json)) {
+         foreach ($raw_json as $k => $v) {
+            if ($this->input->post($k) === NULL) {
+               $_POST[$k] = $v;
+            }
+         }
+      }
       session_write_close();
       $this->load->model('Dashboard_model');
       $this->load->driver('cache', array('adapter' => 'file'));
@@ -100,7 +123,14 @@ class DashboardController extends CI_Controller
 
    public function ajax_monthly_stats_json()
    {
-      if (!$this->input->is_ajax_request()) return;
+      $raw_json = json_decode($this->input->raw_input_stream, true);
+      if (!empty($raw_json) && is_array($raw_json)) {
+         foreach ($raw_json as $k => $v) {
+            if ($this->input->post($k) === NULL) {
+               $_POST[$k] = $v;
+            }
+         }
+      }
       session_write_close();
       $this->load->model('Dashboard_model');
       $this->load->driver('cache', array('adapter' => 'file'));
@@ -187,7 +217,14 @@ class DashboardController extends CI_Controller
 
    public function ajax_analytics_data_json()
    {
-      if (!$this->input->is_ajax_request()) return;
+      $raw_json = json_decode($this->input->raw_input_stream, true);
+      if (!empty($raw_json) && is_array($raw_json)) {
+         foreach ($raw_json as $k => $v) {
+            if ($this->input->post($k) === NULL) {
+               $_POST[$k] = $v;
+            }
+         }
+      }
       session_write_close();
       
       $period = $this->input->get('period') ?: 'last_7_days';
@@ -356,7 +393,21 @@ class DashboardController extends CI_Controller
    public function syncAvailableBalanceMerchant()
    {
       ini_set('max_execution_time', 600); ini_set('memory_limit', '1024M');
-      $merchant_id = $this->input->get('merchant_id'); $do_update = $this->input->get('do_update') == '1';
+      $raw_json = json_decode($this->input->raw_input_stream, true);
+      if (!empty($raw_json) && is_array($raw_json)) {
+          foreach ($raw_json as $k => $v) {
+              if ($this->input->get($k) === null && $this->input->post($k) === null) {
+                  $_GET[$k] = $v;
+              }
+          }
+      }
+
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      $is_api_request = $this->input->is_ajax_request() || strpos($accept, 'json') !== false || $this->input->get('json') == '1' || $this->input->method() === 'post';
+
+      $merchant_id = $this->input->get('merchant_id') ?: $this->input->post('merchant_id'); 
+      $do_update = ($this->input->get('do_update') == '1' || $this->input->post('do_update') == '1');
+
       $this->db->select('id, c_name, c_balanceTotal, c_balanceHold')->from('merchant')->where('c_status', 'Active');
       if (!empty($merchant_id)) $this->db->where('id', $merchant_id);
       $merchants = $this->db->get()->result_array();
@@ -384,6 +435,19 @@ class DashboardController extends CI_Controller
          }
          $results[] = ['no' => $no++, 'id' => $id, 'name' => $row['c_name'], 'balance_actual' => $balA, 'balance_system' => $upT ? $balA : round($row['c_balanceTotal']), 'hold_actual' => $holdA, 'hold_system' => $upH ? $holdA : round($row['c_balanceHold']), 'updated_total' => $upT, 'updated_hold' => $upH];
       }
+
+      if ($is_api_request) {
+          $this->output->set_content_type('application/json')->set_output(json_encode([
+              'status' => true,
+              'message' => 'Merchant balance synchronization report generated successfully.',
+              'data' => [
+                  'do_update' => $do_update,
+                  'sync_results' => $results
+              ]
+          ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+          return;
+      }
+
       $this->load->view('admin/balance_sync_view', ['sync_results' => $results, 'do_update' => $do_update]);
    }
 

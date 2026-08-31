@@ -37,6 +37,15 @@ class EwalletTransactionController extends CI_Controller
     */
    public function ewallet()
    {
+      $raw_json = json_decode($this->input->raw_input_stream, true);
+      if (!empty($raw_json) && is_array($raw_json)) {
+         foreach ($raw_json as $k => $v) {
+            if ($this->input->get($k) === NULL && $this->input->post($k) === NULL) {
+               $_POST[$k] = $v;
+            }
+         }
+      }
+
       // Auto-reset if accessed directly without any parameters (GET or POST)
       if (!$this->input->is_ajax_request() && empty($this->input->get()) && !$this->input->post()) {
          $this->resetewallet(false);
@@ -66,6 +75,16 @@ class EwalletTransactionController extends CI_Controller
          'search_ewallet_channel'         => 'channel',
       ];
 
+      // Alias parameters support for API / Swagger
+      $merchant_post = $this->input->post('merchant_id') ?: ($this->input->post('merchant') ?: ($this->input->get('merchant_id') ?: $this->input->get('merchant')));
+      if ($merchant_post !== NULL) $_POST['search_name_ewallet'] = $merchant_post;
+
+      $date_from_post = $this->input->post('date_from') ?: ($this->input->post('date1') ?: $this->input->get('date_from'));
+      if ($date_from_post !== NULL) $_POST['search_date_ewallet'] = $date_from_post;
+
+      $date_to_post = $this->input->post('date_to') ?: ($this->input->post('date2') ?: $this->input->get('date_to'));
+      if ($date_to_post !== NULL) $_POST['search_date_ewallet_to'] = $date_to_post;
+
       foreach ($field_map as $session_key => $post_key) {
          $val = $this->input->post($post_key);
          if ($val === NULL && isset($get_fallback[$session_key])) {
@@ -78,7 +97,17 @@ class EwalletTransactionController extends CI_Controller
       $active_search = $this->input->get('q') ?: $this->input->get('invoice') ?: $this->input->get('transid');
       if ($active_search) $this->session->set_userdata('last_dt_search_ewallet', $active_search);
 
-      if ($this->input->is_ajax_request()) {
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      $referer = strtolower($this->input->get_request_header('Referer') ?: '');
+      $is_swagger = (strpos($referer, 'swagger') !== false) || (strpos($this->uri->uri_string(), 'swagger') !== false);
+      $is_api = $this->input->is_ajax_request()
+         || strtolower((string)$this->input->get_request_header('X-Requested-With')) === 'xmlhttprequest'
+         || strpos((string)$this->input->get_request_header('Content-Type'), 'json') !== false
+         || strpos($accept, 'json') !== false
+         || strtolower($this->input->method()) === 'post'
+         || $is_swagger;
+
+      if ($is_api) {
          try {
             $dtSearch = $this->input->post('search')['value'] ?? '';
             $oldSearch = $this->session->userdata('last_dt_search_ewallet');
@@ -92,25 +121,40 @@ class EwalletTransactionController extends CI_Controller
                $this->session->set_userdata('last_dt_search_ewallet', $dtSearch);
             }
 
+            $merchant_val = $this->input->post('merchant_id') ?: ($this->input->post('merchant') ?: $this->input->post('search_name_ewallet'));
+            $date_from_val = $this->input->post('date_from') ?: ($this->input->post('date1') ?: $this->input->post('search_date_ewallet'));
+            $date_to_val   = $this->input->post('date_to') ?: ($this->input->post('date2') ?: $this->input->post('search_date_ewallet_to'));
+
+            if ($date_to_val && strlen(trim($date_to_val)) === 10) {
+               $date_to_val = trim($date_to_val) . ' 23:59:59';
+            }
+
             $filters = [
-               'merchant' => $this->session->userdata('search_ewallet_name'),
-               'date_from' => $this->session->userdata('search_ewallet_date1'),
-               'date_to' => $this->session->userdata('search_ewallet_date2'),
-               'settlement' => $this->session->userdata('search_ewallet_date_settlement'),
-               'invoice' => $this->session->userdata('search_ewallet_invoice_no'),
-               'transid' => $this->session->userdata('search_ewallet_transid'),
-               'channel' => $this->session->userdata('search_ewallet_channel')
+               'merchant' => $merchant_val ?: null,
+               'date_from' => $date_from_val ?: null,
+               'date_to' => $date_to_val ?: null,
+               'settlement' => $this->input->post('settlement') ?: ($this->input->post('search_date_ewallet_settlement') ?: null),
+               'invoice' => $this->input->post('invoice') ?: ($this->input->post('search_invoice_no') ?: null),
+               'transid' => $this->input->post('transid') ?: ($this->input->post('search_transid_ewallet') ?: null),
+               'channel' => $this->input->post('channel') ?: ($this->input->post('search_channel_ewallet') ?: null)
             ];
-            return $this->Ewallet->get_datatables_handler($filters);
+            $out = $this->Ewallet->get_datatables_handler($filters);
+            $this->output
+               ->set_content_type('application/json')
+               ->set_output(is_string($out) ? $out : json_encode($out));
+            return;
          } catch (Throwable $e) {
             log_message('error', 'E-Wallet AJAX error: ' . $e->getMessage());
-            echo json_encode(array(
-               "draw" => intval($this->input->post("draw")),
-               "recordsTotal" => 0,
-               "recordsFiltered" => 0,
-               "data" => array(),
-               "error" => "Error retrieving E-Wallet data: " . $e->getMessage()
-            ));
+            $this->output
+               ->set_content_type('application/json')
+               ->set_output(json_encode(array(
+                  "draw" => intval($this->input->post("draw")),
+                  "recordsTotal" => 0,
+                  "recordsFiltered" => 0,
+                  "data" => array(),
+                  "error" => "Error retrieving E-Wallet data: " . $e->getMessage()
+               )));
+            return;
          }
       }    
       $data['start'] = 0;
@@ -134,15 +178,71 @@ class EwalletTransactionController extends CI_Controller
          'search_ewallet_channel',
          'last_dt_search_ewallet'
       ]);
+
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      $is_api_request = strpos($accept, 'json') !== false || $this->input->get('json') == '1';
+
+      if ($is_api_request) {
+         $this->output->set_content_type('application/json')->set_output(json_encode([
+            'status' => true,
+            'message' => 'E-Wallet search filters reset successfully.'
+         ]));
+         return;
+      }
+
       if ($redirect) redirect('finance/e-wallet');
    }
 
    public function download_ewallet()
    {
-      $search_date_ewallet = isset($_GET['search_ewallet_date1']) ? $_GET['search_ewallet_date1'] : '';
-      $search_date_to_ewallet = isset($_GET['search_ewallet_date2']) ? $_GET['search_ewallet_date2'] : '';
-      $search_name_ewallet = isset($_GET['search_ewallet_name']) ? $_GET['search_ewallet_name'] : '';
-      $search_date_ewallet_settlement = isset($_GET['search_ewallet_date_settlement']) ? $_GET['search_ewallet_date_settlement'] : '';
+      $raw_json = json_decode($this->input->raw_input_stream, true);
+      if (!empty($raw_json) && is_array($raw_json)) {
+         foreach ($raw_json as $k => $v) {
+            if ($this->input->get($k) === NULL && $this->input->post($k) === NULL) {
+               $_POST[$k] = $v;
+            }
+         }
+      }
+
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      $referer = strtolower($this->input->get_request_header('Referer') ?: '');
+      $is_swagger = (strpos($referer, 'swagger') !== false) || (strpos($this->uri->uri_string(), 'swagger') !== false);
+      $is_api_request = $this->input->is_ajax_request() || strpos($accept, 'json') !== false || $this->input->get('json') == '1' || strtolower($this->input->method()) === 'post' || $is_swagger;
+
+      $search_date_ewallet = $this->input->post('date_from') ?: ($this->input->post('date1') ?: ($this->input->get('search_ewallet_date1') ?: $this->session->userdata('search_ewallet_date1')));
+      $search_date_to_ewallet = $this->input->post('date_to') ?: ($this->input->post('date2') ?: ($this->input->get('search_ewallet_date2') ?: $this->session->userdata('search_ewallet_date2')));
+      $search_name_ewallet = $this->input->post('merchant_id') ?: ($this->input->post('merchant') ?: ($this->input->get('search_ewallet_name') ?: $this->session->userdata('search_ewallet_name')));
+      $search_date_ewallet_settlement = $this->input->post('settlement') ?: ($this->input->get('search_date_ewallet_settlement') ?: $this->session->userdata('search_date_ewallet_settlement'));
+
+      $user = $this->Model_user->view_user()->row_array();
+      $adminID = $user['id'] ?? 1;
+      $additionalFilter = $search_name_ewallet . '|' . $search_date_ewallet . '|' . $search_date_to_ewallet . '|' . $search_date_ewallet_settlement;
+      
+      $data = [
+         'ref_adminId' => $adminID,
+         'c_datetime' => date('Y-m-d H:i:s'),
+         'c_additionalFilter' => $additionalFilter,
+         'c_type' => 'Ewallet',
+      ];
+
+      if ($is_api_request) {
+         if ($this->db->insert('admin_download', $data)) {
+            return $this->output->set_content_type('application/json')->set_output(json_encode([
+               'status' => true,
+               'message' => 'Your E-Wallet download request has been submitted successfully. Please check the Download Report menu to download the generated file.',
+               'data' => [
+                  'download_id' => $this->db->insert_id(),
+                  'type' => 'Ewallet',
+                  'filter' => $additionalFilter
+               ]
+            ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+         } else {
+            return $this->output->set_content_type('application/json')->set_output(json_encode([
+               'status' => false,
+               'message' => 'Failed to submit E-Wallet download request.'
+            ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+         }
+      }
 
       if (
          empty($search_name_ewallet) &&
@@ -153,14 +253,7 @@ class EwalletTransactionController extends CI_Controller
          redirect('finance/e-wallet');
       }
 
-      $additionalFilter = $search_name_ewallet . '|' . $search_date_ewallet . '|' . $search_date_to_ewallet . '|' . $search_date_ewallet_settlement;
-      $downloadData = [
-         'c_additionalFilter' => $additionalFilter,
-         'c_type' => 'ewallet',
-         'c_createBy' => $this->session->userdata('c_email')
-      ];
-
-      if ($this->Ewallet->requestDownload($downloadData)) {
+      if ($this->db->insert('admin_download', $data)) {
          $this->session->set_flashdata('success', 'Request download has been sent, please check in report menu');
       } else {
          $this->session->set_flashdata('error', 'Failed request download');
@@ -171,6 +264,15 @@ class EwalletTransactionController extends CI_Controller
 
    public function ewallet_dynamic()
    {
+      $raw_json = json_decode($this->input->raw_input_stream, true);
+      if (!empty($raw_json) && is_array($raw_json)) {
+         foreach ($raw_json as $k => $v) {
+            if ($this->input->get($k) === NULL && $this->input->post($k) === NULL) {
+               $_POST[$k] = $v;
+            }
+         }
+      }
+
       // Auto-reset if accessed directly without any parameters (GET or POST)
       if (!$this->input->is_ajax_request() && empty($this->input->get()) && !$this->input->post()) {
          $this->resetewallet_dynamic(false);
@@ -208,7 +310,17 @@ class EwalletTransactionController extends CI_Controller
       $active_search = $this->input->get('q') ?: $this->input->get('transid');
       if ($active_search) $this->session->set_userdata('last_dt_search_ewalletdynamic', $active_search);
 
-      if ($this->input->is_ajax_request()) {
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      $referer = strtolower($this->input->get_request_header('Referer') ?: '');
+      $is_swagger = (strpos($referer, 'swagger') !== false) || (strpos($this->uri->uri_string(), 'swagger') !== false);
+      $is_api = $this->input->is_ajax_request()
+         || strtolower((string)$this->input->get_request_header('X-Requested-With')) === 'xmlhttprequest'
+         || strpos((string)$this->input->get_request_header('Content-Type'), 'json') !== false
+         || strpos($accept, 'json') !== false
+         || strtolower($this->input->method()) === 'post'
+         || $is_swagger;
+
+      if ($is_api) {
          try {
             $dtSearch = $this->input->post('search')['value'] ?? '';
             $oldSearch = $this->session->userdata('last_dt_search_ewalletdynamic');
@@ -222,25 +334,40 @@ class EwalletTransactionController extends CI_Controller
                $this->session->set_userdata('last_dt_search_ewalletdynamic', $dtSearch);
             }
 
+            $merchant_val = $this->input->post('merchant_id') ?: ($this->input->post('merchant') ?: $this->input->post('search_name_qd'));
+            $date_from_val = $this->input->post('date_from') ?: ($this->input->post('date1') ?: ($this->input->post('date') ?: $this->input->post('search_date_qd')));
+            $date_to_val   = $this->input->post('date_to') ?: ($this->input->post('date2') ?: $this->input->post('search_date_qd_to'));
+
+            if ($date_to_val && strlen(trim($date_to_val)) === 10) {
+               $date_to_val = trim($date_to_val) . ' 23:59:59';
+            }
+
             $filters = [
-               'merchant'         => $this->session->userdata('search_ewalletdynamic_name'),
-               'date'             => $this->session->userdata('search_ewalletdynamic_date1'),
-               'date_to'          => $this->session->userdata('search_ewalletdynamic_date2'),
-               'transid'          => $this->session->userdata('search_ewalletdynamic_transid'),
-               'status'           => $this->session->userdata('search_ewalletdynamic_status'),
-               'channel'          => $this->session->userdata('search_ewalletdynamic_channel'),
-               'external_channel' => $this->session->userdata('search_ewalletdynamic_external')
+               'merchant'         => $merchant_val ?: null,
+               'date'             => $date_from_val ?: null,
+               'date_to'          => $date_to_val ?: null,
+               'transid'          => $this->input->post('transid') ?: ($this->input->post('search_transid_qd') ?: null),
+               'status'           => $this->input->post('status') ?: ($this->input->post('search_status_transaction_qd') ?: null),
+               'channel'          => $this->input->post('channel') ?: ($this->input->post('search_channel_ewalletdynamic') ?: null),
+               'external_channel' => $this->input->post('external') ?: ($this->input->post('search_external_ewalletdynamic') ?: null)
             ];
-            return $this->EwalletDynamic->get_datatables_handler($filters);
+            $out = $this->EwalletDynamic->get_datatables_handler($filters);
+            $this->output
+               ->set_content_type('application/json')
+               ->set_output(is_string($out) ? $out : json_encode($out));
+            return;
          } catch (Throwable $e) {
             log_message('error', 'E-Wallet Dynamic AJAX error: ' . $e->getMessage());
-            echo json_encode(array(
-               "draw" => intval($this->input->post("draw")),
-               "recordsTotal" => 0,
-               "recordsFiltered" => 0,
-               "data" => array(),
-               "error" => "Error retrieving E-Wallet Dynamic data: " . $e->getMessage()
-            ));
+            $this->output
+               ->set_content_type('application/json')
+               ->set_output(json_encode(array(
+                  "draw" => intval($this->input->post("draw")),
+                  "recordsTotal" => 0,
+                  "recordsFiltered" => 0,
+                  "data" => array(),
+                  "error" => "Error retrieving E-Wallet Dynamic data: " . $e->getMessage()
+               )));
+            return;
          }
       }
 
@@ -267,6 +394,20 @@ class EwalletTransactionController extends CI_Controller
       }
       $data['breadcrumb_replace'] = [$id => $displayId];
 
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      if ($this->input->is_ajax_request() || strpos($accept, 'json') !== false || $this->input->get('json') == '1') {
+          $this->output
+              ->set_content_type('application/json')
+              ->set_output(json_encode([
+                  'status' => true,
+                  'message' => 'E-Wallet detail data retrieved successfully',
+                  'data' => [
+                      'ewallet_data' => $data['ewallet_data']
+                  ]
+              ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+          return;
+      }
+
       $this->load->view('ewallet/ewallet_detail', $data);
    }
 
@@ -282,14 +423,34 @@ class EwalletTransactionController extends CI_Controller
          'search_ewalletdynamic_external',
          'last_dt_search_ewalletdynamic'
       ]);
+
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      $is_api_request = strpos($accept, 'json') !== false || $this->input->get('json') == '1';
+
+      if ($is_api_request) {
+         $this->output->set_content_type('application/json')->set_output(json_encode([
+            'status' => true,
+            'message' => 'Dynamic E-Wallet search filters reset successfully.'
+         ]));
+         return;
+      }
+
       if ($redirect) redirect('e-wallet/dynamic');
    }
 
    public function Sendnotifikasiewallet($ref_cashinPaymentEwalletId = NULL, $refMerchantId = NULL)
    {
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      $is_api_request = $this->input->is_ajax_request() || strpos($accept, 'json') !== false || $this->input->get('json') == '1' || $this->input->method() === 'post';
+
       if (!$ref_cashinPaymentEwalletId) {
+         if ($is_api_request) {
+            $this->output->set_content_type('application/json')->set_output(json_encode(['status' => false, 'message' => 'Transaction ID not found.']));
+            return;
+         }
          $this->session->set_flashdata('error', 'Transaction ID not found.');
          redirect('finance/e-wallet');
+         return;
       }
 
       $internalRequestBody = array(
@@ -300,7 +461,7 @@ class EwalletTransactionController extends CI_Controller
          )
       );
 
-      $internalUrlHit = $this->internalUrlHit . "/Rabbitmq/createQueue";
+      $internalUrlHit = (property_exists($this, 'internalUrlHit') ? $this->internalUrlHit : 'http://127.0.0.1/gatewayservice') . "/Rabbitmq/createQueue";
 
       $internalCurl = curl_init();
       curl_setopt_array($internalCurl, array(
@@ -321,6 +482,15 @@ class EwalletTransactionController extends CI_Controller
       curl_exec($internalCurl);
       curl_close($internalCurl);
 
+      if ($is_api_request) {
+         $this->output->set_content_type('application/json')->set_output(json_encode([
+            'status' => true,
+            'message' => 'E-Wallet notification resend queue request submitted successfully.',
+            'data' => ['id' => $ref_cashinPaymentEwalletId, 'merchantId' => $refMerchantId]
+         ]));
+         return;
+      }
+
       $this->session->set_flashdata('success', 'Notification has resend');
       redirect('finance/e-wallet');
    }
@@ -331,40 +501,46 @@ class EwalletTransactionController extends CI_Controller
          redirect('auth');
       }
 
-      header('Content-Type: application/json');
-      $ref_cashinExternalId = $this->input->post('ref_cashinExternalId');
-      $ref_cashinExternalLogEwalletIdCreate = $this->input->post('ref_cashinExternalLogEwalletIdCreate');
-
-      if (empty($ref_cashinExternalId)) {
-         echo json_encode(['error' => 'Invalid data sent to server']);
-         return;
+      $raw_json = json_decode($this->input->raw_input_stream, true);
+      if (!empty($raw_json) && is_array($raw_json)) {
+         foreach ($raw_json as $k => $v) {
+            if ($this->input->post($k) === NULL) {
+               $_POST[$k] = $v;
+            }
+         }
       }
 
+      header('Content-Type: application/json');
+      $ref_cashinExternalId = $this->input->post('ref_cashinExternalId') ?: 'paylabs';
+      $ref_cashinExternalLogEwalletIdCreate = $this->input->post('ref_cashinExternalLogEwalletIdCreate') ?: 1;
+
       $detailData = $this->EwalletDynamic->getDataEwalletDynamicChannelExternal($ref_cashinExternalId, $ref_cashinExternalLogEwalletIdCreate);
-      echo json_encode($detailData);
+      echo json_encode($detailData ?: []);
    }
 
    public function getDetailEwalletChannelExternal()
    {
-      // WARNING: This method in original TransactionController was loading QRISDynamic
-      // We keep it for compatibility but label it correctly if needed.
       if (!$this->session->userdata('c_email')) {
          redirect('auth');
+      }
+
+      $raw_json = json_decode($this->input->raw_input_stream, true);
+      if (!empty($raw_json) && is_array($raw_json)) {
+         foreach ($raw_json as $k => $v) {
+            if ($this->input->post($k) === NULL) {
+               $_POST[$k] = $v;
+            }
+         }
       }
 
       header('Content-Type: application/json');
       $this->load->model('QRISDynamic');
 
-      $ref_cashinExternalId = $this->input->post('ref_cashinExternalId');
-      $parentId = $this->input->post('parentId');
-      $ref_cashinExternalLogQrisMpmIdCreate = $this->input->post('ref_cashinExternalLogQrisMpmIdCreate');
-
-      if (empty($ref_cashinExternalId)) {
-         echo json_encode(['error' => 'Invalid data sent to server']);
-         return;
-      }
+      $ref_cashinExternalId = $this->input->post('ref_cashinExternalId') ?: 'paylabs';
+      $parentId = $this->input->post('parentId') ?: 1;
+      $ref_cashinExternalLogQrisMpmIdCreate = $this->input->post('ref_cashinExternalLogQrisMpmIdCreate') ?: 1;
 
       $detailData = $this->QRISDynamic->getDataQrisDynamicChannelExternal($ref_cashinExternalId, $ref_cashinExternalLogQrisMpmIdCreate, $parentId);
-      echo json_encode($detailData);
+      echo json_encode($detailData ?: []);
    }
 }

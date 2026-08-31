@@ -34,7 +34,22 @@ class MerchantSupervisorController extends CI_Controller
          $search_spv = $this->session->userdata('search_spv');
       }
 
-      if ($this->input->is_ajax_request()) {
+      $raw_json = json_decode($this->input->raw_input_stream, true);
+      if (!empty($raw_json) && is_array($raw_json)) {
+         foreach ($raw_json as $k => $v) {
+            if ($this->input->post($k) === NULL) {
+               $_POST[$k] = $v;
+            }
+         }
+      }
+
+      $is_api = $this->input->is_ajax_request()
+         || strtolower((string)$this->input->get_request_header('X-Requested-With')) === 'xmlhttprequest'
+         || strpos((string)$this->input->get_request_header('Content-Type'), 'json') !== false
+         || strpos((string)$this->input->get_request_header('Accept'), 'json') !== false
+         || $this->input->method() === 'post';
+
+      if ($is_api) {
          try {
             $where = [];
             
@@ -53,16 +68,22 @@ class MerchantSupervisorController extends CI_Controller
                $where['c_created_date <='] = $filter_date_to . ' 23:59:59';
             }
 
-            return $this->Merchant->get_merchant_spv_handler($where, $search_spv_sess);
+            $out = $this->Merchant->get_merchant_spv_handler($where, $search_spv_sess);
+            $this->output
+               ->set_content_type('application/json')
+               ->set_output(is_string($out) ? $out : json_encode($out));
+            return;
          } catch (Exception $e) {
             log_message('error', 'Supervisor AJAX error: ' . $e->getMessage());
-            echo json_encode([
-               "draw" => intval($this->input->post("draw")),
-               "recordsTotal" => 0,
-               "recordsFiltered" => 0,
-               "data" => [],
-               "error" => $e->getMessage()
-            ]);
+            $this->output
+               ->set_content_type('application/json')
+               ->set_output(json_encode([
+                  "draw" => intval($this->input->post("draw")),
+                  "recordsTotal" => 0,
+                  "recordsFiltered" => 0,
+                  "data" => [],
+                  "error" => $e->getMessage()
+               ]));
             return;
          }
       }
@@ -100,6 +121,18 @@ class MerchantSupervisorController extends CI_Controller
       $this->session->unset_userdata('search_spv_status');
       $this->session->unset_userdata('search_spv_date_from');
       $this->session->unset_userdata('search_spv_date_to');
+
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      $is_api_request = strpos($accept, 'json') !== false || $this->input->get('json') == '1';
+
+      if ($is_api_request) {
+         $this->output->set_content_type('application/json')->set_output(json_encode([
+            'status' => true,
+            'message' => 'Merchant supervisor search filters reset successfully.'
+         ]));
+         return;
+      }
+
       redirect("merchant/supervisor");
    }
 
@@ -194,18 +227,43 @@ class MerchantSupervisorController extends CI_Controller
       $this->session->unset_userdata('search_spv_merchant_openapi_status');
       $this->session->unset_userdata('search_spv_merchant_date_from');
       $this->session->unset_userdata('search_spv_merchant_date_to');
+
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      $is_api_request = strpos($accept, 'json') !== false || $this->input->get('json') == '1';
+
+      if ($is_api_request) {
+         $this->output->set_content_type('application/json')->set_output(json_encode([
+            'status' => true,
+            'message' => 'Supervisor merchant list search filters reset successfully.'
+         ]));
+         return;
+      }
+
       redirect("merchant/manage/list/" . $supervisorId);
    }
 
 
    public function registerMerchantSpv() 
    {
+      $raw_json = json_decode($this->input->raw_input_stream, true);
+      if (!empty($raw_json) && is_array($raw_json)) {
+         foreach ($raw_json as $k => $v) {
+            if ($this->input->get($k) === null && $this->input->post($k) === null) {
+               $_POST[$k] = $v;
+            }
+         }
+      }
+
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      $is_api_request = $this->input->is_ajax_request() || strpos($accept, 'json') !== false || $this->input->get('json') == '1' || $this->input->method() === 'post';
+
+
       $this->load->library('MerchantRegistrationService', null, 'MerchantRegistrationService');
       try {
          $result = $this->MerchantRegistrationService->registerSupervisor($this->input->post());
          if ($result === true) {
-            if ($this->input->is_ajax_request()) {
-                echo json_encode(['status' => 'success', 'message' => 'Merchant Supervisor Added Successfully.']);
+            if ($is_api_request) {
+                $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'success', 'message' => 'Merchant Supervisor Added Successfully.']));
                 return;
             }
             $this->session->set_flashdata('success', 'Merchant Supervisor Added Successfully.');
@@ -217,16 +275,16 @@ class MerchantSupervisorController extends CI_Controller
             } elseif ($code == 1062) {
                $msg = 'A supervisor account with this username or email already exists.';
             }
-            if ($this->input->is_ajax_request()) {
-                echo json_encode(['status' => 'error', 'message' => $msg]);
+            if ($is_api_request) {
+                $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'error', 'message' => $msg]));
                 return;
             }
             $this->session->set_flashdata('error', $msg);
          }
          redirect('merchant/supervisor');
       } catch (Exception $e) {
-         if ($this->input->is_ajax_request()) {
-             echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+         if ($is_api_request) {
+             $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'error', 'message' => $e->getMessage()]));
              return;
          }
          $this->session->set_flashdata('error', $e->getMessage());
@@ -238,13 +296,23 @@ class MerchantSupervisorController extends CI_Controller
       }
    }
 
-   public function deleteMerchantSpv($id)
+   public function deleteMerchantSpv($id = null)
    {
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      $is_api_request = $this->input->is_ajax_request() || strpos($accept, 'json') !== false || $this->input->get('json') == '1' || $this->input->method() === 'post';
+
       if (!$id) {
+         if ($is_api_request) {
+            $this->output->set_content_type('application/json')->set_output(json_encode([
+               'status' => false,
+               'message' => 'Supervisor ID missing.'
+            ]));
+            return;
+         }
          $this->session->set_flashdata('error', 'Supervisor ID missing.');
          redirect('merchant/supervisor');
+         return;
       }
-
 
       $this->db->trans_start();
       $this->db->where('c_refSupervisor', $id);
@@ -260,15 +328,29 @@ class MerchantSupervisorController extends CI_Controller
       if (!$successDelete || !$successUpdate) {
          $err = !$successDelete ? $errDelete : $errUpdate;
          $code = isset($err['code']) ? $err['code'] : 0;
+         $msg = 'Unable to delete supervisor account.';
          if ($code == 1142) {
-            $this->session->set_flashdata('error', 'Access Denied. You do not have sufficient database privileges to delete supervisor accounts.');
+            $msg = 'Access Denied. You do not have sufficient database privileges to delete supervisor accounts.';
          } elseif ($code == 1451) {
-            $this->session->set_flashdata('error', 'Cannot delete supervisor because active merchant records are still linked to this account.');
-         } else {
-            $this->session->set_flashdata('error', 'Unable to delete supervisor account due to a system constraint. Please contact technical support.');
+            $msg = 'Cannot delete supervisor because active merchant records are still linked to this account.';
          }
+         if ($is_api_request) {
+            $this->output->set_content_type('application/json')->set_output(json_encode([
+               'status' => false,
+               'message' => $msg
+            ]));
+            return;
+         }
+         $this->session->set_flashdata('error', $msg);
       } else {
-         $this->session->set_flashdata('success', 'Supervisor deleted successfully.');
+         if ($is_api_request) {
+            $this->output->set_content_type('application/json')->set_output(json_encode([
+               'status' => true,
+               'message' => 'Merchant supervisor deleted successfully.'
+            ]));
+            return;
+         }
+         $this->session->set_flashdata('success', 'Merchant supervisor deleted successfully.');
       }
       redirect('merchant/supervisor');
    }
@@ -300,21 +382,35 @@ class MerchantSupervisorController extends CI_Controller
 
    public function updateMerchantSpv($id = null)
    {
+      $raw_json = json_decode($this->input->raw_input_stream, true);
+      if (!empty($raw_json) && is_array($raw_json)) {
+         foreach ($raw_json as $k => $v) {
+            if ($this->input->get($k) === null && $this->input->post($k) === null) {
+               $_POST[$k] = $v;
+            }
+         }
+      }
+
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      $is_api_request = $this->input->is_ajax_request() || strpos($accept, 'json') !== false || $this->input->get('json') == '1' || $this->input->method() === 'post';
+
       if (!$id) {
-         if ($this->input->is_ajax_request()) {
-             echo json_encode(['status' => 'error', 'message' => 'Supervisor ID missing.']);
+         if ($is_api_request) {
+             $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'error', 'message' => 'Supervisor ID missing.']));
              return;
          }
          $this->session->set_flashdata('error', 'Supervisor ID missing.');
          redirect('merchant/supervisor');
+         return;
       }
+
 
       $this->load->library('MerchantRegistrationService', null, 'MerchantRegistrationService');
       try {
          $result = $this->MerchantRegistrationService->updateSupervisor($id, $this->input->post());
          if ($result === true) {
-            if ($this->input->is_ajax_request()) {
-                echo json_encode(['status' => 'success', 'message' => 'Merchant Supervisor Updated Successfully.']);
+            if ($is_api_request) {
+                $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'success', 'message' => 'Merchant Supervisor Updated Successfully.']));
                 return;
             }
             $this->session->set_flashdata('success', 'Merchant Supervisor Updated Successfully.');
@@ -326,21 +422,23 @@ class MerchantSupervisorController extends CI_Controller
             } elseif ($code == 1062) {
                $msg = 'A supervisor account with this username or email already exists.';
             }
-            if ($this->input->is_ajax_request()) {
-                echo json_encode(['status' => 'error', 'message' => $msg]);
+            if ($is_api_request) {
+                $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'error', 'message' => $msg]));
                 return;
             }
             $this->session->set_flashdata('error', $msg);
          }
       } catch (Exception $e) {
-         if ($this->input->is_ajax_request()) {
-             echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+         if ($is_api_request) {
+             $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'error', 'message' => $e->getMessage()]));
              return;
          }
          $this->session->set_flashdata('error', $e->getMessage());
       }
       redirect('merchant/supervisor');
    }
+
+
 
    public function fetchMerchantPermissions($merchantId = null)
    {
@@ -393,7 +491,16 @@ class MerchantSupervisorController extends CI_Controller
 
    public function saveDelegation($merchantId)
    {
-      $merchantId =$merchantId ?? $this->input->post('merchantId');
+      $raw_json = json_decode($this->input->raw_input_stream, true);
+      if (!empty($raw_json) && is_array($raw_json)) {
+         foreach ($raw_json as $k => $v) {
+            if ($this->input->get($k) === null && $this->input->post($k) === null) {
+               $_POST[$k] = $v;
+            }
+         }
+      }
+
+      $merchantId = $merchantId ?? $this->input->post('merchantId');
       if (!$merchantId) {
          echo json_encode(['status' => 'error', 'message' => 'ID missing']);
          return;
@@ -402,9 +509,14 @@ class MerchantSupervisorController extends CI_Controller
       if (!empty($permissions) && is_array($permissions)) {
          $successCount = 0;
          foreach ($permissions as $permId => $action) {
-            if ($this->Merchant->save_merchant_delegation($merchantId, $permId, $action)) $successCount++;
+            $res = $this->Merchant->save_merchant_delegation($merchantId, $permId, $action);
+            if ($res === true || (is_numeric($res) && $res > 0)) $successCount++;
          }
-         echo json_encode(['status' => 'success', 'message' => "$successCount updated"]);
+         if ($successCount > 0) {
+            echo json_encode(['status' => 'success', 'message' => "$successCount updated"]);
+         } else {
+            echo json_encode(['status' => 'error', 'message' => 'Failed to update. Verify Merchant ID exists in database.']);
+         }
       } else {
          echo json_encode(['status' => 'error', 'message' => 'No data']);
       }

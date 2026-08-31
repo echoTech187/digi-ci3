@@ -394,7 +394,8 @@ class GlobalSearchController extends CI_Controller
             exit('No direct script access allowed');
         }
 
-        $merchant_id = $this->input->get('merchant_id') ?: $this->input->post('merchant_id');
+        $raw_json = json_decode($this->input->raw_input_stream, true);
+        $merchant_id = $this->input->get('merchant_id') ?: $this->input->post('merchant_id') ?: ($raw_json['merchant_id'] ?? null);
 
         if (!$merchant_id) {
             echo json_encode(['status' => 'error', 'message' => 'Merchant ID is required']);

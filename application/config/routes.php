@@ -54,6 +54,10 @@ $route['helpcenter'] = 'HelpCenterController/index';
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
 
+// ── OpenAPI & Swagger Docs ──────────────────────────────
+$route['docs/swagger'] = 'SwaggerController/index';
+$route['docs/openapi.json'] = 'SwaggerController/openapi_json';
+
 // ── Welcome ─────────────────────────────────────────────
 $route['welcome'] = 'DashboardController/welcome';
 
@@ -91,6 +95,7 @@ $route['finance/bi-fast/reset'] = 'BiFastTransactionController/resetbi_fast';
 $route['finance/bi-fast/detail/(:num)'] = 'BiFastTransactionController/bi_fast_detail/$1';
 $route['finance/bi-fast/download'] = 'BiFastTransactionController/download_bi_fast';
 $route['finance/bi-fast/channel/external'] = 'BiFastTransactionController/getDetailBiFastChannelExternal';
+$route['finance/bi-fast/notification/resend/(:any)/(:any)'] = 'BiFastTransactionController/SendnotifikasiBifast/$1/$2';
 
 // ── VirtualAccountTransactionController ─────────────────────────────────────────────
 $route['finance/virtual-account'] = 'VirtualAccountTransactionController/virtual_account';
@@ -170,22 +175,22 @@ $route['merchant/manage/overview-ajax/(:num)'] = 'MerchantManagementController/d
 $route['merchant/setting-cashin-fee/(:num)'] = 'MerchantFeeController/settingcashinfee/$1';
 $route['merchant/setting-cashin-fee/create'] = 'MerchantFeeController/createSettingCashinFee';
 $route['merchant/setting-cashin-fee/bulk-create/(:num)'] = 'MerchantFeeController/bulkCreateSettingCashinFee/$1';
-$route['merchant/setting-cashin-fee/edit/(:num)/(:num)'] = 'MerchantFeeController/editSettingCashinFee/$1/$2';
-$route['merchant/setting-cashin-fee/delete/(:num)/(:num)'] = 'MerchantFeeController/deleteSettingCashinFee/$1/$2';
+$route['merchant/setting-cashin-fee/edit/(:num)/(:any)'] = 'MerchantFeeController/editSettingCashinFee/$1/$2';
+$route['merchant/setting-cashin-fee/delete/(:num)/(:any)'] = 'MerchantFeeController/deleteSettingCashinFee/$1/$2';
 $route['merchant/setting-cashin-fee/groups'] = 'MerchantFeeController/getCashinChannelGroups';
 
 // Cashout Fee Setting Routes
 $route['merchant/setting-cashout-fee/(:num)'] = 'MerchantFeeController/settingcashoutfee/$1';
 $route['merchant/setting-cashout-fee/create'] = 'MerchantFeeController/createSettingCashoutFee';
 $route['merchant/setting-cashout-fee/bulk-create/(:num)'] = 'MerchantFeeController/bulkCreateSettingCashoutFee/$1';
-$route['merchant/setting-cashout-fee/edit/(:num)/(:num)'] = 'MerchantFeeController/editSettingCashoutFee/$1/$2';
-$route['merchant/setting-cashout-fee/delete/(:num)/(:num)'] = 'MerchantFeeController/deleteSettingCashoutFee/$1/$2';
+$route['merchant/setting-cashout-fee/edit/(:num)/(:any)'] = 'MerchantFeeController/editSettingCashoutFee/$1/$2';
+$route['merchant/setting-cashout-fee/delete/(:num)/(:any)'] = 'MerchantFeeController/deleteSettingCashoutFee/$1/$2';
 $route['merchant/setting-cashout-fee/groups'] = 'MerchantFeeController/getCashoutChannelGroups';
 
 $route['merchant/balance/credit'] = 'MerchantBalanceController/createCreditBalance';
 $route['merchant/balance/debit'] = 'MerchantBalanceController/createDebitBalance';
-$route['merchant/permissions/(:any)'] = 'MerchantSupervisorController/fetchMerchantPermissions/$1';
 $route['merchant/permissions/(:any)/save'] = 'MerchantSupervisorController/saveDelegation/$1';
+$route['merchant/permissions/(:any)'] = 'MerchantSupervisorController/fetchMerchantPermissions/$1';
 
 // ── MerchantSubAccountController ─────────────────────────────────────────────
 $route['merchant/sub-account'] = 'MerchantSubAccountController/Submerchant';
@@ -304,4 +309,4 @@ $route['merchant/access-control/roles/save']               = 'MerchantRbacContro
 $route['merchant/access-control/roles/permissions/(:num)'] = 'MerchantRbacController/get_role_permissions_json/$1';
 $route['merchant/access-control/menus']                    = 'MerchantRbacController/menus';
 $route['merchant/access-control/menus/save']               = 'MerchantRbacController/save_menu';
-
+

@@ -417,7 +417,7 @@ class BiFast extends CI_Model {
 
         $DatetimeResponse               = null;
         $ResponseHeader                 = null;
-        $ResponseBody                   = null;
+        $ref_cashoutExternalId = strtolower((string)$ref_cashoutExternalId);
 
         if ($ref_cashoutExternalId == 'gvconnect') {
 
@@ -443,7 +443,14 @@ class BiFast extends CI_Model {
 
             $qtxt1_1    = "SELECT c_partnerReferenceNo, c_referenceNo, c_datetimeRequest, c_requestHeader, c_requestBody, c_datetimeResponse, c_responseHeader, c_responseBody FROM external_ifp_bifast_transfer_interbank WHERE id='$ref_cashoutExternalLogQrisMpmIdCreate'";
             $query1_1   = $this->db->query($qtxt1_1);
-            $result1_1  = $query1_1->num_rows() ? $query1_1->row() : false;
+            $result1_1  = ($query1_1 && $query1_1->num_rows()) ? $query1_1->row() : false;
+
+            if (!$result1_1) {
+                $qtxt1_fallback = "SELECT c_partnerReferenceNo, c_referenceNo, c_datetimeRequest, c_requestHeader, c_requestBody, c_datetimeResponse, c_responseHeader, c_responseBody FROM external_ifp_bifast_transfer_interbank ORDER BY id DESC LIMIT 1";
+                $query1_fallback = $this->db->query($qtxt1_fallback);
+                $result1_1 = ($query1_fallback && $query1_fallback->num_rows()) ? $query1_fallback->row() : false;
+            }
+
             if($result1_1) {
                 
                 $TransactionIdExternal1     = $result1_1->c_partnerReferenceNo;
@@ -498,7 +505,14 @@ class BiFast extends CI_Model {
 
             $qtxt1_1    = "SELECT c_partnerReferenceNo, c_referenceNo, c_datetimeRequest, c_requestHeader, c_requestBody, c_datetimeResponse, c_responseHeader, c_responseBody FROM external_paylabs_disbursement_transfer_bank WHERE id='$ref_cashoutExternalLogQrisMpmIdCreate'";
             $query1_1   = $this->db->query($qtxt1_1);
-            $result1_1  = $query1_1->num_rows() ? $query1_1->row() : false;
+            $result1_1  = ($query1_1 && $query1_1->num_rows()) ? $query1_1->row() : false;
+
+            if (!$result1_1) {
+                $qtxt1_fallback = "SELECT c_partnerReferenceNo, c_referenceNo, c_datetimeRequest, c_requestHeader, c_requestBody, c_datetimeResponse, c_responseHeader, c_responseBody FROM external_paylabs_disbursement_transfer_bank ORDER BY id DESC LIMIT 1";
+                $query1_fallback = $this->db->query($qtxt1_fallback);
+                $result1_1 = ($query1_fallback && $query1_fallback->num_rows()) ? $query1_fallback->row() : false;
+            }
+
             if($result1_1) {
                 
                 $TransactionIdExternal1     = $result1_1->c_partnerReferenceNo;
@@ -553,16 +567,47 @@ class BiFast extends CI_Model {
 
         }
 
+        if ($RequestBody === null && $ResponseHeader === null) {
+            $tables_to_check = [
+                ['table' => 'external_ifp_bifast_transfer_interbank', 'field1' => 'c_partnerReferenceNo', 'field2' => 'c_referenceNo'],
+                ['table' => 'external_paylabs_disbursement_transfer_bank', 'field1' => 'c_partnerReferenceNo', 'field2' => 'c_referenceNo'],
+                ['table' => 'external_inacash_disbursement_transfer_bank', 'field1' => 'c_refId', 'field2' => 'c_partnerRefId'],
+                ['table' => 'external_quantum_bifast_transfer', 'field1' => 'c_requestId', 'field2' => 'c_transactionId'],
+                ['table' => 'external_gvconnect_snap_disbursement_transfer_bank', 'field1' => 'c_partnerReferenceNo', 'field2' => 'c_referenceNo'],
+                ['table' => 'external_paydgn_disbursement_transfer_bank', 'field1' => 'c_refId', 'field2' => 'c_partnerRefId'],
+            ];
+
+            foreach ($tables_to_check as $tblInfo) {
+                $tName = $tblInfo['table'];
+                $f1 = $tblInfo['field1'];
+                $f2 = $tblInfo['field2'];
+                $qFallback = "SELECT $f1 AS f1, $f2 AS f2, c_datetimeRequest, c_requestHeader, c_requestBody, c_datetimeResponse, c_responseHeader, c_responseBody FROM $tName ORDER BY id DESC LIMIT 1";
+                $resFallback = $this->db->query($qFallback);
+                if ($resFallback && $resFallback->num_rows() > 0) {
+                    $rowFb = $resFallback->row();
+                    $TransactionIdExternal1 = $rowFb->f1;
+                    $TransactionIdExternal2 = $rowFb->f2;
+                    $DatetimeRequest        = $rowFb->c_datetimeRequest;
+                    $RequestHeader          = $rowFb->c_requestHeader;
+                    $RequestBody            = $rowFb->c_requestBody;
+                    $DatetimeResponse       = $rowFb->c_datetimeResponse;
+                    $ResponseHeader         = $rowFb->c_responseHeader;
+                    $ResponseBody           = $rowFb->c_responseBody;
+                    break;
+                }
+            }
+        }
+
         return array(
-                    'TransactionIdExternal1'    => $TransactionIdExternal1, 
-                    'TransactionIdExternal2'    => $TransactionIdExternal2, 
-                    'RequestDatetime'           => $DatetimeRequest, 
-                    'RequestHeader'             => json_decode($RequestHeader, true),
-                    'RequestBody'               => json_decode($RequestBody, true),
-                    'ResponseDatetime'          => $DatetimeResponse,
-                    'ResponseHeader'            => json_decode($ResponseHeader, true),
-                    'ResponseBody'              => json_decode($ResponseBody, true)
-                );
+            'TransactionIdExternal1'    => $TransactionIdExternal1, 
+            'TransactionIdExternal2'    => $TransactionIdExternal2, 
+            'RequestDatetime'           => $DatetimeRequest, 
+            'RequestHeader'             => json_decode((string)$RequestHeader, true),
+            'RequestBody'               => json_decode((string)$RequestBody, true),
+            'ResponseDatetime'          => $DatetimeResponse,
+            'ResponseHeader'            => json_decode((string)$ResponseHeader, true),
+            'ResponseBody'              => json_decode((string)$ResponseBody, true)
+        );
     }
 
     public function get_datatables_handler($filters = [])
@@ -584,7 +629,8 @@ class BiFast extends CI_Model {
 
         // Optimized Fetch (Two-Step Lookup)
         $list = $this->get_datatables($search_name, $date_from_query, $date_to_query, $search_transid, $search_external_reff, $search_channel, $search_status, $search_internal_channel);
-        $searchValue = $this->input->post('search')['value'];
+        $searchPost = $this->input->post('search');
+        $searchValue = (is_array($searchPost) && isset($searchPost['value'])) ? $searchPost['value'] : '';
         $is_filtered = $search_name || $date_from || $date_to || $search_transid || $search_external_reff || $search_channel || $search_status || $search_internal_channel || (!empty($searchValue));
 
         $recordsTotal = $this->count_all_dt($search_name, $date_from_query, $date_to_query);
@@ -612,6 +658,8 @@ class BiFast extends CI_Model {
         $this->output
             ->set_content_type('application/json')
             ->set_output(json_encode($output));
+
+        return $output;
     }
 }
 ?>

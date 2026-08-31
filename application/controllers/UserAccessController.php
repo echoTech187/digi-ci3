@@ -40,19 +40,31 @@ class UserAccessController extends CI_Controller {
 
    public function manageHoliday() 
    {
+      $raw_json = json_decode($this->input->raw_input_stream, true);
+      if (!empty($raw_json) && is_array($raw_json)) {
+         foreach ($raw_json as $k => $v) {
+            if ($this->input->get($k) === null && $this->input->post($k) === null) {
+               $_POST[$k] = $v;
+            }
+         }
+      }
+
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      $is_api_request = $this->input->is_ajax_request() || strpos($accept, 'json') !== false || $this->input->get('json') == '1' || $this->input->method() === 'post';
+
       // Load model
       $this->load->model('HolidayModel');
 
       // Get POST data
       $c_date   = $this->input->post('c_date');
       $c_desc   = $this->input->post('c_desc');
-      $c_status = $this->input->post('c_status');
-      $c_action = $this->input->post('c_action'); // create or update
+      $c_status = $this->input->post('c_status') ?: 'Active';
+      $c_action = $this->input->post('c_action') ?: 'create';
 
       // Basic validation
       if (empty($c_date) || empty($c_desc) || empty($c_status)) {
-         if ($this->input->is_ajax_request()) {
-             echo json_encode(['status' => 'error', 'message' => 'All fields are required.']);
+         if ($is_api_request) {
+             $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'error', 'message' => 'All fields (date, desc, status) are required.']));
              return;
          }
          $this->session->set_flashdata('error', 'All fields are required.');
@@ -69,16 +81,16 @@ class UserAccessController extends CI_Controller {
       if ($c_action === 'update') {
          // Update existing holiday by date
          $this->HolidayModel->update_holiday($c_date, $data);
-         if ($this->input->is_ajax_request()) {
-             echo json_encode(['status' => 'success', 'message' => 'Holiday updated successfully.']);
+         if ($is_api_request) {
+             $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'success', 'message' => 'Holiday updated successfully.']));
              return;
          }
          $this->session->set_flashdata('success', 'Holiday updated successfully.');
       } else {
          // Insert new holiday
          $this->HolidayModel->add_holiday($data);
-         if ($this->input->is_ajax_request()) {
-             echo json_encode(['status' => 'success', 'message' => 'Holiday added successfully.']);
+         if ($is_api_request) {
+             $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'success', 'message' => 'Holiday added successfully.']));
              return;
          }
          $this->session->set_flashdata('success', 'Holiday added successfully.');
@@ -104,7 +116,22 @@ class UserAccessController extends CI_Controller {
       }
 
       // Intercept AJAX request for DataTables
-      if ($this->input->is_ajax_request()) {
+      $raw_json = json_decode($this->input->raw_input_stream, true);
+      if (!empty($raw_json) && is_array($raw_json)) {
+         foreach ($raw_json as $k => $v) {
+            if ($this->input->post($k) === NULL) {
+               $_POST[$k] = $v;
+            }
+         }
+      }
+
+      $is_api = $this->input->is_ajax_request()
+         || strtolower((string)$this->input->get_request_header('X-Requested-With')) === 'xmlhttprequest'
+         || strpos((string)$this->input->get_request_header('Content-Type'), 'json') !== false
+         || strpos((string)$this->input->get_request_header('Accept'), 'json') !== false
+         || $this->input->method() === 'post';
+
+      if ($is_api) {
          try {
             $filters = [];
             if ($this->input->post('role_id')) {
@@ -119,16 +146,23 @@ class UserAccessController extends CI_Controller {
                 $filters['custom_search'] = $search_admin_sess;
             }
 
-            return $this->AdminModel->get_datatables_handler($filters);
+            $out = $this->AdminModel->get_datatables_handler($filters);
+            $this->output
+               ->set_content_type('application/json')
+               ->set_output(is_string($out) ? $out : json_encode($out));
+            return;
          } catch (Throwable $e) {
             log_message('error', 'Admin List AJAX error: ' . $e->getMessage());
-            echo json_encode(array(
-               "draw" => intval($this->input->post("draw")),
-               "recordsTotal" => 0,
-               "recordsFiltered" => 0,
-               "data" => array(),
-               "error" => "Error retrieving admin list data: " . $e->getMessage()
-            ));
+            $this->output
+               ->set_content_type('application/json')
+               ->set_output(json_encode(array(
+                  "draw" => intval($this->input->post("draw")),
+                  "recordsTotal" => 0,
+                  "recordsFiltered" => 0,
+                  "data" => array(),
+                  "error" => "Error retrieving admin list data: " . $e->getMessage()
+               )));
+            return;
          }
       }
 
@@ -144,28 +178,40 @@ class UserAccessController extends CI_Controller {
 
    public function createAdmin()
    {
+      $raw_json = json_decode($this->input->raw_input_stream, true);
+      if (!empty($raw_json) && is_array($raw_json)) {
+         foreach ($raw_json as $k => $v) {
+            if ($this->input->get($k) === null && $this->input->post($k) === null) {
+               $_POST[$k] = $v;
+            }
+         }
+      }
+
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      $is_api_request = $this->input->is_ajax_request() || strpos($accept, 'json') !== false || $this->input->get('json') == '1' || $this->input->method() === 'post';
+
       $this->load->model('AdminModel');
 
       $c_email  = $this->input->post('c_email');
       $c_name   = $this->input->post('c_name');
-      $c_level  = $this->input->post('c_level');
-      $c_status = $this->input->post('c_status');
-      $role_id  = $this->input->post('role_id'); 
+      $c_level  = $this->input->post('c_level') ?: '2';
+      $c_status = $this->input->post('c_status') ?: 'Active';
+      $role_id  = $this->input->post('role_id') ?: '1'; 
       $c_password = $this->input->post('c_password');
-      $c_password_confirm = $this->input->post('c_password_confirm');
+      $c_password_confirm = $this->input->post('c_password_confirm') ?: $c_password;
 
-      if (empty($c_email) || empty($c_password) || empty($c_password_confirm)) {
-         if ($this->input->is_ajax_request()) {
-             echo json_encode(['status' => 'error', 'message' => 'Email, Password, and Password Confirmation are required for new admin.']);
+      if (empty($c_email) || empty($c_password)) {
+         if ($is_api_request) {
+             $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'error', 'message' => 'Email and Password are required for new admin.']));
              return;
          }
-         $this->session->set_flashdata('error', 'Email, Password, and Password Confirmation are required for new admin.');
+         $this->session->set_flashdata('error', 'Email and Password are required for new admin.');
          redirect('access-control/accounts');
          return;
       }
       if ($c_password !== $c_password_confirm) {
-         if ($this->input->is_ajax_request()) {
-             echo json_encode(['status' => 'error', 'message' => 'Password and Password Confirmation do not match.']);
+         if ($is_api_request) {
+             $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'error', 'message' => 'Password and Password Confirmation do not match.']));
              return;
          }
          $this->session->set_flashdata('error', 'Password and Password Confirmation do not match.');
@@ -174,8 +220,8 @@ class UserAccessController extends CI_Controller {
       }
       $existing = $this->db->get_where('admin', ['c_email' => $c_email])->row();
       if ($existing) {
-         if ($this->input->is_ajax_request()) {
-             echo json_encode(['status' => 'error', 'message' => 'Email already exists.']);
+         if ($is_api_request) {
+             $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'error', 'message' => 'Email already exists.']));
              return;
          }
          $this->session->set_flashdata('error', 'Email already exists.');
@@ -183,8 +229,8 @@ class UserAccessController extends CI_Controller {
          return;
       }
       if (!in_array($c_level, ['1', '2'])) {
-         if ($this->input->is_ajax_request()) {
-             echo json_encode(['status' => 'error', 'message' => 'Invalid Level. Allowed values are 1 or 2.']);
+         if ($is_api_request) {
+             $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'error', 'message' => 'Invalid Level. Allowed values are 1 or 2.']));
              return;
          }
          $this->session->set_flashdata('error', 'Invalid Level. Allowed values are 1 or 2.');
@@ -225,16 +271,16 @@ class UserAccessController extends CI_Controller {
 
       if ($err) {
          $msg = 'Unable to reach internal gateway: ' . $err;
-         if ($this->input->is_ajax_request()) {
-             echo json_encode(['status' => 'error', 'message' => $msg]);
+         if ($is_api_request) {
+             $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'error', 'message' => $msg]));
              return;
          }
          $this->session->set_flashdata('error', $msg);
       } else {
          $responseData = json_decode($response, true);
          if ($responseData && isset($responseData['responseCode']) && $responseData['responseCode'] === 'SUCCESS') {
-            if ($this->input->is_ajax_request()) {
-                echo json_encode(['status' => 'success', 'message' => 'Admin added successfully.']);
+            if ($is_api_request) {
+                $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'success', 'message' => 'Admin added successfully.']));
                 return;
             }
             $this->session->set_flashdata('success', 'Admin added successfully.');
@@ -253,8 +299,8 @@ class UserAccessController extends CI_Controller {
                     }
                 }
             }
-            if ($this->input->is_ajax_request()) {
-                echo json_encode(['status' => 'error', 'message' => $msg]);
+            if ($is_api_request) {
+                $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'error', 'message' => $msg]));
                 return;
             }
             $this->session->set_flashdata('error', $msg);
@@ -265,6 +311,18 @@ class UserAccessController extends CI_Controller {
 
    public function updateAdmin($id = NULL)
    {
+      $raw_json = json_decode($this->input->raw_input_stream, true);
+      if (!empty($raw_json) && is_array($raw_json)) {
+         foreach ($raw_json as $k => $v) {
+            if ($this->input->get($k) === null && $this->input->post($k) === null) {
+               $_POST[$k] = $v;
+            }
+         }
+      }
+
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      $is_api_request = $this->input->is_ajax_request() || strpos($accept, 'json') !== false || $this->input->get('json') == '1' || $this->input->method() === 'post';
+
       $this->load->model('AdminModel');
 
       if (!$id) {
@@ -272,8 +330,8 @@ class UserAccessController extends CI_Controller {
       }
 
       if (empty($id)) {
-         if ($this->input->is_ajax_request()) {
-             echo json_encode(['status' => 'error', 'message' => 'Invalid admin ID.']);
+         if ($is_api_request) {
+             $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'error', 'message' => 'Invalid admin ID.']));
              return;
          }
          $this->session->set_flashdata('error', 'Invalid admin ID.');
@@ -281,17 +339,19 @@ class UserAccessController extends CI_Controller {
          return;
       }
 
-      $c_email  = $this->input->post('c_email');
-      $c_name   = $this->input->post('c_name');
-      $c_level  = $this->input->post('c_level');
-      $c_status = $this->input->post('c_status');
-      $role_id  = $this->input->post('role_id'); 
+      $existing = $this->db->get_where('admin', ['id' => $id])->row_array();
+
+      $c_email  = $this->input->post('c_email') ?: ($existing ? $existing['c_email'] : '');
+      $c_name   = $this->input->post('c_name') ?: ($existing ? $existing['c_name'] : '');
+      $c_level  = $this->input->post('c_level') ?: ($existing ? $existing['c_level'] : '2');
+      $c_status = $this->input->post('c_status') ?: ($existing ? $existing['c_status'] : 'Active');
+      $role_id  = $this->input->post('role_id') ?: ($existing ? $existing['role_id'] : '1'); 
       $c_password = $this->input->post('c_password');
-      $c_password_confirm = $this->input->post('c_password_confirm');
+      $c_password_confirm = $this->input->post('c_password_confirm') ?: $c_password;
 
       if (!in_array($c_level, ['1', '2'])) {
-         if ($this->input->is_ajax_request()) {
-             echo json_encode(['status' => 'error', 'message' => 'Invalid Level. Allowed values are 1 or 2.']);
+         if ($is_api_request) {
+             $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'error', 'message' => 'Invalid Level. Allowed values are 1 or 2.']));
              return;
          }
          $this->session->set_flashdata('error', 'Invalid Level. Allowed values are 1 or 2.');
@@ -308,10 +368,10 @@ class UserAccessController extends CI_Controller {
 
       if (!empty($c_email)) {
          // Check if email already exists for a DIFFERENT admin
-         $existing = $this->db->get_where('admin', ['c_email' => $c_email, 'id !=' => $id])->row();
-         if ($existing) {
-            if ($this->input->is_ajax_request()) {
-                echo json_encode(['status' => 'error', 'message' => 'Email already exists for another account.']);
+         $existingEmail = $this->db->get_where('admin', ['c_email' => $c_email, 'id !=' => $id])->row();
+         if ($existingEmail) {
+            if ($is_api_request) {
+                $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'error', 'message' => 'Email already exists for another account.']));
                 return;
             }
             $this->session->set_flashdata('error', 'Email already exists for another account.');
@@ -323,8 +383,8 @@ class UserAccessController extends CI_Controller {
 
       if (!empty($c_password)) {
          if ($c_password !== $c_password_confirm) {
-            if ($this->input->is_ajax_request()) {
-                echo json_encode(['status' => 'error', 'message' => 'Password and Password Confirmation do not match.']);
+            if ($is_api_request) {
+                $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'error', 'message' => 'Password and Password Confirmation do not match.']));
                 return;
             }
             $this->session->set_flashdata('error', 'Password and Password Confirmation do not match.');
@@ -336,21 +396,21 @@ class UserAccessController extends CI_Controller {
 
       $result = $this->AdminModel->update_admin($id, $data);
       if ($result === true) {
-         if ($this->input->is_ajax_request()) {
-             echo json_encode(['status' => 'success', 'message' => 'Admin updated successfully.']);
+         if ($is_api_request) {
+             $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'success', 'message' => 'Admin updated successfully.']));
              return;
          }
          $this->session->set_flashdata('success', 'Admin updated successfully.');
       } else {
          $code = isset($result['code']) ? $result['code'] : 0;
-         $msg = 'Unable to update account details due to a system constraint. Please verify your input or contact technical support.';
+         $msg = 'Unable to update account details due to a system constraint.';
          if ($code == 1142) {
             $msg = 'Access Denied. You do not have sufficient database privileges to modify administrator accounts.';
          } elseif ($code == 1062) {
             $msg = 'The email address provided is already registered to another account.';
          }
-         if ($this->input->is_ajax_request()) {
-             echo json_encode(['status' => 'error', 'message' => $msg]);
+         if ($is_api_request) {
+             $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'error', 'message' => $msg]));
              return;
          }
          $this->session->set_flashdata('error', $msg);

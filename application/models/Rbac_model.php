@@ -61,34 +61,66 @@ class Rbac_model extends CI_Model {
     }
 
     public function createRole($data) {
+        $db_debug = $this->db->db_debug;
+        $this->db->db_debug = FALSE;
         $this->db->insert('rbac_roles', $data);
-        return $this->db->insert_id();
+        $insert_id = $this->db->insert_id();
+        $this->db->db_debug = $db_debug;
+        return $insert_id;
     }
 
     public function updateRole($roleId, $data) {
-        return $this->db->where('id', $roleId)->update('rbac_roles', $data);
+        $db_debug = $this->db->db_debug;
+        $this->db->db_debug = FALSE;
+        $res = $this->db->where('id', $roleId)->update('rbac_roles', $data);
+        $this->db->db_debug = $db_debug;
+        return $res;
     }
 
     public function deleteRole($roleId) {
         $role = $this->getRoleById($roleId);
         if ($role && !$role['c_isSystem']) {
-            return $this->db->where('id', $roleId)->delete('rbac_roles');
+            $db_debug = $this->db->db_debug;
+            $this->db->db_debug = FALSE;
+            $res = $this->db->where('id', $roleId)->delete('rbac_roles');
+            $this->db->db_debug = $db_debug;
+            return $res;
         }
         return false;
     }
 
     public function setRolePermissions($roleId, $permissionIds) {
+        $db_debug = $this->db->db_debug;
+        $this->db->db_debug = FALSE;
+
         $this->db->where('ref_roleId', $roleId)->delete('rbac_role_permissions');
-        if (!empty($permissionIds)) {
+
+        if (!empty($permissionIds) && is_array($permissionIds)) {
             $data = [];
             foreach ($permissionIds as $pId) {
-                $data[] = [
-                    'ref_roleId' => $roleId,
-                    'ref_permissionId' => $pId
-                ];
+                if (is_numeric($pId)) {
+                    $intId = (int)$pId;
+                } else {
+                    $perm = $this->db->get_where('rbac_permissions', ['c_code' => $pId])->row_array();
+                    if (!$perm) {
+                        $perm = $this->db->get_where('rbac_permissions', ['c_name' => $pId])->row_array();
+                    }
+                    $intId = $perm ? $perm['id'] : null;
+                }
+
+                if (!empty($intId)) {
+                    $data[] = [
+                        'ref_roleId' => (int)$roleId,
+                        'ref_permissionId' => (int)$intId
+                    ];
+                }
             }
-            $this->db->insert_batch('rbac_role_permissions', $data);
+            if (!empty($data)) {
+                $this->db->insert_batch('rbac_role_permissions', $data);
+            }
         }
+
+        $this->db->db_debug = $db_debug;
     }
 
     // ── User Roles ─────────────────────────────────────────────────

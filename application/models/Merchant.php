@@ -95,13 +95,15 @@ class Merchant extends CI_Model
     }
 
     public function create_merchant($data, $gvconnectBusinessId, $gvconnectBusinessName) {
+        $this->db->db_debug = FALSE;
         $this->db->trans_begin();
         if ($this->db->insert('merchant', $data)) {
+            $inserted_id = !empty($data['id']) ? $data['id'] : $this->db->insert_id();
             $submerchant_data = [
-                'ref_merchantId'    => $this->db->insert_id(),
-                'c_name'            => $data['c_name'],
-                'c_status'          => $data['c_status'],
-                'c_email'           => $data['c_email'],
+                'ref_merchantId'            => $inserted_id,
+                'c_name'                    => $data['c_name'],
+                'c_status'                  => $data['c_status'],
+                'c_email'                   => $data['c_email'],
                 'c_gvconnectBusinessId'     => $gvconnectBusinessId,
                 'c_gvconnectBusinessName'   => $gvconnectBusinessName,
             ];
@@ -121,7 +123,7 @@ class Merchant extends CI_Model
         } else {
             $err = $this->db->error();
             $this->db->trans_rollback();
-            return $err; // Returns array with 'code' and 'message'
+            return $err;
         }
     }
 
@@ -300,6 +302,12 @@ class Merchant extends CI_Model
 
     public function save_merchant_delegation($granteeId, $permissionId, $action)
     {
+        // Check if grantee merchant exists to avoid Foreign Key constraint error 1452
+        $merchantExists = $this->db->get_where('merchant', ['id' => $granteeId])->row();
+        if (!$merchantExists) {
+            return false;
+        }
+
         // Action can be: 'Grant', 'Deny', 'Inherit'
         if ($action === 'Inherit') {
             // Delete any explicit grant by Admin (NULL or 0 granter)
@@ -324,7 +332,7 @@ class Merchant extends CI_Model
                 'ref_permissionId'      => $permissionId,
                 'ref_granterMerchantId' => NULL, // Must be NULL to satisfy fk_rbac_access_granter foreign key referencing merchant(id)
                 'c_isAllowed'           => $isAllowed,
-                'c_grantedByUserId'     => $this->session->userdata('id'), // Admin's user ID is 'id', not 'user_id'
+                'c_grantedByUserId'     => $this->session->userdata('id') ?: ($this->session->userdata('user_id') ?: NULL),
                 'c_updatedAt'           => date('Y-m-d H:i:s')
             ];
 

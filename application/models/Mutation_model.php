@@ -26,7 +26,9 @@ class Mutation_model extends CI_Model
         // Optimized: Only join cashin/cashout if we actually need the columns for display
         $this->db->join('cashin', 'cashin.id = mutation.ref_cashinId', 'left');
         $this->db->join('cashout', 'cashout.id = mutation.ref_cashoutId', 'left');
-        $this->db->where('mutation.ref_merchantId', $id);
+        if (!empty($id)) {
+            $this->db->where('mutation.ref_merchantId', $id);
+        }
 
         if ($search_date_mutation && $search_date_mutation_to) {
             $this->db->where('mutation.c_datetime >=', date('Y-m-d', strtotime($search_date_mutation)) . ' 00:00:00');
@@ -277,15 +279,15 @@ class Mutation_model extends CI_Model
      * Default: Show today's mutations only.
      * Filtered/Searched: Search across all historical data without date restriction (unless explicit date range is selected).
      */
-    public function get_datatables_handler($id, $filters = [])
+    public function get_datatables_handler($id = null, $filters = [])
     {
         $this->load->library('datatables');
         
         // Safeguard
         $this->db->query("SET SESSION max_execution_time = 30000");
 
-        if (empty($id)) {
-            return $this->datatables->of('mutation')->set_recordsTotal(0)->set_recordsFiltered(0)->set_data([])->make(true);
+        if (empty($id) && !empty($filters['merchant'])) {
+            $id = $filters['merchant'];
         }
 
         $start = (int) ($this->input->post('start') ?? 0);
@@ -325,7 +327,9 @@ class Mutation_model extends CI_Model
             mutation.c_balanceAfter
         ");
         $this->db->from('mutation');
-        $this->db->where('mutation.ref_merchantId', (int)$id);
+        if (!empty($id)) {
+            $this->db->where('mutation.ref_merchantId', (int)$id);
+        }
 
         // Date Filters (Only if explicitly selected by user)
         if ($search_date && $search_date_to) {

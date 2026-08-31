@@ -62,6 +62,34 @@ class MerchantFeeController extends CI_Controller
 
    public function createSettingCashinFee()
    {
+      $raw_json = json_decode($this->input->raw_input_stream, true);
+      if (!empty($raw_json) && is_array($raw_json)) {
+         foreach ($raw_json as $k => $v) {
+            if ($this->input->get($k) === null && $this->input->post($k) === null) {
+               $_POST[$k] = $v;
+            }
+         }
+      }
+
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      $is_api_request = $this->input->is_ajax_request() || strpos($accept, 'json') !== false || $this->input->get('json') == '1' || $this->input->method() === 'post';
+
+
+
+      $merchant_id = $this->input->post('ref_merchantId');
+      if (!$merchant_id) {
+         if ($is_api_request) {
+            $this->output->set_content_type('application/json')->set_output(json_encode([
+               'status' => false,
+               'message' => 'Merchant ID is required.'
+            ]));
+            return;
+         }
+         $this->session->set_flashdata('error', 'Merchant ID not found.');
+         redirect('merchant/manage');
+         return;
+      }
+
       $rules = [
          ['field' => 'ref_cashinChannelId', 'label' => 'Channel ID', 'rules' => 'required'],
          ['field' => 'c_cashinChannelGroup', 'label' => 'Channel Group', 'rules' => 'required'],
@@ -76,20 +104,19 @@ class MerchantFeeController extends CI_Controller
       ];
       $this->form_validation->set_rules($rules);
 
-      $merchant_id = $this->input->post('ref_merchantId');
-      if (!$merchant_id) {
-         $this->session->set_flashdata('error', 'Merchant ID not found.');
-         redirect('merchant/manage');
-      }
-
       if ($this->form_validation->run() == FALSE) {
-         if ($this->input->is_ajax_request()) {
-             echo json_encode(['status' => 'error', 'message' => validation_errors()]);
+         $clean_error = trim(preg_replace('/\s+/', ' ', strip_tags(validation_errors())));
+         if ($is_api_request) {
+             $this->output->set_content_type('application/json')->set_output(json_encode([
+                'status' => false,
+                'message' => $clean_error ?: 'Validation failed.'
+             ]));
              return;
          }
          $errors = validation_errors('<li>', '</li>');
          $this->session->set_flashdata('error', '<ul>' . $errors . '</ul>');
          redirect('merchant/setting-cashin-fee/' . $merchant_id);
+         return;
       } else {
          $data = array(
             'ref_merchantId' => $merchant_id,
@@ -106,8 +133,11 @@ class MerchantFeeController extends CI_Controller
          );
          $result = $this->Chanel->createCashinChannelXMerchant($data);
          if ($result === true) {
-            if ($this->input->is_ajax_request()) {
-                echo json_encode(['status' => 'success', 'message' => 'Data successfully inserted']);
+            if ($is_api_request) {
+                $this->output->set_content_type('application/json')->set_output(json_encode([
+                   'status' => true,
+                   'message' => 'Data successfully inserted'
+                ]));
                 return;
             }
             $this->session->set_flashdata('success', 'Data successfully inserted');
@@ -119,8 +149,11 @@ class MerchantFeeController extends CI_Controller
             } elseif ($code == 1062) {
                $msg = 'Failed to insert data: A fee configuration for this channel already exists.';
             }
-            if ($this->input->is_ajax_request()) {
-                echo json_encode(['status' => 'error', 'message' => $msg]);
+            if ($is_api_request) {
+                $this->output->set_content_type('application/json')->set_output(json_encode([
+                   'status' => false,
+                   'message' => $msg
+                ]));
                 return;
             }
             $this->session->set_flashdata('error', $msg);
@@ -171,11 +204,43 @@ class MerchantFeeController extends CI_Controller
 
    public function bulkCreateSettingCashinFee($merchant_id = NULL)
    {
-      if (!$merchant_id) $merchant_id = $this->uri->segment(4);
+      $raw_json = json_decode($this->input->raw_input_stream, true);
+      if (!empty($raw_json) && is_array($raw_json)) {
+         foreach ($raw_json as $k => $v) {
+            if ($this->input->get($k) === null && $this->input->post($k) === null) {
+               $_POST[$k] = $v;
+            }
+         }
+      }
+
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      $is_api_request = $this->input->is_ajax_request() || strpos($accept, 'json') !== false || $this->input->get('json') == '1' || $this->input->method() === 'post';
+
+      // Parameter Key Aliasing
+      if (isset($_POST['channel_group']) && empty($_POST['c_cashinChannelGroup'])) $_POST['c_cashinChannelGroup'] = $_POST['channel_group'];
+      if (isset($_POST['external_default']) && empty($_POST['c_externalIdDefault'])) $_POST['c_externalIdDefault'] = $_POST['external_default'];
+      if (isset($_POST['fee_type']) && empty($_POST['c_feeType'])) $_POST['c_feeType'] = $_POST['fee_type'];
+      if (isset($_POST['fee']) && empty($_POST['c_fee'])) $_POST['c_fee'] = $_POST['fee'];
+      if (isset($_POST['fee_percentage']) && empty($_POST['c_feePercetange'])) $_POST['c_feePercetange'] = $_POST['fee_percentage'];
+      if (isset($_POST['amount_min']) && empty($_POST['c_amountMin'])) $_POST['c_amountMin'] = $_POST['amount_min'];
+      if (isset($_POST['amount_max']) && empty($_POST['c_amountMax'])) $_POST['c_amountMax'] = $_POST['amount_max'];
+      if (isset($_POST['status']) && empty($_POST['c_status'])) $_POST['c_status'] = $_POST['status'];
+
+      if (!$merchant_id) $merchant_id = $this->input->post('ref_merchantId') ?: $this->uri->segment(4);
       if (!$merchant_id) {
+         if ($is_api_request) {
+            $this->output->set_content_type('application/json')->set_output(json_encode([
+               'status' => false,
+               'message' => 'Merchant ID is required.'
+            ]));
+            return;
+         }
          $this->session->set_flashdata('error', 'Merchant ID not found.');
          redirect('merchant/manage');
+         return;
       }
+
+
 
       $rules = [
          ['field' => 'c_cashinChannelGroup',    'label' => 'Channel Group',       'rules' => 'required'],
@@ -191,16 +256,25 @@ class MerchantFeeController extends CI_Controller
       $this->form_validation->set_rules($rules);
 
       if ($this->form_validation->run() == FALSE) {
+         $clean_error = trim(preg_replace('/\s+/', ' ', strip_tags(validation_errors())));
+         if ($is_api_request) {
+            $this->output->set_content_type('application/json')->set_output(json_encode([
+               'status' => false,
+               'message' => $clean_error ?: 'Validation failed.'
+            ]));
+            return;
+         }
          $errors = validation_errors('<li>', '</li>');
          $this->session->set_flashdata('error', '<ul>' . $errors . '</ul>');
          redirect('merchant/setting-cashin-fee/' . $merchant_id);
+         return;
       } else {
          $channelGroups = $this->Chanel->get_cashin_channels($this->input->post('c_externalIdDefault'), $this->input->post('c_cashinChannelGroup'));
          
          if (empty($channelGroups)) {
-             $msg = 'Tidak ada channel yang ditemukan untuk grup dan provider ini.';
-             if ($this->input->is_ajax_request()) {
-                 echo json_encode(['status' => 'error', 'message' => $msg]);
+             $msg = 'No channels found for the selected group and provider.';
+             if ($is_api_request) {
+                 $this->output->set_content_type('application/json')->set_output(json_encode(['status' => false, 'message' => $msg]));
                  return;
              }
              $this->session->set_flashdata('error', $msg);
@@ -217,14 +291,10 @@ class MerchantFeeController extends CI_Controller
                               
          if (!empty($existing)) {
              $existingIds = array_unique(array_column($existing, 'ref_cashinChannelId'));
-             $duplicates = [];
-             foreach ($existingIds as $eid) {
-                 $duplicates[] = "<strong>{$eid}</strong>";
-             }
-             $msg = 'Gagal menyimpan pengaturan Bulk. Channel berikut telah terdaftar untuk merchant ini:<br> • ' . implode('<br> • ', $duplicates) . '<br><br>Mohon gunakan opsi <em>Edit Mapping</em> jika ingin memperbarui data yang sudah ada.';
+             $msg = 'Failed to bulk insert: Channels already configured for this merchant (' . implode(', ', $existingIds) . ').';
              
-             if ($this->input->is_ajax_request()) {
-                 echo json_encode(['status' => 'error', 'message' => $msg]);
+             if ($is_api_request) {
+                 $this->output->set_content_type('application/json')->set_output(json_encode(['status' => false, 'message' => $msg]));
                  return;
              }
              $this->session->set_flashdata('error', $msg);
@@ -251,14 +321,28 @@ class MerchantFeeController extends CI_Controller
 
          $result = $this->Chanel->bulkCreateCashinChannelXMerchant($data);
          if ($result === true) {
+            if ($is_api_request) {
+                $this->output->set_content_type('application/json')->set_output(json_encode([
+                   'status' => true,
+                   'message' => 'Bulk cashin fee settings successfully created.'
+                ]));
+                return;
+            }
             $this->session->set_flashdata('success', 'Data successfully inserted');
          } else {
             $code = isset($result['code']) ? $result['code'] : 0;
+            $msg = 'Unable to complete bulk insertion due to a system constraint.';
             if ($code == 1142) {
-               $this->session->set_flashdata('error', 'Access Denied. You do not have sufficient database privileges to perform bulk cashin fee settings.');
-            } else {
-               $this->session->set_flashdata('error', 'Unable to complete bulk insertion due to a system constraint. Please contact technical support.');
+               $msg = 'Access Denied. You do not have sufficient database privileges to perform bulk cashin fee settings.';
             }
+            if ($is_api_request) {
+                $this->output->set_content_type('application/json')->set_output(json_encode([
+                   'status' => false,
+                   'message' => $msg
+                ]));
+                return;
+            }
+            $this->session->set_flashdata('error', $msg);
          }
 
          redirect('merchant/setting-cashin-fee/' . $merchant_id);
@@ -267,28 +351,87 @@ class MerchantFeeController extends CI_Controller
 
    public function getCashinChannelGroups()
    {
-      $rules = [
-         ['field' => 'c_cashinChannelGroup',     'label' => 'Channel Group',       'rules' => 'required'],
-         ['field' => 'c_externalIdDefault',      'label' => 'External Default',    'rules' => 'required'],
-      ];
+      $raw_json = json_decode($this->input->raw_input_stream, true);
+      if (!empty($raw_json) && is_array($raw_json)) {
+         foreach ($raw_json as $k => $v) {
+            if ($this->input->get($k) === null && $this->input->post($k) === null) {
+               $_POST[$k] = $v;
+            }
+         }
+      }
 
-      $this->form_validation->set_rules($rules);
+      $external_id = $this->input->post('c_externalIdDefault') ?: $this->input->get('external_id');
+      $channel_group = $this->input->post('c_cashinChannelGroup') ?: $this->input->get('channel_group');
 
-      if ($this->form_validation->run() == FALSE) {
-         $errors = validation_errors('<li>', '</li>');
-         echo json_encode($errors);
-         return;
-      } 
+      if ($external_id && $channel_group) {
+         $channels = $this->Chanel->get_cashin_channels($external_id, $channel_group);
+         return $this->output->set_content_type('application/json')->set_output(json_encode($channels));
+      }
 
-      $channelGroups = $this->Chanel->get_cashin_channels($this->input->post('c_externalIdDefault'), $this->input->post('c_cashinChannelGroup'));
-      echo json_encode($channelGroups);
+      $groups = $this->Chanel->get_cashin_chanel_group();
+      return $this->output->set_content_type('application/json')->set_output(json_encode($groups));
    }
 
    public function editSettingCashinFee($merchant_id = NULL, $id = NULL)
    {
+      $raw_json = json_decode($this->input->raw_input_stream, true);
+      if (!empty($raw_json) && is_array($raw_json)) {
+         foreach ($raw_json as $k => $v) {
+            if ($this->input->get($k) === null && $this->input->post($k) === null) {
+               $_POST[$k] = $v;
+            }
+         }
+      }
+
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      $is_api_request = $this->input->is_ajax_request() || strpos($accept, 'json') !== false || $this->input->get('json') == '1' || $this->input->method() === 'post';
+
       if (!$merchant_id) $merchant_id = $this->uri->segment(4);
       if (!$id) $id = $this->uri->segment(5);
-      
+
+      if (!$merchant_id || !$id) {
+         if ($is_api_request) {
+            $this->output->set_content_type('application/json')->set_output(json_encode([
+               'status' => false,
+               'message' => 'Merchant ID or Channel ID missing.'
+            ]));
+            return;
+         }
+         $this->session->set_flashdata('error', 'Merchant ID or Channel ID missing.');
+         redirect('merchant/manage');
+         return;
+      }
+
+      // Resolve $id if string channel code (e.g. va_bni)
+      $existing = null;
+      if (is_numeric($id)) {
+         $existing = $this->db->get_where('cashin_channel_x_merchant', ['id' => $id])->row_array();
+      }
+      if (!$existing && $merchant_id) {
+         $existing = $this->db->get_where('cashin_channel_x_merchant', [
+            'ref_merchantId' => $merchant_id,
+            'ref_cashinChannelId' => $id
+         ])->row_array();
+      }
+      if ($existing) {
+         $id = $existing['id'];
+         $fields_to_fill = ['ref_cashinChannelId', 'c_cashinChannelGroup', 'c_externalIdDefault', 'c_feeType', 'c_fee', 'c_feePercetange', 'c_settlementInterval', 'c_amountMin', 'c_amountMax', 'c_status'];
+         foreach ($fields_to_fill as $f) {
+            if ($this->input->post($f) === null && isset($existing[$f])) {
+               $_POST[$f] = $existing[$f];
+            }
+         }
+      } else if ($is_api_request) {
+         $this->output->set_content_type('application/json')->set_output(json_encode([
+            'status' => false,
+            'message' => 'Cashin fee setting for channel (' . $id . ') not found for merchant (' . $merchant_id . ').'
+         ]));
+         return;
+      }
+
+
+
+
       $rules = [
          ['field' => 'ref_cashinChannelId',      'label' => 'Channel ID',          'rules' => 'required'],
          ['field' => 'c_cashinChannelGroup',     'label' => 'Channel Group',       'rules' => 'required'],
@@ -305,9 +448,18 @@ class MerchantFeeController extends CI_Controller
       $this->form_validation->set_rules($rules);
 
       if ($this->form_validation->run() == FALSE) {
+         $clean_error = trim(preg_replace('/\s+/', ' ', strip_tags(validation_errors())));
+         if ($is_api_request) {
+            $this->output->set_content_type('application/json')->set_output(json_encode([
+               'status' => false,
+               'message' => $clean_error ?: 'Validation failed.'
+            ]));
+            return;
+         }
          $errors = validation_errors('<li>', '</li>');
          $this->session->set_flashdata('error', '<ul>' . $errors . '</ul>');
          redirect('merchant/setting-cashin-fee/' . $merchant_id);
+         return;
       } else {
          $data = array(
                'c_cashinChannelGroup'  => $this->input->post('c_cashinChannelGroup'),
@@ -324,16 +476,30 @@ class MerchantFeeController extends CI_Controller
 
          $result = $this->Chanel->updateCashinChannelXMerchant($id, $data);
          if ($result === true) {
-               $this->session->set_flashdata('success', 'Data successfully updated');
+            if ($is_api_request) {
+               $this->output->set_content_type('application/json')->set_output(json_encode([
+                  'status' => true,
+                  'message' => 'Cashin fee setting updated successfully.'
+               ]));
+               return;
+            }
+            $this->session->set_flashdata('success', 'Data successfully updated');
          } else {
-               $code = isset($result['code']) ? $result['code'] : 0;
-               if ($code == 1142) {
-                  $this->session->set_flashdata('error', 'Access Denied. You do not have sufficient database privileges to update cashin fee settings.');
-               } elseif ($code == 1062) {
-                  $this->session->set_flashdata('error', 'Failed to update data: A fee configuration for this channel already exists.');
-               } else {
-                  $this->session->set_flashdata('error', 'Unable to update data due to a system constraint. Please verify your input or contact technical support.');
-               }
+            $code = isset($result['code']) ? $result['code'] : 0;
+            $msg = 'Unable to update data due to a system constraint.';
+            if ($code == 1142) {
+               $msg = 'Access Denied. You do not have sufficient database privileges to update cashin fee settings.';
+            } elseif ($code == 1062) {
+               $msg = 'Failed to update data: A fee configuration for this channel already exists.';
+            }
+            if ($is_api_request) {
+               $this->output->set_content_type('application/json')->set_output(json_encode([
+                  'status' => false,
+                  'message' => $msg
+               ]));
+               return;
+            }
+            $this->session->set_flashdata('error', $msg);
          }
 
          redirect('merchant/setting-cashin-fee/' . $merchant_id);
@@ -342,22 +508,49 @@ class MerchantFeeController extends CI_Controller
 
    public function deleteSettingCashinFee($merchant_id = NULL, $id = NULL)
    {
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      $is_api_request = $this->input->is_ajax_request() || strpos($accept, 'json') !== false || $this->input->get('json') == '1' || $this->input->method() === 'post';
+
       if (!$merchant_id) $merchant_id = $this->uri->segment(4);
       if (!$id) $id = $this->uri->segment(5);
+
+      if (!is_numeric($id) && $merchant_id) {
+         $row = $this->db->get_where('cashin_channel_x_merchant', [
+            'ref_merchantId' => $merchant_id,
+            'ref_cashinChannelId' => $id
+         ])->row_array();
+         if ($row) {
+            $id = $row['id'];
+         }
+      }
 
       $result = $this->Chanel->deleteCashinChannelXMerchant($id);
 
       if ($result === true) {
+         if ($is_api_request) {
+            $this->output->set_content_type('application/json')->set_output(json_encode([
+               'status' => true,
+               'message' => 'Data successfully deleted.'
+            ]));
+            return;
+         }
          $this->session->set_flashdata('success', 'Data successfully deleted');
       } else {
          $code = isset($result['code']) ? $result['code'] : 0;
+         $msg = 'Unable to delete setting due to a system constraint.';
          if ($code == 1142) {
-            $this->session->set_flashdata('error', 'Access Denied. You do not have sufficient database privileges to delete cashin fee settings.');
+            $msg = 'Access Denied. You do not have sufficient database privileges to delete cashin fee settings.';
          } elseif ($code == 1451) {
-            $this->session->set_flashdata('error', 'Cannot delete this setting because it is currently linked to existing transaction records.');
-         } else {
-            $this->session->set_flashdata('error', 'Unable to delete setting due to a system constraint. Please contact technical support.');
+            $msg = 'Cannot delete this setting because it is currently linked to existing transaction records.';
          }
+         if ($is_api_request) {
+            $this->output->set_content_type('application/json')->set_output(json_encode([
+               'status' => false,
+               'message' => $msg
+            ]));
+            return;
+         }
+         $this->session->set_flashdata('error', $msg);
       }
 
       redirect('merchant/setting-cashin-fee/' . $merchant_id);
@@ -365,10 +558,33 @@ class MerchantFeeController extends CI_Controller
 
    public function createSettingCashoutFee()
    {
+      $raw_json = json_decode($this->input->raw_input_stream, true);
+      if (!empty($raw_json) && is_array($raw_json)) {
+         foreach ($raw_json as $k => $v) {
+            if ($this->input->get($k) === null && $this->input->post($k) === null) {
+               $_POST[$k] = $v;
+            }
+         }
+      }
+
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      $is_api_request = $this->input->is_ajax_request() || strpos($accept, 'json') !== false || $this->input->get('json') == '1' || $this->input->method() === 'post';
+
+
+
+
       $merchant_id = $this->input->post('ref_merchantId');
       if (!$merchant_id) {
+         if ($is_api_request) {
+            $this->output->set_content_type('application/json')->set_output(json_encode([
+               'status' => false,
+               'message' => 'Merchant ID is required.'
+            ]));
+            return;
+         }
          $this->session->set_flashdata('error', 'Merchant ID not found.');
          redirect('merchant/manage');
+         return;
       }
 
       $rules = [
@@ -386,13 +602,18 @@ class MerchantFeeController extends CI_Controller
       $this->form_validation->set_rules($rules);
 
       if ($this->form_validation->run() == FALSE) {
-         if ($this->input->is_ajax_request()) {
-             echo json_encode(['status' => 'error', 'message' => validation_errors()]);
+         $clean_error = trim(preg_replace('/\s+/', ' ', strip_tags(validation_errors())));
+         if ($is_api_request) {
+             $this->output->set_content_type('application/json')->set_output(json_encode([
+                'status' => false,
+                'message' => $clean_error ?: 'Validation failed.'
+             ]));
              return;
          }
          $errors = validation_errors('<li>', '</li>');
          $this->session->set_flashdata('error', '<ul>' . $errors . '</ul>');
          redirect('merchant/setting-cashout-fee/' . $merchant_id);
+         return;
       } else {
          $data = array(
             'ref_merchantId'           => $merchant_id,
@@ -409,8 +630,11 @@ class MerchantFeeController extends CI_Controller
 
          $result = $this->Chanel->createCashoutChannelXMerchant($data);
          if ($result === true) {
-            if ($this->input->is_ajax_request()) {
-                echo json_encode(['status' => 'success', 'message' => 'Data successfully inserted']);
+            if ($is_api_request) {
+                $this->output->set_content_type('application/json')->set_output(json_encode([
+                   'status' => true,
+                   'message' => 'Data successfully inserted'
+                ]));
                 return;
             }
             $this->session->set_flashdata('success', 'Data successfully inserted');
@@ -422,8 +646,11 @@ class MerchantFeeController extends CI_Controller
             } elseif ($code == 1062) {
                $msg = 'Failed to insert data: A fee configuration for this channel already exists.';
             }
-            if ($this->input->is_ajax_request()) {
-                echo json_encode(['status' => 'error', 'message' => $msg]);
+            if ($is_api_request) {
+                $this->output->set_content_type('application/json')->set_output(json_encode([
+                   'status' => false,
+                   'message' => $msg
+                ]));
                 return;
             }
             $this->session->set_flashdata('error', $msg);
@@ -435,11 +662,33 @@ class MerchantFeeController extends CI_Controller
 
    public function bulkCreateSettingCashoutFee($merchant_id = NULL)
    {
-      if (!$merchant_id) $merchant_id = $this->uri->segment(4);
+      $raw_json = json_decode($this->input->raw_input_stream, true);
+      if (!empty($raw_json) && is_array($raw_json)) {
+         foreach ($raw_json as $k => $v) {
+            if ($this->input->get($k) === null && $this->input->post($k) === null) {
+               $_POST[$k] = $v;
+            }
+         }
+      }
+
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      $is_api_request = $this->input->is_ajax_request() || strpos($accept, 'json') !== false || $this->input->get('json') == '1' || $this->input->method() === 'post';
+
+      if (!$merchant_id) $merchant_id = $this->input->post('ref_merchantId') ?: $this->uri->segment(4);
       if (!$merchant_id) {
+         if ($is_api_request) {
+            $this->output->set_content_type('application/json')->set_output(json_encode([
+               'status' => false,
+               'message' => 'Merchant ID is required.'
+            ]));
+            return;
+         }
          $this->session->set_flashdata('error', 'Merchant ID not found.');
          redirect('merchant/manage');
+         return;
       }
+
+
 
       $rules = [
          ['field' => 'c_cashoutChannelGroup',    'label' => 'Channel Group',       'rules' => 'required'],
@@ -455,22 +704,28 @@ class MerchantFeeController extends CI_Controller
       $this->form_validation->set_rules($rules);
 
       if ($this->form_validation->run() == FALSE) {
-         if ($this->input->is_ajax_request()) {
-             echo json_encode(['status' => 'error', 'message' => validation_errors()]);
+         $clean_error = trim(preg_replace('/\s+/', ' ', strip_tags(validation_errors())));
+         if ($is_api_request) {
+             $this->output->set_content_type('application/json')->set_output(json_encode([
+                'status' => false,
+                'message' => $clean_error ?: 'Validation failed.'
+             ]));
              return;
          }
          $errors = validation_errors('<li>', '</li>');
          $this->session->set_flashdata('error', '<ul>' . $errors . '</ul>');
          redirect('merchant/setting-cashout-fee/' . $merchant_id);
+         return;
       } else {
          $channelGroups = $this->Chanel->get_cashout_channels($this->input->post('c_externalIdDefault'), $this->input->post('c_cashoutChannelGroup'));
          
          if (empty($channelGroups)) {
-             if ($this->input->is_ajax_request()) {
-                 echo json_encode(['status' => 'error', 'message' => 'Tidak ada channel yang ditemukan untuk grup dan provider ini.']);
+             $msg = 'No channels found for the selected group and provider.';
+             if ($is_api_request) {
+                 $this->output->set_content_type('application/json')->set_output(json_encode(['status' => false, 'message' => $msg]));
                  return;
              }
-             $this->session->set_flashdata('error', 'Tidak ada channel yang ditemukan untuk grup dan provider ini.');
+             $this->session->set_flashdata('error', $msg);
              redirect('merchant/setting-cashout-fee/' . $merchant_id);
              return;
          }
@@ -484,14 +739,10 @@ class MerchantFeeController extends CI_Controller
                               
          if (!empty($existing)) {
              $existingIds = array_unique(array_column($existing, 'ref_cashoutChannelId'));
-             $duplicates = [];
-             foreach ($existingIds as $eid) {
-                 $duplicates[] = "<strong>{$eid}</strong>";
-             }
-             $msg = 'Gagal menyimpan pengaturan Bulk. Channel berikut telah terdaftar untuk merchant ini:<br> • ' . implode('<br> • ', $duplicates) . '<br><br>Mohon gunakan opsi <em>Edit Mapping</em> jika ingin memperbarui data yang sudah ada.';
+             $msg = 'Failed to bulk insert: Channels already configured for this merchant (' . implode(', ', $existingIds) . ').';
              
-             if ($this->input->is_ajax_request()) {
-                 echo json_encode(['status' => 'error', 'message' => $msg]);
+             if ($is_api_request) {
+                 $this->output->set_content_type('application/json')->set_output(json_encode(['status' => false, 'message' => $msg]));
                  return;
              }
              $this->session->set_flashdata('error', $msg);
@@ -517,19 +768,25 @@ class MerchantFeeController extends CI_Controller
 
          $result = $this->Chanel->bulkCreateCashoutChannelXMerchant($data);
          if ($result === true) {
-            if ($this->input->is_ajax_request()) {
-                echo json_encode(['status' => 'success', 'message' => 'Data successfully inserted']);
+            if ($is_api_request) {
+                $this->output->set_content_type('application/json')->set_output(json_encode([
+                   'status' => true,
+                   'message' => 'Bulk cashout fee settings successfully created.'
+                ]));
                 return;
             }
             $this->session->set_flashdata('success', 'Data successfully inserted');
          } else {
             $code = isset($result['code']) ? $result['code'] : 0;
-            $msg = 'Unable to complete bulk insertion due to a system constraint. Please contact technical support.';
+            $msg = 'Unable to complete bulk insertion due to a system constraint.';
             if ($code == 1142) {
                $msg = 'Access Denied. You do not have sufficient database privileges to perform bulk cashout fee settings.';
             }
-            if ($this->input->is_ajax_request()) {
-                echo json_encode(['status' => 'error', 'message' => $msg]);
+            if ($is_api_request) {
+                $this->output->set_content_type('application/json')->set_output(json_encode([
+                   'status' => false,
+                   'message' => $msg
+                ]));
                 return;
             }
             $this->session->set_flashdata('error', $msg);
@@ -541,27 +798,86 @@ class MerchantFeeController extends CI_Controller
 
    public function getCashoutChannelGroups()
    {
-      $rules = [
-         ['field' => 'c_cashoutChannelGroup',     'label' => 'Channel Group',       'rules' => 'required'],
-         ['field' => 'c_externalIdDefault',      'label' => 'External Default',    'rules' => 'required'],
-      ];
+      $raw_json = json_decode($this->input->raw_input_stream, true);
+      if (!empty($raw_json) && is_array($raw_json)) {
+         foreach ($raw_json as $k => $v) {
+            if ($this->input->get($k) === null && $this->input->post($k) === null) {
+               $_POST[$k] = $v;
+            }
+         }
+      }
 
-      $this->form_validation->set_rules($rules);
+      $external_id = $this->input->post('c_externalIdDefault') ?: $this->input->get('external_id');
+      $channel_group = $this->input->post('c_cashoutChannelGroup') ?: $this->input->get('channel_group');
 
-      if ($this->form_validation->run() == FALSE) {
-         $errors = validation_errors('<li>', '</li>');
-         echo json_encode($errors);
-         return;
-      } 
+      if ($external_id && $channel_group) {
+         $channels = $this->Chanel->get_cashout_channels($external_id, $channel_group);
+         return $this->output->set_content_type('application/json')->set_output(json_encode($channels));
+      }
 
-      $channelGroups = $this->Chanel->get_cashout_channels($this->input->post('c_externalIdDefault'), $this->input->post('c_cashoutChannelGroup'));
-      echo json_encode($channelGroups);
+      $groups = $this->Chanel->get_cashout_chanel_group();
+      return $this->output->set_content_type('application/json')->set_output(json_encode($groups));
    }
 
    public function editSettingCashoutFee($merchant_id = NULL, $id = NULL)
    {
+      $raw_json = json_decode($this->input->raw_input_stream, true);
+      if (!empty($raw_json) && is_array($raw_json)) {
+         foreach ($raw_json as $k => $v) {
+            if ($this->input->get($k) === null && $this->input->post($k) === null) {
+               $_POST[$k] = $v;
+            }
+         }
+      }
+
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      $is_api_request = $this->input->is_ajax_request() || strpos($accept, 'json') !== false || $this->input->get('json') == '1' || $this->input->method() === 'post';
+
       if (!$merchant_id) $merchant_id = $this->uri->segment(4);
       if (!$id) $id = $this->uri->segment(5);
+
+      if (!$merchant_id || !$id) {
+         if ($is_api_request) {
+            $this->output->set_content_type('application/json')->set_output(json_encode([
+               'status' => false,
+               'message' => 'Merchant ID or Channel ID missing.'
+            ]));
+            return;
+         }
+         $this->session->set_flashdata('error', 'Merchant ID or Channel ID missing.');
+         redirect('merchant/manage');
+         return;
+      }
+
+      // Resolve $id if string channel code (e.g. bifast_bca)
+      $existing = null;
+      if (is_numeric($id)) {
+         $existing = $this->db->get_where('cashout_channel_x_merchant', ['id' => $id])->row_array();
+      }
+      if (!$existing && $merchant_id) {
+         $existing = $this->db->get_where('cashout_channel_x_merchant', [
+            'ref_merchantId' => $merchant_id,
+            'ref_cashoutChannelId' => $id
+         ])->row_array();
+      }
+      if ($existing) {
+         $id = $existing['id'];
+         $fields_to_fill = ['ref_cashoutChannelId', 'c_cashoutChannelGroup', 'c_externalIdDefault', 'c_feeType', 'c_fee', 'c_feePercetange', 'c_amountMin', 'c_amountMax', 'c_status'];
+         foreach ($fields_to_fill as $f) {
+            if ($this->input->post($f) === null && isset($existing[$f])) {
+               $_POST[$f] = $existing[$f];
+            }
+         }
+      } else if ($is_api_request) {
+         $this->output->set_content_type('application/json')->set_output(json_encode([
+            'status' => false,
+            'message' => 'Cashout fee setting for channel (' . $id . ') not found for merchant (' . $merchant_id . ').'
+         ]));
+         return;
+      }
+
+
+
 
       $rules = [
          ['field' => 'ref_cashoutChannelId',      'label' => 'Channel ID',          'rules' => 'required'],
@@ -578,9 +894,18 @@ class MerchantFeeController extends CI_Controller
       $this->form_validation->set_rules($rules);
 
       if ($this->form_validation->run() == FALSE) {
+         $clean_error = trim(preg_replace('/\s+/', ' ', strip_tags(validation_errors())));
+         if ($is_api_request) {
+            $this->output->set_content_type('application/json')->set_output(json_encode([
+               'status' => false,
+               'message' => $clean_error ?: 'Validation failed.'
+            ]));
+            return;
+         }
          $errors = validation_errors('<li>', '</li>');
          $this->session->set_flashdata('error', '<ul>' . $errors . '</ul>');
          redirect('merchant/setting-cashout-fee/' . $merchant_id);
+         return;
       } else {
          $data = array(
                'c_cashoutChannelGroup'  => $this->input->post('c_cashoutChannelGroup'),
@@ -596,16 +921,30 @@ class MerchantFeeController extends CI_Controller
 
          $result = $this->Chanel->updateCashoutChannelXMerchant($id, $data);
          if ($result === true) {
-               $this->session->set_flashdata('success', 'Data successfully updated');
+            if ($is_api_request) {
+               $this->output->set_content_type('application/json')->set_output(json_encode([
+                  'status' => true,
+                  'message' => 'Cashout fee setting updated successfully.'
+               ]));
+               return;
+            }
+            $this->session->set_flashdata('success', 'Data successfully updated');
          } else {
-               $code = isset($result['code']) ? $result['code'] : 0;
-               if ($code == 1142) {
-                  $this->session->set_flashdata('error', 'Access Denied. You do not have sufficient database privileges to update cashout fee settings.');
-               } elseif ($code == 1062) {
-                  $this->session->set_flashdata('error', 'Failed to update data: A fee configuration for this channel already exists.');
-               } else {
-                  $this->session->set_flashdata('error', 'Unable to update data due to a system constraint. Please verify your input or contact technical support.');
-               }
+            $code = isset($result['code']) ? $result['code'] : 0;
+            $msg = 'Unable to update data due to a system constraint.';
+            if ($code == 1142) {
+               $msg = 'Access Denied. You do not have sufficient database privileges to update cashout fee settings.';
+            } elseif ($code == 1062) {
+               $msg = 'Failed to update data: A fee configuration for this channel already exists.';
+            }
+            if ($is_api_request) {
+               $this->output->set_content_type('application/json')->set_output(json_encode([
+                  'status' => false,
+                  'message' => $msg
+               ]));
+               return;
+            }
+            $this->session->set_flashdata('error', $msg);
          }
 
          redirect('merchant/setting-cashout-fee/' . $merchant_id);
@@ -614,22 +953,50 @@ class MerchantFeeController extends CI_Controller
 
    public function deleteSettingCashoutFee($merchant_id = NULL, $id = NULL)
    {
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      $is_api_request = $this->input->is_ajax_request() || strpos($accept, 'json') !== false || $this->input->get('json') == '1' || $this->input->method() === 'post';
+
       if (!$merchant_id) $merchant_id = $this->uri->segment(4);
       if (!$id) $id = $this->uri->segment(5);
+
+      // Resolve $id if string channel code (e.g. bifast_bca)
+      if (!is_numeric($id) && $merchant_id) {
+         $row = $this->db->get_where('cashout_channel_x_merchant', [
+            'ref_merchantId' => $merchant_id,
+            'ref_cashoutChannelId' => $id
+         ])->row_array();
+         if ($row) {
+            $id = $row['id'];
+         }
+      }
 
       $result = $this->Chanel->deleteCashoutChannelXMerchant($id);
 
       if ($result === true) {
+         if ($is_api_request) {
+            $this->output->set_content_type('application/json')->set_output(json_encode([
+               'status' => true,
+               'message' => 'Data successfully deleted.'
+            ]));
+            return;
+         }
          $this->session->set_flashdata('success', 'Data successfully deleted');
       } else {
          $code = isset($result['code']) ? $result['code'] : 0;
+         $msg = 'Unable to delete setting due to a system constraint.';
          if ($code == 1142) {
-            $this->session->set_flashdata('error', 'Access Denied. You do not have sufficient database privileges to delete cashout fee settings.');
+            $msg = 'Access Denied. You do not have sufficient database privileges to delete cashout fee settings.';
          } elseif ($code == 1451) {
-            $this->session->set_flashdata('error', 'Cannot delete this setting because it is currently linked to existing transaction records.');
-         } else {
-            $this->session->set_flashdata('error', 'Unable to delete setting due to a system constraint. Please contact technical support.');
+            $msg = 'Cannot delete this setting because it is currently linked to existing transaction records.';
          }
+         if ($is_api_request) {
+            $this->output->set_content_type('application/json')->set_output(json_encode([
+               'status' => false,
+               'message' => $msg
+            ]));
+            return;
+         }
+         $this->session->set_flashdata('error', $msg);
       }
 
       redirect('merchant/setting-cashout-fee/' . $merchant_id);

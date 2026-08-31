@@ -33,7 +33,22 @@ class MerchantManagementController extends CI_Controller
 
    public function merchant()
    {
-      if ($this->input->is_ajax_request()) {
+      $raw_json = json_decode($this->input->raw_input_stream, true);
+      if (!empty($raw_json) && is_array($raw_json)) {
+         foreach ($raw_json as $k => $v) {
+            if ($this->input->post($k) === NULL) {
+               $_POST[$k] = $v;
+            }
+         }
+      }
+
+      $is_api = $this->input->is_ajax_request()
+         || strtolower((string)$this->input->get_request_header('X-Requested-With')) === 'xmlhttprequest'
+         || strpos((string)$this->input->get_request_header('Content-Type'), 'json') !== false
+         || strpos((string)$this->input->get_request_header('Accept'), 'json') !== false
+         || $this->input->method() === 'post';
+
+      if ($is_api) {
          try {
             $this->load->library('datatables');
             $where = ['m.c_merchantLevel' => 0];
@@ -68,16 +83,22 @@ class MerchantManagementController extends CI_Controller
 
             session_write_close();
 
-            return $this->Merchant->getMerchantDataTable($where, $hasBalancePermission, $search_merchant);
+            $out = $this->Merchant->getMerchantDataTable($where, $hasBalancePermission, $search_merchant);
+            $this->output
+               ->set_content_type('application/json')
+               ->set_output(is_string($out) ? $out : json_encode($out));
+            return;
          } catch (Throwable $e) {
             log_message('error', 'Merchant AJAX error: ' . $e->getMessage());
-            echo json_encode([
-               "draw" => intval($this->input->post("draw")),
-               "recordsTotal" => 0,
-               "recordsFiltered" => 0,
-               "data" => [],
-               "error" => $e->getMessage()
-            ]);
+            $this->output
+               ->set_content_type('application/json')
+               ->set_output(json_encode([
+                  "draw" => intval($this->input->post("draw")),
+                  "recordsTotal" => 0,
+                  "recordsFiltered" => 0,
+                  "data" => [],
+                  "error" => $e->getMessage()
+               ]));
             return;
          }
       }
@@ -160,11 +181,30 @@ class MerchantManagementController extends CI_Controller
       $this->session->unset_userdata('search_merchant_openapi_status');
       $this->session->unset_userdata('search_merchant_date_from');
       $this->session->unset_userdata('search_merchant_date_to');
+
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      $is_api_request = strpos($accept, 'json') !== false || $this->input->get('json') == '1';
+
+      if ($is_api_request) {
+         $this->output->set_content_type('application/json')->set_output(json_encode([
+            'status' => true,
+            'message' => 'Merchant search filters reset successfully.'
+         ]));
+         return;
+      }
+
       redirect("merchant/manage");
    }
 
    public function addMerchant()
    {
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      $is_api_request = $this->input->is_ajax_request() || strpos($accept, 'json') !== false || $this->input->get('json') == '1' || $this->input->method() === 'post';
+
+      if ($is_api_request || $this->input->method() === 'post') {
+         return $this->registerMerchant();
+      }
+
       $data['title'] = 'Register New Merchant';
       $data['user'] = $this->Model_user->view_user()->row_array();
       $this->load->view('merchant/add-merchant', $data);
@@ -172,6 +212,28 @@ class MerchantManagementController extends CI_Controller
 
    public function registerMerchant()
    {
+      $raw_json = json_decode($this->input->raw_input_stream, true);
+      if (!empty($raw_json) && is_array($raw_json)) {
+         foreach ($raw_json as $k => $v) {
+            if ($this->input->get($k) === null && $this->input->post($k) === null) {
+               $_POST[$k] = $v;
+            }
+         }
+      }
+
+      // Parameter Key Aliasing
+      if (isset($_POST['merchant_name']) && empty($_POST['c_name'])) $_POST['c_name'] = $_POST['merchant_name'];
+      if (isset($_POST['name']) && empty($_POST['c_name'])) $_POST['c_name'] = $_POST['name'];
+      if (isset($_POST['email']) && empty($_POST['c_email'])) $_POST['c_email'] = $_POST['email'];
+      if (isset($_POST['phone']) && empty($_POST['c_phoneNumber'])) $_POST['c_phoneNumber'] = $_POST['phone'];
+      if (isset($_POST['password']) && empty($_POST['c_password'])) $_POST['c_password'] = $_POST['password'];
+      if (isset($_POST['confirm_password']) && empty($_POST['c_confirmPassword'])) $_POST['c_confirmPassword'] = $_POST['confirm_password'];
+      if (isset($_POST['confirmPassword']) && empty($_POST['c_confirmPassword'])) $_POST['c_confirmPassword'] = $_POST['confirmPassword'];
+
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      $is_api_request = $this->input->is_ajax_request() || strpos($accept, 'json') !== false || $this->input->get('json') == '1' || $this->input->method() === 'post';
+
+
       $formValidationRules = [
          ['field' => 'c_name', 'label' => 'Merchant Name', 'rules' => 'trim|required'],
          ['field' => 'c_email', 'label' => 'Merchant Email', 'rules' => 'trim|required|valid_email'],
@@ -201,13 +263,18 @@ class MerchantManagementController extends CI_Controller
       $this->form_validation->set_rules($formValidationRules);
 
       if ($this->form_validation->run() == FALSE) {
-         if ($this->input->is_ajax_request()) {
-             echo json_encode(['status' => 'error', 'message' => validation_errors()]);
+         $clean_error = trim(preg_replace('/\s+/', ' ', strip_tags(validation_errors())));
+         if ($is_api_request) {
+             $this->output->set_content_type('application/json')->set_output(json_encode([
+                 'status' => false,
+                 'message' => $clean_error ?: 'Validation failed. Mandatory fields are missing.'
+             ]));
              return;
          }
          $errors = validation_errors('<li>', '</li>');
          $this->session->set_flashdata('error', '<ul>' . $errors . '</ul>');
          redirect('merchant/manage/add');
+         return;
       } else {
          $this->load->library('MerchantRegistrationService', null, 'MerchantRegistrationService');
          try {
@@ -266,20 +333,21 @@ class MerchantManagementController extends CI_Controller
                  }
                  // ---------------------------------
 
-                 if ($this->input->is_ajax_request()) {
-                     $this->session->set_flashdata('secret_url', $secretUrl);
-                     $this->session->set_flashdata('secret_expires_at', time() + 86400);
-                     echo json_encode([
-                         'status'       => 'success',
-                         'message'      => $msg,
-                         'redirect_url' => base_url('private/secret')
-                     ]);
-                     return;
-                 }
-                 $this->session->set_flashdata('success', $msg);
-                 $this->session->set_flashdata('secret_url', $secretUrl);
-                 $this->session->set_flashdata('secret_expires_at', time() + 86400);
-                 redirect('private/secret');
+                  if ($is_api_request) {
+                      $this->session->set_flashdata('secret_url', $secretUrl);
+                      $this->session->set_flashdata('secret_expires_at', time() + 86400);
+                      $this->output->set_content_type('application/json')->set_output(json_encode([
+                          'status'       => 'success',
+                          'message'      => $msg,
+                          'secret_url'   => $secretUrl,
+                          'redirect_url' => base_url('private/secret')
+                      ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+                      return;
+                  }
+                  $this->session->set_flashdata('success', $msg);
+                  $this->session->set_flashdata('secret_url', $secretUrl);
+                  $this->session->set_flashdata('secret_expires_at', time() + 86400);
+                  redirect('private/secret');
             } else {
                $code = isset($result['code']) ? $result['code'] : 0;
                $msg = 'Unable to create merchant account due to a system constraint. Please verify your input or contact technical support.';
@@ -288,15 +356,15 @@ class MerchantManagementController extends CI_Controller
                } elseif ($code == 1062) {
                   $msg = 'A merchant account with this email or configuration already exists.';
                }
-               if ($this->input->is_ajax_request()) {
-                   echo json_encode(['status' => 'error', 'message' => $msg]);
+               if ($is_api_request) {
+                   $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'error', 'message' => $msg]));
                    return;
                }
                $this->session->set_flashdata('error', $msg);
             }
          } catch (Exception $e) {
-            if ($this->input->is_ajax_request()) {
-                echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+            if ($is_api_request) {
+                $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'error', 'message' => $e->getMessage()]));
                 return;
             }
             $this->session->set_flashdata('error', $e->getMessage());
@@ -342,12 +410,30 @@ class MerchantManagementController extends CI_Controller
       // Get summary stats if needed
       $data['mutation_summary'] = $this->Mutation_model->get_summary($merchant_id);
       
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      if ($this->input->is_ajax_request() || strpos($accept, 'json') !== false || $this->input->get('json') == '1') {
+          $this->output
+              ->set_content_type('application/json')
+              ->set_output(json_encode([
+                  'status' => true,
+                  'message' => 'Merchant detail data retrieved successfully',
+                  'data' => [
+                      'merchant' => $data['merchant'],
+                      'mutation_summary' => $data['mutation_summary'] ?? null
+                  ]
+              ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+          return;
+      }
+
       $this->load->view('merchant/detail', $data);
    }
 
    public function detailHistoryAjax($merchant_id)
    {
-      if ($this->input->is_ajax_request()) {
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      $is_api_request = $this->input->is_ajax_request() || strpos($accept, 'json') !== false || $this->input->get('json') == '1' || $this->input->method() === 'post';
+
+      if ($is_api_request) {
          try {
             $this->load->model('History');
             $start_date = $this->input->get('start_date') ?: date('Y-m-d', strtotime('-30 days'));
@@ -355,20 +441,24 @@ class MerchantManagementController extends CI_Controller
             return $this->History->get_merchant_all_history_datatables_handler($merchant_id, $start_date, $end_date);
          } catch (Throwable $e) {
             log_message('error', 'Detail History AJAX error: ' . $e->getMessage());
-            echo json_encode([
+            $this->output->set_content_type('application/json')->set_output(json_encode([
                "draw" => intval($this->input->post("draw")),
                "recordsTotal" => 0,
                "recordsFiltered" => 0,
                "data" => [],
                "error" => "Error retrieving history data: " . $e->getMessage()
-            ]);
+            ]));
+            return;
          }
       }
    }
 
    public function detailOverviewAjax($merchant_id)
    {
-      if ($this->input->is_ajax_request()) {
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      $is_api_request = $this->input->is_ajax_request() || strpos($accept, 'json') !== false || $this->input->get('json') == '1' || $this->input->method() === 'post';
+
+      if ($is_api_request) {
          try {
             $start_date = $this->input->get('start_date') ?: date('Y-m-d', strtotime('-30 days'));
             $end_date = $this->input->get('end_date') ?: date('Y-m-d');
@@ -761,7 +851,7 @@ class MerchantManagementController extends CI_Controller
                 $merchant_ids, [$start_date . ' 00:00:00', $end_date . ' 23:59:59']
             ))->result_array();
 
-            echo json_encode([
+            $this->output->set_content_type('application/json')->set_output(json_encode([
                 'status' => 'success',
                 'summary' => $summary,
                 'channels' => $channels,
@@ -779,14 +869,14 @@ class MerchantManagementController extends CI_Controller
                 'sub_merchants' => $sub_merchants,
                 'statuses' => $statuses,
                 'recent_activity' => $recent_activity
-            ]);
+            ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
             return;
          } catch (Throwable $e) {
             log_message('error', 'Detail Overview AJAX error: ' . $e->getMessage());
-            echo json_encode([
+            $this->output->set_content_type('application/json')->set_output(json_encode([
                 'status' => 'error',
                 'message' => $e->getMessage()
-            ]);
+            ]));
             return;
          }
       }
@@ -794,48 +884,92 @@ class MerchantManagementController extends CI_Controller
 
    public function detailMutationAjax($merchant_id)
    {
-      if ($this->input->is_ajax_request()) {
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      $is_api_request = $this->input->is_ajax_request() || strpos($accept, 'json') !== false || $this->input->get('json') == '1' || $this->input->method() === 'post';
+
+      if ($is_api_request) {
          try {
             $this->load->model('Mutation_model');
             return $this->Mutation_model->get_datatables_handler($merchant_id);
          } catch (Throwable $e) {
             log_message('error', 'Detail Mutation AJAX error: ' . $e->getMessage());
-            echo json_encode([
+            $this->output->set_content_type('application/json')->set_output(json_encode([
                "draw" => intval($this->input->post("draw")),
                "recordsTotal" => 0,
                "recordsFiltered" => 0,
                "data" => [],
                "error" => "Error retrieving mutation data: " . $e->getMessage()
-            ]);
+            ]));
+            return;
          }
       }
    }
 
    public function detailSubmerchantAjax($merchant_id)
    {
-      if ($this->input->is_ajax_request()) {
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      $is_api_request = $this->input->is_ajax_request() || strpos($accept, 'json') !== false || $this->input->get('json') == '1' || $this->input->method() === 'post';
+
+      if ($is_api_request) {
          try {
             $this->load->model('SubMerchant');
             return $this->SubMerchant->get_datatables_handler($merchant_id);
          } catch (Throwable $e) {
             log_message('error', 'Detail Submerchant AJAX error: ' . $e->getMessage());
-            echo json_encode([
+            $this->output->set_content_type('application/json')->set_output(json_encode([
                "draw" => intval($this->input->post("draw")),
                "recordsTotal" => 0,
                "recordsFiltered" => 0,
                "data" => [],
                "error" => "Error retrieving submerchant data: " . $e->getMessage()
-            ]);
+            ]));
+            return;
          }
       }
    }
 
    public function updateMerchant($merchant_id)
    {
+      $raw_json = json_decode($this->input->raw_input_stream, true);
+      if (!empty($raw_json) && is_array($raw_json)) {
+         foreach ($raw_json as $k => $v) {
+            if ($this->input->get($k) === null && $this->input->post($k) === null) {
+               $_POST[$k] = $v;
+            }
+         }
+      }
+
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      $is_api_request = $this->input->is_ajax_request() || strpos($accept, 'json') !== false || $this->input->get('json') == '1' || $this->input->method() === 'post';
+
       if (!$merchant_id) {
+         if ($is_api_request) {
+            $this->output->set_content_type('application/json')->set_output(json_encode([
+               'status' => false,
+               'message' => 'Merchant ID not found.'
+            ]));
+            return;
+         }
          $this->session->set_flashdata('error', 'Merchant ID not found.');
          redirect('merchant/manage');
+         return;
       }
+
+      // Check direct DB row first to ensure merchant exists
+      $existing = $this->db->get_where('merchant', ['id' => $merchant_id])->row_array();
+      if (!$existing) {
+         if ($is_api_request) {
+            $this->output->set_content_type('application/json')->set_output(json_encode([
+               'status' => false,
+               'message' => "Merchant with ID {$merchant_id} not found."
+            ]));
+            return;
+         }
+         $this->session->set_flashdata('error', "Merchant with ID {$merchant_id} not found.");
+         redirect('merchant/manage');
+         return;
+      }
+
 
       $rules = [
          ['field' => 'c_name', 'label' => 'Merchant Name', 'rules' => 'trim|required'],
@@ -852,13 +986,18 @@ class MerchantManagementController extends CI_Controller
       $this->form_validation->set_rules($rules);
 
       if ($this->form_validation->run() == FALSE) {
-         if ($this->input->is_ajax_request()) {
-             echo json_encode(['status' => 'error', 'message' => validation_errors()]);
+         $clean_error = trim(preg_replace('/\s+/', ' ', strip_tags(validation_errors())));
+         if ($is_api_request) {
+             $this->output->set_content_type('application/json')->set_output(json_encode([
+                 'status' => false,
+                 'message' => $clean_error ?: 'Validation failed. Mandatory fields are missing.'
+             ]));
              return;
          }
          $errors = validation_errors('<li>', '</li>');
          $this->session->set_flashdata('error', '<ul>' . $errors . '</ul>');
          redirect('merchant/manage/edit/' . $merchant_id);
+         return;
       } else {
          $data = [
             'c_name' => $this->input->post('c_name'),
@@ -889,12 +1028,13 @@ class MerchantManagementController extends CI_Controller
             if($this->input->post('c_password') == $this->input->post('c_confirmPassword')) {
                $data['c_password'] = password_hash($this->input->post('c_password'), PASSWORD_DEFAULT);
             } else {
-               if ($this->input->is_ajax_request()) {
-                   echo json_encode(['status' => 'error', 'message' => 'Password not match']);
+               if ($is_api_request) {
+                   $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'error', 'message' => 'Password not match']));
                    return;
                }
                $this->session->set_flashdata('message', 'Password not match');
                redirect('merchant/manage/edit/' . $merchant_id);
+               return;
             }
          }
          $data['c_openapiSecurityType'] = !empty($data['c_openapiIPAllow']) ? 'Whitelist IP' : 'Not Both';
@@ -944,20 +1084,20 @@ class MerchantManagementController extends CI_Controller
             } elseif ($code == 1062) {
                $msg = 'A merchant account with this email already exists.';
             }
-            if ($this->input->is_ajax_request()) {
-                echo json_encode(['status' => 'error', 'message' => $msg]);
+            if ($is_api_request) {
+                $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'error', 'message' => $msg]));
                 return;
             }
             $this->session->set_flashdata('error', $msg);
          } else {
             $this->db->trans_commit();
-            if ($this->input->is_ajax_request()) {
-                echo json_encode(['status' => 'success', 'message' => 'Merchant successfully updated.']);
+            if ($is_api_request) {
+                $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'success', 'message' => 'Merchant successfully updated.']));
                 return;
             }
             $this->session->set_flashdata('success', 'Merchant successfully updated.');
          }
-         redirect('merchant/manage/edit/' . $merchant_id);
+         redirect('merchant/manage');
       }
    }
 
@@ -1015,8 +1155,24 @@ class MerchantManagementController extends CI_Controller
 
    public function secretPublished()
    {
-      // Ambil secretUrl dari flashdata. Jika kosong, asumsikan testing atau redirect back.
-      $secretUrl = $this->session->flashdata('secret_url');
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      $is_api_request = $this->input->is_ajax_request() || strpos($accept, 'json') !== false || $this->input->get('json') == '1' || $this->input->method() === 'post';
+
+      $secretUrl = $this->session->flashdata('secret_url') ?: ($this->input->get('secret_url') ?: $this->input->post('secret_url'));
+      $secretExpiresAt = $this->session->flashdata('secret_expires_at') ?: ($this->input->get('secret_expires_at') ?: (time() + 86400));
+
+      if ($is_api_request) {
+         $this->output->set_content_type('application/json')->set_output(json_encode([
+            'status' => true,
+            'message' => 'Secret published detail retrieved successfully.',
+            'data' => [
+               'secret_url' => $secretUrl ?: null,
+               'secret_expires_at' => $secretExpiresAt
+            ]
+         ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+         return;
+      }
+
       if (!$secretUrl) {
          redirect('merchant/manage');
          return;
@@ -1025,7 +1181,7 @@ class MerchantManagementController extends CI_Controller
       $data['title'] = 'Secret URL Published';
       $data['user'] = $this->Model_user->view_user()->row_array();
       $data['secretUrl'] = $secretUrl;
-      $data['secretExpiresAt'] = $this->session->flashdata('secret_expires_at') ?: (time() + 86400);
+      $data['secretExpiresAt'] = $secretExpiresAt;
 
       // Render the new view
       $this->load->view('templates/user_header', $data);

@@ -134,18 +134,41 @@ class ServiceController extends CI_Controller {
 
    public function createProduk()
    {
+      $raw_json = json_decode($this->input->raw_input_stream, true);
+      if (!empty($raw_json) && is_array($raw_json)) {
+         foreach ($raw_json as $k => $v) {
+            if ($this->input->get($k) === null && $this->input->post($k) === null) {
+               $_POST[$k] = $v;
+            }
+         }
+      }
+
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      $is_api_request = $this->input->is_ajax_request() || strpos($accept, 'json') !== false || $this->input->get('json') == '1' || $this->input->method() === 'post';
+
       $this->form_validation->set_rules('caption', 'Caption', 'required');
-    //   $this->form_validation->set_rules('description', 'Description', 'required');
       $this->form_validation->set_rules('price', 'Price', 'required|numeric');
 
-      $caption = $this->input->post('caption');
-      $id = str_replace(' ', '_', $caption);
-      $description = $this->input->post('description');
-      $price = $this->input->post('price');
       $name = $this->input->post('name');
+
+      if ($this->form_validation->run() == FALSE) {
+         $clean_error = trim(preg_replace('/\s+/', ' ', strip_tags(validation_errors())));
+         if ($is_api_request) {
+            $this->output->set_content_type('application/json')->set_output(json_encode(['status' => false, 'message' => $clean_error ?: 'Validation failed.']));
+            return;
+         }
+         $this->session->set_flashdata('error', validation_errors());
+         redirect($this->_get_route_by_view($name));
+         return;
+      }
+
+      $caption = $this->input->post('caption');
+      $id = $this->input->post('id') ?: str_replace(' ', '_', strtolower($caption));
+      $description = $this->input->post('description') ?: $caption;
+      $price = $this->input->post('price');
       $channelgroup = $this->input->post('channelgroup') ? $this->input->post('channelgroup') : 'ppob';
       $channelgroup2 = $this->input->post('channelgroup2');
-      if (empty($channelgroup2) && !empty($name)) {
+      if (empty($channelgroup2)) {
           $mapping = [
               'topupovo' => 'topup_ovo',
               'topupgopay' => 'topup_gopay',
@@ -156,30 +179,22 @@ class ServiceController extends CI_Controller {
               'hago' => 'hago',
               'googleplay' => 'google_play',
               'freefire' => 'free_fire',
+              'pulsa_reguler' => 'pulsa',
           ];
-          if (isset($mapping[$name])) {
+          if (!empty($name) && isset($mapping[$name])) {
               $channelgroup2 = $mapping[$name];
+          } else {
+              $channelgroup2 = !empty($name) ? $name : 'pulsa';
           }
       }
-      log_message('error', 'CREATE_PRODUK_POST: ' . json_encode($_POST));
 
-      if ($this->form_validation->run() == FALSE) {
-         if ($this->input->is_ajax_request()) {
-            echo json_encode(['status' => 'error', 'message' => validation_errors()]);
-         } else {
-            $this->session->set_flashdata('error', validation_errors());
-            redirect($this->_get_route_by_view($name));
-         }
-         return;
-      }
-
-      $channel_id = str_replace(' ', '_', strtolower($caption));
+      $channel_id = $id;
       
       // Insert or Update the master channel in cashout_channel
       $data_channel = array(
          'id' => $channel_id,
          'c_channelGroup' => $channelgroup,
-         'c_channelGroup2' => $channelgroup2,
+         'c_channelGroup2' => $channelgroup2 ?: 'pulsa',
          'c_description' => $description,
          'c_caption' => $caption,
          'c_externalIdDefault' => 'portalpulsa',
@@ -188,45 +203,70 @@ class ServiceController extends CI_Controller {
          'c_amountMin' => 0,
          'c_amountMax' => 0
       );
+
+      $db_debug = $this->db->db_debug;
+      $this->db->db_debug = FALSE;
+
       // Handle potential duplicates gracefully by updating caption/desc
       $exists = $this->db->get_where('cashout_channel', ['id' => $channel_id])->num_rows() > 0;
       if ($exists) {
-          $success = $this->db->where('id', $channel_id)->update('cashout_channel', $data_channel);
+          $this->db->where('id', $channel_id);
+          $res = $this->db->update('cashout_channel', $data_channel);
+          $err = $this->db->error();
+          $success = ($res || $err['code'] == 0);
       } else {
-          $success= $this->db->insert('cashout_channel', $data_channel);
+          $res = $this->db->insert('cashout_channel', $data_channel);
+          $err = $this->db->error();
+          $success = ($res || $err['code'] == 0);
       }
 
+      $this->db->db_debug = $db_debug;
+
       if ($success) {
-         if ($this->input->is_ajax_request()) {
-            echo json_encode(['status' => 'success', 'message' => 'Product created successfully']);
-         } else {
-            $this->session->set_flashdata('message', 'Product created successfully');
-            redirect($this->_get_route_by_view($name));
+         if ($is_api_request) {
+            $this->output->set_content_type('application/json')->set_output(json_encode(['status' => true, 'message' => 'Product created successfully']));
+            return;
          }
+         $this->session->set_flashdata('message', 'Product created successfully');
+         redirect($this->_get_route_by_view($name));
       } else {
-         if ($this->input->is_ajax_request()) {
-            echo json_encode(['status' => 'error', 'message' => 'An error occurred while creating the product']);
-         } else {
-            $this->session->set_flashdata('error', 'An error occurred while creating the product');
-            redirect($this->_get_route_by_view($name));
+         $msg = !empty($err['message']) ? $err['message'] : 'An error occurred while creating the product';
+         if ($is_api_request) {
+            $this->output->set_content_type('application/json')->set_output(json_encode(['status' => false, 'message' => $msg]));
+            return;
          }
+         $this->session->set_flashdata('error', $msg);
+         redirect($this->_get_route_by_view($name));
       }
    }
 
    public function updateProduct()
    {
+        $raw_json = json_decode($this->input->raw_input_stream, true);
+        if (!empty($raw_json) && is_array($raw_json)) {
+           foreach ($raw_json as $k => $v) {
+              if ($this->input->get($k) === null && $this->input->post($k) === null) {
+                 $_POST[$k] = $v;
+              }
+           }
+        }
+
+        $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+        $is_api_request = $this->input->is_ajax_request() || strpos($accept, 'json') !== false || $this->input->get('json') == '1' || $this->input->method() === 'post';
+
+        $id = $this->input->post('id') ?: $this->uri->segment(4);
+        $existing = $id ? $this->db->get_where('cashout_channel', ['id' => $id])->row_array() : null;
+
         $this->form_validation->set_rules('id', 'Product ID', 'required');
         $this->form_validation->set_rules('caption', 'Caption', 'required');
-        //   $this->form_validation->set_rules('description', 'Description', 'required');
         $this->form_validation->set_rules('price', 'Price', 'required|numeric');
 
-        $id = $this->input->post('id');
         $caption = $this->input->post('caption');
-        $description = $this->input->post('description');
+        $description = $this->input->post('description') ?: ($existing ? $existing['c_description'] : '');
         $price = $this->input->post('price');
         $view_name = $this->input->post('name') ? $this->input->post('name') : $this->input->post('view_name');
-        $channelgroup = $this->input->post('channelgroup') ? $this->input->post('channelgroup') : 'ppob';
-        $channelgroup2 = $this->input->post('channelgroup2');
+        $channelgroup = $this->input->post('channelgroup') ? $this->input->post('channelgroup') : ($existing ? $existing['c_channelGroup'] : 'ppob');
+        $channelgroup2 = $this->input->post('channelgroup2') ?: ($existing ? $existing['c_channelGroup2'] : '');
         if (empty($channelgroup2) && !empty($view_name)) {
           $mapping = [
               'topupovo' => 'topup_ovo',
@@ -244,15 +284,19 @@ class ServiceController extends CI_Controller {
           }
         }
         if ($this->form_validation->run() == FALSE) {
-            if ($this->input->is_ajax_request()) {
-                echo json_encode(['status' => 'error', 'message' => validation_errors()]);
-            } else {
-                $this->session->set_flashdata('error', validation_errors());
-                redirect($this->_get_route_by_view($view_name));
+            $clean_error = trim(preg_replace('/\s+/', ' ', strip_tags(validation_errors())));
+            if ($is_api_request) {
+                $this->output->set_content_type('application/json')->set_output(json_encode(['status' => false, 'message' => $clean_error ?: 'Validation failed.']));
+                return;
             }
+            $this->session->set_flashdata('error', validation_errors());
+            redirect($this->_get_route_by_view($view_name));
             return;
         }
       
+        $db_debug = $this->db->db_debug;
+        $this->db->db_debug = FALSE;
+
         $exists = $this->db->get_where('cashout_channel', ['id' => $id])->num_rows() > 0;
         $data_channel = [
             'c_caption' => $caption,
@@ -286,42 +330,42 @@ class ServiceController extends CI_Controller {
          $data_external['c_cashoutChannelGroup2'] = $channelgroup2;
       }
 
-      if ($this->Chanel->update_cashout_chanel($id, $data_external)) {
-         if ($this->input->is_ajax_request()) {
-            echo json_encode(['status' => 'success', 'message' => 'Product updated successfully']);
-         } else {
-            $this->session->set_flashdata('message', 'Product updated successfully');
-            redirect($this->_get_route_by_view($view_name));
+      $update_result = $this->Chanel->update_cashout_chanel($id, $data_external);
+      $this->db->db_debug = $db_debug;
+
+      if ($update_result) {
+         if ($is_api_request) {
+            $this->output->set_content_type('application/json')->set_output(json_encode(['status' => true, 'message' => 'Product updated successfully']));
+            return;
          }
+         $this->session->set_flashdata('message', 'Product updated successfully');
+         redirect($this->_get_route_by_view($view_name));
       } else {
-         if ($this->input->is_ajax_request()) {
-            echo json_encode(['status' => 'error', 'message' => 'An error occurred while updating the product']);
-         } else {
-            $this->session->set_flashdata('error', 'An error occurred while updating the product');
-            redirect($this->_get_route_by_view($view_name));
+         if ($is_api_request) {
+            $this->output->set_content_type('application/json')->set_output(json_encode(['status' => false, 'message' => 'An error occurred while updating the product']));
+            return;
          }
+         $this->session->set_flashdata('error', 'An error occurred while updating the product');
+         redirect($this->_get_route_by_view($view_name));
       }
    }
 
-   public function deleteProduct($id)
+   public function deleteProduct($id = null)
    {
-      if (!$this->input->is_ajax_request()) {
-         show_404();
-      }
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      $is_api_request = $this->input->is_ajax_request() || strpos($accept, 'json') !== false || $this->input->get('json') == '1' || $this->input->method() === 'post';
+
+      if (!$id) $id = $this->uri->segment(4);
 
       $result = $this->Chanel->deleteCashoutChannel($id);
       
       if ($result === true) {
-         echo json_encode(['status' => 'success', 'message' => 'Product deleted successfully']);
+         $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'success', 'message' => 'Product deleted successfully']));
+         return;
       } else {
-         // Determine a user-friendly error message based on the error code if needed,
-         // but generally, hide raw SQL errors from the UI.
-         $friendlyMessage = 'Failed to delete product. Access denied or the data is currently in use.';
-         
-         // You can log the actual $result['message'] here if you have logging set up.
-         // log_message('error', 'Delete Product Error: ' . (is_array($result) && isset($result['message']) ? $result['message'] : 'Unknown error'));
-         
-         echo json_encode(['status' => 'error', 'message' => $friendlyMessage]);
+         $friendlyMessage = 'Failed to delete product. Access denied or data is currently in use.';
+         $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'error', 'message' => $friendlyMessage]));
+         return;
       }
    }
 
