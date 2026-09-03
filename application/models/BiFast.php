@@ -1,304 +1,119 @@
-<?php defined('BASEPATH') OR exit('No direct script access allowed');
+<?php defined('BASEPATH') or exit('No direct script access allowed');
 
-class BiFast extends CI_Model {
-
-    // DataTables variables
+/**
+ * BiFast Model
+ * Handles BI-FAST transaction queries, two-step DataTables processing, logs, and external channel payload resolution.
+ */
+class BiFast extends CI_Model
+{
     var $table = 'cashout_payment_bifast cpb';
-    var $column_order = array(null, 'm.c_name', 'cpb.c_datetime', 'cpb.c_merchantTransactionId', 'c.c_invoiceNo', 'cpb.ref_cashoutExternalId', 'cpb.ref_cashoutChannelId', 'cpb.c_accountNo', 'mab.c_beneficiaryAccountName', 'cpb.c_amount', 'cpb.c_fee', 'cpb.c_status', null, null);
-    var $column_search = array('cpb.id', 'm.c_name', 'cpb.c_merchantTransactionId', 'cpb.c_accountNo', 'mab.c_beneficiaryAccountName');
+    var $column_order = [
+        null, 'm.c_name', 'cpb.c_datetime', 'cpb.c_merchantTransactionId',
+        'c.c_invoiceNo', 'cpb.ref_cashoutExternalId', 'cpb.ref_cashoutChannelId',
+        'cpb.c_accountNo', 'mab.c_beneficiaryAccountName', 'cpb.c_amount',
+        'cpb.c_fee', 'cpb.c_status', null, null
+    ];
+    var $column_search = ['cpb.id', 'm.c_name', 'cpb.c_merchantTransactionId', 'cpb.c_accountNo', 'mab.c_beneficiaryAccountName'];
     private static $cached_total = null;
-    var $order = array('cpb.id' => 'desc');
+    var $order = ['cpb.id' => 'desc'];
 
 
 
-
-    public function get_bifast($limit, $start, $date_from = null, $date_to = null, $search_name_bifast = null, $search_transid_bifast = null, $search_external_reff_id = null, $search_channel_bifast = null, $search_status_transaction_bifast = null)
+    public function get_summary($date_from, $date_to, $refMerchantId = null)
     {
-        $query = " FROM cashout_payment_bifast
-                   JOIN cashout 
-                        ON cashout.id = cashout_payment_bifast.ref_cashoutId
-                   JOIN merchant 
-                        ON merchant.id = cashout_payment_bifast.ref_merchantId
-                   LEFT JOIN merchant_account_bank ON merchant_account_bank.c_beneficiaryAccountNo = cashout_payment_bifast.c_accountNo
-                            AND merchant_account_bank.ref_cashoutChannelId = cashout_payment_bifast.ref_cashoutChannelId
-                            AND merchant_account_bank.ref_merchantId = cashout_payment_bifast.ref_merchantId
-                   LEFT JOIN external_paylabs_disbursement_transfer_bank 
-                        ON external_paylabs_disbursement_transfer_bank.ref_cashoutPaymentBifastId = cashout_payment_bifast.id 
-                   LEFT JOIN external_gvconnect_snap_disbursement_transfer_bank 
-                        ON external_gvconnect_snap_disbursement_transfer_bank.ref_cashoutPaymentBifastId = cashout_payment_bifast.id 
-                   LEFT JOIN external_ifp_bifast_transfer_interbank 
-                        ON external_ifp_bifast_transfer_interbank.ref_cashoutPaymentBifastId = cashout_payment_bifast.id 
-                   LEFT JOIN external_paydgn_disbursement_transfer_bank 
-                        ON external_paydgn_disbursement_transfer_bank.ref_cashoutPaymentBifastId = cashout_payment_bifast.id 
-                   WHERE 1=1
-                 ";
-                 
-
-        // Optimized: Create a lean query for counting total rows without unnecessary joins
-        $lean_query = " FROM cashout_payment_bifast WHERE 1=1 ";
-        if (!empty($date_from) && !empty($date_to)) {
-            $lean_query .= " and cashout_payment_bifast.c_datetime >= '$date_from' AND cashout_payment_bifast.c_datetime <= '$date_to'";
-        }
-        if ($search_name_bifast) {
-            $lean_query .= " AND cashout_payment_bifast.ref_merchantId = $search_name_bifast";
-        }
-        if (!empty($search_transid_bifast)) {
-            $lean_query .= " AND cashout_payment_bifast.c_merchantTransactionId ='$search_transid_bifast'";
-        }
-        if (!empty($search_status_transaction_bifast)) {
-            $lean_query .= " AND cashout_payment_bifast.c_status ='$search_status_transaction_bifast'";
-        }
-
-        $total_query = "SELECT COUNT(*) as total_rows " . $lean_query;
-        $total_rows = $this->db->query($total_query)->row()->total_rows;
-
-        $data_query = "SELECT 
-                merchant.c_name AS name_merchant,
-                cashout_payment_bifast.id, 
-                cashout_payment_bifast.ref_merchantId,
-                cashout_payment_bifast.c_datetime, 
-                cashout.c_invoiceNo, 
-                cashout_payment_bifast.c_merchantTransactionId,
-                cashout_payment_bifast.ref_cashoutChannelId, 
-                cashout_payment_bifast.c_amount, 
-                cashout_payment_bifast.c_fee, 
-                cashout_payment_bifast.c_status,
-                cashout_payment_bifast.c_feeExternal,
-                cashout_payment_bifast.c_accountNo,
-                cashout_payment_bifast.ref_cashoutExternalId,
-                cashout_payment_bifast.ref_cashoutExternalLogBifastId,
-                merchant_account_bank.c_beneficiaryAccountName,
-                COALESCE(
-                    external_paylabs_disbursement_transfer_bank.c_responseBody,
-                    external_gvconnect_snap_disbursement_transfer_bank.c_responseBody,
-                    external_ifp_bifast_transfer_interbank.c_responseBody,
-                    external_paydgn_disbursement_transfer_bank.c_responseBody
-                ) AS c_responseBody " . $query . " Order BY cashout_payment_bifast.id DESC LIMIT $start, $limit";
-
-        $data = $this->db->query($data_query)->result();
-        return [
-        'total_rows' => $total_rows,
-        'data' => $data
-        ];
-    }
-    
-    
-
-    public function get_summary($date_from, $date_to, $refMerchantId = null) {
-        // $this->db->select('COUNT(id) as qty, SUM(c_amount) as amount, SUM(c_fee) as fee, SUM(c_feeExternal) as fee_external');
-        $query = "SELECT COUNT(a.id) as qty, SUM(a.c_amount) as amount, SUM(a.c_fee) as fee, SUM(a.c_feeExternal) as fee_external
-        FROM cashout_payment_bifast a
-        WHERE a.c_datetime  >= '$date_from' AND a.c_datetime <= '$date_to'";
+        $params = [$date_from, $date_to];
+        $sql = "SELECT COUNT(a.id) as qty, SUM(a.c_amount) as amount, SUM(a.c_fee) as fee, SUM(a.c_feeExternal) as fee_external FROM cashout_payment_bifast a WHERE a.c_datetime >= ? AND a.c_datetime <= ?";
 
         if (!empty($refMerchantId)) {
-            $query .= " AND a.ref_merchantId = '$refMerchantId'";
+            $sql .= " AND a.ref_merchantId = ?";
+            $params[] = $refMerchantId;
         }
-
-        return $this->db->query($query)->result_array();
+        return $this->db->query($sql, $params)->result_array();
     }
 
     public function getBifastDetail($id)
     {
-        $query = "SELECT cashout_payment_bifast.*, cashout.*, merchant.c_name as name_merchant, merchant_account_bank.c_beneficiaryAccountName
-        FROM cashout_payment_bifast 
-        JOIN cashout ON cashout.id = cashout_payment_bifast.ref_cashoutId
-        JOIN merchant ON merchant.id = cashout_payment_bifast.ref_merchantId
-        LEFT JOIN merchant_account_bank ON merchant_account_bank.c_beneficiaryAccountNo = cashout_payment_bifast.c_accountNo
-                AND merchant_account_bank.ref_cashoutChannelId = cashout_payment_bifast.ref_cashoutChannelId
-                AND merchant_account_bank.ref_merchantId = cashout_payment_bifast.ref_merchantId
-        WHERE cashout_payment_bifast.id = ?";
-
-        return $this->db->query($query, array($id))->result_array();
-    }
-    
-    public function get_merchant(){
-        $query = "select id, c_name from merchant ";
-        return $this->db->query($query)->result();
+        $sql = "SELECT cashout_payment_bifast.*, cashout.*, merchant.c_name as name_merchant, merchant_account_bank.c_beneficiaryAccountName FROM cashout_payment_bifast JOIN cashout ON cashout.id = cashout_payment_bifast.ref_cashoutId JOIN merchant ON merchant.id = cashout_payment_bifast.ref_merchantId LEFT JOIN merchant_account_bank ON merchant_account_bank.c_beneficiaryAccountNo = cashout_payment_bifast.c_accountNo AND merchant_account_bank.ref_cashoutChannelId = cashout_payment_bifast.ref_cashoutChannelId AND merchant_account_bank.ref_merchantId = cashout_payment_bifast.ref_merchantId WHERE cashout_payment_bifast.id = ?";
+        return $this->db->query($sql, [$id])->result_array();
     }
 
-    public function get_channels(){
-        $query = "SELECT c_cashoutExternalId FROM cashout_external_x_channel  
-                WHERE c_cashoutChannelGroup = 'bifast' AND c_status = 'Active' 
-                GROUP BY c_cashoutExternalId  ";
-        return $this->db->query($query)->result();
+    public function get_merchant()
+    {
+        return $this->db->select('id, c_name')->get('merchant')->result();
     }
 
-    public function get_channel_mappings() {
-        $query = "SELECT c_cashoutExternalId, ref_cashoutChannelId FROM cashout_external_x_channel 
-                WHERE c_cashoutChannelGroup = 'bifast' AND c_status = 'Active'";
-        return $this->db->query($query)->result_array();
+    public function get_channels()
+    {
+        return $this->db->select('c_cashoutExternalId')
+            ->where('c_cashoutChannelGroup', 'bifast')
+            ->where('c_status', 'Active')
+            ->group_by('c_cashoutExternalId')
+            ->get('cashout_external_x_channel')
+            ->result();
     }
 
-    public function get_internal_channels(){
-        $query = "SELECT id, c_description FROM cashout_channel 
-                WHERE c_channelGroup = 'bifast' 
-                ORDER BY c_description ASC";
-        return $this->db->query($query)->result();
+    public function get_channel_mappings()
+    {
+        return $this->db->select('c_cashoutExternalId, ref_cashoutChannelId')
+            ->where('c_cashoutChannelGroup', 'bifast')
+            ->where('c_status', 'Active')
+            ->get('cashout_external_x_channel')
+            ->result_array();
     }
 
-    public function getDataBiFastChannelExternal($ref_cashoutExternalId, $ref_cashoutExternalLogQrisMpmIdCreate) {
-        
-        $TransactionIdExternal1         = null;
-        $TransactionIdExternal2         = null;
+    public function get_internal_channels()
+    {
+        return $this->db->select('id, c_description')
+            ->where('c_channelGroup', 'bifast')
+            ->order_by('c_description', 'ASC')
+            ->get('cashout_channel')
+            ->result();
+    }
 
-        $DatetimeRequest                = null;
-        $RequestHeader                  = null;
-        $RequestBody                    = null;
+    public function getDataBiFastChannelExternal($ref_cashoutExternalId, $ref_cashoutExternalLogQrisMpmIdCreate)
+    {
+        $tableMap = [
+            'gvconnect' => ['tbl' => 'external_gvconnect_snap_disbursement_transfer_bank', 'k1' => 'c_partnerReferenceNo', 'k2' => 'c_referenceNo'],
+            'ifp'       => ['tbl' => 'external_ifp_bifast_transfer_interbank', 'k1' => 'c_partnerReferenceNo', 'k2' => 'c_referenceNo'],
+            'inacash'   => ['tbl' => 'external_inacash_disbursement_transfer_bank', 'k1' => 'c_refId', 'k2' => 'c_partnerRefId'],
+            'stm'       => ['tbl' => 'external_stm_disbursement_transfer_bank', 'k1' => 'client_trans_reference', 'k2' => 'refIdTransfer'],
+            'paylabs'   => ['tbl' => 'external_paylabs_disbursement_transfer_bank', 'k1' => 'c_partnerReferenceNo', 'k2' => 'c_referenceNo'],
+            'paydgn'    => ['tbl' => 'external_paydgn_disbursement_transfer_bank', 'k1' => 'c_refId', 'k2' => 'c_partnerRefId'],
+            'quantum'   => ['tbl' => 'external_quantum_bifast_transfer', 'k1' => 'c_requestId', 'k2' => 'c_transactionId']
+        ];
 
-        $DatetimeResponse               = null;
-        $ResponseHeader                 = null;
-        $ResponseBody                   = null;
-
-        if ($ref_cashoutExternalId == 'gvconnect') {
-
-            $qtxt1_1    = "SELECT c_partnerReferenceNo, c_referenceNo, c_datetimeRequest, c_requestHeader, c_requestBody, c_datetimeResponse, c_responseHeader, c_responseBody FROM external_gvconnect_snap_disbursement_transfer_bank WHERE id='$ref_cashoutExternalLogQrisMpmIdCreate'";
-            $query1_1   = $this->db->query($qtxt1_1);
-            $result1_1  = $query1_1->num_rows() ? $query1_1->row() : false;
-            if($result1_1) {
-
-                $TransactionIdExternal1     = $result1_1->c_partnerReferenceNo;
-                $TransactionIdExternal2     = $result1_1->c_referenceNo;
-                
-                $DatetimeRequest            = $result1_1->c_datetimeRequest;
-                $RequestHeader              = $result1_1->c_requestHeader;
-                $RequestBody                = $result1_1->c_requestBody;
-
-                $DatetimeResponse           = $result1_1->c_datetimeResponse;
-                $ResponseHeader             = $result1_1->c_responseHeader;
-                $ResponseBody               = $result1_1->c_responseBody;
-
+        if (isset($tableMap[$ref_cashoutExternalId])) {
+            $cfg = $tableMap[$ref_cashoutExternalId];
+            $row = $this->db->get_where($cfg['tbl'], ['id' => $ref_cashoutExternalLogQrisMpmIdCreate])->row();
+            if ($row) {
+                return [
+                    'TransactionIdExternal1' => $row->{$cfg['k1']} ?? null,
+                    'TransactionIdExternal2' => $row->{$cfg['k2']} ?? null,
+                    'RequestDatetime'        => $row->c_datetimeRequest ?? null,
+                    'RequestHeader'          => json_decode($row->c_requestHeader ?? '', true),
+                    'RequestBody'            => json_decode($row->c_requestBody ?? '', true),
+                    'ResponseDatetime'       => $row->c_datetimeResponse ?? null,
+                    'ResponseHeader'         => json_decode($row->c_responseHeader ?? '', true),
+                    'ResponseBody'           => json_decode($row->c_responseBody ?? '', true)
+                ];
             }
-
-        } else if ($ref_cashoutExternalId == 'ifp') {
-
-            $qtxt1_1    = "SELECT c_partnerReferenceNo, c_referenceNo, c_datetimeRequest, c_requestHeader, c_requestBody, c_datetimeResponse, c_responseHeader, c_responseBody FROM external_ifp_bifast_transfer_interbank WHERE id='$ref_cashoutExternalLogQrisMpmIdCreate'";
-            $query1_1   = $this->db->query($qtxt1_1);
-            $result1_1  = $query1_1->num_rows() ? $query1_1->row() : false;
-            if($result1_1) {
-                
-                $TransactionIdExternal1     = $result1_1->c_partnerReferenceNo;
-                $TransactionIdExternal2     = $result1_1->c_referenceNo;
-
-                $DatetimeRequest            = $result1_1->c_datetimeRequest;
-                $RequestHeader              = $result1_1->c_requestHeader;
-                $RequestBody                = $result1_1->c_requestBody;
-
-                $DatetimeResponse           = $result1_1->c_datetimeResponse;
-                $ResponseHeader             = $result1_1->c_responseHeader;
-                $ResponseBody               = $result1_1->c_responseBody;
-            }
-
-        } else if($ref_cashoutExternalId == 'inacash'){
-            $qtxt1_1    = "SELECT c_refId, c_partnerRefId, c_datetimeRequest, c_requestHeader, c_requestBody, c_datetimeResponse, c_responseHeader, c_responseBody FROM external_inacash_disbursement_transfer_bank WHERE id='$ref_cashoutExternalLogQrisMpmIdCreate'";
-            $query1_1   = $this->db->query($qtxt1_1);
-            $result1_1  = $query1_1->num_rows() ? $query1_1->row() : false;
-            if($result1_1) {
-                
-                $TransactionIdExternal1     = $result1_1->c_refId;
-                $TransactionIdExternal2     = $result1_1->c_partnerRefId;
-
-                $DatetimeRequest            = $result1_1->c_datetimeRequest;
-                $RequestHeader              = $result1_1->c_requestHeader;
-                $RequestBody                = $result1_1->c_requestBody;
-
-                $DatetimeResponse           = $result1_1->c_datetimeResponse;
-                $ResponseHeader             = $result1_1->c_responseHeader;
-                $ResponseBody               = $result1_1->c_responseBody;
-            }
-        } else if ($ref_cashoutExternalId == 'stm') {
-
-            $qtxt1_1    = "SELECT client_trans_reference, refIdTransfer, c_datetimeRequest, c_requestHeader, c_requestBody, c_datetimeResponse, c_responseHeader, c_responseBody FROM external_stm_disbursement_transfer_bank WHERE id='$ref_cashoutExternalLogQrisMpmIdCreate'";
-            $query1_1   = $this->db->query($qtxt1_1);
-            $result1_1  = $query1_1->num_rows() ? $query1_1->row() : false;
-            if($result1_1) {
-                
-                $TransactionIdExternal1     = $result1_1->client_trans_reference;
-                $TransactionIdExternal2     = $result1_1->refIdTransfer;
-
-                $DatetimeRequest            = $result1_1->c_datetimeRequest;
-                $RequestHeader              = $result1_1->c_requestHeader;
-                $RequestBody                = $result1_1->c_requestBody;
-
-                $DatetimeResponse           = $result1_1->c_datetimeResponse;
-                $ResponseHeader             = $result1_1->c_responseHeader;
-                $ResponseBody               = $result1_1->c_responseBody;
-            }
-
-        } else if ($ref_cashoutExternalId == 'paylabs') {
-
-            $qtxt1_1    = "SELECT c_partnerReferenceNo, c_referenceNo, c_datetimeRequest, c_requestHeader, c_requestBody, c_datetimeResponse, c_responseHeader, c_responseBody FROM external_paylabs_disbursement_transfer_bank WHERE id='$ref_cashoutExternalLogQrisMpmIdCreate'";
-            $query1_1   = $this->db->query($qtxt1_1);
-            $result1_1  = $query1_1->num_rows() ? $query1_1->row() : false;
-            if($result1_1) {
-                
-                $TransactionIdExternal1     = $result1_1->c_partnerReferenceNo;
-                $TransactionIdExternal2     = $result1_1->c_referenceNo;
-
-                $DatetimeRequest            = $result1_1->c_datetimeRequest;
-                $RequestHeader              = $result1_1->c_requestHeader;
-                $RequestBody                = $result1_1->c_requestBody;
-
-                $DatetimeResponse           = $result1_1->c_datetimeResponse;
-                $ResponseHeader             = $result1_1->c_responseHeader;
-                $ResponseBody               = $result1_1->c_responseBody;
-            }
-
-        } else if ($ref_cashoutExternalId == 'paydgn') {
-
-            $qtxt1_1    = "SELECT c_refId, c_partnerRefId, c_datetimeRequest, c_requestHeader, c_requestBody, c_datetimeResponse, c_responseHeader, c_responseBody FROM external_paydgn_disbursement_transfer_bank WHERE id='$ref_cashoutExternalLogQrisMpmIdCreate'";
-            $query1_1   = $this->db->query($qtxt1_1);
-            $result1_1  = $query1_1->num_rows() ? $query1_1->row() : false;
-            if($result1_1) {
-                
-                $TransactionIdExternal1     = $result1_1->c_refId;
-                $TransactionIdExternal2     = $result1_1->c_partnerRefId;
-
-                $DatetimeRequest            = $result1_1->c_datetimeRequest;
-                $RequestHeader              = $result1_1->c_requestHeader;
-                $RequestBody                = $result1_1->c_requestBody;
-
-                $DatetimeResponse           = $result1_1->c_datetimeResponse;
-                $ResponseHeader             = $result1_1->c_responseHeader;
-                $ResponseBody               = $result1_1->c_responseBody;
-            }
-
-        } else if ($ref_cashoutExternalId == 'quantum') {
-
-            $qtxt1_1    = "SELECT c_requestId, c_transactionId, c_datetimeRequest, c_requestHeader, c_requestBody, c_datetimeResponse, c_responseHeader, c_responseBody FROM external_quantum_bifast_transfer WHERE id='$ref_cashoutExternalLogQrisMpmIdCreate'";
-            $query1_1   = $this->db->query($qtxt1_1);
-            $result1_1  = $query1_1->num_rows() ? $query1_1->row() : false;
-            if($result1_1) {
-                
-                $TransactionIdExternal1     = $result1_1->c_requestId;
-                $TransactionIdExternal2     = $result1_1->c_transactionId;
-
-                $DatetimeRequest            = $result1_1->c_datetimeRequest;
-                $RequestHeader              = $result1_1->c_requestHeader;
-                $RequestBody                = $result1_1->c_requestBody;
-
-                $DatetimeResponse           = $result1_1->c_datetimeResponse;
-                $ResponseHeader             = $result1_1->c_responseHeader;
-                $ResponseBody               = $result1_1->c_responseBody;
-            }
-
         }
 
-        return array(
-                    'TransactionIdExternal1'    => $TransactionIdExternal1, 
-                    'TransactionIdExternal2'    => $TransactionIdExternal2, 
-                    'RequestDatetime'           => $DatetimeRequest, 
-                    'RequestHeader'             => json_decode($RequestHeader, true),
-                    'RequestBody'               => json_decode($RequestBody, true),
-                    'ResponseDatetime'          => $DatetimeResponse,
-                    'ResponseHeader'            => json_decode($ResponseHeader, true),
-                    'ResponseBody'              => json_decode($ResponseBody, true)
-                );
+        return [
+            'TransactionIdExternal1' => null,
+            'TransactionIdExternal2' => null,
+            'RequestDatetime'        => null,
+            'RequestHeader'          => null,
+            'RequestBody'            => null,
+            'ResponseDatetime'       => null,
+            'ResponseHeader'         => null,
+            'ResponseBody'           => null
+        ];
     }
 
     public function get_datatables_handler($filters = [])
     {
         $this->load->library('datatables');
-
         $search_name = $filters['merchant'] ?? null;
         $date_from = $filters['date_from'] ?? null;
         $date_to = $filters['date_to'] ?? null;
@@ -335,4 +150,3 @@ class BiFast extends CI_Model {
             ->make(true);
     }
 }
-?>

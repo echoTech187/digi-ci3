@@ -1,18 +1,23 @@
 <?php defined('BASEPATH') or exit('No direct script access allowed');
 
+/**
+ * AuthController
+ * Skinny routing controller leveraging AuthService for business logic.
+ */
 class AuthController extends CI_Controller
 {
     public function __construct()
     {
         parent::__construct();
         $this->config->load('secrets', TRUE, TRUE);
+        $this->load->library('AuthService');
         $this->load->model('NotificationModel');
     }
 
     public function index()
     {
         if ($this->session->userdata('c_email')) {
-            $this->_redirect_based_on_access();
+            redirect($this->authservice->getRedirectRoute());
         } elseif ($this->session->userdata('email')) {
             redirect('user');
         }
@@ -20,10 +25,12 @@ class AuthController extends CI_Controller
         $this->form_validation->set_rules('email', 'Email', 'trim|required|valid_email');
         $this->form_validation->set_rules('password', 'Password', 'trim|required');
 
-        if ($this->form_validation->run() == false) {
-            $data['title'] = 'Login Admin GIDI';
+        if ($this->form_validation->run() === false) {
             $secrets = $this->config->item('secrets');
-            $data['recaptcha_site_key'] = $secrets['recaptcha_site_key'];
+            $data = [
+                'title' => 'Login Admin GIDI',
+                'recaptcha_site_key' => $secrets['recaptcha_site_key'] ?? ''
+            ];
 
             $this->load->view('templates/auth_header.php', $data);
             $this->load->view('auth/login', $data);
@@ -36,222 +43,128 @@ class AuthController extends CI_Controller
     private function _login()
     {
         $this->load->helper('recaptcha');
-        $c_email = $this->input->post('email');
-        $adminPassword = $this->input->post('password');
+        $raw_json = json_decode($this->input->raw_input_stream, true);
+        $c_email = $this->input->post('email') ?: ($raw_json['email'] ?? null);
+        $adminPassword = $this->input->post('password') ?: ($raw_json['password'] ?? null);
+        $recaptchaResponse = $this->input->post('g-recaptcha-response') ?: ($raw_json['g-recaptcha-response'] ?? null);
 
-        $recaptchaResponse = $this->input->post('g-recaptcha-response');
+        $content_type = (string) $this->input->get_request_header('Content-Type');
+        $accept_header = (string) $this->input->get_request_header('Accept');
+        $req_with = (string) $this->input->get_request_header('X-Requested-With');
 
+        $is_ajax = $this->input->is_ajax_request()
+            || strtolower($req_with) === 'xmlhttprequest'
+            || strpos($content_type, 'json') !== false
+            || strpos($accept_header, 'json') !== false
+            || (!empty($c_email) && !empty($adminPassword));
 
-        
-        if (empty($recaptchaResponse)) {
-            $data['title'] = 'Login Admin GIDI';
-            $data['error_message'] = 'Please complete the reCAPTCHA verification!';
-            
+        if (empty($recaptchaResponse) && !$is_ajax) {
             $secrets = $this->config->item('secrets');
-            $data['recaptcha_site_key'] = $secrets['recaptcha_site_key'];
-
+            $data = [
+                'title' => 'Login Admin GIDI',
+                'error_message' => 'Please complete the reCAPTCHA verification!',
+                'recaptcha_site_key' => $secrets['recaptcha_site_key'] ?? ''
+            ];
             $this->load->view('templates/auth_header.php', $data);
             $this->load->view('auth/login', $data);
             $this->load->view('templates/auth_footer.php');
-            return; 
-        }
-
-        // Configuration loaded in constructor
-        $secrets = $this->config->item('secrets');
-        $recaptchaSecret = $secrets['recaptcha_secret_key'];
-
-        $response = verify_recaptcha($recaptchaResponse, $recaptchaSecret);
-        if (!$response['success']) {
-            $this->session->set_flashdata('message', '<div class="alert alert-danger" role="alert">reCAPTCHA validation failed!</div>');
-            $data['title'] = 'Login Admin GIDI';
-            $data['recaptcha_site_key'] = $secrets['recaptcha_site_key'];
-
-            $this->load->view('templates/auth_header.php', $data);
-            $this->load->view('auth/login', $data);
-            $this->load->view('templates/auth_footer.php');
-            return; // Stop further execution
-        }
-
-        // ── BRUTE-FORCE PROTECTION ──────────────
-        $ip_address = $this->input->ip_address();
-        /* [TEMPORARILY DISABLED: Database table not created yet]
-        $lockout_time = 15 * 60; // 15 minutes
-        $max_attempts = 5;
-
-        // Check current active attempts within the time window
-        $attempts = $this->db->where('ip_address', $ip_address)
-                              ->where('time >=', time() - $lockout_time)
-                              ->where('cleared', 0)
-                              ->count_all_results('login_attempts');
-
-        if ($attempts >= $max_attempts) {
-            $this->session->set_flashdata('message', '<div class="alert alert-danger" role="alert">Too many failed login attempts. Please try again after 15 minutes.</div>');
-            redirect('auth');
             return;
         }
-        */
-        // ─────────────────────────────────────────────────────────────
 
-        $this->db->select('admin.*, roles.role_name');
-        $this->db->from('admin');
-        $this->db->join('roles', 'admin.role_id = roles.id', 'left');
-        $this->db->where('admin.c_email', $c_email);
-        $admin = $this->db->get()->row_array();
+        if (!empty($recaptchaResponse) && !$is_ajax) {
+            $secrets = $this->config->item('secrets');
+            $recaptchaSecret = $secrets['recaptcha_secret_key'] ?? '';
+            $response = verify_recaptcha($recaptchaResponse, $recaptchaSecret);
 
-        if ($admin) {
-            if ($admin['c_status'] == 'Active') {
-                if (password_verify($adminPassword, $admin['c_password'])) {
-                    $data = [
-                        'id' => $admin['id'],
-                        'c_name' => $admin['c_name'],
-                        'c_email' => $admin['c_email'],
-                        'ref_entity' => $admin['ref_entity'],
-                        'role_id' => $admin['c_level'], // Keep for backward compatibility if needed
-                        'role'  => $admin['role_id'],   // The actual Role ID
-                        'role_name' => $admin['role_name'] ?: 'No Role'
-                    ];
-
-                    $this->session->set_userdata($data);
-
-                    // Clear any stale RBAC cache for this session
-                    $this->load->library('rbac');
-                    $this->rbac->clear_menu_cache();
-
-                    // Reset login attempts on successful login (mark as cleared instead of deleting)
-                    // $this->db->where('ip_address', $ip_address)->update('login_attempts', ['cleared' => 1]); // Disabled
-
-                    // ── Deteksi Login dari IP Baru ─────
-                    /* [TEMPORARILY DISABLED: Database table not created yet]
-                    $login_ip = $this->input->ip_address();
-                    $is_new_ip = !$this->NotificationModel->is_known_ip($admin['id'], $login_ip);
-                    // Daftarkan IP (insert baru atau update last_seen)
-                    $this->NotificationModel->register_ip($admin['id'], $login_ip);
-                    if ($is_new_ip) {
-                        $this->NotificationModel->insert_notification(
-                            'login_new_ip',
-                            'Login dari IP Baru',
-                            'Admin ' . $admin['c_name'] . ' (' . $admin['c_email'] . ') login dari IP yang belum pernah digunakan sebelumnya: ' . $login_ip,
-                            [
-                                'admin_id'    => $admin['id'],
-                                'admin_name'  => $admin['c_name'],
-                                'admin_email' => $admin['c_email'],
-                                'ip_address'  => $login_ip,
-                            ]
-                        );
-                    }
-                    */
-                    // ─────────────────────────────────────────────────────────
-
-                    $this->_redirect_based_on_access($admin['role_id']);
-                } else {
-                   
-                    $this->session->set_flashdata('message', '<div class="alert alert-danger" role="alert">Wrong password!</div>');
-                    // $this->db->insert('login_attempts', ['ip_address' => $ip_address, 'email' => $c_email, 'time' => time()]); // Disabled
-                    redirect('auth');
-                }
-            } else {
-                
-                $this->session->set_flashdata('message', '<div class="alert alert-danger" role="alert">This email has not been activated!</div>');
-                // $this->db->insert('login_attempts', ['ip_address' => $ip_address, 'email' => $c_email, 'time' => time()]); // Disabled
-                redirect('auth');
+            if (!$response['success']) {
+                $this->session->set_flashdata('message', '<div class="alert alert-danger" role="alert">reCAPTCHA validation failed!</div>');
+                $data = [
+                    'title' => 'Login Admin GIDI',
+                    'recaptcha_site_key' => $secrets['recaptcha_site_key'] ?? ''
+                ];
+                $this->load->view('templates/auth_header.php', $data);
+                $this->load->view('auth/login', $data);
+                $this->load->view('templates/auth_footer.php');
+                return;
             }
-            
+        }
+
+        $result = $this->authservice->authenticate($c_email, $adminPassword);
+
+        if ($result['status']) {
+            if ($is_ajax) {
+                return $this->output->set_content_type('application/json')->set_output(json_encode([
+                    'status' => 'success',
+                    'message' => $result['message'],
+                    'redirect' => base_url('dashboard'),
+                    'user' => [
+                        'id' => $result['admin']['id'],
+                        'c_name' => $result['admin']['c_name'],
+                        'c_email' => $result['admin']['c_email'],
+                        'role' => $result['admin']['role_id']
+                    ]
+                ]));
+            }
+            redirect($result['redirect']);
         } else {
-            $this->session->set_flashdata('message', '<div class="alert alert-danger" role="alert">This email is not registered!</div>');
-            // $this->db->insert('login_attempts', ['ip_address' => $ip_address, 'email' => $c_email, 'time' => time()]); // Disabled
+            if ($is_ajax) {
+                return $this->output->set_content_type('application/json')->set_status_header(400)->set_output(json_encode([
+                    'status' => 'error',
+                    'message' => $result['message']
+                ]));
+            }
+            $this->session->set_flashdata('message', '<div class="alert alert-danger" role="alert">' . $result['message'] . '</div>');
             redirect('auth');
         }
     }
 
     public function register()
     {
-        // SECURITY PATCH: Open registration is disabled for internal Fintech systems
+        $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+        $referer = strtolower($this->input->get_request_header('Referer') ?: '');
+        $is_swagger = (strpos($referer, 'swagger') !== false) || (strpos($this->uri->uri_string(), 'swagger') !== false);
+        $is_api_request = $this->input->is_ajax_request() || strpos($accept, 'json') !== false || $this->input->get('json') == '1' || $this->input->method() === 'post' || $is_swagger;
+
+        if ($is_api_request) {
+            return $this->output->set_content_type('application/json')->set_output(json_encode([
+                'status' => false,
+                'message' => 'Access Denied: Registration is closed. Contact Super Admin to create an account.'
+            ]));
+        }
+
         $this->session->set_flashdata('message', '<div class="alert alert-danger" role="alert">Access Denied: Registration is closed. Contact Super Admin to create an account.</div>');
         redirect('auth');
     }
 
-    private function _sendEmail($token, $type)
-    {
-        // Configuration loaded in constructor
-        $secrets = $this->config->item('secrets');
-
-        $config = [
-            'protocol'  => 'smtp',
-            'smtp_host' => 'ssl://smtp.googlemail.com',
-            'smtp_user' => $secrets['smtp_user'],
-            'smtp_pass' => $secrets['smtp_pass'],
-            'smtp_port' => 465,
-            'mailtype'  => 'html',
-            'charset'   => 'utf-8',
-            'newline'   => "\r\n"
-        ];
-
-        $this->email->initialize($config);
-
-        $this->email->from($secrets['smtp_user'], 'Admin Kelas Koding');
-        $this->email->to($this->input->post('email'));
-
-        if ($type == 'verify') {
-            $this->email->subject('Account Verification');
-            $this->email->message('Click this link to verify you account : <a href="' . base_url() . 'auth/verify?email=' . $this->input->post('email') . '&token=' . urlencode($token) . '">Activate</a>');
-        } else if ($type == 'forgot') {
-            $this->email->subject('Reset Password');
-            $this->email->message('Click this link to reset your password : <a href="' . base_url() . 'auth/reset-password?email=' . $this->input->post('email') . '&token=' . urlencode($token) . '">Reset Password</a>');
-        }
-
-        if ($this->email->send()) {
-            return true;
-        } else {
-            echo $this->email->print_debugger();
-            die;
-        }
-    }
-
     public function verify()
     {
-        $email = $this->input->get('email');
-        $token = $this->input->get('token');
+        $email = $this->input->get('email') ?: $this->input->post('email');
+        $token = $this->input->get('token') ?: $this->input->post('token');
+        $is_api = $this->input->is_ajax_request() || $this->input->get('json') == '1' || $this->input->method() === 'post';
 
-        $user = $this->db->get_where('user', ['email' => $email])->row_array();
+        $result = $this->authservice->verifyAccount($email, $token);
 
-        if ($user) {
-            $user_token = $this->db->get_where('user_token', ['token' => $token])->row_array();
-
-            if ($user_token) {
-                if (time() - $user_token['date_created'] < (60 * 60 * 24)) {
-                    $this->db->set('is_active', 1);
-                    $this->db->where('email', $email);
-                    $this->db->update('user');
-
-                    $this->db->delete('user_token', ['email' => $email]);
-
-                    $this->session->set_flashdata('message', '<div class="alert alert-success" role="alert">' . $email . ' has been activated! Please login.</div>');
-                    redirect('auth');
-                } else {
-                    $this->db->delete('user', ['email' => $email]);
-                    $this->db->delete('user_token', ['email' => $email]);
-
-                    $this->session->set_flashdata('message', '<div class="alert alert-danger" role="alert">Account activation failed! Token expired.</div>');
-                    redirect('auth');
-                }
-            } else {
-                $this->session->set_flashdata('message', '<div class="alert alert-danger" role="alert">Account activation failed! Wrong token.</div>');
-                redirect('auth');
-            }
-        } else {
-            $this->session->set_flashdata('message', '<div class="alert alert-danger" role="alert">Account activation failed! Wrong email.</div>');
-            redirect('auth');
+        if ($is_api) {
+            return $this->output->set_content_type('application/json')->set_output(json_encode($result));
         }
+
+        $alertClass = $result['status'] ? 'alert-success' : 'alert-danger';
+        $this->session->set_flashdata('message', '<div class="alert ' . $alertClass . '" role="alert">' . $result['message'] . '</div>');
+        redirect('auth');
     }
 
     public function logout()
     {
-        $this->session->unset_userdata('email');
-        $this->session->unset_userdata('c_email');
-        $this->session->unset_userdata('role_id');
-        $this->session->unset_userdata('role');
-        $this->session->unset_userdata('id');
-        $this->session->unset_userdata('ref_entity');
+        $this->session->unset_userdata(['email', 'c_email', 'role_id', 'role', 'id', 'ref_entity']);
+        $this->session->sess_destroy();
+
+        $is_api = $this->input->is_ajax_request() || $this->input->get('json') == '1' || $this->input->method() === 'post';
+        if ($is_api) {
+            return $this->output->set_content_type('application/json')->set_output(json_encode([
+                'status' => true,
+                'message' => 'You have been logged out successfully.'
+            ]));
+        }
 
         $this->session->set_flashdata('message', '<div class="alert alert-success" role="alert">Sesi Anda telah berakhir, silakan login kembali.</div>');
         redirect('auth');
@@ -259,135 +172,187 @@ class AuthController extends CI_Controller
 
     public function blocked()
     {
+        if ($this->input->is_ajax_request() || $this->input->get('json') == '1') {
+            return $this->output->set_content_type('application/json')->set_output(json_encode([
+                'status' => false,
+                'message' => 'Access Denied: You do not have permission to access this resource.'
+            ]));
+        }
         $this->load->view('auth/blocked');
     }
 
     public function forgotPassword()
     {
+        $email = $this->input->post('email') ?: $this->input->get('email');
+        $is_api = $this->input->is_ajax_request() || $this->input->get('json') == '1' || $this->input->method() === 'post';
+
+<<<<<<< HEAD
+        if ($is_api_request) {
+            if (empty($email)) {
+                return $this->output->set_content_type('application/json')->set_output(json_encode([
+                    'status' => false,
+                    'message' => 'Please provide a valid email address.'
+                ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+            }
+
+            $user = null;
+            if ($this->db->table_exists('user')) {
+                $user = $this->db->get_where('user', ['email' => $email, 'is_active' => 1])->row_array();
+            }
+            if (!$user) {
+                $user = $this->db->get_where('admin', ['c_email' => $email, 'c_status' => 'Active'])->row_array();
+            }
+
+            if ($user) {
+                $token = base64_encode(random_bytes(32));
+                if ($this->db->table_exists('user_token')) {
+                    $user_token = [
+                        'email' => $email,
+                        'token' => $token,
+                        'date_created' => time()
+                    ];
+                    $this->db->insert('user_token', $user_token);
+                }
+                try {
+                    $this->_sendEmail($token, 'forgot');
+                } catch (Throwable $e) {
+                    log_message('error', 'Failed to send reset password email: ' . $e->getMessage());
+                }
+
+                return $this->output->set_content_type('application/json')->set_output(json_encode([
+                    'status' => true,
+                    'message' => 'Please check your email to reset your password!'
+                ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+            } else {
+                return $this->output->set_content_type('application/json')->set_output(json_encode([
+                    'status' => false,
+                    'message' => 'Email is not registered or activated!'
+                ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+            }
+=======
+        if ($is_api) {
+            $result = $this->authservice->requestPasswordReset($email);
+            return $this->output->set_content_type('application/json')->set_output(json_encode($result));
+>>>>>>> a49b5fe1bf4e6664c99daaa483c66bfbc1e0d4f7
+        }
+
         $this->form_validation->set_rules('email', 'Email', 'trim|required|valid_email');
-
-        if ($this->form_validation->run() == false) {
+        if ($this->form_validation->run() === false) {
             $data['title'] = 'Forgot Password';
-
             $this->load->view('templates/auth_header.php', $data);
             $this->load->view('auth/forgotPassword');
             $this->load->view('templates/auth_footer.php');
         } else {
+<<<<<<< HEAD
             $email = $this->input->post('email');
-            $user = $this->db->get_where('user', ['email' => $email, 'is_active' => 1])->row_array();
+            $user = null;
+            if ($this->db->table_exists('user')) {
+                $user = $this->db->get_where('user', ['email' => $email, 'is_active' => 1])->row_array();
+            }
+            if (!$user) {
+                $user = $this->db->get_where('admin', ['c_email' => $email, 'c_status' => 'Active'])->row_array();
+            }
 
             if ($user) {
                 $token = base64_encode(random_bytes(32));
-                $user_token = [
-                    'email' => $email,
-                    'token' => $token,
-                    'date_created' => time()
-                ];
+                if ($this->db->table_exists('user_token')) {
+                    $user_token = [
+                        'email' => $email,
+                        'token' => $token,
+                        'date_created' => time()
+                    ];
 
-                $this->db->insert('user_token', $user_token);
-                $this->_sendEmail($token, 'forgot');
+                    $this->db->insert('user_token', $user_token);
+                }
+                try {
+                    $this->_sendEmail($token, 'forgot');
+                } catch (Throwable $e) {
+                    log_message('error', 'Failed to send reset password email: ' . $e->getMessage());
+                }
 
-                $this->session->set_flashdata('message', '<div class="alert alert-success" role="alert">Please check your email to reset your password!</div>');
+                $msg = 'Please check your email to reset your password!';
+                $this->session->set_flashdata('message', '<div class="alert alert-success" role="alert">' . $msg . '</div>');
                 redirect('auth/forgotpassword');
             } else {
-                $this->session->set_flashdata('message', '<div class="alert alert-danger" role="alert">Email is not registered or activated!</div>');
+                $msg = 'Email is not registered or activated!';
+                $this->session->set_flashdata('message', '<div class="alert alert-danger" role="alert">' . $msg . '</div>');
                 redirect('auth/forgotpassword');
             }
+=======
+            $result = $this->authservice->requestPasswordReset($email);
+            $alertClass = $result['status'] ? 'alert-success' : 'alert-danger';
+            $this->session->set_flashdata('message', '<div class="alert ' . $alertClass . '" role="alert">' . $result['message'] . '</div>');
+            redirect('auth/forgotpassword');
+>>>>>>> a49b5fe1bf4e6664c99daaa483c66bfbc1e0d4f7
         }
     }
 
     public function resetPassword()
     {
-        $email = $this->input->get('email');
-        $token = $this->input->get('token');
+        $email = $this->input->get('email') ?: $this->input->post('email');
+        $token = $this->input->get('token') ?: $this->input->post('token');
+        $new_password = $this->input->post('new_password') ?: ($this->input->post('password1') ?: $this->input->post('newPassword'));
+        $is_api = $this->input->is_ajax_request() || $this->input->get('json') == '1' || strtolower($this->input->method()) === 'post';
 
-        $user = $this->db->get_where('user', ['email' => $email])->row_array();
+        if ($is_api) {
+            $result = $this->authservice->processPasswordReset($token, $email, $new_password);
+            return $this->output->set_content_type('application/json')->set_output(json_encode($result));
+        }
 
-        if ($user) {
-            $user_token = $this->db->get_where('user_token', ['token' => $token])->row_array();
-
-            if ($user_token) {
-                $this->session->set_userdata('reset_email', $email);
-                $this->changePassword();
-            } else {
-                $this->session->set_flashdata('message', '<div class="alert alert-danger" role="alert">Reset password failed! Wrong token.</div>');
-                redirect('auth');
-            }
+        if (!empty($email)) {
+            $this->session->set_userdata('reset_email', $email);
+            $this->changePassword();
         } else {
-            $this->session->set_flashdata('message', '<div class="alert alert-danger" role="alert">Reset password failed! Wrong email.</div>');
+            $this->session->set_flashdata('message', '<div class="alert alert-danger" role="alert">Reset password failed! Wrong or missing email.</div>');
             redirect('auth');
         }
     }
 
     public function changePassword()
     {
+        $is_api = $this->input->is_ajax_request() || $this->input->get('json') == '1' || $this->input->method() === 'post';
+        $current_password = $this->input->post('current_password') ?: $this->input->post('currentPassword');
+        $new_password = $this->input->post('new_password') ?: ($this->input->post('newPassword') ?: $this->input->post('password1'));
+        $confirm_password = $this->input->post('confirm_password') ?: ($this->input->post('confirmPassword') ?: ($this->input->post('password2') ?: $this->input->post('repeatPassword')));
+
+        if ($is_api) {
+            if (empty($current_password) || empty($new_password)) {
+                return $this->output->set_content_type('application/json')->set_output(json_encode([
+                    'status' => false,
+                    'message' => 'Current password and new password are required.'
+                ]));
+            }
+            if (!empty($confirm_password) && $new_password !== $confirm_password) {
+                return $this->output->set_content_type('application/json')->set_output(json_encode([
+                    'status' => false,
+                    'message' => 'Password confirmation does not match.'
+                ]));
+            }
+
+            $email = $this->session->userdata('c_email') ?: ($this->session->userdata('reset_email') ?: $this->session->userdata('email'));
+            $result = $this->authservice->changePassword($email, $current_password, $new_password);
+            return $this->output->set_content_type('application/json')->set_output(json_encode($result));
+        }
+
         if (!$this->session->userdata('reset_email')) {
             redirect('auth');
+            return;
         }
 
         $this->form_validation->set_rules('password1', 'Password', 'trim|required|min_length[3]|matches[password2]');
         $this->form_validation->set_rules('password2', 'Repeat Password', 'trim|required|min_length[3]|matches[password1]');
 
-        if ($this->form_validation->run() == false) {
+        if ($this->form_validation->run() === false) {
             $data['title'] = 'Change Password';
             $this->load->view('templates/auth_header', $data);
             $this->load->view('auth/change-password');
             $this->load->view('templates/auth_footer');
         } else {
-            $password = password_hash($this->input->post('password1'), PASSWORD_DEFAULT);
             $email = $this->session->userdata('reset_email');
-
-            $this->db->set('password', $password);
-            $this->db->where('email', $email);
-            $this->db->update('user');
-
+            $this->authservice->processPasswordReset(null, $email, $this->input->post('password1'));
             $this->session->unset_userdata('reset_email');
-
-            $this->db->delete('user_token', ['email' => $email]);
-
             $this->session->set_flashdata('message', '<div class="alert alert-success" role="alert">Password has been changed! Please login.</div>');
             redirect('auth');
-        }
-    }
-
-    private function _redirect_based_on_access($role_id = null)
-    {
-        if ($role_id === null) {
-            $role_id = $this->session->userdata('role') ?: $this->session->userdata('role_id');
-        }
-        
-        $this->load->library('rbac');
-        $menus = $this->rbac->get_menus_by_role($role_id);
-        
-        $has_dashboard = false;
-        if (!empty($menus)) {
-            foreach ($menus as $m) {
-                if (strtolower($m['url']) === 'dashboard') {
-                    $has_dashboard = true;
-                    break;
-                }
-                if (!empty($m['sub_menus'])) {
-                    foreach ($m['sub_menus'] as $sm) {
-                        if (strtolower($sm['url']) === 'dashboard') {
-                            $has_dashboard = true;
-                            break 2;
-                        }
-                    }
-                }
-            }
-        }
-
-        if (!$has_dashboard) {
-            $this->db->select('id')->from('user_menu')->where('url', 'dashboard')->limit(1);
-            if ($this->db->get()->num_rows() == 0) {
-                $has_dashboard = true;
-            }
-        }
-
-        if (empty($menus) || !$has_dashboard) {
-            redirect('welcome');
-        } else {
-            redirect('dashboard');
         }
     }
 }

@@ -8,7 +8,20 @@ function is_logged_in()
     // SECURITY PATCH: Strictly enforce admin session, drop legacy 'email' fallback to prevent leakage
     $email = $ci->session->userdata('c_email');
 
+    $accept = strtolower($ci->input->get_request_header('Accept') ?: '');
+    $referer = strtolower($ci->input->get_request_header('Referer') ?: '');
+    $is_swagger = (strpos($referer, 'swagger') !== false) || (strpos($ci->uri->uri_string(), 'swagger') !== false);
+    $is_api_request = $ci->input->is_ajax_request() || strpos($accept, 'json') !== false || $ci->input->get('json') == '1' || $ci->input->method() === 'post' || $is_swagger;
+
     if (!$email) {
+        if ($is_api_request) {
+            $ci->output->set_content_type('application/json')->set_output(json_encode([
+                'status' => false,
+                'message' => 'Unauthenticated: Please login first.'
+            ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+            $ci->output->_display();
+            exit;
+        }
         // If no session and not on auth page, redirect to login
         if ($segment1 !== 'auth') {
             redirect('auth');
@@ -26,6 +39,14 @@ function is_logged_in()
             $user = $ci->db->get_where('admin', ['c_email' => $email])->row_array();
             // SECURITY PATCH: Enforce 'Active' status check to kill zombie sessions instantly
             if (!$user || $user['c_status'] !== 'Active') {
+                if ($is_api_request) {
+                    $ci->output->set_content_type('application/json')->set_output(json_encode([
+                        'status' => false,
+                        'message' => 'Session expired or account inactive. Please login again.'
+                    ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+                    $ci->output->_display();
+                    exit;
+                }
                 redirect('auth/logout');
             }
             $ci->session->set_userdata($user_verify_key, time());
@@ -77,6 +98,14 @@ function is_logged_in()
             $exists_in_db = $ci->db->get()->num_rows() > 0;
             
             if ($exists_in_db) {
+                if ($is_api_request) {
+                    $ci->output->set_content_type('application/json')->set_output(json_encode([
+                        'status' => false,
+                        'message' => 'Access Denied: You do not have permission to access this resource.'
+                    ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+                    $ci->output->_display();
+                    exit;
+                }
                 redirect('auth/blocked');
             }
         }

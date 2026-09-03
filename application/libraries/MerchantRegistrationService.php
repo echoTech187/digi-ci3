@@ -211,9 +211,10 @@ class MerchantRegistrationService
         // Hash password
         $data['c_password'] = password_hash($data['c_password'], PASSWORD_DEFAULT);
 
-        // Generate ID (should be replaced with UUID or auto-increment in the future)
-        $merchantId = rand(1111, 4444);
-        $data['id'] = $merchantId;
+        // Generate unique merchant ID safely (highest ID + 1)
+        $max_row = $this->CI->db->select_max('id')->get('merchant')->row();
+        $nextId = ($max_row && !empty($max_row->id)) ? ((int)$max_row->id + 1) : 10001;
+        $data['id'] = $nextId;
 
         // Generate Credential Key (Server Key) & Client Key
         $this->CI->load->helper('cstring');

@@ -19,9 +19,14 @@ if (!function_exists('verify_recaptcha')) {
             'response' => $response
         )));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
 
         // Execute curl
         $result = curl_exec($ch);
+        if (curl_errno($ch)) {
+            log_message('error', 'reCAPTCHA API cURL Error: ' . curl_error($ch));
+        }
         curl_close($ch);
 
         // Decode result

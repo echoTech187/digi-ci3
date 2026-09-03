@@ -23,18 +23,27 @@ class MerchantBalanceController extends CI_Controller
    public function createCreditBalance()
    {
       is_logged_in();
-      $isAjax = $this->input->is_ajax_request();
+      $raw_json = json_decode($this->input->raw_input_stream, true);
+      if (!empty($raw_json) && is_array($raw_json)) {
+         foreach ($raw_json as $k => $v) {
+            if ($this->input->get($k) === null && $this->input->post($k) === null) {
+               $_POST[$k] = $v;
+            }
+         }
+      }
+
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      $is_api_request = $this->input->is_ajax_request() || strpos($accept, 'json') !== false || $this->input->get('json') == '1' || $this->input->method() === 'post';
 
       $merchantId  = $this->input->post('merchantId');
-      $channelId   = $this->input->post('channelId');
+      $channelId   = $this->input->post('channelId') ?: 'SYSTEM';
       $description = $this->input->post('description');
       $amount      = $this->input->post('rawAmountCredit');
 
-      if (empty($merchantId) || empty($channelId) || empty($amount)) {
-         $errorMessage = 'All fields are required.';
-         if ($isAjax) {
-            header('Content-Type: application/json');
-            echo json_encode(['status' => 'error', 'message' => $errorMessage]);
+      if (empty($merchantId) || empty($amount)) {
+         $errorMessage = 'Required fields merchantId and amount must be provided.';
+         if ($is_api_request) {
+            $this->output->set_content_type('application/json')->set_output(json_encode(['status' => false, 'message' => $errorMessage]));
             return;
          }
          $this->session->set_flashdata('error_message', $errorMessage);
@@ -51,15 +60,14 @@ class MerchantBalanceController extends CI_Controller
       $internalUrlHit = $this->internalUrlHit . "/Merchant/creditBalance";
       $response = $this->_internalCurl($internalUrlHit, $internalRequestBody);
       $decoded = json_decode($response, true);
-      if ($isAjax) {
-         header('Content-Type: application/json');
+      if ($is_api_request) {
          if ($response !== false && isset($decoded['responseCode']) && $decoded['responseCode'] === 'SUCCESS') {
-            echo json_encode(['status' => 'success', 'message' => 'Credit balance successfully added.']);
+            $this->output->set_content_type('application/json')->set_output(json_encode(['status' => true, 'message' => 'Credit balance successfully added.']));
          } else {
             $msg = isset($decoded['responseMessage']) ? $decoded['responseMessage'] : (isset($decoded['responseCode']) ? $decoded['responseCode'] : 'Failed to process request.');
             if (is_array($msg)) $msg = implode(', ', $msg);
-            $rawHtml = htmlspecialchars($response !== false ? $response : 'Curl Failed');
-            echo json_encode(['status' => 'error', 'message' => "Internal Error: " . $msg . " <br><br>RAW Response: " . $rawHtml]);
+            $cleanMsg = trim(preg_replace('/\s+/', ' ', strip_tags($msg)));
+            $this->output->set_content_type('application/json')->set_output(json_encode(['status' => false, 'message' => "Internal Error: " . ($cleanMsg ?: 'Curl Failed')]));
          }
          return;
       }
@@ -75,18 +83,27 @@ class MerchantBalanceController extends CI_Controller
    public function createDebitBalance()
    {
       is_logged_in();
-      $isAjax = $this->input->is_ajax_request();
+      $raw_json = json_decode($this->input->raw_input_stream, true);
+      if (!empty($raw_json) && is_array($raw_json)) {
+         foreach ($raw_json as $k => $v) {
+            if ($this->input->get($k) === null && $this->input->post($k) === null) {
+               $_POST[$k] = $v;
+            }
+         }
+      }
+
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      $is_api_request = $this->input->is_ajax_request() || strpos($accept, 'json') !== false || $this->input->get('json') == '1' || $this->input->method() === 'post';
 
       $merchantId  = $this->input->post('merchantIdDebit');
-      $channelId   = $this->input->post('channelId');
+      $channelId   = $this->input->post('channelId') ?: 'SYSTEM';
       $description = $this->input->post('description');
       $amount      = $this->input->post('rawAmountDebit');
 
-      if (empty($merchantId) || empty($channelId) || empty($amount)) {
-         $errorMessage = 'All fields are required.';
-         if ($isAjax) {
-            header('Content-Type: application/json');
-            echo json_encode(['status' => 'error', 'message' => $errorMessage]);
+      if (empty($merchantId) || empty($amount)) {
+         $errorMessage = 'Required fields merchantId and amount must be provided.';
+         if ($is_api_request) {
+            $this->output->set_content_type('application/json')->set_output(json_encode(['status' => false, 'message' => $errorMessage]));
             return;
          }
          $this->session->set_flashdata('error_message', $errorMessage);
@@ -102,9 +119,8 @@ class MerchantBalanceController extends CI_Controller
 
       if (!$balanceResponse || !isset($balanceResponse['responseCode']) || $balanceResponse['responseCode'] !== 'SUCCESS') {
          $errorMessage = 'Failed to retrieve merchant balance.';
-         if ($isAjax) {
-            header('Content-Type: application/json');
-            echo json_encode(['status' => 'error', 'message' => $errorMessage,'response'=>$balanceResponse]);
+         if ($is_api_request) {
+            $this->output->set_content_type('application/json')->set_output(json_encode(['status' => false, 'message' => $errorMessage, 'response' => $balanceResponse]));
             return;
          }
          $this->session->set_flashdata('error', $errorMessage);
@@ -115,9 +131,8 @@ class MerchantBalanceController extends CI_Controller
       $availableBalance = floatval($balanceResponse['responseDetail']['balanceAvailable']);
       if (floatval($amount) > $availableBalance) {
          $errorMessage = 'Debit amount cannot exceed available balance (Rp ' . number_format($availableBalance, 0, ',', '.') . ').';
-         if ($isAjax) {
-            header('Content-Type: application/json');
-            echo json_encode(['status' => 'error', 'message' => $errorMessage]);
+         if ($is_api_request) {
+            $this->output->set_content_type('application/json')->set_output(json_encode(['status' => false, 'message' => $errorMessage]));
             return;
          }
          $this->session->set_flashdata('error', $errorMessage);
@@ -136,14 +151,14 @@ class MerchantBalanceController extends CI_Controller
       $response = $this->_internalCurl($internalUrlHit, $internalRequestBody);
       $decoded = json_decode($response, true);
 
-      if ($isAjax) {
-         header('Content-Type: application/json');
+      if ($is_api_request) {
          if ($response !== false && isset($decoded['responseCode']) && $decoded['responseCode'] === 'SUCCESS') {
-            echo json_encode(['status' => 'success', 'message' => 'Debit balance successfully processed.']);
+            $this->output->set_content_type('application/json')->set_output(json_encode(['status' => true, 'message' => 'Debit balance successfully processed.']));
          } else {
             $msg = isset($decoded['responseMessage']) ? $decoded['responseMessage'] : (isset($decoded['responseCode']) ? $decoded['responseCode'] : 'Failed to process request.');
             if (is_array($msg)) $msg = implode(', ', $msg);
-            echo json_encode(['status' => 'error', 'message' => $msg]);
+            $cleanMsg = trim(preg_replace('/\s+/', ' ', strip_tags($msg)));
+            $this->output->set_content_type('application/json')->set_output(json_encode(['status' => false, 'message' => $cleanMsg ?: 'Failed to process request.']));
          }
          return;
       }
@@ -154,6 +169,30 @@ class MerchantBalanceController extends CI_Controller
          $this->session->set_flashdata('error', 'Failed to send data.');
       }
       redirect('merchant/manage');
+   }
+
+   private function _internalCurl($url, $data)
+   {
+      $ch = curl_init();
+      curl_setopt_array($ch, [
+         CURLOPT_URL => $url,
+         CURLOPT_RETURNTRANSFER => true,
+         CURLOPT_CONNECTTIMEOUT => 5,
+         CURLOPT_TIMEOUT => 15,
+         CURLOPT_FOLLOWLOCATION => true,
+         CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+         CURLOPT_SSL_VERIFYHOST => 0,
+         CURLOPT_SSL_VERIFYPEER => 0,
+         CURLOPT_CUSTOMREQUEST => 'POST',
+         CURLOPT_POSTFIELDS => json_encode($data),
+         CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
+      ]);
+      $response = curl_exec($ch);
+      if (curl_errno($ch)) {
+         log_message('error', 'MerchantBalance Internal cURL Error: ' . curl_error($ch));
+      }
+      curl_close($ch);
+      return $response;
    }
 
 }

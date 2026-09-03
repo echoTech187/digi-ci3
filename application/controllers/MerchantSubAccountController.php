@@ -51,18 +51,40 @@ class MerchantSubAccountController extends CI_Controller
       $merchant_name = isset($data['merchant'][0]) ? $data['merchant'][0]->c_name : 'Merchant';
       $data['breadcrumb_replace'] = [$id => $merchant_name];
 
-      if ($this->input->is_ajax_request()) {
+      $raw_json = json_decode($this->input->raw_input_stream, true);
+      if (!empty($raw_json) && is_array($raw_json)) {
+         foreach ($raw_json as $k => $v) {
+            if ($this->input->post($k) === NULL) {
+               $_POST[$k] = $v;
+            }
+         }
+      }
+
+      $is_api = $this->input->is_ajax_request()
+         || strtolower((string)$this->input->get_request_header('X-Requested-With')) === 'xmlhttprequest'
+         || strpos((string)$this->input->get_request_header('Content-Type'), 'json') !== false
+         || strpos((string)$this->input->get_request_header('Accept'), 'json') !== false
+         || $this->input->method() === 'post';
+
+      if ($is_api) {
          try {
-            return $this->SubMerchant->get_datatables_handler($id);
+            $out = $this->SubMerchant->get_datatables_handler($id);
+            $this->output
+               ->set_content_type('application/json')
+               ->set_output(is_string($out) ? $out : json_encode($out));
+            return;
          } catch (Throwable $e) {
             log_message('error', 'Submerchant AJAX error: ' . $e->getMessage());
-            echo json_encode(array(
-               "draw" => intval($this->input->post("draw")),
-               "recordsTotal" => 0,
-               "recordsFiltered" => 0,
-               "data" => array(),
-               "error" => "Error retrieving submerchant data: " . $e->getMessage()
-            ));
+            $this->output
+               ->set_content_type('application/json')
+               ->set_output(json_encode(array(
+                  "draw" => intval($this->input->post("draw")),
+                  "recordsTotal" => 0,
+                  "recordsFiltered" => 0,
+                  "data" => array(),
+                  "error" => "Error retrieving submerchant data: " . $e->getMessage()
+               )));
+            return;
          }
       }
 
@@ -73,11 +95,36 @@ class MerchantSubAccountController extends CI_Controller
    {
       $id = $this->uri->segment(3);
       $this->session->unset_userdata('search_submerchant');
+
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      $is_api_request = strpos($accept, 'json') !== false || $this->input->get('json') == '1';
+
+      if ($is_api_request) {
+         $this->output->set_content_type('application/json')->set_output(json_encode([
+            'status' => true,
+            'message' => 'Submerchant search filters reset successfully.'
+         ]));
+         return;
+      }
+
       redirect("merchant/sub-account/$id");
    }
 
    public function registersubMerchant()
    {
+      $raw_json = json_decode($this->input->raw_input_stream, true);
+      if (!empty($raw_json) && is_array($raw_json)) {
+         foreach ($raw_json as $k => $v) {
+            if ($this->input->get($k) === null && $this->input->post($k) === null) {
+               $_POST[$k] = $v;
+            }
+         }
+      }
+
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      $is_api_request = $this->input->is_ajax_request() || strpos($accept, 'json') !== false || $this->input->get('json') == '1' || $this->input->method() === 'post';
+
+
       $formValidationRules = [
          ['field' => 'ref_merchantId', 'label' => 'Merchant ID', 'rules' => 'trim|required'],
          ['field' => 'c_name', 'label' => 'Nama', 'rules' => 'trim|required'],
@@ -88,13 +135,14 @@ class MerchantSubAccountController extends CI_Controller
       $this->form_validation->set_rules($formValidationRules);
 
       if ($this->form_validation->run() == FALSE) {
-         if ($this->input->is_ajax_request()) {
-             echo json_encode(['status' => 'error', 'message' => validation_errors()]);
-         } else {
-             $errors = validation_errors('<li>', '</li>');
-             $this->session->set_flashdata('error', '<ul>' . $errors . '</ul>');
-             redirect('merchant/sub-account/' . $this->input->post('ref_merchantId'));
+         $clean_error = trim(preg_replace('/\s+/', ' ', strip_tags(validation_errors())));
+         if ($is_api_request) {
+             $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'error', 'message' => $clean_error ?: 'Validation failed.']));
+             return;
          }
+         $errors = validation_errors('<li>', '</li>');
+         $this->session->set_flashdata('error', '<ul>' . $errors . '</ul>');
+         redirect('merchant/sub-account/' . $this->input->post('ref_merchantId'));
          return;
       }
 
@@ -124,12 +172,12 @@ class MerchantSubAccountController extends CI_Controller
       }
       
       if ($parent_level >= 3) {
-          if ($this->input->is_ajax_request()) {
-              echo json_encode(['status' => 'error', 'message' => 'Maximum hierarchy depth level of 3 has been reached. Cannot create deeper sub-accounts.']);
-          } else {
-              $this->session->set_flashdata('error', 'Maximum hierarchy depth level of 3 has been reached. Cannot create deeper sub-accounts.');
-              redirect('merchant/sub-account/' . $parent_id);
+          if ($is_api_request) {
+              $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'error', 'message' => 'Maximum hierarchy depth level of 3 has been reached. Cannot create deeper sub-accounts.']));
+              return;
           }
+          $this->session->set_flashdata('error', 'Maximum hierarchy depth level of 3 has been reached. Cannot create deeper sub-accounts.');
+          redirect('merchant/sub-account/' . $parent_id);
           return;
       }
       
@@ -137,38 +185,55 @@ class MerchantSubAccountController extends CI_Controller
       $data['c_password'] = password_hash($this->input->post('c_email'), PASSWORD_DEFAULT);
       $data['c_status'] = $this->input->post('c_status') ?: 'Active';
 
-
       $newId = $this->SubMerchant->create_submerchant_standard($parent_id, $data, $subData);
 
       if ($newId) {
-         if ($this->input->is_ajax_request()) {
-             echo json_encode(['status' => 'success', 'message' => 'Submerchant successfully registered']);
-         } else {
-             $this->session->set_flashdata('success', 'Submerchant successfully registered');
-             redirect('merchant/sub-account/' . $parent_id);
+         if ($is_api_request) {
+             $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'success', 'message' => 'Submerchant successfully registered']));
+             return;
          }
+         $this->session->set_flashdata('success', 'Submerchant successfully registered');
+         redirect('merchant/sub-account/' . $parent_id);
       } else {
-         if ($this->input->is_ajax_request()) {
-             echo json_encode(['status' => 'error', 'message' => 'Failed to register Submerchant.']);
-         } else {
-             $this->session->set_flashdata('error', 'Failed to register Submerchant.');
-             redirect('merchant/sub-account/' . $parent_id);
+         if ($is_api_request) {
+             $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'error', 'message' => 'Failed to register Submerchant.']));
+             return;
          }
+         $this->session->set_flashdata('error', 'Failed to register Submerchant.');
+         redirect('merchant/sub-account/' . $parent_id);
       }
    }
 
    public function edit_submerchant($id = null)
    {
+      $raw_json = json_decode($this->input->raw_input_stream, true);
+      if (!empty($raw_json) && is_array($raw_json)) {
+         foreach ($raw_json as $k => $v) {
+            if ($this->input->get($k) === null && $this->input->post($k) === null) {
+               $_POST[$k] = $v;
+            }
+         }
+      }
+
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      $is_api_request = $this->input->is_ajax_request() || strpos($accept, 'json') !== false || $this->input->get('json') == '1' || $this->input->method() === 'post';
+
+      if (!$id) $id = $this->uri->segment(4);
+
+      $existing = $id ? $this->db->get_where('submerchant', ['id' => $id])->row_array() : null;
+
+
       $this->form_validation->set_rules('c_name', 'Nama', 'required');
       $this->form_validation->set_rules('c_email', 'Email', 'required|valid_email');
 
       if ($this->form_validation->run() == FALSE) {
-         if ($this->input->is_ajax_request()) {
-             echo json_encode(['status' => 'error', 'message' => validation_errors()]);
-         } else {
-             $this->session->set_flashdata('error', validation_errors());
-             redirect($_SERVER['HTTP_REFERER']);
+         $clean_error = trim(preg_replace('/\s+/', ' ', strip_tags(validation_errors())));
+         if ($is_api_request) {
+             $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'error', 'message' => $clean_error ?: 'Validation failed.']));
+             return;
          }
+         $this->session->set_flashdata('error', validation_errors());
+         redirect($_SERVER['HTTP_REFERER']);
          return;
       }
 
@@ -179,37 +244,57 @@ class MerchantSubAccountController extends CI_Controller
       ];
 
       $updated = $this->SubMerchant->update_submerchant($id, $data);
-
-      $refMerchantId = $this->input->post('ref_merchantId');
+      $refMerchantId = $this->input->post('ref_merchantId') ?: ($existing ? $existing['ref_merchantId'] : '');
 
       if ($updated) {
-         if ($this->input->is_ajax_request()) {
-             echo json_encode(['status' => 'success', 'message' => 'SubMerchant was successfully updated.']);
-         } else {
-             $this->session->set_flashdata('success', 'SubMerchant was successfully updated.');
-             redirect('merchant/sub-account/' . $refMerchantId);
+         if ($is_api_request) {
+             $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'success', 'message' => 'SubMerchant was successfully updated.']));
+             return;
          }
+         $this->session->set_flashdata('success', 'SubMerchant was successfully updated.');
+         redirect('merchant/sub-account/' . $refMerchantId);
       } else {
-         if ($this->input->is_ajax_request()) {
-             echo json_encode(['status' => 'error', 'message' => 'Failed to update SubMerchant.']);
-         } else {
-             $this->session->set_flashdata('error', 'Failed to update SubMerchant.');
-             redirect('merchant/sub-account/' . $refMerchantId);
+         if ($is_api_request) {
+             $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'error', 'message' => 'Failed to update SubMerchant.']));
+             return;
          }
+         $this->session->set_flashdata('error', 'Failed to update SubMerchant.');
+         redirect('merchant/sub-account/' . $refMerchantId);
       }
    }
 
    public function get_submerchants()
    {
-      if ($this->input->post('merchant_id')) {
-         $merchant_id = $this->input->post('merchant_id');
-         $submerchants = $this->SubMerchant->get_submerchants_by_merchant_id($merchant_id);
-
-         $options = '<option value="">Pilih SubMerchant</option>';
-         foreach ($submerchants as $submerchant) {
-            $options .= '<option value="' . $submerchant->id . '">' . $submerchant->c_name . '</option>';
+      $raw_json = json_decode($this->input->raw_input_stream, true);
+      if (!empty($raw_json) && is_array($raw_json)) {
+         foreach ($raw_json as $k => $v) {
+            if ($this->input->get($k) === null && $this->input->post($k) === null) {
+               $_POST[$k] = $v;
+            }
          }
-         echo $options;
       }
+
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      $is_api_request = $this->input->is_ajax_request() || strpos($accept, 'json') !== false || $this->input->get('json') == '1' || $this->input->method() === 'post';
+
+      $merchant_id = $this->input->get('merchant_id') ?: $this->input->post('merchant_id');
+      $submerchants = $this->SubMerchant->get_submerchants_by_merchant_id($merchant_id);
+
+      if ($is_api_request) {
+         $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode([
+               'status' => true,
+               'message' => 'Submerchants list retrieved successfully',
+               'data' => $submerchants
+            ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+         return;
+      }
+
+      $options = '<option value="">Pilih SubMerchant</option>';
+      foreach ($submerchants as $submerchant) {
+         $options .= '<option value="' . $submerchant->id . '">' . $submerchant->c_name . '</option>';
+      }
+      echo $options;
    }
 }

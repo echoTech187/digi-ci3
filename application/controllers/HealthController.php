@@ -7,17 +7,15 @@ class HealthController extends CI_Controller {
     }
 
     public function dbCheck() {
-        header('Content-Type: application/json');
-
         // Load database configuration
         if (!file_exists(APPPATH . 'config/database.php')) {
-            echo json_encode(['status' => 'offline', 'message' => 'Database config not found']);
+            $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'offline', 'message' => 'Database config not found']));
             return;
         }
 
         include(APPPATH . 'config/database.php');
         if (!isset($active_group) || !isset($db[$active_group])) {
-            echo json_encode(['status' => 'offline', 'message' => 'Active group not configured']);
+            $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'offline', 'message' => 'Active group not configured']));
             return;
         }
 
@@ -36,7 +34,7 @@ class HealthController extends CI_Controller {
 
         $link = mysqli_init();
         if (!$link) {
-            echo json_encode(['status' => 'offline', 'message' => 'MySQLi init failed']);
+            $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'offline', 'message' => 'MySQLi init failed']));
             return;
         }
 
@@ -46,10 +44,10 @@ class HealthController extends CI_Controller {
         @$link->real_connect($host, $user, $pass, $dbname, $port);
 
         if ($link->connect_error) {
-            echo json_encode(['status' => 'offline', 'message' => $link->connect_error]);
+            $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'offline', 'message' => $link->connect_error]));
         } else {
             $link->close();
-            echo json_encode(['status' => 'online']);
+            $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'online']));
         }
     }
 }

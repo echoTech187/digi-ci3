@@ -1,432 +1,280 @@
 <?php defined('BASEPATH') or exit('No direct script access allowed');
 
+/**
+ * MenuController
+ * Handles navigation menus, submenus, dynamic role access control, and hierarchical grouping.
+ */
 class MenuController extends CI_Controller
 {
-   public function __construct()
-   {
-      parent::__construct();
-      is_logged_in();
-      $this->load->library('session');
-      $this->load->library('rbac');
-      $this->load->model('Model_user');
-      $this->load->model('Model_menu');
-   }
+    public function __construct()
+    {
+        parent::__construct();
+        $this->load->library(['session', 'rbac', 'form_validation']);
+        $this->load->model(['Model_menu', 'Model_user']);
+        is_logged_in();
+    }
 
-   public function index()
-   {
-      $data['title'] = 'Menu Management';
-      $data['user'] = $this->Model_user->view_user()->row_array();
-      $data['Mmenu'] = $this->Model_menu->view_menu()->result_array();
-      $data['menu'] = $this->Model_menu->getMenu();
+    private function _isApi()
+    {
+        return $this->input->is_ajax_request()
+            || strpos(strtolower($this->input->get_request_header('Accept') ?: ''), 'json') !== false
+            || $this->input->get('json') == '1';
+    }
 
-      $this->form_validation->set_rules('menu', 'Menu', 'required');
-
-      if ($this->form_validation->run() == false) {
-         $this->load->view('menu/index', $data);
-      } else {
-         $data = [
-            'menu' => $this->input->post('menu')
-         ];
-
-         $result = $this->Model_menu->insert_menu($data, 'user_menu');
-         if ($result === true) {
-            if ($this->input->is_ajax_request()) {
-                echo json_encode(['status' => 'success', 'message' => 'New Menu Added Successfully.']);
-                return;
+    private function _parseRawJson()
+    {
+        $raw = file_get_contents('php://input');
+        if (!empty($raw)) {
+            $parsed = json_decode($raw, true);
+            if (is_array($parsed)) {
+                foreach ($parsed as $k => $v) {
+                    if ($this->input->post($k) === null) {
+                        $_POST[$k] = $v;
+                    }
+                }
             }
-            $this->session->set_flashdata('success', 'New Menu Added Successfully.');
-         } else {
-            $code = isset($result['code']) ? $result['code'] : 0;
-            $msg = 'Unable to add menu due to a system constraint. Please contact technical support.';
-            if ($code == 1142) {
-               $msg = 'Access Denied. You do not have sufficient database privileges to create menu items.';
-            }
-            if ($this->input->is_ajax_request()) {
-                echo json_encode(['status' => 'error', 'message' => $msg]);
-                return;
-            }
-            $this->session->set_flashdata('error', $msg);
-         }
-         redirect('menu');
-      }
-   }
+        }
+    }
 
-   public function changeMenu($id)
-   {
-      if (!$id) {
-         $this->session->set_flashdata('message', '<div class="alert alert-danger" role="alert">Menu ID not found.</div>');
-         redirect('menu');
-      }
-      $where = [
-         'id' => $id
-      ];
+    private function _respond($isApi, $status, $message, $redirectUrl = null, $data = [])
+    {
+        if ($isApi) {
+            $resp = array_merge(['status' => $status, 'message' => $message], $data);
+            return $this->output->set_content_type('application/json')->set_output(json_encode($resp));
+        }
+        $this->session->set_flashdata('message', '<div class="alert alert-' . ($status ? 'success' : 'danger') . '" role="alert">' . $message . '</div>');
+        if ($redirectUrl) {
+            redirect($redirectUrl);
+        }
+    }
 
-      $data['title'] = 'Change Menu';
-      $data['user'] = $this->Model_user->view_user()->row_array();
-      $data['Mmenu'] = $this->Model_menu->view_menu()->result_array();
-      $data['Mmenu'] = $this->Model_menu->editMenu($where, 'user_menu')->result_array();
-      $data['menu'] = $this->Model_menu->getMenu();
+    public function index()
+    {
+        $data = [
+            'title'                  => 'Menu Management',
+            'user'                   => $this->Model_user->view_user()->row_array(),
+            'menu'                   => $this->Model_menu->get_menu()->result_array(),
+            'breadcrumb_url_replace' => ['menu' => 'access-control/menus']
+        ];
 
-      $this->form_validation->set_rules('menu', 'Menu', 'required');
+        $this->form_validation->set_rules('menu', 'Menu', 'required');
+        if ($this->form_validation->run() == false) {
+            $this->load->view('menu/index', $data);
+        } else {
+            $this->Model_menu->addMenu(['menu' => $this->input->post('menu')], 'user_menu');
+            $this->_respond(false, true, 'New Menu Added!', 'menu');
+        }
+    }
 
-      $this->load->view('menu/editMenu', $data);
-   }
+    public function editMenu($id = null)
+    {
+        $this->_parseRawJson();
+        $isApi = $this->_isApi();
+        if ($id === null) {
+            $id = $this->input->post('id');
+        }
 
-   public function updateMenu()
-   {
-      $id = $this->input->post('id');
+        if (!$id) {
+            $this->_respond($isApi, false, 'Menu ID not found.', 'menu');
+            return;
+        }
 
-      $data = [
-         'menu' => $this->input->post('menu')
-      ];
+        $this->form_validation->set_rules('menu', 'Menu Name', 'required');
+        if ($this->form_validation->run() == false) {
+            $data = [
+                'title'                  => 'Edit Menu',
+                'user'                   => $this->Model_user->view_user()->row_array(),
+                'menu'                   => $this->Model_menu->get_menu_by_id($id)->row_array(),
+                'breadcrumb_url_replace' => ['menu' => 'access-control/menus']
+            ];
+            $this->load->view('menu/edit_menu', $data);
+        } else {
+            $this->Model_menu->update_menu(['id' => $id], ['menu' => $this->input->post('menu')], 'user_menu');
+            $this->_respond($isApi, true, 'Menu Updated Successfully.', 'menu');
+        }
+    }
 
-      $where = [
-         'id' => $id
-      ];
+    public function deleteMenu($id)
+    {
+        $isApi = $this->_isApi();
+        if (!$id) {
+            $this->_respond($isApi, false, 'Menu ID not found.', 'menu');
+            return;
+        }
 
-      $result = $this->Model_menu->changeMenu($where, $data, 'user_menu');
-      if ($result === true) {
-         if ($this->input->is_ajax_request()) {
-             echo json_encode(['status' => 'success', 'message' => 'Menu Updated Successfully.']);
-             return;
-         }
-         $this->session->set_flashdata('success', 'Menu Updated Successfully.');
-      } else {
-         $code = isset($result['code']) ? $result['code'] : 0;
-         $msg = 'Unable to update menu due to a system constraint. Please contact technical support.';
-         if ($code == 1142) {
-            $msg = 'Access Denied. You do not have sufficient database privileges to modify menu items.';
-         }
-         if ($this->input->is_ajax_request()) {
-             echo json_encode(['status' => 'error', 'message' => $msg]);
-             return;
-         }
-         $this->session->set_flashdata('error', $msg);
-      }
-      redirect('menu');
-   }
+        $this->Model_menu->delete_menu(['id' => $id], 'user_menu');
+        $this->_respond($isApi, true, 'Menu Deleted Successfully.', 'menu');
+    }
 
-   public function subMenu()
-   {
-      $data['title'] = 'Submenu Management';
-      $data['user'] = $this->Model_user->view_user()->row_array();
-      $data['subMenu'] = $this->Model_menu->getSubMenu()->result_array();
+    public function subMenu()
+    {
+        $isApi = $this->_isApi();
+        $this->form_validation->set_rules('title', 'Title', 'required');
+        $this->form_validation->set_rules('menu_id', 'Menu', 'required');
+        $this->form_validation->set_rules('url', 'URL', 'required');
+        $this->form_validation->set_rules('icon', 'Icon', 'required');
 
-      $data['menu'] = $this->Model_menu->view_subMenu();
-      $data['menu'] = $this->Model_menu->getMenu();
+        if ($this->form_validation->run() == false) {
+            $data = [
+                'title'                  => 'Submenu Management',
+                'user'                   => $this->Model_user->view_user()->row_array(),
+                'subMenu'                => $this->Model_menu->getSubMenu(),
+                'menu'                   => $this->Model_menu->get_menu()->result_array(),
+                'breadcrumb_url_replace' => ['menu' => 'access-control/menus', 'subMenu' => 'access-control/submenus']
+            ];
+            $this->load->view('menu/submenu', $data);
+        } else {
+            $dataInsert = [
+                'title'     => $this->input->post('title'),
+                'menu_id'   => $this->input->post('menu_id'),
+                'url'       => $this->input->post('url'),
+                'icon'      => $this->input->post('icon'),
+                'is_active' => $this->input->post('is_active') ? 1 : 0
+            ];
+            $this->Model_menu->addSubMenu($dataInsert, 'user_sub_menu');
+            $this->_respond($isApi, true, 'New Submenu Added!', 'menu/subMenu');
+        }
+    }
 
-      $this->form_validation->set_rules('menu_id', 'Menu', 'required');
-      $this->form_validation->set_rules('title', 'Title', 'required');
-      $this->form_validation->set_rules('url', 'Url', 'required');
-      $this->form_validation->set_rules('icon', 'Icon', 'required');
+    public function editSubmenu($id = null)
+    {
+        $this->_parseRawJson();
+        $isApi = $this->_isApi();
+        if ($id === null) {
+            $id = $this->input->post('id');
+        }
 
-      if ($this->form_validation->run() == false) {
-         $this->load->view('menu/subMenu', $data);
-      } else {
-         $data = [
-            'menu_id'   => $this->input->post('menu_id'),
-            'title'     => $this->input->post('title'),
-            'url'       => $this->input->post('url'),
-            'icon'      => $this->input->post('icon'),
-            'is_active' => $this->input->post('is_active')
-         ];
+        if (!$id) {
+            $this->_respond($isApi, false, 'Submenu ID not found.', 'menu/subMenu');
+            return;
+        }
 
-         $result = $this->Model_menu->insert_subMenu($data, 'user_sub_menu');
-         if ($result === true) {
-            if ($this->input->is_ajax_request()) {
-                echo json_encode(['status' => 'success', 'message' => 'New Submenu Added Successfully.']);
-                return;
-            }
-            $this->session->set_flashdata('success', 'New Submenu Added Successfully.');
-         } else {
-            $code = isset($result['code']) ? $result['code'] : 0;
-            $msg = 'Unable to add submenu due to a system constraint. Please contact technical support.';
-            if ($code == 1142) {
-               $msg = 'Access Denied. You do not have sufficient database privileges to create submenu items.';
-            }
-            if ($this->input->is_ajax_request()) {
-                echo json_encode(['status' => 'error', 'message' => $msg]);
-                return;
-            }
-            $this->session->set_flashdata('error', $msg);
-         }
-         redirect('menu/subMenu');
-      }
-   }
+        $this->form_validation->set_rules('title', 'Title', 'required');
+        $this->form_validation->set_rules('menu_id', 'Menu', 'required');
+        $this->form_validation->set_rules('url', 'URL', 'required');
+        $this->form_validation->set_rules('icon', 'Icon', 'required');
 
-   public function editSubMenu($id)
-   {
-      if (!$id) {
-         $this->session->set_flashdata('message', '<div class="alert alert-danger" role="alert">Submenu ID not found.</div>');
-         redirect('menu/subMenu');
-      }
-      $where = [
-         'id' => $id
-      ];
+        if ($this->form_validation->run() == false) {
+            $data = [
+                'title'                  => 'Edit Submenu',
+                'user'                   => $this->Model_user->view_user()->row_array(),
+                'subMenu'                => $this->Model_menu->getSubMenuById($id)->row_array(),
+                'menu'                   => $this->Model_menu->get_menu()->result_array(),
+                'breadcrumb_url_replace' => ['menu' => 'access-control/menus', 'subMenu' => 'access-control/submenus']
+            ];
+            $this->load->view('menu/edit_submenu', $data);
+        } else {
+            $dataUpdate = [
+                'title'     => $this->input->post('title'),
+                'menu_id'   => $this->input->post('menu_id'),
+                'url'       => $this->input->post('url'),
+                'icon'      => $this->input->post('icon'),
+                'is_active' => $this->input->post('is_active') ? 1 : 0
+            ];
+            $this->Model_menu->update_subMenu(['id' => $id], $dataUpdate, 'user_sub_menu');
+            $this->_respond($isApi, true, 'Submenu Updated Successfully.', 'menu/subMenu');
+        }
+    }
 
-      $data['title'] = 'Change Sub Menu';
-      $data['user'] = $this->Model_user->view_user()->row_array();
-      $data['menu'] = $this->Model_menu->getMenu();
-      $data['getMenu'] = $this->Model_menu->getSubMenu()->result_array();
-      $data['subMenu'] = $this->Model_menu->editSubMenu($where, 'user_sub_menu')->result_array();
+    public function deleteSubmenu($id)
+    {
+        $isApi = $this->_isApi();
+        if (!$id) {
+            $this->_respond($isApi, false, 'Submenu ID not found.', 'menu/subMenu');
+            return;
+        }
 
-      $this->form_validation->set_rules('menu_id', 'Menu', 'required');
-      $this->form_validation->set_rules('title', 'Title', 'required');
-      $this->form_validation->set_rules('url', 'Url', 'required');
-      $this->form_validation->set_rules('icon', 'Icon', 'required');
+        $result = $this->Model_menu->hapus_subMenu(['id' => $id], 'user_sub_menu');
+        $msg = ($result === true) ? 'Submenu Deleted Successfully.' : 'Unable to delete submenu.';
+        $this->_respond($isApi, $result === true, $msg, 'menu/subMenu');
+    }
 
-      if ($this->form_validation->run() == false) {
-         // Breadcrumb override: Replace ID with Sub-menu Title
-         $subMenuName = isset($data['subMenu'][0]['title']) ? $data['subMenu'][0]['title'] : 'Sub-menu';
-         $data['breadcrumb_replace'] = [
-            $id => $subMenuName
-         ];
+    public function role()
+    {
+        $this->load->model('AdminModel');
+        $roles = $this->AdminModel->get_roles();
+        if ($this->_isApi()) {
+            return $this->output->set_content_type('application/json')->set_output(json_encode(['status' => true, 'data' => $roles]));
+        }
 
-         $this->load->view('menu/editSubMenu', $data);
-      }
-   }
+        $data = [
+            'title'                  => 'Role Access',
+            'user'                   => $this->Model_user->view_user()->row_array(),
+            'role'                   => $roles,
+            'breadcrumb_url_replace' => ['menu' => 'access-control/roles']
+        ];
+        $this->load->view('menu/role', $data);
+    }
 
-   public function updateSubMenu()
-   {
-      $id = $this->input->post('id');
+    public function roleAccess($role_id)
+    {
+        $isApi = $this->_isApi();
+        if (!$role_id) {
+            $this->_respond($isApi, false, 'Role ID not found.', 'access-control/roles');
+            return;
+        }
 
-      $data = [
-         'menu_id'    => $this->input->post('menu_id'),
-         'title'    => $this->input->post('title'),
-         'url'        => $this->input->post('url'),
-         'icon'        => $this->input->post('icon'),
-         'is_active' => $this->input->post('is_active')
-      ];
+        $roleData = $this->db->get_where('roles', ['id' => $role_id])->row_array();
+        $access_query = $this->db->select('menu_id')->where('role_id', $role_id)->get('user_access_menu')->result_array();
+        $assigned_menu_ids = array_column($access_query, 'menu_id');
+        $menus = $this->Model_menu->get_all_menus_hierarchical();
 
-      $where = [
-         'id' => $id,
-      ];
+        if ($isApi) {
+            return $this->output->set_content_type('application/json')->set_output(json_encode([
+                'status' => true,
+                'data'   => [
+                    'role'              => $roleData,
+                    'assigned_menu_ids' => $assigned_menu_ids,
+                    'all_menus'         => $menus
+                ]
+            ]));
+        }
 
-      $result = $this->Model_menu->changeSubMenu($where, $data, 'user_sub_menu');
-      if ($result === true) {
-         if ($this->input->is_ajax_request()) {
-             echo json_encode(['status' => 'success', 'message' => 'Submenu Updated Successfully.']);
-             return;
-         }
-         $this->session->set_flashdata('success', 'Submenu Updated Successfully.');
-      } else {
-         $code = isset($result['code']) ? $result['code'] : 0;
-         $msg = 'Unable to update submenu due to a system constraint. Please contact technical support.';
-         if ($code == 1142) {
-            $msg = 'Access Denied. You do not have sufficient database privileges to modify submenu items.';
-         }
-         if ($this->input->is_ajax_request()) {
-             echo json_encode(['status' => 'error', 'message' => $msg]);
-             return;
-         }
-         $this->session->set_flashdata('error', $msg);
-      }
-      redirect('menu/submenu');
-   }
+        $data = [
+            'title'                  => 'Role Access',
+            'user'                   => $this->Model_user->view_user()->row_array(),
+            'role'                   => $roleData,
+            'role_access_ids'        => $assigned_menu_ids,
+            'menu'                   => $menus,
+            'main_menus'             => $this->db->get_where('user_menu', ['parent_id' => 0])->result_array(),
+            'breadcrumb_replace'     => [$role_id => $roleData['role_name'] ?? 'Role'],
+            'breadcrumb_url_replace' => [
+                'menu'       => 'access-control/roles',
+                'roleAccess' => 'access-control/roles/access/' . $role_id
+            ],
+            'group_modules'          => $this->db->select('group_modules')
+                ->where('group_modules !=', '')
+                ->where('group_modules IS NOT NULL', null, false)
+                ->group_by('group_modules')
+                ->get('user_menu')
+                ->result_array()
+        ];
+        $this->load->view('menu/roleAccess', $data);
+    }
 
-   public function hapus($id)
-   {
-      if (!$id) {
-         $this->session->set_flashdata('message', '<div class="alert alert-danger" role="alert">Menu ID not found.</div>');
-         redirect('menu');
-      }
-      $where = [
-         'id' => $id
-      ];
+    public function changeAccess()
+    {
+        $this->_parseRawJson();
+        $isApi = $this->_isApi();
+        $menu_id = $this->input->post('menuId') ?: $this->input->post('menu_id');
+        $role_id = $this->input->post('roleId') ?: $this->input->post('role_id');
 
-      $result = $this->Model_menu->hapus_menu($where, 'user_menu');
-      if ($result === true) {
-         $this->session->set_flashdata('success', 'Menu Deleted Successfully.');
-      } else {
-         $code = isset($result['code']) ? $result['code'] : 0;
-         if ($code == 1142) {
-            $this->session->set_flashdata('error', 'Access Denied. You do not have sufficient database privileges to delete menu items.');
-         } elseif ($code == 1451) {
-            $this->session->set_flashdata('error', 'Cannot delete this menu because it contains active submenus or access permissions.');
-         } else {
-            $this->session->set_flashdata('error', 'Unable to delete menu due to a system constraint. Please contact technical support.');
-         }
-      }
-      redirect('menu');
-   }
+        if (!$menu_id || !$role_id) {
+            $this->_respond($isApi, false, 'Invalid parameters.');
+            return;
+        }
 
-   public function hapus_subMenu($id)
-   {
-      if (!$id) {
-         $this->session->set_flashdata('message', '<div class="alert alert-danger" role="alert">Submenu ID not found.</div>');
-         redirect('menu/subMenu');
-      }
-      $where = [
-         'id' => $id
-      ];
+        $params = ['role_id' => $role_id, 'menu_id' => $menu_id];
+        $result = $this->db->get_where('user_access_menu', $params);
 
-      $result = $this->Model_menu->hapus_subMenu($where, 'user_sub_menu');
-      if ($result === true) {
-         $this->session->set_flashdata('success', 'Submenu Deleted Successfully.');
-      } else {
-         $code = isset($result['code']) ? $result['code'] : 0;
-         if ($code == 1142) {
-            $this->session->set_flashdata('error', 'Access Denied. You do not have sufficient database privileges to delete submenu items.');
-         } else {
-            $this->session->set_flashdata('error', 'Unable to delete submenu due to a system constraint. Please contact technical support.');
-         }
-      }
-      redirect('menu/subMenu');
-   }
+        if ($result->num_rows() < 1) {
+            $this->db->insert('user_access_menu', $params);
+            $action = 'granted';
+        } else {
+            $this->db->delete('user_access_menu', $params);
+            $action = 'revoked';
+        }
 
-   public function role()
-   {
-      $data['title'] = 'Role Access';
-      $data['user'] = $this->Model_user->view_user()->row_array();
-      
-      $this->load->model('AdminModel');
-      $data['role'] = $this->AdminModel->get_roles();
-      $data['breadcrumb_url_replace'] = [
-         'menu' => 'access-control/roles'
-      ];
-      $this->load->view('menu/role', $data);
-   }
-
-   public function roleAccess($role_id)
-   {
-      if (!$role_id) {
-         $this->session->set_flashdata('message', '<div class="alert alert-danger" role="alert">Role ID not found.</div>');
-         redirect('access-control/roles');
-      }
-      $data['title'] = 'Role Access';
-      $data['user'] = $this->Model_user->view_user()->row_array();
-
-      $this->load->model('AdminModel');
-      $data['role'] = $this->db->get_where('roles', ['id' => $role_id])->row_array();
-
-      // Breadcrumb override: Replace ID with Role name
-      $role_name = isset($data['role']['role_name']) ? $data['role']['role_name'] : 'Role';
-      $data['breadcrumb_replace'] = [
-         $role_id => $role_name
-      ];
-
-      // Custom breadcrumb redirects
-      $data['breadcrumb_url_replace'] = [
-         'menu'       => 'access-control/roles',
-         'roleAccess' => 'access-control/roles/access/'.$role_id,
-      ];
-
-      // Get all menus hierarchically
-      $data['menu'] = $this->Model_menu->get_all_menus_hierarchical();
-      $data['main_menus'] = $this->db->get_where('user_menu', ['parent_id' => 0])->result_array();
-
-      // Fetch all assigned menu IDs for this role in ONE query to avoid N+1 in view
-      $this->db->select('menu_id');
-      $this->db->where('role_id', $role_id);
-      $access_query = $this->db->get('user_access_menu')->result_array();
-      $data['role_access_ids'] = array_column($access_query, 'menu_id');
-
-      $this->db->select('group_modules');
-      $this->db->where('group_modules !=', '');
-      $this->db->where('group_modules IS NOT NULL', null, false);
-      $this->db->group_by('group_modules');
-      $data['group_modules'] = $this->db->get('user_menu')->result_array();
-
-      $this->load->view('menu/roleAccess', $data);
-   }
-
-   public function changeAccess()
-   {
-      $menu_id = $this->input->post('menuId');
-      $role_id = $this->input->post('roleId');
-
-      $data = [
-         'role_id' => $role_id,
-         'menu_id' => $menu_id
-      ];
-
-      $result = $this->db->get_where('user_access_menu', $data);
-
-      if ($result->num_rows() < 1) {
-         $this->db->insert('user_access_menu', $data);
-      } else {
-         $this->db->delete('user_access_menu', $data);
-      }
-      
-      $this->rbac->clear_menu_cache();
-      $this->session->set_flashdata('message', '<div class="alert alert-success" role="alert">Menu Access Modified!</div>');
-   }
-
-   public function getMenuById($id)
-   {
-      $menu = $this->db->get_where('user_menu', ['id' => $id])->row_array();
-      echo json_encode($menu);
-   }
-
-   public function saveMenuAjax()
-   {
-      $data = [
-         'title' => $this->input->post('title'),
-         'url' => $this->input->post('url'),
-         'icon' => $this->input->post('icon'),
-         'parent_id' => $this->input->post('parent_id'),
-         'group_modules' => $this->input->post('group_modules'),
-         'menu_order' => $this->input->post('menu_order'),
-         'is_active' => 1
-      ];
-
-      $this->Model_menu->insert_menu($data, 'user_menu');
-      $this->rbac->clear_menu_cache();
-      $this->session->set_flashdata('message', 'New Menu Added Successfully!');
-      echo json_encode(['status' => 'success']);
-   }
-
-   public function updateMenuAjax()
-   {
-      $id = $this->input->post('id');
-      $data = [
-         'title' => $this->input->post('title'),
-         'url' => $this->input->post('url'),
-         'icon' => $this->input->post('icon'),
-         'parent_id' => $this->input->post('parent_id'),
-         'group_modules' => $this->input->post('group_modules'),
-         'menu_order' => $this->input->post('menu_order')
-      ];
-
-      $this->Model_menu->changeMenu(['id' => $id], $data, 'user_menu');
-      $this->rbac->clear_menu_cache();
-      $this->session->set_flashdata('message', 'Menu Updated Successfully!');
-      echo json_encode(['status' => 'success']);
-   }
-
-   public function deleteMenuAjax()
-   {
-      $id = $this->input->post('id');
-      
-
-      // Also delete submenus
-      $this->db->where('parent_id', $id);
-      $successSub = $this->db->delete('user_menu');
-      $errSub = $this->db->error();
-      
-      // Delete the menu itself
-      $resultMenu = $this->Model_menu->hapus_menu(['id' => $id], 'user_menu');
-      
-      // Clean up access mappings
-      $this->db->where('menu_id', $id);
-      $successAccess = $this->db->delete('user_access_menu');
-      $errAccess = $this->db->error();
-
-
-      if (!$successSub || $resultMenu !== true || !$successAccess) {
-         $err = (!$successSub) ? $errSub : (($resultMenu !== true) ? $resultMenu : $errAccess);
-         $code = isset($err['code']) ? $err['code'] : 0;
-         $msg = 'Unable to delete menu due to a system constraint.';
-         if ($code == 1142) {
-            $msg = 'Access Denied. You do not have sufficient database privileges to delete menu items.';
-         } elseif ($code == 1451) {
-            $msg = 'Cannot delete this menu because it contains active submenus or access permissions.';
-         }
-         echo json_encode(['status' => 'error', 'message' => $msg]);
-      } else {
-         $this->rbac->clear_menu_cache();
-         $this->session->set_flashdata('message', 'Menu Deleted Successfully!');
-         echo json_encode(['status' => 'success']);
-      }
-   }
+        $this->_respond($isApi, true, 'Access ' . $action . ' successfully.', null, ['action' => $action]);
+    }
 }

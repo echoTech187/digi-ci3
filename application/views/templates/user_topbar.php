@@ -20,40 +20,17 @@
             foreach ($segments as $segment) {
                 $current_url .= '/' . $segment;
                 
-                // Default display name
                 $displayName = ucwords(str_replace(['_', '-'], ' ', $segment));
                 
-                // 1. Priority: Explicit replacement from Controller
                 if (isset($breadcrumb_replace) && isset($breadcrumb_replace[$segment])) {
                     $displayName = $breadcrumb_replace[$segment];
-                } 
-                // 2. Fallback: If segment is numeric (ID) and no replacement provided, mask it
-                elseif (is_numeric($segment)) {
+                } elseif (is_numeric($segment)) {
                     $displayName = '#' . $segment;
                 }
 
-                // 3. URL Override & Unclickable Fallback
-                // Berikut adalah daftar segment yang murni HANYA berupa grup (tanpa halaman index) 
-                // atau action method (butuh parameter).
-                $unclickable_segments = [
-                    // Grup Modul Utama (tidak ada halamannya sendiri)
-                    'finance', 'merchant', 'report', 'access-control', 'external', 'channel', 'product', 'health', 'auth', 'games',
-                    
-                    // Aksi / Method (Pasti error kalau dibuka tanpa parameter / POST)
-                    'detail', 'edit', 'update', 'delete', 'add', 'create', 'bulk-create', 'reset', 'download',
-                    'notification', 'resend', 'ajax', 'json', 'save', 'get', 'search', 'groups', 'register',
-                    'history-ajax', 'mutation-ajax', 'submerchant-ajax', 'overview-ajax', 'bulk-update',
-                    'get-channels', 'get-filter-options', 'get-merchant-mappings', 'change-password', 'forgot-password', 'reset-password',
-                    'verify', 'blocked', 'toggle-openapi', 'maintenance-status', 'sync-balance', 'recent-mutations', 'today-stats',
-                    'monthly-stats', 'metadata', 'analytics-data', 'global-search', 'recent-search', 'channels',
-                    'setting-cashin-fee', 'setting-cashout-fee', 'balance', 'credit', 'debit', 'permissions'
-                ];
-                
                 $finalUrl = base_url($current_url);
                 if (isset($breadcrumb_url_replace) && isset($breadcrumb_url_replace[$segment])) {
                     $finalUrl = base_url($breadcrumb_url_replace[$segment]);
-                } elseif (in_array(strtolower($segment), $unclickable_segments) || is_numeric($segment)) {
-                    $finalUrl = 'javascript:void(0)';
                 }
 
                 $breadcrumb[] = [
@@ -63,63 +40,18 @@
             }
             ?>
             <nav aria-label="breadcrumb" class="d-none d-lg-block">
-                <ol class="dt-breadcrumb align-items-center">
-                    <li class="dt-breadcrumb-item"><a href="<?= base_url('dashboard') ?>" title="Home" style="font-weight: 600;">Home</a></li>
-                    <?php
-                    $breadcrumbCount = count($breadcrumb);
-                    $maxVisible = 1; // Show only the last item normally
-
-                    if ($breadcrumbCount > $maxVisible) {
-                        $hiddenItems = array_slice($breadcrumb, 0, $breadcrumbCount - $maxVisible);
-                        $visibleItems = array_slice($breadcrumb, $breadcrumbCount - $maxVisible);
-                        
-                        // Render ellipsis dropdown
-                        ?>
-                        <li class="dt-breadcrumb-separator"><i class="fas fa-chevron-right" style="font-size: 10px;"></i></li>
-                        <li class="dt-breadcrumb-item dropdown">
-                            <a href="#" class="text-decoration-none d-flex align-items-center" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="font-weight: 700; font-size: 16px; margin-top: -6px; letter-spacing: 1px;">
-                                ... <i class="fas fa-chevron-down ml-1" style="font-size: 10px; margin-top: 6px;"></i>
-                            </a>
-                            <div class="dropdown-menu shadow-sm border-0 animated--fade-in p-2 mt-2" style="border-radius: 8px;">
-                                <?php foreach ($hiddenItems as $hItem): ?>
-                                    <a class="dropdown-item rounded py-2 font-weight-bold" href="<?= $hItem['url'] ?>"><?= $hItem['name'] ?></a>
-                                <?php endforeach; ?>
-                            </div>
+                <ol class="dt-breadcrumb">
+                    <li class="dt-breadcrumb-item"><a href="<?= base_url('dashboard') ?>" title="Home"><i class="fas fa-home" style="font-size:12px;"></i></a></li>
+                    <?php foreach ($breadcrumb as $index => $item): ?>
+                        <li class="dt-breadcrumb-separator"><i class="fas fa-chevron-right"></i></li>
+                        <li class="dt-breadcrumb-item">
+                            <?php if ($index === count($breadcrumb) - 1): ?>
+                                <span><?= $item['name'] ?></span>
+                            <?php else: ?>
+                                <a href="<?= $item['url'] ?>"><?= $item['name'] ?></a>
+                            <?php endif; ?>
                         </li>
-                        <?php
-                        
-                        // Render visible items
-                        foreach ($visibleItems as $index => $item):
-                            $isLast = ($index === count($visibleItems) - 1);
-                            ?>
-                            <li class="dt-breadcrumb-separator"><i class="fas fa-chevron-right" style="font-size: 10px;"></i></li>
-                            <li class="dt-breadcrumb-item">
-                                <?php if ($isLast): ?>
-                                    <span class="text-dark font-weight-bold"><?= $item['name'] ?></span>
-                                <?php else: ?>
-                                    <a href="<?= $item['url'] ?>" style="font-weight: 600;"><?= $item['name'] ?></a>
-                                <?php endif; ?>
-                            </li>
-                            <?php
-                        endforeach;
-
-                    } else {
-                        // Render normally
-                        foreach ($breadcrumb as $index => $item):
-                            $isLast = ($index === $breadcrumbCount - 1);
-                            ?>
-                            <li class="dt-breadcrumb-separator"><i class="fas fa-chevron-right" style="font-size: 10px;"></i></li>
-                            <li class="dt-breadcrumb-item">
-                                <?php if ($isLast): ?>
-                                    <span class="text-dark font-weight-bold"><?= $item['name'] ?></span>
-                                <?php else: ?>
-                                    <a href="<?= $item['url'] ?>" style="font-weight: 600;"><?= $item['name'] ?></a>
-                                <?php endif; ?>
-                            </li>
-                            <?php
-                        endforeach;
-                    }
-                    ?>
+                    <?php endforeach; ?>
                 </ol>
             </nav>
             
@@ -170,6 +102,7 @@
                         }
                         
                         $topbar_placeholder = $active_term ?: "Search anything (Merchant, Channel, Admin, or Transaction...)";
+                        $topbar_merchant_id = (isset($merchant) && isset($merchant['id'])) ? $merchant['id'] : (($this->uri->segment(1) == 'merchant' && is_numeric($this->uri->segment(4))) ? $this->uri->segment(4) : '');
                     ?>
                     <input type="text" class="form-control premium-search-input" placeholder="<?= htmlspecialchars($topbar_placeholder); ?>" id="globalSearchInput" autocomplete="off">
                     <i class="fas fa-search search-icon" id="globalSearchIcon"></i>
@@ -181,9 +114,8 @@
 
             <!-- Topbar Navbar -->
             <ul class="navbar-nav ml-auto align-items-center">
-
-                <!-- Theme Toggle (Desktop Only) -->
-                <li class="nav-item d-none d-lg-block">
+                <!-- Theme Toggle -->
+                <li class="nav-item">
                     <button id="themeToggle" class="btn btn-link rounded-circle text-gray-500" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; text-decoration: none; outline: none !important; flex-shrink: 0;">
                         <i class="fas fa-moon theme-icon-dark"></i>
                         <i class="fas fa-sun theme-icon-light d-none"></i>
@@ -193,27 +125,13 @@
                 <div class="topbar-divider d-none d-sm-block" style="height: 24px; border-left: 1px solid rgba(0,0,0,0.08);"></div>
 
                 <!-- Nav Item - User Information -->
-                <li class="nav-item dropdown no-arrow ">
+                <li class="nav-item dropdown no-arrow">
                     <a class="nav-link dropdown-toggle navbar-user-info pr-0 rounded-circle" href="#" id="userDropdown" role="button" data-toggle="dropdown" data-boundary="viewport" aria-haspopup="true" aria-expanded="false">
                         <img class="navbar-avatar" src="<?= base_url('assets/img/profile/default.jpg') ?>">
                     </a>
 
-                    <!-- Dropdown - User Information (Converts to Right Drawer on Mobile/Tablet <= 991px) -->
-                    <div class="dropdown-menu dropdown-menu-right shadow-lg border-0 animated--grow-in mt-3 p-0 overflow-hidden user-profile-drawer" aria-labelledby="userDropdown" style="border-radius: 20px; width: 280px; backdrop-filter: blur(10px);">
-                        <!-- Drawer Mobile Header -->
-                        <div class="d-flex align-items-center justify-content-between px-4 pt-3 pb-2 d-lg-none border-bottom">
-                            <span class="text-xs font-weight-bold text-uppercase text-muted" style="letter-spacing: 1px;">Account Menu</span>
-                            <div class="d-flex align-items-center gap-2">
-                                <button type="button" class="btn btn-sm btn-light rounded-circle themeToggleMobile mr-2" style="width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center; outline: none !important;" title="Toggle Theme">
-                                    <i class="fas fa-moon theme-icon-dark text-gray-600"></i>
-                                    <i class="fas fa-sun theme-icon-light d-none text-warning"></i>
-                                </button>
-                                <button type="button" class="btn btn-sm btn-light rounded-circle user-drawer-close" aria-label="Close drawer" style="width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center;">
-                                    <i class="fas fa-times text-muted"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <!-- Header Section -->
+                    <!-- Dropdown - User Information -->
+                    <div class="dropdown-menu dropdown-menu-right shadow-lg border-0 animated--grow-in mt-3 p-0 overflow-hidden" aria-labelledby="userDropdown" style="border-radius: 20px; width: 280px; backdrop-filter: blur(10px);">
                         <div class="px-4 py-4 border-bottom bg-light-subtle d-flex align-items-center">
                             <div class="mr-3">
                                 <div class="avatar-glow-sm">
@@ -226,7 +144,6 @@
                             </div>
                         </div>
 
-                        <!-- Account Stats Section -->
                         <div class="px-4 py-3 bg-white">
                             <div class="row no-gutters mb-2">
                                 <div class="col-6">
@@ -235,17 +152,7 @@
                                 </div>
                                 <div class="col-6 text-right">
                                     <p class="text-xs font-weight-bold text-uppercase text-muted mb-1" style="letter-spacing: 0.5px;">Level</p>
-                                    <?php 
-                                        $topbar_role_name = $this->session->userdata('role_name');
-                                        if (!$topbar_role_name && isset($user['role_id'])) {
-                                            $role_query = $this->db->get_where('roles', ['id' => $user['role_id']])->row_array();
-                                            $topbar_role_name = $role_query ? $role_query['role_name'] : 'ADMIN';
-                                        }
-                                        $topbar_role_name = $topbar_role_name ? strtoupper($topbar_role_name) : 'ADMIN';
-                                    ?>
-                                    <span class="badge badge-primary-soft text-primary font-weight-bold px-2 py-1" style="font-size: 10px;">
-                                        <?= htmlspecialchars($topbar_role_name); ?>
-                                    </span>
+                                    <span class="badge badge-primary-soft text-primary font-weight-bold px-2 py-1" style="font-size: 10px;">Admin</span>
                                 </div>
                             </div>
                             <div class="d-flex align-items-center justify-content-between">
@@ -256,7 +163,6 @@
 
                         <div class="dropdown-divider m-0" style="opacity: 0.05;"></div>
                         
-                        <!-- Menu Section -->
                         <div class="p-2">
                             <?php if ($user['role_id'] != 4): ?>
                                 <div class="dropdown-item px-3 rounded-lg border-bottom mb-1">
@@ -274,15 +180,6 @@
                                     </div>
                                 </div>
                             <?php endif; ?>
-
-                            <a class="dropdown-item px-3 rounded-lg" href="<?= base_url('helpcenter'); ?>" target="_blank">
-                                <div class="d-flex align-items-center">
-                                    <div class="dropdown-icon-wrap mr-3 bg-primary-soft text-primary">
-                                        <i class="fas fa-book fa-sm"></i>
-                                    </div>
-                                    <span class="font-weight-bold small">Help Center / Docs</span>
-                                </div>
-                            </a>
 
                             <a class="dropdown-item px-3 rounded-lg" href="<?= base_url('user/change-password'); ?>">
                                 <div class="d-flex align-items-center">
@@ -308,6 +205,7 @@
                 </li>
             </ul>
 
+<<<<<<< HEAD
             <script>
             document.addEventListener('DOMContentLoaded', function () {
                 const html = document.documentElement;
@@ -543,7 +441,7 @@
                                     }
                                     html += '</div>';
                                     
-                                    resultsDropdown.innerHTML = html;
+                                    $(resultsDropdown).html(html);
                                     
                                     // Add event listeners to tabs
                                     const tabs = resultsDropdown.querySelectorAll('.search-tab');
@@ -795,19 +693,19 @@
 
                         // ── Fetch list saat dropdown dibuka ──────────────────────
                         function fetchList() {
-                            listEl.innerHTML = '<div class="text-center py-4"><i class="fas fa-spinner fa-spin text-muted"></i></div>';
+                            $(listEl).html('<div class="text-center py-4"><i class="fas fa-spinner fa-spin text-muted"></i></div>');
                             fetch(BASE + 'notifications/list', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
                                 .then(r => r.json())
                                 .then(d => {
                                     updateBadge(d.unread || 0);
                                     if (!d.items || d.items.length === 0) {
-                                        listEl.innerHTML = '<div class="text-center py-4 text-muted"><i class="fas fa-bell-slash fa-2x mb-2 d-block opacity-50"></i><span style="font-size:13px;">Tidak ada notifikasi</span></div>';
+                                        $(listEl).html('<div class="text-center py-4 text-muted"><i class="fas fa-bell-slash fa-2x mb-2 d-block opacity-50"></i><span style="font-size:13px;">Tidak ada notifikasi</span></div>');
                                     } else {
-                                        listEl.innerHTML = d.items.map(renderItem).join('');
+                                        $(listEl).html(d.items.map(renderItem).join(''));
                                     }
                                 })
                                 .catch(() => {
-                                    listEl.innerHTML = '<div class="text-center py-3 text-danger" style="font-size:12px;"><i class="fas fa-exclamation-circle mr-1"></i>Gagal memuat notifikasi</div>';
+                                    $(listEl).html('<div class="text-center py-3 text-danger" style="font-size:12px;"><i class="fas fa-exclamation-circle mr-1"></i>Gagal memuat notifikasi</div>');
                                 });
                         }
 
@@ -857,6 +755,12 @@
             });
             </script>
 
+=======
+>>>>>>> a49b5fe1bf4e6664c99daaa483c66bfbc1e0d4f7
         </nav>
         <!-- End of Topbar -->
 
+<script>
+    window.SEARCH_MERCHANT_ID = "<?= $topbar_merchant_id; ?>";
+</script>
+<script src="<?= base_url('assets/js/user_topbar.js'); ?>"></script>

@@ -96,7 +96,29 @@ $config['csrf_token_name'] = 'csrf_test_name';
 $config['csrf_cookie_name'] = 'csrf_cookie_name';
 $config['csrf_expire'] = 7200;
 $config['csrf_regenerate'] = FALSE; // Set to FALSE for better AJAX compatibility
-$config['csrf_exclude_uris'] = array();
+$config['csrf_exclude_uris'] = array(
+    'docs/.*',
+    'api/.*',
+    'auth/.*',
+    'dashboard/.*',
+    'finance/.*',
+    'merchant/.*',
+    'virtual-account/.*',
+    'qris/.*',
+    'e-wallet/.*',
+    'transfer/.*',
+    'retail/.*',
+    'external/.*',
+    'channel/.*',
+    'product/.*',
+    'report/.*',
+    'access-control/.*',
+    'menu/.*',
+    'user/.*',
+    'notifications/.*',
+    'private/.*',
+    'health/.*'
+);
 
 /* |-------------------------------------------------------------------------- | Output Compression |-------------------------------------------------------------------------- | | Enables Gzip output compression for faster page loads.  When enabled, | the output class will test whether your server supports Gzip. | Even if it does, however, not all browsers support compression | so enable only if you are reasonably sure your visitors can handle it. | | Only used if zlib.output_compression is turned off in your php.ini. | Please do not use it together with httpd-level output compression. | | VERY IMPORTANT:  If you are getting a blank page when compression is enabled it | means you are prematurely outputting something to your browser. It could | even be a line of whitespace at the end of one of your scripts.  For | compression to work, nothing can be sent before the output buffer is called | by the output class.  Do not 'echo' any values with compression enabled. | */
 $config['compress_output'] = FALSE;

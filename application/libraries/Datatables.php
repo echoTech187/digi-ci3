@@ -439,10 +439,11 @@ class Datatables
         ];
 
         if ($json) {
+            $json_str = json_encode($output);
             $this->CI->output
                 ->set_content_type('application/json')
-                ->set_output(json_encode($output));
-            return;
+                ->set_output($json_str);
+            return $json_str;
         }
 
         return $output;

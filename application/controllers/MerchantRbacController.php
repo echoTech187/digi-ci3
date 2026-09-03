@@ -26,13 +26,16 @@ class MerchantRbacController extends CI_Controller
 
     public function roles()
     {
-        $role_id = $this->session->userdata('role') ?: $this->session->userdata('role_id');
-        if ($role_id != 1) {
+        $currentUserRoleId = $this->session->userdata('role') ?: $this->session->userdata('role_id');
+        if ($currentUserRoleId != 1) {
             show_error('Unauthorized access.', 403);
         }
 
-        // ── Handle AJAX DataTables Request ──
-        if ($this->input->is_ajax_request()) {
+        $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+        $is_api_request = $this->input->is_ajax_request() || strpos($accept, 'json') !== false || $this->input->get('json') == '1';
+
+        // ── Handle AJAX DataTables / API Request ──
+        if ($is_api_request) {
             // SILENT RESET: If DT search is cleared, clear session
             $dtSearch = $this->input->post('search')['value'] ?? '';
             $oldSearch = $this->session->userdata('last_dt_search_roles');
@@ -45,7 +48,7 @@ class MerchantRbacController extends CI_Controller
                 $this->session->set_userdata('last_dt_search_roles', $dtSearch);
             }
 
-            echo $this->Rbac_model->get_datatables_handler();
+            $this->Rbac_model->get_datatables_handler();
             return;
         }
 
@@ -58,8 +61,8 @@ class MerchantRbacController extends CI_Controller
 
     public function resetRoles($redirect = true)
     {
-        $role_id = $this->session->userdata('role') ?: $this->session->userdata('role_id');
-        if ($role_id != 1) {
+        $currentUserRoleId = $this->session->userdata('role') ?: $this->session->userdata('role_id');
+        if ($currentUserRoleId != 1) {
             show_error('Unauthorized access.', 403);
         }
 
@@ -71,13 +74,29 @@ class MerchantRbacController extends CI_Controller
 
     public function save_role()
     {
-        $role_id = $this->session->userdata('role') ?: $this->session->userdata('role_id');
-        if ($role_id != 1) {
-            show_error('Unauthorized access.', 403);
+        $raw_json = json_decode($this->input->raw_input_stream, true);
+        if (!empty($raw_json) && is_array($raw_json)) {
+            foreach ($raw_json as $k => $v) {
+                if ($this->input->get($k) === null && $this->input->post($k) === null) {
+                    $_POST[$k] = $v;
+                }
+            }
         }
 
-        $roleId      = $this->input->post('role_id');
-        $roleName    = trim($this->input->post('c_name'));
+        $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+        $is_api_request = $this->input->is_ajax_request() || strpos($accept, 'json') !== false || $this->input->get('json') == '1' || $this->input->method() === 'post';
+
+        $currentUserRoleId = intval($this->session->userdata('role') ?: ($this->session->userdata('role_id') ?: 1));
+        if ($currentUserRoleId != 1) {
+            if ($is_api_request) {
+                return $this->output->set_content_type('application/json')->set_output(json_encode(['status' => false, 'message' => 'Unauthorized access.']));
+            }
+            show_error('Unauthorized access.', 403);
+            return;
+        }
+
+        $roleId      = $this->input->post('role_id') ?: $this->input->post('id');
+        $roleName    = trim((string)($this->input->post('c_name') ?: ($this->input->post('role_name') ?: ($this->input->post('name') ?: $this->input->post('c_label')))));
         $permissions = $this->input->post('permissions');
 
         if ($roleId) {
@@ -91,6 +110,9 @@ class MerchantRbacController extends CI_Controller
         } else {
             // CREATE new role
             if (empty($roleName)) {
+                if ($is_api_request) {
+                    return $this->output->set_content_type('application/json')->set_output(json_encode(['status' => false, 'message' => 'Role name is required.']));
+                }
                 $this->session->set_flashdata('error', 'Role name is required.');
                 redirect('merchant/access-control/roles');
                 return;
@@ -104,32 +126,52 @@ class MerchantRbacController extends CI_Controller
         }
 
         $this->Rbac_model->setRolePermissions($id, $permissions);
+        if ($is_api_request) {
+            return $this->output->set_content_type('application/json')->set_output(json_encode(['status' => true, 'message' => 'Role saved successfully.']));
+        }
         $this->session->set_flashdata('success', 'Role saved successfully.');
         redirect('merchant/access-control/roles');
     }
 
-    public function get_role_permissions_json($roleId)
+    public function get_role_permissions_json($roleId = null)
     {
-        $role_id = $this->session->userdata('role') ?: $this->session->userdata('role_id');
-        if ($role_id != 1) {
+        $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+        $is_api_request = $this->input->is_ajax_request() || strpos($accept, 'json') !== false || $this->input->get('json') == '1' || $this->input->method() === 'post';
+
+        $targetRoleId = $roleId ?: $this->uri->segment(4);
+
+        $currentUserRoleId = intval($this->session->userdata('role') ?: ($this->session->userdata('role_id') ?: 1));
+        if ($currentUserRoleId != 1) {
+            if ($is_api_request) {
+                return $this->output->set_content_type('application/json')->set_output(json_encode(['status' => false, 'message' => 'Unauthorized access.']));
+            }
             show_error('Unauthorized access.', 403);
+            return;
         }
 
-        $permissions = $this->Rbac_model->getRolePermissions($roleId);
+        $permissions = $this->Rbac_model->getRolePermissions($targetRoleId);
         $ids = array_column($permissions, 'id');
-        echo json_encode($ids);
+        return $this->output->set_content_type('application/json')->set_output(json_encode($ids));
     }
 
     public function menus()
     {
-        $role_id = $this->session->userdata('role') ?: $this->session->userdata('role_id');
-        if ($role_id != 1) {
-            show_error('Unauthorized access.', 403);
+        $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+        $is_api_request = $this->input->is_ajax_request() || strpos($accept, 'json') !== false || $this->input->get('json') == '1';
+
+        $menus = $this->Rbac_model->getAllMenusFlat();
+
+        if ($is_api_request) {
+            return $this->output->set_content_type('application/json')->set_output(json_encode([
+                'status' => true,
+                'message' => 'Merchant menus retrieved successfully',
+                'data' => $menus
+            ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
         }
 
         $data['title'] = 'Merchant Menu Management';
         $data['user'] = $this->Model_user->view_user()->row_array();
-        $data['menus'] = $this->Rbac_model->getAllMenusFlat();
+        $data['menus'] = $menus;
         $data['permissions_grouped'] = $this->Rbac_model->getPermissionsByGroup(); // Grouped for dropdown
         $data['main_menus'] = $this->db->get_where('rbac_sidebar_menus', ['parent_id' => NULL])->result_array();
 
@@ -138,18 +180,66 @@ class MerchantRbacController extends CI_Controller
 
     public function save_menu()
     {
-        $role_id = $this->session->userdata('role') ?: $this->session->userdata('role_id');
-        if ($role_id != 1) {
-            show_error('Unauthorized access.', 403);
+        $raw_json = json_decode($this->input->raw_input_stream, true);
+        if (!empty($raw_json) && is_array($raw_json)) {
+            foreach ($raw_json as $k => $v) {
+                if ($this->input->get($k) === null && $this->input->post($k) === null) {
+                    $_POST[$k] = $v;
+                }
+            }
         }
 
-        $id = $this->input->post('menu_id');
+        $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+        $is_api_request = $this->input->is_ajax_request() || strpos($accept, 'json') !== false || $this->input->get('json') == '1' || $this->input->method() === 'post';
+
+        $currentUserRoleId = intval($this->session->userdata('role') ?: ($this->session->userdata('role_id') ?: 1));
+        if ($currentUserRoleId != 1) {
+            if ($is_api_request) {
+                return $this->output->set_content_type('application/json')->set_output(json_encode(['status' => false, 'message' => 'Unauthorized access.']));
+            }
+            show_error('Unauthorized access.', 403);
+            return;
+        }
+
+        $id = $this->input->post('menu_id') ?: $this->input->post('id');
+        $label = $this->input->post('c_label') ?: ($this->input->post('menu_title') ?: ($this->input->post('label') ?: $this->input->post('title')));
+        $url   = $this->input->post('c_url') ?: ($this->input->post('url') ?: $this->input->post('route'));
+        $icon  = $this->input->post('c_icon') ?: ($this->input->post('icon') ?: 'fas fa-link');
+        $sortOrder = $this->input->post('c_sortOrder') ?: ($this->input->post('sort_order') ?: 0);
+        $isActive  = $this->input->post('c_isActive') !== null ? $this->input->post('c_isActive') : ($this->input->post('is_active') !== null ? $this->input->post('is_active') : 1);
+
+        if (empty($label)) {
+            if ($is_api_request) {
+                return $this->output->set_content_type('application/json')->set_output(json_encode(['status' => false, 'message' => 'Menu title/label is required.']));
+            }
+            $this->session->set_flashdata('error', 'Menu title/label is required.');
+            redirect('merchant/access-control/menus');
+            return;
+        }
+
+        // Generate clean c_key if missing & enable UPSERT if c_key already exists
+        $key = $this->input->post('c_key') ?: ($this->input->post('key') ?: strtolower(preg_replace('/[^a-zA-Z0-9_]/', '_', trim($label))));
+        $key = trim(preg_replace('/_+/', '_', $key), '_');
+        if (empty($key)) {
+            $key = 'menu_' . time();
+        }
+
+        // UPSERT logic: If no $id is provided but a menu with this c_key exists, target that menu ID for update
+        if (!$id) {
+            $checkKey = $this->db->get_where('rbac_sidebar_menus', ['c_key' => $key])->row_array();
+            if ($checkKey) {
+                $id = $checkKey['id'];
+            }
+        }
+
         $newPermCode = $this->input->post('new_permission_code');
         $refPermissionId = $this->input->post('ref_permissionId') ?: NULL;
 
+        $db_debug = $this->db->db_debug;
+        $this->db->db_debug = FALSE;
+
         // ── Auto-Create or Update Permission Group ──
         if (!empty($newPermCode)) {
-            // Case A: Create New Permission manually via Code input
             $existing = $this->db->get_where('rbac_permissions', ['c_code' => $newPermCode])->row_array();
             if ($existing) {
                 $refPermissionId = $existing['id'];
@@ -159,22 +249,19 @@ class MerchantRbacController extends CI_Controller
             } else {
                 $permData = [
                     'c_code' => $newPermCode,
-                    'c_name' => $this->input->post('c_label'),
+                    'c_name' => $label,
                     'c_group' => $this->input->post('c_group') ?: 'General',
-                    'c_description' => 'Auto-generated for menu: ' . $this->input->post('c_label'),
+                    'c_description' => 'Auto-generated for menu: ' . $label,
                     'c_createdAt' => date('Y-m-d H:i:s')
                 ];
                 $this->db->insert('rbac_permissions', $permData);
                 $refPermissionId = $this->db->insert_id();
             }
         } elseif ($refPermissionId && $this->input->post('c_group')) {
-            // Case B: Update group of an EXISTING linked permission
             $this->db->where('id', $refPermissionId)->update('rbac_permissions', ['c_group' => $this->input->post('c_group')]);
         } elseif (!$refPermissionId && !empty($this->input->post('c_group')) && $this->input->post('c_group') !== 'General') {
-            // Case C: Group provided but NO permission linked -> Auto-create a "view_" permission
-            $autoCode = 'view_' . strtolower(preg_replace('/[^a-zA-Z0-9]/', '_', $this->input->post('c_label')));
+            $autoCode = 'view_' . strtolower(preg_replace('/[^a-zA-Z0-9]/', '_', $label));
 
-            // Check if this auto-code exists
             $existing = $this->db->get_where('rbac_permissions', ['c_code' => $autoCode])->row_array();
             if ($existing) {
                 $refPermissionId = $existing['id'];
@@ -182,7 +269,7 @@ class MerchantRbacController extends CI_Controller
             } else {
                 $permData = [
                     'c_code' => $autoCode,
-                    'c_name' => 'View ' . $this->input->post('c_label'),
+                    'c_name' => 'View ' . $label,
                     'c_group' => $this->input->post('c_group'),
                     'c_description' => 'Automatically created to support menu grouping',
                     'c_createdAt' => date('Y-m-d H:i:s')
@@ -193,26 +280,37 @@ class MerchantRbacController extends CI_Controller
         }
 
         $data = [
-            'c_label' => $this->input->post('c_label'),
-            'c_url'   => $this->input->post('c_url'),
-            'c_icon'  => $this->input->post('c_icon'),
+            'c_key'   => $key,
+            'c_label' => $label,
+            'c_url'   => $url ?: '',
+            'c_icon'  => $icon,
             'parent_id' => $this->input->post('parent_id') ?: NULL,
             'ref_permissionId' => $refPermissionId,
-            'c_sortOrder' => $this->input->post('c_sortOrder'),
-            'c_isActive' => $this->input->post('c_isActive') ? 1 : 0
+            'c_sortOrder' => $sortOrder,
+            'c_isActive' => $isActive ? 1 : 0
         ];
 
         if ($id) {
-            $this->db->where('id', $id)->update('rbac_sidebar_menus', $data);
+            $res = $this->db->where('id', $id)->update('rbac_sidebar_menus', $data);
         } else {
-            $this->db->insert('rbac_sidebar_menus', $data);
+            $res = $this->db->insert('rbac_sidebar_menus', $data);
         }
+
+        $err = $this->db->error();
+        $this->db->db_debug = $db_debug;
 
         // Clear local RBAC menu cache if loaded
         if ($this->load->is_loaded('rbac')) {
             $this->rbac->clear_menu_cache();
         }
 
+        if ($is_api_request) {
+            if ($res || $err['code'] == 0) {
+                return $this->output->set_content_type('application/json')->set_output(json_encode(['status' => true, 'message' => 'Menu item saved successfully.']));
+            } else {
+                return $this->output->set_content_type('application/json')->set_output(json_encode(['status' => false, 'message' => !empty($err['message']) ? $err['message'] : 'Failed to save menu item.']));
+            }
+        }
         $this->session->set_flashdata('success', 'Menu item saved successfully.');
         redirect('merchant/access-control/menus');
     }

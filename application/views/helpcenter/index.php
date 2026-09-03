@@ -1296,10 +1296,11 @@
                     });
 
                     if (matchCount > 0) {
-                        searchResults.innerHTML = resultsHTML;
+                        $(searchResults).html(resultsHTML);
                         searchResults.style.display = 'block';
                     } else {
-                        searchResults.innerHTML = '<div style="padding: 16px; text-align: center; color: #64748b; font-size: 12px;">No results found for "' + query + '"</div>';
+                        const safeQuery = $('<div>').text(query).html();
+                        $(searchResults).html('<div style="padding: 16px; text-align: center; color: #64748b; font-size: 12px;">No results found for "' + safeQuery + '"</div>');
                         searchResults.style.display = 'block';
                     }
                 });
@@ -1340,12 +1341,11 @@
                 
                 const text = codeEl.innerText || codeEl.textContent;
                 navigator.clipboard.writeText(text).then(() => {
-                    const originalText = btn.innerHTML;
-                    btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
-                    btn.classList.add('copied');
+                    const $btn = $(btn);
+                    const originalHtml = $btn.html();
+                    $btn.html('<i class="fas fa-check"></i> Copied!').addClass('copied');
                     setTimeout(() => {
-                        btn.innerHTML = originalText;
-                        btn.classList.remove('copied');
+                        $btn.html(originalHtml).removeClass('copied');
                     }, 2000);
                 });
             };

@@ -39,23 +39,45 @@ class ReportController extends CI_Controller {
          $this->session->set_userdata('search_date_balance_log_to', $search_date_to);
       }
 
-      if ($this->input->is_ajax_request()) {
+      $raw_json = json_decode($this->input->raw_input_stream, true);
+      if (!empty($raw_json) && is_array($raw_json)) {
+         foreach ($raw_json as $k => $v) {
+            if ($this->input->post($k) === NULL) {
+               $_POST[$k] = $v;
+            }
+         }
+      }
+
+      $is_api = $this->input->is_ajax_request()
+         || strtolower((string)$this->input->get_request_header('X-Requested-With')) === 'xmlhttprequest'
+         || strpos((string)$this->input->get_request_header('Content-Type'), 'json') !== false
+         || strpos((string)$this->input->get_request_header('Accept'), 'json') !== false
+         || $this->input->method() === 'post';
+
+      if ($is_api) {
          try {
             $filters = [
                'merchant' => $this->session->userdata('search_merchant_balance_log'),
                'date_from' => $this->session->userdata('search_date_balance_log'),
                'date_to' => $this->session->userdata('search_date_balance_log_to')
             ];
-            return $this->BalanceLogModel->get_datatables_handler($filters);
+            $out = $this->BalanceLogModel->get_datatables_handler($filters);
+            $this->output
+               ->set_content_type('application/json')
+               ->set_output(is_string($out) ? $out : json_encode($out));
+            return;
          } catch (Throwable $e) {
             log_message('error', 'Balance Log AJAX error: ' . $e->getMessage());
-            echo json_encode(array(
-               "draw" => intval($this->input->post("draw")),
-               "recordsTotal" => 0,
-               "recordsFiltered" => 0,
-               "data" => array(),
-               "error" => "Error retrieving balance log data: " . $e->getMessage()
-            ));
+            $this->output
+               ->set_content_type('application/json')
+               ->set_output(json_encode(array(
+                  "draw" => intval($this->input->post("draw")),
+                  "recordsTotal" => 0,
+                  "recordsFiltered" => 0,
+                  "data" => array(),
+                  "error" => "Error retrieving balance log data: " . $e->getMessage()
+               )));
+            return;
          }
       }
 
@@ -101,7 +123,22 @@ class ReportController extends CI_Controller {
          if ($search_status !== null) $this->session->set_userdata('search_status', $search_status);
       }
 
-      if ($this->input->is_ajax_request()) {
+      $raw_json = json_decode($this->input->raw_input_stream, true);
+      if (!empty($raw_json) && is_array($raw_json)) {
+         foreach ($raw_json as $k => $v) {
+            if ($this->input->post($k) === NULL) {
+               $_POST[$k] = $v;
+            }
+         }
+      }
+
+      $is_api = $this->input->is_ajax_request()
+         || strtolower((string)$this->input->get_request_header('X-Requested-With')) === 'xmlhttprequest'
+         || strpos((string)$this->input->get_request_header('Content-Type'), 'json') !== false
+         || strpos((string)$this->input->get_request_header('Accept'), 'json') !== false
+         || $this->input->method() === 'post';
+
+      if ($is_api) {
          try {
             $filters = [
                'date' => $this->session->userdata('search_date'),
@@ -109,16 +146,23 @@ class ReportController extends CI_Controller {
                'type' => $this->session->userdata('search_type'),
                'status' => $this->session->userdata('search_status')
             ];
-            return $this->AdminDownload->get_datatables_handler($filters);
+            $out = $this->AdminDownload->get_datatables_handler($filters);
+            $this->output
+               ->set_content_type('application/json')
+               ->set_output(is_string($out) ? $out : json_encode($out));
+            return;
          } catch (Throwable $e) {
             log_message('error', 'Report AJAX error: ' . $e->getMessage());
-            echo json_encode(array(
-               "draw" => intval($this->input->post("draw")),
-               "recordsTotal" => 0,
-               "recordsFiltered" => 0,
-               "data" => array(),
-               "error" => "Error retrieving report data: " . $e->getMessage()
-            ));
+            $this->output
+               ->set_content_type('application/json')
+               ->set_output(json_encode(array(
+                  "draw" => intval($this->input->post("draw")),
+                  "recordsTotal" => 0,
+                  "recordsFiltered" => 0,
+                  "data" => array(),
+                  "error" => "Error retrieving report data: " . $e->getMessage()
+               )));
+            return;
          }
       }
 
@@ -141,12 +185,26 @@ class ReportController extends CI_Controller {
       $this->session->unset_userdata('search_date_to');
       $this->session->unset_userdata('search_type');
       $this->session->unset_userdata('search_status');
+
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      $is_api_request = strpos($accept, 'json') !== false || $this->input->get('json') == '1';
+
+      if ($is_api_request) {
+         $this->output->set_content_type('application/json')->set_output(json_encode([
+            'status' => true,
+            'message' => 'Report download search filters reset successfully.'
+         ]));
+         return;
+      }
+
       redirect('report/download');
    }
 
    public function download()
    {
-      $filename = $this->input->get('filename');
+      $filename = $this->input->get('filename') ?: $this->input->post('filename');
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      $is_api_request = $this->input->is_ajax_request() || strpos($accept, 'json') !== false || $this->input->get('json') == '1';
 
       if (!empty($filename)) {
           // Standard report download path with candidate paths check
@@ -167,7 +225,7 @@ class ReportController extends CI_Controller {
               }
           }
 
-         if (file_exists($filepath)) {
+         if ($filepath && file_exists($filepath)) {
             header('Content-Description: File Transfer');
             header('Content-Type: application/octet-stream');
             header('Content-Disposition: attachment; filename="' . basename($filepath) . '"');
@@ -177,10 +235,25 @@ class ReportController extends CI_Controller {
             header('Content-Length: ' . filesize($filepath));
 
             readfile($filepath);
+            return;
          } else {
+            if ($is_api_request) {
+               $this->output->set_content_type('application/json')->set_output(json_encode([
+                  'status' => false,
+                  'message' => 'Requested report file was not found on server.'
+               ]));
+               return;
+            }
             echo 'File not found.';
          }
       } else {
+         if ($is_api_request) {
+            $this->output->set_content_type('application/json')->set_output(json_encode([
+               'status' => false,
+               'message' => 'Filename parameter is missing.'
+            ]));
+            return;
+         }
          echo 'Filename parameter is missing.';
       }
    }
@@ -190,6 +263,18 @@ class ReportController extends CI_Controller {
       $this->session->unset_userdata('search_merchant_balance_log');
       $this->session->unset_userdata('search_date_balance_log');
       $this->session->unset_userdata('search_date_balance_log_to');
+
+      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+      $is_api_request = strpos($accept, 'json') !== false || $this->input->get('json') == '1';
+
+      if ($is_api_request) {
+         $this->output->set_content_type('application/json')->set_output(json_encode([
+            'status' => true,
+            'message' => 'Balance log search filters reset successfully.'
+         ]));
+         return;
+      }
+
       redirect('report/balance-log');
    }
 }
