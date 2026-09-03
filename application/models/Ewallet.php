@@ -206,8 +206,7 @@ class Ewallet extends CI_Model {
 
     public function count_filtered($search_name = null, $date_from = null, $date_to = null, $search_date_settlement = null, $search_invoice_no = null, $search_transid = null, $search_channel = null)
     {
-        $searchPost = $this->input->post('search');
-        $searchValue = (is_array($searchPost) && isset($searchPost['value'])) ? $searchPost['value'] : '';
+        $searchValue = $this->input->post('search')['value'];
         $is_filtered = $search_name || $date_from || $date_to || $search_date_settlement || $search_invoice_no || $search_transid || $search_channel || (!empty($searchValue));
 
         if (!$is_filtered) {
@@ -271,8 +270,7 @@ class Ewallet extends CI_Model {
         // Optimized Fetch (Two-Step Lookup)
         $list = $this->get_datatables($search_name, $date_from_query, $date_to_query, $search_date_settlement, $search_invoice_no, $search_transid, $search_channel);
         
-        $searchPost = $this->input->post('search');
-        $searchValue = (is_array($searchPost) && isset($searchPost['value'])) ? $searchPost['value'] : '';
+        $searchValue = $this->input->post('search')['value'];
         $is_filtered = $search_name || $date_from || $date_to || $search_date_settlement || $search_invoice_no || $search_transid || $search_channel || (!empty($searchValue));
 
         $recordsTotal = $this->count_all_dt($search_name, $date_from_query, $date_to_query);
@@ -300,8 +298,6 @@ class Ewallet extends CI_Model {
         $this->output
             ->set_content_type('application/json')
             ->set_output(json_encode($output));
-
-        return $output;
     }
 
     public function get_internal_channels(){

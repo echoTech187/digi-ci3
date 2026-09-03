@@ -10,7 +10,7 @@ class Merchant extends CI_Model
             $hasBalancePermission = $this->load->library('rbac') ? $this->rbac->has_permission($role_id, 'balance_merchant_module') : true;
         }
 
-        $cols = 'id, c_name, c_email, c_phoneNumber, c_status, c_merchantLevel, c_openapiStatus, c_dateCreated, c_openapiUrlCallbackQrisMpm, c_openapiUrlCallbackVa, c_openapiUrlCallbackEwallet, c_openapiIPAllow, c_openapiSecurityType, c_refSupervisor, ref_entity, c_openapiChannelVaDynamicCreate, c_openapiChannelVaDynamicQuery, c_openapiChannelVaDynamicCancel, c_openapiChannelVaRecurringCreate, c_openapiChannelVaRecurringCancel, c_openapiChannelQrisMpmDynamicCreate, c_openapiChannelQrisMpmDynamicQuery, c_openapiChannelQrisMpmDynamicCancel, c_openapiChannelEwalletDynamicCreate, c_openapiChannelEwalletDynamicQuery, c_openapiChannelEwalletDynamicCancel, c_openapiChannelTransferToBifast, c_openapiChannelTransferToRealtimeOnline, c_allowTransferFromDashboard, c_balanceTotal, c_balanceHold';
+        $cols = 'id, c_name, c_email, c_phoneNumber, c_status, c_merchantLevel, c_openapiStatus, c_dateCreated, c_openapiUrlCallbackQrisMpm, c_openapiUrlCallbackVa, c_openapiUrlCallbackEwallet, c_openapiUrlCallbackTransfer, c_openapiIPAllow, c_openapiSecurityType, c_refSupervisor, ref_entity, c_openapiChannelVaDynamicCreate, c_openapiChannelVaDynamicQuery, c_openapiChannelVaDynamicCancel, c_openapiChannelVaRecurringCreate, c_openapiChannelVaRecurringCancel, c_openapiChannelQrisMpmDynamicCreate, c_openapiChannelQrisMpmDynamicQuery, c_openapiChannelQrisMpmDynamicCancel, c_openapiChannelEwalletDynamicCreate, c_openapiChannelEwalletDynamicQuery, c_openapiChannelEwalletDynamicCancel, c_openapiChannelTransferToBifast, c_openapiChannelTransferToBifastQuery, c_openapiChannelTransferToRealtimeOnline, c_openapiChannelTransferToRealtimeOnlineQuery, c_openapiChannelBalanceQuery, c_allowTransferFromDashboard, c_balanceTotal, c_balanceHold';
         
         // if ($hasBalancePermission) {
         //     $cols .= ', c_balanceTotal, c_balanceHold';
@@ -95,15 +95,13 @@ class Merchant extends CI_Model
     }
 
     public function create_merchant($data, $gvconnectBusinessId, $gvconnectBusinessName) {
-        $this->db->db_debug = FALSE;
         $this->db->trans_begin();
         if ($this->db->insert('merchant', $data)) {
-            $inserted_id = !empty($data['id']) ? $data['id'] : $this->db->insert_id();
             $submerchant_data = [
-                'ref_merchantId'            => $inserted_id,
-                'c_name'                    => $data['c_name'],
-                'c_status'                  => $data['c_status'],
-                'c_email'                   => $data['c_email'],
+                'ref_merchantId'    => $this->db->insert_id(),
+                'c_name'            => $data['c_name'],
+                'c_status'          => $data['c_status'],
+                'c_email'           => $data['c_email'],
                 'c_gvconnectBusinessId'     => $gvconnectBusinessId,
                 'c_gvconnectBusinessName'   => $gvconnectBusinessName,
             ];
@@ -123,7 +121,7 @@ class Merchant extends CI_Model
         } else {
             $err = $this->db->error();
             $this->db->trans_rollback();
-            return $err;
+            return $err; // Returns array with 'code' and 'message'
         }
     }
 
@@ -302,12 +300,6 @@ class Merchant extends CI_Model
 
     public function save_merchant_delegation($granteeId, $permissionId, $action)
     {
-        // Check if grantee merchant exists to avoid Foreign Key constraint error 1452
-        $merchantExists = $this->db->get_where('merchant', ['id' => $granteeId])->row();
-        if (!$merchantExists) {
-            return false;
-        }
-
         // Action can be: 'Grant', 'Deny', 'Inherit'
         if ($action === 'Inherit') {
             // Delete any explicit grant by Admin (NULL or 0 granter)
@@ -332,7 +324,7 @@ class Merchant extends CI_Model
                 'ref_permissionId'      => $permissionId,
                 'ref_granterMerchantId' => NULL, // Must be NULL to satisfy fk_rbac_access_granter foreign key referencing merchant(id)
                 'c_isAllowed'           => $isAllowed,
-                'c_grantedByUserId'     => $this->session->userdata('id') ?: ($this->session->userdata('user_id') ?: NULL),
+                'c_grantedByUserId'     => $this->session->userdata('id'), // Admin's user ID is 'id', not 'user_id'
                 'c_updatedAt'           => date('Y-m-d H:i:s')
             ];
 

@@ -16,7 +16,36 @@
             <span class="badge bg-white text-primary border shadow-sm px-3 py-2" style="font-size: 13px;">
                 <i class="fas fa-store mr-1"></i> <?= count($merchants) ?> Merchants Found
             </span>
+            <button type="button" class="btn-dt-action btn-dt-action-primary border-0 d-flex align-items-center shadow-sm" id="toggleGuideBtn" >
+                <i class="fas fa-book-open mr-2"></i> <span class="d-none d-md-block">Instructions Guide</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ── Toggleable Page Instructional Drawer ── -->
+    <div class="drawer-overlay" id="instructionOverlay"></div>
+    <div class="drawer-right" id="instructionDrawer">
+        <div class="drawer-header">
+            <h6 class="drawer-title"><i class="fas fa-book mr-2"></i> Supervisor Merchants Guide</h6>
+            <button type="button" class="drawer-close" id="closeDrawerBtn">&times;</button>
+        </div>
+        <div class="drawer-body">
+            <p class="drawer-desc">This page displays all merchant accounts currently assigned to and supervised by this specific supervisor agent.</p>
             
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-user-shield text-primary mr-2"></i> Supervisor Merchants</div>
+                <p class="drawer-card-text">Monitor assigned merchant stores and view details by clicking on the merchant name link.</p>
+            </div>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-wallet text-primary mr-2"></i> Balance Audit</div>
+                <p class="drawer-card-text">Audit the merchant's Total Balance versus Hold Balance (funds locked or reserved due to pending disputes/verification).</p>
+            </div>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-key text-primary mr-2"></i> OpenAPI & Account Status</div>
+                <p class="drawer-card-text">Track status for both overall account registration and OpenAPI credentials (Active, Pending, Blocked, or Frozen).</p>
+            </div>
         </div>
     </div>
 
@@ -138,6 +167,18 @@
 
 <script>
 $(document).ready(function() {
+    // Instructions Guide drawer handlers
+    $('#toggleGuideBtn').on('click', function() {
+        $('#instructionDrawer').addClass('open');
+        $('#instructionOverlay').addClass('open');
+        $('body').css('overflow', 'hidden'); // Lock background scroll
+    });
+
+    $('#closeDrawerBtn, #instructionOverlay').on('click', function() {
+        $('#instructionDrawer').removeClass('open');
+        $('#instructionOverlay').removeClass('open');
+        $('body').css('overflow', ''); // Unlock scroll
+    });
 
     const supervisorId = "<?= $supervisor_id ?>";
     const table = initServerDataTable("#supervisorMerchantTable", "<?= base_url('merchant/manage/list/') ?>" + supervisorId, [
@@ -264,4 +305,6 @@ $(document).ready(function() {
     });
 });
 </script>
+
+
 

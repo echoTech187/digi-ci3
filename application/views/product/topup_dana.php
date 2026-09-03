@@ -7,7 +7,31 @@
             <p class="dt-page-subtitle">Manage Dana Top Up products and denominations.</p>
         </div>
         <div class="d-flex align-items-center gap-2">
+            <button type="button" class="btn-dt-action btn-dt-action-primary border-0 d-flex align-items-center shadow-sm" id="toggleGuideBtn" >
+                <i class="fas fa-book-open mr-2"></i> <span class="d-none d-md-block">Instructions Guide</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ── Toggleable Page Instructional Drawer ── -->
+    <div class="drawer-overlay" id="instructionOverlay"></div>
+    <div class="drawer-right" id="instructionDrawer">
+        <div class="drawer-header">
+            <h6 class="drawer-title"><i class="fas fa-book mr-2"></i> Product Guide</h6>
+            <button type="button" class="drawer-close" id="closeDrawerBtn">&times;</button>
+        </div>
+        <div class="drawer-body">
+            <p class="drawer-desc">This product catalog allows administrators to manage top-up products, denominations, and pricing.</p>
             
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-gamepad text-primary mr-2"></i> Product List</div>
+                <p class="drawer-card-text">Audit PPOB/Game denomination catalog settings, including display caption, internal description, and pricing details.</p>
+            </div>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-tag text-primary mr-2"></i> Pricing Setup</div>
+                <p class="drawer-card-text">Configure product sale prices. Pricing updates affect merchant fee calculations and payment checkout rates instantly.</p>
+            </div>
         </div>
     </div>
 
@@ -169,7 +193,18 @@
 </div>
 <script>
 $(document).ready(function() {
-    
+    // Instructions Guide drawer handlers
+    $('#toggleGuideBtn').on('click', function() {
+        $('#instructionDrawer').addClass('open');
+        $('#instructionOverlay').addClass('open');
+        $('body').css('overflow', 'hidden'); // Lock background scroll
+    });
+
+    $('#closeDrawerBtn, #instructionOverlay').on('click', function() {
+        $('#instructionDrawer').removeClass('open');
+        $('#instructionOverlay').removeClass('open');
+        $('body').css('overflow', ''); // Unlock scroll
+    });
     window.productTable = initServerDataTable('#productTable', "<?= base_url('product/ewallet/dana') ?>", [
         { data: 'no' },
         { data: 'c_caption' },

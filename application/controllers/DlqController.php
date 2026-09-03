@@ -129,11 +129,20 @@ class DlqController extends CI_Controller {
 
         $ch = curl_init($internal_url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 15);
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
         curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json', 'Content-Length: ' . strlen(json_encode($payload))]);
         $response = curl_exec($ch);
+        $curlErrNo = curl_errno($ch);
+        $curlErrMsg = curl_error($ch);
         $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
+
+        if ($curlErrNo) {
+            log_message('error', 'Gateway Internal Timeout / Error: ' . $curlErrMsg);
+            return ['status' => false, 'message' => 'Service Gateway timeout: ' . $curlErrMsg];
+        }
 
         $resData = json_decode($response, true);
 

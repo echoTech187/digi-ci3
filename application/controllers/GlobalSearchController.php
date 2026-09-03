@@ -50,12 +50,12 @@ class GlobalSearchController extends CI_Controller
             $has_access   = function ($url) use ($allowed_urls) { return in_array($url, $allowed_urls); };
 
             // Filter menu matches in PHP – zero extra roundtrip
-            foreach ($all_menus as $m) {
-                if ($m->url !== '#' && (stripos($m->title, $query) !== false || stripos($m->url, $query) !== false)) {
-                    $results[] = ['title' => $m->title, 'url' => base_url($m->url), 'category' => 'Navigation', 'icon' => $m->icon ?: 'fas fa-link'];
-                    if (count($results) >= 3) break;
-                }
-            }
+            $matched_menus = array_slice(array_filter((array) $all_menus, function($m) use ($query) {
+                return $m->url !== '#' && (stripos($m->title, $query) !== false || stripos($m->url, $query) !== false);
+            }), 0, 3);
+            $results = array_merge($results, array_map(function($m) {
+                return ['title' => $m->title, 'url' => base_url($m->url), 'category' => 'Navigation', 'icon' => $m->icon ?: 'fas fa-link'];
+            }, $matched_menus));
 
             // ── QUERIES 2–3: Merchant + presence (skipped for numeric transaction IDs) ─
             if (!$isNumericTid && $qLen >= 3) {
@@ -107,21 +107,30 @@ class GlobalSearchController extends CI_Controller
                 } // end if $merchants
 
                 // Admin / Supervisor / Channel (text queries only)
+                $like_param = $safeQ . '%';
                 if ($has_access('access-control/accounts')) {
-                    foreach ($this->db->query("SELECT id, c_name, c_email FROM admin WHERE c_name LIKE '$safeQ%' OR c_email LIKE '$safeQ%' LIMIT 2")->result() as $a)
-                        $results[] = ['title' => "Admin: $a->c_name ($a->c_email)", 'url' => base_url('access-control/accounts?search_admin=' . urlencode($query)), 'category' => 'Admin Accounts', 'icon' => 'fas fa-user-shield'];
+                    $admin_rows = $this->db->query("SELECT id, c_name, c_email FROM admin WHERE c_name LIKE ? OR c_email LIKE ? LIMIT 2", [$like_param, $like_param])->result();
+                    $results = array_merge($results, array_map(function($a) use ($query) {
+                        return ['title' => "Admin: $a->c_name ($a->c_email)", 'url' => base_url('access-control/accounts?search_admin=' . urlencode($query)), 'category' => 'Admin Accounts', 'icon' => 'fas fa-user-shield'];
+                    }, $admin_rows ?: []));
                 }
                 if ($has_access('merchant/supervisor')) {
-                    foreach ($this->db->query("SELECT id, c_name, c_email FROM merchant_supervisor WHERE c_name LIKE '$safeQ%' OR c_email LIKE '$safeQ%' LIMIT 2")->result() as $s)
-                        $results[] = ['title' => "Supervisor: $s->c_name ($s->c_email)", 'url' => base_url('merchant/supervisor?search_spv=' . urlencode($query)), 'category' => 'Supervisor Management', 'icon' => 'fas fa-user-tie'];
+                    $spv_rows = $this->db->query("SELECT id, c_name, c_email FROM merchant_supervisor WHERE c_name LIKE ? OR c_email LIKE ? LIMIT 2", [$like_param, $like_param])->result();
+                    $results = array_merge($results, array_map(function($s) use ($query) {
+                        return ['title' => "Supervisor: $s->c_name ($s->c_email)", 'url' => base_url('merchant/supervisor?search_spv=' . urlencode($query)), 'category' => 'Supervisor Management', 'icon' => 'fas fa-user-tie'];
+                    }, $spv_rows ?: []));
                 }
                 if ($has_access('channel/cashin')) {
-                    foreach ($this->db->query("SELECT id, c_description FROM cashin_channel WHERE c_description LIKE '$safeQ%' OR c_externalIdDefault LIKE '$safeQ%' LIMIT 2")->result() as $cc)
-                        $results[] = ['title' => "Cash-In Channel: $cc->id", 'url' => base_url('channel/cashin?search_channel=' . urlencode($query)), 'category' => 'Configuration', 'icon' => 'fas fa-download'];
+                    $chin_rows = $this->db->query("SELECT id, c_description FROM cashin_channel WHERE c_description LIKE ? OR c_externalIdDefault LIKE ? LIMIT 2", [$like_param, $like_param])->result();
+                    $results = array_merge($results, array_map(function($cc) use ($query) {
+                        return ['title' => "Cash-In Channel: $cc->id", 'url' => base_url('channel/cashin?search_channel=' . urlencode($query)), 'category' => 'Configuration', 'icon' => 'fas fa-download'];
+                    }, $chin_rows ?: []));
                 }
                 if ($has_access('channel/cashout')) {
-                    foreach ($this->db->query("SELECT id, c_description FROM cashout_channel WHERE c_description LIKE '$safeQ%' OR c_externalIdDefault LIKE '$safeQ%' LIMIT 2")->result() as $cc)
-                        $results[] = ['title' => "Cash-Out Channel: $cc->id", 'url' => base_url('channel/cashout?search_channel=' . urlencode($query)), 'category' => 'Configuration', 'icon' => 'fas fa-upload'];
+                    $chout_rows = $this->db->query("SELECT id, c_description FROM cashout_channel WHERE c_description LIKE ? OR c_externalIdDefault LIKE ? LIMIT 2", [$like_param, $like_param])->result();
+                    $results = array_merge($results, array_map(function($cc) use ($query) {
+                        return ['title' => "Cash-Out Channel: $cc->id", 'url' => base_url('channel/cashout?search_channel=' . urlencode($query)), 'category' => 'Configuration', 'icon' => 'fas fa-upload'];
+                    }, $chout_rows ?: []));
                 }
             } // end if !$isNumericTid
 
@@ -137,76 +146,76 @@ class GlobalSearchController extends CI_Controller
             $qrisRrnPids = [];
 
             if ($qLen >= 6) {
-                $op  = ($qLen >= 15) ? '='      : 'LIKE';
-                $val = ($qLen >= 15) ? "'$safeQ'" : "'$safeQ%'";
-
                 $parts    = [];
+                $bindings = [];
+                $qPattern = ($qLen >= 15) ? $safeQ : ($safeQ . '%');
+
                 $needQris = $has_access('finance/qris') || $has_access('qris/dynamic') || $has_access('qris/recurring');
                 $needVa   = $has_access('finance/virtual-account') || $has_access('virtual-account/dynamic') || $has_access('virtual-account/recurring');
                 $needEw   = $has_access('finance/e-wallet') || $has_access('e-wallet/dynamic');
 
                 if ($needQris) {
-                    $parts[] = "(SELECT 'qdt' AS s, CAST(id AS CHAR) AS r, CAST(c_merchantTransactionId AS CHAR) AS tid, CAST(c_amount AS CHAR) AS amt FROM cashin_dynamic_qris_mpm WHERE c_merchantTransactionId $op $val LIMIT 5)";
+                    $parts[] = "(SELECT 'qdt' AS s, CAST(id AS CHAR) AS r, CAST(c_merchantTransactionId AS CHAR) AS tid, CAST(c_amount AS CHAR) AS amt FROM cashin_dynamic_qris_mpm WHERE c_merchantTransactionId LIKE ? LIMIT 5)";
+                    $bindings[] = $qPattern;
                     if ($has_access('finance/qris')) {
-                        // RRN is stored in external callback tables, not in cashin_payment_qris_mpm
-                        $rrn_tables = [
-                            'external_paydgn_qris_mpm_callback' => 'c_issuerRrn',
-                            'external_gvconnect_snap_qris_mpm_callback' => 'c_issuerRrn',
-                            'external_inacash_qris_mpm_callback' => 'c_issuerRrn',
-                            'external_paylabs_qris_mpm_callback_payment' => 'c_issuerRrn',
-                            'external_quantum_qris_mpm_calback_payment' => 'c_transactionId',
-                            'external_stm_qris_mpm_callback' => 'c_issuerRrn',
-                            'external_yukk_qris_mpm_callback' => 'c_issuerRrn'
-                        ];
-                        
-                        $db_name = $this->db->database;
-                        $info_query = $this->db->query("SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA = '$db_name' AND TABLE_NAME LIKE 'external_%'")->result_array();
-                        $valid_tables = array_column($info_query, 'TABLE_NAME');
-                        
-                        $found_rrn_ids = [];
-                        foreach ($rrn_tables as $t => $col) {
-                            if (!in_array($t, $valid_tables)) continue; // Skip non-existent tables safely
-                            
-                            $q = $this->db->query("SELECT ref_cashinPaymentQrisMpmId FROM $t WHERE $col $op $val LIMIT 5");
-                            if ($q) {
-                                foreach ($q->result() as $r) {
-                                    if ($r->ref_cashinPaymentQrisMpmId) $found_rrn_ids[] = $r->ref_cashinPaymentQrisMpmId;
-                                }
+                        $rrn_union_sql = "
+                            SELECT ref_cashinPaymentQrisMpmId FROM external_paydgn_qris_mpm_callback WHERE c_issuerRrn LIKE ?
+                            UNION ALL SELECT ref_cashinPaymentQrisMpmId FROM external_gvconnect_snap_qris_mpm_callback WHERE c_issuerRrn LIKE ?
+                            UNION ALL SELECT ref_cashinPaymentQrisMpmId FROM external_inacash_qris_mpm_callback WHERE c_issuerRrn LIKE ?
+                            UNION ALL SELECT ref_cashinPaymentQrisMpmId FROM external_paylabs_qris_mpm_callback_payment WHERE c_issuerRrn LIKE ?
+                            UNION ALL SELECT ref_cashinPaymentQrisMpmId FROM external_quantum_qris_mpm_calback_payment WHERE c_transactionId LIKE ?
+                            UNION ALL SELECT ref_cashinPaymentQrisMpmId FROM external_stm_qris_mpm_callback WHERE c_issuerRrn LIKE ?
+                            UNION ALL SELECT ref_cashinPaymentQrisMpmId FROM external_yukk_qris_mpm_callback WHERE c_issuerRrn LIKE ?
+                        ";
+                        $q_rrn = $this->db->query($rrn_union_sql, [$qPattern, $qPattern, $qPattern, $qPattern, $qPattern, $qPattern, $qPattern]);
+                        if ($q_rrn) {
+                            $found_rrn_ids = array_filter(array_column($q_rrn->result(), 'ref_cashinPaymentQrisMpmId'));
+                            if (!empty($found_rrn_ids)) {
+                                $clean_ids = array_map('intval', array_unique($found_rrn_ids));
+                                $id_str = implode(',', $clean_ids);
+                                $parts[] = "(SELECT 'qrn', CAST(id AS CHAR), CAST('' AS CHAR), '0' FROM cashin_payment_qris_mpm WHERE id IN ($id_str) LIMIT 5)";
                             }
                         }
-                        
-                        if ($found_rrn_ids) {
-                            $id_str = implode(',', array_unique($found_rrn_ids));
-                            $parts[] = "(SELECT 'qrn', CAST(id AS CHAR), CAST('' AS CHAR), '0' FROM cashin_payment_qris_mpm WHERE id IN ($id_str) LIMIT 5)";
-                        }
                     }
-                    if ($has_access('qris/recurring'))
-                        $parts[] = "(SELECT 'qrc', CAST(id AS CHAR), CAST(c_merchantTransactionId AS CHAR), CAST(c_amount AS CHAR) FROM cashin_recurring_qris_mpm WHERE c_merchantTransactionId $op $val LIMIT 3)";
+                    if ($has_access('qris/recurring')) {
+                        $parts[] = "(SELECT 'qrc', CAST(id AS CHAR), CAST(c_merchantTransactionId AS CHAR), CAST(c_amount AS CHAR) FROM cashin_recurring_qris_mpm WHERE c_merchantTransactionId LIKE ? LIMIT 3)";
+                        $bindings[] = $qPattern;
+                    }
                 }
                 if ($needVa) {
-                    $parts[] = "(SELECT 'vdt', CAST(id AS CHAR), CAST(c_merchantTransactionId AS CHAR), CAST(c_amount AS CHAR) FROM cashin_dynamic_va WHERE c_merchantTransactionId $op $val LIMIT 5)";
-                    $parts[] = "(SELECT 'vdn', CAST(id AS CHAR), CAST(c_vaNumber AS CHAR),              CAST(c_amount AS CHAR) FROM cashin_dynamic_va WHERE c_vaNumber $op $val LIMIT 5)";
+                    $parts[] = "(SELECT 'vdt', CAST(id AS CHAR), CAST(c_merchantTransactionId AS CHAR), CAST(c_amount AS CHAR) FROM cashin_dynamic_va WHERE c_merchantTransactionId LIKE ? LIMIT 5)";
+                    $bindings[] = $qPattern;
+                    $parts[] = "(SELECT 'vdn', CAST(id AS CHAR), CAST(c_vaNumber AS CHAR),              CAST(c_amount AS CHAR) FROM cashin_dynamic_va WHERE c_vaNumber LIKE ? LIMIT 5)";
+                    $bindings[] = $qPattern;
                     if ($has_access('virtual-account/recurring')) {
-                        $parts[] = "(SELECT 'vrt', CAST(id AS CHAR), CAST(c_merchantTransactionId AS CHAR), CAST(c_amount AS CHAR) FROM cashin_recurring_va WHERE c_merchantTransactionId $op $val LIMIT 3)";
-                        $parts[] = "(SELECT 'vrn', CAST(id AS CHAR), CAST(c_vaNumber AS CHAR),              CAST(c_amount AS CHAR) FROM cashin_recurring_va WHERE c_vaNumber $op $val LIMIT 3)";
+                        $parts[] = "(SELECT 'vrt', CAST(id AS CHAR), CAST(c_merchantTransactionId AS CHAR), CAST(c_amount AS CHAR) FROM cashin_recurring_va WHERE c_merchantTransactionId LIKE ? LIMIT 3)";
+                        $bindings[] = $qPattern;
+                        $parts[] = "(SELECT 'vrn', CAST(id AS CHAR), CAST(c_vaNumber AS CHAR),              CAST(c_amount AS CHAR) FROM cashin_recurring_va WHERE c_vaNumber LIKE ? LIMIT 3)";
+                        $bindings[] = $qPattern;
                     }
                 }
                 if ($needEw) {
-                    $parts[] = "(SELECT 'ewt', CAST(id AS CHAR), CAST(c_merchantTransactionId AS CHAR), CAST(c_amount AS CHAR) FROM cashin_dynamic_ewallet WHERE c_merchantTransactionId $op $val LIMIT 5)";
+                    $parts[] = "(SELECT 'ewt', CAST(id AS CHAR), CAST(c_merchantTransactionId AS CHAR), CAST(c_amount AS CHAR) FROM cashin_dynamic_ewallet WHERE c_merchantTransactionId LIKE ? LIMIT 5)";
+                    $bindings[] = $qPattern;
                 }
                 if ($has_access('finance/bi-fast')) {
-                    $parts[] = "(SELECT 'bft', CAST(ref_cashoutId AS CHAR), CAST(c_merchantTransactionId AS CHAR), '0' FROM cashout_payment_bifast WHERE c_merchantTransactionId $op $val LIMIT 5)";
-                    if (is_numeric($query) && $qLen <= 16)
-                        $parts[] = "(SELECT 'bfa', CAST(ref_cashoutId AS CHAR), CAST(c_accountNo AS CHAR), '0' FROM cashout_payment_bifast WHERE c_accountNo $op $val LIMIT 5)";
+                    $parts[] = "(SELECT 'bft', CAST(ref_cashoutId AS CHAR), CAST(c_merchantTransactionId AS CHAR), '0' FROM cashout_payment_bifast WHERE c_merchantTransactionId LIKE ? LIMIT 5)";
+                    $bindings[] = $qPattern;
+                    if (is_numeric($query) && $qLen <= 16) {
+                        $parts[] = "(SELECT 'bfa', CAST(ref_cashoutId AS CHAR), CAST(c_accountNo AS CHAR), '0' FROM cashout_payment_bifast WHERE c_accountNo LIKE ? LIMIT 5)";
+                        $bindings[] = $qPattern;
+                    }
                 }
                 if ($has_access('finance/history')) {
-                    $parts[] = "(SELECT 'ppb', CAST(ref_cashoutId AS CHAR), CAST(ref_cashoutChannelId AS CHAR), '0' FROM cashout_payment_ppob WHERE ref_cashoutChannelId $op $val LIMIT 5)";
-                    $parts[] = "(SELECT 'pph', CAST(ref_cashoutId AS CHAR), CAST(c_phone AS CHAR), '0' FROM cashout_payment_ppob WHERE c_phone $op $val LIMIT 5)";
+                    $parts[] = "(SELECT 'ppb', CAST(ref_cashoutId AS CHAR), CAST(ref_cashoutChannelId AS CHAR), '0' FROM cashout_payment_ppob WHERE ref_cashoutChannelId LIKE ? LIMIT 5)";
+                    $bindings[] = $qPattern;
+                    $parts[] = "(SELECT 'pph', CAST(ref_cashoutId AS CHAR), CAST(c_phone AS CHAR), '0' FROM cashout_payment_ppob WHERE c_phone LIKE ? LIMIT 5)";
+                    $bindings[] = $qPattern;
                 }
 
                 if ($parts) {
                     $seen = [];
-                    $u_res = $this->db->query(implode(" UNION ALL ", $parts));
+                    $u_res = $this->db->query(implode(" UNION ALL ", $parts), $bindings);
                     if ($u_res) {
                         foreach ($u_res->result() as $row) {
                             $rid = (int) $row->r;

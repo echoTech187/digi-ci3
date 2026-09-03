@@ -4,7 +4,13 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<meta name="viewport" content="width=1024">
+	<!-- Force Desktop View Layout (Min 1024px) -->
+	<style>
+		html, body, #wrapper, #content-wrapper {
+			min-width: 1024px !important;
+		}
+	</style>
 	<meta name="description" content="">
 	<meta name="author" content="">
 
@@ -24,7 +30,7 @@
 
 	<!-- Custom fonts for this template-->
 	<link href="<?= base_url('assets/'); ?>vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
-	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
 
 	<!-- Custom styles for this template-->
 	<link href="<?= base_url('assets/'); ?>css/sb-admin-2.min.css" rel="stylesheet">
@@ -34,6 +40,7 @@
 
 	<!-- Custom styles for this page -->
 	<link href="<?= base_url('assets/'); ?>vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
+	
 
 	<!-- Core Scripts -->
 	<script src="<?= base_url('assets/'); ?>vendor/jquery/jquery.min.js"></script>
@@ -46,13 +53,11 @@
 	
 	<!-- Reusable Scripts -->
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
-	<script src="<?= base_url('assets/js/server-datatables.js?v=' . filemtime(FCPATH . 'assets/js/server-datatables.js')); ?>"></script>
+	<script src="<?= base_url('assets/'); ?>js/server-datatables.js"></script>
 	<!-- SweetAlert2 (Global) -->
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 	<link href="<?= base_url('assets/'); ?>css/theme-1.css?v=<?= time(); ?>" rel="stylesheet">
-	<!-- Premium UI/UX Override (Loaded last for highest precedence) -->
-	<link href="<?= base_url('assets/'); ?>css/premium-theme.css?v=<?= time(); ?>" rel="stylesheet">
 </head>
 
 <body id="page-top">

@@ -44,9 +44,13 @@ class Model_user extends CI_Model
             curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
             curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 15);
 
             $response = curl_exec($ch);
-
+            if (curl_errno($ch)) {
+                log_message('error', 'Admin Model_user balanceQuery cURL Error: ' . curl_error($ch));
+            }
             curl_close($ch);
 
             $result = json_decode($response, true);

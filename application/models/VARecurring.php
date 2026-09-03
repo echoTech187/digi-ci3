@@ -282,14 +282,7 @@ class VARecurring extends CI_Model {
         if ($ref_cashinExternalId == 'ifp') {
             $qtxt1_1    = "SELECT c_orderId, c_transactionId, c_datetimeRequest, c_requestHeader, c_requestBody, c_datetimeResponse, c_responseHeader, c_responseBody FROM external_ifp_va_create WHERE id='$ref_cashinExternalLogVaIdCreate'";
             $query1_1   = $this->db->query($qtxt1_1);
-            $result1_1  = ($query1_1 && $query1_1->num_rows()) ? $query1_1->row() : false;
-
-            if (!$result1_1) {
-                $qtxt1_fallback = "SELECT c_orderId, c_transactionId, c_datetimeRequest, c_requestHeader, c_requestBody, c_datetimeResponse, c_responseHeader, c_responseBody FROM external_ifp_va_create ORDER BY id DESC LIMIT 1";
-                $query1_fallback = $this->db->query($qtxt1_fallback);
-                $result1_1 = ($query1_fallback && $query1_fallback->num_rows()) ? $query1_fallback->row() : false;
-            }
-
+            $result1_1  = $query1_1->num_rows() ? $query1_1->row() : false;
             if($result1_1) {
                 $TransactionIdExternal1     = $result1_1->c_orderId;
                 $TransactionIdExternal2     = $result1_1->c_transactionId;
@@ -363,11 +356,11 @@ class VARecurring extends CI_Model {
             'TransactionIdExternal1'    => $TransactionIdExternal1, 
             'TransactionIdExternal2'    => $TransactionIdExternal2, 
             'RequestDatetime'           => $DatetimeRequest, 
-            'RequestHeader'             => json_decode((string)$RequestHeader, true),
-            'RequestBody'               => json_decode((string)$RequestBody, true),
+            'RequestHeader'             => json_decode($RequestHeader, true),
+            'RequestBody'               => json_decode($RequestBody, true),
             'ResponseDatetime'          => $DatetimeResponse,
-            'ResponseHeader'            => json_decode((string)$ResponseHeader, true),
-            'ResponseBody'              => json_decode((string)$ResponseBody, true)
+            'ResponseHeader'            => json_decode($ResponseHeader, true),
+            'ResponseBody'              => json_decode($ResponseBody, true)
         );
     }
     public function get_datatables_handler($filters = [])
@@ -386,8 +379,7 @@ class VARecurring extends CI_Model {
         // Optimized Fetch (Two-Step Lookup)
         $list = $this->get_datatables($search_name, $search_date, $search_sub, $search_va, $search_trxid, $search_status, $search_channel, $search_external_channel);
         
-        $searchPost = $this->input->post('search');
-        $searchValue = (is_array($searchPost) && isset($searchPost['value'])) ? $searchPost['value'] : '';
+        $searchValue = $this->input->post('search')['value'];
         $is_filtered = $search_name || $search_date || $search_sub || $search_va || $search_trxid || $search_status || $search_channel || $search_external_channel || (!empty($searchValue));
         
         $recordsTotal = $this->count_all_dt($search_name, $search_date);

@@ -7,7 +7,36 @@
             <p class="dt-page-subtitle">Historical ledger of all credit and debit activities for <strong><?php echo $merchant[0]->c_name; ?></strong>.</p>
         </div>
         <div class="d-flex" style="gap:10px;">
+            <button type="button" class="btn-dt-action btn-dt-action-primary border-0 d-flex align-items-center shadow-sm" id="toggleGuideBtn" >
+                <i class="fas fa-book-open mr-2"></i> <span class="d-none d-md-block">Instructions Guide</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ── Toggleable Page Instructional Drawer ── -->
+    <div class="drawer-overlay" id="instructionOverlay"></div>
+    <div class="drawer-right" id="instructionDrawer">
+        <div class="drawer-header">
+            <h6 class="drawer-title"><i class="fas fa-book mr-2"></i> Mutation Ledger Guide</h6>
+            <button type="button" class="drawer-close" id="closeDrawerBtn">&times;</button>
+        </div>
+        <div class="drawer-body">
+            <p class="drawer-desc">This ledger displays the historical record of all credit and debit activities for this merchant.</p>
             
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-history text-primary mr-2"></i> Audit Ledger</div>
+                <p class="drawer-card-text">Track timestamps, Credit/Debit positions, routing channels, unique reference numbers, and settlement amounts.</p>
+            </div>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-filter text-primary mr-2"></i> Position Filter</div>
+                <p class="drawer-card-text">Filter by Credit or Debit. Selecting a position will dynamically load the associated channel sources.</p>
+            </div>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-download text-primary mr-2"></i> Export Options</div>
+                <p class="drawer-card-text">Use the Export button to download the filtered mutation list as an Excel/CSV spreadsheet report.</p>
+            </div>
         </div>
     </div>
 
@@ -69,6 +98,7 @@
             <?= $error_message ? '<div class="alert alert-danger mx-4 mt-3 border-0 shadow-sm"><i class="fas fa-exclamation-circle "></i>'.$error_message.'</div>' : '' ?>
         </div>
 
+        
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table dt-table mb-0" style="width:100%">
@@ -158,6 +188,7 @@ $(document).ready(function () {
     $('#search_position').on('change', function () {
             console.log('POSITION CHANGED:', this.value);
 
+
         const position = this.value;
 
         channelSelect
@@ -202,4 +233,5 @@ $(document).ready(function () {
 
 });
 </script>
+
 

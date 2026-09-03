@@ -1,140 +1,44 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
-// Membersihkan buffer agar error ini tidak nyangkut di dalam container flex halaman aslinya
-for ($i = 0; $i < ob_get_level(); $i++) {
-    @ob_clean();
-}
-?><!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <link rel="icon" href="<?php echo config_item('base_url'); ?>/public/icon/favicon.ico" type="image/x-icon">
-    <title>System Exception</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600&family=Montserrat:wght@800;900&display=swap" rel="stylesheet">
-    <style type="text/css">
-        :root {
-            --bg-color: #ffdd00;
-            --text-dark: #00214d;
-            --text-white: #ffffff;
-        }
-        body {
-            background-color: var(--bg-color);
-            margin: 0;
-            padding: 0;
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow-x: hidden;
-        }
-        .error-wrapper {
-            max-width: 1200px;
-            width: 100%;
-            margin: 0 auto;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 40px;
-            box-sizing: border-box;
-            gap: 60px;
-        }
-        .content-section {
-            flex: 1;
-            max-width: 480px;
-        }
-        .image-section {
-            flex: 1.2;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        .image-section img {
-            max-width: 100%;
-            height: auto;
-            mix-blend-mode: multiply;
-        }
-        .error-code {
-            font-family: 'Montserrat', sans-serif;
-            font-size: 130px;
-            font-weight: 900;
-            color: var(--text-dark);
-            margin: 0;
-            line-height: 0.9;
-            letter-spacing: -6px;
-        }
-        .error-title {
-            font-family: 'Montserrat', sans-serif;
-            font-size: 40px;
-            font-weight: 800;
-            color: var(--text-white);
-            margin: 0 0 30px 0;
-            line-height: 1.1;
-            letter-spacing: -1.5px;
-        }
-        .error-message {
-            font-size: 16px;
-            line-height: 1.6;
-            color: var(--text-dark);
-            font-weight: 500;
-            margin-bottom: 40px;
-        }
-        .btn {
-            display: inline-block;
-            background-color: var(--text-dark);
-            color: var(--text-white);
-            padding: 16px 32px;
-            text-decoration: none;
-            font-weight: 700;
-            font-size: 13px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            border-radius: 4px;
-            transition: transform 0.2s, background-color 0.2s;
-        }
-        .btn:hover {
-            background-color: #00122e;
-            transform: translateY(-2px);
-        }
-        @media (max-width: 900px) {
-            .error-wrapper {
-                flex-direction: column-reverse;
-                text-align: center;
-                padding: 20px;
-            }
-            .content-section {
-                max-width: 100%;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-            }
-            .error-code { font-size: 90px; letter-spacing: -4px; }
-            .error-title { font-size: 32px; }
-            .image-section { margin-bottom: 20px; }
-        }
-    </style>
-</head>
-<body>
-    <div class="error-wrapper">
-        <div class="image-section">
-            <img src="<?php echo config_item('base_url'); ?>/public/img/exception_error.png" alt="Exception Error Illustration">
+
+// Only display professional alert in development mode
+if (ENVIRONMENT === 'development'):
+?>
+<div style="background-color: #fef2f2; border: 1px solid #fee2e2; border-radius: 12px; padding: 24px; margin: 24px 0; font-family: 'Inter', system-ui, -apple-system, sans-serif;">
+    <div style="display: flex; align-items: flex-start; gap: 16px;">
+        <div style="background-color: #fee2e2; color: #ef4444; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
         </div>
-        <div class="content-section">
-            <h1 class="error-code">Exception</h1>
-            <h2 class="error-title">System Error</h2>
-            <p class="error-message">
-                A system exception has occurred. Our engineers have been alerted and are investigating the issue to ensure the stability of your integrations.
-            </p>
-            <a href="javascript:window.location.reload();" class="btn">TRY AGAIN</a>
+        <div style="flex-grow: 1;">
+            <h4 style="margin: 0 0 8px; color: #991b1b; font-size: 16px; font-weight: 700;">An uncaught Exception was encountered</h4>
+            <div style="color: #b91c1c; font-size: 14px; line-height: 1.5;">
+                <p style="margin: 0 0 4px;"><strong>Type:</strong> <?php echo get_class($exception); ?></p>
+                <p style="margin: 0 0 4px;"><strong>Message:</strong> <?php echo $message; ?></p>
+                <p style="margin: 0 0 4px;"><strong>Filename:</strong> <?php echo $exception->getFile(); ?></p>
+                <p style="margin: 0 0 12px;"><strong>Line Number:</strong> <?php echo $exception->getLine(); ?></p>
+
+                <?php if (defined('SHOW_DEBUG_BACKTRACE') && SHOW_DEBUG_BACKTRACE === TRUE): ?>
+                    <p style="margin: 16px 0 8px; font-weight: 700; color: #991b1b;">Debug Backtrace:</p>
+                    <div style="background: rgba(255,255,255,0.5); border-radius: 8px; padding: 12px; font-family: monospace; font-size: 12px; color: #4b5563;">
+                        <?php foreach ($exception->getTrace() as $error): ?>
+                            <?php if (isset($error['file']) && strpos($error['file'], realpath(BASEPATH)) !== 0): ?>
+                                <div style="margin-bottom: 8px; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 4px;">
+                                    File: <?php echo $error['file']; ?><br />
+                                    Line: <?php echo $error['line']; ?><br />
+                                    Function: <?php echo $error['function']; ?>
+                                </div>
+                            <?php endif ?>
+                        <?php endforeach ?>
+                    </div>
+                <?php endif ?>
+            </div>
         </div>
     </div>
-    
-    <?php
-    // Jangan pernah membuang log error exception, kita log diam-diam
-    log_message('error', "Exception: " . $exception->getMessage() . " in " . $exception->getFile() . " on line " . $exception->getLine());
-    ?>
-</body>
-</html>
+</div>
+<?php 
+else:
+	// In non-development mode, log the exception and show the general error page
+	log_message('error', "Exception: $message in ".$exception->getFile());
+	// CI will usually trigger error_general or similar for terminal exceptions
+endif; 
+?>
