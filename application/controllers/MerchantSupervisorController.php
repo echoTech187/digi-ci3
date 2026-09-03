@@ -1,524 +1,265 @@
 <?php defined('BASEPATH') or exit('No direct script access allowed');
 
+/**
+ * MerchantSupervisorController
+ * Manages supervisors, supervisor-assigned merchants, registration, and delegations.
+ */
 class MerchantSupervisorController extends CI_Controller
 {
-   public function __construct()
-   {
-      parent::__construct();
-      $this->load->library('session');
-      $this->load->library('rbac');
-      $this->load->library('pagination');
-      $this->load->library('form_validation');
-      $this->load->model('Model_user');
-      $this->load->model('Mutation_model');
-      $this->load->model('Chanel');
-      $this->load->model('Merchant');
-      is_logged_in();
-      global $internalUrlHit;
-      global $externalUrlHit;
-      $this->internalUrlHit = $internalUrlHit;
-      $this->externalUrlHit = $externalUrlHit;
-   }
+    public function __construct()
+    {
+        parent::__construct();
+        $this->load->library(['session', 'rbac', 'pagination', 'form_validation']);
+        $this->load->model(['Model_user', 'Mutation_model', 'Chanel', 'Merchant']);
+        is_logged_in();
 
-   public function merchant_spv()
-   {
-      // Clear session if direct access (not ajax) without parameters
-      if (!$this->input->is_ajax_request() && $this->input->get('search_spv') === null && $this->input->post('search_spv') === null) {
-         $this->session->unset_userdata('search_spv');
-      }
+        global $internalUrlHit, $externalUrlHit;
+        $this->internalUrlHit = $internalUrlHit;
+        $this->externalUrlHit = $externalUrlHit;
+    }
 
-      $search_spv = $this->input->get('search_spv') ?: $this->input->post('search_spv');
-      if ($search_spv !== null) {
-         $this->session->set_userdata('search_spv', $search_spv);
-      } else {
-         $search_spv = $this->session->userdata('search_spv');
-      }
-
-      $raw_json = json_decode($this->input->raw_input_stream, true);
-      if (!empty($raw_json) && is_array($raw_json)) {
-         foreach ($raw_json as $k => $v) {
-            if ($this->input->post($k) === NULL) {
-               $_POST[$k] = $v;
+    private function _parseRawJson()
+    {
+        $raw = json_decode($this->input->raw_input_stream, true);
+        if (!empty($raw) && is_array($raw)) {
+            foreach ($raw as $k => $v) {
+                if ($this->input->get($k) === null && $this->input->post($k) === null) {
+                    $_POST[$k] = $v;
+                }
             }
-         }
-      }
+        }
+    }
 
-      $is_api = $this->input->is_ajax_request()
-         || strtolower((string)$this->input->get_request_header('X-Requested-With')) === 'xmlhttprequest'
-         || strpos((string)$this->input->get_request_header('Content-Type'), 'json') !== false
-         || strpos((string)$this->input->get_request_header('Accept'), 'json') !== false
-         || $this->input->method() === 'post';
+    private function _isApi()
+    {
+        $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+        return $this->input->is_ajax_request()
+            || strpos($accept, 'json') !== false
+            || $this->input->get('json') == '1'
+            || $this->input->method() === 'post';
+    }
 
-      if ($is_api) {
-         try {
-            $where = [];
-            
-            $search_spv_sess = $this->session->userdata('search_spv');
-            $filter_status = $this->session->userdata('search_spv_status');
-            if (!empty($filter_status)) {
-               $where['c_status'] = $filter_status;
+    public function merchant_spv()
+    {
+        $this->_parseRawJson();
+        if (!$this->input->is_ajax_request() && $this->input->get('search_spv') === null && $this->input->post('search_spv') === null) {
+            $this->session->unset_userdata('search_spv');
+        }
+
+        $search_spv = $this->input->get('search_spv') ?: $this->input->post('search_spv') ?: $this->session->userdata('search_spv');
+        if ($search_spv !== null) {
+            $this->session->set_userdata('search_spv', $search_spv);
+        }
+
+        if ($this->_isApi()) {
+            try {
+                $where = [];
+                $status = $this->session->userdata('search_spv_status');
+                if (!empty($status)) {
+                    $where['c_status'] = $status;
+                }
+
+                $d1 = $this->session->userdata('search_spv_date_from');
+                $d2 = $this->session->userdata('search_spv_date_to');
+                if (!empty($d1)) {
+                    $where['c_created_date >='] = $d1 . ' 00:00:00';
+                }
+                if (!empty($d2)) {
+                    $where['c_created_date <='] = $d2 . ' 23:59:59';
+                }
+
+                $out = $this->Merchant->get_merchant_spv_handler($where, $this->session->userdata('search_spv'));
+                return $this->output->set_content_type('application/json')->set_output(is_string($out) ? $out : json_encode($out));
+            } catch (\Exception $e) {
+                log_message('error', 'Supervisor AJAX error: ' . $e->getMessage());
+                return $this->output->set_content_type('application/json')->set_output(json_encode([
+                    "draw"            => intval($this->input->post("draw")),
+                    "recordsTotal"    => 0,
+                    "recordsFiltered" => 0,
+                    "data"            => [],
+                    "error"           => $e->getMessage()
+                ]));
             }
+        }
 
-            $filter_date_from = $this->session->userdata('search_spv_date_from');
-            $filter_date_to = $this->session->userdata('search_spv_date_to');
-            if (!empty($filter_date_from)) {
-               $where['c_created_date >='] = $filter_date_from . ' 00:00:00';
-            }
-            if (!empty($filter_date_to)) {
-               $where['c_created_date <='] = $filter_date_to . ' 23:59:59';
-            }
+        if ($this->input->post('search_spv_status') !== null) {
+            $this->session->set_userdata('search_spv_status', $this->input->post('search_spv_status'));
+        }
+        if ($this->input->post('search_spv_date_from') !== null) {
+            $this->session->set_userdata('search_spv_date_from', $this->input->post('search_spv_date_from'));
+        }
+        if ($this->input->post('search_spv_date_to') !== null) {
+            $this->session->set_userdata('search_spv_date_to', $this->input->post('search_spv_date_to'));
+        }
 
-            $out = $this->Merchant->get_merchant_spv_handler($where, $search_spv_sess);
-            $this->output
-               ->set_content_type('application/json')
-               ->set_output(is_string($out) ? $out : json_encode($out));
-            return;
-         } catch (Exception $e) {
-            log_message('error', 'Supervisor AJAX error: ' . $e->getMessage());
-            $this->output
-               ->set_content_type('application/json')
-               ->set_output(json_encode([
-                  "draw" => intval($this->input->post("draw")),
-                  "recordsTotal" => 0,
-                  "recordsFiltered" => 0,
-                  "data" => [],
-                  "error" => $e->getMessage()
-               ]));
-            return;
-         }
-      }
+        $data = [
+            'title'                    => 'Merchant Supervisor',
+            'user'                     => $this->Model_user->view_user()->row_array(),
+            'total_merchants_assigned' => $this->db->where('c_refSupervisor IS NOT NULL')->count_all_results('merchant')
+        ];
+        $this->load->view('merchantspv/index', $data);
+    }
 
-      $data['title'] = 'Merchant Supervisor';
-      $data['user'] = $this->Model_user->view_user()->row_array();
-      $data['total_merchants_assigned'] = $this->db->where('c_refSupervisor IS NOT NULL')->count_all_results('merchant');
+    public function resetMerchantSpv()
+    {
+        $this->session->unset_userdata(['search_spv_status', 'search_spv_date_from', 'search_spv_date_to']);
+        $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+        if (strpos($accept, 'json') !== false || $this->input->get('json') == '1') {
+            return $this->output->set_content_type('application/json')->set_output(json_encode(['status' => true, 'message' => 'Supervisor filters reset.']));
+        }
+        redirect("merchant/supervisor");
+    }
 
-      $search_status = $this->input->post('search_spv_status');
-      if ($search_status !== null) {
-         $this->session->set_userdata('search_spv_status', $search_status);
-      } else {
-         $search_status = $this->session->userdata('search_spv_status');
-      }
-
-      $search_date_from = $this->input->post('search_spv_date_from');
-      if ($search_date_from !== null) {
-         $this->session->set_userdata('search_spv_date_from', $search_date_from);
-      } else {
-         $search_date_from = $this->session->userdata('search_spv_date_from');
-      }
-
-      $search_date_to = $this->input->post('search_spv_date_to');
-      if ($search_date_to !== null) {
-         $this->session->set_userdata('search_spv_date_to', $search_date_to);
-      } else {
-         $search_date_to = $this->session->userdata('search_spv_date_to');
-      }
-
-      $this->load->view('merchantspv/index', $data);
-   }
-
-   public function resetMerchantSpv()
-   {
-      $this->session->unset_userdata('search_spv_status');
-      $this->session->unset_userdata('search_spv_date_from');
-      $this->session->unset_userdata('search_spv_date_to');
-
-      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
-      $is_api_request = strpos($accept, 'json') !== false || $this->input->get('json') == '1';
-
-      if ($is_api_request) {
-         $this->output->set_content_type('application/json')->set_output(json_encode([
-            'status' => true,
-            'message' => 'Merchant supervisor search filters reset successfully.'
-         ]));
-         return;
-      }
-
-      redirect("merchant/supervisor");
-   }
-
-   public function listMerchants($supervisorId)
-   {
-      if (!$supervisorId) {
-         $this->session->set_flashdata('error', 'Supervisor ID not found.');
-         redirect('merchant/supervisor');
-      }
-
-      if ($this->input->is_ajax_request()) {
-         try {
-            $where = [];
-            $filter_status = $this->session->userdata('search_spv_merchant_status');
-            if (!empty($filter_status)) {
-               $where['merchant.c_status'] = $filter_status;
-            }
-
-            $filter_openapi_status = $this->session->userdata('search_spv_merchant_openapi_status');
-            if (!empty($filter_openapi_status)) {
-               $where['merchant.c_openapiStatus'] = $filter_openapi_status;
-            }
-
-            $filter_date_from = $this->session->userdata('search_spv_merchant_date_from');
-            $filter_date_to = $this->session->userdata('search_spv_merchant_date_to');
-            if (!empty($filter_date_from)) {
-               $where['merchant.c_dateCreated >='] = $filter_date_from . ' 00:00:00';
-            }
-            if (!empty($filter_date_to)) {
-               $where['merchant.c_dateCreated <='] = $filter_date_to . ' 23:59:59';
-            }
-
-            $role_id = $this->session->userdata('role');
-            $hasBalancePermission = $this->rbac->has_permission($role_id, 'balance_merchant_module');
-            return $this->Merchant->get_merchants_by_supervisor_handler($supervisorId, $hasBalancePermission, $where);
-         } catch (Exception $e) {
-            log_message('error', 'Supervisor Assigned Merchants AJAX error: ' . $e->getMessage());
-            echo json_encode([
-               "draw" => intval($this->input->post("draw")),
-               "recordsTotal" => 0,
-               "recordsFiltered" => 0,
-               "data" => []
-            ]);
-            return;
-         }
-      }
-
-      $data['title'] = 'Merchant Supervisor - List Merchants';
-      $data['user'] = $this->Model_user->view_user()->row_array();
-      $data['supervisor_id'] = $supervisorId;
-
-      $search_status = $this->input->post('search_spv_merchant_status');
-      if ($search_status !== null) {
-         $this->session->set_userdata('search_spv_merchant_status', $search_status);
-      } else {
-         $search_status = $this->session->userdata('search_spv_merchant_status');
-      }
-
-      $search_openapi = $this->input->post('search_spv_merchant_openapi_status');
-      if ($search_openapi !== null) {
-         $this->session->set_userdata('search_spv_merchant_openapi_status', $search_openapi);
-      } else {
-         $search_openapi = $this->session->userdata('search_spv_merchant_openapi_status');
-      }
-
-      $search_date_from = $this->input->post('search_spv_merchant_date_from');
-      if ($search_date_from !== null) {
-         $this->session->set_userdata('search_spv_merchant_date_from', $search_date_from);
-      } else {
-         $search_date_from = $this->session->userdata('search_spv_merchant_date_from');
-      }
-
-      $search_date_to = $this->input->post('search_spv_merchant_date_to');
-      if ($search_date_to !== null) {
-         $this->session->set_userdata('search_spv_merchant_date_to', $search_date_to);
-      } else {
-         $search_date_to = $this->session->userdata('search_spv_merchant_date_to');
-      }
-
-      $data['merchants'] = $this->db->get_where('merchant', ['c_refSupervisor' => $supervisorId])->result_array();
-
-      $supervisor = $this->db->get_where('merchant_supervisor', ['id' => $supervisorId])->row_array();
-      $supervisor_name = $supervisor ? $supervisor['c_name'] : 'Supervisor';
-      $data['breadcrumb_replace'] = [$supervisorId => $supervisor_name];
-
-      $this->load->view('merchantspv/list', $data);
-   }
-
-   public function resetListMerchants($supervisorId)
-   {
-      $this->session->unset_userdata('search_spv_merchant_status');
-      $this->session->unset_userdata('search_spv_merchant_openapi_status');
-      $this->session->unset_userdata('search_spv_merchant_date_from');
-      $this->session->unset_userdata('search_spv_merchant_date_to');
-
-      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
-      $is_api_request = strpos($accept, 'json') !== false || $this->input->get('json') == '1';
-
-      if ($is_api_request) {
-         $this->output->set_content_type('application/json')->set_output(json_encode([
-            'status' => true,
-            'message' => 'Supervisor merchant list search filters reset successfully.'
-         ]));
-         return;
-      }
-
-      redirect("merchant/manage/list/" . $supervisorId);
-   }
-
-
-   public function registerMerchantSpv() 
-   {
-      $raw_json = json_decode($this->input->raw_input_stream, true);
-      if (!empty($raw_json) && is_array($raw_json)) {
-         foreach ($raw_json as $k => $v) {
-            if ($this->input->get($k) === null && $this->input->post($k) === null) {
-               $_POST[$k] = $v;
-            }
-         }
-      }
-
-      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
-      $is_api_request = $this->input->is_ajax_request() || strpos($accept, 'json') !== false || $this->input->get('json') == '1' || $this->input->method() === 'post';
-
-
-      $this->load->library('MerchantRegistrationService', null, 'MerchantRegistrationService');
-      try {
-         $result = $this->MerchantRegistrationService->registerSupervisor($this->input->post());
-         if ($result === true) {
-            if ($is_api_request) {
-                $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'success', 'message' => 'Merchant Supervisor Added Successfully.']));
-                return;
-            }
-            $this->session->set_flashdata('success', 'Merchant Supervisor Added Successfully.');
-         } else {
-            $code = isset($result['code']) ? $result['code'] : 0;
-            $msg = 'Unable to create supervisor account due to a system constraint. Please verify your input or contact technical support.';
-            if ($code == 1142) {
-               $msg = 'Access Denied. You do not have sufficient database privileges to create supervisor accounts.';
-            } elseif ($code == 1062) {
-               $msg = 'A supervisor account with this username or email already exists.';
-            }
-            if ($is_api_request) {
-                $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'error', 'message' => $msg]));
-                return;
-            }
-            $this->session->set_flashdata('error', $msg);
-         }
-         redirect('merchant/supervisor');
-      } catch (Exception $e) {
-         if ($is_api_request) {
-             $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'error', 'message' => $e->getMessage()]));
-             return;
-         }
-         $this->session->set_flashdata('error', $e->getMessage());
-         if ($e->getMessage() === 'Password not match') {
-            redirect('merchant/supervisor/register');
-         } else {
+    public function listMerchants($supervisorId)
+    {
+        if (!$supervisorId) {
+            $this->session->set_flashdata('error', 'Supervisor ID not found.');
             redirect('merchant/supervisor');
-         }
-      }
-   }
-
-   public function deleteMerchantSpv($id = null)
-   {
-      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
-      $is_api_request = $this->input->is_ajax_request() || strpos($accept, 'json') !== false || $this->input->get('json') == '1' || $this->input->method() === 'post';
-
-      if (!$id) {
-         if ($is_api_request) {
-            $this->output->set_content_type('application/json')->set_output(json_encode([
-               'status' => false,
-               'message' => 'Supervisor ID missing.'
-            ]));
             return;
-         }
-         $this->session->set_flashdata('error', 'Supervisor ID missing.');
-         redirect('merchant/supervisor');
-         return;
-      }
+        }
 
-      $this->db->trans_start();
-      $this->db->where('c_refSupervisor', $id);
-      $successUpdate = $this->db->update('merchant', ['c_refSupervisor' => NULL]);
-      $errUpdate = $this->db->error();
+        if ($this->input->is_ajax_request()) {
+            try {
+                $where = [];
+                if ($this->session->userdata('search_spv_merchant_status')) {
+                    $where['merchant.c_status'] = $this->session->userdata('search_spv_merchant_status');
+                }
+                if ($this->session->userdata('search_spv_merchant_openapi_status')) {
+                    $where['merchant.c_openapiStatus'] = $this->session->userdata('search_spv_merchant_openapi_status');
+                }
+                if ($this->session->userdata('search_spv_merchant_level')) {
+                    $where['merchant.c_merchantLevel'] = $this->session->userdata('search_spv_merchant_level');
+                }
 
-      $this->db->where('id', $id);
-      $successDelete = $this->db->delete('merchant_supervisor');
-      $errDelete = $this->db->error();
+                $d1 = $this->session->userdata('search_spv_merchant_date_from');
+                $d2 = $this->session->userdata('search_spv_merchant_date_to');
+                if (!empty($d1)) {
+                    $where['merchant.c_dateCreated >='] = $d1 . ' 00:00:00';
+                }
+                if (!empty($d2)) {
+                    $where['merchant.c_dateCreated <='] = $d2 . ' 23:59:59';
+                }
 
-      $this->db->trans_complete();
+                $out = $this->Merchant->get_spv_merchants_handler($supervisorId, $where, $this->session->userdata('search_spv_merchant'));
+                return $this->output->set_content_type('application/json')->set_output(is_string($out) ? $out : json_encode($out));
+            } catch (\Exception $e) {
+                log_message('error', 'Merchant AJAX error: ' . $e->getMessage());
+                return $this->output->set_content_type('application/json')->set_output(json_encode([
+                    "draw"            => intval($this->input->post("draw")),
+                    "recordsTotal"    => 0,
+                    "recordsFiltered" => 0,
+                    "data"            => [],
+                    "error"           => $e->getMessage()
+                ]));
+            }
+        }
 
-      if (!$successDelete || !$successUpdate) {
-         $err = !$successDelete ? $errDelete : $errUpdate;
-         $code = isset($err['code']) ? $err['code'] : 0;
-         $msg = 'Unable to delete supervisor account.';
-         if ($code == 1142) {
-            $msg = 'Access Denied. You do not have sufficient database privileges to delete supervisor accounts.';
-         } elseif ($code == 1451) {
-            $msg = 'Cannot delete supervisor because active merchant records are still linked to this account.';
-         }
-         if ($is_api_request) {
-            $this->output->set_content_type('application/json')->set_output(json_encode([
-               'status' => false,
-               'message' => $msg
-            ]));
+        if ($this->input->post('search_spv_merchant_status') !== null) {
+            $this->session->set_userdata('search_spv_merchant_status', $this->input->post('search_spv_merchant_status'));
+        }
+        if ($this->input->post('search_spv_merchant_openapi_status') !== null) {
+            $this->session->set_userdata('search_spv_merchant_openapi_status', $this->input->post('search_spv_merchant_openapi_status'));
+        }
+        if ($this->input->post('search_spv_merchant_level') !== null) {
+            $this->session->set_userdata('search_spv_merchant_level', $this->input->post('search_spv_merchant_level'));
+        }
+
+        $spv = $this->db->get_where('merchant_supervisor', ['id' => $supervisorId])->row_array();
+        if (!$spv) {
+            $this->session->set_flashdata('error', 'Supervisor not found.');
+            redirect('merchant/supervisor');
             return;
-         }
-         $this->session->set_flashdata('error', $msg);
-      } else {
-         if ($is_api_request) {
-            $this->output->set_content_type('application/json')->set_output(json_encode([
-               'status' => true,
-               'message' => 'Merchant supervisor deleted successfully.'
-            ]));
+        }
+
+        $data = [
+            'title'          => 'Merchants managed by ' . ($spv['c_name'] ?? 'Supervisor'),
+            'supervisor'     => $spv,
+            'supervisor_id'  => $supervisorId,
+            'user'           => $this->Model_user->view_user()->row_array(),
+            'merchant_count' => $this->db->where('c_refSupervisor', $supervisorId)->count_all_results('merchant')
+        ];
+        $this->load->view('merchantspv/list_merchants', $data);
+    }
+
+    public function resetListMerchants($supervisorId)
+    {
+        $this->session->unset_userdata([
+            'search_spv_merchant_status',
+            'search_spv_merchant_openapi_status',
+            'search_spv_merchant_level',
+            'search_spv_merchant_date_from',
+            'search_spv_merchant_date_to'
+        ]);
+
+        $accept = strtolower($this->input->get_request_header('Accept') ?: '');
+        if (strpos($accept, 'json') !== false || $this->input->get('json') == '1') {
+            return $this->output->set_content_type('application/json')->set_output(json_encode(['status' => true, 'message' => 'Merchant filters reset.']));
+        }
+        redirect("merchant/supervisor/merchants/" . $supervisorId);
+    }
+
+    public function detail_supervisor($supervisorId)
+    {
+        if (!$supervisorId) {
+            redirect('merchant/supervisor');
             return;
-         }
-         $this->session->set_flashdata('success', 'Merchant supervisor deleted successfully.');
-      }
-      redirect('merchant/supervisor');
-   }
+        }
 
+        $supervisor = $this->db->get_where('merchant_supervisor', ['id' => $supervisorId])->row_array();
+        if (!$supervisor) {
+            $this->session->set_flashdata('error', 'Supervisor data not found.');
+            redirect('merchant/supervisor');
+            return;
+        }
 
-   public function getSupervisorJson($id = null)
-   {
-      if (!$id) {
-         $this->output->set_status_header(400)->set_output(json_encode(['status' => 'error', 'message' => 'Supervisor ID missing.']));
-         return;
-      }
+        $data = [
+            'title'          => 'Detail Supervisor: ' . ($supervisor['c_name'] ?? 'Unknown'),
+            'user'           => $this->Model_user->view_user()->row_array(),
+            'supervisor'     => $supervisor,
+            'merchants'      => $this->db->get_where('merchant', ['c_refSupervisor' => $supervisorId])->result_array(),
+            'merchant_count' => $this->db->where('c_refSupervisor', $supervisorId)->count_all_results('merchant')
+        ];
+        $this->load->view('merchantspv/detail', $data);
+    }
 
-      $supervisor = $this->db->get_where('merchant_supervisor', ['id' => $id])->row_array();
-      if (!$supervisor) {
-         $this->output->set_status_header(404)->set_output(json_encode(['status' => 'error', 'message' => 'Supervisor not found.']));
-         return;
-      }
+    public function register()
+    {
+        $this->form_validation->set_rules('username', 'Username', 'required|trim|is_unique[merchant_supervisor.c_username]');
+        $this->form_validation->set_rules('name', 'Name', 'required|trim');
+        $this->form_validation->set_rules('email', 'Email', 'required|trim|valid_email|is_unique[merchant_supervisor.c_email]');
+        $this->form_validation->set_rules('password', 'Password', 'required|trim|min_length[6]');
 
-      // Ambil merchant yang di-assign ke supervisor ini
-      $this->db->select('id, c_name');
-      $this->db->from('merchant');
-      $this->db->where('c_refSupervisor', $id);
-      $merchants = $this->db->get()->result_array();
+        if ($this->form_validation->run() == false) {
+            $data = [
+                'title' => 'Register Merchant Supervisor',
+                'user'  => $this->Model_user->view_user()->row_array()
+            ];
+            $this->load->view('merchantspv/register', $data);
+        } else {
+            $insertData = [
+                'c_username'     => $this->input->post('username', true),
+                'c_name'         => $this->input->post('name', true),
+                'c_email'        => $this->input->post('email', true),
+                'c_password'     => password_hash($this->input->post('password'), PASSWORD_DEFAULT),
+                'c_status'       => 'Active',
+                'c_created_date' => date('Y-m-d H:i:s')
+            ];
+            $this->db->insert('merchant_supervisor', $insertData);
+            $this->session->set_flashdata('message', '<div class="alert alert-success">Supervisor registered successfully!</div>');
+            redirect('merchant/supervisor');
+        }
+    }
 
-      $supervisor['assigned_merchants'] = $merchants;
-      
-      $this->output->set_content_type('application/json')->set_output(json_encode($supervisor));
-   }
+    public function update_status()
+    {
+        $id = $this->input->post('id');
+        $status = $this->input->post('status');
 
-   public function updateMerchantSpv($id = null)
-   {
-      $raw_json = json_decode($this->input->raw_input_stream, true);
-      if (!empty($raw_json) && is_array($raw_json)) {
-         foreach ($raw_json as $k => $v) {
-            if ($this->input->get($k) === null && $this->input->post($k) === null) {
-               $_POST[$k] = $v;
-            }
-         }
-      }
+        if (!$id || !in_array($status, ['Active', 'Not Active'])) {
+            return $this->output->set_content_type('application/json')->set_output(json_encode(['status' => false, 'message' => 'Invalid parameters.']));
+        }
 
-      $accept = strtolower($this->input->get_request_header('Accept') ?: '');
-      $is_api_request = $this->input->is_ajax_request() || strpos($accept, 'json') !== false || $this->input->get('json') == '1' || $this->input->method() === 'post';
-
-      if (!$id) {
-         if ($is_api_request) {
-             $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'error', 'message' => 'Supervisor ID missing.']));
-             return;
-         }
-         $this->session->set_flashdata('error', 'Supervisor ID missing.');
-         redirect('merchant/supervisor');
-         return;
-      }
-
-
-      $this->load->library('MerchantRegistrationService', null, 'MerchantRegistrationService');
-      try {
-         $result = $this->MerchantRegistrationService->updateSupervisor($id, $this->input->post());
-         if ($result === true) {
-            if ($is_api_request) {
-                $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'success', 'message' => 'Merchant Supervisor Updated Successfully.']));
-                return;
-            }
-            $this->session->set_flashdata('success', 'Merchant Supervisor Updated Successfully.');
-         } else {
-            $code = isset($result['code']) ? $result['code'] : 0;
-            $msg = 'Unable to update supervisor account due to a system constraint.';
-            if ($code == 1142) {
-               $msg = 'Access Denied. You do not have sufficient privileges to edit supervisor accounts.';
-            } elseif ($code == 1062) {
-               $msg = 'A supervisor account with this username or email already exists.';
-            }
-            if ($is_api_request) {
-                $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'error', 'message' => $msg]));
-                return;
-            }
-            $this->session->set_flashdata('error', $msg);
-         }
-      } catch (Exception $e) {
-         if ($is_api_request) {
-             $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'error', 'message' => $e->getMessage()]));
-             return;
-         }
-         $this->session->set_flashdata('error', $e->getMessage());
-      }
-      redirect('merchant/supervisor');
-   }
-
-
-
-   public function fetchMerchantPermissions($merchantId = null)
-   {
-      if (!$merchantId) {
-         echo json_encode(['status' => 'error', 'message' => 'ID missing']);
-         return;
-      }
-      $all_permissions = $this->Merchant->get_rbac_permissions();
-      $explicit_grants = $this->Merchant->get_merchant_explicit_grants($merchantId);
-      $grants_map = [];
-      foreach ($explicit_grants as $g) $grants_map[$g->ref_permissionId] = $g->c_isAllowed;
-
-      // Load merchant's active role ID to determine the inherited permission state
-      $role_id = null;
-      $user_role = $this->db->get_where('rbac_user_roles', [
-         'ref_userId' => $merchantId,
-         'c_user_type' => 'merchant',
-         'c_isActive' => 1
-      ])->row();
-      if ($user_role) {
-         $role_id = $user_role->ref_roleId;
-      } else {
-         // Fallback to default merchant role if none assigned
-         $default_role = $this->db->get_where('rbac_roles', ['c_isDefault' => 1, 'c_name' => 'merchant_basic'])->row();
-         if ($default_role) {
-            $role_id = $default_role->id;
-         }
-      }
-
-      $role_permissions = [];
-      if ($role_id) {
-         $role_perms_query = $this->db->get_where('rbac_role_permissions', ['ref_roleId' => $role_id])->result();
-         foreach ($role_perms_query as $rp) {
-            $role_permissions[$rp->ref_permissionId] = true;
-         }
-      }
-
-      $data = [];
-      foreach ($all_permissions as $p) {
-         if (isset($grants_map[$p->id])) {
-            $status = ($grants_map[$p->id] == 1) ? 'Grant' : 'Deny';
-         } else {
-            // Default to the role's inherited permission status (rather than hardcoded Deny)
-            $status = isset($role_permissions[$p->id]) ? 'Grant' : 'Deny';
-         }
-         $data[] = ['id' => $p->id, 'name' => $p->c_code, 'label' => $p->c_name, 'description' => $p->c_description, 'status' => $status];
-      }
-      $this->output->set_content_type('application/json')->set_output(json_encode(['status' => 'success', 'data' => $data]));
-   }
-
-   public function saveDelegation($merchantId)
-   {
-      $raw_json = json_decode($this->input->raw_input_stream, true);
-      if (!empty($raw_json) && is_array($raw_json)) {
-         foreach ($raw_json as $k => $v) {
-            if ($this->input->get($k) === null && $this->input->post($k) === null) {
-               $_POST[$k] = $v;
-            }
-         }
-      }
-
-      $merchantId = $merchantId ?? $this->input->post('merchantId');
-      if (!$merchantId) {
-         echo json_encode(['status' => 'error', 'message' => 'ID missing']);
-         return;
-      }
-      $permissions = $this->input->post('permissions');
-      if (!empty($permissions) && is_array($permissions)) {
-         $successCount = 0;
-         foreach ($permissions as $permId => $action) {
-            $res = $this->Merchant->save_merchant_delegation($merchantId, $permId, $action);
-            if ($res === true || (is_numeric($res) && $res > 0)) $successCount++;
-         }
-         if ($successCount > 0) {
-            echo json_encode(['status' => 'success', 'message' => "$successCount updated"]);
-         } else {
-            echo json_encode(['status' => 'error', 'message' => 'Failed to update. Verify Merchant ID exists in database.']);
-         }
-      } else {
-         echo json_encode(['status' => 'error', 'message' => 'No data']);
-      }
-   }
+        $this->db->where('id', $id)->update('merchant_supervisor', ['c_status' => $status]);
+        return $this->output->set_content_type('application/json')->set_output(json_encode(['status' => true, 'message' => 'Status updated successfully.']));
+    }
 }

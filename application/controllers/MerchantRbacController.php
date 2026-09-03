@@ -217,6 +217,21 @@ class MerchantRbacController extends CI_Controller
             return;
         }
 
+        // Generate clean c_key if missing & enable UPSERT if c_key already exists
+        $key = $this->input->post('c_key') ?: ($this->input->post('key') ?: strtolower(preg_replace('/[^a-zA-Z0-9_]/', '_', trim($label))));
+        $key = trim(preg_replace('/_+/', '_', $key), '_');
+        if (empty($key)) {
+            $key = 'menu_' . time();
+        }
+
+        // UPSERT logic: If no $id is provided but a menu with this c_key exists, target that menu ID for update
+        if (!$id) {
+            $checkKey = $this->db->get_where('rbac_sidebar_menus', ['c_key' => $key])->row_array();
+            if ($checkKey) {
+                $id = $checkKey['id'];
+            }
+        }
+
         $newPermCode = $this->input->post('new_permission_code');
         $refPermissionId = $this->input->post('ref_permissionId') ?: NULL;
 
@@ -265,6 +280,7 @@ class MerchantRbacController extends CI_Controller
         }
 
         $data = [
+            'c_key'   => $key,
             'c_label' => $label,
             'c_url'   => $url ?: '',
             'c_icon'  => $icon,

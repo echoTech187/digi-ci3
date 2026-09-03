@@ -44,7 +44,7 @@
     </div>
 
     <!-- Navigation Menu -->
-    <div class="sb-nav-wrapper pb-2">
+    <div class="sb-nav-wrapper pb-3">
         <ul class="sb-nav" id="sb-accordion">
 
             <?php 

@@ -12,13 +12,10 @@
             <!-- Alerts Standardized to Swal2 Premium -->
             <script>
                 $(document).ready(function() {
-                    <?php 
-                    $successMsg = $this->session->flashdata('success') ?: $this->session->flashdata('message');
-                    if ($successMsg) : 
-                    ?>
+                    <?php if ($this->session->flashdata('success')) : ?>
                         Swal.fire({
                             title: 'Success!',
-                            text: '<?= strip_tags($successMsg); ?>',
+                            text: '<?= $this->session->flashdata('success'); ?>',
                             icon: 'success',
                             customClass: {
                                 popup: 'swal2-premium-popup',
@@ -31,7 +28,7 @@
                     <?php if ($this->session->flashdata('error')) : ?>
                         Swal.fire({
                             title: 'Error!',
-                            html: '<?= trim(str_replace(["\r", "\n"], '', $this->session->flashdata('error'))); ?>',
+                            text: '<?= $this->session->flashdata('error'); ?>',
                             icon: 'error',
                             customClass: {
                                 popup: 'swal2-premium-popup',
@@ -45,7 +42,7 @@
 
             <div class="card border-0 shadow-sm dt-card">
                 <div class="card-body p-4">
-                    <form action="<?= base_url('auth/change-password'); ?>" method="post">
+                    <form action="<?= base_url('user/change-password'); ?>" method="post">
                         <div class="form-group mb-4">
                             <label class="dt-more-label mb-2" for="currentPassword">Current Password</label>
                             <input type="password" name="currentPassword" id="currentPassword" class="form-control dt-card border-0 shadow-none px-3" style="background: var(--dt-bg-subtle); height: 45px;" placeholder="Enter current password">

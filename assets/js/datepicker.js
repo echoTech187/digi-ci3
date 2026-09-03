@@ -3,6 +3,72 @@
  * Utilizes Moment.js for date manipulation
  */
 
+// ── 1. Date Preset Helper ──
+const DatePresetHelper = {
+    getRange(preset) {
+        const today = moment().startOf('day');
+        switch (preset) {
+            case 'today':
+                return { start: today.clone(), end: today.clone() };
+            case 'yesterday':
+                return { start: today.clone().subtract(1, 'day'), end: today.clone().subtract(1, 'day') };
+            case 'last7':
+                return { start: today.clone().subtract(6, 'days'), end: today.clone() };
+            case 'last30':
+                return { start: today.clone().subtract(29, 'days'), end: today.clone() };
+            case 'thisMonth':
+                return { start: today.clone().startOf('month'), end: today.clone() };
+            case 'lastMonth':
+                return {
+                    start: today.clone().subtract(1, 'month').startOf('month'),
+                    end: today.clone().subtract(1, 'month').endOf('month')
+                };
+            default:
+                return null;
+        }
+    },
+
+    matchActivePreset(startDate, endDate) {
+        if (!startDate || !endDate) return 'custom';
+        const s = startDate.format('YYYY-MM-DD');
+        const e = endDate.format('YYYY-MM-DD');
+        const today = moment().format('YYYY-MM-DD');
+        const yest = moment().subtract(1, 'day').format('YYYY-MM-DD');
+
+        if (s === today && e === today) return 'today';
+        if (s === yest && e === yest) return 'yesterday';
+        if (s === moment().subtract(6, 'days').format('YYYY-MM-DD') && e === today) return 'last7';
+        if (s === moment().subtract(29, 'days').format('YYYY-MM-DD') && e === today) return 'last30';
+        if (s === moment().startOf('month').format('YYYY-MM-DD') && e === today) return 'thisMonth';
+        if (s === moment().subtract(1, 'month').startOf('month').format('YYYY-MM-DD') &&
+            e === moment().subtract(1, 'month').endOf('month').format('YYYY-MM-DD')) return 'lastMonth';
+        return 'custom';
+    }
+};
+
+// ── 2. Position Helper ──
+const DatePositionHelper = {
+    position($popover, $trigger) {
+        if (!$popover.length || !$trigger.length) return;
+        const rect = $trigger[0].getBoundingClientRect();
+        const vWidth = window.innerWidth;
+        const vHeight = window.innerHeight;
+        const pWidth = $popover.outerWidth() || 736;
+        const pHeight = $popover.outerHeight() || 350;
+
+        let left = rect.left;
+        if (left + pWidth > vWidth - 24) left = vWidth - pWidth - 24;
+        if (left < 24) left = 24;
+
+        let top = (rect.bottom + pHeight + 8 > vHeight && rect.top - pHeight - 8 > 0)
+            ? rect.top - pHeight - 8
+            : rect.bottom + 8;
+
+        $popover.css({ top: `${top}px`, left: `${left}px` });
+    }
+};
+
+// ── 3. Main Premium Date Range Picker Component ──
 class PremiumDateRangePicker {
     constructor(triggerSelector, options = {}) {
         this.$trigger = $(triggerSelector);
@@ -20,9 +86,7 @@ class PremiumDateRangePicker {
         this.$endInput = this.options.singleDate ? null : $(this.options.endInput);
         this.$displayText = $(this.options.displayText);
 
-        // Date states (read initial values from input fields)
         const startVal = this.$startInput.val();
-        
         this.startDate = (startVal && moment(startVal).isValid()) ? moment(startVal) : null;
         if (this.options.singleDate) {
             this.endDate = this.startDate;
@@ -30,11 +94,9 @@ class PremiumDateRangePicker {
             const endVal = this.$endInput.val();
             this.endDate = (endVal && moment(endVal).isValid()) ? moment(endVal) : null;
         }
-        
+
         this.tempStartDate = this.startDate ? this.startDate.clone() : null;
         this.tempEndDate = this.endDate ? this.endDate.clone() : null;
-
-        // Calendar viewing state (Left calendar starts at startDate's month, or current month if null)
         this.leftCalendarDate = this.startDate ? this.startDate.clone().startOf('month') : moment().startOf('month');
 
         this.init();
@@ -49,9 +111,8 @@ class PremiumDateRangePicker {
     }
 
     createPopoverHtml() {
-        // Create popover elements
         this.$popover = $(`
-            <div class="dt-datepicker-popover">
+            <div class="dt-datepicker-popover ${this.options.singleDate ? 'dt-datepicker-single' : ''}">
                 <div class="dt-datepicker-sidebar">
                     <ul class="dt-datepicker-presets">
                         <li data-preset="today">Today</li>
@@ -65,28 +126,22 @@ class PremiumDateRangePicker {
                 </div>
                 <div class="dt-datepicker-main">
                     <div class="dt-datepicker-calendars">
-                        <!-- Left Calendar -->
                         <div class="dt-datepicker-calendar" id="cal-left">
                             <div class="dt-datepicker-header">
                                 <button type="button" class="btn-cal-prev"><i class="fas fa-chevron-left"></i></button>
                                 <span class="cal-title">Month Year</span>
-                                <span style="width:28px;"></span> <!-- Spacer -->
+                                <span style="width:28px;"></span>
                             </div>
-                            <div class="dt-datepicker-days-header">
-                                <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
-                            </div>
+                            <div class="dt-datepicker-days-header"><span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span></div>
                             <div class="dt-datepicker-days-grid"></div>
                         </div>
-                        <!-- Right Calendar -->
                         <div class="dt-datepicker-calendar" id="cal-right">
                             <div class="dt-datepicker-header">
-                                <span style="width:28px;"></span> <!-- Spacer -->
+                                <span style="width:28px;"></span>
                                 <span class="cal-title">Month Year</span>
                                 <button type="button" class="btn-cal-next"><i class="fas fa-chevron-right"></i></button>
                             </div>
-                            <div class="dt-datepicker-days-header">
-                                <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
-                            </div>
+                            <div class="dt-datepicker-days-header"><span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span></div>
                             <div class="dt-datepicker-days-grid"></div>
                         </div>
                     </div>
@@ -100,46 +155,17 @@ class PremiumDateRangePicker {
                 </div>
             </div>
         `);
-
-        if (this.options.singleDate) {
-            this.$popover.addClass('dt-datepicker-single');
-        }
-
-        // Append popover to body so it escapes all overflow contexts
         $('body').append(this.$popover);
     }
 
     bindEvents() {
         const self = this;
+        this.$trigger.on('click', (e) => { e.stopPropagation(); self.togglePopover(); });
+        this.$popover.find('.btn-cal-prev').on('click', (e) => { e.stopPropagation(); self.leftCalendarDate.subtract(1, 'month'); self.renderCalendars(); });
+        this.$popover.find('.btn-cal-next').on('click', (e) => { e.stopPropagation(); self.leftCalendarDate.add(1, 'month'); self.renderCalendars(); });
+        this.$popover.find('.dt-datepicker-presets li').on('click', function(e) { e.stopPropagation(); self.applyPreset($(this).data('preset')); });
 
-        // Toggle popover
-        this.$trigger.on('click', function(e) {
-            e.stopPropagation();
-            self.togglePopover();
-        });
-
-        // Prev/Next month navigation
-        this.$popover.find('.btn-cal-prev').on('click', function(e) {
-            e.stopPropagation();
-            self.leftCalendarDate.subtract(1, 'month');
-            self.renderCalendars();
-        });
-
-        this.$popover.find('.btn-cal-next').on('click', function(e) {
-            e.stopPropagation();
-            self.leftCalendarDate.add(1, 'month');
-            self.renderCalendars();
-        });
-
-        // Preset selection
-        this.$popover.find('.dt-datepicker-presets li').on('click', function(e) {
-            e.stopPropagation();
-            const preset = $(this).data('preset');
-            self.applyPreset(preset);
-        });
-
-        // Today footer button (moves view to current month)
-        this.$popover.find('.btn-cal-today').on('click', function(e) {
+        this.$popover.find('.btn-cal-today').on('click', (e) => {
             e.stopPropagation();
             self.leftCalendarDate = moment().startOf('month');
             self.tempStartDate = moment().startOf('day');
@@ -150,38 +176,20 @@ class PremiumDateRangePicker {
             self.$popover.find('[data-preset="today"]').addClass('active');
         });
 
-        // Apply action button
-        this.$popover.find('.btn-cal-apply').on('click', function(e) {
-            e.stopPropagation();
-            self.applySelection();
-        });
+        this.$popover.find('.btn-cal-apply').on('click', (e) => { e.stopPropagation(); self.applySelection(); });
+        this.$popover.on('click', (e) => e.stopPropagation());
 
-        // Prevent clicks inside popover from bubbling to document and closing panels
-        this.$popover.on('click', function(e) {
-            e.stopPropagation();
-        });
-
-        // Click outside to close
-        $(document).on('click', function(e) {
+        $(document).on('click', (e) => {
             if (!self.$popover.hasClass('open')) return;
-            if (!$(e.target).closest('.dt-datepicker-popover').length && !$(e.target).closest(self.$trigger).length) {
-                self.closePopover();
-            }
+            if (!$(e.target).closest('.dt-datepicker-popover').length && !$(e.target).closest(self.$trigger).length) self.closePopover();
         });
 
-        // Reposition on scroll or resize while open
-        $(window).on('scroll.dtdatepicker resize.dtdatepicker', function() {
-            if (self.$popover.hasClass('open')) {
-                self.positionPopover();
-            }
+        $(window).on('scroll.dtdatepicker resize.dtdatepicker', () => {
+            if (self.$popover.hasClass('open')) self.positionPopover();
         });
 
-        // Handle cell hover preview range
         this.$popover.on('mouseenter', '.dt-datepicker-day:not(.empty)', function() {
-            if (self.tempStartDate && !self.tempEndDate) {
-                const hoverDate = moment($(this).data('date'));
-                self.renderHoverPreview(hoverDate);
-            }
+            if (self.tempStartDate && !self.tempEndDate) self.renderHoverPreview(moment($(this).data('date')));
         });
     }
 
@@ -189,109 +197,65 @@ class PremiumDateRangePicker {
         if (this.$popover.hasClass('open')) {
             this.closePopover();
         } else {
-            // Re-sync temp dates from original values
             this.tempStartDate = this.startDate ? this.startDate.clone() : null;
             this.tempEndDate = this.endDate ? this.endDate.clone() : null;
             this.leftCalendarDate = this.startDate ? this.startDate.clone().startOf('month') : moment().startOf('month');
-            
             this.renderCalendars();
             this.updateFooterPreview();
             this.highlightActivePreset();
-            
-            // Position the fixed popover below the trigger element
             this.positionPopover();
-            
-            this.$popover.addClass('open');
-            this.$trigger.parent().addClass('open');
+            this.popoverOpenState(true);
         }
     }
 
     positionPopover() {
-        const rect = this.$trigger[0].getBoundingClientRect();
-        const viewportWidth = window.innerWidth;
-        const viewportHeight = window.innerHeight;
-        const popoverWidth = this.$popover.outerWidth() || 736;
-        const popoverHeight = this.$popover.outerHeight() || 350;
-
-        let left = rect.left;
-        // Clamp so the popover doesn't go off-screen to the right (using 24px padding for aesthetics)
-        if (left + popoverWidth > viewportWidth - 24) {
-            left = viewportWidth - popoverWidth - 24;
-        }
-        if (left < 24) left = 24;
-
-        // Check if there is enough space below the trigger, otherwise open above
-        let top;
-        if (rect.bottom + popoverHeight + 8 > viewportHeight && rect.top - popoverHeight - 8 > 0) {
-            top = rect.top - popoverHeight - 8;
-        } else {
-            top = rect.bottom + 8;
-        }
-
-        this.$popover.css({
-            top: top + 'px',
-            left: left + 'px'
-        });
+        DatePositionHelper.position(this.$popover, this.$trigger);
     }
 
     closePopover() {
-        this.$popover.removeClass('open');
-        this.$trigger.parent().removeClass('open');
+        this.popoverOpenState(false);
+    }
+
+    popoverOpenState(isOpen) {
+        this.$popover.toggleClass('open', isOpen);
+        this.$trigger.parent().toggleClass('open', isOpen);
     }
 
     renderCalendars() {
-        const leftMonth = this.leftCalendarDate.clone();
-        const rightMonth = this.leftCalendarDate.clone().add(1, 'month');
-
-        this.renderCalendarGrid('#cal-left', leftMonth);
-        this.renderCalendarGrid('#cal-right', rightMonth);
+        this.renderCalendarGrid('#cal-left', this.leftCalendarDate.clone());
+        this.renderCalendarGrid('#cal-right', this.leftCalendarDate.clone().add(1, 'month'));
     }
 
-    renderCalendarGrid(calendarSelector, monthMoment) {
-        const $cal = this.$popover.find(calendarSelector);
+    renderCalendarGrid(selector, monthMoment) {
+        const $cal = this.$popover.find(selector);
         $cal.find('.cal-title').text(monthMoment.format('MMMM, YYYY'));
-
-        const $grid = $cal.find('.dt-datepicker-days-grid');
-        $grid.empty();
+        const $grid = $cal.find('.dt-datepicker-days-grid').empty();
 
         const firstDay = monthMoment.clone().startOf('month');
         const daysInMonth = monthMoment.daysInMonth();
-        const startDayOfWeek = firstDay.day(); // 0 (Sunday) to 6 (Saturday)
+        const startDayOfWeek = firstDay.day();
 
-        // Padding cells for empty leading days
         for (let i = 0; i < startDayOfWeek; i++) {
             $grid.append('<div class="dt-datepicker-day empty"></div>');
         }
 
-        // Render actual month days
         for (let day = 1; day <= daysInMonth; day++) {
             const dateStr = monthMoment.clone().date(day).format('YYYY-MM-DD');
             const dayMoment = moment(dateStr);
             const $dayCell = $(`<div class="dt-datepicker-day" data-date="${dateStr}">${day}</div>`);
 
-            // Apply active selection range styles
             if (this.tempStartDate && dateStr === this.tempStartDate.format('YYYY-MM-DD')) {
                 $dayCell.addClass('start-date');
-                if (this.options.singleDate) {
-                    $dayCell.addClass('end-date');
-                }
+                if (this.options.singleDate) $dayCell.addClass('end-date');
             }
             if (!this.options.singleDate) {
-                if (this.tempEndDate && dateStr === this.tempEndDate.format('YYYY-MM-DD')) {
-                    $dayCell.addClass('end-date');
-                }
+                if (this.tempEndDate && dateStr === this.tempEndDate.format('YYYY-MM-DD')) $dayCell.addClass('end-date');
                 if (this.tempStartDate && this.tempEndDate && dayMoment.isBetween(this.tempStartDate, this.tempEndDate, 'day', '()')) {
                     $dayCell.addClass('in-range');
                 }
             }
 
-            // Click listener for selecting dates
-            const self = this;
-            $dayCell.on('click', function(e) {
-                e.stopPropagation();
-                self.selectDate(dayMoment);
-            });
-
+            $dayCell.on('click', (e) => { e.stopPropagation(); this.selectDate(dayMoment); });
             $grid.append($dayCell);
         }
     }
@@ -307,13 +271,11 @@ class PremiumDateRangePicker {
         }
 
         if (!this.tempStartDate || (this.tempStartDate && this.tempEndDate)) {
-            // First click (or reset): set start date
             this.tempStartDate = dateMoment.clone();
             this.tempEndDate = null;
             this.$popover.find('.dt-datepicker-presets li').removeClass('active');
             this.$popover.find('[data-preset="custom"]').addClass('active');
-        } else if (this.tempStartDate && !this.tempEndDate) {
-            // Second click: set end date
+        } else {
             if (dateMoment.isBefore(this.tempStartDate, 'day')) {
                 this.tempStartDate = dateMoment.clone();
             } else {
@@ -326,48 +288,31 @@ class PremiumDateRangePicker {
     }
 
     renderHoverPreview(hoverDate) {
-        if (this.options.singleDate) return;
-        if (!this.tempStartDate || this.tempEndDate) return;
-
+        if (this.options.singleDate || !this.tempStartDate || this.tempEndDate) return;
         const startStr = this.tempStartDate.format('YYYY-MM-DD');
         const hoverStr = hoverDate.format('YYYY-MM-DD');
-        const self = this;
 
-        this.$popover.find('.dt-datepicker-day:not(.empty)').each(function() {
-            const cellDateStr = $(this).data('date');
-            const $cell = $(this);
-
-            // Reset non-primary range states
+        this.$popover.find('.dt-datepicker-day:not(.empty)').each((_, el) => {
+            const cellDateStr = $(el).data('date');
+            const $cell = $(el);
             $cell.removeClass('in-range end-date');
-
-            if (cellDateStr === hoverStr && hoverDate.isAfter(self.tempStartDate, 'day')) {
+            if (cellDateStr === hoverStr && hoverDate.isAfter(this.tempStartDate, 'day')) {
                 $cell.addClass('end-date');
             } else if (cellDateStr > startStr && cellDateStr < hoverStr) {
                 $cell.addClass('in-range');
             }
         });
-        
-        // Update footer range preview dynamically on hover
-        const previewText = `${this.tempStartDate.format('DD/MM/YYYY')} to ${hoverDate.format('DD/MM/YYYY')}`;
-        this.$popover.find('.dt-datepicker-range-preview').text(previewText);
+
+        this.$popover.find('.dt-datepicker-range-preview').text(`${this.tempStartDate.format('DD/MM/YYYY')} to ${hoverDate.format('DD/MM/YYYY')}`);
     }
 
     updateFooterPreview() {
-        let previewText = '';
+        let previewText = 'Select date...';
         if (this.options.singleDate) {
-            if (this.tempStartDate) {
-                previewText = this.tempStartDate.format('DD/MM/YYYY');
-            } else {
-                previewText = 'Select date...';
-            }
+            if (this.tempStartDate) previewText = this.tempStartDate.format('DD/MM/YYYY');
         } else {
             if (this.tempStartDate) {
-                previewText = this.tempStartDate.format('DD/MM/YYYY');
-                if (this.tempEndDate) {
-                    previewText += ' to ' + this.tempEndDate.format('DD/MM/YYYY');
-                } else {
-                    previewText += ' to ...';
-                }
+                previewText = this.tempStartDate.format('DD/MM/YYYY') + (this.tempEndDate ? ` to ${this.tempEndDate.format('DD/MM/YYYY')}` : ' to ...');
             } else {
                 previewText = 'Select range...';
             }
@@ -376,41 +321,13 @@ class PremiumDateRangePicker {
     }
 
     applyPreset(preset) {
-        const today = moment().startOf('day');
+        const range = DatePresetHelper.getRange(preset);
+        if (!range) return;
 
-        switch (preset) {
-            case 'today':
-                this.tempStartDate = today.clone();
-                this.tempEndDate = today.clone();
-                break;
-            case 'yesterday':
-                this.tempStartDate = today.clone().subtract(1, 'day');
-                this.tempEndDate = today.clone().subtract(1, 'day');
-                break;
-            case 'last7':
-                this.tempStartDate = today.clone().subtract(6, 'days');
-                this.tempEndDate = today.clone();
-                break;
-            case 'last30':
-                this.tempStartDate = today.clone().subtract(29, 'days');
-                this.tempEndDate = today.clone();
-                break;
-            case 'thisMonth':
-                this.tempStartDate = today.clone().startOf('month');
-                this.tempEndDate = today.clone();
-                break;
-            case 'lastMonth':
-                this.tempStartDate = today.clone().subtract(1, 'month').startOf('month');
-                this.tempEndDate = today.clone().subtract(1, 'month').endOf('month');
-                break;
-            default:
-                // Custom range - leave dates as is
-                return;
-        }
-
-        // Adjust left view date to match new start date's month
+        this.tempStartDate = range.start;
+        this.tempEndDate = range.end;
         this.leftCalendarDate = this.tempStartDate.clone().startOf('month');
-        
+
         this.$popover.find('.dt-datepicker-presets li').removeClass('active');
         this.$popover.find(`[data-preset="${preset}"]`).addClass('active');
 
@@ -421,106 +338,58 @@ class PremiumDateRangePicker {
     highlightActivePreset() {
         this.$popover.find('.dt-datepicker-presets li').removeClass('active');
         if (this.options.singleDate) return;
-        
-        if (!this.startDate || !this.endDate) {
-            this.$popover.find('[data-preset="custom"]').addClass('active');
-            return;
-        }
-
-        const startStr = this.startDate.format('YYYY-MM-DD');
-        const endStr = this.endDate.format('YYYY-MM-DD');
-        const todayStr = moment().format('YYYY-MM-DD');
-        
-        if (startStr === todayStr && endStr === todayStr) {
-            this.$popover.find('[data-preset="today"]').addClass('active');
-        } else if (startStr === moment().subtract(1, 'day').format('YYYY-MM-DD') && endStr === moment().subtract(1, 'day').format('YYYY-MM-DD')) {
-            this.$popover.find('[data-preset="yesterday"]').addClass('active');
-        } else if (startStr === moment().subtract(6, 'days').format('YYYY-MM-DD') && endStr === todayStr) {
-            this.$popover.find('[data-preset="last7"]').addClass('active');
-        } else if (startStr === moment().subtract(29, 'days').format('YYYY-MM-DD') && endStr === todayStr) {
-            this.$popover.find('[data-preset="last30"]').addClass('active');
-        } else if (startStr === moment().startOf('month').format('YYYY-MM-DD') && endStr === todayStr) {
-            this.$popover.find('[data-preset="thisMonth"]').addClass('active');
-        } else if (startStr === moment().subtract(1, 'month').startOf('month').format('YYYY-MM-DD') && endStr === moment().subtract(1, 'month').endOf('month').format('YYYY-MM-DD')) {
-            this.$popover.find('[data-preset="lastMonth"]').addClass('active');
-        } else {
-            this.$popover.find('[data-preset="custom"]').addClass('active');
-        }
+        const activePreset = DatePresetHelper.matchActivePreset(this.startDate, this.endDate);
+        this.$popover.find(`[data-preset="${activePreset}"]`).addClass('active');
     }
 
     updateTriggerText() {
         if (this.options.singleDate) {
-            if (this.startDate) {
-                this.$displayText.text(this.startDate.format('DD/MM/YYYY'));
-            } else {
-                this.$displayText.text('Select Date');
-            }
+            this.$displayText.text(this.startDate ? this.startDate.format('DD/MM/YYYY') : 'Select Date');
         } else {
-            if (this.startDate && this.endDate) {
-                const text = `${this.startDate.format('DD/MM/YYYY')} to ${this.endDate.format('DD/MM/YYYY')}`;
-                this.$displayText.text(text);
-            } else {
-                this.$displayText.text('Select Date Range');
-            }
+            this.$displayText.text((this.startDate && this.endDate) ? `${this.startDate.format('DD/MM/YYYY')} to ${this.endDate.format('DD/MM/YYYY')}` : 'Select Date Range');
         }
     }
 
     applySelection() {
         if (this.options.singleDate) {
             if (!this.tempStartDate) {
-                Swal.fire({
-                    title: 'Invalid Date',
-                    text: 'Please select a date.',
-                    icon: 'warning',
-                    customClass: { popup: 'swal2-premium-popup', confirmButton: 'swal2-premium-confirm' },
-                    buttonsStyling: false
-                });
+                this.showWarning('Invalid Date', 'Please select a date.');
                 return;
             }
             this.startDate = this.tempStartDate.clone();
             this.endDate = this.startDate.clone();
-
             this.$startInput.val(this.startDate.format('YYYY-MM-DD'));
-
-            this.updateTriggerText();
-            this.closePopover();
-
-            if (typeof this.options.onApply === 'function') {
-                this.options.onApply(this.startDate, this.endDate);
-            } else {
-                this.$startInput.trigger('change');
+        } else {
+            if (!this.tempStartDate || !this.tempEndDate) {
+                this.showWarning('Invalid Range', 'Please select both a start and an end date.');
+                return;
             }
-            return;
+            this.startDate = this.tempStartDate.clone();
+            this.endDate = this.tempEndDate.clone();
+            this.$startInput.val(this.startDate.format('YYYY-MM-DD'));
+            this.$endInput.val(this.endDate.format('YYYY-MM-DD'));
         }
-
-        if (!this.tempStartDate || !this.tempEndDate) {
-            Swal.fire({
-                title: 'Invalid Range',
-                text: 'Please select both a start and an end date.',
-                icon: 'warning',
-                customClass: { popup: 'swal2-premium-popup', confirmButton: 'swal2-premium-confirm' },
-                buttonsStyling: false
-            });
-            return;
-        }
-
-        // Save selected dates to actual properties
-        this.startDate = this.tempStartDate.clone();
-        this.endDate = this.tempEndDate.clone();
-
-        // Write values to actual form inputs
-        this.$startInput.val(this.startDate.format('YYYY-MM-DD'));
-        this.$endInput.val(this.endDate.format('YYYY-MM-DD'));
 
         this.updateTriggerText();
         this.closePopover();
 
-        // Trigger change events or run custom callbacks
         if (typeof this.options.onApply === 'function') {
             this.options.onApply(this.startDate, this.endDate);
         } else {
             this.$startInput.trigger('change');
-            this.$endInput.trigger('change');
+            if (this.$endInput) this.$endInput.trigger('change');
+        }
+    }
+
+    showWarning(title, text) {
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                title,
+                text,
+                icon: 'warning',
+                customClass: { popup: 'swal2-premium-popup', confirmButton: 'swal2-premium-confirm' },
+                buttonsStyling: false
+            });
         }
     }
 }

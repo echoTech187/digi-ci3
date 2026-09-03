@@ -177,7 +177,8 @@ class MerchantBalanceController extends CI_Controller
       curl_setopt_array($ch, [
          CURLOPT_URL => $url,
          CURLOPT_RETURNTRANSFER => true,
-         CURLOPT_TIMEOUT => 30,
+         CURLOPT_CONNECTTIMEOUT => 5,
+         CURLOPT_TIMEOUT => 15,
          CURLOPT_FOLLOWLOCATION => true,
          CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
          CURLOPT_SSL_VERIFYHOST => 0,
@@ -187,6 +188,9 @@ class MerchantBalanceController extends CI_Controller
          CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
       ]);
       $response = curl_exec($ch);
+      if (curl_errno($ch)) {
+         log_message('error', 'MerchantBalance Internal cURL Error: ' . curl_error($ch));
+      }
       curl_close($ch);
       return $response;
    }
