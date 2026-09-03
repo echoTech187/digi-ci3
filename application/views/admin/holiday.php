@@ -1,7 +1,33 @@
 <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.17/index.global.min.js'></script>
 
+
 <!-- Begin Page Content -->
 <div class=" w-100">
+    <!-- ── Toggleable Page Instructional Drawer ── -->
+    <div class="drawer-overlay" id="instructionOverlay"></div>
+    <div class="drawer-right" id="instructionDrawer">
+        <div class="drawer-header">
+            <h6 class="drawer-title"><i class="fas fa-book mr-2"></i> Holiday Calendar Guide</h6>
+            <button type="button" class="drawer-close" id="closeDrawerBtn">&times;</button>
+        </div>
+        <div class="drawer-body">
+            <p class="drawer-desc">Configure public holidays that affect settlement delays and payout clearing schedules.</p>
+            
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-calendar-alt text-primary mr-2"></i> Holiday Setting</div>
+                <p class="drawer-card-text">Add national holidays to postpone settlement payouts automatically.</p>
+            </div>
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-calendar-day text-primary mr-2"></i> Calendar View</div>
+                <p class="drawer-card-text">Interactive FullCalendar representation to visually check upcoming non-working days.</p>
+            </div>
+            <div class="drawer-card">
+                <div class="drawer-card-title"><i class="fas fa-sync text-primary mr-2"></i> System Sync</div>
+                <p class="drawer-card-text">Automated calculation adjustments for T+1 / T+2 settlement schedules based on holiday dates.</p>
+            </div>
+        </div>
+    </div>
+
 
     <!-- ── Page Header ── -->
     <div class="dt-page-header d-flex align-items-center justify-content-between">
@@ -10,7 +36,9 @@
             <p class="dt-page-subtitle">Manage and visualize public holidays across the system.</p>
         </div>
         <div class="d-flex align-items-center gap-2">
-            
+            <button type="button" class="btn btn-light border shadow-sm mr-2 d-flex align-items-center" id="toggleGuideBtn">
+                <i class="fas fa-book-open text-primary mr-2"></i> <span class="d-none d-md-block">Instructions Guide</span>
+            </button>
         </div>
     </div>
 
@@ -173,6 +201,7 @@
     </div>
 </div>
 
+
 <script>
   let calendar;
 
@@ -191,8 +220,24 @@
       const title = action === 'create' ? 'ADD HOLIDAY' : 'EDIT HOLIDAY';
       const icon = action === 'create' ? 'fa-calendar-check' : 'fa-edit';
       
-      document.getElementById('settingHolidayModalTitle').innerHTML =
-          `<i class="fas ${icon} mr-3"></i>${title} &nbsp;—&nbsp; <span style="font-weight: 400; opacity: 0.8;">${date}</span>`;
+      const modalTitleEl = document.getElementById('settingHolidayModalTitle');
+      if (modalTitleEl) {
+          modalTitleEl.textContent = '';
+          const iconEl = document.createElement('i');
+          iconEl.className = `fas ${icon} mr-3`;
+          modalTitleEl.appendChild(iconEl);
+          modalTitleEl.appendChild(document.createTextNode(`${title} — ${date}`));
+      }
+  }
+
+  function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#039;');
   }
 
   document.addEventListener('DOMContentLoaded', function() {
@@ -225,7 +270,9 @@
 
         countBadge.textContent = `${monthlyEvents.length} Holiday${monthlyEvents.length !== 1 ? 's' : ''}`;
 
+        listContainer.textContent = '';
         if (monthlyEvents.length === 0) {
+<<<<<<< HEAD
             $(listContainer).html(`
                 <div class="text-center py-5">
                     <div class="mb-3"><i class="fas fa-calendar-day fa-3x"></i></div>
@@ -253,6 +300,73 @@
                 </div>
             </div>
         `).join(''));
+=======
+            const emptyDiv = document.createElement('div');
+            emptyDiv.className = 'text-center py-5';
+            const iconWrapper = document.createElement('div');
+            iconWrapper.className = 'mb-3';
+            const calIcon = document.createElement('i');
+            calIcon.className = 'fas fa-calendar-day fa-3x text-light';
+            iconWrapper.appendChild(calIcon);
+            const msgP = document.createElement('p');
+            msgP.className = 'text-muted small fw-bold';
+            msgP.textContent = 'No holidays found for this month.';
+            emptyDiv.appendChild(iconWrapper);
+            emptyDiv.appendChild(msgP);
+            listContainer.appendChild(emptyDiv);
+            return;
+        }
+
+        monthlyEvents.forEach(ev => {
+            const desc = ev.desc || ev.title || '';
+            const dateObj = new Date(ev.start);
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'mobile-event-item animate__animated animate__fadeInUp';
+            itemDiv.onclick = function() { openEditModal(ev.start, desc, ev.status); };
+            
+            const badgeClass = ev.status === 'Active' ? 'badge-soft-danger' : 'badge-soft-secondary';
+            const dayText = dateObj.getDate();
+            const monthText = dateObj.toLocaleString('default', { month: 'short' });
+
+            const dateDiv = document.createElement('div');
+            dateDiv.className = 'mobile-event-date';
+            const daySpan = document.createElement('span');
+            daySpan.className = 'day';
+            daySpan.textContent = dayText;
+            const monthSpan = document.createElement('span');
+            monthSpan.className = 'month';
+            monthSpan.textContent = monthText;
+            dateDiv.appendChild(daySpan);
+            dateDiv.appendChild(monthSpan);
+
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'mobile-event-content';
+            const titleDiv = document.createElement('div');
+            titleDiv.className = 'title';
+            titleDiv.textContent = desc;
+            const statusDiv = document.createElement('div');
+            statusDiv.className = 'status';
+            const badgeSpan = document.createElement('span');
+            badgeSpan.className = 'badge ' + badgeClass + ' px-2 py-1';
+            badgeSpan.style.cssText = 'font-size: 10px; border-radius: 6px;';
+            badgeSpan.textContent = ev.status || '';
+            statusDiv.appendChild(badgeSpan);
+            contentDiv.appendChild(titleDiv);
+            contentDiv.appendChild(statusDiv);
+
+            const arrowDiv = document.createElement('div');
+            arrowDiv.className = 'mobile-event-arrow';
+            const arrowIcon = document.createElement('i');
+            arrowIcon.className = 'fas fa-chevron-right';
+            arrowDiv.appendChild(arrowIcon);
+
+            itemDiv.appendChild(dateDiv);
+            itemDiv.appendChild(contentDiv);
+            itemDiv.appendChild(arrowDiv);
+
+            listContainer.appendChild(itemDiv);
+        });
+>>>>>>> a49b5fe1bf4e6664c99daaa483c66bfbc1e0d4f7
     }
 
     // Helper for mobile list clicks
@@ -317,6 +431,8 @@
     calendar.render();
   });
 </script>
+
+
 
 <script>
 $(document).ready(function() {

@@ -134,17 +134,6 @@ class SubMerchant extends CI_Model
         return $this->db->where('id', $id)->update('merchant', $data);
     }
 
-    public function get_submerchants_by_merchant_id($merchant_id = null)
-    {
-        $this->db->select('id, c_name, c_email, c_status, c_merchantLevel');
-        $this->db->from('merchant');
-        if ($merchant_id) {
-            $this->db->where('parent_merchant_id', $merchant_id);
-        }
-        $this->db->where('c_merchantLevel >', 0);
-        return $this->db->get()->result();
-    }
-
     /**
      * Standardized DataTables handler for SubAccount list.
      */

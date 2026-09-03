@@ -42,11 +42,7 @@ class CashinExternalController extends CI_Controller {
     public function ajax_list() {
         $raw_json = json_decode($this->input->raw_input_stream, true);
         if (!empty($raw_json) && is_array($raw_json)) {
-            foreach ($raw_json as $k => $v) {
-                if ($this->input->post($k) === NULL) {
-                    $_POST[$k] = $v;
-                }
-            }
+            $_POST = array_merge($raw_json, $_POST);
         }
 
         $search_channel = $this->input->get('search_channel') ?: $this->input->post('search_channel');
@@ -97,11 +93,7 @@ class CashinExternalController extends CI_Controller {
     public function add() {
         $raw_json = json_decode($this->input->raw_input_stream, true);
         if (!empty($raw_json) && is_array($raw_json)) {
-            foreach ($raw_json as $k => $v) {
-                if ($this->input->get($k) === null && $this->input->post($k) === null) {
-                    $_POST[$k] = $v;
-                }
-            }
+            $_POST = array_merge($raw_json, $_POST);
         }
 
         $accept = strtolower($this->input->get_request_header('Accept') ?: '');
@@ -156,20 +148,13 @@ class CashinExternalController extends CI_Controller {
     public function update() {
         $raw_json = json_decode($this->input->raw_input_stream, true);
         if (!empty($raw_json) && is_array($raw_json)) {
-            foreach ($raw_json as $k => $v) {
-                if ($this->input->get($k) === null && $this->input->post($k) === null) {
-                    $_POST[$k] = $v;
-                }
-            }
+            $_POST = array_merge($raw_json, $_POST);
         }
 
         $accept = strtolower($this->input->get_request_header('Accept') ?: '');
         $is_api_request = $this->input->is_ajax_request() || strpos($accept, 'json') !== false || $this->input->get('json') == '1' || $this->input->method() === 'post';
 
         $id = $this->input->post('id') ?: $this->uri->segment(4);
-        $existing = $id ? $this->db->get_where('cashin_channel_x_merchant', ['id' => $id])->row_array() : null;
-
-
 
         $this->_validate('edit', $id);
 
@@ -250,11 +235,7 @@ class CashinExternalController extends CI_Controller {
     public function bulk_update() {
         $raw_json = json_decode($this->input->raw_input_stream, true);
         if (!empty($raw_json) && is_array($raw_json)) {
-            foreach ($raw_json as $k => $v) {
-                if ($this->input->get($k) === null && $this->input->post($k) === null) {
-                    $_POST[$k] = $v;
-                }
-            }
+            $_POST = array_merge($raw_json, $_POST);
         }
 
         $accept = strtolower($this->input->get_request_header('Accept') ?: '');

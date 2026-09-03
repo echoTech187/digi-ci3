@@ -244,11 +244,7 @@ class ServiceController extends CI_Controller {
    {
         $raw_json = json_decode($this->input->raw_input_stream, true);
         if (!empty($raw_json) && is_array($raw_json)) {
-           foreach ($raw_json as $k => $v) {
-              if ($this->input->get($k) === null && $this->input->post($k) === null) {
-                 $_POST[$k] = $v;
-              }
-           }
+           $_POST = array_merge($raw_json, $_POST);
         }
 
         $accept = strtolower($this->input->get_request_header('Accept') ?: '');

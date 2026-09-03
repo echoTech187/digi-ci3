@@ -101,9 +101,13 @@ class SwaggerController extends CI_Controller
                                 var bodyObj = req.body ? JSON.parse(req.body) : {};
                                 bodyObj["' . $csrf_name . '"] = "' . $csrf_hash . '";
                                 req.body = JSON.stringify(bodyObj);
+<<<<<<< HEAD
                             } catch(e) {
                                 console.warn("Failed to parse JSON body for CSRF injection", e);
                             }
+=======
+catch (Exception $e) { log_message('error', $e->getMessage()); throw $e; }
+>>>>>>> a49b5fe1bf4e6664c99daaa483c66bfbc1e0d4f7
                         } else if (typeof req.body === "string" && req.body.length > 0) {
                             if (req.body.indexOf("' . $csrf_name . '=") === -1) {
                                 req.body += "&' . $csrf_name . '=' . $csrf_hash . '";

@@ -292,14 +292,7 @@ class VADynamic extends CI_Model {
         if ($ref_cashinExternalId == 'ifp') {
             $qtxt1_1    = "SELECT c_orderId, c_transactionId, c_datetimeRequest, c_requestHeader, c_requestBody, c_datetimeResponse, c_responseHeader, c_responseBody FROM external_ifp_va_create WHERE id='$ref_cashinExternalLogVaIdCreate'";
             $query1_1   = $this->db->query($qtxt1_1);
-            $result1_1  = ($query1_1 && $query1_1->num_rows()) ? $query1_1->row() : false;
-
-            if (!$result1_1) {
-                $qtxt1_fallback = "SELECT c_orderId, c_transactionId, c_datetimeRequest, c_requestHeader, c_requestBody, c_datetimeResponse, c_responseHeader, c_responseBody FROM external_ifp_va_create ORDER BY id DESC LIMIT 1";
-                $query1_fallback = $this->db->query($qtxt1_fallback);
-                $result1_1 = ($query1_fallback && $query1_fallback->num_rows()) ? $query1_fallback->row() : false;
-            }
-
+            $result1_1  = $query1_1->num_rows() ? $query1_1->row() : false;
             if($result1_1) {
                 $TransactionIdExternal1     = $result1_1->c_orderId;
                 $TransactionIdExternal2     = $result1_1->c_transactionId;
@@ -369,45 +362,15 @@ class VADynamic extends CI_Model {
             }
         }
 
-        if ($RequestBody === null && $ResponseHeader === null) {
-            $tables_to_check = [
-                ['table' => 'external_ifp_va_create', 'field1' => 'c_orderId', 'field2' => 'c_transactionId'],
-                ['table' => 'external_gvpay_va_create', 'field1' => 'c_customId', 'field2' => 'c_vaNumber'],
-                ['table' => 'external_quantum_va_create', 'field1' => 'c_transactionId', 'field2' => 'c_quantumSubMerchantId'],
-                ['table' => 'external_inacash_va_create', 'field1' => 'refId', 'field2' => 'partnerRefId'],
-                ['table' => 'external_paydgn_va_create', 'field1' => 'refId', 'field2' => 'partnerRefId'],
-            ];
-
-            foreach ($tables_to_check as $tblInfo) {
-                $tName = $tblInfo['table'];
-                $f1 = $tblInfo['field1'];
-                $f2 = $tblInfo['field2'];
-                $qFallback = "SELECT $f1 AS f1, $f2 AS f2, c_datetimeRequest, c_requestHeader, c_requestBody, c_datetimeResponse, c_responseHeader, c_responseBody FROM $tName ORDER BY id DESC LIMIT 1";
-                $resFallback = $this->db->query($qFallback);
-                if ($resFallback && $resFallback->num_rows() > 0) {
-                    $rowFb = $resFallback->row();
-                    $TransactionIdExternal1 = $rowFb->f1;
-                    $TransactionIdExternal2 = $rowFb->f2;
-                    $DatetimeRequest        = $rowFb->c_datetimeRequest;
-                    $RequestHeader          = $rowFb->c_requestHeader;
-                    $RequestBody            = $rowFb->c_requestBody;
-                    $DatetimeResponse       = $rowFb->c_datetimeResponse;
-                    $ResponseHeader         = $rowFb->c_responseHeader;
-                    $ResponseBody           = $rowFb->c_responseBody;
-                    break;
-                }
-            }
-        }
-
         return array(
             'TransactionIdExternal1'    => $TransactionIdExternal1, 
             'TransactionIdExternal2'    => $TransactionIdExternal2, 
             'RequestDatetime'           => $DatetimeRequest, 
-            'RequestHeader'             => json_decode((string)$RequestHeader, true),
-            'RequestBody'               => json_decode((string)$RequestBody, true),
+            'RequestHeader'             => json_decode($RequestHeader, true),
+            'RequestBody'               => json_decode($RequestBody, true),
             'ResponseDatetime'          => $DatetimeResponse,
-            'ResponseHeader'            => json_decode((string)$ResponseHeader, true),
-            'ResponseBody'              => json_decode((string)$ResponseBody, true)
+            'ResponseHeader'            => json_decode($ResponseHeader, true),
+            'ResponseBody'              => json_decode($ResponseBody, true)
         );
     }
     public function get_datatables_handler($filters = [])
@@ -426,8 +389,7 @@ class VADynamic extends CI_Model {
         // Optimized Fetch (Two-Step Lookup)
         $list = $this->get_datatables($search_name, $search_date, $search_va, $search_trxid, $search_date_to, $search_status, $search_channel, $search_external_channel);
         
-        $searchPost = $this->input->post('search');
-        $searchValue = (is_array($searchPost) && isset($searchPost['value'])) ? $searchPost['value'] : '';
+        $searchValue = $this->input->post('search')['value'];
         $is_filtered = $search_name || $search_date || $search_va || $search_trxid || $search_status || $search_channel || $search_external_channel || (!empty($searchValue));
         
         $recordsTotal = $this->count_all_dt($search_name, $search_date);

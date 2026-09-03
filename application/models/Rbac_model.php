@@ -35,11 +35,10 @@ class Rbac_model extends CI_Model {
 
     public function getPermissionsByGroup() {
         $perms = $this->getAllPermissions();
-        $grouped = [];
-        foreach ($perms as $p) {
-            $grouped[$p['c_group']][] = $p;
-        }
-        return $grouped;
+        return array_reduce($perms, function($carry, $p) {
+            $carry[$p['c_group']][] = $p;
+            return $carry;
+        }, []);
     }
 
     // ── Roles ─────────────────────────────────────────────────────
@@ -61,39 +60,25 @@ class Rbac_model extends CI_Model {
     }
 
     public function createRole($data) {
-        $db_debug = $this->db->db_debug;
-        $this->db->db_debug = FALSE;
         $this->db->insert('rbac_roles', $data);
-        $insert_id = $this->db->insert_id();
-        $this->db->db_debug = $db_debug;
-        return $insert_id;
+        return $this->db->insert_id();
     }
 
     public function updateRole($roleId, $data) {
-        $db_debug = $this->db->db_debug;
-        $this->db->db_debug = FALSE;
-        $res = $this->db->where('id', $roleId)->update('rbac_roles', $data);
-        $this->db->db_debug = $db_debug;
-        return $res;
+        return $this->db->where('id', $roleId)->update('rbac_roles', $data);
     }
 
     public function deleteRole($roleId) {
         $role = $this->getRoleById($roleId);
         if ($role && !$role['c_isSystem']) {
-            $db_debug = $this->db->db_debug;
-            $this->db->db_debug = FALSE;
-            $res = $this->db->where('id', $roleId)->delete('rbac_roles');
-            $this->db->db_debug = $db_debug;
-            return $res;
+            return $this->db->where('id', $roleId)->delete('rbac_roles');
         }
         return false;
     }
 
     public function setRolePermissions($roleId, $permissionIds) {
-        $db_debug = $this->db->db_debug;
-        $this->db->db_debug = FALSE;
-
         $this->db->where('ref_roleId', $roleId)->delete('rbac_role_permissions');
+<<<<<<< HEAD
 
         if (!empty($permissionIds) && is_array($permissionIds)) {
             $all_perms = $this->db->select('id, c_code, c_name')->from('rbac_permissions')->get()->result_array();
@@ -121,10 +106,18 @@ class Rbac_model extends CI_Model {
             }
             if (!empty($data)) {
                 $this->db->insert_batch('rbac_role_permissions', $data);
+=======
+        if (!empty($permissionIds)) {
+            $data = [];
+            foreach ($permissionIds as $pId) {
+                $data[] = [
+                    'ref_roleId' => $roleId,
+                    'ref_permissionId' => $pId
+                ];
+>>>>>>> a49b5fe1bf4e6664c99daaa483c66bfbc1e0d4f7
             }
+            $this->db->insert_batch('rbac_role_permissions', $data);
         }
-
-        $this->db->db_debug = $db_debug;
     }
 
     // ── User Roles ─────────────────────────────────────────────────
@@ -328,26 +321,22 @@ class Rbac_model extends CI_Model {
         
         $menus = $this->db->get()->result_array();
         
-        $parents = [];
-        $children = [];
-        foreach ($menus as $m) {
+        $grouped = array_reduce($menus, function($acc, $m) {
             if ($m['parent_id'] === NULL || $m['parent_id'] == 0) {
-                $parents[] = $m;
+                $acc['parents'][] = $m;
             } else {
-                $children[$m['parent_id']][] = $m;
+                $acc['children'][$m['parent_id']][] = $m;
             }
-        }
+            return $acc;
+        }, ['parents' => [], 'children' => []]);
 
-        $all_menus = [];
-        foreach ($parents as $p) {
-            $all_menus[] = $p;
-            if (isset($children[$p['id']])) {
-                foreach ($children[$p['id']] as $c) {
-                    $all_menus[] = $c;
-                }
+        return array_reduce($grouped['parents'], function($acc, $p) use ($grouped) {
+            $acc[] = $p;
+            if (!empty($grouped['children'][$p['id']])) {
+                $acc = array_merge($acc, $grouped['children'][$p['id']]);
             }
-        }
-        return $all_menus;
+            return $acc;
+        }, []);
     }
 
     public function get_datatables_handler() {

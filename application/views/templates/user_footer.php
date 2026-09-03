@@ -85,12 +85,13 @@
         });
     </script>
 
+
     <script>
         $(document).ready(function() {
             <?php if ($this->session->flashdata('success')) : ?>
                 Swal.fire({
                     title: 'Success!',
-                    html: '<?= addslashes(trim(str_replace(["\r", "\n"], '', $this->session->flashdata('success')))); ?>',
+                    text: '<?= addslashes(trim(str_replace(["\r", "\n"], '', $this->session->flashdata('success')))); ?>',
                     icon: 'success',
                     customClass: {
                         popup: 'swal2-premium-popup',
