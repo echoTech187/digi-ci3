@@ -102,8 +102,12 @@ class Qris extends CI_Model {
             $this->db->where_in('cpq.id', array_unique($matching_ids));
         }
         if ($search_invoice && !$searchValue) {
-            // Fast invoice lookup via subquery
-            $this->db->where("cpq.ref_cashinId IN (SELECT id FROM cashin WHERE c_invoiceNo = '".$this->db->escape_str($search_invoice)."')", NULL, FALSE);
+            $cashin_row = $this->db->select('id')->from('cashin')->where('c_invoiceNo', $search_invoice)->get()->row();
+            if ($cashin_row) {
+                $this->db->where('cpq.ref_cashinId', $cashin_row->id);
+            } else {
+                $this->db->where('cpq.ref_cashinId', -1);
+            }
         }
 
         if ($searchValue) {
@@ -425,8 +429,7 @@ class Qris extends CI_Model {
 
     public function get_merchant_detail($id)
     {
-        $query = "SELECT c_name FROM merchant WHERE id = '$id'";
-        return $this->db->query($query)->result_array();
+        return $this->db->select('c_name')->from('merchant')->where('id', $id)->get()->result_array();
     }
 
     public function count_qris($refMerchantId, $search_date_qris = null)
@@ -622,14 +625,17 @@ class Qris extends CI_Model {
             'external_quantum_qris_mpm_calback_payment'
         ];
 
+        $unions = [];
         foreach ($tables as $t) {
             $col = ($t == 'external_quantum_qris_mpm_calback_payment') ? 'c_transactionId AS c_issuerRrn' : 'c_issuerRrn';
-            $q = $this->db->query("SELECT ref_cashinPaymentQrisMpmId, $col FROM $t WHERE ref_cashinPaymentQrisMpmId IN ($id_str)");
-            if ($q) {
-                foreach ($q->result() as $row) {
-                    if (!isset($rrn_map[$row->ref_cashinPaymentQrisMpmId])) {
-                        $rrn_map[$row->ref_cashinPaymentQrisMpmId] = $row->c_issuerRrn;
-                    }
+            $unions[] = "SELECT ref_cashinPaymentQrisMpmId, $col FROM $t WHERE ref_cashinPaymentQrisMpmId IN ($id_str)";
+        }
+        $union_sql = implode(" UNION ALL ", $unions);
+        $q = $this->db->query($union_sql);
+        if ($q) {
+            foreach ($q->result() as $row) {
+                if (!isset($rrn_map[$row->ref_cashinPaymentQrisMpmId])) {
+                    $rrn_map[$row->ref_cashinPaymentQrisMpmId] = $row->c_issuerRrn;
                 }
             }
         }
@@ -668,11 +674,15 @@ class Qris extends CI_Model {
         $info_query = $this->db->query("SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA = '$db_name' AND TABLE_NAME LIKE 'external_%'")->result_array();
         $valid_tables = array_column($info_query, 'TABLE_NAME');
 
+        $rrn_unions = [];
         foreach ($tables as $t) {
-            if (!in_array($t, $valid_tables)) continue; // Skip non-existent tables safely
-            
-            $col = ($t == 'external_quantum_qris_mpm_calback_payment') ? 'c_transactionId' : 'c_issuerRrn';
-            $q = $this->db->query("SELECT ref_cashinPaymentQrisMpmId FROM $t WHERE $col LIKE '$safeRrn%' LIMIT 50");
+            if (in_array($t, $valid_tables)) {
+                $col = ($t == 'external_quantum_qris_mpm_calback_payment') ? 'c_transactionId' : 'c_issuerRrn';
+                $rrn_unions[] = "(SELECT ref_cashinPaymentQrisMpmId FROM $t WHERE $col LIKE '$safeRrn%' LIMIT 50)";
+            }
+        }
+        if (!empty($rrn_unions)) {
+            $q = $this->db->query(implode(" UNION ALL ", $rrn_unions));
             if ($q) {
                 foreach ($q->result() as $row) {
                     if ($row->ref_cashinPaymentQrisMpmId) $ids[] = $row->ref_cashinPaymentQrisMpmId;

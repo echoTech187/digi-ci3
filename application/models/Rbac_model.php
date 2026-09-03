@@ -96,16 +96,20 @@ class Rbac_model extends CI_Model {
         $this->db->where('ref_roleId', $roleId)->delete('rbac_role_permissions');
 
         if (!empty($permissionIds) && is_array($permissionIds)) {
+            $all_perms = $this->db->select('id, c_code, c_name')->from('rbac_permissions')->get()->result_array();
+            $code_map = [];
+            $name_map = [];
+            foreach ($all_perms as $ap) {
+                $code_map[$ap['c_code']] = (int)$ap['id'];
+                $name_map[$ap['c_name']] = (int)$ap['id'];
+            }
+
             $data = [];
             foreach ($permissionIds as $pId) {
                 if (is_numeric($pId)) {
                     $intId = (int)$pId;
                 } else {
-                    $perm = $this->db->get_where('rbac_permissions', ['c_code' => $pId])->row_array();
-                    if (!$perm) {
-                        $perm = $this->db->get_where('rbac_permissions', ['c_name' => $pId])->row_array();
-                    }
-                    $intId = $perm ? $perm['id'] : null;
+                    $intId = isset($code_map[$pId]) ? $code_map[$pId] : (isset($name_map[$pId]) ? $name_map[$pId] : null);
                 }
 
                 if (!empty($intId)) {

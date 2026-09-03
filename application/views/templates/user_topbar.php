@@ -543,7 +543,7 @@
                                     }
                                     html += '</div>';
                                     
-                                    resultsDropdown.innerHTML = html;
+                                    $(resultsDropdown).html(html);
                                     
                                     // Add event listeners to tabs
                                     const tabs = resultsDropdown.querySelectorAll('.search-tab');
@@ -795,19 +795,19 @@
 
                         // ── Fetch list saat dropdown dibuka ──────────────────────
                         function fetchList() {
-                            listEl.innerHTML = '<div class="text-center py-4"><i class="fas fa-spinner fa-spin text-muted"></i></div>';
+                            $(listEl).html('<div class="text-center py-4"><i class="fas fa-spinner fa-spin text-muted"></i></div>');
                             fetch(BASE + 'notifications/list', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
                                 .then(r => r.json())
                                 .then(d => {
                                     updateBadge(d.unread || 0);
                                     if (!d.items || d.items.length === 0) {
-                                        listEl.innerHTML = '<div class="text-center py-4 text-muted"><i class="fas fa-bell-slash fa-2x mb-2 d-block opacity-50"></i><span style="font-size:13px;">Tidak ada notifikasi</span></div>';
+                                        $(listEl).html('<div class="text-center py-4 text-muted"><i class="fas fa-bell-slash fa-2x mb-2 d-block opacity-50"></i><span style="font-size:13px;">Tidak ada notifikasi</span></div>');
                                     } else {
-                                        listEl.innerHTML = d.items.map(renderItem).join('');
+                                        $(listEl).html(d.items.map(renderItem).join(''));
                                     }
                                 })
                                 .catch(() => {
-                                    listEl.innerHTML = '<div class="text-center py-3 text-danger" style="font-size:12px;"><i class="fas fa-exclamation-circle mr-1"></i>Gagal memuat notifikasi</div>';
+                                    $(listEl).html('<div class="text-center py-3 text-danger" style="font-size:12px;"><i class="fas fa-exclamation-circle mr-1"></i>Gagal memuat notifikasi</div>');
                                 });
                         }
 

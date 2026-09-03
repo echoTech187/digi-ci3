@@ -467,7 +467,9 @@ class AuthController extends CI_Controller
                 }
                 try {
                     $this->_sendEmail($token, 'forgot');
-                } catch (Throwable $e) {}
+                } catch (Throwable $e) {
+                    log_message('error', 'Failed to send reset password email: ' . $e->getMessage());
+                }
 
                 return $this->output->set_content_type('application/json')->set_output(json_encode([
                     'status' => true,
@@ -512,7 +514,9 @@ class AuthController extends CI_Controller
                 }
                 try {
                     $this->_sendEmail($token, 'forgot');
-                } catch (Throwable $e) {}
+                } catch (Throwable $e) {
+                    log_message('error', 'Failed to send reset password email: ' . $e->getMessage());
+                }
 
                 $msg = 'Please check your email to reset your password!';
                 $this->session->set_flashdata('message', '<div class="alert alert-success" role="alert">' . $msg . '</div>');

@@ -21,7 +21,9 @@ $(document).ready(function () {
 					"sb_collapsed",
 					$sidebar.hasClass("toggled") ? "1" : "0",
 				);
-			} catch (e) {}
+			} catch (err) {
+				console.warn("localStorage is not available:", err);
+			}
 		} else if (window.innerWidth >= 768) {
 			e.preventDefault();
 			$sidebar.addClass("toggled");
@@ -48,7 +50,9 @@ $(document).ready(function () {
 					$sidebar.removeClass("toggled");
 					$wrapper.removeClass("sb-toggled");
 				}
-			} catch (e) {}
+			} catch (err) {
+				console.warn("localStorage is not available:", err);
+			}
 		}
 	}
 

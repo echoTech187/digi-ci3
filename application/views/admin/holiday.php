@@ -226,15 +226,15 @@
         countBadge.textContent = `${monthlyEvents.length} Holiday${monthlyEvents.length !== 1 ? 's' : ''}`;
 
         if (monthlyEvents.length === 0) {
-            listContainer.innerHTML = `
+            $(listContainer).html(`
                 <div class="text-center py-5">
                     <div class="mb-3"><i class="fas fa-calendar-day fa-3x"></i></div>
                     <p class="text-muted small fw-bold">No holidays found for this month.</p>
-                </div>`;
+                </div>`);
             return;
         }
 
-        listContainer.innerHTML = monthlyEvents.map(ev => `
+        $(listContainer).html(monthlyEvents.map(ev => `
             <div class="mobile-event-item animate__animated animate__fadeInUp" onclick="openEditModal('${ev.start}', '${ev.desc || ev.title}', '${ev.status}')">
                 <div class="mobile-event-date">
                     <span class="day">${new Date(ev.start).getDate()}</span>
@@ -252,7 +252,7 @@
                     <i class="fas fa-chevron-right"></i>
                 </div>
             </div>
-        `).join('');
+        `).join(''));
     }
 
     // Helper for mobile list clicks

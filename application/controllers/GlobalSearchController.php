@@ -108,20 +108,28 @@ class GlobalSearchController extends CI_Controller
 
                 // Admin / Supervisor / Channel (text queries only)
                 if ($has_access('access-control/accounts')) {
-                    foreach ($this->db->query("SELECT id, c_name, c_email FROM admin WHERE c_name LIKE '$safeQ%' OR c_email LIKE '$safeQ%' LIMIT 2")->result() as $a)
+                    $admins = $this->db->query("SELECT id, c_name, c_email FROM admin WHERE c_name LIKE '$safeQ%' OR c_email LIKE '$safeQ%' LIMIT 2")->result();
+                    foreach ($admins as $a) {
                         $results[] = ['title' => "Admin: $a->c_name ($a->c_email)", 'url' => base_url('access-control/accounts?search_admin=' . urlencode($query)), 'category' => 'Admin Accounts', 'icon' => 'fas fa-user-shield'];
+                    }
                 }
                 if ($has_access('merchant/supervisor')) {
-                    foreach ($this->db->query("SELECT id, c_name, c_email FROM merchant_supervisor WHERE c_name LIKE '$safeQ%' OR c_email LIKE '$safeQ%' LIMIT 2")->result() as $s)
+                    $supervisors = $this->db->query("SELECT id, c_name, c_email FROM merchant_supervisor WHERE c_name LIKE '$safeQ%' OR c_email LIKE '$safeQ%' LIMIT 2")->result();
+                    foreach ($supervisors as $s) {
                         $results[] = ['title' => "Supervisor: $s->c_name ($s->c_email)", 'url' => base_url('merchant/supervisor?search_spv=' . urlencode($query)), 'category' => 'Supervisor Management', 'icon' => 'fas fa-user-tie'];
+                    }
                 }
                 if ($has_access('channel/cashin')) {
-                    foreach ($this->db->query("SELECT id, c_description FROM cashin_channel WHERE c_description LIKE '$safeQ%' OR c_externalIdDefault LIKE '$safeQ%' LIMIT 2")->result() as $cc)
+                    $cashin_channels = $this->db->query("SELECT id, c_description FROM cashin_channel WHERE c_description LIKE '$safeQ%' OR c_externalIdDefault LIKE '$safeQ%' LIMIT 2")->result();
+                    foreach ($cashin_channels as $cc) {
                         $results[] = ['title' => "Cash-In Channel: $cc->id", 'url' => base_url('channel/cashin?search_channel=' . urlencode($query)), 'category' => 'Configuration', 'icon' => 'fas fa-download'];
+                    }
                 }
                 if ($has_access('channel/cashout')) {
-                    foreach ($this->db->query("SELECT id, c_description FROM cashout_channel WHERE c_description LIKE '$safeQ%' OR c_externalIdDefault LIKE '$safeQ%' LIMIT 2")->result() as $cc)
+                    $cashout_channels = $this->db->query("SELECT id, c_description FROM cashout_channel WHERE c_description LIKE '$safeQ%' OR c_externalIdDefault LIKE '$safeQ%' LIMIT 2")->result();
+                    foreach ($cashout_channels as $cc) {
                         $results[] = ['title' => "Cash-Out Channel: $cc->id", 'url' => base_url('channel/cashout?search_channel=' . urlencode($query)), 'category' => 'Configuration', 'icon' => 'fas fa-upload'];
+                    }
                 }
             } // end if !$isNumericTid
 
@@ -164,10 +172,14 @@ class GlobalSearchController extends CI_Controller
                         $valid_tables = array_column($info_query, 'TABLE_NAME');
                         
                         $found_rrn_ids = [];
+                        $rrn_unions = [];
                         foreach ($rrn_tables as $t => $col) {
-                            if (!in_array($t, $valid_tables)) continue; // Skip non-existent tables safely
-                            
-                            $q = $this->db->query("SELECT ref_cashinPaymentQrisMpmId FROM $t WHERE $col $op $val LIMIT 5");
+                            if (in_array($t, $valid_tables)) {
+                                $rrn_unions[] = "(SELECT ref_cashinPaymentQrisMpmId FROM $t WHERE $col $op $val LIMIT 5)";
+                            }
+                        }
+                        if (!empty($rrn_unions)) {
+                            $q = $this->db->query(implode(" UNION ALL ", $rrn_unions));
                             if ($q) {
                                 foreach ($q->result() as $r) {
                                     if ($r->ref_cashinPaymentQrisMpmId) $found_rrn_ids[] = $r->ref_cashinPaymentQrisMpmId;

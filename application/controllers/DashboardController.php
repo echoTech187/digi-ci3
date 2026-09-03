@@ -346,7 +346,8 @@ class DashboardController extends CI_Controller
                   ->where('c_datetime >=', $date_from . ' 00:00:00')
                   ->where('c_datetime <=', $date_to . ' 23:59:59')
                   ->group_by("DATE(c_datetime)");
-         foreach ($this->db->get()->result_array() as $row) {
+         $qris_rows = $this->db->get()->result_array();
+         foreach ($qris_rows as $row) {
             if (isset($values[$row['date']])) {
                $values[$row['date']] = (float)$row['amount'];
             }
@@ -423,17 +424,25 @@ class DashboardController extends CI_Controller
       $results = []; $no = 1;
       foreach ($merchants as $row) {
          $id = $row['id']; $balA = round($actualBalances[$id] ?? 0); $holdA = round($actualHolds[$id] ?? 0);
+         $sysBal = round($row['c_balanceTotal'] ?? 0);
+         $sysHold = round($row['c_balanceHold'] ?? 0);
          $upT = false; $upH = false;
+
          if ($do_update) {
-            $this->db->trans_start();
-            $curr = $this->db->query("SELECT id, c_balanceTotal, c_balanceHold FROM merchant WHERE id = ? FOR UPDATE", [$id])->row_array();
-            if ($curr) {
-               if (round($curr['c_balanceTotal']) != $balA) { $this->db->where('id', $id)->update('merchant', ['c_balanceTotal' => $balA]); $upT = true; }
-               if (round($curr['c_balanceHold']) != $holdA) { $this->db->where('id', $id)->update('merchant', ['c_balanceHold' => $holdA]); $upH = true; }
+            $update_fields = [];
+            if ($sysBal != $balA) {
+               $update_fields['c_balanceTotal'] = $balA;
+               $upT = true;
             }
-            $this->db->trans_complete();
+            if ($sysHold != $holdA) {
+               $update_fields['c_balanceHold'] = $holdA;
+               $upH = true;
+            }
+            if (!empty($update_fields)) {
+               $this->db->where('id', $id)->update('merchant', $update_fields);
+            }
          }
-         $results[] = ['no' => $no++, 'id' => $id, 'name' => $row['c_name'], 'balance_actual' => $balA, 'balance_system' => $upT ? $balA : round($row['c_balanceTotal']), 'hold_actual' => $holdA, 'hold_system' => $upH ? $holdA : round($row['c_balanceHold']), 'updated_total' => $upT, 'updated_hold' => $upH];
+         $results[] = ['no' => $no++, 'id' => $id, 'name' => $row['c_name'], 'balance_actual' => $balA, 'balance_system' => $upT ? $balA : $sysBal, 'hold_actual' => $holdA, 'hold_system' => $upH ? $holdA : $sysHold, 'updated_total' => $upT, 'updated_hold' => $upH];
       }
 
       if ($is_api_request) {
