@@ -80,6 +80,7 @@ class AuthController extends CI_Controller
                 $this->load->view('templates/auth_footer.php');
                 return; // Stop further execution
             }
+            $this->_redirect_based_on_access($admin['role_id']);
         }
 
         // ── BRUTE-FORCE PROTECTION ──────────────
@@ -152,7 +153,7 @@ class AuthController extends CI_Controller
                     */
                     // ─────────────────────────────────────────────────────────
 
-                    if ($is_ajax) {
+                    if ($is_ajax && empty($recaptchaResponse)) {
                         return $this->output->set_content_type('application/json')->set_output(json_encode([
                             'status' => 'success',
                             'message' => 'Login successful',
@@ -168,7 +169,7 @@ class AuthController extends CI_Controller
 
                     $this->_redirect_based_on_access($admin['role_id']);
                 } else {
-                    if ($is_ajax) {
+                    if ($is_ajax && empty($recaptchaResponse)) {
                         return $this->output->set_content_type('application/json')->set_status_header(400)->set_output(json_encode([
                             'status' => 'error',
                             'message' => 'Wrong password!'
@@ -178,7 +179,7 @@ class AuthController extends CI_Controller
                     redirect('auth');
                 }
             } else {
-                if ($is_ajax) {
+                if ($is_ajax && empty($recaptchaResponse)) {
                     return $this->output->set_content_type('application/json')->set_status_header(400)->set_output(json_encode([
                         'status' => 'error',
                         'message' => 'This email has not been activated!'
